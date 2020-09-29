@@ -11,10 +11,9 @@ package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -27,9 +26,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.GridActionsVisibilityListen
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGenericSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.ComponentContainer;
 
@@ -49,37 +45,27 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     /**
      * Constructor
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
-     * @param entityFactory
-     *            EntityFactory
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param smTypeFilterLayoutUiState
      *            SMTypeFilterLayoutUiState
      */
-    public SMTypeFilterLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final EntityFactory entityFactory, final UINotification uiNotification,
+    public SMTypeFilterLayout(final UIConfiguration uiConfig,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView eventView) {
-        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(i18n, entityFactory, eventBus,
-                uiNotification, softwareModuleTypeManagement);
+        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(uiConfig, softwareModuleTypeManagement);
 
-        this.smTypeFilterHeader = new SMTypeFilterHeader(eventBus, i18n, permChecker, smTypeWindowBuilder,
+        this.smTypeFilterHeader = new SMTypeFilterHeader(uiConfig, smTypeWindowBuilder, smTypeFilterLayoutUiState,
+                eventView);
+        this.smTypeFilterButtons = new SMTypeFilterButtons(uiConfig, softwareModuleTypeManagement, smTypeWindowBuilder,
                 smTypeFilterLayoutUiState, eventView);
-        this.smTypeFilterButtons = new SMTypeFilterButtons(eventBus, i18n, uiNotification, permChecker,
-                softwareModuleTypeManagement, smTypeWindowBuilder, smTypeFilterLayoutUiState, eventView);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, eventView), smTypeFilterButtons::hideActionColumns,
                 smTypeFilterButtons::showEditColumn, smTypeFilterButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyType.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyType.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxySoftwareModule.class).build();
 

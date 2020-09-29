@@ -15,10 +15,10 @@ import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
@@ -28,9 +28,6 @@ import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.layout.listener.GenericEventListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectionChangedListener;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Display the details of the artifacts for a selected software module.
@@ -48,38 +45,29 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for ArtifactDetailsLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param notification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param artifactUploadState
-     *          ArtifactUploadState
+     *            ArtifactUploadState
      * @param artifactDetailsGridLayoutUiState
-     *          ArtifactDetailsGridLayoutUiState
+     *            ArtifactDetailsGridLayoutUiState
      * @param artifactManagement
-     *          ArtifactManagement
+     *            ArtifactManagement
      * @param softwareManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      * @param multipartConfigElement
-     *          MultipartConfigElement
+     *            MultipartConfigElement
      */
-    public ArtifactDetailsGridLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker, final UINotification notification,
-            final ArtifactUploadState artifactUploadState,
+    public ArtifactDetailsGridLayout(final UIConfiguration uiConfig, final ArtifactUploadState artifactUploadState,
             final ArtifactDetailsGridLayoutUiState artifactDetailsGridLayoutUiState,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
             final MultipartConfigElement multipartConfigElement) {
-        this.artifactDetailsHeader = new ArtifactDetailsGridHeader(i18n, eventBus, artifactDetailsGridLayoutUiState);
-        this.artifactDetailsGrid = new ArtifactDetailsGrid(eventBus, i18n, permChecker, notification,
-                artifactManagement);
+        this.artifactDetailsHeader = new ArtifactDetailsGridHeader(uiConfig, artifactDetailsGridLayoutUiState);
+        this.artifactDetailsGrid = new ArtifactDetailsGrid(uiConfig, artifactManagement);
 
-        if (permChecker.hasCreateRepositoryPermission()) {
-            this.uploadDropAreaLayout = new UploadDropAreaLayout(i18n, eventBus, notification, artifactUploadState,
-                    multipartConfigElement, softwareManagement, artifactManagement);
+        if (uiConfig.getPermChecker().hasCreateRepositoryPermission()) {
+            this.uploadDropAreaLayout = new UploadDropAreaLayout(uiConfig, artifactUploadState, multipartConfigElement,
+                    softwareManagement, artifactManagement);
 
             buildLayout(artifactDetailsHeader, artifactDetailsGrid, uploadDropAreaLayout);
         } else {
@@ -89,10 +77,10 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
         }
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.SM_LIST, EventView.UPLOAD);
-        this.selectionChangedListener = new SelectionChangedListener<>(eventBus, masterLayoutView,
+        this.selectionChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
-        this.fileUploadChangedListener = new GenericEventListener<>(eventBus, EventTopics.FILE_UPLOAD_CHANGED,
-                this::onUploadChanged);
+        this.fileUploadChangedListener = new GenericEventListener<>(uiConfig.getEventBus(),
+                EventTopics.FILE_UPLOAD_CHANGED, this::onUploadChanged);
     }
 
     private List<MasterEntityAwareComponent<ProxySoftwareModule>> getMasterEntityAwareComponents() {
@@ -103,7 +91,7 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
      * Checks progress on file upload
      *
      * @param fileUploadProgress
-     *          FileUploadProgress
+     *            FileUploadProgress
      */
     public void onUploadChanged(final FileUploadProgress fileUploadProgress) {
         if (uploadDropAreaLayout != null) {

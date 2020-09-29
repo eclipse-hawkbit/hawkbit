@@ -9,10 +9,7 @@
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 
 import com.vaadin.ui.HorizontalLayout;
 
@@ -29,28 +26,21 @@ public class ActionHistoryLayout extends HorizontalLayout {
     /**
      * Constructor for ActionHistoryLayout
      *
-     * @param i18n
-     *          VaadinMessageSource
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param deploymentManagement
-     *          DeploymentManagement
-     * @param eventBus
-     *          UIEventBus
-     * @param notification
-     *          UINotification
-     * @param permChecker
-     *          SpPermissionChecker
+     *            DeploymentManagement
      * @param actionHistoryGridLayoutUiState
-     *          ActionHistoryGridLayoutUiState
+     *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryLayout(final VaadinMessageSource i18n, final DeploymentManagement deploymentManagement,
-            final UIEventBus eventBus, final UINotification notification, final SpPermissionChecker permChecker,
+    public ActionHistoryLayout(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
 
-        this.actionHistoryGridLayout = new ActionHistoryGridLayout(i18n, deploymentManagement, eventBus, notification,
-                permChecker, actionHistoryGridLayoutUiState);
+        this.actionHistoryGridLayout = new ActionHistoryGridLayout(uiConfig, deploymentManagement,
+                actionHistoryGridLayoutUiState);
 
-        this.actionStatusLayout = new ActionStatusGridLayout(i18n, eventBus, deploymentManagement);
-        this.actionStatusMsgLayout = new ActionStatusMsgGridLayout(i18n, eventBus, deploymentManagement);
+        this.actionStatusLayout = new ActionStatusGridLayout(uiConfig, deploymentManagement);
+        this.actionStatusMsgLayout = new ActionStatusMsgGridLayout(uiConfig, deploymentManagement);
 
         init();
         buildLayout();

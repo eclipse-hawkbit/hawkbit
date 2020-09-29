@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -33,9 +33,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.MetadataDetailsGrid;
 import org.eclipse.hawkbit.ui.common.tagdetails.TargetTagToken;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -56,15 +53,15 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
     private final KeyValueDetailsComponent installedDsDetails;
     private final transient TargetTagToken targetTagToken;
     private final MetadataDetailsGrid<String> targetMetadataGrid;
+    private final UIConfiguration uiConfig;
 
     private final transient TargetMetaDataWindowBuilder targetMetaDataWindowBuilder;
 
-    TargetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final UINotification uiNotification,
-            final TargetTagManagement tagManagement, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement,
+    TargetDetails(final UIConfiguration uiConfig, final TargetTagManagement tagManagement,
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
-        super(i18n);
+        super(uiConfig.getI18n());
+        this.uiConfig = uiConfig;
 
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -76,8 +73,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
         this.installedDsDetails = buildInstalledDsDetails();
 
-        this.targetTagToken = new TargetTagToken(permissionChecker, i18n, uiNotification, eventBus, tagManagement,
-                targetManagement);
+        this.targetTagToken = new TargetTagToken(uiConfig, tagManagement, targetManagement);
 
         addDetailsComponents(Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
                 new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),
@@ -87,8 +83,8 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
                 new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
                 new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
 
-        if (permissionChecker.hasCreateRepositoryPermission()) {
-            this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, eventBus,
+        if (uiConfig.getPermChecker().hasCreateRepositoryPermission()) {
+            this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, uiConfig.getEventBus(),
                     UIComponentIdProvider.TARGET_TYPE_PREFIX, this::showMetadataDetails,
                     new TargetMetaDataDataProvider(targetManagement));
             addDetailsComponent(new SimpleEntry<>(i18n.getMessage("caption.metadata"), targetMetadataGrid));

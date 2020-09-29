@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetFilterQueryToProxyTargetFilterMapper;
@@ -35,9 +35,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterGridLayoutUiSta
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.server.Sizeable;
@@ -71,28 +69,21 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     /**
      * Constructor for TargetFilterGrid
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param notification
-     *            UINotification
-     * @param eventBus
-     *            UIEventBus
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param uiState
      *            TargetFilterGridLayoutUiState
      * @param targetFilterQueryManagement
      *            TargetFilterQueryManagement
-     * @param permChecker
-     *            SpPermissionChecker
      * @param autoAssignmentWindowBuilder
      *            AutoAssignmentWindowBuilder
      */
-    public TargetFilterGrid(final VaadinMessageSource i18n, final UINotification notification,
-            final UIEventBus eventBus, final TargetFilterGridLayoutUiState uiState,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permChecker,
+    public TargetFilterGrid(final UIConfiguration uiConfig, final TargetFilterGridLayoutUiState uiState,
+            final TargetFilterQueryManagement targetFilterQueryManagement,
             final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder) {
-        super(i18n, eventBus, permChecker);
+        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
 
-        this.notification = notification;
+        this.notification = uiConfig.getUiNotification();
         this.uiState = uiState;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.autoAssignmentWindowBuilder = autoAssignmentWindowBuilder;

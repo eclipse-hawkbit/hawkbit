@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.ui.management.tag;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyFilterButton;
 import org.eclipse.hawkbit.ui.components.ColorPickerComponent;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.ComponentContainer;
@@ -24,7 +24,7 @@ import com.vaadin.ui.TextField;
  * Abstract class for tag add/update window layout.
  *
  * @param <T>
- *         Generic type of ProxyFilterButton
+ *            Generic type of ProxyFilterButton
  */
 public class TagWindowLayout<T extends ProxyFilterButton> extends AbstractEntityWindowLayout<T> {
     protected final VaadinMessageSource i18n;
@@ -37,18 +37,16 @@ public class TagWindowLayout<T extends ProxyFilterButton> extends AbstractEntity
 
     /**
      * Constructor for AbstractTagWindowLayout
-     * 
-     * @param i18n
-     *          VaadinMessageSource
-     * @param uiNotification
-     *          UINotification
+     *
+     * @param uiConfig
+     *            {@link UIConfiguration}
      */
-    public TagWindowLayout(final VaadinMessageSource i18n, final UINotification uiNotification) {
+    public TagWindowLayout(final UIConfiguration uiConfig) {
         super();
 
-        this.i18n = i18n;
+        this.i18n = uiConfig.getI18n();
 
-        this.tagComponentBuilder = new TagWindowLayoutComponentBuilder(i18n, uiNotification);
+        this.tagComponentBuilder = new TagWindowLayoutComponentBuilder(i18n, uiConfig.getUiNotification());
 
         this.tagName = tagComponentBuilder.createNameField(binder);
         this.tagDescription = tagComponentBuilder.createDescription(binder);

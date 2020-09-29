@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -22,9 +22,6 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTypeFilterButtons;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.distributions.disttype.DsTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -40,17 +37,11 @@ public class DSTypeFilterButtons extends AbstractTypeFilterButtons {
 
     /**
      * Constructor
-     * 
+     *
      * @param eventBus
      *            UIEventBus
      * @param distributionSetTypeManagement
      *            DistributionSetTypeManagement
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
      * @param systemManagement
      *            SystemManagement
      * @param dsTypeWindowBuilder
@@ -58,11 +49,10 @@ public class DSTypeFilterButtons extends AbstractTypeFilterButtons {
      * @param typeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public DSTypeFilterButtons(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final SpPermissionChecker permChecker,
+    public DSTypeFilterButtons(final UIConfiguration uiConfig,
             final DistributionSetTypeManagement distributionSetTypeManagement, final SystemManagement systemManagement,
             final DsTypeWindowBuilder dsTypeWindowBuilder, final TypeFilterLayoutUiState typeFilterLayoutUiState) {
-        super(eventBus, i18n, uiNotification, permChecker, typeFilterLayoutUiState);
+        super(uiConfig, typeFilterLayoutUiState);
 
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.dsTypeWindowBuilder = dsTypeWindowBuilder;

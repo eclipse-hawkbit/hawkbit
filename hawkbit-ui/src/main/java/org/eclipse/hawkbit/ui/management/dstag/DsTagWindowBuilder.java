@@ -9,14 +9,11 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -24,34 +21,19 @@ import com.vaadin.ui.Window;
  * Builder for distribution set tag window
  */
 public class DsTagWindowBuilder extends AbstractEntityWindowBuilder<ProxyTag> {
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
 
     private final DistributionSetTagManagement dsTagManagement;
 
     /**
      * Constructor for DsTagWindowBuilder
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param entityFactory
-     *          EntityFactory
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dsTagManagement
-     *          DistributionSetTagManagement
+     *            DistributionSetTagManagement
      */
-    public DsTagWindowBuilder(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
-            final DistributionSetTagManagement dsTagManagement) {
-        super(i18n);
-
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+    public DsTagWindowBuilder(final UIConfiguration uiConfig, final DistributionSetTagManagement dsTagManagement) {
+        super(uiConfig);
 
         this.dsTagManagement = dsTagManagement;
     }
@@ -63,14 +45,14 @@ public class DsTagWindowBuilder extends AbstractEntityWindowBuilder<ProxyTag> {
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddDsTagWindowController(i18n, entityFactory, eventBus, uiNotification,
-                dsTagManagement, new TagWindowLayout<ProxyTag>(i18n, uiNotification)));
+        return getWindowForNewEntity(
+                new AddDsTagWindowController(uiConfig, dsTagManagement, new TagWindowLayout<ProxyTag>(uiConfig)));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTag proxyTag) {
-        return getWindowForEntity(proxyTag, new UpdateDsTagWindowController(i18n, entityFactory, eventBus,
-                uiNotification, dsTagManagement, new TagWindowLayout<ProxyTag>(i18n, uiNotification)));
+        return getWindowForEntity(proxyTag,
+                new UpdateDsTagWindowController(uiConfig, dsTagManagement, new TagWindowLayout<ProxyTag>(uiConfig)));
     }
 }

@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyBulkUploadWindow;
 import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -90,31 +91,18 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
 
     private final transient Supplier<ProxyBulkUploadWindow> bulkUploadInputsProvider;
 
-    /**
-     * Constructor
-     *
-     * @param i18n
-     * @param eventBus
-     * @param entityFactory
-     * @param uiExecutor
-     * @param targetManagement
-     * @param tagManagement
-     * @param distributionSetManagement
-     * @param deploymentManagement
-     * @param bulkUploadInputsProvider
-     */
-    BulkUploadHandler(final VaadinMessageSource i18n, final UIEventBus eventBus, final EntityFactory entityFactory,
-            final Executor uiExecutor, final TargetManagement targetManagement, final TargetTagManagement tagManagement,
+    BulkUploadHandler(final UIConfiguration uiConfig, final Executor uiExecutor,
+            final TargetManagement targetManagement, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
             final Supplier<ProxyBulkUploadWindow> bulkUploadInputsProvider) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
-        this.i18n = i18n;
+        this.i18n = uiConfig.getI18n();
         this.uiExecutor = uiExecutor;
-        this.eventBus = eventBus;
+        this.eventBus = uiConfig.getEventBus();
         this.distributionSetManagement = distributionSetManagement;
         this.tagManagement = tagManagement;
-        this.entityFactory = entityFactory;
+        this.entityFactory = uiConfig.getEntityFactory();
         this.bulkUploadInputsProvider = bulkUploadInputsProvider;
     }
 

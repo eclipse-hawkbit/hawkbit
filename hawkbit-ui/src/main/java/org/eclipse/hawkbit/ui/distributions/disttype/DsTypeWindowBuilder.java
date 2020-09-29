@@ -10,14 +10,11 @@ package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -25,9 +22,6 @@ import com.vaadin.ui.Window;
  * Builder for distribution set type window
  */
 public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> {
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
 
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DistributionSetManagement dsManagement;
@@ -36,30 +30,18 @@ public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
     /**
      * Constructor for DsTypeWindowBuilder
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param entityFactory
-     *          EntityFactory
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dsTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param smTypeManagement
-     *          SoftwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
      */
-    public DsTypeWindowBuilder(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
-            final DistributionSetTypeManagement dsTypeManagement, final DistributionSetManagement dsManagement,
-            final SoftwareModuleTypeManagement smTypeManagement) {
-        super(i18n);
-
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+    public DsTypeWindowBuilder(final UIConfiguration uiConfig, final DistributionSetTypeManagement dsTypeManagement,
+            final DistributionSetManagement dsManagement, final SoftwareModuleTypeManagement smTypeManagement) {
+        super(uiConfig);
 
         this.dsTypeManagement = dsTypeManagement;
         this.dsManagement = dsManagement;
@@ -73,15 +55,14 @@ public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddDsTypeWindowController(i18n, entityFactory, eventBus, uiNotification,
-                dsTypeManagement, new DsTypeWindowLayout(i18n, uiNotification, smTypeManagement)));
+        return getWindowForNewEntity(new AddDsTypeWindowController(uiConfig, dsTypeManagement,
+                new DsTypeWindowLayout(uiConfig, smTypeManagement)));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyType proxyType) {
-        return getWindowForEntity(proxyType,
-                new UpdateDsTypeWindowController(i18n, entityFactory, eventBus, uiNotification, dsTypeManagement,
-                        dsManagement, new DsTypeWindowLayout(i18n, uiNotification, smTypeManagement)));
+        return getWindowForEntity(proxyType, new UpdateDsTypeWindowController(uiConfig, dsTypeManagement, dsManagement,
+                new DsTypeWindowLayout(uiConfig, smTypeManagement)));
     }
 }

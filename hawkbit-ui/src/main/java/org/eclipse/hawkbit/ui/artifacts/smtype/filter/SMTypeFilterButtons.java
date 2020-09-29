@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -20,9 +20,6 @@ import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTypeFilterButtons;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -40,17 +37,11 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
 
     /**
      * Constructor
-     * 
-     * @param eventBus
-     *            UIEventBus
+     *
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
      * @param smTypeWindowBuilder
      *            SmTypeWindowBuilder
      * @param typeFilterLayoutUiState
@@ -58,12 +49,11 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
      * @param view
      *            EventView
      */
-    public SMTypeFilterButtons(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final SpPermissionChecker permChecker,
+    public SMTypeFilterButtons(final UIConfiguration uiConfig,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SmTypeWindowBuilder smTypeWindowBuilder, final TypeFilterLayoutUiState typeFilterLayoutUiState,
             final EventView view) {
-        super(eventBus, i18n, uiNotification, permChecker, typeFilterLayoutUiState);
+        super(uiConfig, typeFilterLayoutUiState);
 
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.smTypeWindowBuilder = smTypeWindowBuilder;

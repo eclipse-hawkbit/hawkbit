@@ -9,11 +9,11 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
@@ -25,38 +25,23 @@ import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for add distribution set window
  */
 public class AddDsWindowController extends AbstractEntityWindowController<ProxyDistributionSet, ProxyDistributionSet> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+
     private final SystemManagement systemManagement;
-
     private final DistributionSetManagement dsManagement;
-
     private final DsWindowLayout layout;
-
     private final EventView view;
 
     /**
      * Constructor for AddDsWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param systemManagement
      *            SystemManagement
      * @param dsManagement
@@ -66,19 +51,13 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
      * @param view
      *            EventView
      */
-    public AddDsWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final SystemManagement systemManagement,
+    public AddDsWindowController(final UIConfiguration uiConfig, final SystemManagement systemManagement,
             final DistributionSetManagement dsManagement, final DsWindowLayout layout, final EventView view) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
+
         this.systemManagement = systemManagement;
-
         this.dsManagement = dsManagement;
-
         this.layout = layout;
-
         this.view = view;
     }
 

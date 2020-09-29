@@ -8,10 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.providers.SmMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
@@ -23,9 +22,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.UpdateMetaDataWindowControlle
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Class for metadata add/update window layout.
@@ -34,7 +30,6 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient SoftwareModuleManagement smManagement;
-    private final transient EntityFactory entityFactory;
 
     private final MetaDataWindowGrid<Long> smMetaDataWindowGrid;
 
@@ -44,35 +39,24 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
 
     /**
      * Constructor for AbstractTagWindowLayout
-     * 
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param entityFactory
-     *            EntityFactory
+     *
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param smManagement
      *            SoftwareModuleManagement
      */
-    public SmMetaDataWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final EntityFactory entityFactory, final SoftwareModuleManagement smManagement) {
-        super(i18n, eventBus, uiNotification, permChecker);
+    public SmMetaDataWindowLayout(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement) {
+        super(uiConfig);
 
         this.smManagement = smManagement;
-        this.entityFactory = entityFactory;
 
-        this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new SmMetaDataDataProvider(smManagement), this::deleteMetaData);
+        this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(uiConfig, new SmMetaDataDataProvider(smManagement),
+                this::deleteMetaData);
 
         this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n);
-        this.addSmMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
-                smMetaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
-        this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,
+        this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiConfig, smMetaDataAddUpdateWindowLayout,
+                this::createMetaData, this::isDuplicate);
+        this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(uiConfig,
                 smMetaDataAddUpdateWindowLayout, this::updateMetaData);
 
         buildLayout();
@@ -86,14 +70,15 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
 
     @Override
     protected MetaData doCreateMetaData(final ProxyMetaData entity) {
-        return smManagement.createMetaData(entityFactory.softwareModuleMetadata().create(masterEntityFilter)
-                .key(entity.getKey()).value(entity.getValue()).targetVisible(entity.isVisibleForTargets()));
+        return smManagement
+                .createMetaData(uiConfig.getEntityFactory().softwareModuleMetadata().create(masterEntityFilter)
+                        .key(entity.getKey()).value(entity.getValue()).targetVisible(entity.isVisibleForTargets()));
     }
 
     @Override
     protected MetaData doUpdateMetaData(final ProxyMetaData entity) {
-        return smManagement
-                .updateMetaData(entityFactory.softwareModuleMetadata().update(masterEntityFilter, entity.getKey())
+        return smManagement.updateMetaData(
+                uiConfig.getEntityFactory().softwareModuleMetadata().update(masterEntityFilter, entity.getKey())
                         .value(entity.getValue()).targetVisible(entity.isVisibleForTargets()));
     }
 

@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -29,8 +29,6 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Button;
 
@@ -51,15 +49,14 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
     protected final GridLayoutUiState distributionSetGridLayoutUiState;
     protected final transient DistributionSetManagement dsManagement;
     protected final transient DistributionSetToProxyDistributionMapper dsToProxyDistributionMapper;
-
     protected final transient DeleteSupport<ProxyDistributionSet> distributionDeleteSupport;
+    protected final transient UINotification notification;
 
-    protected AbstractDsGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final DistributionSetManagement dsManagement, final GridLayoutUiState distributionSetGridLayoutUiState,
-            final EventView view) {
-        super(i18n, eventBus, permissionChecker);
+    protected AbstractDsGrid(final UIConfiguration uiConfig, final DistributionSetManagement dsManagement,
+            final GridLayoutUiState distributionSetGridLayoutUiState, final EventView view) {
+        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
 
+        this.notification = uiConfig.getUiNotification();
         this.distributionSetGridLayoutUiState = distributionSetGridLayoutUiState;
         this.dsManagement = dsManagement;
         this.dsToProxyDistributionMapper = new DistributionSetToProxyDistributionMapper();

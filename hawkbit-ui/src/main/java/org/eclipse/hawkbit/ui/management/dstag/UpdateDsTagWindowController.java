@@ -11,17 +11,14 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.tag.AbstractUpdateTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update distribution set tag window
@@ -33,8 +30,8 @@ public class UpdateDsTagWindowController extends AbstractUpdateTagWindowControll
     /**
      * Constructor for UpdateDsTagWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param entityFactory
      *            EntityFactory
      * @param eventBus
@@ -46,11 +43,9 @@ public class UpdateDsTagWindowController extends AbstractUpdateTagWindowControll
      * @param layout
      *            Tag window layout
      */
-    public UpdateDsTagWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public UpdateDsTagWindowController(final UIConfiguration uiConfig,
             final DistributionSetTagManagement dsTagManagement, final TagWindowLayout<ProxyTag> layout) {
-        super(i18n, entityFactory, eventBus, uiNotification, layout, ProxyDistributionSet.class,
-                "caption.entity.distribution.tag");
+        super(uiConfig, layout, ProxyDistributionSet.class, "caption.entity.distribution.tag");
 
         this.dsTagManagement = dsTagManagement;
     }

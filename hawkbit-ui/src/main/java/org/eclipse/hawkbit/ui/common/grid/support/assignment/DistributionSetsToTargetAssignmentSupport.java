@@ -18,16 +18,15 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * Support for assigning the distribution sets to target.
- * 
+ *
  */
 public class DistributionSetsToTargetAssignmentSupport
         extends DeploymentAssignmentSupport<ProxyDistributionSet, ProxyTarget> {
@@ -53,14 +52,14 @@ public class DistributionSetsToTargetAssignmentSupport
      * @param assignmentController
      *            DeploymentAssignmentWindowController
      */
-    public DistributionSetsToTargetAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
+    public DistributionSetsToTargetAssignmentSupport(final UIConfiguration uiConfig,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
-            final SpPermissionChecker permChecker, final DeploymentAssignmentWindowController assignmentController) {
-        super(notification, i18n);
+            final DeploymentAssignmentWindowController assignmentController) {
+        super(uiConfig.getUiNotification(), uiConfig.getI18n());
 
         this.systemSecurityContext = systemSecurityContext;
         this.configManagement = configManagement;
-        this.permChecker = permChecker;
+        this.permChecker = uiConfig.getPermChecker();
         this.assignmentController = assignmentController;
     }
 

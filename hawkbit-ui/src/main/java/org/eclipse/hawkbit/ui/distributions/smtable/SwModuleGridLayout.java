@@ -13,12 +13,11 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGrid;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridHeader;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetails;
@@ -38,9 +37,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelec
 import org.eclipse.hawkbit.ui.common.softwaremodule.AbstractSoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Implementation of software module Layout on the Distribution View
@@ -56,20 +52,12 @@ public class SwModuleGridLayout extends AbstractSoftwareModuleGridLayout {
     /**
      * Constructor for SwModuleGridLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
-     * @param eventBus
-     *            UIEventBus
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param softwareModuleManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
-     * @param entityFactory
-     *            EntityFactory
-     * @param permChecker
-     *            SpPermissionChecker
      * @param artifactManagement
      *            ArtifactManagement
      * @param smTypeFilterLayoutUiState
@@ -77,41 +65,38 @@ public class SwModuleGridLayout extends AbstractSoftwareModuleGridLayout {
      * @param swModuleGridLayoutUiState
      *            GridLayoutUiState
      */
-    public SwModuleGridLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final UIEventBus eventBus, final SoftwareModuleManagement softwareModuleManagement,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory,
-            final SpPermissionChecker permChecker, final ArtifactManagement artifactManagement,
-            final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
+    public SwModuleGridLayout(final UIConfiguration uiConfig, final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final ArtifactManagement artifactManagement, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
             final GridLayoutUiState swModuleGridLayoutUiState) {
-        super(i18n, entityFactory, eventBus, uiNotification, softwareModuleManagement, softwareModuleTypeManagement,
-                permChecker, EventView.DISTRIBUTIONS);
+        super(uiConfig, softwareModuleManagement, softwareModuleTypeManagement, EventView.DISTRIBUTIONS);
 
-        this.swModuleGridHeader = new SoftwareModuleGridHeader(i18n, permChecker, eventBus, smTypeFilterLayoutUiState,
+        this.swModuleGridHeader = new SoftwareModuleGridHeader(uiConfig, smTypeFilterLayoutUiState,
                 swModuleGridLayoutUiState, getSmWindowBuilder(), getEventView());
         this.swModuleGridHeader.buildHeader();
-        this.swModuleGrid = new SoftwareModuleGrid(eventBus, i18n, permChecker, uiNotification,
-                smTypeFilterLayoutUiState, swModuleGridLayoutUiState, softwareModuleManagement, getEventView());
+        this.swModuleGrid = new SoftwareModuleGrid(uiConfig, smTypeFilterLayoutUiState, swModuleGridLayoutUiState,
+                softwareModuleManagement, getEventView());
         this.swModuleGrid.addDragAndDropSupport();
         this.swModuleGrid.addMasterSupport();
         this.swModuleGrid.init();
 
-        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(i18n, permChecker, eventBus, uiNotification,
-                getSmWindowBuilder(), getSmMetaDataWindowBuilder());
+        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(uiConfig, getSmWindowBuilder(),
+                getSmMetaDataWindowBuilder());
         this.softwareModuleDetailsHeader.addArtifactDetailsHeaderSupport(artifactManagement);
         this.softwareModuleDetailsHeader.buildHeader();
-        this.swModuleDetails = new SoftwareModuleDetails(i18n, eventBus, softwareModuleManagement,
+        this.swModuleDetails = new SoftwareModuleDetails(uiConfig, softwareModuleManagement,
                 softwareModuleTypeManagement, getSmMetaDataWindowBuilder());
         this.swModuleDetails.buildDetails();
 
-        addEventListener(new FilterChangedListener<>(eventBus, ProxySoftwareModule.class,
+        addEventListener(new FilterChangedListener<>(uiConfig.getEventBus(), ProxySoftwareModule.class,
                 new EventViewAware(getEventView()), swModuleGrid.getFilterSupport()));
-        addEventListener(new SelectionChangedListener<>(eventBus,
+        addEventListener(new SelectionChangedListener<>(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()), getMasterDsAwareComponents()));
-        addEventListener(new SelectionChangedListener<>(eventBus,
+        addEventListener(new SelectionChangedListener<>(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()), getMasterSmAwareComponents()));
-        addEventListener(new SelectGridEntityListener<>(eventBus,
+        addEventListener(new SelectGridEntityListener<>(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()), swModuleGrid.getSelectionSupport()));
-        addEventListener(new EntityModifiedListener.Builder<>(eventBus, ProxySoftwareModule.class)
+        addEventListener(new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxySoftwareModule.class)
                 .entityModifiedAwareSupports(getSmModifiedAwareSupports()).build());
 
         buildLayout(swModuleGridHeader, swModuleGrid, softwareModuleDetailsHeader, swModuleDetails);

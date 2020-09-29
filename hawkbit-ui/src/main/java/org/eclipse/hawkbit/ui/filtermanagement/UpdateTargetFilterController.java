@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -16,16 +15,14 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update target filter
@@ -35,15 +32,8 @@ public class UpdateTargetFilterController
 
     private static final Logger LOG = LoggerFactory.getLogger(UpdateTargetFilterController.class);
 
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
-
     private final TargetFilterQueryManagement targetFilterManagement;
-
     private final TargetFilterAddUpdateLayout layout;
-
     private final Runnable closeFormCallback;
 
     private String nameBeforeEdit;
@@ -51,34 +41,22 @@ public class UpdateTargetFilterController
     /**
      * Constructor for UpdateTargetFilterController
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param entityFactory
-     *          EntityFactory
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetFilterManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param layout
-     *          TargetFilterAddUpdateLayout
+     *            TargetFilterAddUpdateLayout
      * @param closeFormCallback
-     *          Runnable
+     *            Runnable
      */
-    public UpdateTargetFilterController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public UpdateTargetFilterController(final UIConfiguration uiConfig,
             final TargetFilterQueryManagement targetFilterManagement, final TargetFilterAddUpdateLayout layout,
             final Runnable closeFormCallback) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
 
         this.targetFilterManagement = targetFilterManagement;
-
         this.layout = layout;
-
         this.closeFormCallback = closeFormCallback;
     }
 

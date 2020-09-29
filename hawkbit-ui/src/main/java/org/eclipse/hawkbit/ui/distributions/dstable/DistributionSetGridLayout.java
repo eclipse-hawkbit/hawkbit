@@ -15,7 +15,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
@@ -23,7 +22,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.distributionset.AbstractDistributionSetGridLayout;
@@ -45,9 +44,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelec
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedTagTokenAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * DistributionSet table layout in distributions view.
@@ -63,16 +59,8 @@ public class DistributionSetGridLayout extends AbstractDistributionSetGridLayout
     /**
      * Constructor for DistributionSetGridLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param entityFactory
-     *            EntityFactory
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetManagement
      *            TargetManagement
      * @param targetFilterQueryManagement
@@ -98,9 +86,7 @@ public class DistributionSetGridLayout extends AbstractDistributionSetGridLayout
      * @param distributionSetGridLayoutUiState
      *            GridLayoutUiState
      */
-    public DistributionSetGridLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final UINotification uiNotification,
-            final EntityFactory entityFactory, final TargetManagement targetManagement,
+    public DistributionSetGridLayout(final UIConfiguration uiConfig, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement smManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
@@ -109,39 +95,38 @@ public class DistributionSetGridLayout extends AbstractDistributionSetGridLayout
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState,
             final GridLayoutUiState distributionSetGridLayoutUiState) {
-        super(i18n, entityFactory, eventBus, uiNotification, systemManagement, systemSecurityContext, configManagement,
-                distributionSetManagement, distributionSetTypeManagement, permissionChecker, EventView.DISTRIBUTIONS);
+        super(uiConfig, systemManagement, systemSecurityContext, configManagement, distributionSetManagement,
+                distributionSetTypeManagement, EventView.DISTRIBUTIONS);
 
-        this.distributionSetGridHeader = new DistributionSetGridHeader(i18n, permissionChecker, eventBus,
-                dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState, EventLayout.DS_TYPE_FILTER,
-                getEventView());
+        this.distributionSetGridHeader = new DistributionSetGridHeader(uiConfig, dSTypeFilterLayoutUiState,
+                distributionSetGridLayoutUiState, EventLayout.DS_TYPE_FILTER, getEventView());
         this.distributionSetGridHeader.addAddHeaderSupport(getDsWindowBuilder());
         this.distributionSetGridHeader.buildHeader();
 
-        this.distributionSetGrid = new DistributionSetGrid(eventBus, i18n, permissionChecker, uiNotification,
-                targetManagement, distributionSetManagement, smManagement, distributionSetTypeManagement,
-                smTypeManagement, dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState);
+        this.distributionSetGrid = new DistributionSetGrid(uiConfig, targetManagement, distributionSetManagement,
+                smManagement, distributionSetTypeManagement, smTypeManagement, dSTypeFilterLayoutUiState,
+                distributionSetGridLayoutUiState);
 
-        this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(i18n, permissionChecker, eventBus,
-                uiNotification, getDsWindowBuilder(), getDsMetaDataWindowBuilder());
+        this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(uiConfig, getDsWindowBuilder(),
+                getDsMetaDataWindowBuilder());
 
-        this.distributionSetDetails = new DistributionSetDetails(i18n, eventBus, permissionChecker, uiNotification,
-                distributionSetManagement, smManagement, distributionSetTypeManagement, distributionSetTagManagement,
-                configManagement, systemSecurityContext, getDsMetaDataWindowBuilder());
+        this.distributionSetDetails = new DistributionSetDetails(uiConfig, distributionSetManagement, smManagement,
+                distributionSetTypeManagement, distributionSetTagManagement, configManagement, systemSecurityContext,
+                getDsMetaDataWindowBuilder());
         this.distributionSetDetails.setUnassignSmAllowed(true);
         this.distributionSetDetails.addTfqDetailsGrid(targetFilterQueryManagement);
         this.distributionSetDetails.buildDetails();
 
-        addEventListener(new FilterChangedListener<>(eventBus, ProxyDistributionSet.class,
+        addEventListener(new FilterChangedListener<>(uiConfig.getEventBus(), ProxyDistributionSet.class,
                 new EventViewAware(getEventView()), distributionSetGrid.getFilterSupport()));
-        addEventListener(new SelectionChangedListener<>(eventBus,
+        addEventListener(new SelectionChangedListener<>(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()), getDsEntityAwareComponents()));
-        addEventListener(
-                new SelectGridEntityListener<>(eventBus, new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()),
-                        distributionSetGrid.getSelectionSupport()));
-        addEventListener(new EntityModifiedListener.Builder<>(eventBus, ProxyDistributionSet.class)
+        addEventListener(new SelectGridEntityListener<>(uiConfig.getEventBus(),
+                new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()),
+                distributionSetGrid.getSelectionSupport()));
+        addEventListener(new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyDistributionSet.class)
                 .entityModifiedAwareSupports(getDsModifiedAwareSupports()).build());
-        addEventListener(new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
+        addEventListener(new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyTag.class)
                 .entityModifiedAwareSupports(getTagModifiedAwareSupports()).parentEntityType(ProxyDistributionSet.class)
                 .build());
 

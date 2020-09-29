@@ -10,12 +10,12 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import javax.validation.ConstraintViolationException;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.SoftwareModuleToProxyMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
@@ -26,23 +26,15 @@ import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for populating and saving data in Add Software Module Window.
  */
 public class AddSmWindowController extends AbstractEntityWindowController<ProxySoftwareModule, ProxySoftwareModule> {
     private static final Logger LOG = LoggerFactory.getLogger(AddSmWindowController.class);
-
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
 
     private final SoftwareModuleManagement smManagement;
 
@@ -53,14 +45,8 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     /**
      * Constructor
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param smManagement
      *            SoftwareModuleManagement
      * @param layout
@@ -68,18 +54,12 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
      * @param view
      *            EventView
      */
-    public AddSmWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final SoftwareModuleManagement smManagement,
+    public AddSmWindowController(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement,
             final SmWindowLayout layout, final EventView view) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
 
         this.smManagement = smManagement;
-
         this.layout = layout;
-
         this.view = view;
     }
 

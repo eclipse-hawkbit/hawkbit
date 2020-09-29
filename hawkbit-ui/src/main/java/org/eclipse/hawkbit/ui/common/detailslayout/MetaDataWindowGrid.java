@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.providers.AbstractMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -21,9 +21,6 @@ import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Grid for MetaData pop up layout.
@@ -43,27 +40,19 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
     /**
      * Constructor for MetaDataWindowGrid
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param notification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dataProvider
      *            AbstractMetaDataDataProvider for filter support
      * @param itemsDeletionCallback
      *            Grid item deletion Call back for event listener
      *
      */
-    public MetaDataWindowGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final AbstractMetaDataDataProvider<?, F> dataProvider,
+    public MetaDataWindowGrid(final UIConfiguration uiConfig, final AbstractMetaDataDataProvider<?, F> dataProvider,
             final Predicate<Collection<ProxyMetaData>> itemsDeletionCallback) {
-        super(i18n, eventBus, permissionChecker);
+        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
 
-        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.metadata",
+        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiConfig.getUiNotification(), "caption.metadata",
                 "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
                 UIComponentIdProvider.METADATA_DELETE_CONFIRMATION_DIALOG);
 

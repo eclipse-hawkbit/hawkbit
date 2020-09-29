@@ -8,16 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -36,23 +34,18 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for SMTypeFilterHeader
      *
-     * @param eventBus
-     *          UIEventBus
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param smTypeWindowBuilder
-     *          SmTypeWindowBuilder
+     *            SmTypeWindowBuilder
      * @param smTypeFilterLayoutUiState
-     *          TypeFilterLayoutUiState
+     *            TypeFilterLayoutUiState
      * @param view
-     *          EventView
+     *            EventView
      */
-    public SMTypeFilterHeader(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final SmTypeWindowBuilder smTypeWindowBuilder,
+    public SMTypeFilterHeader(final UIConfiguration uiConfig, final SmTypeWindowBuilder smTypeWindowBuilder,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView view) {
-        super(i18n, permChecker, eventBus);
+        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
         this.smTypeWindowBuilder = smTypeWindowBuilder;

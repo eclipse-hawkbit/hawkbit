@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -22,8 +22,6 @@ import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour.ClickBehaviourType;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -42,23 +40,16 @@ public abstract class AbstractTypeFilterButtons extends AbstractFilterButtons<Pr
     /**
      * Constructor for AbstractTypeFilterButtons
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
-     * @param permChecker
-     *            SpPermissionChecker
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param typeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public AbstractTypeFilterButtons(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final SpPermissionChecker permChecker,
+    public AbstractTypeFilterButtons(final UIConfiguration uiConfig,
             final TypeFilterLayoutUiState typeFilterLayoutUiState) {
-        super(eventBus, i18n, uiNotification, permChecker);
+        super(uiConfig.getEventBus(), uiConfig.getI18n(), uiConfig.getUiNotification(), uiConfig.getPermChecker());
 
-        this.uiNotification = uiNotification;
+        this.uiNotification = uiConfig.getUiNotification();
         this.typeFilterLayoutUiState = typeFilterLayoutUiState;
         this.typeFilterButtonClick = new TypeFilterButtonClick(this::onFilterChanged);
     }

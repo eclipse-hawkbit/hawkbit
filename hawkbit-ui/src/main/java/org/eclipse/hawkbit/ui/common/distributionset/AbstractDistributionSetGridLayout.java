@@ -13,18 +13,14 @@ import java.util.Set;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.filters.DsFilterParams;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.TopicEventListener;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Abstract base class for distribution set grid layouts.
@@ -40,14 +36,8 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
     /**
      * Constructor for AbstractDistributionSetGridLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param notification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param systemManagement
      *            SystemManagement
      * @param systemSecurityContext
@@ -58,25 +48,19 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      *            DistributionSetManagement
      * @param distributionSetTypeManagement
      *            DistributionSetTypeManagement
-     * @param permissionChecker
-     *            SpPermissionChecker
      * @param eventView
      *            EventView
      */
-    public AbstractDistributionSetGridLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification notification, final SystemManagement systemManagement,
+    public AbstractDistributionSetGridLayout(final UIConfiguration uiConfig, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
             final DistributionSetManagement distributionSetManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement,
-            final SpPermissionChecker permissionChecker, final EventView eventView) {
+            final DistributionSetTypeManagement distributionSetTypeManagement, final EventView eventView) {
 
         this.eventView = eventView;
 
-        dsWindowBuilder = new DsWindowBuilder(i18n, entityFactory, eventBus, notification, systemManagement,
-                systemSecurityContext, configManagement, distributionSetManagement, distributionSetTypeManagement,
-                EventView.DEPLOYMENT);
-        dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(i18n, entityFactory, eventBus, notification,
-                permissionChecker, distributionSetManagement);
+        dsWindowBuilder = new DsWindowBuilder(uiConfig, systemManagement, systemSecurityContext, configManagement,
+                distributionSetManagement, distributionSetTypeManagement, EventView.DEPLOYMENT);
+        dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(uiConfig, distributionSetManagement);
     }
 
     /**

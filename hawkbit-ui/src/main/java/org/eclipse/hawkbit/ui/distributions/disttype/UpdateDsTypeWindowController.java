@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -23,19 +22,17 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update distribution set type window
@@ -43,15 +40,9 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 public class UpdateDsTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateDsTypeWindowController.class);
 
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
-
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DistributionSetManagement dsManagement;
     private final TypeToProxyTypeMapper<SoftwareModuleType> smTypeToProxyTypeMapper;
-
     private final DsTypeWindowLayout layout;
 
     private String nameBeforeEdit;
@@ -61,14 +52,8 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
     /**
      * Constructor for UpdateDsTypeWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
      * @param dsManagement
@@ -76,20 +61,14 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
      * @param layout
      *            DsTypeWindowLayout
      */
-    public UpdateDsTypeWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public UpdateDsTypeWindowController(final UIConfiguration uiConfig,
             final DistributionSetTypeManagement dsTypeManagement, final DistributionSetManagement dsManagement,
             final DsTypeWindowLayout layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
 
         this.dsTypeManagement = dsTypeManagement;
         this.dsManagement = dsManagement;
-
         this.smTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
-
         this.layout = layout;
     }
 

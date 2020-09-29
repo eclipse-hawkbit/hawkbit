@@ -8,13 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -31,24 +28,16 @@ public class TargetDetailsHeader extends AbstractDetailsHeader<ProxyTarget> {
     /**
      * Constructor for TargetDetailsHeader
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetWindowBuilder
-     *          TargetWindowBuilder
+     *            TargetWindowBuilder
      * @param targetMetaDataWindowBuilder
-     *          TargetMetaDataWindowBuilder
+     *            TargetMetaDataWindowBuilder
      */
-    public TargetDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification uiNotification,
-            final TargetWindowBuilder targetWindowBuilder,
+    public TargetDetailsHeader(final UIConfiguration uiConfig, final TargetWindowBuilder targetWindowBuilder,
             final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
-        super(i18n, permChecker, eventBus, uiNotification);
+        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus(), uiConfig.getUiNotification());
 
         this.targetWindowBuilder = targetWindowBuilder;
         this.targetMetaDataWindowBuilder = targetMetaDataWindowBuilder;

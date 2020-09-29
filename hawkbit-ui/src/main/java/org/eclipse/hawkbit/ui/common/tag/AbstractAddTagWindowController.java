@@ -10,69 +10,54 @@ package org.eclipse.hawkbit.ui.common.tag;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Abstract base class for add tag window controller.
  */
 public abstract class AbstractAddTagWindowController extends AbstractEntityWindowController<ProxyTag, ProxyTag> {
 
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
     private final TagWindowLayout<ProxyTag> layout;
     private final Class<? extends ProxyIdentifiableEntity> parentType;
 
     /**
      * Constructor for AbstractDsTagWindowController.
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param layout
      *            TagWindowLayout
      * @param parentType
      *            parent type for publishing event
      */
-    public AbstractAddTagWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final TagWindowLayout<ProxyTag> layout,
+    public AbstractAddTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
+
         this.layout = layout;
         this.parentType = parentType;
     }
 
     @Override
     protected void persistEntity(final ProxyTag entity) {
-        final TagCreate tagCreate = entityFactory.tag().create().name(entity.getName())
+        final TagCreate tagCreate = uiConfig.getEntityFactory().tag().create().name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour());
         final Tag newTag = createEntityInRepository(tagCreate);
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newTag.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        uiConfig.getUiNotification()
+                .displaySuccess(uiConfig.getI18n().getMessage("message.save.success", newTag.getName()));
+        uiConfig.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, parentType, ProxyTag.class, newTag.getId()));
     }
 
@@ -93,13 +78,15 @@ public abstract class AbstractAddTagWindowController extends AbstractEntityWindo
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.tagname"));
+            uiConfig.getUiNotification()
+                    .displayValidationError(uiConfig.getI18n().getMessage("message.error.missing.tagname"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (getTagByNameFromRepository(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.tag.duplicate.check", trimmedName));
+            uiConfig.getUiNotification()
+                    .displayValidationError(uiConfig.getI18n().getMessage("message.tag.duplicate.check", trimmedName));
             return false;
         }
 

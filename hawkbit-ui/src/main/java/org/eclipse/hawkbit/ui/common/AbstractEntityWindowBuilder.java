@@ -20,13 +20,15 @@ import com.vaadin.ui.Window;
  * Builder for abstract entity window
  *
  * @param <T>
- *       Generic type entity
+ *            Generic type entity
  */
 public abstract class AbstractEntityWindowBuilder<T> {
+    protected final UIConfiguration uiConfig;
     protected final VaadinMessageSource i18n;
 
-    protected AbstractEntityWindowBuilder(final VaadinMessageSource i18n) {
-        this.i18n = i18n;
+    protected AbstractEntityWindowBuilder(final UIConfiguration uiConfig) {
+        this.uiConfig = uiConfig;
+        this.i18n = uiConfig.getI18n();
     }
 
     protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?> controller) {
@@ -56,8 +58,9 @@ public abstract class AbstractEntityWindowBuilder<T> {
 
     protected CommonDialogWindow createWindow(final Component content,
             final SaveDialogCloseListener saveDialogCloseListener) {
-        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).id(getWindowId()).content(content).i18n(i18n)
-                .helpLink(getHelpLink()).saveDialogCloseListener(saveDialogCloseListener).buildCommonDialogWindow();
+        return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).id(getWindowId()).content(content)
+                .i18n(uiConfig.getI18n()).helpLink(getHelpLink()).saveDialogCloseListener(saveDialogCloseListener)
+                .buildCommonDialogWindow();
     }
 
     protected abstract String getWindowId();
@@ -73,7 +76,7 @@ public abstract class AbstractEntityWindowBuilder<T> {
      * Gets the update window
      *
      * @param entity
-     *          Generic type entity
+     *            Generic type entity
      *
      * @return window
      */

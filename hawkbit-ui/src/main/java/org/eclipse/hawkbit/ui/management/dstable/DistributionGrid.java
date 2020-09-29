@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.DsManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
@@ -45,10 +45,7 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
@@ -73,14 +70,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     /**
      * Constructor for DistributionGrid
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param notification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetManagement
      *            TargetManagement
      * @param distributionSetManagement
@@ -96,15 +87,12 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionGrid(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState,
+    public DistributionGrid(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+            final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
+            final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(i18n, eventBus, permissionChecker, notification, distributionSetManagement, distributionGridLayoutUiState,
-                EventView.DEPLOYMENT);
+        super(uiConfig, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
 
         this.targetGridLayoutUiState = targetGridLayoutUiState;
         this.distributionGridLayoutUiState = distributionGridLayoutUiState;

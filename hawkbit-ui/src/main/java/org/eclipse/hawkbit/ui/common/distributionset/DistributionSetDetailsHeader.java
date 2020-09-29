@@ -8,13 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.distributionset;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -31,23 +28,16 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     /**
      * Constructor for DistributionSetDetailsHeader
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dsWindowBuilder
-     *          DsWindowBuilder
+     *            DsWindowBuilder
      * @param dsMetaDataWindowBuilder
-     *          DsMetaDataWindowBuilder
+     *            DsMetaDataWindowBuilder
      */
-    public DistributionSetDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification uiNotification, final DsWindowBuilder dsWindowBuilder,
+    public DistributionSetDetailsHeader(final UIConfiguration uiConfig, final DsWindowBuilder dsWindowBuilder,
             final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
-        super(i18n, permChecker, eventBus, uiNotification);
+        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus(), uiConfig.getUiNotification());
 
         this.dsWindowBuilder = dsWindowBuilder;
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;

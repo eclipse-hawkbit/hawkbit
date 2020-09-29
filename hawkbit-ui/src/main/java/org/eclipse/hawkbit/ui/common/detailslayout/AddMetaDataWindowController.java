@@ -13,18 +13,14 @@ import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller to add meta data window
  */
 public class AddMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
-    private final VaadinMessageSource i18n;
-    private final UINotification uiNotification;
-
     private final MetaDataAddUpdateWindowLayout layout;
 
     private final Function<ProxyMetaData, MetaData> createMetaDataCallback;
@@ -33,10 +29,8 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     /**
      * Constructor for AddMetaDataWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param createMetaDataCallback
@@ -44,11 +38,10 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
      * @param duplicateCheckCallback
      *            Duplicate check callback
      */
-    public AddMetaDataWindowController(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> createMetaDataCallback,
+    public AddMetaDataWindowController(final UIConfiguration uiConfig, final MetaDataAddUpdateWindowLayout layout,
+            final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
 
         this.layout = layout;
 

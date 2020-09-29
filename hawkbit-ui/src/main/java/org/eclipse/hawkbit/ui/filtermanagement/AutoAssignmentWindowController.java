@@ -8,22 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.UI;
@@ -33,10 +30,6 @@ import com.vaadin.ui.UI;
  */
 public class AutoAssignmentWindowController
         extends AbstractEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery> {
-    private final VaadinMessageSource i18n;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
-    private final EntityFactory entityFactory;
 
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
@@ -46,14 +39,8 @@ public class AutoAssignmentWindowController
     /**
      * Constructor for AutoAssignmentWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetManagement
      *            TargetManagement
      * @param targetFilterQueryManagement
@@ -61,18 +48,12 @@ public class AutoAssignmentWindowController
      * @param layout
      *            AutoAssignmentWindowLayout
      */
-    public AutoAssignmentWindowController(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final EntityFactory entityFactory,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
-            final AutoAssignmentWindowLayout layout) {
-        this.i18n = i18n;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
-        this.entityFactory = entityFactory;
+    public AutoAssignmentWindowController(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final AutoAssignmentWindowLayout layout) {
+        super(uiConfig);
 
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-
         this.layout = layout;
     }
 

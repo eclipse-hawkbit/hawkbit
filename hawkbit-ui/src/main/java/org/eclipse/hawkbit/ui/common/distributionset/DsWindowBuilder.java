@@ -10,20 +10,17 @@ package org.eclipse.hawkbit.ui.common.distributionset;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.distributions.dstable.AddDsWindowController;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsWindowLayout;
 import org.eclipse.hawkbit.ui.distributions.dstable.UpdateDsWindowController;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -31,9 +28,6 @@ import com.vaadin.ui.Window;
  * Builder for distribution set window
  */
 public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributionSet> {
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
     private final SystemManagement systemManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantConfigurationManagement tenantConfigurationManagement;
@@ -46,38 +40,28 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
     /**
      * Constructor for DsWindowBuilder
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param entityFactory
-     *          EntityFactory
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param systemManagement
-     *          SystemManagement
+     *            SystemManagement
      * @param systemSecurityContext
-     *          SystemSecurityContext
+     *            SystemSecurityContext
      * @param tenantConfigurationManagement
-     *          TenantConfigurationManagement
+     *            TenantConfigurationManagement
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param dsTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param view
-     *          EventView
+     *            EventView
      */
-    public DsWindowBuilder(final VaadinMessageSource i18n, final EntityFactory entityFactory, final UIEventBus eventBus,
-            final UINotification uiNotification, final SystemManagement systemManagement,
+    public DsWindowBuilder(final UIConfiguration uiConfig, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final DistributionSetManagement dsManagement, final DistributionSetTypeManagement dsTypeManagement,
             final EventView view) {
-        super(i18n);
+        super(uiConfig);
 
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
@@ -95,17 +79,16 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddDsWindowController(i18n, entityFactory, eventBus, uiNotification,
-                systemManagement, dsManagement,
-                new DsWindowLayout(i18n, systemSecurityContext, tenantConfigurationManagement, dsTypeManagement),
+        return getWindowForNewEntity(new AddDsWindowController(uiConfig, systemManagement, dsManagement,
+                new DsWindowLayout(uiConfig.getI18n(), systemSecurityContext, tenantConfigurationManagement,
+                        dsTypeManagement),
                 view));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyDistributionSet proxyDs) {
-        return getWindowForEntity(proxyDs, new UpdateDsWindowController(i18n, entityFactory, eventBus, uiNotification,
-                dsManagement,
+        return getWindowForEntity(proxyDs, new UpdateDsWindowController(uiConfig, dsManagement,
                 new DsWindowLayout(i18n, systemSecurityContext, tenantConfigurationManagement, dsTypeManagement)));
     }
 }

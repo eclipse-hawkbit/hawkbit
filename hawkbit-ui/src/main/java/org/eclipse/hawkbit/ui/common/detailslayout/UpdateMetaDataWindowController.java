@@ -14,9 +14,8 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -27,9 +26,6 @@ import org.springframework.util.StringUtils;
 public class UpdateMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateMetaDataWindowController.class);
 
-    private final VaadinMessageSource i18n;
-    private final UINotification uiNotification;
-
     private final MetaDataAddUpdateWindowLayout layout;
 
     private final Function<ProxyMetaData, MetaData> updateMetaDataCallback;
@@ -37,24 +33,19 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     /**
      * Constructor for UpdateMetaDataWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param updateMetaDataCallback
      *            Update meta data call back function for event listener
      *
      */
-    public UpdateMetaDataWindowController(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final MetaDataAddUpdateWindowLayout layout,
+    public UpdateMetaDataWindowController(final UIConfiguration uiConfig, final MetaDataAddUpdateWindowLayout layout,
             final Function<ProxyMetaData, MetaData> updateMetaDataCallback) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
+        super(uiConfig);
 
         this.layout = layout;
-
         this.updateMetaDataCallback = updateMetaDataCallback;
     }
 

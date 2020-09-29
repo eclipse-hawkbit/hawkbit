@@ -12,9 +12,11 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -38,6 +40,9 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     protected final VaadinMessageSource i18n;
     protected final transient UIEventBus eventBus;
     protected final UINotification uiNotification;
+    protected final SpPermissionChecker permChecker;
+    protected EntityFactory entityFactory;
+    protected final UIConfiguration uiConfig;
 
     private final MetadataWindowGridHeader metadataWindowGridHeader;
 
@@ -48,23 +53,18 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     /**
      * Constructor for AbstractTagWindowLayout
      *
-     * @param i18n
-     *            I18N
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
-     * @param permChecker
-     *            SpPermissionChecker
+     * @param uiConfig
+     *            {@link UIConfiguration}
      */
-    public AbstractMetaDataWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final SpPermissionChecker permChecker) {
-        this.i18n = i18n;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+    public AbstractMetaDataWindowLayout(final UIConfiguration uiConfig) {
+        this.uiConfig = uiConfig;
+        this.i18n = uiConfig.getI18n();
+        this.eventBus = uiConfig.getEventBus();
+        this.uiNotification = uiConfig.getUiNotification();
+        this.permChecker = uiConfig.getPermChecker();
+        this.entityFactory = uiConfig.getEntityFactory();
 
-        this.metadataWindowGridHeader = new MetadataWindowGridHeader(i18n, permChecker, eventBus,
-                this::showAddMetaDataLayout);
+        this.metadataWindowGridHeader = new MetadataWindowGridHeader(uiConfig, this::showAddMetaDataLayout);
     }
 
     protected MetaData createMetaData(final ProxyMetaData entity) {

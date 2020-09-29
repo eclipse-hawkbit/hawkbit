@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.filters.DsDistributionsFilterParams;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetDistributionsStateDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -31,9 +31,6 @@ import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Distribution set grid which is shown on the Distributions View.
@@ -46,38 +43,29 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
     /**
      * Constructor for DistributionSetGrid
      *
-     * @param eventBus
-     *          UIEventBus
-     * @param i18n
- *              VaadinMessageSource
-     * @param permissionChecker
-     *          SpPermissionChecker
-     * @param notification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param smManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      * @param dsTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param smTypeManagement
-     *          SoftwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
      * @param dSTypeFilterLayoutUiState
-     *          TypeFilterLayoutUiState
+     *            TypeFilterLayoutUiState
      * @param distributionSetGridLayoutUiState
-     *          GridLayoutUiState
+     *            GridLayoutUiState
      */
-    public DistributionSetGrid(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final TargetManagement targetManagement, final DistributionSetManagement dsManagement,
-            final SoftwareModuleManagement smManagement, final DistributionSetTypeManagement dsTypeManagement,
-            final SoftwareModuleTypeManagement smTypeManagement,
+    public DistributionSetGrid(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+            final DistributionSetManagement dsManagement, final SoftwareModuleManagement smManagement,
+            final DistributionSetTypeManagement dsTypeManagement, final SoftwareModuleTypeManagement smTypeManagement,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState,
             final GridLayoutUiState distributionSetGridLayoutUiState) {
-        super(i18n, eventBus, permissionChecker, notification, dsManagement, distributionSetGridLayoutUiState,
-                EventView.DISTRIBUTIONS);
+        super(uiConfig, dsManagement, distributionSetGridLayoutUiState, EventView.DISTRIBUTIONS);
 
         this.dSTypeFilterLayoutUiState = dSTypeFilterLayoutUiState;
 

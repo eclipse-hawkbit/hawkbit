@@ -8,13 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.common.grid.header.support.AddHeaderSupport;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Component;
 
@@ -29,18 +27,13 @@ public class MetadataWindowGridHeader extends AbstractGridHeader {
     /**
      * Constructor for MetadataWindowGridHeader
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param addNewItemCallback
      *            Runnable
      */
-    public MetadataWindowGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final Runnable addNewItemCallback) {
-        super(i18n, permChecker, eventBus);
+    public MetadataWindowGridHeader(final UIConfiguration uiConfig, final Runnable addNewItemCallback) {
+        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
 
         if (permChecker.hasCreateRepositoryPermission()) {
             this.addHeaderSupport = new AddHeaderSupport(i18n, UIComponentIdProvider.METADTA_ADD_ICON_ID,

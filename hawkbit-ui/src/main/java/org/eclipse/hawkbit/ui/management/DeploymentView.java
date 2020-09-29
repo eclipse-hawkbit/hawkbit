@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -99,21 +100,23 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
+        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, uiNotification,
+                permChecker);
+
         if (permChecker.hasTargetReadPermission()) {
-            this.targetTagFilterLayout = new TargetTagFilterLayout(i18n, managementUIState, permChecker, eventBus,
-                    uiNotification, entityFactory, targetFilterQueryManagement, targetTagManagement, targetManagement,
+            this.targetTagFilterLayout = new TargetTagFilterLayout(uiConfig, managementUIState,
+                    targetFilterQueryManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState());
 
-            this.targetGridLayout = new TargetGridLayout(eventBus, targetManagement, entityFactory, i18n,
-                    uiNotification, deploymentManagement, uiProperties, permChecker, targetTagManagement,
-                    distributionSetManagement, uiExecutor, configManagement, systemSecurityContext,
+            this.targetGridLayout = new TargetGridLayout(uiConfig, targetManagement, deploymentManagement, uiProperties,
+                    targetTagManagement, distributionSetManagement, uiExecutor, configManagement, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
                     managementUIState.getDistributionGridLayoutUiState());
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
-            this.actionHistoryLayout = new ActionHistoryLayout(i18n, deploymentManagement, eventBus, uiNotification,
-                    permChecker, managementUIState.getActionHistoryGridLayoutUiState());
+            this.actionHistoryLayout = new ActionHistoryLayout(uiConfig, deploymentManagement,
+                    managementUIState.getActionHistoryGridLayoutUiState());
         } else {
             this.targetTagFilterLayout = null;
             this.targetGridLayout = null;
@@ -122,14 +125,12 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
 
         if (permChecker.hasReadRepositoryPermission()) {
-            this.distributionTagLayout = new DistributionTagLayout(eventBus, i18n, permChecker,
-                    distributionSetTagManagement, entityFactory, uiNotification, distributionSetManagement,
-                    managementUIState.getDistributionTagLayoutUiState());
-            this.distributionGridLayout = new DistributionGridLayout(i18n, eventBus, permChecker, entityFactory,
-                    uiNotification, targetManagement, distributionSetManagement, smManagement,
-                    distributionSetTypeManagement, distributionSetTagManagement, systemManagement, deploymentManagement,
-                    configManagement, systemSecurityContext, uiProperties,
-                    managementUIState.getDistributionGridLayoutUiState(),
+            this.distributionTagLayout = new DistributionTagLayout(uiConfig, distributionSetTagManagement,
+                    distributionSetManagement, managementUIState.getDistributionTagLayoutUiState());
+            this.distributionGridLayout = new DistributionGridLayout(uiConfig, targetManagement,
+                    distributionSetManagement, smManagement, distributionSetTypeManagement,
+                    distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
+                    systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),
                     managementUIState.getDistributionTagLayoutUiState(),
                     managementUIState.getTargetGridLayoutUiState());
         } else {

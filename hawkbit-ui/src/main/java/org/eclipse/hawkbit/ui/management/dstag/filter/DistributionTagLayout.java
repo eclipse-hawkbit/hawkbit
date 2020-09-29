@@ -13,8 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -28,9 +27,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGener
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.dstag.DsTagWindowBuilder;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -52,43 +48,32 @@ public class DistributionTagLayout extends AbstractFilterLayout {
 
     /**
      * Constructor
-     * 
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
+     *
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param distributionSetTagManagement
      *            DistributionSetTagManagement
-     * @param entityFactory
-     *            EntityFactory
-     * @param uiNotification
-     *            UINotification
      * @param distributionSetManagement
      *            DistributionSetManagement
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionTagLayout(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final DistributionSetTagManagement distributionSetTagManagement,
-            final EntityFactory entityFactory, final UINotification uiNotification,
+    public DistributionTagLayout(final UIConfiguration uiConfig,
+            final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(i18n, entityFactory, eventBus,
-                uiNotification, distributionSetTagManagement);
+        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(uiConfig, distributionSetTagManagement);
 
-        this.distributionTagFilterHeader = new DistributionTagFilterHeader(i18n, permChecker, eventBus,
-                dsTagWindowBuilder, distributionTagLayoutUiState);
-        this.distributionTagButtons = new DistributionTagButtons(eventBus, i18n, uiNotification, permChecker,
-                distributionSetTagManagement, distributionSetManagement, dsTagWindowBuilder,
+        this.distributionTagFilterHeader = new DistributionTagFilterHeader(uiConfig, dsTagWindowBuilder,
                 distributionTagLayoutUiState);
+        this.distributionTagButtons = new DistributionTagButtons(uiConfig, distributionSetTagManagement,
+                distributionSetManagement, dsTagWindowBuilder, distributionTagLayoutUiState);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiConfig.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_TAG_FILTER, EventView.DEPLOYMENT),
                 distributionTagButtons::hideActionColumns, distributionTagButtons::showEditColumn,
                 distributionTagButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyTag.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxyDistributionSet.class).build();
 

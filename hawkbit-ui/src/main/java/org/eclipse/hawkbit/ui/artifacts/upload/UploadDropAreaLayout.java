@@ -18,14 +18,13 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
@@ -59,13 +58,9 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
 
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.
-     * 
-     * @param i18n
-     *            the {@link VaadinMessageSource}
-     * @param eventBus
-     *            the {@link EventBus} used to send/retrieve events
-     * @param uiNotification
-     *            {@link UINotification} for showing notifications
+     *
+     * @param uiConfig
+     *            the {@link UIConfiguration}
      * @param artifactUploadState
      *            the {@link ArtifactUploadState} for state information
      * @param multipartConfigElement
@@ -77,18 +72,17 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
      *            the {@link ArtifactManagement} for storing the uploaded
      *            artifacts
      */
-    public UploadDropAreaLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
+    public UploadDropAreaLayout(final UIConfiguration uiConfig, final ArtifactUploadState artifactUploadState,
             final MultipartConfigElement multipartConfigElement, final SoftwareModuleManagement softwareManagement,
             final ArtifactManagement artifactManagement) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
+        this.i18n = uiConfig.getI18n();
+        this.uiNotification = uiConfig.getUiNotification();
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
 
-        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, eventBus, artifactUploadState,
+        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, uiConfig.getEventBus(), artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareManagement, uploadLock);
 
         buildLayout();
@@ -125,7 +119,7 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
      * Update the upload view on file drop
      *
      * @param masterEntity
-     *          ProxySoftwareModule
+     *            ProxySoftwareModule
      */
     @Override
     public void masterEntityChanged(final ProxySoftwareModule masterEntity) {
@@ -139,7 +133,7 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
      * Checks progress on file upload
      *
      * @param fileUploadProgress
-     *          FileUploadProgress
+     *            FileUploadProgress
      */
     public void onUploadChanged(final FileUploadProgress fileUploadProgress) {
         uploadButtonLayout.onUploadChanged(fileUploadProgress);
@@ -178,7 +172,7 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
          * Validates the file drop events and triggers the upload
          *
          * @param event
-         *          FileDropEvent
+         *            FileDropEvent
          */
         @Override
         public void drop(final FileDropEvent<VerticalLayout> event) {

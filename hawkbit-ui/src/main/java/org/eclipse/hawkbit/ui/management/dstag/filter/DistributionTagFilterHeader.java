@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag.filter;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.dstag.DsTagWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -34,21 +32,16 @@ public class DistributionTagFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for UIEventBus
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param eventBus
-     *         UIEventBus
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param dsTagWindowBuilder
-     *          DsTagWindowBuilder
+     *            DsTagWindowBuilder
      * @param distributionTagLayoutUiState
-     *          TagFilterLayoutUiState
+     *            TagFilterLayoutUiState
      */
-    public DistributionTagFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final DsTagWindowBuilder dsTagWindowBuilder,
+    public DistributionTagFilterHeader(final UIConfiguration uiConfig, final DsTagWindowBuilder dsTagWindowBuilder,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(i18n, permChecker, eventBus);
+        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
 
         this.distributionTagLayoutUiState = distributionTagLayoutUiState;
         this.dsTagWindowBuilder = dsTagWindowBuilder;

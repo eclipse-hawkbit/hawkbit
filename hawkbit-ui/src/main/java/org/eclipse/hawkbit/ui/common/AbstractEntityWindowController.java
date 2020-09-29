@@ -8,23 +8,47 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for abstract entity window
  *
  * @param <T>
- *     Generic type entity
+ *            Generic type entity
  * @param <E>
- *     Generic type entity
+ *            Generic type entity
  */
 public abstract class AbstractEntityWindowController<T, E> {
+
+    protected final UIConfiguration uiConfig;
+    protected final VaadinMessageSource i18n;
+    protected final EntityFactory entityFactory;
+    protected final UIEventBus eventBus;
+    protected final UINotification uiNotification;
+
+    /**
+     * Constructor.
+     *
+     * @param uiConfig
+     *            the {@link UIConfiguration}
+     */
+    protected AbstractEntityWindowController(final UIConfiguration uiConfig) {
+        this.uiConfig = uiConfig;
+        this.entityFactory = uiConfig.getEntityFactory();
+        this.eventBus = uiConfig.getEventBus();
+        this.i18n = uiConfig.getI18n();
+        this.uiNotification = uiConfig.getUiNotification();
+    }
 
     /**
      * Populate entity with data
      *
      * @param proxyEntity
-     *          Generic type entity
+     *            Generic type entity
      */
     public void populateWithData(final T proxyEntity) {
         getLayout().setEntity(buildEntityFromProxy(proxyEntity));

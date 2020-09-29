@@ -9,11 +9,10 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.FormLayout;
@@ -31,16 +30,14 @@ public class DsTypeWindowLayout extends TagWindowLayout<ProxyType> {
     /**
      * Constructor for DsTypeWindowLayout
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param uiNotification
-     *          UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param softwareModuleTypeManagement
-     *          SoftwareModuleTypeManagement
+     *            SoftwareModuleTypeManagement
      */
-    public DsTypeWindowLayout(final VaadinMessageSource i18n, final UINotification uiNotification,
+    public DsTypeWindowLayout(final UIConfiguration uiConfig,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(i18n, uiNotification);
+        super(uiConfig);
 
         this.dsTypeComponentBuilder = new DsTypeWindowLayoutComponentBuilder(i18n, softwareModuleTypeManagement);
 

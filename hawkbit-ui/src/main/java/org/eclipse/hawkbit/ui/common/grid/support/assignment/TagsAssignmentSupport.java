@@ -12,14 +12,13 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * Support for assigning the {@link ProxyTag} items to target item (target or
  * distribution set).
- * 
+ *
  * @param <T>
  *            The item-type of target item
  * @param <R>
@@ -27,8 +26,8 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
  */
 public abstract class TagsAssignmentSupport<T, R extends NamedEntity> extends AssignmentSupport<ProxyTag, T> {
 
-    protected TagsAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n) {
-        super(notification, i18n);
+    protected TagsAssignmentSupport(final UIConfiguration uiConfig) {
+        super(uiConfig.getUiNotification(), uiConfig.getI18n());
     }
 
     @Override

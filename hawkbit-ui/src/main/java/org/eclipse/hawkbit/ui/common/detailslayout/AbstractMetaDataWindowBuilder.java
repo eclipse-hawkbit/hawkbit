@@ -10,9 +10,9 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Window;
@@ -21,18 +21,18 @@ import com.vaadin.ui.Window;
  * Abstract builder for Meta data window
  *
  * @param <F>
- *          Generic type
+ *            Generic type
  */
 public abstract class AbstractMetaDataWindowBuilder<F> extends AbstractEntityWindowBuilder<ProxyMetaData> {
 
     /**
      * Constructor for AbstractMetaDataWindowBuilder
      *
-     * @param i18n
-     *          VaadinMessageSource
+     * @param uiConfig
+     *            {@link UIConfiguration}
      */
-    public AbstractMetaDataWindowBuilder(final VaadinMessageSource i18n) {
-        super(i18n);
+    public AbstractMetaDataWindowBuilder(final UIConfiguration uiConfig) {
+        super(uiConfig);
     }
 
     @Override

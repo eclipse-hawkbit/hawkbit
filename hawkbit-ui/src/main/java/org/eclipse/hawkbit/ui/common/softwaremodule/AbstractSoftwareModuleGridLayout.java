@@ -11,20 +11,16 @@ package org.eclipse.hawkbit.ui.common.softwaremodule;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGrid;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridHeader;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.TopicEventListener;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Abstract base class for software modules in grid layouts.
@@ -40,34 +36,23 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
     /**
      * Constructor for AbstractSoftwareModuleGridLayout.
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param softwareModuleManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
-     * @param permChecker
-     *            SpPermissionChecker
      * @param eventView
      *            EventView
      */
-    public AbstractSoftwareModuleGridLayout(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public AbstractSoftwareModuleGridLayout(final UIConfiguration uiConfig,
             final SoftwareModuleManagement softwareModuleManagement,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final SpPermissionChecker permChecker,
-            final EventView eventView) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EventView eventView) {
 
         this.eventView = eventView;
-        smWindowBuilder = new SmWindowBuilder(i18n, entityFactory, eventBus, uiNotification, softwareModuleManagement,
-                softwareModuleTypeManagement, eventView);
-        smMetaDataWindowBuilder = new SmMetaDataWindowBuilder(i18n, entityFactory, eventBus, uiNotification,
-                permChecker, softwareModuleManagement);
+        smWindowBuilder = new SmWindowBuilder(uiConfig, softwareModuleManagement, softwareModuleTypeManagement,
+                eventView);
+        smMetaDataWindowBuilder = new SmMetaDataWindowBuilder(uiConfig, softwareModuleManagement);
 
     }
 

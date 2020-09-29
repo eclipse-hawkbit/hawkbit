@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -65,13 +66,14 @@ public class FilterManagementView extends VerticalLayout implements View {
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement) {
         this.filterManagementUIState = filterManagementUIState;
 
-        this.targetFilterGridLayout = new TargetFilterGridLayout(i18n, eventBus, permissionChecker, notification,
-                entityFactory, targetFilterQueryManagement, targetManagement, distributionSetManagement,
-                filterManagementUIState);
+        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, notification,
+                permissionChecker);
 
-        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(i18n, permissionChecker, eventBus, notification,
-                uiProperties, entityFactory, rsqlValidationOracle, targetManagement, targetFilterQueryManagement,
-                filterManagementUIState.getDetailsLayoutUiState());
+        this.targetFilterGridLayout = new TargetFilterGridLayout(uiConfig, targetFilterQueryManagement,
+                targetManagement, distributionSetManagement, filterManagementUIState);
+
+        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiConfig, uiProperties, rsqlValidationOracle,
+                targetManagement, targetFilterQueryManagement, filterManagementUIState.getDetailsLayoutUiState());
 
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
         layoutVisibilityHandlers.put(EventLayout.TARGET_FILTER_QUERY_LIST,
