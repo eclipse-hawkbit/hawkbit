@@ -31,12 +31,11 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
 
     private final transient SmWindowBuilder smWindowBuilder;
     private final transient SmMetaDataWindowBuilder smMetaDataWindowBuilder;
+    private final transient UIConfiguration uiConfig;
 
     private transient ArtifactDetailsHeaderSupport artifactDetailsHeaderSupport;
     private transient ArtifactManagement artifactManagement;
     private ArtifactDetailsGrid artifactDetailsGrid;
-
-    private final UIConfiguration uiConfig;
 
     /**
      * Constructor for SoftwareModuleDetailsHeader

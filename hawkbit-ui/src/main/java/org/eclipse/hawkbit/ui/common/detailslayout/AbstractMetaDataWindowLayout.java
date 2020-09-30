@@ -38,11 +38,11 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     private static final long serialVersionUID = 1L;
 
     protected final VaadinMessageSource i18n;
-    protected final transient UIEventBus eventBus;
     protected final UINotification uiNotification;
     protected final SpPermissionChecker permChecker;
-    protected EntityFactory entityFactory;
-    protected final UIConfiguration uiConfig;
+    protected final transient UIEventBus eventBus;
+    protected final transient EntityFactory entityFactory;
+    protected final transient UIConfiguration uiConfig;
 
     private final MetadataWindowGridHeader metadataWindowGridHeader;
 

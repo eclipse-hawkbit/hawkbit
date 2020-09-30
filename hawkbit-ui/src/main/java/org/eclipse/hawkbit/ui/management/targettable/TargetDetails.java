@@ -53,7 +53,6 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
     private final KeyValueDetailsComponent installedDsDetails;
     private final transient TargetTagToken targetTagToken;
     private final MetadataDetailsGrid<String> targetMetadataGrid;
-    private final UIConfiguration uiConfig;
 
     private final transient TargetMetaDataWindowBuilder targetMetaDataWindowBuilder;
 
@@ -61,7 +60,6 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
         super(uiConfig.getI18n());
-        this.uiConfig = uiConfig;
 
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
