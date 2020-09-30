@@ -343,9 +343,7 @@
                      <exclude>**/addons.scss</exclude>
                      <exclude>**/VAADIN/widgetsets/**</exclude>
                      <exclude>.sonar</exclude>
-                     <exclude>**/Dockerfile</exclude>
-                     <exclude>**/docker-compose.yml</exclude>
-                     <exclude>**/docker-compose-stack.yml</exclude>
+                     <exclude>**/hawkbit-runtime/docker/**</exclude>
                      <exclude>**/.sonar/**</exclude>
                      <exclude>docs/content/**</exclude>
                      <exclude>docs/layouts/**</exclude>
