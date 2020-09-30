@@ -32,10 +32,10 @@ public final class RolloutWindowBuilder extends AbstractEntityWindowBuilder<Prox
      * Constructor for RolloutWindowBuilder
      *
      * @param rolloutWindowDependencies
-     *          RolloutWindowDependencies
+     *            RolloutWindowDependencies
      */
     public RolloutWindowBuilder(final RolloutWindowDependencies rolloutWindowDependencies) {
-        super(rolloutWindowDependencies.getI18n());
+        super(rolloutWindowDependencies.getUiConfig());
 
         this.dependencies = rolloutWindowDependencies;
     }
@@ -60,7 +60,7 @@ public final class RolloutWindowBuilder extends AbstractEntityWindowBuilder<Prox
      * Gets the copy rollout window
      *
      * @param proxyRollout
-     *          ProxyRollout
+     *            ProxyRollout
      *
      * @return Common dialog window to copy rollout
      */
@@ -79,7 +79,7 @@ public final class RolloutWindowBuilder extends AbstractEntityWindowBuilder<Prox
      * Gets the approval rollout window
      *
      * @param proxyRollout
-     *          ProxyRollout
+     *            ProxyRollout
      *
      * @return Common dialog window to approve rollout
      */

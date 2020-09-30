@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -73,13 +74,15 @@ public class RolloutView extends VerticalLayout implements View {
             final SystemSecurityContext systemSecurityContext) {
         this.rolloutManagementUIState = rolloutManagementUIState;
 
-        this.rolloutsLayout = new RolloutGridLayout(permissionChecker, rolloutManagementUIState, eventBus,
-                rolloutManagement, targetManagement, uiNotification, uiProperties, entityFactory, i18n,
-                targetFilterQueryManagement, rolloutGroupManagement, quotaManagement, tenantConfigManagement,
-                distributionSetManagement, systemSecurityContext);
-        this.rolloutGroupsLayout = new RolloutGroupGridLayout(i18n, eventBus, rolloutGroupManagement,
-                rolloutManagementUIState, permissionChecker);
-        this.rolloutGroupTargetsLayout = new RolloutGroupTargetGridLayout(eventBus, i18n, rolloutGroupManagement,
+        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, uiNotification,
+                permissionChecker);
+
+        this.rolloutsLayout = new RolloutGridLayout(uiConfig, rolloutManagementUIState, rolloutManagement,
+                targetManagement, uiProperties, targetFilterQueryManagement, rolloutGroupManagement, quotaManagement,
+                tenantConfigManagement, distributionSetManagement, systemSecurityContext);
+        this.rolloutGroupsLayout = new RolloutGroupGridLayout(uiConfig, rolloutGroupManagement,
+                rolloutManagementUIState);
+        this.rolloutGroupTargetsLayout = new RolloutGroupTargetGridLayout(uiConfig, rolloutGroupManagement,
                 rolloutManagementUIState);
 
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);

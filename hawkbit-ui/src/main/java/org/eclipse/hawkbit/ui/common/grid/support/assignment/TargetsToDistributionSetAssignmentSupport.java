@@ -15,16 +15,15 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * Support for assigning targets to distribution set.
- * 
+ *
  */
 public class TargetsToDistributionSetAssignmentSupport
         extends DeploymentAssignmentSupport<ProxyTarget, ProxyDistributionSet> {
@@ -35,20 +34,16 @@ public class TargetsToDistributionSetAssignmentSupport
     /**
      * Constructor for TargetsToDistributionSetAssignmentSupport
      *
-     * @param notification
-     *            UINotification
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param assignmentController
      *            DeploymentAssignmentWindowController
      */
-    public TargetsToDistributionSetAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final DeploymentAssignmentWindowController assignmentController) {
-        super(notification, i18n);
+    public TargetsToDistributionSetAssignmentSupport(final UIConfiguration uiConfig,
+            final DeploymentAssignmentWindowController assignmentController) {
+        super(uiConfig.getUiNotification(), uiConfig.getI18n());
 
-        this.permChecker = permChecker;
+        this.permChecker = uiConfig.getPermChecker();
         this.assignmentController = assignmentController;
     }
 

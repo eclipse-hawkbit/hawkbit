@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutStatusIconSupplier;
@@ -53,8 +53,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.cronutils.utils.StringUtils;
 import com.google.common.base.Predicates;
@@ -107,19 +105,19 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
     private final transient DeleteSupport<ProxyRollout> rolloutDeleteSupport;
 
-    RolloutGrid(final VaadinMessageSource i18n, final UIEventBus eventBus, final RolloutManagement rolloutManagement,
-            final RolloutGroupManagement rolloutGroupManagement, final UINotification uiNotification,
-            final RolloutManagementUIState rolloutManagementUIState, final SpPermissionChecker permissionChecker,
+    RolloutGrid(final UIConfiguration uiConfig, final RolloutManagement rolloutManagement,
+            final RolloutGroupManagement rolloutGroupManagement,
+            final RolloutManagementUIState rolloutManagementUIState,
             final TenantConfigurationManagement tenantConfigManagement, final RolloutWindowBuilder rolloutWindowBuilder,
             final SystemSecurityContext systemSecurityContext) {
-        super(i18n, eventBus, permissionChecker);
+        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.tenantConfigManagement = tenantConfigManagement;
         this.systemSecurityContext = systemSecurityContext;
-        this.uiNotification = uiNotification;
+        this.uiNotification = uiConfig.getUiNotification();
         this.rolloutWindowBuilder = rolloutWindowBuilder;
         this.rolloutMapper = new RolloutToProxyRolloutMapper();
 
@@ -422,7 +420,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     /**
      * Used to show the Rollouts List View in case the currently selected
      * Rollout was deleted.
-     * 
+     *
      * @param deletedSelectedRolloutId
      *            id of the deleted Rollout that is currently selected
      */

@@ -105,14 +105,14 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
         final Map<String, AssignmentSupport<?, ProxyDistributionSet>> sourceTargetAssignmentStrategies = new HashMap<>();
 
-        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(i18n,
-                uiProperties, eventBus, notification, deploymentManagement);
+        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
+                uiConfig, uiProperties, deploymentManagement);
         final TargetsToDistributionSetAssignmentSupport targetsToDsAssignment = new TargetsToDistributionSetAssignmentSupport(
-                notification, i18n, permissionChecker, assignmentController);
+                uiConfig, assignmentController);
         final TargetTagsToDistributionSetAssignmentSupport targetTagsToDsAssignment = new TargetTagsToDistributionSetAssignmentSupport(
-                notification, i18n, targetManagement, targetsToDsAssignment);
+                uiConfig, targetManagement, targetsToDsAssignment);
         final DsTagsToDistributionSetAssignmentSupport dsTagsToDsAssignment = new DsTagsToDistributionSetAssignmentSupport(
-                notification, i18n, distributionSetManagement, eventBus, permissionChecker);
+                uiConfig, distributionSetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TABLE_ID, targetsToDsAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToDsAssignment);

@@ -14,7 +14,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutGroupStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.RolloutGroupToProxyRolloutGroupMapper;
@@ -36,8 +36,6 @@ import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.google.common.base.Predicates;
 import com.vaadin.shared.ui.ContentMode;
@@ -60,24 +58,9 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
 
     private final transient MasterEntitySupport<ProxyRollout> masterEntitySupport;
 
-    /**
-     * Constructor for RolloutGroupGrid
-     *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param rolloutGroupManagement
-     *            RolloutGroupManagement
-     * @param rolloutManagementUIState
-     *            RolloutManagementUIState
-     */
-    public RolloutGroupGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final RolloutGroupManagement rolloutGroupManagement,
+    RolloutGroupGrid(final UIConfiguration uiConfig, final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagementUIState rolloutManagementUIState) {
-        super(i18n, eventBus, permissionChecker);
+        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutGroupManagement = rolloutGroupManagement;

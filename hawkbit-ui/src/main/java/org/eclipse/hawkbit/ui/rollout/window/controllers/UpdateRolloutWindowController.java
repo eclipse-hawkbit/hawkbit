@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.ui.rollout.window.controllers;
 
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -36,23 +35,15 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.UpdateRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for populating and editing/saving data in Update Rollout Window.
  */
 public class UpdateRolloutWindowController extends AbstractEntityWindowController<ProxyRollout, ProxyRolloutWindow> {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateRolloutWindowController.class);
-
-    protected final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    protected final UIEventBus eventBus;
-    protected final UINotification uiNotification;
 
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     protected final RolloutManagement rolloutManagement;
@@ -67,16 +58,13 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
      * Constructor for UpdateRolloutWindowController
      *
      * @param dependencies
-     *          RolloutWindowDependencies
+     *            RolloutWindowDependencies
      * @param layout
-     *          UpdateRolloutWindowLayout
+     *            UpdateRolloutWindowLayout
      */
     public UpdateRolloutWindowController(final RolloutWindowDependencies dependencies,
             final UpdateRolloutWindowLayout layout) {
-        this.i18n = dependencies.getI18n();
-        this.entityFactory = dependencies.getEntityFactory();
-        this.eventBus = dependencies.getEventBus();
-        this.uiNotification = dependencies.getUiNotification();
+        super(dependencies.getUiConfig());
 
         this.targetFilterQueryManagement = dependencies.getTargetFilterQueryManagement();
         this.rolloutManagement = dependencies.getRolloutManagement();

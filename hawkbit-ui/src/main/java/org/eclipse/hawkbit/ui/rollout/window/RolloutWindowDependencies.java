@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -31,53 +32,40 @@ public final class RolloutWindowDependencies {
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final DistributionSetManagement distributionSetManagement;
-    private final UINotification uiNotification;
-    private final EntityFactory entityFactory;
-    private final VaadinMessageSource i18n;
-    private final UIEventBus eventBus;
     private final UiProperties uiProperties;
+    private final UIConfiguration uiConfig;
 
     /**
      * Constructor for RolloutWindowDependencies
      *
+     * @param uiConfig
+     *            {@link UIConfiguration}
      * @param rolloutManagement
-     *          RolloutManagement
+     *            RolloutManagement
      * @param targetManagement
-     *          TargetManagement
-     * @param uiNotification
-     *          UINotification
-     * @param entityFactory
-     *          EntityFactory
-     * @param i18n
-     *          VaadinMessageSource
+     *            TargetManagement
      * @param uiProperties
-     *          UiProperties
-     * @param eventBus
-     *          TargetFilterQueryManagement
+     *            UiProperties
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param rolloutGroupManagement
-     *          RolloutGroupManagement
+     *            RolloutGroupManagement
      * @param quotaManagement
-     *          QuotaManagement
+     *            QuotaManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      */
-    public RolloutWindowDependencies(final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
-            final UINotification uiNotification, final EntityFactory entityFactory, final VaadinMessageSource i18n,
-            final UiProperties uiProperties, final UIEventBus eventBus,
+    public RolloutWindowDependencies(final UIConfiguration uiConfig, final RolloutManagement rolloutManagement,
+            final TargetManagement targetManagement, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final DistributionSetManagement distributionSetManagement) {
+        this.uiConfig = uiConfig;
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.quotaManagement = quotaManagement;
         this.targetManagement = targetManagement;
-        this.uiNotification = uiNotification;
         this.uiProperties = uiProperties;
-        this.entityFactory = entityFactory;
-        this.i18n = i18n;
-        this.eventBus = eventBus;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.distributionSetManagement = distributionSetManagement;
     }
@@ -121,21 +109,21 @@ public final class RolloutWindowDependencies {
      * @return UI notification
      */
     public UINotification getUiNotification() {
-        return uiNotification;
+        return uiConfig.getUiNotification();
     }
 
     /**
      * @return Entity factory
      */
     public EntityFactory getEntityFactory() {
-        return entityFactory;
+        return uiConfig.getEntityFactory();
     }
 
     /**
      * @return Vaadin message source
      */
     public VaadinMessageSource getI18n() {
-        return i18n;
+        return uiConfig.getI18n();
     }
 
     /**
@@ -149,7 +137,7 @@ public final class RolloutWindowDependencies {
      * @return UI event bus
      */
     public UIEventBus getEventBus() {
-        return eventBus;
+        return uiConfig.getEventBus();
     }
 
     /**
@@ -157,5 +145,12 @@ public final class RolloutWindowDependencies {
      */
     public DistributionSetManagement getDistributionSetManagement() {
         return distributionSetManagement;
+    }
+
+    /**
+     * @return the uiConfig
+     */
+    public UIConfiguration getUiConfig() {
+        return uiConfig;
     }
 }

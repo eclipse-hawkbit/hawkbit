@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.rollout.window.controllers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -38,20 +37,12 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.AddRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for populating and saving data in Add Rollout Window.
  */
 public class AddRolloutWindowController extends AbstractEntityWindowController<ProxyRollout, ProxyRolloutWindow> {
-    protected final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
-
     private final RolloutManagement rolloutManagement;
 
     protected final AddRolloutWindowLayout layout;
@@ -66,10 +57,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
      */
     public AddRolloutWindowController(final RolloutWindowDependencies dependencies,
             final AddRolloutWindowLayout layout) {
-        this.i18n = dependencies.getI18n();
-        this.entityFactory = dependencies.getEntityFactory();
-        this.eventBus = dependencies.getEventBus();
-        this.uiNotification = dependencies.getUiNotification();
+        super(dependencies.getUiConfig());
 
         this.rolloutManagement = dependencies.getRolloutManagement();
 
