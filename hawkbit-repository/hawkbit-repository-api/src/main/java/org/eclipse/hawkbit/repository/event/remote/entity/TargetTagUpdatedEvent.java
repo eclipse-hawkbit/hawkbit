@@ -9,13 +9,14 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event for updating a {@link TargetTag}.
  *
  */
-public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implements EntityUpdatedEvent {
+public class TargetTagUpdatedEvent extends RemoteIdEvent implements EntityUpdatedEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,14 +28,19 @@ public class TargetTagUpdatedEvent extends RemoteEntityEvent<TargetTag> implemen
     }
 
     /**
-     * Constructor.
-     * 
-     * @param tag
-     *            the tag which is updated
+     * Constructor for json serialization.
+     *
+     * @param tenant
+     *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagUpdatedEvent(final TargetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public TargetTagUpdatedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
 }

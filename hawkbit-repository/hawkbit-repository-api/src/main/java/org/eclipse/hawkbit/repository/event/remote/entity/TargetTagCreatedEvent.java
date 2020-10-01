@@ -9,13 +9,14 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event for the creation of a new {@link TargetTag}.
  *
  */
-public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> implements EntityCreatedEvent {
+public class TargetTagCreatedEvent extends RemoteIdEvent implements EntityCreatedEvent {
 
     private static final long serialVersionUID = 1L;
 
@@ -27,14 +28,20 @@ public class TargetTagCreatedEvent extends RemoteEntityEvent<TargetTag> implemen
     }
 
     /**
-     * Constructor.
-     * 
-     * @param tag
-     *            the tag which is deleted
+     * Constructor for json serialization.
+     *
+     * @param tenant
+     *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClass
+     *            the entity class
      * @param applicationId
      *            the origin application id
      */
-    public TargetTagCreatedEvent(final TargetTag tag, final String applicationId) {
-        super(tag, applicationId);
+    public TargetTagCreatedEvent(final String tenant, final Long entityId, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
     }
+
 }
