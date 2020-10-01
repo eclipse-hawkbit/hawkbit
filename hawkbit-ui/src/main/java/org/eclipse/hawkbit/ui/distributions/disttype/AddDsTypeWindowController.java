@@ -75,7 +75,7 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
                 .key(entity.getKey()).name(entity.getName()).description(entity.getDescription())
                 .colour(entity.getColour()).mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newDsType.getName()));
+        displaySuccess("message.save.success", newDsType.getName());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, ProxyType.class, newDsType.getId()));
     }
@@ -84,18 +84,18 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
+            displayValidationError("message.error.missing.typenameorkeyorsmtype");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (dsTypeManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
+            displayValidationError("message.type.duplicate.check", trimmedName);
             return false;
         }
         if (dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.key.ds.duplicate.check", trimmedKey));
+            displayValidationError("message.type.key.ds.duplicate.check", trimmedKey);
             return false;
         }
 

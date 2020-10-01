@@ -105,4 +105,16 @@ public abstract class AbstractEntityWindowController<T, E> {
     protected UINotification getUiNotification() {
         return uiConfig.getUiNotification();
     }
+
+    protected void displaySuccess(final String messageKey, final Object... args) {
+        getUiNotification().displaySuccess(getI18n().getMessage(messageKey, args));
+    }
+
+    protected void displayValidationError(final String messageKey, final Object... args) {
+        getUiNotification().displayValidationError(getI18n().getMessage(messageKey, args));
+    }
+
+    protected void displayWarning(final String messageKey, final Object... args) {
+        getUiNotification().displayWarning(getI18n().getMessage(messageKey, args));
+    }
 }

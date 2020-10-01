@@ -85,8 +85,7 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
                 .description(entity.getDescription()).requiredMigrationStep(entity.isRequiredMigrationStep()));
 
-        getUiNotification()
-                .displaySuccess(getI18n().getMessage("message.save.success", newDs.getName() + ":" + newDs.getVersion()));
+        displaySuccess("message.save.success", newDs.getName() + ":" + newDs.getVersion());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, newDs.getId()));
 
@@ -98,15 +97,14 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversion"));
+            displayValidationError("message.error.missing.nameorversion");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         if (dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.duplicate.dist", trimmedName, trimmedVersion));
+            displayValidationError("message.duplicate.dist", trimmedName, trimmedVersion);
             return false;
         }
 

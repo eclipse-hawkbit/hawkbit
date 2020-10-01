@@ -67,7 +67,7 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
                 .create(getEntityFactory().softwareModuleType().create().key(entity.getKey()).name(entity.getName())
                         .description(entity.getDescription()).colour(entity.getColour()).maxAssignments(assignNumber));
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newSmType.getName()));
+        displaySuccess("message.save.success", newSmType.getName());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, ProxyType.class, newSmType.getId()));
     }
@@ -76,19 +76,18 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || entity.getSmTypeAssign() == null) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
+            displayValidationError("message.error.missing.typenameorkeyorsmtype");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (smTypeManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
+            displayValidationError("message.type.duplicate.check", trimmedName);
             return false;
         }
         if (smTypeManagement.getByKey(trimmedKey).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.type.key.swmodule.duplicate.check", trimmedKey));
+            displayValidationError("message.type.key.swmodule.duplicate.check", trimmedKey);
             return false;
         }
 

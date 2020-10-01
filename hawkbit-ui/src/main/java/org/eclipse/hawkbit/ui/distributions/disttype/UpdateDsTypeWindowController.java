@@ -123,8 +123,7 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
         layout.disableTypeKey();
 
         if (isDsTypeAssigned) {
-            getUiNotification().displayValidationError(
-                    nameBeforeEdit + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
+            displayValidationError(nameBeforeEdit + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
             layout.disableDsTypeSmSelectLayout();
         }
     }
@@ -146,15 +145,14 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
         try {
             final DistributionSetType updatedDsType = dsTypeManagement.update(dsTypeUpdate);
 
-            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedDsType.getName()));
+            displaySuccess("message.update.success", updatedDsType.getName());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this,
                     new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class,
                             ProxyType.class, updatedDsType.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of DS type failed in UI: {}", e.getMessage());
             final String entityType = getI18n().getMessage("caption.entity.distribution.type");
-            getUiNotification()
-                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         }
     }
 
@@ -162,18 +160,18 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
+            displayValidationError("message.error.missing.typenameorkeyorsmtype");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (!nameBeforeEdit.equals(trimmedName) && dsTypeManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
+            displayValidationError("message.type.duplicate.check", trimmedName);
             return false;
         }
         if (!keyBeforeEdit.equals(trimmedKey) && dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.key.ds.duplicate.check", trimmedKey));
+            displayValidationError("message.type.key.ds.duplicate.check", trimmedKey);
             return false;
         }
 

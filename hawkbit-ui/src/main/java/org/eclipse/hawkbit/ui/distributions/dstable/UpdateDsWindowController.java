@@ -86,30 +86,27 @@ public class UpdateDsWindowController
         try {
             final DistributionSet updatedDs = dsManagement.update(dsUpdate);
 
-            getUiNotification().displaySuccess(
-                    getI18n().getMessage("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion()));
+            displaySuccess("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class, updatedDs.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of distribution set failed in UI: {}", e.getMessage());
             final String entityType = getI18n().getMessage("caption.distribution");
-            getUiNotification()
-                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         }
     }
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversion"));
+            displayValidationError("message.error.missing.nameorversion");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         if (dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.duplicate.dist", trimmedName, trimmedVersion));
+            displayValidationError("message.duplicate.dist", trimmedName, trimmedVersion);
             return false;
         }
 

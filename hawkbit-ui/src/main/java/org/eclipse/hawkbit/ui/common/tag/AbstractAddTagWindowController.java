@@ -45,7 +45,7 @@ public abstract class AbstractAddTagWindowController extends AbstractTagWindowCo
                 .description(entity.getDescription()).colour(entity.getColour());
         final Tag newTag = createEntityInRepository(tagCreate);
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newTag.getName()));
+        displaySuccess("message.save.success", newTag.getName());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, parentType, ProxyTag.class, newTag.getId()));
     }
@@ -62,14 +62,13 @@ public abstract class AbstractAddTagWindowController extends AbstractTagWindowCo
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.tagname"));
+            displayValidationError("message.error.missing.tagname");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (existsEntityInRepository(trimmedName)) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.tag.duplicate.check", trimmedName));
+            displayValidationError("message.tag.duplicate.check", trimmedName);
             return false;
         }
 

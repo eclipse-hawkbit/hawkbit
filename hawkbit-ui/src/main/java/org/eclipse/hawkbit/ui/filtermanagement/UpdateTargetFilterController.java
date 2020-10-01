@@ -86,14 +86,13 @@ public class UpdateTargetFilterController
         try {
             final TargetFilterQuery updatedTargetFilter = targetFilterManagement.update(targetFilterUpdate);
 
-            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedTargetFilter.getName()));
+            displaySuccess("message.update.success", updatedTargetFilter.getName());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyTargetFilterQuery.class, updatedTargetFilter.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of target filter failed in UI: {}", e.getMessage());
             final String entityType = getI18n().getMessage("caption.target.filter");
-            getUiNotification()
-                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         } finally {
             closeFormCallback.run();
         }
@@ -102,13 +101,13 @@ public class UpdateTargetFilterController
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.filtername"));
+            displayValidationError("message.error.missing.filtername");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (!nameBeforeEdit.equals(trimmedName) && targetFilterManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.target.filter.duplicate", trimmedName));
+            displayValidationError("message.target.filter.duplicate", trimmedName);
             return false;
         }
 

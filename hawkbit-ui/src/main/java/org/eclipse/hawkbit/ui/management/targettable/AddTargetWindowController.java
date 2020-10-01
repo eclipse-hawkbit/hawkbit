@@ -78,7 +78,7 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
         final Target newTarget = targetManagement.create(getEntityFactory().target().create()
                 .controllerId(entity.getControllerId()).name(entity.getName()).description(entity.getDescription()));
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newTarget.getName()));
+        displaySuccess("message.save.success", newTarget.getName());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyTarget.class, newTarget.getId()));
 
@@ -90,14 +90,13 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         if (!StringUtils.hasText(entity.getControllerId())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.controllerId"));
+            displayValidationError("message.error.missing.controllerId");
             return false;
         }
 
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
         if (targetManagement.getByControllerID(trimmedControllerId).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.target.duplicate.check", trimmedControllerId));
+            displayValidationError("message.target.duplicate.check", trimmedControllerId);
             return false;
         }
 

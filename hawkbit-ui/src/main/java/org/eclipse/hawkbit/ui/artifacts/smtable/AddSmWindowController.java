@@ -84,13 +84,11 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
             newSoftwareModule = smManagement.create(smCreate);
         } catch (final ConstraintViolationException ex) {
             LOG.trace("Create of software module failed in UI: {}", ex.getMessage());
-            getUiNotification().displayValidationError(
-                    getI18n().getMessage("message.save.fail", entity.getName() + ":" + entity.getVersion()));
+            displayWarning("message.save.fail", entity.getName() + ":" + entity.getVersion());
             return;
         }
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success",
-                newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
+        displaySuccess("message.save.success", newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, newSoftwareModule.getId()));
 
@@ -103,7 +101,7 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())
                 || entity.getTypeInfo() == null) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversionortype"));
+            displayValidationError("message.error.missing.nameorversionortype");
             return false;
         }
 
@@ -111,8 +109,7 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         final Long typeId = entity.getTypeInfo().getId();
         if (smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent()) {
-            getUiNotification().displayValidationError(
-                    getI18n().getMessage("message.duplicate.softwaremodule", trimmedName, trimmedVersion));
+            displayValidationError("message.duplicate.softwaremodule", trimmedName, trimmedVersion);
             return false;
         }
 

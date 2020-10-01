@@ -80,14 +80,13 @@ public abstract class AbstractUpdateTagWindowController extends AbstractTagWindo
         try {
             final Tag updatedTag = updateEntityInRepository(tagUpdate);
 
-            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedTag.getName()));
+            displaySuccess("message.update.success", updatedTag.getName());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, parentType, ProxyTag.class, updatedTag.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             final String entityType = getI18n().getMessage(keyForEntityTypeInNotifications);
             LOG.trace("Update of {} failed in UI: {}", entityType, e.getMessage());
-            getUiNotification().displayWarning(
-                    getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         }
     }
 
@@ -96,14 +95,13 @@ public abstract class AbstractUpdateTagWindowController extends AbstractTagWindo
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.tagname"));
+            displayValidationError("message.error.missing.tagname");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (!nameBeforeEdit.equals(trimmedName) && existsEntityInRepository(trimmedName)) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.tag.duplicate.check", trimmedName));
+            displayValidationError("message.tag.duplicate.check", trimmedName);
             return false;
         }
 

@@ -80,35 +80,33 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
 
     @Override
     protected void persistEntity(final ProxyTarget entity) {
-        final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId()).name(entity.getName())
-                .description(entity.getDescription());
+        final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId())
+                .name(entity.getName()).description(entity.getDescription());
 
         try {
             final Target updatedTarget = targetManagement.update(targetUpdate);
 
-            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedTarget.getName()));
+            displaySuccess("message.update.success", updatedTarget.getName());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class, updatedTarget.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of target failed in UI: {}", e.getMessage());
             final String entityType = getI18n().getMessage("caption.target");
-            getUiNotification()
-                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         }
     }
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         if (!StringUtils.hasText(entity.getControllerId())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.controllerId"));
+            displayValidationError("message.error.missing.controllerId");
             return false;
         }
 
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
         if (!controllerIdBeforeEdit.equals(trimmedControllerId)
                 && targetManagement.getByControllerID(trimmedControllerId).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.target.duplicate.check", trimmedControllerId));
+            displayValidationError("message.target.duplicate.check", trimmedControllerId);
             return false;
         }
 

@@ -103,8 +103,8 @@ public class AutoAssignmentWindowController
             showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
                     entity.getAutoAssignActionType(), entity);
         } else {
-            targetFilterQueryManagement
-                    .updateAutoAssignDS(getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
+            targetFilterQueryManagement.updateAutoAssignDS(
+                    getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
             publishModifiedEvent(entity.getId());
         }
     }
@@ -112,8 +112,8 @@ public class AutoAssignmentWindowController
     private void showConsequencesDialog(final String confirmationCaption, final String confirmationQuestion,
             final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType,
             final ProxyTargetFilterQuery entity) {
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption, confirmationQuestion,
-                ok -> {
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption,
+                confirmationQuestion, ok -> {
                     if (ok) {
                         targetFilterQueryManagement.updateAutoAssignDS(getEntityFactory().targetFilterQuery()
                                 .updateAutoAssign(targetFilterId).ds(autoAssignDsId).actionType(autoAssignActionType));
@@ -136,8 +136,7 @@ public class AutoAssignmentWindowController
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (entity.isAutoAssignmentEnabled()
                 && (entity.getAutoAssignActionType() == null || entity.getDistributionSetInfo() == null)) {
-            getUiNotification().displayValidationError(
-                    getI18n().getMessage(UIMessageIdProvider.MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS));
+            displayValidationError(UIMessageIdProvider.MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS);
             return false;
         }
 

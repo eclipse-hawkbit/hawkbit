@@ -99,7 +99,7 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
         try {
             final SoftwareModuleType updatedSmType = smTypeManagement.update(smTypeUpdate);
 
-            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedSmType.getName()));
+            displaySuccess("message.update.success", updatedSmType.getName());
             getEventBus().publish(EventTopics.ENTITY_MODIFIED, this,
                     new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class,
                             ProxyType.class, updatedSmType.getId()));
@@ -107,8 +107,7 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
             LOG.trace("Update of software module type failed in UI: {}", e.getMessage());
 
             final String entityType = getI18n().getMessage("caption.entity.software.module.type");
-            getUiNotification()
-                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
         }
     }
 
@@ -116,19 +115,18 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || entity.getSmTypeAssign() == null) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
+            displayValidationError("message.error.missing.typenameorkeyorsmtype");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (!nameBeforeEdit.equals(trimmedName) && smTypeManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
+            displayValidationError("message.type.duplicate.check", trimmedName);
             return false;
         }
         if (!keyBeforeEdit.equals(trimmedKey) && smTypeManagement.getByKey(trimmedKey).isPresent()) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.type.key.swmodule.duplicate.check", trimmedKey));
+            displayValidationError("message.type.key.swmodule.duplicate.check", trimmedKey);
             return false;
         }
 

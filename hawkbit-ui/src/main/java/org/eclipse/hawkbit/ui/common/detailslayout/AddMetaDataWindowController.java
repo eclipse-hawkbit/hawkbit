@@ -43,7 +43,7 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
             final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
         super(uiConfig);
-        
+
         this.layout = layout;
 
         this.createMetaDataCallback = createMetaDataCallback;
@@ -70,24 +70,24 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     @Override
     protected void persistEntity(final ProxyMetaData entity) {
         final MetaData newMetaData = createMetaDataCallback.apply(entity);
-        getUiNotification().displaySuccess(getI18n().getMessage("message.metadata.saved", newMetaData.getKey()));
+        displaySuccess("message.metadata.saved", newMetaData.getKey());
     }
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
         if (!StringUtils.hasText(entity.getKey())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.key.missing"));
+            displayValidationError("message.key.missing");
             return false;
         }
 
         if (!StringUtils.hasText(entity.getValue())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.value.missing"));
+            displayValidationError("message.value.missing");
             return false;
         }
 
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (duplicateCheckCallback.test(trimmedKey)) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.metadata.duplicate.check", trimmedKey));
+            displayValidationError("message.metadata.duplicate.check", trimmedKey);
             return false;
         }
 

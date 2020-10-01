@@ -119,7 +119,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
                     getRolloutGroupsCreateFromDefinitions(entity.getAdvancedRolloutGroupDefinitions()), conditions);
         }
 
-        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", rolloutToCreate.getName()));
+        displaySuccess("message.save.success", rolloutToCreate.getName());
         getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyRollout.class, rolloutToCreate.getId()));
     }
@@ -135,19 +135,18 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
         if (entity == null) {
-            getUiNotification()
-                    .displayValidationError(getI18n().getMessage("message.save.fail", getI18n().getMessage("caption.rollout")));
+            displayValidationError("message.save.fail", getI18n().getMessage("caption.rollout"));
             return false;
         }
 
         if (!StringUtils.hasText(entity.getName())) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.name.empty"));
+            displayValidationError("message.rollout.name.empty");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (rolloutManagement.getByName(trimmedName).isPresent()) {
-            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.duplicate.check", trimmedName));
+            displayValidationError("message.rollout.duplicate.check", trimmedName);
             return false;
         }
 
