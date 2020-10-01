@@ -54,6 +54,9 @@ spring.datasource.password=YOUR_PWD
 spring.datasource.driverClassName=org.mariadb.jdbc.Driver
 ```
 
+Note: On Ubuntu 18.04 with MariaDB 10.1 installed from the default repository via apt install _COLLATE option_ of database have to be changed manually to "latin1".
+For recent versions of MariaDB running on Ubuntu this is not required (cf. [system variables](https://mariadb.com/kb/en/differences-in-mariadb-in-debian-and-ubuntu), [issue](https://github.com/eclipse/hawkbit/issues/963))
+
 ### Configure RabbitMQ connection settings for update server and device simulator (optional).
 
 We provide already defaults that should work with a standard Rabbit installation. Otherwise configure the following in the `application.properties` of the two services:
