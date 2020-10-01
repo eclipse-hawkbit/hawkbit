@@ -51,6 +51,23 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
         this.entity = baseEntity;
     }
 
+    /**
+     * Constructor for json serialization.
+     *
+     * @param tenant
+     *            the tenant
+     * @param entityId
+     *            the entity id
+     * @param entityClass
+     *            the entity class
+     * @param applicationId
+     *            the origin application id
+     */
+    public RemoteEntityEvent(final Long entityId, final String tenant, final String entityClass,
+            final String applicationId) {
+        super(entityId, tenant, entityClass, applicationId);
+    }
+
     @JsonIgnore
     public E getEntity() {
         if (entity == null) {

@@ -9,13 +9,14 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 
 /**
  * Defines the remote event of delete a {@link TargetTag}.
  *
  */
-public class TargetTagDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
+public class TargetTagDeletedEvent extends RemoteEntityEvent<TargetTag> implements EntityDeletedEvent {
 
     private static final long serialVersionUID = 1L;
 

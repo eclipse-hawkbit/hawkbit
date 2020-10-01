@@ -72,16 +72,14 @@ public class JpaTargetTag extends JpaTag implements TargetTag, EventAwareEntity 
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetTagCreatedEvent(getTenant(), getId(), getClass().getName(),
-                        EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new TargetTagCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
 
     }
 
     @Override
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
-                .publishEvent(new TargetTagUpdatedEvent(getTenant(), getId(), getClass().getName(),
-                        EventPublisherHolder.getInstance().getApplicationId()));
+                .publishEvent(new TargetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
