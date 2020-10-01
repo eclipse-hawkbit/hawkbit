@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -62,7 +62,7 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyDistributionSet> getLayout() {
+    public EntityWindowLayout<ProxyDistributionSet> getLayout() {
         return layout;
     }
 

@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.SoftwareModuleToProxyMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
@@ -37,9 +37,7 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     private static final Logger LOG = LoggerFactory.getLogger(AddSmWindowController.class);
 
     private final SoftwareModuleManagement smManagement;
-
     private final SmWindowLayout layout;
-
     private final EventView view;
 
     /**
@@ -63,11 +61,8 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
         this.view = view;
     }
 
-    /**
-     * @return software module layout
-     */
     @Override
-    public AbstractEntityWindowLayout<ProxySoftwareModule> getLayout() {
+    public EntityWindowLayout<ProxySoftwareModule> getLayout() {
         return layout;
     }
 

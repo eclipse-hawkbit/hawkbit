@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -54,11 +54,6 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTarget> getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyTarget buildEntityFromProxy(final ProxyTarget proxyEntity) {
         final ProxyTarget target = new ProxyTarget();
 
@@ -70,6 +65,11 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
         controllerIdBeforeEdit = proxyEntity.getControllerId();
 
         return target;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyTarget> getLayout() {
+        return layout;
     }
 
     @Override

@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -54,11 +54,6 @@ public class UpdateDsWindowController
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyDistributionSet> getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyDistributionSet buildEntityFromProxy(final ProxyDistributionSet proxyEntity) {
         final ProxyDistributionSet ds = new ProxyDistributionSet();
 
@@ -70,6 +65,11 @@ public class UpdateDsWindowController
         ds.setRequiredMigrationStep(proxyEntity.isRequiredMigrationStep());
 
         return ds;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyDistributionSet> getLayout() {
+        return layout;
     }
 
     @Override

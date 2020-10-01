@@ -49,7 +49,6 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
     protected final RolloutManagement rolloutManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final QuotaManagement quotaManagement;
-
     private final UpdateRolloutWindowLayout layout;
 
     private String nameBeforeEdit;
@@ -70,7 +69,6 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
         this.rolloutManagement = dependencies.getRolloutManagement();
         this.rolloutGroupManagement = dependencies.getRolloutGroupManagement();
         this.quotaManagement = dependencies.getQuotaManagement();
-
         this.layout = layout;
     }
 

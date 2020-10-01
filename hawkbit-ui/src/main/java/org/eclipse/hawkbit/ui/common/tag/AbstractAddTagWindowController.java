@@ -8,12 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.tag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -26,10 +22,7 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract base class for add tag window controller.
  */
-public abstract class AbstractAddTagWindowController extends AbstractEntityWindowController<ProxyTag, ProxyTag> {
-
-    private final TagWindowLayout<ProxyTag> layout;
-    private final Class<? extends ProxyIdentifiableEntity> parentType;
+public abstract class AbstractAddTagWindowController extends AbstractTagWindowController {
 
     /**
      * Constructor for AbstractDsTagWindowController.
@@ -43,10 +36,7 @@ public abstract class AbstractAddTagWindowController extends AbstractEntityWindo
      */
     public AbstractAddTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType) {
-        super(uiConfig);
-
-        this.layout = layout;
-        this.parentType = parentType;
+        super(uiConfig, layout, parentType);
     }
 
     @Override
@@ -64,11 +54,6 @@ public abstract class AbstractAddTagWindowController extends AbstractEntityWindo
     protected abstract Tag createEntityInRepository(TagCreate tagCreate);
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
         // We ignore the method parameter, because we are interested in the
         // empty object, that we can populate with defaults
@@ -84,7 +69,7 @@ public abstract class AbstractAddTagWindowController extends AbstractEntityWindo
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (getTagByNameFromRepository(trimmedName).isPresent()) {
+        if (existsEntityInRepository(trimmedName)) {
             uiConfig.getUiNotification()
                     .displayValidationError(uiConfig.getI18n().getMessage("message.tag.duplicate.check", trimmedName));
             return false;
@@ -92,6 +77,4 @@ public abstract class AbstractAddTagWindowController extends AbstractEntityWindo
 
         return true;
     }
-
-    protected abstract <T extends Tag> Optional<T> getTagByNameFromRepository(String trimmedName);
 }

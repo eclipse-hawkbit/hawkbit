@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -51,7 +51,7 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
+    public EntityWindowLayout<ProxyType> getLayout() {
         return layout;
     }
 

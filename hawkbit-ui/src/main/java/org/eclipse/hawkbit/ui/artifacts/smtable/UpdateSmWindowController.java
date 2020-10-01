@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -31,7 +31,6 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSmWindowController.class);
 
     private final SoftwareModuleManagement smManagement;
-
     private final SmWindowLayout layout;
 
     /**
@@ -52,14 +51,6 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
         this.layout = layout;
     }
 
-    /**
-     * @return Software module layout
-     */
-    @Override
-    public AbstractEntityWindowLayout<ProxySoftwareModule> getLayout() {
-        return layout;
-    }
-
     @Override
     protected ProxySoftwareModule buildEntityFromProxy(final ProxySoftwareModule proxyEntity) {
         final ProxySoftwareModule sm = new ProxySoftwareModule();
@@ -72,6 +63,11 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
         sm.setDescription(proxyEntity.getDescription());
 
         return sm;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxySoftwareModule> getLayout() {
+        return layout;
     }
 
     @Override

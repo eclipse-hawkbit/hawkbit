@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.slf4j.Logger;
@@ -27,7 +28,6 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     private static final Logger LOG = LoggerFactory.getLogger(UpdateMetaDataWindowController.class);
 
     private final MetaDataAddUpdateWindowLayout layout;
-
     private final Function<ProxyMetaData, MetaData> updateMetaDataCallback;
 
     /**
@@ -50,11 +50,6 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     }
 
     @Override
-    public MetaDataAddUpdateWindowLayout getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyMetaData buildEntityFromProxy(final ProxyMetaData proxyEntity) {
         final ProxyMetaData metaData = new ProxyMetaData();
 
@@ -64,6 +59,11 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
         metaData.setVisibleForTargets(proxyEntity.isVisibleForTargets());
 
         return metaData;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyMetaData> getLayout() {
+        return layout;
     }
 
     @Override

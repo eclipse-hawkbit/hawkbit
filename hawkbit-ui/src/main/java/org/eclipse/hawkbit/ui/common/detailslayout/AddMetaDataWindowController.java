@@ -13,6 +13,7 @@ import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.util.StringUtils;
@@ -42,7 +43,7 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
             final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
         super(uiConfig);
-
+        
         this.layout = layout;
 
         this.createMetaDataCallback = createMetaDataCallback;
@@ -50,15 +51,15 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     }
 
     @Override
-    public MetaDataAddUpdateWindowLayout getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyMetaData buildEntityFromProxy(final ProxyMetaData proxyEntity) {
         // We ignore the method parameter, because we are interested in the
         // empty object, that we can populate with defaults
         return new ProxyMetaData();
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyMetaData> getLayout() {
+        return layout;
     }
 
     @Override

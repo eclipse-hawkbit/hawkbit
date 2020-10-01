@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -56,15 +56,15 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTarget> getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyTarget buildEntityFromProxy(final ProxyTarget proxyEntity) {
         // We ignore the method parameter, because we are interested in the
         // empty object, that we can populate with defaults
         return new ProxyTarget();
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyTarget> getLayout() {
+        return layout;
     }
 
     @Override

@@ -44,7 +44,6 @@ import org.springframework.util.StringUtils;
  */
 public class AddRolloutWindowController extends AbstractEntityWindowController<ProxyRollout, ProxyRolloutWindow> {
     private final RolloutManagement rolloutManagement;
-
     protected final AddRolloutWindowLayout layout;
 
     /**
@@ -60,13 +59,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
         super(dependencies.getUiConfig());
 
         this.rolloutManagement = dependencies.getRolloutManagement();
-
         this.layout = layout;
-    }
-
-    @Override
-    public EntityWindowLayout<ProxyRolloutWindow> getLayout() {
-        return layout;
     }
 
     @Override
@@ -91,6 +84,11 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
                 .build();
         proxyRolloutWindow.setTriggerThresholdPercentage(defaultRolloutGroupConditions.getSuccessConditionExp());
         proxyRolloutWindow.setErrorThresholdPercentage(defaultRolloutGroupConditions.getErrorConditionExp());
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyRolloutWindow> getLayout() {
+        return layout;
     }
 
     @Override

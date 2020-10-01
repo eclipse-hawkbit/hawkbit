@@ -8,11 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -49,7 +46,7 @@ public class AddDsTagWindowController extends AbstractAddTagWindowController {
     }
 
     @Override
-    protected Optional<DistributionSetTag> getTagByNameFromRepository(final String trimmedName) {
-        return dsTagManagement.getByName(trimmedName);
+    protected boolean existsEntityInRepository(final String trimmedName) {
+        return dsTagManagement.getByName(trimmedName).isPresent();
     }
 }

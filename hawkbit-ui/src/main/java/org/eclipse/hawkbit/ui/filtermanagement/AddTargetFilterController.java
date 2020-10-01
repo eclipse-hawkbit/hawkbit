@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -55,7 +55,7 @@ public class AddTargetFilterController
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTargetFilterQuery> getLayout() {
+    public EntityWindowLayout<ProxyTargetFilterQuery> getLayout() {
         return layout;
     }
 

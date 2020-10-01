@@ -12,8 +12,8 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -33,7 +33,6 @@ public class AutoAssignmentWindowController
 
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
-
     private final AutoAssignmentWindowLayout layout;
 
     /**
@@ -58,11 +57,6 @@ public class AutoAssignmentWindowController
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyTargetFilterQuery> getLayout() {
-        return layout;
-    }
-
-    @Override
     protected ProxyTargetFilterQuery buildEntityFromProxy(final ProxyTargetFilterQuery proxyEntity) {
         final ProxyTargetFilterQuery autoAssignmentFilter = new ProxyTargetFilterQuery();
 
@@ -80,6 +74,11 @@ public class AutoAssignmentWindowController
         }
 
         return autoAssignmentFilter;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyTargetFilterQuery> getLayout() {
+        return layout;
     }
 
     @Override

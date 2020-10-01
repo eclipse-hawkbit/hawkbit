@@ -8,14 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.tag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -30,11 +26,9 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract base class for update tag window controller.
  */
-public abstract class AbstractUpdateTagWindowController extends AbstractEntityWindowController<ProxyTag, ProxyTag> {
+public abstract class AbstractUpdateTagWindowController extends AbstractTagWindowController {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractUpdateTagWindowController.class);
 
-    private final TagWindowLayout<ProxyTag> layout;
-    private final Class<? extends ProxyIdentifiableEntity> parentType;
     private final String keyForEntityTypeInNotifications;
 
     private String nameBeforeEdit;
@@ -54,16 +48,9 @@ public abstract class AbstractUpdateTagWindowController extends AbstractEntityWi
      */
     public AbstractUpdateTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType, final String keyForEntityTypeInNotifications) {
-        super(uiConfig);
+        super(uiConfig, layout, parentType);
 
-        this.layout = layout;
-        this.parentType = parentType;
         this.keyForEntityTypeInNotifications = keyForEntityTypeInNotifications;
-    }
-
-    @Override
-    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
-        return layout;
     }
 
     @Override
@@ -116,7 +103,7 @@ public abstract class AbstractUpdateTagWindowController extends AbstractEntityWi
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (!nameBeforeEdit.equals(trimmedName) && getTagByNameFromRepository(trimmedName).isPresent()) {
+        if (!nameBeforeEdit.equals(trimmedName) && existsEntityInRepository(trimmedName)) {
             uiConfig.getUiNotification()
                     .displayValidationError(uiConfig.getI18n().getMessage("message.tag.duplicate.check", trimmedName));
             return false;
@@ -124,6 +111,4 @@ public abstract class AbstractUpdateTagWindowController extends AbstractEntityWi
 
         return true;
     }
-
-    protected abstract <T extends Tag> Optional<T> getTagByNameFromRepository(String trimmedName);
 }

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -27,7 +27,6 @@ import org.springframework.util.StringUtils;
 public class AddSmTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
 
     private final SoftwareModuleTypeManagement smTypeManagement;
-
     private final SmTypeWindowLayout layout;
 
     /**
@@ -48,13 +47,8 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
         this.layout = layout;
     }
 
-    /**
-     * Getter for Software module type Window Layout
-     *
-     * @return AbstractEntityWindowLayout
-     */
     @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
+    public EntityWindowLayout<ProxyType> getLayout() {
         return layout;
     }
 

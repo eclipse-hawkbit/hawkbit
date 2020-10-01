@@ -8,12 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -50,7 +47,7 @@ public class AddTargetTagWindowController extends AbstractAddTagWindowController
     }
 
     @Override
-    protected Optional<TargetTag> getTagByNameFromRepository(final String trimmedName) {
-        return targetTagManagement.getByName(trimmedName);
+    protected boolean existsEntityInRepository(final String trimmedName) {
+        return targetTagManagement.getByName(trimmedName).isPresent();
     }
 }

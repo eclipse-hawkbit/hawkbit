@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.UIConfiguration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -33,7 +33,6 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
     private static final Logger LOG = LoggerFactory.getLogger(UpdateSmTypeWindowController.class);
 
     private final SoftwareModuleTypeManagement smTypeManagement;
-
     private final SmTypeWindowLayout layout;
 
     private String nameBeforeEdit;
@@ -57,16 +56,6 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
         this.layout = layout;
     }
 
-    /**
-     * Getter for Software module type Window Layout
-     *
-     * @return AbstractEntityWindowLayout
-     */
-    @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
-        return layout;
-    }
-
     @Override
     protected ProxyType buildEntityFromProxy(final ProxyType proxyEntity) {
         final ProxyType smType = new ProxyType();
@@ -88,6 +77,11 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
         return smTypeManagement.get(id)
                 .map(smType -> smType.getMaxAssignments() == 1 ? SmTypeAssign.SINGLE : SmTypeAssign.MULTI)
                 .orElse(SmTypeAssign.SINGLE);
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyType> getLayout() {
+        return layout;
     }
 
     @Override
