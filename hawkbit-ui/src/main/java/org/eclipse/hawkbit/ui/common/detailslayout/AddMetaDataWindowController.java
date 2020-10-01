@@ -70,24 +70,24 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     @Override
     protected void persistEntity(final ProxyMetaData entity) {
         final MetaData newMetaData = createMetaDataCallback.apply(entity);
-        uiNotification.displaySuccess(i18n.getMessage("message.metadata.saved", newMetaData.getKey()));
+        getUiNotification().displaySuccess(getI18n().getMessage("message.metadata.saved", newMetaData.getKey()));
     }
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
         if (!StringUtils.hasText(entity.getKey())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.key.missing"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.key.missing"));
             return false;
         }
 
         if (!StringUtils.hasText(entity.getValue())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.value.missing"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.value.missing"));
             return false;
         }
 
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (duplicateCheckCallback.test(trimmedKey)) {
-            uiNotification.displayValidationError(i18n.getMessage("message.metadata.duplicate.check", trimmedKey));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.metadata.duplicate.check", trimmedKey));
             return false;
         }
 

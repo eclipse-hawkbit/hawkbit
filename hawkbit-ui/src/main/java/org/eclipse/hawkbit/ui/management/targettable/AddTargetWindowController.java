@@ -75,29 +75,29 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
 
     @Override
     protected void persistEntity(final ProxyTarget entity) {
-        final Target newTarget = targetManagement.create(entityFactory.target().create()
+        final Target newTarget = targetManagement.create(getEntityFactory().target().create()
                 .controllerId(entity.getControllerId()).name(entity.getName()).description(entity.getDescription()));
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newTarget.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newTarget.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyTarget.class, newTarget.getId()));
 
-        final ProxyTarget addedItem = new TargetToProxyTargetMapper(i18n).map(newTarget);
-        eventBus.publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
+        final ProxyTarget addedItem = new TargetToProxyTargetMapper(getI18n()).map(newTarget);
+        getEventBus().publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
                 SelectionChangedEventType.ENTITY_SELECTED, addedItem, EventLayout.TARGET_LIST, view));
     }
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         if (!StringUtils.hasText(entity.getControllerId())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.controllerId"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.controllerId"));
             return false;
         }
 
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
         if (targetManagement.getByControllerID(trimmedControllerId).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.target.duplicate.check", trimmedControllerId));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.target.duplicate.check", trimmedControllerId));
             return false;
         }
 

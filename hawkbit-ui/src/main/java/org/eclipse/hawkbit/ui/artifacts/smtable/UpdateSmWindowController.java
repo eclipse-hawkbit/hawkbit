@@ -79,21 +79,21 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
 
     @Override
     protected void persistEntity(final ProxySoftwareModule entity) {
-        final SoftwareModuleUpdate smUpdate = entityFactory.softwareModule().update(entity.getId())
+        final SoftwareModuleUpdate smUpdate = getEntityFactory().softwareModule().update(entity.getId())
                 .vendor(entity.getVendor()).description(entity.getDescription());
 
         try {
             final SoftwareModule updatedSm = smManagement.update(smUpdate);
 
-            uiNotification.displaySuccess(
-                    i18n.getMessage("message.update.success", updatedSm.getName() + ":" + updatedSm.getVersion()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+            getUiNotification().displaySuccess(
+                    getI18n().getMessage("message.update.success", updatedSm.getName() + ":" + updatedSm.getVersion()));
+            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class, updatedSm.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of software module failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.software.module");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            final String entityType = getI18n().getMessage("caption.software.module");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
         }
     }
 
@@ -101,7 +101,7 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())
                 || entity.getTypeInfo() == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.nameorversionortype"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversionortype"));
             return false;
         }
 

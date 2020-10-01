@@ -64,11 +64,11 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
         final int assignNumber = entity.getSmTypeAssign() == SmTypeAssign.SINGLE ? 1 : Integer.MAX_VALUE;
 
         final SoftwareModuleType newSmType = smTypeManagement
-                .create(entityFactory.softwareModuleType().create().key(entity.getKey()).name(entity.getName())
+                .create(getEntityFactory().softwareModuleType().create().key(entity.getKey()).name(entity.getName())
                         .description(entity.getDescription()).colour(entity.getColour()).maxAssignments(assignNumber));
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newSmType.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newSmType.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, ProxyType.class, newSmType.getId()));
     }
 
@@ -76,19 +76,19 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || entity.getSmTypeAssign() == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkeyorsmtype"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (smTypeManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.duplicate.check", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
             return false;
         }
         if (smTypeManagement.getByKey(trimmedKey).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.type.key.swmodule.duplicate.check", trimmedKey));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.type.key.swmodule.duplicate.check", trimmedKey));
             return false;
         }
 

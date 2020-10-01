@@ -75,24 +75,24 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     protected void persistEntity(final ProxyMetaData entity) {
         try {
             final MetaData updatedMetaData = updateMetaDataCallback.apply(entity);
-            uiNotification.displaySuccess(i18n.getMessage("message.metadata.updated", updatedMetaData.getKey()));
+            getUiNotification().displaySuccess(getI18n().getMessage("message.metadata.updated", updatedMetaData.getKey()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of meta data failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.metadata");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.key.deleted.or.notAllowed", entityType, entity.getKey()));
+            final String entityType = getI18n().getMessage("caption.metadata");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.key.deleted.or.notAllowed", entityType, entity.getKey()));
         }
     }
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
         if (!StringUtils.hasText(entity.getKey())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.key.missing"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.key.missing"));
             return false;
         }
 
         if (!StringUtils.hasText(entity.getValue())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.value.missing"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.value.missing"));
             return false;
         }
 

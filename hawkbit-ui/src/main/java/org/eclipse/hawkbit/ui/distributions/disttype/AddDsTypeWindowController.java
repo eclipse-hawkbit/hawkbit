@@ -71,12 +71,12 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
                 .filter(selectedSmType -> !selectedSmType.isMandatory()).map(ProxyType::getId)
                 .collect(Collectors.toList());
 
-        final DistributionSetType newDsType = dsTypeManagement.create(entityFactory.distributionSetType().create()
+        final DistributionSetType newDsType = dsTypeManagement.create(getEntityFactory().distributionSetType().create()
                 .key(entity.getKey()).name(entity.getName()).description(entity.getDescription())
                 .colour(entity.getColour()).mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newDsType.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newDsType.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, ProxyType.class, newDsType.getId()));
     }
 
@@ -84,18 +84,18 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkeyorsmtype"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (dsTypeManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.duplicate.check", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
             return false;
         }
         if (dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.key.ds.duplicate.check", trimmedKey));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.type.key.ds.duplicate.check", trimmedKey));
             return false;
         }
 

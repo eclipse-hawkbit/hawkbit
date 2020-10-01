@@ -79,37 +79,37 @@ public class UpdateDsWindowController
 
     @Override
     protected void persistEntity(final ProxyDistributionSet entity) {
-        final DistributionSetUpdate dsUpdate = entityFactory.distributionSet().update(entity.getId())
+        final DistributionSetUpdate dsUpdate = getEntityFactory().distributionSet().update(entity.getId())
                 .name(entity.getName()).version(entity.getVersion()).description(entity.getDescription())
                 .requiredMigrationStep(entity.isRequiredMigrationStep());
 
         try {
             final DistributionSet updatedDs = dsManagement.update(dsUpdate);
 
-            uiNotification.displaySuccess(
-                    i18n.getMessage("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+            getUiNotification().displaySuccess(
+                    getI18n().getMessage("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion()));
+            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class, updatedDs.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of distribution set failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.distribution");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            final String entityType = getI18n().getMessage("caption.distribution");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
         }
     }
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.nameorversion"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversion"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         if (dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.duplicate.dist", trimmedName, trimmedVersion));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.duplicate.dist", trimmedName, trimmedVersion));
             return false;
         }
 

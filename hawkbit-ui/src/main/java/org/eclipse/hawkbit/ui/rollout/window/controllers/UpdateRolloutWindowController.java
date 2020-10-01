@@ -122,7 +122,7 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
 
     @Override
     protected void persistEntity(final ProxyRolloutWindow entity) {
-        final RolloutUpdate rolloutUpdate = entityFactory.rollout().update(entity.getId()).name(entity.getName())
+        final RolloutUpdate rolloutUpdate = getEntityFactory().rollout().update(entity.getId()).name(entity.getName())
                 .description(entity.getDescription()).set(entity.getDistributionSetId())
                 .actionType(entity.getActionType())
                 .forcedTime(entity.getActionType() == ActionType.TIMEFORCED ? entity.getForcedTime()
@@ -132,35 +132,35 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
         try {
             final Rollout updatedRollout = rolloutManagement.update(rolloutUpdate);
 
-            uiNotification.displaySuccess(i18n.getMessage("message.update.success", updatedRollout.getName()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedRollout.getName()));
+            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyRollout.class, updatedRollout.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of rollout failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.rollout");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            final String entityType = getI18n().getMessage("caption.rollout");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
 
-            eventBus.publish(this, RolloutEvent.SHOW_ROLLOUTS);
+            getEventBus().publish(this, RolloutEvent.SHOW_ROLLOUTS);
         }
     }
 
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
         if (entity == null) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.save.fail", i18n.getMessage("caption.rollout")));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.save.fail", getI18n().getMessage("caption.rollout")));
             return false;
         }
 
         if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.name.empty"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (!nameBeforeEdit.equals(trimmedName) && rolloutManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.duplicate.check", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.duplicate.check", trimmedName));
             return false;
         }
 

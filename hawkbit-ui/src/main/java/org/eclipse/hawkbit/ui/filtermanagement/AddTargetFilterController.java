@@ -67,10 +67,10 @@ public class AddTargetFilterController
     @Override
     protected void persistEntity(final ProxyTargetFilterQuery entity) {
         final TargetFilterQuery newTargetFilter = targetFilterManagement
-                .create(entityFactory.targetFilterQuery().create().name(entity.getName()).query(entity.getQuery()));
+                .create(getEntityFactory().targetFilterQuery().create().name(entity.getName()).query(entity.getQuery()));
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newTargetFilter.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newTargetFilter.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyTargetFilterQuery.class, newTargetFilter.getId()));
 
         closeFormCallback.run();
@@ -79,13 +79,13 @@ public class AddTargetFilterController
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.filtername"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.filtername"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (targetFilterManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.target.filter.duplicate", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.target.filter.duplicate", trimmedName));
             return false;
         }
 

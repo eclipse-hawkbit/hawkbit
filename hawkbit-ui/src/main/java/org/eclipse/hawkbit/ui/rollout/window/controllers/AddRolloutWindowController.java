@@ -104,7 +104,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, entity.getErrorThresholdPercentage())
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
 
-        final RolloutCreate rolloutCreate = entityFactory.rollout().create().name(entity.getName())
+        final RolloutCreate rolloutCreate = getEntityFactory().rollout().create().name(entity.getName())
                 .description(entity.getDescription()).set(entity.getDistributionSetId())
                 .targetFilterQuery(entity.getTargetFilterQuery()).actionType(entity.getActionType())
                 .forcedTime(entity.getActionType() == ActionType.TIMEFORCED ? entity.getForcedTime()
@@ -119,15 +119,15 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
                     getRolloutGroupsCreateFromDefinitions(entity.getAdvancedRolloutGroupDefinitions()), conditions);
         }
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", rolloutToCreate.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", rolloutToCreate.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxyRollout.class, rolloutToCreate.getId()));
     }
 
     private List<RolloutGroupCreate> getRolloutGroupsCreateFromDefinitions(
             final List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions) {
         final AdvancedRolloutGroupDefinitionToCreateMapper mapper = new AdvancedRolloutGroupDefinitionToCreateMapper(
-                entityFactory);
+                getEntityFactory());
 
         return advancedRolloutGroupDefinitions.stream().map(mapper::map).collect(Collectors.toList());
     }
@@ -135,19 +135,19 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
         if (entity == null) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.save.fail", i18n.getMessage("caption.rollout")));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.save.fail", getI18n().getMessage("caption.rollout")));
             return false;
         }
 
         if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.name.empty"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.name.empty"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (rolloutManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.duplicate.check", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.rollout.duplicate.check", trimmedName));
             return false;
         }
 

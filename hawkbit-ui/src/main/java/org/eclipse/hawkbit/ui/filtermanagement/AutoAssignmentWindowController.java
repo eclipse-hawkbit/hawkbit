@@ -93,18 +93,18 @@ public class AutoAssignmentWindowController
             final Long targetsForAutoAssignmentCount = targetManagement.countByRsqlAndNonDS(autoAssignDsId,
                     entity.getQuery());
 
-            final String confirmationCaption = i18n
+            final String confirmationCaption = getI18n()
                     .getMessage(UIMessageIdProvider.CAPTION_CONFIRM_AUTO_ASSIGN_CONSEQUENCES);
             final String confirmationQuestion = targetsForAutoAssignmentCount == 0
-                    ? i18n.getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE)
-                    : i18n.getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT,
+                    ? getI18n().getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE)
+                    : getI18n().getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT,
                             targetsForAutoAssignmentCount);
 
             showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
                     entity.getAutoAssignActionType(), entity);
         } else {
             targetFilterQueryManagement
-                    .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
+                    .updateAutoAssignDS(getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
             publishModifiedEvent(entity.getId());
         }
     }
@@ -112,10 +112,10 @@ public class AutoAssignmentWindowController
     private void showConsequencesDialog(final String confirmationCaption, final String confirmationQuestion,
             final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType,
             final ProxyTargetFilterQuery entity) {
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(i18n, confirmationCaption, confirmationQuestion,
+        final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption, confirmationQuestion,
                 ok -> {
                     if (ok) {
-                        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                        targetFilterQueryManagement.updateAutoAssignDS(getEntityFactory().targetFilterQuery()
                                 .updateAutoAssign(targetFilterId).ds(autoAssignDsId).actionType(autoAssignActionType));
                         publishModifiedEvent(entity.getId());
                     }
@@ -128,7 +128,7 @@ public class AutoAssignmentWindowController
     }
 
     private void publishModifiedEvent(final Long entityId) {
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_UPDATED, ProxyTargetFilterQuery.class, entityId));
     }
 
@@ -136,8 +136,8 @@ public class AutoAssignmentWindowController
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (entity.isAutoAssignmentEnabled()
                 && (entity.getAutoAssignActionType() == null || entity.getDistributionSetInfo() == null)) {
-            uiNotification.displayValidationError(
-                    i18n.getMessage(UIMessageIdProvider.MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS));
+            getUiNotification().displayValidationError(
+                    getI18n().getMessage(UIMessageIdProvider.MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS));
             return false;
         }
 

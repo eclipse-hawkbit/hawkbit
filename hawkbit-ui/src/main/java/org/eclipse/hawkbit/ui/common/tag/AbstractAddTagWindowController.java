@@ -41,13 +41,12 @@ public abstract class AbstractAddTagWindowController extends AbstractTagWindowCo
 
     @Override
     protected void persistEntity(final ProxyTag entity) {
-        final TagCreate tagCreate = uiConfig.getEntityFactory().tag().create().name(entity.getName())
+        final TagCreate tagCreate = getEntityFactory().tag().create().name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour());
         final Tag newTag = createEntityInRepository(tagCreate);
 
-        uiConfig.getUiNotification()
-                .displaySuccess(uiConfig.getI18n().getMessage("message.save.success", newTag.getName()));
-        uiConfig.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success", newTag.getName()));
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, parentType, ProxyTag.class, newTag.getId()));
     }
 
@@ -63,15 +62,14 @@ public abstract class AbstractAddTagWindowController extends AbstractTagWindowCo
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            uiConfig.getUiNotification()
-                    .displayValidationError(uiConfig.getI18n().getMessage("message.error.missing.tagname"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.tagname"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (existsEntityInRepository(trimmedName)) {
-            uiConfig.getUiNotification()
-                    .displayValidationError(uiConfig.getI18n().getMessage("message.tag.duplicate.check", trimmedName));
+            getUiNotification()
+                    .displayValidationError(getI18n().getMessage("message.tag.duplicate.check", trimmedName));
             return false;
         }
 

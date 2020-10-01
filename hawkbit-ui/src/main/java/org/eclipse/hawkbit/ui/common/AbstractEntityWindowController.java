@@ -24,11 +24,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public abstract class AbstractEntityWindowController<T, E> {
 
-    protected final UIConfiguration uiConfig;
-    protected final VaadinMessageSource i18n;
-    protected final EntityFactory entityFactory;
-    protected final UIEventBus eventBus;
-    protected final UINotification uiNotification;
+    private final UIConfiguration uiConfig;
 
     /**
      * Constructor.
@@ -38,10 +34,6 @@ public abstract class AbstractEntityWindowController<T, E> {
      */
     protected AbstractEntityWindowController(final UIConfiguration uiConfig) {
         this.uiConfig = uiConfig;
-        this.entityFactory = uiConfig.getEntityFactory();
-        this.eventBus = uiConfig.getEventBus();
-        this.i18n = uiConfig.getI18n();
-        this.uiNotification = uiConfig.getUiNotification();
     }
 
     /**
@@ -96,5 +88,21 @@ public abstract class AbstractEntityWindowController<T, E> {
 
     protected boolean closeWindowAfterSave() {
         return true;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return uiConfig.getI18n();
+    }
+
+    protected EntityFactory getEntityFactory() {
+        return uiConfig.getEntityFactory();
+    }
+
+    protected UIEventBus getEventBus() {
+        return uiConfig.getEventBus();
+    }
+
+    protected UINotification getUiNotification() {
+        return uiConfig.getUiNotification();
     }
 }

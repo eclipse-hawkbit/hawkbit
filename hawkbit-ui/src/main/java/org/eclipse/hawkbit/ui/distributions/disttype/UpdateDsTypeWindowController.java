@@ -123,15 +123,15 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
         layout.disableTypeKey();
 
         if (isDsTypeAssigned) {
-            uiNotification.displayValidationError(
-                    nameBeforeEdit + "  " + i18n.getMessage("message.error.dist.set.type.update"));
+            getUiNotification().displayValidationError(
+                    nameBeforeEdit + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
             layout.disableDsTypeSmSelectLayout();
         }
     }
 
     @Override
     protected void persistEntity(final ProxyType entity) {
-        final DistributionSetTypeUpdate dsTypeUpdate = entityFactory.distributionSetType().update(entity.getId())
+        final DistributionSetTypeUpdate dsTypeUpdate = getEntityFactory().distributionSetType().update(entity.getId())
                 .description(entity.getDescription()).colour(entity.getColour());
 
         final List<Long> mandatorySmTypeIds = entity.getSelectedSmTypes().stream().filter(ProxyType::isMandatory)
@@ -146,15 +146,15 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
         try {
             final DistributionSetType updatedDsType = dsTypeManagement.update(dsTypeUpdate);
 
-            uiNotification.displaySuccess(i18n.getMessage("message.update.success", updatedDsType.getName()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
+            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedDsType.getName()));
+            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this,
                     new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class,
                             ProxyType.class, updatedDsType.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of DS type failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.entity.distribution.type");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            final String entityType = getI18n().getMessage("caption.entity.distribution.type");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
         }
     }
 
@@ -162,18 +162,18 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkeyorsmtype"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.typenameorkeyorsmtype"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (!nameBeforeEdit.equals(trimmedName) && dsTypeManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.duplicate.check", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.type.duplicate.check", trimmedName));
             return false;
         }
         if (!keyBeforeEdit.equals(trimmedKey) && dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.key.ds.duplicate.check", trimmedKey));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.type.key.ds.duplicate.check", trimmedKey));
             return false;
         }
 

@@ -80,20 +80,20 @@ public class UpdateTargetFilterController
 
     @Override
     protected void persistEntity(final ProxyTargetFilterQuery entity) {
-        final TargetFilterQueryUpdate targetFilterUpdate = entityFactory.targetFilterQuery().update(entity.getId())
+        final TargetFilterQueryUpdate targetFilterUpdate = getEntityFactory().targetFilterQuery().update(entity.getId())
                 .name(entity.getName()).query(entity.getQuery());
 
         try {
             final TargetFilterQuery updatedTargetFilter = targetFilterManagement.update(targetFilterUpdate);
 
-            uiNotification.displaySuccess(i18n.getMessage("message.update.success", updatedTargetFilter.getName()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+            getUiNotification().displaySuccess(getI18n().getMessage("message.update.success", updatedTargetFilter.getName()));
+            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyTargetFilterQuery.class, updatedTargetFilter.getId()));
         } catch (final EntityNotFoundException | EntityReadOnlyException e) {
             LOG.trace("Update of target filter failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.target.filter");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
+            final String entityType = getI18n().getMessage("caption.target.filter");
+            getUiNotification()
+                    .displayWarning(getI18n().getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
         } finally {
             closeFormCallback.run();
         }
@@ -102,13 +102,13 @@ public class UpdateTargetFilterController
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         if (!StringUtils.hasText(entity.getName())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.filtername"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.filtername"));
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (!nameBeforeEdit.equals(trimmedName) && targetFilterManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.target.filter.duplicate", trimmedName));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.target.filter.duplicate", trimmedName));
             return false;
         }
 

@@ -75,7 +75,7 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
 
     @Override
     protected void persistEntity(final ProxySoftwareModule entity) {
-        final SoftwareModuleCreate smCreate = entityFactory.softwareModule().create()
+        final SoftwareModuleCreate smCreate = getEntityFactory().softwareModule().create()
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
                 .vendor(entity.getVendor()).description(entity.getDescription());
 
@@ -84,18 +84,18 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
             newSoftwareModule = smManagement.create(smCreate);
         } catch (final ConstraintViolationException ex) {
             LOG.trace("Create of software module failed in UI: {}", ex.getMessage());
-            uiNotification.displayValidationError(
-                    i18n.getMessage("message.save.fail", entity.getName() + ":" + entity.getVersion()));
+            getUiNotification().displayValidationError(
+                    getI18n().getMessage("message.save.fail", entity.getName() + ":" + entity.getVersion()));
             return;
         }
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success",
+        getUiNotification().displaySuccess(getI18n().getMessage("message.save.success",
                 newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, newSoftwareModule.getId()));
 
         final ProxySoftwareModule addedItem = new SoftwareModuleToProxyMapper().map(newSoftwareModule);
-        eventBus.publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
+        getEventBus().publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
                 SelectionChangedEventType.ENTITY_SELECTED, addedItem, EventLayout.SM_LIST, view));
     }
 
@@ -103,7 +103,7 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
         if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())
                 || entity.getTypeInfo() == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.nameorversionortype"));
+            getUiNotification().displayValidationError(getI18n().getMessage("message.error.missing.nameorversionortype"));
             return false;
         }
 
@@ -111,8 +111,8 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         final Long typeId = entity.getTypeInfo().getId();
         if (smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent()) {
-            uiNotification.displayValidationError(
-                    i18n.getMessage("message.duplicate.softwaremodule", trimmedName, trimmedVersion));
+            getUiNotification().displayValidationError(
+                    getI18n().getMessage("message.duplicate.softwaremodule", trimmedName, trimmedVersion));
             return false;
         }
 
