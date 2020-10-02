@@ -63,7 +63,7 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
      */
     public UpdateRolloutWindowController(final RolloutWindowDependencies dependencies,
             final UpdateRolloutWindowLayout layout) {
-        super(dependencies.getUiConfig());
+        super(dependencies.getuiDependencies());
 
         this.targetFilterQueryManagement = dependencies.getTargetFilterQueryManagement();
         this.rolloutManagement = dependencies.getRolloutManagement();

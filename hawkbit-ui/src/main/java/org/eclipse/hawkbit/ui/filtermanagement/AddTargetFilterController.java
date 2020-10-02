@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -35,8 +35,8 @@ public class AddTargetFilterController
     /**
      * Constructor for AddTargetFilterController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetFilterManagement
      *            TargetFilterQueryManagement
      * @param layout
@@ -44,10 +44,10 @@ public class AddTargetFilterController
      * @param closeFormCallback
      *            Runnable
      */
-    public AddTargetFilterController(final UIConfiguration uiConfig,
+    public AddTargetFilterController(final CommonUiDependencies uiDependencies,
             final TargetFilterQueryManagement targetFilterManagement, final TargetFilterAddUpdateLayout layout,
             final Runnable closeFormCallback) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetFilterManagement = targetFilterManagement;
         this.layout = layout;

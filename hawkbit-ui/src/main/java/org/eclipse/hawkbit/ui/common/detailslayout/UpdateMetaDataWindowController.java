@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,17 +33,17 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     /**
      * Constructor for UpdateMetaDataWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param updateMetaDataCallback
      *            Update meta data call back function for event listener
      *
      */
-    public UpdateMetaDataWindowController(final UIConfiguration uiConfig, final MetaDataAddUpdateWindowLayout layout,
+    public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies, final MetaDataAddUpdateWindowLayout layout,
             final Function<ProxyMetaData, MetaData> updateMetaDataCallback) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.layout = layout;
         this.updateMetaDataCallback = updateMetaDataCallback;

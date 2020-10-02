@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -38,16 +38,16 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
     /**
      * Constructor for UpdateTargetWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param layout
      *            TargetWindowLayout
      */
-    public UpdateTargetWindowController(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public UpdateTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetWindowLayout layout) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;

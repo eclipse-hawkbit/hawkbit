@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -52,11 +52,11 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
     protected final transient DeleteSupport<ProxyDistributionSet> distributionDeleteSupport;
     protected final transient UINotification notification;
 
-    protected AbstractDsGrid(final UIConfiguration uiConfig, final DistributionSetManagement dsManagement,
+    protected AbstractDsGrid(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement,
             final GridLayoutUiState distributionSetGridLayoutUiState, final EventView view) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.notification = uiConfig.getUiNotification();
+        this.notification = uiDependencies.getUiNotification();
         this.distributionSetGridLayoutUiState = distributionSetGridLayoutUiState;
         this.dsManagement = dsManagement;
         this.dsToProxyDistributionMapper = new DistributionSetToProxyDistributionMapper();

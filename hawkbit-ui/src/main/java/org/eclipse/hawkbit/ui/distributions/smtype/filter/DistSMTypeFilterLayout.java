@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.distributions.smtype.filter;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 
@@ -25,17 +25,17 @@ public class DistSMTypeFilterLayout extends SMTypeFilterLayout {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param smTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public DistSMTypeFilterLayout(final UIConfiguration uiConfig,
+    public DistSMTypeFilterLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState) {
-        super(uiConfig, softwareModuleTypeManagement, smTypeFilterLayoutUiState, EventView.DISTRIBUTIONS);
+        super(uiDependencies, softwareModuleTypeManagement, smTypeFilterLayoutUiState, EventView.DISTRIBUTIONS);
 
         this.smTypeCssStylesHandler = new SmTypeCssStylesHandler(softwareModuleTypeManagement);
         this.smTypeCssStylesHandler.updateSmTypeStyles();

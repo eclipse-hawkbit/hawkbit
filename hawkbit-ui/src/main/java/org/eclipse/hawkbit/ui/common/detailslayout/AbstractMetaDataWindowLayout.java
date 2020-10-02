@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -42,7 +42,7 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     protected final SpPermissionChecker permChecker;
     protected final transient UIEventBus eventBus;
     protected final transient EntityFactory entityFactory;
-    protected final transient UIConfiguration uiConfig;
+    protected final transient CommonUiDependencies uiDependencies;
 
     private final MetadataWindowGridHeader metadataWindowGridHeader;
 
@@ -53,18 +53,18 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     /**
      * Constructor for AbstractTagWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      */
-    public AbstractMetaDataWindowLayout(final UIConfiguration uiConfig) {
-        this.uiConfig = uiConfig;
-        this.i18n = uiConfig.getI18n();
-        this.eventBus = uiConfig.getEventBus();
-        this.uiNotification = uiConfig.getUiNotification();
-        this.permChecker = uiConfig.getPermChecker();
-        this.entityFactory = uiConfig.getEntityFactory();
+    public AbstractMetaDataWindowLayout(final CommonUiDependencies uiDependencies) {
+        this.uiDependencies = uiDependencies;
+        this.i18n = uiDependencies.getI18n();
+        this.eventBus = uiDependencies.getEventBus();
+        this.uiNotification = uiDependencies.getUiNotification();
+        this.permChecker = uiDependencies.getPermChecker();
+        this.entityFactory = uiDependencies.getEntityFactory();
 
-        this.metadataWindowGridHeader = new MetadataWindowGridHeader(uiConfig, this::showAddMetaDataLayout);
+        this.metadataWindowGridHeader = new MetadataWindowGridHeader(uiDependencies, this::showAddMetaDataLayout);
     }
 
     protected MetaData createMetaData(final ProxyMetaData entity) {

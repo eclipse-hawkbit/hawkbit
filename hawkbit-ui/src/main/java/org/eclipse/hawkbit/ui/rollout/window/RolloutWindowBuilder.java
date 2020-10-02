@@ -35,7 +35,7 @@ public final class RolloutWindowBuilder extends AbstractEntityWindowBuilder<Prox
      *            RolloutWindowDependencies
      */
     public RolloutWindowBuilder(final RolloutWindowDependencies rolloutWindowDependencies) {
-        super(rolloutWindowDependencies.getUiConfig());
+        super(rolloutWindowDependencies.getuiDependencies());
 
         this.dependencies = rolloutWindowDependencies;
     }

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -38,8 +38,8 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param smTypeWindowBuilder
@@ -49,11 +49,11 @@ public class SMTypeFilterButtons extends AbstractTypeFilterButtons {
      * @param view
      *            EventView
      */
-    public SMTypeFilterButtons(final UIConfiguration uiConfig,
+    public SMTypeFilterButtons(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SmTypeWindowBuilder smTypeWindowBuilder, final TypeFilterLayoutUiState typeFilterLayoutUiState,
             final EventView view) {
-        super(uiConfig, typeFilterLayoutUiState);
+        super(uiDependencies, typeFilterLayoutUiState);
 
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.smTypeWindowBuilder = smTypeWindowBuilder;

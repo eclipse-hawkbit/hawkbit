@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -40,16 +40,16 @@ public class TargetTagToken extends AbstractTagToken<ProxyTarget> {
     /**
      * Constructor for TargetTagToken
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagManagement
      *            TargetTagManagement
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetTagToken(final UIConfiguration uiConfig, final TargetTagManagement targetTagManagement,
+    public TargetTagToken(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement,
             final TargetManagement targetManagement) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetTagManagement = targetTagManagement;
         this.targetManagement = targetManagement;

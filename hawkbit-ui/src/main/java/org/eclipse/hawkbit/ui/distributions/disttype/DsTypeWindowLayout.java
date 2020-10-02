@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.distributions.disttype;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
@@ -30,14 +30,14 @@ public class DsTypeWindowLayout extends TagWindowLayout<ProxyType> {
     /**
      * Constructor for DsTypeWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      */
-    public DsTypeWindowLayout(final UIConfiguration uiConfig,
+    public DsTypeWindowLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.dsTypeComponentBuilder = new DsTypeWindowLayoutComponentBuilder(i18n, softwareModuleTypeManagement);
 

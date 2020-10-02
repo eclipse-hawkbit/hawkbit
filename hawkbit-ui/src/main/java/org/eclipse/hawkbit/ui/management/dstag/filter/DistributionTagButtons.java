@@ -12,7 +12,7 @@ import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTagDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -42,8 +42,8 @@ public class DistributionTagButtons extends AbstractTagFilterButtons {
     /**
      * Constructor for DistributionTagButtons
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetTagManagement
      *            DistributionSetTagManagement
      * @param distributionSetManagement
@@ -53,17 +53,17 @@ public class DistributionTagButtons extends AbstractTagFilterButtons {
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionTagButtons(final UIConfiguration uiConfig,
+    public DistributionTagButtons(final CommonUiDependencies uiDependencies,
             final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement, final DsTagWindowBuilder dsTagWindowBuilder,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(uiConfig, distributionTagLayoutUiState);
+        super(uiDependencies, distributionTagLayoutUiState);
 
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.dsTagWindowBuilder = dsTagWindowBuilder;
 
         final DistributionSetsToTagAssignmentSupport distributionSetsToTagAssignment = new DistributionSetsToTagAssignmentSupport(
-                uiConfig, distributionSetManagement);
+                uiDependencies, distributionSetManagement);
 
         setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiNotification,
                 Collections.singletonMap(UIComponentIdProvider.DIST_TABLE_ID, distributionSetsToTagAssignment),

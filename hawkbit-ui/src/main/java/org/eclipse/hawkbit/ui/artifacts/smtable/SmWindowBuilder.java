@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -31,8 +31,8 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     /**
      * Constructor for SmWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smManagement
      *            SoftwareModuleManagement
      * @param smTypeManagement
@@ -40,9 +40,9 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
      * @param view
      *            EventView
      */
-    public SmWindowBuilder(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement,
+    public SmWindowBuilder(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
             final SoftwareModuleTypeManagement smTypeManagement, final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.smManagement = smManagement;
         this.smTypeManagement = smTypeManagement;
@@ -61,7 +61,7 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(
-                new AddSmWindowController(uiConfig, smManagement, new SmWindowLayout(i18n, smTypeManagement), view));
+                new AddSmWindowController(uiDependencies, smManagement, new SmWindowLayout(i18n, smTypeManagement), view));
 
     }
 
@@ -74,6 +74,6 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForUpdate(final ProxySoftwareModule proxySm) {
         return getWindowForEntity(proxySm,
-                new UpdateSmWindowController(uiConfig, smManagement, new SmWindowLayout(i18n, smTypeManagement)));
+                new UpdateSmWindowController(uiDependencies, smManagement, new SmWindowLayout(i18n, smTypeManagement)));
     }
 }

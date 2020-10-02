@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 import java.util.Collection;
 import java.util.function.Predicate;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.providers.AbstractMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -40,19 +40,19 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
     /**
      * Constructor for MetaDataWindowGrid
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dataProvider
      *            AbstractMetaDataDataProvider for filter support
      * @param itemsDeletionCallback
      *            Grid item deletion Call back for event listener
      *
      */
-    public MetaDataWindowGrid(final UIConfiguration uiConfig, final AbstractMetaDataDataProvider<?, F> dataProvider,
+    public MetaDataWindowGrid(final CommonUiDependencies uiDependencies, final AbstractMetaDataDataProvider<?, F> dataProvider,
             final Predicate<Collection<ProxyMetaData>> itemsDeletionCallback) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiConfig.getUiNotification(), "caption.metadata",
+        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiDependencies.getUiNotification(), "caption.metadata",
                 "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
                 UIComponentIdProvider.METADATA_DELETE_CONFIRMATION_DIALOG);
 

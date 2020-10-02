@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
@@ -30,11 +30,11 @@ public class SmTypeWindowLayout extends TagWindowLayout<ProxyType> {
     /**
      * Constructor for SmTypeWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      */
-    public SmTypeWindowLayout(final UIConfiguration uiConfig) {
-        super(uiConfig);
+    public SmTypeWindowLayout(final CommonUiDependencies uiDependencies) {
+        super(uiDependencies);
 
         this.smTypeComponentBuilder = new SmTypeWindowLayoutComponentBuilder(i18n);
 

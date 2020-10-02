@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -34,14 +34,14 @@ public class ArtifactDetailsGridHeader extends AbstractMasterAwareGridHeader<Pro
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param artifactDetailsGridLayoutUiState
      *            ArtifactDetailsGridLayoutUiState
      */
-    public ArtifactDetailsGridHeader(final UIConfiguration uiConfig,
+    public ArtifactDetailsGridHeader(final CommonUiDependencies uiDependencies,
             final ArtifactDetailsGridLayoutUiState artifactDetailsGridLayoutUiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.artifactDetailsGridLayoutUiState = artifactDetailsGridLayoutUiState;
 

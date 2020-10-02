@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -100,22 +100,22 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
-        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, uiNotification,
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
                 permChecker);
 
         if (permChecker.hasTargetReadPermission()) {
-            this.targetTagFilterLayout = new TargetTagFilterLayout(uiConfig, managementUIState,
+            this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
                     targetFilterQueryManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState());
 
-            this.targetGridLayout = new TargetGridLayout(uiConfig, targetManagement, deploymentManagement, uiProperties,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement, uiProperties,
                     targetTagManagement, distributionSetManagement, uiExecutor, configManagement, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
                     managementUIState.getDistributionGridLayoutUiState());
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
-            this.actionHistoryLayout = new ActionHistoryLayout(uiConfig, deploymentManagement,
+            this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,
                     managementUIState.getActionHistoryGridLayoutUiState());
         } else {
             this.targetTagFilterLayout = null;
@@ -125,9 +125,9 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
 
         if (permChecker.hasReadRepositoryPermission()) {
-            this.distributionTagLayout = new DistributionTagLayout(uiConfig, distributionSetTagManagement,
+            this.distributionTagLayout = new DistributionTagLayout(uiDependencies, distributionSetTagManagement,
                     distributionSetManagement, managementUIState.getDistributionTagLayoutUiState());
-            this.distributionGridLayout = new DistributionGridLayout(uiConfig, targetManagement,
+            this.distributionGridLayout = new DistributionGridLayout(uiDependencies, targetManagement,
                     distributionSetManagement, smManagement, distributionSetTypeManagement,
                     distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
                     systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),

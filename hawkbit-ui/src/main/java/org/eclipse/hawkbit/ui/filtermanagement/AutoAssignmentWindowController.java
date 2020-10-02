@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -38,8 +38,8 @@ public class AutoAssignmentWindowController
     /**
      * Constructor for AutoAssignmentWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param targetFilterQueryManagement
@@ -47,9 +47,9 @@ public class AutoAssignmentWindowController
      * @param layout
      *            AutoAssignmentWindowLayout
      */
-    public AutoAssignmentWindowController(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public AutoAssignmentWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final AutoAssignmentWindowLayout layout) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;

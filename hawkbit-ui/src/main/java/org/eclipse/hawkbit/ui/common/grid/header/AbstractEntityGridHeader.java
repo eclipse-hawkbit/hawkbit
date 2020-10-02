@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.common.grid.header;
 import java.util.Arrays;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -57,8 +57,8 @@ public abstract class AbstractEntityGridHeader extends AbstractGridHeader {
     /**
      * Constructor for AbstractEntityGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param filterLayoutUiState
      *            HidableLayoutUiState
      * @param gridLayoutUiState
@@ -68,9 +68,9 @@ public abstract class AbstractEntityGridHeader extends AbstractGridHeader {
      * @param view
      *            EventView
      */
-    public AbstractEntityGridHeader(final UIConfiguration uiConfig, final HidableLayoutUiState filterLayoutUiState,
+    public AbstractEntityGridHeader(final CommonUiDependencies uiDependencies, final HidableLayoutUiState filterLayoutUiState,
             final GridLayoutUiState gridLayoutUiState, final EventLayout filterLayout, final EventView view) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.filterLayoutUiState = filterLayoutUiState;
         this.gridLayoutUiState = gridLayoutUiState;

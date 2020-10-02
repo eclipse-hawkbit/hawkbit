@@ -12,7 +12,7 @@ import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetTagDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -37,15 +37,15 @@ public class TargetTagFilterButtons extends AbstractTagFilterButtons {
     private final transient TargetTagManagement targetTagManagement;
     private final transient TargetTagWindowBuilder targetTagWindowBuilder;
 
-    TargetTagFilterButtons(final UIConfiguration uiConfig, final TargetTagManagement targetTagManagement,
+    TargetTagFilterButtons(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement,
             final TargetManagement targetManagement, final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetTagWindowBuilder targetTagWindowBuilder) {
-        super(uiConfig, targetTagFilterLayoutUiState);
+        super(uiDependencies, targetTagFilterLayoutUiState);
 
         this.targetTagManagement = targetTagManagement;
         this.targetTagWindowBuilder = targetTagWindowBuilder;
 
-        final TargetsToTagAssignmentSupport targetsToTagAssignment = new TargetsToTagAssignmentSupport(uiConfig,
+        final TargetsToTagAssignmentSupport targetsToTagAssignment = new TargetsToTagAssignmentSupport(uiDependencies,
                 targetManagement);
 
         setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiNotification,

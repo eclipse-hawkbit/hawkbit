@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -33,7 +33,7 @@ public class BulkUploadWindowBuilder {
     private final DeploymentManagement deploymentManagement;
     private final TargetTagManagement tagManagement;
     private final DistributionSetManagement distributionSetManagement;
-    private final UIConfiguration uiConfig;
+    private final CommonUiDependencies uiDependencies;
 
     private final TargetBulkUploadUiState targetBulkUploadUiState;
 
@@ -42,8 +42,8 @@ public class BulkUploadWindowBuilder {
     /**
      * Constructor for BulkUploadWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiproperties
      *            UiProperties
      * @param uiExecutor
@@ -59,12 +59,12 @@ public class BulkUploadWindowBuilder {
      * @param targetBulkUploadUiState
      *            TargetBulkUploadUiState
      */
-    public BulkUploadWindowBuilder(final UIConfiguration uiConfig, final UiProperties uiproperties,
+    public BulkUploadWindowBuilder(final CommonUiDependencies uiDependencies, final UiProperties uiproperties,
             final Executor uiExecutor, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement,
             final TargetBulkUploadUiState targetBulkUploadUiState) {
-        this.uiConfig = uiConfig;
+        this.uiDependencies = uiDependencies;
         this.uiproperties = uiproperties;
         this.uiExecutor = uiExecutor;
         this.targetManagement = targetManagement;
@@ -79,7 +79,7 @@ public class BulkUploadWindowBuilder {
      */
     public Window getWindowForTargetBulkUpload() {
         if (!targetBulkUploadUiState.isInProgress() || targetBulkUpdateWindowLayout == null) {
-            targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiConfig, targetManagement,
+            targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiDependencies, targetManagement,
                     deploymentManagement, tagManagement, distributionSetManagement, uiproperties, uiExecutor,
                     targetBulkUploadUiState);
         }
@@ -106,7 +106,7 @@ public class BulkUploadWindowBuilder {
      * Restore target bulk update window layout
      */
     public void restoreState() {
-        targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiConfig, targetManagement,
+        targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiDependencies, targetManagement,
                 deploymentManagement, tagManagement, distributionSetManagement, uiproperties, uiExecutor,
                 targetBulkUploadUiState);
         targetBulkUpdateWindowLayout.restoreComponentsValue();

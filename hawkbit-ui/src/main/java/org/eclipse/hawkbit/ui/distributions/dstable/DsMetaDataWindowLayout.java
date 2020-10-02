@@ -12,7 +12,7 @@ import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.DsMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -42,23 +42,23 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
     /**
      * Constructor for AbstractTagWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      */
-    public DsMetaDataWindowLayout(final UIConfiguration uiConfig, final DistributionSetManagement dsManagement) {
-        super(uiConfig);
+    public DsMetaDataWindowLayout(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement) {
+        super(uiDependencies);
 
         this.dsManagement = dsManagement;
 
-        this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(uiConfig, new DsMetaDataDataProvider(dsManagement),
+        this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies, new DsMetaDataDataProvider(dsManagement),
                 this::deleteMetaData);
 
         this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
-        this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiConfig, metaDataAddUpdateWindowLayout,
+        this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiDependencies, metaDataAddUpdateWindowLayout,
                 this::createMetaData, this::isDuplicate);
-        this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(uiConfig,
+        this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::updateMetaData);
 
         buildLayout();

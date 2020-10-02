@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.actionhistory;
 import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.providers.ActionStatusMsgDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyActionStatus;
@@ -44,8 +44,8 @@ public class ActionStatusMsgGrid extends AbstractGrid<ProxyMessage, Long> {
 
     private final Registration itemClickListenerRegistration;
 
-    protected ActionStatusMsgGrid(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+    protected ActionStatusMsgGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         setSelectionSupport(new SelectionSupport<ProxyMessage>(this));
         getSelectionSupport().enableSingleSelection();

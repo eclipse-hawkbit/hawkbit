@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -66,13 +66,13 @@ public class FilterManagementView extends VerticalLayout implements View {
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement) {
         this.filterManagementUIState = filterManagementUIState;
 
-        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, notification,
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, notification,
                 permissionChecker);
 
-        this.targetFilterGridLayout = new TargetFilterGridLayout(uiConfig, targetFilterQueryManagement,
+        this.targetFilterGridLayout = new TargetFilterGridLayout(uiDependencies, targetFilterQueryManagement,
                 targetManagement, distributionSetManagement, filterManagementUIState);
 
-        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiConfig, uiProperties, rsqlValidationOracle,
+        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiDependencies, uiProperties, rsqlValidationOracle,
                 targetManagement, targetFilterQueryManagement, filterManagementUIState.getDetailsLayoutUiState());
 
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 
 import com.vaadin.ui.HorizontalLayout;
 
@@ -26,21 +26,21 @@ public class ActionHistoryLayout extends HorizontalLayout {
     /**
      * Constructor for ActionHistoryLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param deploymentManagement
      *            DeploymentManagement
      * @param actionHistoryGridLayoutUiState
      *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryLayout(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement,
+    public ActionHistoryLayout(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
 
-        this.actionHistoryGridLayout = new ActionHistoryGridLayout(uiConfig, deploymentManagement,
+        this.actionHistoryGridLayout = new ActionHistoryGridLayout(uiDependencies, deploymentManagement,
                 actionHistoryGridLayoutUiState);
 
-        this.actionStatusLayout = new ActionStatusGridLayout(uiConfig, deploymentManagement);
-        this.actionStatusMsgLayout = new ActionStatusMsgGridLayout(uiConfig, deploymentManagement);
+        this.actionStatusLayout = new ActionStatusGridLayout(uiDependencies, deploymentManagement);
+        this.actionStatusMsgLayout = new ActionStatusMsgGridLayout(uiDependencies, deploymentManagement);
 
         init();
         buildLayout();

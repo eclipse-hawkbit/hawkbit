@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
@@ -41,16 +41,16 @@ public class UpdateSmTypeWindowController extends AbstractEntityWindowController
     /**
      * Constructor for UpdateSmTypeWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeManagement
      *            SoftwareModuleTypeManagement
      * @param layout
      *            SmTypeWindowLayout
      */
-    public UpdateSmTypeWindowController(final UIConfiguration uiConfig,
+    public UpdateSmTypeWindowController(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement smTypeManagement, final SmTypeWindowLayout layout) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.smTypeManagement = smTypeManagement;
         this.layout = layout;

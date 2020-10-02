@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.tag.AbstractAddTagWindowController;
@@ -27,16 +27,16 @@ public class AddTargetTagWindowController extends AbstractAddTagWindowController
     /**
      * Constructor for AddTargetTagWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagManagement
      *            TargetTagManagement
      * @param layout
      *            TagWindowLayout
      */
-    public AddTargetTagWindowController(final UIConfiguration uiConfig, final TargetTagManagement targetTagManagement,
+    public AddTargetTagWindowController(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement,
             final TagWindowLayout<ProxyTag> layout) {
-        super(uiConfig, layout, ProxyTarget.class);
+        super(uiDependencies, layout, ProxyTarget.class);
 
         this.targetTagManagement = targetTagManagement;
     }

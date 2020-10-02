@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.ActionStatusToProxyActionStatusMapper;
@@ -43,13 +43,13 @@ public class ActionStatusGrid extends AbstractGrid<ProxyActionStatus, Long> {
     /**
      * Constructor.
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param deploymentManagement
      *            deploymentManagement
      */
-    protected ActionStatusGrid(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+    protected ActionStatusGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         setSelectionSupport(new SelectionSupport<ProxyActionStatus>(this, eventBus,
                 EventLayout.ACTION_HISTORY_STATUS_LIST, EventView.DEPLOYMENT, null, null, null));

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -31,17 +31,17 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for TargetTagFilterHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagFilterLayoutUiState
      *            TargetTagFilterLayoutUiState
      * @param targetTagWindowBuilder
      *            TargetTagWindowBuilder
      */
-    public TargetTagFilterHeader(final UIConfiguration uiConfig,
+    public TargetTagFilterHeader(final CommonUiDependencies uiDependencies,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetTagWindowBuilder targetTagWindowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
         this.targetTagWindowBuilder = targetTagWindowBuilder;

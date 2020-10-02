@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.distributions.dstable.AddDsWindowController;
@@ -40,8 +40,8 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
     /**
      * Constructor for DsWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param systemManagement
      *            SystemManagement
      * @param systemSecurityContext
@@ -55,12 +55,12 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
      * @param view
      *            EventView
      */
-    public DsWindowBuilder(final UIConfiguration uiConfig, final SystemManagement systemManagement,
+    public DsWindowBuilder(final CommonUiDependencies uiDependencies, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final DistributionSetManagement dsManagement, final DistributionSetTypeManagement dsTypeManagement,
             final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.systemManagement = systemManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -79,8 +79,8 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddDsWindowController(uiConfig, systemManagement, dsManagement,
-                new DsWindowLayout(uiConfig.getI18n(), systemSecurityContext, tenantConfigurationManagement,
+        return getWindowForNewEntity(new AddDsWindowController(uiDependencies, systemManagement, dsManagement,
+                new DsWindowLayout(uiDependencies.getI18n(), systemSecurityContext, tenantConfigurationManagement,
                         dsTypeManagement),
                 view));
 
@@ -88,7 +88,7 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
 
     @Override
     public Window getWindowForUpdate(final ProxyDistributionSet proxyDs) {
-        return getWindowForEntity(proxyDs, new UpdateDsWindowController(uiConfig, dsManagement,
+        return getWindowForEntity(proxyDs, new UpdateDsWindowController(uiDependencies, dsManagement,
                 new DsWindowLayout(i18n, systemSecurityContext, tenantConfigurationManagement, dsTypeManagement)));
     }
 }

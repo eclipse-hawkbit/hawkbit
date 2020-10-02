@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -41,18 +41,18 @@ public class DistributionSetsToTagAssignmentSupport
     /**
      * Constructor for DistributionSetsToTagAssignmentSupport
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetManagement
      *            DistributionSetManagement
      */
-    public DistributionSetsToTagAssignmentSupport(final UIConfiguration uiConfig,
+    public DistributionSetsToTagAssignmentSupport(final CommonUiDependencies uiDependencies,
             final DistributionSetManagement distributionSetManagement) {
-        super(uiConfig.getUiNotification(), uiConfig.getI18n());
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
         this.distributionSetManagement = distributionSetManagement;
-        this.eventBus = uiConfig.getEventBus();
-        this.permChecker = uiConfig.getPermChecker();
+        this.eventBus = uiDependencies.getEventBus();
+        this.permChecker = uiDependencies.getPermChecker();
     }
 
     @Override

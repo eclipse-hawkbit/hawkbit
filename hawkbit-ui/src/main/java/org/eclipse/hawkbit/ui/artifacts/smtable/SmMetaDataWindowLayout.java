@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.SmMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
@@ -40,23 +40,23 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
     /**
      * Constructor for AbstractTagWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smManagement
      *            SoftwareModuleManagement
      */
-    public SmMetaDataWindowLayout(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement) {
-        super(uiConfig);
+    public SmMetaDataWindowLayout(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement) {
+        super(uiDependencies);
 
         this.smManagement = smManagement;
 
-        this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(uiConfig, new SmMetaDataDataProvider(smManagement),
+        this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies, new SmMetaDataDataProvider(smManagement),
                 this::deleteMetaData);
 
         this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n);
-        this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiConfig, smMetaDataAddUpdateWindowLayout,
+        this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiDependencies, smMetaDataAddUpdateWindowLayout,
                 this::createMetaData, this::isDuplicate);
-        this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(uiConfig,
+        this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
                 smMetaDataAddUpdateWindowLayout, this::updateMetaData);
 
         buildLayout();
@@ -71,14 +71,14 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
     @Override
     protected MetaData doCreateMetaData(final ProxyMetaData entity) {
         return smManagement
-                .createMetaData(uiConfig.getEntityFactory().softwareModuleMetadata().create(masterEntityFilter)
+                .createMetaData(uiDependencies.getEntityFactory().softwareModuleMetadata().create(masterEntityFilter)
                         .key(entity.getKey()).value(entity.getValue()).targetVisible(entity.isVisibleForTargets()));
     }
 
     @Override
     protected MetaData doUpdateMetaData(final ProxyMetaData entity) {
         return smManagement.updateMetaData(
-                uiConfig.getEntityFactory().softwareModuleMetadata().update(masterEntityFilter, entity.getKey())
+                uiDependencies.getEntityFactory().softwareModuleMetadata().update(masterEntityFilter, entity.getKey())
                         .value(entity.getValue()).targetVisible(entity.isVisibleForTargets()));
     }
 

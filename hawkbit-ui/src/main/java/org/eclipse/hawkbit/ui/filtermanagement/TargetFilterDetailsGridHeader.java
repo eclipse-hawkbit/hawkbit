@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -43,8 +43,8 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
     /**
      * Constructor for TargetFilterDetailsGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetFilterManagement
      *            TargetFilterQueryManagement
      * @param uiProperties
@@ -54,10 +54,10 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
      * @param uiState
      *            TargetFilterDetailsLayoutUiState
      */
-    public TargetFilterDetailsGridHeader(final UIConfiguration uiConfig,
+    public TargetFilterDetailsGridHeader(final CommonUiDependencies uiDependencies,
             final TargetFilterQueryManagement targetFilterManagement, final UiProperties uiProperties,
             final RsqlValidationOracle rsqlValidationOracle, final TargetFilterDetailsLayoutUiState uiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.uiState = uiState;
 
@@ -71,9 +71,9 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
 
         this.targetFilterAddUpdateLayout = new TargetFilterAddUpdateLayout(i18n, permChecker, uiProperties, uiState,
                 eventBus, rsqlValidationOracle);
-        this.addTargetFilterController = new AddTargetFilterController(uiConfig, targetFilterManagement,
+        this.addTargetFilterController = new AddTargetFilterController(uiDependencies, targetFilterManagement,
                 targetFilterAddUpdateLayout, this::closeDetails);
-        this.updateTargetFilterController = new UpdateTargetFilterController(uiConfig, targetFilterManagement,
+        this.updateTargetFilterController = new UpdateTargetFilterController(uiDependencies, targetFilterManagement,
                 targetFilterAddUpdateLayout, this::closeDetails);
 
         buildHeader();

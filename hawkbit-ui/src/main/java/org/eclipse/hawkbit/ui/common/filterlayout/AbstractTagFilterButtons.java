@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -51,16 +51,16 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
     /**
      * Constructor for AbstractTagFilterButtons
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param tagFilterLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public AbstractTagFilterButtons(final UIConfiguration uiConfig,
+    public AbstractTagFilterButtons(final CommonUiDependencies uiDependencies,
             final TagFilterLayoutUiState tagFilterLayoutUiState) {
-        super(uiConfig.getEventBus(), uiConfig.getI18n(), uiConfig.getUiNotification(), uiConfig.getPermChecker());
+        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(), uiDependencies.getPermChecker());
 
-        this.uiNotification = uiConfig.getUiNotification();
+        this.uiNotification = uiDependencies.getUiNotification();
         this.tagFilterLayoutUiState = tagFilterLayoutUiState;
         this.noTagButton = buildNoTagButton();
         this.tagFilterButtonClick = new TagFilterButtonClick(this::onFilterChangedEvent, this::onNoTagChangedEvent);

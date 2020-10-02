@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -30,8 +30,8 @@ public class SoftwareModuleGridHeader extends AbstractEntityGridHeader {
     /**
      * Constructor for SoftwareModuleGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeFilterLayoutUiState
      *            HidableLayoutUiState
      * @param smGridLayoutUiState
@@ -41,10 +41,10 @@ public class SoftwareModuleGridHeader extends AbstractEntityGridHeader {
      * @param view
      *            EventView
      */
-    public SoftwareModuleGridHeader(final UIConfiguration uiConfig,
+    public SoftwareModuleGridHeader(final CommonUiDependencies uiDependencies,
             final HidableLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState,
             final SmWindowBuilder smWindowBuilder, final EventView view) {
-        super(uiConfig, smTypeFilterLayoutUiState, smGridLayoutUiState, EventLayout.SM_TYPE_FILTER, view);
+        super(uiDependencies, smTypeFilterLayoutUiState, smGridLayoutUiState, EventLayout.SM_TYPE_FILTER, view);
 
         addAddHeaderSupport(smWindowBuilder);
     }

@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGrid;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -31,7 +31,7 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
 
     private final transient SmWindowBuilder smWindowBuilder;
     private final transient SmMetaDataWindowBuilder smMetaDataWindowBuilder;
-    private final transient UIConfiguration uiConfig;
+    private final transient CommonUiDependencies uiDependencies;
 
     private transient ArtifactDetailsHeaderSupport artifactDetailsHeaderSupport;
     private transient ArtifactManagement artifactManagement;
@@ -40,17 +40,17 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
     /**
      * Constructor for SoftwareModuleDetailsHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smWindowBuilder
      *            SmWindowBuilder
      * @param smMetaDataWindowBuilder
      *            SmMetaDataWindowBuilder
      */
-    public SoftwareModuleDetailsHeader(final UIConfiguration uiConfig, final SmWindowBuilder smWindowBuilder,
+    public SoftwareModuleDetailsHeader(final CommonUiDependencies uiDependencies, final SmWindowBuilder smWindowBuilder,
             final SmMetaDataWindowBuilder smMetaDataWindowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus(), uiConfig.getUiNotification());
-        this.uiConfig = uiConfig;
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(), uiDependencies.getUiNotification());
+        this.uiDependencies = uiDependencies;
 
         this.smWindowBuilder = smWindowBuilder;
         this.smMetaDataWindowBuilder = smMetaDataWindowBuilder;
@@ -153,7 +153,7 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
         }
 
         if (artifactDetailsGrid == null) {
-            artifactDetailsGrid = new ArtifactDetailsGrid(uiConfig, artifactManagement);
+            artifactDetailsGrid = new ArtifactDetailsGrid(uiDependencies, artifactManagement);
         }
         setInitialArtifactDetailsGridSize(artifactDetailsGrid);
         artifactDetailsGrid.getMasterEntitySupport().masterEntityChanged(selectedEntity);

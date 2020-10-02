@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -52,8 +52,8 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
     /**
      * Constructor for UpdateDsTypeWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
      * @param dsManagement
@@ -61,10 +61,10 @@ public class UpdateDsTypeWindowController extends AbstractEntityWindowController
      * @param layout
      *            DsTypeWindowLayout
      */
-    public UpdateDsTypeWindowController(final UIConfiguration uiConfig,
+    public UpdateDsTypeWindowController(final CommonUiDependencies uiDependencies,
             final DistributionSetTypeManagement dsTypeManagement, final DistributionSetManagement dsManagement,
             final DsTypeWindowLayout layout) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.dsTypeManagement = dsTypeManagement;
         this.dsManagement = dsManagement;

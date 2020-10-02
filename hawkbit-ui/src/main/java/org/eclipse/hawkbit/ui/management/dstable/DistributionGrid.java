@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.DsManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
@@ -70,8 +70,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     /**
      * Constructor for DistributionGrid
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param distributionSetManagement
@@ -87,12 +87,12 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionGrid(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public DistributionGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
             final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(uiConfig, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
+        super(uiDependencies, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
 
         this.targetGridLayoutUiState = targetGridLayoutUiState;
         this.distributionGridLayoutUiState = distributionGridLayoutUiState;
@@ -106,13 +106,13 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         final Map<String, AssignmentSupport<?, ProxyDistributionSet>> sourceTargetAssignmentStrategies = new HashMap<>();
 
         final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
-                uiConfig, uiProperties, deploymentManagement);
+                uiDependencies, uiProperties, deploymentManagement);
         final TargetsToDistributionSetAssignmentSupport targetsToDsAssignment = new TargetsToDistributionSetAssignmentSupport(
-                uiConfig, assignmentController);
+                uiDependencies, assignmentController);
         final TargetTagsToDistributionSetAssignmentSupport targetTagsToDsAssignment = new TargetTagsToDistributionSetAssignmentSupport(
-                uiConfig, targetManagement, targetsToDsAssignment);
+                uiDependencies, targetManagement, targetsToDsAssignment);
         final DsTagsToDistributionSetAssignmentSupport dsTagsToDsAssignment = new DsTagsToDistributionSetAssignmentSupport(
-                uiConfig, distributionSetManagement);
+                uiDependencies, distributionSetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TABLE_ID, targetsToDsAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToDsAssignment);

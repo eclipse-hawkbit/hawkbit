@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -45,27 +45,27 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param smTypeFilterLayoutUiState
      *            SMTypeFilterLayoutUiState
      */
-    public SMTypeFilterLayout(final UIConfiguration uiConfig,
+    public SMTypeFilterLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView eventView) {
-        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(uiConfig, softwareModuleTypeManagement);
+        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(uiDependencies, softwareModuleTypeManagement);
 
-        this.smTypeFilterHeader = new SMTypeFilterHeader(uiConfig, smTypeWindowBuilder, smTypeFilterLayoutUiState,
+        this.smTypeFilterHeader = new SMTypeFilterHeader(uiDependencies, smTypeWindowBuilder, smTypeFilterLayoutUiState,
                 eventView);
-        this.smTypeFilterButtons = new SMTypeFilterButtons(uiConfig, softwareModuleTypeManagement, smTypeWindowBuilder,
+        this.smTypeFilterButtons = new SMTypeFilterButtons(uiDependencies, softwareModuleTypeManagement, smTypeWindowBuilder,
                 smTypeFilterLayoutUiState, eventView);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiConfig.getEventBus(),
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, eventView), smTypeFilterButtons::hideActionColumns,
                 smTypeFilterButtons::showEditColumn, smTypeFilterButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyType.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyType.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxySoftwareModule.class).build();
 

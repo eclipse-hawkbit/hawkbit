@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
@@ -26,13 +26,13 @@ public class SmTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
     /**
      * Constructor for SmTypeWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeManagement
      *            SoftwareModuleTypeManagement
      */
-    public SmTypeWindowBuilder(final UIConfiguration uiConfig, final SoftwareModuleTypeManagement smTypeManagement) {
-        super(uiConfig);
+    public SmTypeWindowBuilder(final CommonUiDependencies uiDependencies, final SoftwareModuleTypeManagement smTypeManagement) {
+        super(uiDependencies);
         this.smTypeManagement = smTypeManagement;
     }
 
@@ -49,7 +49,7 @@ public class SmTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(
-                new AddSmTypeWindowController(uiConfig, smTypeManagement, new SmTypeWindowLayout(uiConfig)));
+                new AddSmTypeWindowController(uiDependencies, smTypeManagement, new SmTypeWindowLayout(uiDependencies)));
 
     }
 
@@ -64,6 +64,6 @@ public class SmTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
     @Override
     public Window getWindowForUpdate(final ProxyType proxyType) {
         return getWindowForEntity(proxyType,
-                new UpdateSmTypeWindowController(uiConfig, smTypeManagement, new SmTypeWindowLayout(uiConfig)));
+                new UpdateSmTypeWindowController(uiDependencies, smTypeManagement, new SmTypeWindowLayout(uiDependencies)));
     }
 }

@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.artifacts.upload.UploadDropAreaLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
@@ -45,8 +45,8 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for ArtifactDetailsLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param artifactUploadState
      *            ArtifactUploadState
      * @param artifactDetailsGridLayoutUiState
@@ -58,15 +58,15 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
      * @param multipartConfigElement
      *            MultipartConfigElement
      */
-    public ArtifactDetailsGridLayout(final UIConfiguration uiConfig, final ArtifactUploadState artifactUploadState,
+    public ArtifactDetailsGridLayout(final CommonUiDependencies uiDependencies, final ArtifactUploadState artifactUploadState,
             final ArtifactDetailsGridLayoutUiState artifactDetailsGridLayoutUiState,
             final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareManagement,
             final MultipartConfigElement multipartConfigElement) {
-        this.artifactDetailsHeader = new ArtifactDetailsGridHeader(uiConfig, artifactDetailsGridLayoutUiState);
-        this.artifactDetailsGrid = new ArtifactDetailsGrid(uiConfig, artifactManagement);
+        this.artifactDetailsHeader = new ArtifactDetailsGridHeader(uiDependencies, artifactDetailsGridLayoutUiState);
+        this.artifactDetailsGrid = new ArtifactDetailsGrid(uiDependencies, artifactManagement);
 
-        if (uiConfig.getPermChecker().hasCreateRepositoryPermission()) {
-            this.uploadDropAreaLayout = new UploadDropAreaLayout(uiConfig, artifactUploadState, multipartConfigElement,
+        if (uiDependencies.getPermChecker().hasCreateRepositoryPermission()) {
+            this.uploadDropAreaLayout = new UploadDropAreaLayout(uiDependencies, artifactUploadState, multipartConfigElement,
                     softwareManagement, artifactManagement);
 
             buildLayout(artifactDetailsHeader, artifactDetailsGrid, uploadDropAreaLayout);
@@ -77,9 +77,9 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
         }
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.SM_LIST, EventView.UPLOAD);
-        this.selectionChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), masterLayoutView,
+        this.selectionChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
-        this.fileUploadChangedListener = new GenericEventListener<>(uiConfig.getEventBus(),
+        this.fileUploadChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.FILE_UPLOAD_CHANGED, this::onUploadChanged);
     }
 

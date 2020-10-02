@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -36,8 +36,8 @@ public abstract class AbstractUpdateTagWindowController extends AbstractTagWindo
     /**
      * Constructor for AbstractUpdateTagWindowController.
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            TagWindowLayout
      * @param parentType
@@ -46,9 +46,9 @@ public abstract class AbstractUpdateTagWindowController extends AbstractTagWindo
      *            i18n key to get the entity type info to be used in
      *            notifications
      */
-    public AbstractUpdateTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
+    public AbstractUpdateTagWindowController(final CommonUiDependencies uiDependencies, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType, final String keyForEntityTypeInNotifications) {
-        super(uiConfig, layout, parentType);
+        super(uiDependencies, layout, parentType);
 
         this.keyForEntityTypeInNotifications = keyForEntityTypeInNotifications;
     }

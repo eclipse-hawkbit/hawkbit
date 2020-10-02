@@ -56,7 +56,7 @@ public class AddRolloutWindowController extends AbstractEntityWindowController<P
      */
     public AddRolloutWindowController(final RolloutWindowDependencies dependencies,
             final AddRolloutWindowLayout layout) {
-        super(dependencies.getUiConfig());
+        super(dependencies.getuiDependencies());
 
         this.rolloutManagement = dependencies.getRolloutManagement();
         this.layout = layout;

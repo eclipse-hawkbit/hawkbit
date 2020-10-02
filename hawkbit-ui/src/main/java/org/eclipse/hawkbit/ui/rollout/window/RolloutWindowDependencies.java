@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -33,13 +33,13 @@ public final class RolloutWindowDependencies {
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final DistributionSetManagement distributionSetManagement;
     private final UiProperties uiProperties;
-    private final UIConfiguration uiConfig;
+    private final CommonUiDependencies uiDependencies;
 
     /**
      * Constructor for RolloutWindowDependencies
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param rolloutManagement
      *            RolloutManagement
      * @param targetManagement
@@ -55,12 +55,12 @@ public final class RolloutWindowDependencies {
      * @param distributionSetManagement
      *            DistributionSetManagement
      */
-    public RolloutWindowDependencies(final UIConfiguration uiConfig, final RolloutManagement rolloutManagement,
+    public RolloutWindowDependencies(final CommonUiDependencies uiDependencies, final RolloutManagement rolloutManagement,
             final TargetManagement targetManagement, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final DistributionSetManagement distributionSetManagement) {
-        this.uiConfig = uiConfig;
+        this.uiDependencies = uiDependencies;
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.quotaManagement = quotaManagement;
@@ -109,21 +109,21 @@ public final class RolloutWindowDependencies {
      * @return UI notification
      */
     public UINotification getUiNotification() {
-        return uiConfig.getUiNotification();
+        return uiDependencies.getUiNotification();
     }
 
     /**
      * @return Entity factory
      */
     public EntityFactory getEntityFactory() {
-        return uiConfig.getEntityFactory();
+        return uiDependencies.getEntityFactory();
     }
 
     /**
      * @return Vaadin message source
      */
     public VaadinMessageSource getI18n() {
-        return uiConfig.getI18n();
+        return uiDependencies.getI18n();
     }
 
     /**
@@ -137,7 +137,7 @@ public final class RolloutWindowDependencies {
      * @return UI event bus
      */
     public UIEventBus getEventBus() {
-        return uiConfig.getEventBus();
+        return uiDependencies.getEventBus();
     }
 
     /**
@@ -148,9 +148,9 @@ public final class RolloutWindowDependencies {
     }
 
     /**
-     * @return the uiConfig
+     * @return the uiDependencies
      */
-    public UIConfiguration getUiConfig() {
-        return uiConfig;
+    public CommonUiDependencies getuiDependencies() {
+        return uiDependencies;
     }
 }

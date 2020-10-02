@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.util.StringUtils;
 
@@ -30,8 +30,8 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     /**
      * Constructor for AddMetaDataWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param createMetaDataCallback
@@ -39,10 +39,10 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
      * @param duplicateCheckCallback
      *            Duplicate check callback
      */
-    public AddMetaDataWindowController(final UIConfiguration uiConfig, final MetaDataAddUpdateWindowLayout layout,
+    public AddMetaDataWindowController(final CommonUiDependencies uiDependencies, final MetaDataAddUpdateWindowLayout layout,
             final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.layout = layout;
 

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.tag;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyFilterButton;
 import org.eclipse.hawkbit.ui.components.ColorPickerComponent;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -38,15 +38,15 @@ public class TagWindowLayout<T extends ProxyFilterButton> extends AbstractEntity
     /**
      * Constructor for AbstractTagWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      */
-    public TagWindowLayout(final UIConfiguration uiConfig) {
+    public TagWindowLayout(final CommonUiDependencies uiDependencies) {
         super();
 
-        this.i18n = uiConfig.getI18n();
+        this.i18n = uiDependencies.getI18n();
 
-        this.tagComponentBuilder = new TagWindowLayoutComponentBuilder(i18n, uiConfig.getUiNotification());
+        this.tagComponentBuilder = new TagWindowLayoutComponentBuilder(i18n, uiDependencies.getUiNotification());
 
         this.tagName = tagComponentBuilder.createNameField(binder);
         this.tagDescription = tagComponentBuilder.createDescription(binder);

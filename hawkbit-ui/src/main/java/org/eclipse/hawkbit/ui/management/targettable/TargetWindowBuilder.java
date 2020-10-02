@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -29,16 +29,16 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
     /**
      * Constructor for TargetWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param view
      *            EventView
      */
-    public TargetWindowBuilder(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public TargetWindowBuilder(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
 
@@ -53,13 +53,13 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(
-                new AddTargetWindowController(uiConfig, targetManagement, new TargetWindowLayout(i18n), view));
+                new AddTargetWindowController(uiDependencies, targetManagement, new TargetWindowLayout(i18n), view));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTarget proxyTarget) {
         return getWindowForEntity(proxyTarget,
-                new UpdateTargetWindowController(uiConfig, targetManagement, new TargetWindowLayout(i18n)));
+                new UpdateTargetWindowController(uiDependencies, targetManagement, new TargetWindowLayout(i18n)));
     }
 }

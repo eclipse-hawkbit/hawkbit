@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.SoftwareModuleToProxyMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
@@ -43,8 +43,8 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smManagement
      *            SoftwareModuleManagement
      * @param layout
@@ -52,9 +52,9 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
      * @param view
      *            EventView
      */
-    public AddSmWindowController(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement,
+    public AddSmWindowController(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
             final SmWindowLayout layout, final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.smManagement = smManagement;
         this.layout = layout;

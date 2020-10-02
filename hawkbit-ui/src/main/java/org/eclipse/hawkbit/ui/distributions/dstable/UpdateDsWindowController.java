@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -38,16 +38,16 @@ public class UpdateDsWindowController
     /**
      * Constructor for UpdateDsWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      * @param layout
      *            DsWindowLayout
      */
-    public UpdateDsWindowController(final UIConfiguration uiConfig, final DistributionSetManagement dsManagement,
+    public UpdateDsWindowController(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement,
             final DsWindowLayout layout) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.dsManagement = dsManagement;
         this.layout = layout;

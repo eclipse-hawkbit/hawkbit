@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
@@ -47,12 +47,12 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     private final transient BulkUploadHeaderSupport bulkUploadHeaderSupport;
     private final transient DistributionSetFilterDropAreaSupport distributionSetFilterDropAreaSupport;
 
-    TargetGridHeader(final UIConfiguration uiConfig, final TargetWindowBuilder targetWindowBuilder,
+    TargetGridHeader(final CommonUiDependencies uiDependencies, final TargetWindowBuilder targetWindowBuilder,
             final BulkUploadWindowBuilder bulkUploadWindowBuilder,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState) {
-        super(uiConfig, targetTagFilterLayoutUiState, targetGridLayoutUiState, EventLayout.TARGET_TAG_FILTER,
+        super(uiDependencies, targetTagFilterLayoutUiState, targetGridLayoutUiState, EventLayout.TARGET_TAG_FILTER,
                 EventView.DEPLOYMENT);
 
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
@@ -73,7 +73,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
 
         // DistributionSetFilterDropArea is only available in TargetTableHeader
         this.distributionSetFilterDropAreaSupport = new DistributionSetFilterDropAreaSupport(i18n, eventBus,
-                uiConfig.getUiNotification(), targetGridLayoutUiState);
+                uiDependencies.getUiNotification(), targetGridLayoutUiState);
     }
 
     /**

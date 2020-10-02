@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -28,16 +28,16 @@ public class TargetDetailsHeader extends AbstractDetailsHeader<ProxyTarget> {
     /**
      * Constructor for TargetDetailsHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetWindowBuilder
      *            TargetWindowBuilder
      * @param targetMetaDataWindowBuilder
      *            TargetMetaDataWindowBuilder
      */
-    public TargetDetailsHeader(final UIConfiguration uiConfig, final TargetWindowBuilder targetWindowBuilder,
+    public TargetDetailsHeader(final CommonUiDependencies uiDependencies, final TargetWindowBuilder targetWindowBuilder,
             final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus(), uiConfig.getUiNotification());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(), uiDependencies.getUiNotification());
 
         this.targetWindowBuilder = targetWindowBuilder;
         this.targetMetaDataWindowBuilder = targetMetaDataWindowBuilder;

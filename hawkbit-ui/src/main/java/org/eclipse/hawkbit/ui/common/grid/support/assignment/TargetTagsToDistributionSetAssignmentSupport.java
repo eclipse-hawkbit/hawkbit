@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -30,17 +30,17 @@ public class TargetTagsToDistributionSetAssignmentSupport extends AssignmentSupp
     /**
      * Constructor for TargetTagsToDistributionSetAssignmentSupport
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param targetsToDistributionSetAssignmentSupport
      *            TargetsToDistributionSetAssignmentSupport
      */
-    public TargetTagsToDistributionSetAssignmentSupport(final UIConfiguration uiConfig,
+    public TargetTagsToDistributionSetAssignmentSupport(final CommonUiDependencies uiDependencies,
             final TargetManagement targetManagement,
             final TargetsToDistributionSetAssignmentSupport targetsToDistributionSetAssignmentSupport) {
-        super(uiConfig.getUiNotification(), uiConfig.getI18n());
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
         this.targetManagement = targetManagement;
         this.targetsToDistributionSetAssignmentSupport = targetsToDistributionSetAssignmentSupport;

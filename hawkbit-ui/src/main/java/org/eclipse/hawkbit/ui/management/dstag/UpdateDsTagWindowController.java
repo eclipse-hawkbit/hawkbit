@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.tag.AbstractUpdateTagWindowController;
@@ -27,8 +27,8 @@ public class UpdateDsTagWindowController extends AbstractUpdateTagWindowControll
     /**
      * Constructor for UpdateDsTagWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param entityFactory
      *            EntityFactory
      * @param eventBus
@@ -40,9 +40,9 @@ public class UpdateDsTagWindowController extends AbstractUpdateTagWindowControll
      * @param layout
      *            Tag window layout
      */
-    public UpdateDsTagWindowController(final UIConfiguration uiConfig,
+    public UpdateDsTagWindowController(final CommonUiDependencies uiDependencies,
             final DistributionSetTagManagement dsTagManagement, final TagWindowLayout<ProxyTag> layout) {
-        super(uiConfig, layout, ProxyDistributionSet.class, "caption.entity.distribution.tag");
+        super(uiDependencies, layout, ProxyDistributionSet.class, "caption.entity.distribution.tag");
 
         this.dsTagManagement = dsTagManagement;
     }

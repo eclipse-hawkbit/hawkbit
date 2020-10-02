@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.Arrays;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -40,9 +40,9 @@ public class RolloutGridHeader extends AbstractGridHeader {
     private final transient SearchHeaderSupport searchHeaderSupport;
     private final transient AddHeaderSupport addHeaderSupport;
 
-    RolloutGridHeader(final UIConfiguration uiConfig, final RolloutManagementUIState rolloutManagementUIState,
+    RolloutGridHeader(final CommonUiDependencies uiDependencies, final RolloutManagementUIState rolloutManagementUIState,
             final RolloutWindowBuilder windowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutWindowBuilder = windowBuilder;

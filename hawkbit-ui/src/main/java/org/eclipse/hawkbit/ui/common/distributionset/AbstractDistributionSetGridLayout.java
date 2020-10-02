@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.filters.DsFilterParams;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
@@ -36,8 +36,8 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
     /**
      * Constructor for AbstractDistributionSetGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param systemManagement
      *            SystemManagement
      * @param systemSecurityContext
@@ -51,16 +51,16 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      * @param eventView
      *            EventView
      */
-    public AbstractDistributionSetGridLayout(final UIConfiguration uiConfig, final SystemManagement systemManagement,
+    public AbstractDistributionSetGridLayout(final CommonUiDependencies uiDependencies, final SystemManagement systemManagement,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final EventView eventView) {
 
         this.eventView = eventView;
 
-        dsWindowBuilder = new DsWindowBuilder(uiConfig, systemManagement, systemSecurityContext, configManagement,
+        dsWindowBuilder = new DsWindowBuilder(uiDependencies, systemManagement, systemSecurityContext, configManagement,
                 distributionSetManagement, distributionSetTypeManagement, EventView.DEPLOYMENT);
-        dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(uiConfig, distributionSetManagement);
+        dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(uiDependencies, distributionSetManagement);
     }
 
     /**

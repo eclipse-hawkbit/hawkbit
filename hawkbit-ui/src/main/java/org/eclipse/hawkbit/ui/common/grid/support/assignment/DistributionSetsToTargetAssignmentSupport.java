@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
@@ -52,14 +52,14 @@ public class DistributionSetsToTargetAssignmentSupport
      * @param assignmentController
      *            DeploymentAssignmentWindowController
      */
-    public DistributionSetsToTargetAssignmentSupport(final UIConfiguration uiConfig,
+    public DistributionSetsToTargetAssignmentSupport(final CommonUiDependencies uiDependencies,
             final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
             final DeploymentAssignmentWindowController assignmentController) {
-        super(uiConfig.getUiNotification(), uiConfig.getI18n());
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
         this.systemSecurityContext = systemSecurityContext;
         this.configManagement = configManagement;
-        this.permChecker = uiConfig.getPermChecker();
+        this.permChecker = uiDependencies.getPermChecker();
         this.assignmentController = assignmentController;
     }
 

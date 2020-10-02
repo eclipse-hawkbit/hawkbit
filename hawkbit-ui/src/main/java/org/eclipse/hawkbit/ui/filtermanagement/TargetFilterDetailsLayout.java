@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -40,8 +40,8 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
     /**
      * TargetFilterDetailsLayout constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiProperties
      *            properties
      * @param rsqlValidationOracle
@@ -53,23 +53,23 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      * @param uiState
      *            to persist the user interaction
      */
-    public TargetFilterDetailsLayout(final UIConfiguration uiConfig, final UiProperties uiProperties,
+    public TargetFilterDetailsLayout(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
             final RsqlValidationOracle rsqlValidationOracle, final TargetManagement targetManagement,
             final TargetFilterQueryManagement targetFilterManagement, final TargetFilterDetailsLayoutUiState uiState) {
 
-        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(uiConfig, targetFilterManagement,
+        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(uiDependencies, targetFilterManagement,
                 uiProperties, rsqlValidationOracle, uiState);
-        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiConfig, targetManagement, uiState);
-        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiConfig.getI18n());
+        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetManagement, uiState);
+        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
 
         initGridDataUpdatedListener();
 
-        this.showFilterQueryFormListener = new ShowEntityFormLayoutListener<>(uiConfig.getEventBus(),
+        this.showFilterQueryFormListener = new ShowEntityFormLayoutListener<>(uiDependencies.getEventBus(),
                 ProxyTargetFilterQuery.class,
                 new EventLayoutViewAware(EventLayout.TARGET_FILTER_QUERY_FORM, EventView.TARGET_FILTER),
                 targetFilterDetailsGridHeader::showAddFilterLayout,
                 targetFilterDetailsGridHeader::showEditFilterLayout);
-        this.targetFilterListener = new FilterChangedListener<>(uiConfig.getEventBus(), ProxyTarget.class,
+        this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
                 new EventViewAware(EventView.TARGET_FILTER), targetFilterTargetGrid.getFilterSupport());
 
         buildLayout(targetFilterDetailsGridHeader, targetFilterTargetGrid, targetFilterCountMessageLabel);

@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -78,16 +78,16 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
 
-        final UIConfiguration uiConfig = new UIConfiguration(i18n, entityFactory, eventBus, uiNotification,
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
                 permChecker);
 
         if (permChecker.hasReadRepositoryPermission()) {
-            this.smTypeFilterLayout = new SMTypeFilterLayout(uiConfig, softwareModuleTypeManagement,
+            this.smTypeFilterLayout = new SMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
                     artifactUploadState.getSmTypeFilterLayoutUiState(), EventView.UPLOAD);
-            this.smGridLayout = new SoftwareModuleGridLayout(uiConfig, softwareModuleManagement,
+            this.smGridLayout = new SoftwareModuleGridLayout(uiDependencies, softwareModuleManagement,
                     softwareModuleTypeManagement, artifactUploadState.getSmTypeFilterLayoutUiState(),
                     artifactUploadState.getSmGridLayoutUiState());
-            this.artifactDetailsGridLayout = new ArtifactDetailsGridLayout(uiConfig, artifactUploadState,
+            this.artifactDetailsGridLayout = new ArtifactDetailsGridLayout(uiDependencies, artifactUploadState,
                     artifactUploadState.getArtifactDetailsGridLayoutUiState(), artifactManagement,
                     softwareModuleManagement, multipartConfigElement);
 

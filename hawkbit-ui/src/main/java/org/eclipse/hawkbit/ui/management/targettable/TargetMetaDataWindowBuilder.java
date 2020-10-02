@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractMetaDataWindowBuilder;
 
@@ -25,13 +25,13 @@ public class TargetMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<S
     /**
      * Constructor for TargetMetaDataWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetMetaDataWindowBuilder(final UIConfiguration uiConfig, final TargetManagement targetManagement) {
-        super(uiConfig);
+    public TargetMetaDataWindowBuilder(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement) {
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
     }
@@ -64,7 +64,7 @@ public class TargetMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<S
      */
     public Window getWindowForShowTargetMetaData(final String controllerId, final String name,
             final ProxyMetaData proxyMetaData) {
-        return getWindowForShowMetaData(new TargetMetaDataWindowLayout(uiConfig, targetManagement), controllerId, name,
+        return getWindowForShowMetaData(new TargetMetaDataWindowLayout(uiDependencies, targetManagement), controllerId, name,
                 proxyMetaData);
     }
 }

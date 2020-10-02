@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.SwFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.AssignedSoftwareModuleToProxyMapper;
@@ -73,8 +73,8 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
     /**
      * Constructor for SoftwareModuleGrid
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      * @param smGridLayoutUiState
@@ -84,14 +84,14 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
      * @param view
      *            EventView
      */
-    public SoftwareModuleGrid(final UIConfiguration uiConfig, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
+    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
             final GridLayoutUiState smGridLayoutUiState, final SoftwareModuleManagement softwareModuleManagement,
             final EventView view) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
         this.smGridLayoutUiState = smGridLayoutUiState;
-        this.notification = uiConfig.getUiNotification();
+        this.notification = uiDependencies.getUiNotification();
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleToProxyMapper = new SoftwareModuleToProxyMapper();
 

@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
@@ -36,18 +36,18 @@ public class ActionStatusGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for ActionStatusGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param deploymentManagement
      *            DeploymentManagement
      */
-    public ActionStatusGridLayout(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement) {
-        this.actionStatusGridHeader = new ActionStatusGridHeader(uiConfig.getI18n());
-        this.actionStatusGrid = new ActionStatusGrid(uiConfig, deploymentManagement);
+    public ActionStatusGridLayout(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+        this.actionStatusGridHeader = new ActionStatusGridHeader(uiDependencies.getI18n());
+        this.actionStatusGrid = new ActionStatusGrid(uiDependencies, deploymentManagement);
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.ACTION_HISTORY_LIST,
                 EventView.DEPLOYMENT);
-        this.selectionChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), masterLayoutView,
+        this.selectionChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
 
         buildLayout(actionStatusGridHeader, actionStatusGrid);

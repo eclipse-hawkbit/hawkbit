@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.Arrays;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -43,13 +43,13 @@ public class TargetFilterGridHeader extends AbstractGridHeader {
     /**
      * Constructor for TargetFilterHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiState
      *            TargetFilterGridLayoutUiState
      */
-    public TargetFilterGridHeader(final UIConfiguration uiConfig, final TargetFilterGridLayoutUiState uiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+    public TargetFilterGridHeader(final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.uiState = uiState;
 

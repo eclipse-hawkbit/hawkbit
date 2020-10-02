@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.tag;
 
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -27,16 +27,16 @@ public abstract class AbstractAddTagWindowController extends AbstractTagWindowCo
     /**
      * Constructor for AbstractDsTagWindowController.
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            TagWindowLayout
      * @param parentType
      *            parent type for publishing event
      */
-    public AbstractAddTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
+    public AbstractAddTagWindowController(final CommonUiDependencies uiDependencies, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType) {
-        super(uiConfig, layout, parentType);
+        super(uiDependencies, layout, parentType);
     }
 
     @Override

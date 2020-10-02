@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -42,24 +42,24 @@ public class ActionHistoryGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for ActionHistoryGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param deploymentManagement
      *            DeploymentManagement
      * @param actionHistoryGridLayoutUiState
      *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryGridLayout(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement,
+    public ActionHistoryGridLayout(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
-        this.actionHistoryHeader = new ActionHistoryGridHeader(uiConfig, actionHistoryGridLayoutUiState);
-        this.actionHistoryGrid = new ActionHistoryGrid(uiConfig, deploymentManagement, actionHistoryGridLayoutUiState);
+        this.actionHistoryHeader = new ActionHistoryGridHeader(uiDependencies, actionHistoryGridLayoutUiState);
+        this.actionHistoryGrid = new ActionHistoryGrid(uiDependencies, deploymentManagement, actionHistoryGridLayoutUiState);
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.TARGET_LIST,
                 EventView.DEPLOYMENT);
 
-        this.masterEntityChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), masterLayoutView,
+        this.masterEntityChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyAction.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyAction.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports()).parentEntityType(ProxyTarget.class)
                 .parentEntityIdProvider(this::getMasterEntityId).build();
 

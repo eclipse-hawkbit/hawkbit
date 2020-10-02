@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutGroup;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
@@ -36,9 +36,9 @@ public class RolloutGroupTargetGridHeader extends AbstractBreadcrumbGridHeader
 
     private final transient Consumer<String> setRolloutNameCallback;
 
-    RolloutGroupTargetGridHeader(final UIConfiguration uiConfig,
+    RolloutGroupTargetGridHeader(final CommonUiDependencies uiDependencies,
             final RolloutManagementUIState rolloutManagementUIState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
 

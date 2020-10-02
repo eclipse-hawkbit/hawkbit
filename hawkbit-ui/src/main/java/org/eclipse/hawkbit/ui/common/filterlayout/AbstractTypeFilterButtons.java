@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import java.util.Collection;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
@@ -40,16 +40,16 @@ public abstract class AbstractTypeFilterButtons extends AbstractFilterButtons<Pr
     /**
      * Constructor for AbstractTypeFilterButtons
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param typeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public AbstractTypeFilterButtons(final UIConfiguration uiConfig,
+    public AbstractTypeFilterButtons(final CommonUiDependencies uiDependencies,
             final TypeFilterLayoutUiState typeFilterLayoutUiState) {
-        super(uiConfig.getEventBus(), uiConfig.getI18n(), uiConfig.getUiNotification(), uiConfig.getPermChecker());
+        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(), uiDependencies.getPermChecker());
 
-        this.uiNotification = uiConfig.getUiNotification();
+        this.uiNotification = uiDependencies.getUiNotification();
         this.typeFilterLayoutUiState = typeFilterLayoutUiState;
         this.typeFilterButtonClick = new TypeFilterButtonClick(this::onFilterChanged);
     }

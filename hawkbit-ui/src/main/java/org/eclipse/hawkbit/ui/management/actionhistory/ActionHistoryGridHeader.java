@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -34,14 +34,14 @@ public class ActionHistoryGridHeader extends AbstractMasterAwareGridHeader<Proxy
     /**
      * Constructor for ActionHistoryGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param actionHistoryGridLayoutUiState
      *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryGridHeader(final UIConfiguration uiConfig,
+    public ActionHistoryGridHeader(final CommonUiDependencies uiDependencies,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.actionHistoryGridLayoutUiState = actionHistoryGridLayoutUiState;
 

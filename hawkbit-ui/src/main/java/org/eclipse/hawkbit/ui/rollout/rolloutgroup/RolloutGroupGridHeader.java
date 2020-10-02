@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.rolloutgroup;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -30,8 +30,8 @@ public class RolloutGroupGridHeader extends AbstractBreadcrumbGridHeader
 
     private final RolloutManagementUIState rolloutManagementUIState;
 
-    RolloutGroupGridHeader(final UIConfiguration uiConfig, final RolloutManagementUIState rolloutManagementUIState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+    RolloutGroupGridHeader(final CommonUiDependencies uiDependencies, final RolloutManagementUIState rolloutManagementUIState) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
 

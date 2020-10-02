@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -49,8 +49,8 @@ public class RolloutGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for RolloutGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param rolloutManagementUIState
      *            RolloutManagementUIState
      * @param rolloutManagement
@@ -72,26 +72,26 @@ public class RolloutGridLayout extends AbstractGridComponentLayout {
      * @param systemSecurityContext
      *            SystemSecurityContext
      */
-    public RolloutGridLayout(final UIConfiguration uiConfig, final RolloutManagementUIState rolloutManagementUIState,
+    public RolloutGridLayout(final CommonUiDependencies uiDependencies, final RolloutManagementUIState rolloutManagementUIState,
             final RolloutManagement rolloutManagement, final TargetManagement targetManagement,
             final UiProperties uiProperties, final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final TenantConfigurationManagement tenantConfigManagement,
             final DistributionSetManagement distributionSetManagement,
             final SystemSecurityContext systemSecurityContext) {
-        final RolloutWindowDependencies rolloutWindowDependecies = new RolloutWindowDependencies(uiConfig,
+        final RolloutWindowDependencies rolloutWindowDependecies = new RolloutWindowDependencies(uiDependencies,
                 rolloutManagement, targetManagement, uiProperties, targetFilterQueryManagement, rolloutGroupManagement,
                 quotaManagement, distributionSetManagement);
 
         final RolloutWindowBuilder rolloutWindowBuilder = new RolloutWindowBuilder(rolloutWindowDependecies);
 
-        this.rolloutListHeader = new RolloutGridHeader(uiConfig, rolloutManagementUIState, rolloutWindowBuilder);
-        this.rolloutListGrid = new RolloutGrid(uiConfig, rolloutManagement, rolloutGroupManagement,
+        this.rolloutListHeader = new RolloutGridHeader(uiDependencies, rolloutManagementUIState, rolloutWindowBuilder);
+        this.rolloutListGrid = new RolloutGrid(uiDependencies, rolloutManagement, rolloutGroupManagement,
                 rolloutManagementUIState, tenantConfigManagement, rolloutWindowBuilder, systemSecurityContext);
 
-        this.rolloutFilterListener = new FilterChangedListener<>(uiConfig.getEventBus(), ProxyRollout.class,
+        this.rolloutFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyRollout.class,
                 new EventViewAware(EventView.ROLLOUT), rolloutListGrid.getFilterSupport());
-        this.rolloutModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyRollout.class)
+        this.rolloutModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyRollout.class)
                 .entityModifiedAwareSupports(getRolloutModifiedAwareSupports()).build();
 
         buildLayout(rolloutListHeader, rolloutListGrid);

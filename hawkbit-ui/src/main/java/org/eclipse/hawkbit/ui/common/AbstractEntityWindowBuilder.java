@@ -23,12 +23,12 @@ import com.vaadin.ui.Window;
  *            Generic type entity
  */
 public abstract class AbstractEntityWindowBuilder<T> {
-    protected final UIConfiguration uiConfig;
+    protected final CommonUiDependencies uiDependencies;
     protected final VaadinMessageSource i18n;
 
-    protected AbstractEntityWindowBuilder(final UIConfiguration uiConfig) {
-        this.uiConfig = uiConfig;
-        this.i18n = uiConfig.getI18n();
+    protected AbstractEntityWindowBuilder(final CommonUiDependencies uiDependencies) {
+        this.uiDependencies = uiDependencies;
+        this.i18n = uiDependencies.getI18n();
     }
 
     protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?> controller) {
@@ -59,7 +59,7 @@ public abstract class AbstractEntityWindowBuilder<T> {
     protected CommonDialogWindow createWindow(final Component content,
             final SaveDialogCloseListener saveDialogCloseListener) {
         return new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW).id(getWindowId()).content(content)
-                .i18n(uiConfig.getI18n()).helpLink(getHelpLink()).saveDialogCloseListener(saveDialogCloseListener)
+                .i18n(uiDependencies.getI18n()).helpLink(getHelpLink()).saveDialogCloseListener(saveDialogCloseListener)
                 .buildCommonDialogWindow();
     }
 

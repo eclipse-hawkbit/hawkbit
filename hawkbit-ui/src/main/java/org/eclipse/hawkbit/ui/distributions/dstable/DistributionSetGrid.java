@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.filters.DsDistributionsFilterParams;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetDistributionsStateDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -43,8 +43,8 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
     /**
      * Constructor for DistributionSetGrid
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param dsManagement
@@ -60,12 +60,12 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
      * @param distributionSetGridLayoutUiState
      *            GridLayoutUiState
      */
-    public DistributionSetGrid(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public DistributionSetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DistributionSetManagement dsManagement, final SoftwareModuleManagement smManagement,
             final DistributionSetTypeManagement dsTypeManagement, final SoftwareModuleTypeManagement smTypeManagement,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState,
             final GridLayoutUiState distributionSetGridLayoutUiState) {
-        super(uiConfig, dsManagement, distributionSetGridLayoutUiState, EventView.DISTRIBUTIONS);
+        super(uiDependencies, dsManagement, distributionSetGridLayoutUiState, EventView.DISTRIBUTIONS);
 
         this.dSTypeFilterLayoutUiState = dSTypeFilterLayoutUiState;
 

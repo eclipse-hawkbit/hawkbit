@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.common.distributionset;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowLayout;
@@ -26,13 +26,13 @@ public class DsMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<Long>
     /**
      * Constructor for DsMetaDataWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      */
-    public DsMetaDataWindowBuilder(final UIConfiguration uiConfig, final DistributionSetManagement dsManagement) {
-        super(uiConfig);
+    public DsMetaDataWindowBuilder(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement) {
+        super(uiDependencies);
 
         this.dsManagement = dsManagement;
     }
@@ -64,6 +64,6 @@ public class DsMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<Long>
      * @return Dialog window
      */
     public Window getWindowForShowDsMetaData(final Long dsId, final String name, final ProxyMetaData proxyMetaData) {
-        return getWindowForShowMetaData(new DsMetaDataWindowLayout(uiConfig, dsManagement), dsId, name, proxyMetaData);
+        return getWindowForShowMetaData(new DsMetaDataWindowLayout(uiDependencies, dsManagement), dsId, name, proxyMetaData);
     }
 }

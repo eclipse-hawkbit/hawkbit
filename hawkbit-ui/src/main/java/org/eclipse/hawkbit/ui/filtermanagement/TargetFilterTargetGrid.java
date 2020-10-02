@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
@@ -35,9 +35,9 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
     private final TargetFilterDetailsLayoutUiState uiState;
 
-    TargetFilterTargetGrid(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    TargetFilterTargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetFilterDetailsLayoutUiState uiState) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus());
 
         this.uiState = uiState;
 

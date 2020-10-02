@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutGroup;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -43,24 +43,24 @@ public class RolloutGroupGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for RolloutGroupsListView
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param rolloutGroupManagement
      *            RolloutGroupManagement
      * @param rolloutManagementUIState
      *            UIState
      */
-    public RolloutGroupGridLayout(final UIConfiguration uiConfig, final RolloutGroupManagement rolloutGroupManagement,
+    public RolloutGroupGridLayout(final CommonUiDependencies uiDependencies, final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagementUIState rolloutManagementUIState) {
-        this.rolloutGroupsListHeader = new RolloutGroupGridHeader(uiConfig, rolloutManagementUIState);
-        this.rolloutGroupListGrid = new RolloutGroupGrid(uiConfig, rolloutGroupManagement, rolloutManagementUIState);
+        this.rolloutGroupsListHeader = new RolloutGroupGridHeader(uiDependencies, rolloutManagementUIState);
+        this.rolloutGroupListGrid = new RolloutGroupGrid(uiDependencies, rolloutGroupManagement, rolloutManagementUIState);
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.ROLLOUT_LIST,
                 EventView.ROLLOUT);
 
-        this.masterEntityChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), masterLayoutView,
+        this.masterEntityChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(),
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
                 ProxyRolloutGroup.class).entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                         .parentEntityType(ProxyRollout.class).parentEntityIdProvider(this::getMasterEntityId).build();
 

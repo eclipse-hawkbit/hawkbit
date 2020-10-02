@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.distributionset;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -28,16 +28,16 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     /**
      * Constructor for DistributionSetDetailsHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsWindowBuilder
      *            DsWindowBuilder
      * @param dsMetaDataWindowBuilder
      *            DsMetaDataWindowBuilder
      */
-    public DistributionSetDetailsHeader(final UIConfiguration uiConfig, final DsWindowBuilder dsWindowBuilder,
+    public DistributionSetDetailsHeader(final CommonUiDependencies uiDependencies, final DsWindowBuilder dsWindowBuilder,
             final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus(), uiConfig.getUiNotification());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(), uiDependencies.getUiNotification());
 
         this.dsWindowBuilder = dsWindowBuilder;
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;

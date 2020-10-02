@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -27,13 +27,13 @@ public class TargetTagWindowBuilder extends AbstractEntityWindowBuilder<ProxyTag
     /**
      * Constructor for TargetTagWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagManagement
      *            TargetTagManagement
      */
-    public TargetTagWindowBuilder(final UIConfiguration uiConfig, final TargetTagManagement targetTagManagement) {
-        super(uiConfig);
+    public TargetTagWindowBuilder(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement) {
+        super(uiDependencies);
 
         this.targetTagManagement = targetTagManagement;
     }
@@ -45,14 +45,14 @@ public class TargetTagWindowBuilder extends AbstractEntityWindowBuilder<ProxyTag
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddTargetTagWindowController(uiConfig, targetTagManagement,
-                new TagWindowLayout<ProxyTag>(uiConfig)));
+        return getWindowForNewEntity(new AddTargetTagWindowController(uiDependencies, targetTagManagement,
+                new TagWindowLayout<ProxyTag>(uiDependencies)));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTag proxyTag) {
-        return getWindowForEntity(proxyTag, new UpdateTargetTagWindowController(uiConfig, targetTagManagement,
-                new TagWindowLayout<ProxyTag>(uiConfig)));
+        return getWindowForEntity(proxyTag, new UpdateTargetTagWindowController(uiDependencies, targetTagManagement,
+                new TagWindowLayout<ProxyTag>(uiDependencies)));
     }
 }

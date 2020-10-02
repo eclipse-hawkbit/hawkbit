@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -49,8 +49,8 @@ public class DistributionTagLayout extends AbstractFilterLayout {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetTagManagement
      *            DistributionSetTagManagement
      * @param distributionSetManagement
@@ -58,22 +58,22 @@ public class DistributionTagLayout extends AbstractFilterLayout {
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionTagLayout(final UIConfiguration uiConfig,
+    public DistributionTagLayout(final CommonUiDependencies uiDependencies,
             final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(uiConfig, distributionSetTagManagement);
+        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(uiDependencies, distributionSetTagManagement);
 
-        this.distributionTagFilterHeader = new DistributionTagFilterHeader(uiConfig, dsTagWindowBuilder,
+        this.distributionTagFilterHeader = new DistributionTagFilterHeader(uiDependencies, dsTagWindowBuilder,
                 distributionTagLayoutUiState);
-        this.distributionTagButtons = new DistributionTagButtons(uiConfig, distributionSetTagManagement,
+        this.distributionTagButtons = new DistributionTagButtons(uiDependencies, distributionSetTagManagement,
                 distributionSetManagement, dsTagWindowBuilder, distributionTagLayoutUiState);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiConfig.getEventBus(),
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_TAG_FILTER, EventView.DEPLOYMENT),
                 distributionTagButtons::hideActionColumns, distributionTagButtons::showEditColumn,
                 distributionTagButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyTag.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxyDistributionSet.class).build();
 

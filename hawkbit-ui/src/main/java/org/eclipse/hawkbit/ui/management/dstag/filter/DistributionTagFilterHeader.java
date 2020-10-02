@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.dstag.filter;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -32,16 +32,16 @@ public class DistributionTagFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for UIEventBus
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTagWindowBuilder
      *            DsTagWindowBuilder
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionTagFilterHeader(final UIConfiguration uiConfig, final DsTagWindowBuilder dsTagWindowBuilder,
+    public DistributionTagFilterHeader(final CommonUiDependencies uiDependencies, final DsTagWindowBuilder dsTagWindowBuilder,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.distributionTagLayoutUiState = distributionTagLayoutUiState;
         this.dsTagWindowBuilder = dsTagWindowBuilder;

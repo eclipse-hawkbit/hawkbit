@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.tag;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
@@ -23,9 +23,9 @@ public abstract class AbstractTagWindowController extends AbstractEntityWindowCo
     protected final Class<? extends ProxyIdentifiableEntity> parentType;
     protected final TagWindowLayout<ProxyTag> layout;
 
-    AbstractTagWindowController(final UIConfiguration uiConfig, final TagWindowLayout<ProxyTag> layout,
+    AbstractTagWindowController(final CommonUiDependencies uiDependencies, final TagWindowLayout<ProxyTag> layout,
             final Class<? extends ProxyIdentifiableEntity> parentType) {
-        super(uiConfig);
+        super(uiDependencies);
         this.layout = layout;
         this.parentType = parentType;
     }

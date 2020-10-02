@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
@@ -84,11 +84,11 @@ public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
 
     private final transient MasterEntitySupport<ProxyTarget> masterEntitySupport;
 
-    ActionHistoryGrid(final UIConfiguration uiConfig, final DeploymentManagement deploymentManagement,
+    ActionHistoryGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.notification = uiConfig.getUiNotification();
+        this.notification = uiDependencies.getUiNotification();
         this.deploymentManagement = deploymentManagement;
         this.actionToProxyActionMapper = new ActionToProxyActionMapper();
 

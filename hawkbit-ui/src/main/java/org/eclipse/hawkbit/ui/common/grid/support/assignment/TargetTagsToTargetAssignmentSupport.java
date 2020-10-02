@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -27,27 +27,27 @@ import org.eclipse.hawkbit.ui.common.event.EventTopics;
  */
 public class TargetTagsToTargetAssignmentSupport extends TagsAssignmentSupport<ProxyTarget, Target> {
     private final TargetManagement targetManagement;
-    private final UIConfiguration uiConfig;
+    private final CommonUiDependencies uiDependencies;
 
     /**
      * Constructor for TargetTagsToTargetAssignmentSupport
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetTagsToTargetAssignmentSupport(final UIConfiguration uiConfig,
+    public TargetTagsToTargetAssignmentSupport(final CommonUiDependencies uiDependencies,
             final TargetManagement targetManagement) {
-        super(uiConfig);
-        this.uiConfig = uiConfig;
+        super(uiDependencies);
+        this.uiDependencies = uiDependencies;
 
         this.targetManagement = targetManagement;
     }
 
     @Override
     public List<String> getMissingPermissionsForDrop() {
-        return uiConfig.getPermChecker().hasUpdateTargetPermission() ? Collections.emptyList()
+        return uiDependencies.getPermChecker().hasUpdateTargetPermission() ? Collections.emptyList()
                 : Collections.singletonList(SpPermission.UPDATE_TARGET);
     }
 
@@ -63,7 +63,7 @@ public class TargetTagsToTargetAssignmentSupport extends TagsAssignmentSupport<P
 
     @Override
     protected void publishTagAssignmentEvent(final ProxyTarget targetItem) {
-        uiConfig.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        uiDependencies.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class, targetItem.getId()));
     }
 }

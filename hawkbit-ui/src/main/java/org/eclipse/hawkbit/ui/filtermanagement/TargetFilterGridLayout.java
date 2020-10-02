@@ -14,7 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -40,8 +40,8 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
     /**
      * TargetFilterGridLayout constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetFilterQueryManagement
      *            management to CRUD target filters
      * @param targetManagement
@@ -51,23 +51,23 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
      * @param filterManagementUIState
      *            to persist the user interaction
      */
-    public TargetFilterGridLayout(final UIConfiguration uiConfig,
+    public TargetFilterGridLayout(final CommonUiDependencies uiDependencies,
             final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement,
             final FilterManagementUIState filterManagementUIState) {
-        this.targetFilterGridHeader = new TargetFilterGridHeader(uiConfig,
+        this.targetFilterGridHeader = new TargetFilterGridHeader(uiDependencies,
                 filterManagementUIState.getGridLayoutUiState());
 
-        final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder = new AutoAssignmentWindowBuilder(uiConfig,
+        final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder = new AutoAssignmentWindowBuilder(uiDependencies,
                 targetManagement, targetFilterQueryManagement, distributionSetManagement);
 
-        this.targetFilterGrid = new TargetFilterGrid(uiConfig, filterManagementUIState.getGridLayoutUiState(),
+        this.targetFilterGrid = new TargetFilterGrid(uiDependencies, filterManagementUIState.getGridLayoutUiState(),
                 targetFilterQueryManagement, autoAssignmentWindowBuilder);
 
-        this.targetQueryFilterListener = new FilterChangedListener<>(uiConfig.getEventBus(),
+        this.targetQueryFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(),
                 ProxyTargetFilterQuery.class, new EventViewAware(EventView.TARGET_FILTER),
                 targetFilterGrid.getFilterSupport());
-        this.filterQueryModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(),
+        this.filterQueryModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
                 ProxyTargetFilterQuery.class).entityModifiedAwareSupports(getFilterQueryModifiedAwareSupports())
                         .build();
 

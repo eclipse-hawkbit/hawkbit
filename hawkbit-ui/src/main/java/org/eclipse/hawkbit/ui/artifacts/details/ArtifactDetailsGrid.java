@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.ArtifactToProxyArtifactMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.ArtifactDataProvider;
@@ -63,15 +63,15 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param artifactManagement
      *            ArtifactManagement
      */
-    public ArtifactDetailsGrid(final UIConfiguration uiConfig, final ArtifactManagement artifactManagement) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+    public ArtifactDetailsGrid(final CommonUiDependencies uiDependencies, final ArtifactManagement artifactManagement) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.notification = uiConfig.getUiNotification();
+        this.notification = uiDependencies.getUiNotification();
         this.artifactManagement = artifactManagement;
 
         this.artifactDeleteSupport = new DeleteSupport<>(this, i18n, notification, "artifact.details.header",

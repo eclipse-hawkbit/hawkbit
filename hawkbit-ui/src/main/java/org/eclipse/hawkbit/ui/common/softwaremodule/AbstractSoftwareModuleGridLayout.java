@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.ui.artifacts.smtable.SmMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGrid;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridHeader;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.TopicEventListener;
@@ -36,8 +36,8 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
     /**
      * Constructor for AbstractSoftwareModuleGridLayout.
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
@@ -45,14 +45,14 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
      * @param eventView
      *            EventView
      */
-    public AbstractSoftwareModuleGridLayout(final UIConfiguration uiConfig,
+    public AbstractSoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EventView eventView) {
 
         this.eventView = eventView;
-        smWindowBuilder = new SmWindowBuilder(uiConfig, softwareModuleManagement, softwareModuleTypeManagement,
+        smWindowBuilder = new SmWindowBuilder(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement,
                 eventView);
-        smMetaDataWindowBuilder = new SmMetaDataWindowBuilder(uiConfig, softwareModuleManagement);
+        smMetaDataWindowBuilder = new SmMetaDataWindowBuilder(uiDependencies, softwareModuleManagement);
 
     }
 

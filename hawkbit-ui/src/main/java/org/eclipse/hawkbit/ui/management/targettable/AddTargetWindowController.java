@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
@@ -37,8 +37,8 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
     /**
      * Constructor for AddTargetWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param layout
@@ -46,9 +46,9 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
      * @param view
      *            EventView
      */
-    public AddTargetWindowController(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public AddTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetWindowLayout layout, final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;

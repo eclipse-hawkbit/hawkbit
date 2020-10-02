@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -39,16 +39,16 @@ public class TargetsToTagAssignmentSupport extends ToTagAssignmentSupport<ProxyT
     /**
      * Constructor for TargetsToTagAssignmentSupport
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetsToTagAssignmentSupport(final UIConfiguration uiConfig, final TargetManagement targetManagement) {
-        super(uiConfig.getUiNotification(), uiConfig.getI18n());
+    public TargetsToTagAssignmentSupport(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement) {
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
-        this.eventBus = uiConfig.getEventBus();
-        this.permChecker = uiConfig.getPermChecker();
+        this.eventBus = uiDependencies.getEventBus();
+        this.permChecker = uiDependencies.getPermChecker();
         this.targetManagement = targetManagement;
     }
 

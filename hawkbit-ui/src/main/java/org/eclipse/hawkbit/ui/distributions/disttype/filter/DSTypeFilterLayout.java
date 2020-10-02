@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -47,8 +47,8 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param distributionSetTypeManagement
@@ -60,23 +60,23 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
      * @param dSTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public DSTypeFilterLayout(final UIConfiguration uiConfig,
+    public DSTypeFilterLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final DistributionSetManagement distributionSetManagement, final SystemManagement systemManagement,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
-        final DsTypeWindowBuilder dsTypeWindowBuilder = new DsTypeWindowBuilder(uiConfig, distributionSetTypeManagement,
+        final DsTypeWindowBuilder dsTypeWindowBuilder = new DsTypeWindowBuilder(uiDependencies, distributionSetTypeManagement,
                 distributionSetManagement, softwareModuleTypeManagement);
 
-        this.dsTypeFilterHeader = new DSTypeFilterHeader(uiConfig, dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
-        this.dSTypeFilterButtons = new DSTypeFilterButtons(uiConfig, distributionSetTypeManagement, systemManagement,
+        this.dsTypeFilterHeader = new DSTypeFilterHeader(uiDependencies, dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
+        this.dSTypeFilterButtons = new DSTypeFilterButtons(uiDependencies, distributionSetTypeManagement, systemManagement,
                 dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiConfig.getEventBus(),
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_TYPE_FILTER, EventView.DISTRIBUTIONS),
                 dSTypeFilterButtons::hideActionColumns, dSTypeFilterButtons::showEditColumn,
                 dSTypeFilterButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxyType.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyType.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxyDistributionSet.class).build();
 

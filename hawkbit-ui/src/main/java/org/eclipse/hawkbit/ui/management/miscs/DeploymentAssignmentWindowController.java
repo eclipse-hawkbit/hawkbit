@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAssignmentWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -57,18 +57,18 @@ public class DeploymentAssignmentWindowController {
     /**
      * Constructor for DeploymentAssignmentWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiProperties
      *            UiProperties
      * @param deploymentManagement
      *            DeploymentManagement
      */
-    public DeploymentAssignmentWindowController(final UIConfiguration uiConfig, final UiProperties uiProperties,
+    public DeploymentAssignmentWindowController(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
             final DeploymentManagement deploymentManagement) {
-        this.i18n = uiConfig.getI18n();
-        this.eventBus = uiConfig.getEventBus();
-        this.notification = uiConfig.getUiNotification();
+        this.i18n = uiDependencies.getI18n();
+        this.eventBus = uiDependencies.getEventBus();
+        this.notification = uiDependencies.getUiNotification();
         this.deploymentManagement = deploymentManagement;
 
         this.assignmentWindowLayout = new AssignmentWindowLayout(i18n, uiProperties);

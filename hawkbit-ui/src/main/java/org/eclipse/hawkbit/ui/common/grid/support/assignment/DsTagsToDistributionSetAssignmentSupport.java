@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
@@ -28,27 +28,27 @@ import org.eclipse.hawkbit.ui.common.event.EventTopics;
 public class DsTagsToDistributionSetAssignmentSupport
         extends TagsAssignmentSupport<ProxyDistributionSet, DistributionSet> {
     private final DistributionSetManagement distributionSetManagement;
-    private final UIConfiguration uiConfig;
+    private final CommonUiDependencies uiDependencies;
 
     /**
      * Constructor for DsTagsToDistributionSetAssignmentSupport
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetManagement
      *            DistributionSetManagement
      */
-    public DsTagsToDistributionSetAssignmentSupport(final UIConfiguration uiConfig,
+    public DsTagsToDistributionSetAssignmentSupport(final CommonUiDependencies uiDependencies,
             final DistributionSetManagement distributionSetManagement) {
-        super(uiConfig);
-        this.uiConfig = uiConfig;
+        super(uiDependencies);
+        this.uiDependencies = uiDependencies;
 
         this.distributionSetManagement = distributionSetManagement;
     }
 
     @Override
     public List<String> getMissingPermissionsForDrop() {
-        return uiConfig.getPermChecker().hasUpdateRepositoryPermission() ? Collections.emptyList()
+        return uiDependencies.getPermChecker().hasUpdateRepositoryPermission() ? Collections.emptyList()
                 : Collections.singletonList(SpPermission.UPDATE_REPOSITORY);
     }
 
@@ -65,7 +65,7 @@ public class DsTagsToDistributionSetAssignmentSupport
 
     @Override
     protected void publishTagAssignmentEvent(final ProxyDistributionSet targetItem) {
-        uiConfig.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        uiDependencies.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class, targetItem.getId()));
 
     }

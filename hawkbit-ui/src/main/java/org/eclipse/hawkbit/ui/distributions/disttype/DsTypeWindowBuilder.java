@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
@@ -30,8 +30,8 @@ public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
     /**
      * Constructor for DsTypeWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
      * @param dsManagement
@@ -39,9 +39,9 @@ public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
      * @param smTypeManagement
      *            SoftwareModuleTypeManagement
      */
-    public DsTypeWindowBuilder(final UIConfiguration uiConfig, final DistributionSetTypeManagement dsTypeManagement,
+    public DsTypeWindowBuilder(final CommonUiDependencies uiDependencies, final DistributionSetTypeManagement dsTypeManagement,
             final DistributionSetManagement dsManagement, final SoftwareModuleTypeManagement smTypeManagement) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.dsTypeManagement = dsTypeManagement;
         this.dsManagement = dsManagement;
@@ -55,14 +55,14 @@ public class DsTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> 
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddDsTypeWindowController(uiConfig, dsTypeManagement,
-                new DsTypeWindowLayout(uiConfig, smTypeManagement)));
+        return getWindowForNewEntity(new AddDsTypeWindowController(uiDependencies, dsTypeManagement,
+                new DsTypeWindowLayout(uiDependencies, smTypeManagement)));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyType proxyType) {
-        return getWindowForEntity(proxyType, new UpdateDsTypeWindowController(uiConfig, dsTypeManagement, dsManagement,
-                new DsTypeWindowLayout(uiConfig, smTypeManagement)));
+        return getWindowForEntity(proxyType, new UpdateDsTypeWindowController(uiDependencies, dsTypeManagement, dsManagement,
+                new DsTypeWindowLayout(uiDependencies, smTypeManagement)));
     }
 }

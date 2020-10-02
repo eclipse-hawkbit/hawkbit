@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
@@ -40,8 +40,8 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
     /**
      * Constructor for AddDsWindowController
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param systemManagement
      *            SystemManagement
      * @param dsManagement
@@ -51,9 +51,9 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
      * @param view
      *            EventView
      */
-    public AddDsWindowController(final UIConfiguration uiConfig, final SystemManagement systemManagement,
+    public AddDsWindowController(final CommonUiDependencies uiDependencies, final SystemManagement systemManagement,
             final DistributionSetManagement dsManagement, final DsWindowLayout layout, final EventView view) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.systemManagement = systemManagement;
         this.dsManagement = dsManagement;

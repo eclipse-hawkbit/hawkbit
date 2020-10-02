@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
@@ -59,8 +59,8 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
     /**
      * Creates a new {@link UploadDropAreaLayout} instance.
      *
-     * @param uiConfig
-     *            the {@link UIConfiguration}
+     * @param uiDependencies
+     *            the {@link CommonUiDependencies}
      * @param artifactUploadState
      *            the {@link ArtifactUploadState} for state information
      * @param multipartConfigElement
@@ -72,17 +72,17 @@ public class UploadDropAreaLayout extends CustomComponent implements MasterEntit
      *            the {@link ArtifactManagement} for storing the uploaded
      *            artifacts
      */
-    public UploadDropAreaLayout(final UIConfiguration uiConfig, final ArtifactUploadState artifactUploadState,
+    public UploadDropAreaLayout(final CommonUiDependencies uiDependencies, final ArtifactUploadState artifactUploadState,
             final MultipartConfigElement multipartConfigElement, final SoftwareModuleManagement softwareManagement,
             final ArtifactManagement artifactManagement) {
-        this.i18n = uiConfig.getI18n();
-        this.uiNotification = uiConfig.getUiNotification();
+        this.i18n = uiDependencies.getI18n();
+        this.uiNotification = uiDependencies.getUiNotification();
         this.artifactUploadState = artifactUploadState;
         this.multipartConfigElement = multipartConfigElement;
         this.softwareManagement = softwareManagement;
         this.artifactManagement = artifactManagement;
 
-        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, uiConfig.getEventBus(), artifactUploadState,
+        this.uploadButtonLayout = new UploadProgressButtonLayout(i18n, uiDependencies.getEventBus(), artifactUploadState,
                 multipartConfigElement, artifactManagement, softwareManagement, uploadLock);
 
         buildLayout();

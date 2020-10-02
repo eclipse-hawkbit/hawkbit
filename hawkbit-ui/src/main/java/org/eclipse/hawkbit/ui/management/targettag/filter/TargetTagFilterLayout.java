@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.TargetFilterTabChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
@@ -35,8 +35,8 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param managementUIState
      *            ManagementUIState
      * @param targetFilterQueryManagement
@@ -48,18 +48,18 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
      * @param targetTagFilterLayoutUiState
      *            TargetTagFilterLayoutUiState
      */
-    public TargetTagFilterLayout(final UIConfiguration uiConfig, final ManagementUIState managementUIState,
+    public TargetTagFilterLayout(final CommonUiDependencies uiDependencies, final ManagementUIState managementUIState,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
-        final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(uiConfig, targetTagManagement);
+        final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(uiDependencies, targetTagManagement);
 
-        this.targetTagFilterHeader = new TargetTagFilterHeader(uiConfig, targetTagFilterLayoutUiState,
+        this.targetTagFilterHeader = new TargetTagFilterHeader(uiDependencies, targetTagFilterLayoutUiState,
                 targetTagWindowBuilder);
-        this.multipleTargetFilter = new MultipleTargetFilter(uiConfig, targetFilterQueryManagement, targetTagManagement,
+        this.multipleTargetFilter = new MultipleTargetFilter(uiDependencies, targetFilterQueryManagement, targetTagManagement,
                 targetManagement, targetTagFilterLayoutUiState, targetTagWindowBuilder);
 
-        this.filterTabChangedListener = new GenericEventListener<>(uiConfig.getEventBus(),
+        this.filterTabChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);
 
         buildLayout();

@@ -24,16 +24,16 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public abstract class AbstractEntityWindowController<T, E> {
 
-    private final UIConfiguration uiConfig;
+    private final CommonUiDependencies uiDependencies;
 
     /**
      * Constructor.
      *
-     * @param uiConfig
-     *            the {@link UIConfiguration}
+     * @param uiDependencies
+     *            the {@link CommonUiDependencies}
      */
-    protected AbstractEntityWindowController(final UIConfiguration uiConfig) {
-        this.uiConfig = uiConfig;
+    protected AbstractEntityWindowController(final CommonUiDependencies uiDependencies) {
+        this.uiDependencies = uiDependencies;
     }
 
     /**
@@ -91,19 +91,19 @@ public abstract class AbstractEntityWindowController<T, E> {
     }
 
     protected VaadinMessageSource getI18n() {
-        return uiConfig.getI18n();
+        return uiDependencies.getI18n();
     }
 
     protected EntityFactory getEntityFactory() {
-        return uiConfig.getEntityFactory();
+        return uiDependencies.getEntityFactory();
     }
 
     protected UIEventBus getEventBus() {
-        return uiConfig.getEventBus();
+        return uiDependencies.getEventBus();
     }
 
     protected UINotification getUiNotification() {
-        return uiConfig.getUiNotification();
+        return uiDependencies.getUiNotification();
     }
 
     protected void displaySuccess(final String messageKey, final Object... args) {

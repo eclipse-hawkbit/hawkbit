@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -39,17 +39,17 @@ public class DistributionTagToken extends AbstractTagToken<ProxyDistributionSet>
     /**
      * Constructor for DistributionTagToken
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetTagManagement
      *            DistributionSetTagManagement
      * @param distributionSetManagement
      *            DistributionSetManagement
      */
-    public DistributionTagToken(final UIConfiguration uiConfig,
+    public DistributionTagToken(final CommonUiDependencies uiDependencies,
             final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement) {
-        super(uiConfig);
+        super(uiDependencies);
 
         this.distributionSetTagManagement = distributionSetTagManagement;
         this.distributionSetManagement = distributionSetManagement;

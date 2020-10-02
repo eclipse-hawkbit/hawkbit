@@ -24,7 +24,7 @@ import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutStatusIconSupplier;
@@ -105,19 +105,19 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
     private final transient DeleteSupport<ProxyRollout> rolloutDeleteSupport;
 
-    RolloutGrid(final UIConfiguration uiConfig, final RolloutManagement rolloutManagement,
+    RolloutGrid(final CommonUiDependencies uiDependencies, final RolloutManagement rolloutManagement,
             final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagementUIState rolloutManagementUIState,
             final TenantConfigurationManagement tenantConfigManagement, final RolloutWindowBuilder rolloutWindowBuilder,
             final SystemSecurityContext systemSecurityContext) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.tenantConfigManagement = tenantConfigManagement;
         this.systemSecurityContext = systemSecurityContext;
-        this.uiNotification = uiConfig.getUiNotification();
+        this.uiNotification = uiDependencies.getUiNotification();
         this.rolloutWindowBuilder = rolloutWindowBuilder;
         this.rolloutMapper = new RolloutToProxyRolloutMapper();
 

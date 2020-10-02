@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -56,10 +56,10 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
     private final transient TargetMetaDataWindowBuilder targetMetaDataWindowBuilder;
 
-    TargetDetails(final UIConfiguration uiConfig, final TargetTagManagement tagManagement,
+    TargetDetails(final CommonUiDependencies uiDependencies, final TargetTagManagement tagManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
-        super(uiConfig.getI18n());
+        super(uiDependencies.getI18n());
 
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
@@ -71,7 +71,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
         this.installedDsDetails = buildInstalledDsDetails();
 
-        this.targetTagToken = new TargetTagToken(uiConfig, tagManagement, targetManagement);
+        this.targetTagToken = new TargetTagToken(uiDependencies, tagManagement, targetManagement);
 
         addDetailsComponents(Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
                 new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),
@@ -81,8 +81,8 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
                 new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
                 new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
 
-        if (uiConfig.getPermChecker().hasCreateRepositoryPermission()) {
-            this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, uiConfig.getEventBus(),
+        if (uiDependencies.getPermChecker().hasCreateRepositoryPermission()) {
+            this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, uiDependencies.getEventBus(),
                     UIComponentIdProvider.TARGET_TYPE_PREFIX, this::showMetadataDetails,
                     new TargetMetaDataDataProvider(targetManagement));
             addDetailsComponent(new SimpleEntry<>(i18n.getMessage("caption.metadata"), targetMetadataGrid));

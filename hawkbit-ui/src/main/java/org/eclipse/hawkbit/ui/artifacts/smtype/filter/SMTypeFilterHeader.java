@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtype.filter;
 
 import org.eclipse.hawkbit.ui.artifacts.smtype.SmTypeWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -34,8 +34,8 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for SMTypeFilterHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeWindowBuilder
      *            SmTypeWindowBuilder
      * @param smTypeFilterLayoutUiState
@@ -43,9 +43,9 @@ public class SMTypeFilterHeader extends AbstractFilterHeader {
      * @param view
      *            EventView
      */
-    public SMTypeFilterHeader(final UIConfiguration uiConfig, final SmTypeWindowBuilder smTypeWindowBuilder,
+    public SMTypeFilterHeader(final CommonUiDependencies uiDependencies, final SmTypeWindowBuilder smTypeWindowBuilder,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView view) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
         this.smTypeWindowBuilder = smTypeWindowBuilder;

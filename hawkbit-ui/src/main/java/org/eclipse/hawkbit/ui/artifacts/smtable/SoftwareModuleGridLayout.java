@@ -14,7 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsHeader;
@@ -50,8 +50,8 @@ public class SoftwareModuleGridLayout extends AbstractSoftwareModuleGridLayout {
     /**
      * Constructor for SoftwareModuleGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
@@ -61,36 +61,36 @@ public class SoftwareModuleGridLayout extends AbstractSoftwareModuleGridLayout {
      * @param smGridLayoutUiState
      *            GridLayoutUiState
      */
-    public SoftwareModuleGridLayout(final UIConfiguration uiConfig,
+    public SoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState) {
-        super(uiConfig, softwareModuleManagement, softwareModuleTypeManagement, EventView.UPLOAD);
+        super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, EventView.UPLOAD);
 
-        this.softwareModuleGridHeader = new SoftwareModuleGridHeader(uiConfig, smTypeFilterLayoutUiState,
+        this.softwareModuleGridHeader = new SoftwareModuleGridHeader(uiDependencies, smTypeFilterLayoutUiState,
                 smGridLayoutUiState, getSmWindowBuilder(), getEventView());
         this.softwareModuleGridHeader.buildHeader();
-        this.softwareModuleGrid = new SoftwareModuleGrid(uiConfig, smTypeFilterLayoutUiState, smGridLayoutUiState,
+        this.softwareModuleGrid = new SoftwareModuleGrid(uiDependencies, smTypeFilterLayoutUiState, smGridLayoutUiState,
                 softwareModuleManagement, getEventView());
         this.softwareModuleGrid.init();
 
-        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(uiConfig, getSmWindowBuilder(),
+        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(uiDependencies, getSmWindowBuilder(),
                 getSmMetaDataWindowBuilder());
         this.softwareModuleDetailsHeader.buildHeader();
-        this.softwareModuleDetails = new SoftwareModuleDetails(uiConfig, softwareModuleManagement,
+        this.softwareModuleDetails = new SoftwareModuleDetails(uiDependencies, softwareModuleManagement,
                 softwareModuleTypeManagement, getSmMetaDataWindowBuilder());
         this.softwareModuleDetails.buildDetails();
 
-        addEventListener(new FilterChangedListener<>(uiConfig.getEventBus(), ProxySoftwareModule.class,
+        addEventListener(new FilterChangedListener<>(uiDependencies.getEventBus(), ProxySoftwareModule.class,
                 new EventViewAware(getEventView()), softwareModuleGrid.getFilterSupport()));
-        addEventListener(new SelectionChangedListener<>(uiConfig.getEventBus(),
+        addEventListener(new SelectionChangedListener<>(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()), getMasterSmAwareComponents()));
-        addEventListener(new SelectGridEntityListener<>(uiConfig.getEventBus(),
+        addEventListener(new SelectGridEntityListener<>(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()),
                 softwareModuleGrid.getSelectionSupport()));
-        addEventListener(new EntityModifiedListener.Builder<>(uiConfig.getEventBus(), ProxySoftwareModule.class)
+        addEventListener(new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxySoftwareModule.class)
                 .entityModifiedAwareSupports(getSmModifiedAwareSupports()).build());
-        addEventListener(new GenericEventListener<>(uiConfig.getEventBus(), EventTopics.FILE_UPLOAD_CHANGED,
+        addEventListener(new GenericEventListener<>(uiDependencies.getEventBus(), EventTopics.FILE_UPLOAD_CHANGED,
                 this::onUploadChanged));
 
         buildLayout(softwareModuleGridHeader, softwareModuleGrid, softwareModuleDetailsHeader, softwareModuleDetails);

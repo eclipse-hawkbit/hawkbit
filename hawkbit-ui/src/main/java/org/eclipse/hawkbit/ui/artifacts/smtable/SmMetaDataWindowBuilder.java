@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractMetaDataWindowBuilder;
 
@@ -25,13 +25,13 @@ public class SmMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<Long>
     /**
      * Constructor for SmMetaDataWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smManagement
      *            SoftwareModuleManagement
      */
-    public SmMetaDataWindowBuilder(final UIConfiguration uiConfig, final SoftwareModuleManagement smManagement) {
-        super(uiConfig);
+    public SmMetaDataWindowBuilder(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement) {
+        super(uiDependencies);
 
         this.smManagement = smManagement;
     }
@@ -63,6 +63,6 @@ public class SmMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<Long>
      * @return software module window
      */
     public Window getWindowForShowSmMetaData(final Long smId, final String name, final ProxyMetaData proxyMetaData) {
-        return getWindowForShowMetaData(new SmMetaDataWindowLayout(uiConfig, smManagement), smId, name, proxyMetaData);
+        return getWindowForShowMetaData(new SmMetaDataWindowLayout(uiDependencies, smManagement), smId, name, proxyMetaData);
     }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 
 /**
@@ -26,8 +26,8 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
  */
 public abstract class TagsAssignmentSupport<T, R extends NamedEntity> extends AssignmentSupport<ProxyTag, T> {
 
-    protected TagsAssignmentSupport(final UIConfiguration uiConfig) {
-        super(uiConfig.getUiNotification(), uiConfig.getI18n());
+    protected TagsAssignmentSupport(final CommonUiDependencies uiDependencies) {
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
     }
 
     @Override

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -49,10 +49,10 @@ public class DSTypeFilterButtons extends AbstractTypeFilterButtons {
      * @param typeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public DSTypeFilterButtons(final UIConfiguration uiConfig,
+    public DSTypeFilterButtons(final CommonUiDependencies uiDependencies,
             final DistributionSetTypeManagement distributionSetTypeManagement, final SystemManagement systemManagement,
             final DsTypeWindowBuilder dsTypeWindowBuilder, final TypeFilterLayoutUiState typeFilterLayoutUiState) {
-        super(uiConfig, typeFilterLayoutUiState);
+        super(uiDependencies, typeFilterLayoutUiState);
 
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.dsTypeWindowBuilder = dsTypeWindowBuilder;

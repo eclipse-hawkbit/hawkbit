@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetFilterQueryToProxyTargetFilterMapper;
@@ -69,8 +69,8 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     /**
      * Constructor for TargetFilterGrid
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiState
      *            TargetFilterGridLayoutUiState
      * @param targetFilterQueryManagement
@@ -78,12 +78,12 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
      * @param autoAssignmentWindowBuilder
      *            AutoAssignmentWindowBuilder
      */
-    public TargetFilterGrid(final UIConfiguration uiConfig, final TargetFilterGridLayoutUiState uiState,
+    public TargetFilterGrid(final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder) {
-        super(uiConfig.getI18n(), uiConfig.getEventBus(), uiConfig.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.notification = uiConfig.getUiNotification();
+        this.notification = uiDependencies.getUiNotification();
         this.uiState = uiState;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.autoAssignmentWindowBuilder = autoAssignmentWindowBuilder;

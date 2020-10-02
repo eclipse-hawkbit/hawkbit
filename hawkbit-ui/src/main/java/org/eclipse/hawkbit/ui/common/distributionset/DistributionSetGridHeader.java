@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.distributionset;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -30,8 +30,8 @@ public class DistributionSetGridHeader extends AbstractEntityGridHeader {
     /**
      * Constructor for DistributionSetGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dSTypeFilterLayoutUiState
      *            HidableLayoutUiState
      * @param distributionSetGridLayoutUiState
@@ -41,11 +41,11 @@ public class DistributionSetGridHeader extends AbstractEntityGridHeader {
      * @param view
      *            EventView
      */
-    public DistributionSetGridHeader(final UIConfiguration uiConfig,
+    public DistributionSetGridHeader(final CommonUiDependencies uiDependencies,
             final HidableLayoutUiState dSTypeFilterLayoutUiState,
             final GridLayoutUiState distributionSetGridLayoutUiState, final EventLayout filterLayout,
             final EventView view) {
-        super(uiConfig, dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState, filterLayout, view);
+        super(uiDependencies, dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState, filterLayout, view);
     }
 
     @Override

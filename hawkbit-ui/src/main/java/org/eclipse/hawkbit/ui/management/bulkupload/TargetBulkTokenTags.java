@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -32,8 +32,8 @@ public class TargetBulkTokenTags extends AbstractTagToken<ProxyTarget> {
 
     private final TagToProxyTagMapper<TargetTag> tagMapper;
 
-    TargetBulkTokenTags(final UIConfiguration uiConfig, final TargetTagManagement tagManagement) {
-        super(uiConfig);
+    TargetBulkTokenTags(final CommonUiDependencies uiDependencies, final TargetTagManagement tagManagement) {
+        super(uiDependencies);
 
         this.tagManagement = tagManagement;
         this.tagMapper = new TagToProxyTagMapper<>();

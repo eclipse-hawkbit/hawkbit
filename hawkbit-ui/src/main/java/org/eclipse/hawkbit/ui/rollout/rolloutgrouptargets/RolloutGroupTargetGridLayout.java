@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutGroup;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -41,20 +41,20 @@ public class RolloutGroupTargetGridLayout extends AbstractGridComponentLayout {
     /**
      * Constructor for RolloutGroupTargetGridLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param rolloutGroupManagement
      *            RolloutGroupManagement
      * @param rolloutManagementUIState
      *            RolloutManagementUIState
      */
-    public RolloutGroupTargetGridLayout(final UIConfiguration uiConfig,
+    public RolloutGroupTargetGridLayout(final CommonUiDependencies uiDependencies,
             final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagementUIState rolloutManagementUIState) {
-        this.rolloutGroupTargetsListHeader = new RolloutGroupTargetGridHeader(uiConfig, rolloutManagementUIState);
-        this.rolloutGroupTargetsListGrid = new RolloutGroupTargetGrid(uiConfig, rolloutGroupManagement,
+        this.rolloutGroupTargetsListHeader = new RolloutGroupTargetGridHeader(uiDependencies, rolloutManagementUIState);
+        this.rolloutGroupTargetsListGrid = new RolloutGroupTargetGrid(uiDependencies, rolloutGroupManagement,
                 rolloutManagementUIState);
-        this.rolloutGroupTargetCountMessageLabel = new TargetFilterCountMessageLabel(uiConfig.getI18n());
+        this.rolloutGroupTargetCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
 
         initGridDataUpdatedListener();
 
@@ -63,9 +63,9 @@ public class RolloutGroupTargetGridLayout extends AbstractGridComponentLayout {
         final EventLayoutViewAware rolloutGroupLayoutView = new EventLayoutViewAware(EventLayout.ROLLOUT_GROUP_LIST,
                 EventView.ROLLOUT);
 
-        this.rolloutChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(), rolloutLayoutView,
+        this.rolloutChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), rolloutLayoutView,
                 Collections.singletonList(rolloutGroupTargetsListHeader::rolloutChanged));
-        this.rolloutGroupChangedListener = new SelectionChangedListener<>(uiConfig.getEventBus(),
+        this.rolloutGroupChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(),
                 rolloutGroupLayoutView, getMasterEntityAwareComponents());
 
         buildLayout(rolloutGroupTargetsListHeader, rolloutGroupTargetsListGrid, rolloutGroupTargetCountMessageLabel);

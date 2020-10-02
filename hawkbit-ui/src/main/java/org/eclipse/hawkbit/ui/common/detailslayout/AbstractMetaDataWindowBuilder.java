@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
@@ -28,11 +28,11 @@ public abstract class AbstractMetaDataWindowBuilder<F> extends AbstractEntityWin
     /**
      * Constructor for AbstractMetaDataWindowBuilder
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      */
-    public AbstractMetaDataWindowBuilder(final UIConfiguration uiConfig) {
-        super(uiConfig);
+    public AbstractMetaDataWindowBuilder(final CommonUiDependencies uiDependencies) {
+        super(uiDependencies);
     }
 
     @Override

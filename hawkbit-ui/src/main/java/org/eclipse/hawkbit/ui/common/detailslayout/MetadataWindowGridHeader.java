@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.common.grid.header.support.AddHeaderSupport;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -27,13 +27,13 @@ public class MetadataWindowGridHeader extends AbstractGridHeader {
     /**
      * Constructor for MetadataWindowGridHeader
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param addNewItemCallback
      *            Runnable
      */
-    public MetadataWindowGridHeader(final UIConfiguration uiConfig, final Runnable addNewItemCallback) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+    public MetadataWindowGridHeader(final CommonUiDependencies uiDependencies, final Runnable addNewItemCallback) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         if (permChecker.hasCreateRepositoryPermission()) {
             this.addHeaderSupport = new AddHeaderSupport(i18n, UIComponentIdProvider.METADTA_ADD_ICON_ID,

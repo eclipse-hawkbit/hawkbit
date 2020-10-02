@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.SmMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -45,8 +45,8 @@ public class SoftwareModuleDetails extends AbstractGridDetailsLayout<ProxySoftwa
     /**
      * Constructor for SoftwareModuleDetails
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
@@ -54,15 +54,15 @@ public class SoftwareModuleDetails extends AbstractGridDetailsLayout<ProxySoftwa
      * @param smMetaDataWindowBuilder
      *            SmMetaDataWindowBuilder
      */
-    public SoftwareModuleDetails(final UIConfiguration uiConfig, final SoftwareModuleManagement softwareManagement,
+    public SoftwareModuleDetails(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement softwareManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SmMetaDataWindowBuilder smMetaDataWindowBuilder) {
-        super(uiConfig.getI18n());
+        super(uiDependencies.getI18n());
 
         this.smMetaDataWindowBuilder = smMetaDataWindowBuilder;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
 
-        this.smMetadataGrid = new MetadataDetailsGrid<>(i18n, uiConfig.getEventBus(),
+        this.smMetadataGrid = new MetadataDetailsGrid<>(i18n, uiDependencies.getEventBus(),
                 UIComponentIdProvider.SW_TYPE_PREFIX, this::showMetadataDetails,
                 new SmMetaDataDataProvider(softwareManagement));
 

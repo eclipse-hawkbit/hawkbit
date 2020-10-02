@@ -17,7 +17,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 /**
  * Container for commonly used dependencies in the UI.
  */
-public class UIConfiguration {
+public class CommonUiDependencies {
 
     private final VaadinMessageSource i18n;
     private final EntityFactory entityFactory;
@@ -37,7 +37,7 @@ public class UIConfiguration {
      * @param uiNotification
      *            UINotification
      */
-    public UIConfiguration(final VaadinMessageSource i18n, final EntityFactory entityFactory, final UIEventBus eventBus,
+    public CommonUiDependencies(final VaadinMessageSource i18n, final EntityFactory entityFactory, final UIEventBus eventBus,
             final UINotification uiNotification, final SpPermissionChecker permChecker) {
         super();
         this.i18n = i18n;

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -34,16 +34,16 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTypeWindowBuilder
      *            DsTypeWindowBuilder
      * @param dSTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    DSTypeFilterHeader(final UIConfiguration uiConfig, final DsTypeWindowBuilder dsTypeWindowBuilder,
+    DSTypeFilterHeader(final CommonUiDependencies uiDependencies, final DsTypeWindowBuilder dsTypeWindowBuilder,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
-        super(uiConfig.getI18n(), uiConfig.getPermChecker(), uiConfig.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.dSTypeFilterLayoutUiState = dSTypeFilterLayoutUiState;
         this.dsTypeWindowBuilder = dsTypeWindowBuilder;

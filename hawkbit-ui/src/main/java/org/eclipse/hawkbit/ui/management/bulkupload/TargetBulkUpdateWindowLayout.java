@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.eclipse.hawkbit.ui.common.UIConfiguration;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyBulkUploadWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -75,8 +75,8 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     /**
      * Constructor for TargetBulkUpdateWindowLayout
      *
-     * @param uiConfig
-     *            {@link UIConfiguration}
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param deploymentManagement
@@ -92,12 +92,12 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      * @param targetBulkUploadUiState
      *            TargetBulkUploadUiState
      */
-    public TargetBulkUpdateWindowLayout(final UIConfiguration uiConfig, final TargetManagement targetManagement,
+    public TargetBulkUpdateWindowLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TargetTagManagement tagManagement,
             final DistributionSetManagement distributionSetManagement, final UiProperties uiproperties,
             final Executor uiExecutor, final TargetBulkUploadUiState targetBulkUploadUiState) {
-        this.i18n = uiConfig.getI18n();
-        this.uinotification = uiConfig.getUiNotification();
+        this.i18n = uiDependencies.getI18n();
+        this.uinotification = uiDependencies.getUiNotification();
         this.targetBulkUploadUiState = targetBulkUploadUiState;
         this.binder = new Binder<>();
 
@@ -106,13 +106,13 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
 
         this.dsCombo = componentBuilder.createDistributionSetCombo(binder);
 
-        this.tagsComponent = new TargetBulkTokenTags(uiConfig, tagManagement);
+        this.tagsComponent = new TargetBulkTokenTags(uiDependencies, tagManagement);
 
         this.descTextArea = componentBuilder.createDescriptionField(binder);
         this.progressBar = createProgressBar();
         this.targetsCountLabel = getStatusCountLabel();
 
-        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(uiConfig, uiExecutor, targetManagement,
+        final BulkUploadHandler bulkUploadHandler = new BulkUploadHandler(uiDependencies, uiExecutor, targetManagement,
                 tagManagement, distributionSetManagement, deploymentManagement, this::getBulkUploadInputsBean);
         this.uploadButton = createUploadButton(bulkUploadHandler);
 
