@@ -409,7 +409,7 @@
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>${jacoco.agent.ut.arg} ${aspectj-weaver.arg}</argLine>
+                  <argLine>${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
