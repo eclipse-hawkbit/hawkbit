@@ -131,6 +131,9 @@ public class DelayedEventBusPushStrategy
         LOG.debug("Cleanup delayed event push strategy for UI {}", vaadinUI.getUIId());
         jobHandle.cancel(true);
         queue.clear();
+
+        jobHandle = null;
+        vaadinUI = null;
     }
 
     private final class DispatchRunnable implements Runnable {
