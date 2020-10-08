@@ -103,7 +103,7 @@ public class AutoAssignmentWindowController extends
                             targetsForAutoAssignmentCount);
 
             showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
-                    entity.getAutoAssignActionType(), entity);
+                    entity.getAutoAssignActionType());
         } else {
             final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
                     getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
@@ -112,8 +112,7 @@ public class AutoAssignmentWindowController extends
     }
 
     private void showConsequencesDialog(final String confirmationCaption, final String confirmationQuestion,
-            final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType,
-            final ProxyTargetFilterQuery entity) {
+            final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption,
                 confirmationQuestion, ok -> {
                     if (ok) {
