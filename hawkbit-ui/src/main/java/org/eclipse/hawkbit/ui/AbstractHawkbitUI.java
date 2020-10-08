@@ -104,6 +104,8 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
             pushStrategy.clean();
             clearContextListener();
         }
+
+        SpringContextHelper.clearContext();
     }
 
     private void clearContextListener() {
