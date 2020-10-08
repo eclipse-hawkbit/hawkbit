@@ -31,22 +31,22 @@ public abstract class AbstractEntityWindowBuilder<T> {
         this.i18n = uiDependencies.getI18n();
     }
 
-    protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?> controller) {
+    protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?, ?> controller) {
         return getWindowForEntity(null, controller);
     }
 
-    protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?> controller,
+    protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?, ?> controller,
             final Component windowContent) {
         return getWindowForEntity(null, controller, windowContent);
     }
 
     protected CommonDialogWindow getWindowForEntity(final T proxyEntity,
-            final AbstractEntityWindowController<T, ?> controller) {
+            final AbstractEntityWindowController<T, ?, ?> controller) {
         return getWindowForEntity(proxyEntity, controller, controller.getLayout().getRootComponent());
     }
 
     protected CommonDialogWindow getWindowForEntity(final T proxyEntity,
-            final AbstractEntityWindowController<T, ?> controller, final Component windowContent) {
+            final AbstractEntityWindowController<T, ?, ?> controller, final Component windowContent) {
         controller.populateWithData(proxyEntity);
 
         final CommonDialogWindow window = createWindow(windowContent, controller.getSaveDialogCloseListener());

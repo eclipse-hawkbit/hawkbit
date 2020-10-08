@@ -9,20 +9,23 @@
 package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
-import org.eclipse.hawkbit.ui.common.tag.AbstractAddTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
+import org.springframework.util.StringUtils;
 
 /**
  * Controller for add distribution tag window
  */
-public class AddDsTagWindowController extends AbstractAddTagWindowController {
+public class AddDsTagWindowController extends AbstractAddEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final DistributionSetTagManagement dsTagManagement;
+    private final TagWindowLayout<ProxyTag> layout;
 
     /**
      * Constructor for AddDsTagWindowController
@@ -34,19 +37,70 @@ public class AddDsTagWindowController extends AbstractAddTagWindowController {
      * @param layout
      *            Tag window layout
      */
-    public AddDsTagWindowController(final CommonUiDependencies uiDependencies, final DistributionSetTagManagement dsTagManagement,
-            final TagWindowLayout<ProxyTag> layout) {
-        super(uiDependencies, layout, ProxyDistributionSet.class);
+    public AddDsTagWindowController(final CommonUiDependencies uiDependencies,
+            final DistributionSetTagManagement dsTagManagement, final TagWindowLayout<ProxyTag> layout) {
+        super(uiDependencies);
+
         this.dsTagManagement = dsTagManagement;
+        this.layout = layout;
     }
 
     @Override
-    protected Tag createEntityInRepository(final TagCreate tagCreate) {
-        return dsTagManagement.create(tagCreate);
+    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
+        return layout;
     }
 
     @Override
-    protected boolean existsEntityInRepository(final String trimmedName) {
-        return dsTagManagement.getByName(trimmedName).isPresent();
+    protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
+        // We ignore the method parameter, because we are interested in the
+        // empty object, that we can populate with defaults
+        return new ProxyTag();
+    }
+
+    @Override
+    protected Tag persistEntityInRepository(final ProxyTag entity) {
+        return dsTagManagement.create(getEntityFactory().tag().create().name(entity.getName())
+                .description(entity.getDescription()).colour(entity.getColour()));
+    }
+
+    @Override
+    protected String getDisplayableName(final ProxyTag entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.entity.distribution.tag";
+    }
+
+    @Override
+    protected Long getId(final Tag entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyTag.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxyDistributionSet.class;
+    }
+
+    @Override
+    protected boolean isEntityValid(final ProxyTag entity) {
+        if (!StringUtils.hasText(entity.getName())) {
+            displayValidationError("message.error.missing.tagname");
+            return false;
+        }
+
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        if (dsTagManagement.getByName(trimmedName).isPresent()) {
+            displayValidationError("message.tag.duplicate.check", trimmedName);
+            return false;
+        }
+
+        return true;
     }
 }

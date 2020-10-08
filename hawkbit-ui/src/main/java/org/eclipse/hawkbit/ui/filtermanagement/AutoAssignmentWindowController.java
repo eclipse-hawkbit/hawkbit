@@ -11,14 +11,13 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
@@ -28,8 +27,8 @@ import com.vaadin.ui.UI;
 /**
  * Controller for auto assignment window
  */
-public class AutoAssignmentWindowController
-        extends AbstractEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery> {
+public class AutoAssignmentWindowController extends
+        AbstractUpdateEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery, TargetFilterQuery> {
 
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
@@ -47,8 +46,9 @@ public class AutoAssignmentWindowController
      * @param layout
      *            AutoAssignmentWindowLayout
      */
-    public AutoAssignmentWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final AutoAssignmentWindowLayout layout) {
+    public AutoAssignmentWindowController(final CommonUiDependencies uiDependencies,
+            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final AutoAssignmentWindowLayout layout) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
@@ -88,6 +88,8 @@ public class AutoAssignmentWindowController
 
     @Override
     protected void persistEntity(final ProxyTargetFilterQuery entity) {
+        // super.persistEntity couldn't be used because of the two cases
+        // store/show dialog
         if (entity.isAutoAssignmentEnabled() && entity.getDistributionSetInfo() != null) {
             final Long autoAssignDsId = entity.getDistributionSetInfo().getId();
             final Long targetsForAutoAssignmentCount = targetManagement.countByRsqlAndNonDS(autoAssignDsId,
@@ -103,9 +105,9 @@ public class AutoAssignmentWindowController
             showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
                     entity.getAutoAssignActionType(), entity);
         } else {
-            targetFilterQueryManagement.updateAutoAssignDS(
+            final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
                     getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
-            publishModifiedEvent(entity.getId());
+            publishModifiedEvent(createModifiedEventPayload(targetFilterQuery));
         }
     }
 
@@ -115,9 +117,10 @@ public class AutoAssignmentWindowController
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption,
                 confirmationQuestion, ok -> {
                     if (ok) {
-                        targetFilterQueryManagement.updateAutoAssignDS(getEntityFactory().targetFilterQuery()
-                                .updateAutoAssign(targetFilterId).ds(autoAssignDsId).actionType(autoAssignActionType));
-                        publishModifiedEvent(entity.getId());
+                        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
+                                getEntityFactory().targetFilterQuery().updateAutoAssign(targetFilterId)
+                                        .ds(autoAssignDsId).actionType(autoAssignActionType));
+                        publishModifiedEvent(createModifiedEventPayload(targetFilterQuery));
                     }
                 }, UIComponentIdProvider.DIST_SET_SELECT_CONS_WINDOW_ID);
 
@@ -127,9 +130,39 @@ public class AutoAssignmentWindowController
         confirmDialog.getWindow().bringToFront();
     }
 
-    private void publishModifiedEvent(final Long entityId) {
-        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_UPDATED, ProxyTargetFilterQuery.class, entityId));
+    @Override
+    protected TargetFilterQuery persistEntityInRepository(final ProxyTargetFilterQuery entity) {
+        return null;
+    }
+
+    @Override
+    protected String getDisplayableName(final ProxyTargetFilterQuery entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return null;
+    }
+
+    @Override
+    protected Long getId(final TargetFilterQuery entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected String getPersistSuccessMessageKey() {
+        return null;
+    }
+
+    @Override
+    protected String getPersistFailureMessageKey() {
+        return null;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyTargetFilterQuery.class;
     }
 
     @Override

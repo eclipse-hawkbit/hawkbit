@@ -9,20 +9,23 @@
 package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.tag.AbstractAddTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
+import org.springframework.util.StringUtils;
 
 /**
  * Controller for add target tag window
  */
-public class AddTargetTagWindowController extends AbstractAddTagWindowController {
+public class AddTargetTagWindowController extends AbstractAddEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final TargetTagManagement targetTagManagement;
+    private final TagWindowLayout<ProxyTag> layout;
 
     /**
      * Constructor for AddTargetTagWindowController
@@ -34,20 +37,70 @@ public class AddTargetTagWindowController extends AbstractAddTagWindowController
      * @param layout
      *            TagWindowLayout
      */
-    public AddTargetTagWindowController(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement,
-            final TagWindowLayout<ProxyTag> layout) {
-        super(uiDependencies, layout, ProxyTarget.class);
+    public AddTargetTagWindowController(final CommonUiDependencies uiDependencies,
+            final TargetTagManagement targetTagManagement, final TagWindowLayout<ProxyTag> layout) {
+        super(uiDependencies);
 
         this.targetTagManagement = targetTagManagement;
+        this.layout = layout;
     }
 
     @Override
-    protected Tag createEntityInRepository(final TagCreate tagCreate) {
-        return targetTagManagement.create(tagCreate);
+    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
+        return layout;
     }
 
     @Override
-    protected boolean existsEntityInRepository(final String trimmedName) {
-        return targetTagManagement.getByName(trimmedName).isPresent();
+    protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
+        // We ignore the method parameter, because we are interested in the
+        // empty object, that we can populate with defaults
+        return new ProxyTag();
+    }
+
+    @Override
+    protected Tag persistEntityInRepository(final ProxyTag entity) {
+        return targetTagManagement.create(getEntityFactory().tag().create().name(entity.getName())
+                .description(entity.getDescription()).colour(entity.getColour()));
+    }
+
+    @Override
+    protected String getDisplayableName(final ProxyTag entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.entity.target.tag";
+    }
+
+    @Override
+    protected Long getId(final Tag entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyTag.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxyTarget.class;
+    }
+
+    @Override
+    protected boolean isEntityValid(final ProxyTag entity) {
+        if (!StringUtils.hasText(entity.getName())) {
+            displayValidationError("message.error.missing.tagname");
+            return false;
+        }
+
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        if (targetTagManagement.getByName(trimmedName).isPresent()) {
+            displayValidationError("message.tag.duplicate.check", trimmedName);
+            return false;
+        }
+
+        return true;
     }
 }

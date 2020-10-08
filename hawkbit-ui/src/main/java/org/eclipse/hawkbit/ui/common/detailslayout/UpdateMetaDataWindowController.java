@@ -10,22 +10,20 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.Function;
 
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update meta data window
  */
-public class UpdateMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateMetaDataWindowController.class);
+public class UpdateMetaDataWindowController
+        extends AbstractUpdateEntityWindowController<ProxyMetaData, ProxyMetaData, MetaData> {
 
     private final MetaDataAddUpdateWindowLayout layout;
     private final Function<ProxyMetaData, MetaData> updateMetaDataCallback;
@@ -41,7 +39,8 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
      *            Update meta data call back function for event listener
      *
      */
-    public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies, final MetaDataAddUpdateWindowLayout layout,
+    public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies,
+            final MetaDataAddUpdateWindowLayout layout,
             final Function<ProxyMetaData, MetaData> updateMetaDataCallback) {
         super(uiDependencies);
 
@@ -72,15 +71,54 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     }
 
     @Override
-    protected void persistEntity(final ProxyMetaData entity) {
-        try {
-            final MetaData updatedMetaData = updateMetaDataCallback.apply(entity);
-            displaySuccess("message.metadata.updated", updatedMetaData.getKey());
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of meta data failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.metadata");
-            displayWarning("message.key.deleted.or.notAllowed", entityType, entity.getKey());
-        }
+    protected boolean closeWindowAfterSave() {
+        return false;
+    }
+
+    @Override
+    protected MetaData persistEntityInRepository(final ProxyMetaData entity) {
+        return updateMetaDataCallback.apply(entity);
+    }
+
+    @Override
+    protected void handleEntityPersistedSuccessfully(final ProxyMetaData entity, final MetaData persistedEntity) {
+        // override to not publish event
+        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(entity));
+    }
+
+    @Override
+    protected String getPersistSuccessMessageKey() {
+        return "message.metadata.updated";
+    }
+
+    @Override
+    protected String getPersistFailureMessageKey() {
+        return "message.key.deleted.or.notAllowed";
+    }
+
+    @Override
+    protected String getDisplayableName(final ProxyMetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.metadata";
+    }
+
+    @Override
+    protected Long getId(final MetaData entity) {
+        return entity.getEntityId();
+    }
+
+    @Override
+    protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
+        // do not publish entity updated
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyMetaData.class;
     }
 
     @Override
@@ -96,10 +134,5 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
         }
 
         return true;
-    }
-
-    @Override
-    protected boolean closeWindowAfterSave() {
-        return false;
     }
 }

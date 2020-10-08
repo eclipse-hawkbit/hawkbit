@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
@@ -137,7 +138,7 @@ public class TargetFilterDetailsGridHeader extends AbstractBreadcrumbGridHeader 
     }
 
     private void showAddUpdateFilterLayout(final String captionMessage,
-            final AbstractEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery> controller,
+            final AbstractEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery, TargetFilterQuery> controller,
             final ProxyTargetFilterQuery proxyEntity) {
         headerCaptionDetails.setValue(captionMessage);
         controller.populateWithData(proxyEntity);

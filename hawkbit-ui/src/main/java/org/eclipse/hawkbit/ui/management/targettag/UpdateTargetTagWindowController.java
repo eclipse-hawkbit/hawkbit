@@ -11,18 +11,24 @@ package org.eclipse.hawkbit.ui.management.targettag;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.tag.AbstractUpdateTagWindowController;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
+import org.springframework.util.StringUtils;
 
 /**
  * Controller for Update target tag window
  */
-public class UpdateTargetTagWindowController extends AbstractUpdateTagWindowController {
+public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final TargetTagManagement targetTagManagement;
+    private final TagWindowLayout<ProxyTag> layout;
+
+    private String nameBeforeEdit;
 
     /**
      * Constructor for UpdateTargetTagWindowController
@@ -36,18 +42,81 @@ public class UpdateTargetTagWindowController extends AbstractUpdateTagWindowCont
      */
     public UpdateTargetTagWindowController(final CommonUiDependencies uiDependencies,
             final TargetTagManagement targetTagManagement, final TagWindowLayout<ProxyTag> layout) {
-        super(uiDependencies, layout, ProxyTarget.class, "caption.entity.target.tag");
+        super(uiDependencies);
 
         this.targetTagManagement = targetTagManagement;
+        this.layout = layout;
     }
 
     @Override
-    protected Tag updateEntityInRepository(final TagUpdate tagUpdate) {
+    public AbstractEntityWindowLayout<ProxyTag> getLayout() {
+        return layout;
+    }
+
+    @Override
+    protected ProxyTag buildEntityFromProxy(final ProxyTag proxyEntity) {
+        final ProxyTag targetTag = new ProxyTag();
+
+        targetTag.setId(proxyEntity.getId());
+        targetTag.setName(proxyEntity.getName());
+        targetTag.setDescription(proxyEntity.getDescription());
+        targetTag.setColour(proxyEntity.getColour());
+
+        nameBeforeEdit = proxyEntity.getName();
+
+        return targetTag;
+    }
+
+    @Override
+    protected void adaptLayout(final ProxyTag proxyEntity) {
+        layout.disableTagName();
+    }
+
+    @Override
+    protected Tag persistEntityInRepository(final ProxyTag entity) {
+        final TagUpdate tagUpdate = getEntityFactory().tag().update(entity.getId()).name(entity.getName())
+                .description(entity.getDescription()).colour(entity.getColour());
         return targetTagManagement.update(tagUpdate);
     }
 
     @Override
-    protected boolean existsEntityInRepository(final String trimmedName) {
-        return targetTagManagement.getByName(trimmedName).isPresent();
+    protected String getDisplayableName(final ProxyTag entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.entity.target.tag";
+    }
+
+    @Override
+    protected Long getId(final Tag entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyTag.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxyTarget.class;
+    }
+
+    @Override
+    protected boolean isEntityValid(final ProxyTag entity) {
+        if (!StringUtils.hasText(entity.getName())) {
+            displayValidationError("message.error.missing.tagname");
+            return false;
+        }
+
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        if (!nameBeforeEdit.equals(trimmedName) && targetTagManagement.getByName(trimmedName).isPresent()) {
+            displayValidationError("message.tag.duplicate.check", trimmedName);
+            return false;
+        }
+
+        return true;
     }
 }

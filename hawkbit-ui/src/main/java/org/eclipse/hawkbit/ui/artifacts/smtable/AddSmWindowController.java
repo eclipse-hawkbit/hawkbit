@@ -8,33 +8,27 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import javax.validation.ConstraintViolationException;
-
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.SoftwareModuleToProxyMapper;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
-import org.eclipse.hawkbit.ui.common.event.CommandTopics;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for populating and saving data in Add Software Module Window.
  */
-public class AddSmWindowController extends AbstractEntityWindowController<ProxySoftwareModule, ProxySoftwareModule> {
-    private static final Logger LOG = LoggerFactory.getLogger(AddSmWindowController.class);
+public class AddSmWindowController
+        extends AbstractAddEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
     private final SmWindowLayout layout;
@@ -74,27 +68,39 @@ public class AddSmWindowController extends AbstractEntityWindowController<ProxyS
     }
 
     @Override
-    protected void persistEntity(final ProxySoftwareModule entity) {
+    protected SoftwareModule persistEntityInRepository(final ProxySoftwareModule entity) {
         final SoftwareModuleCreate smCreate = getEntityFactory().softwareModule().create()
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
                 .vendor(entity.getVendor()).description(entity.getDescription());
 
-        final SoftwareModule newSoftwareModule;
-        try {
-            newSoftwareModule = smManagement.create(smCreate);
-        } catch (final ConstraintViolationException ex) {
-            LOG.trace("Create of software module failed in UI: {}", ex.getMessage());
-            displayWarning("message.save.fail", entity.getName() + ":" + entity.getVersion());
-            return;
-        }
+        return smManagement.create(smCreate);
+    }
 
-        displaySuccess("message.save.success", newSoftwareModule.getName() + ":" + newSoftwareModule.getVersion());
-        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, newSoftwareModule.getId()));
+    @Override
+    protected String getDisplayableName(final ProxySoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
 
-        final ProxySoftwareModule addedItem = new SoftwareModuleToProxyMapper().map(newSoftwareModule);
-        getEventBus().publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
-                SelectionChangedEventType.ENTITY_SELECTED, addedItem, EventLayout.SM_LIST, view));
+    @Override
+    protected Long getId(final SoftwareModule entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxySoftwareModule.class;
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.software.module";
+    }
+
+    @Override
+    protected void selectPersistedEntity(final SoftwareModule entity) {
+        final ProxySoftwareModule addedItem = new SoftwareModuleToProxyMapper().map(entity);
+        publishSelectionEvent(new SelectionChangedEventPayload<>(SelectionChangedEventType.ENTITY_SELECTED, addedItem,
+                EventLayout.SM_LIST, view));
     }
 
     @Override

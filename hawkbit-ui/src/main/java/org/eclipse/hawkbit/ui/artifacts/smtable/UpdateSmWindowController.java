@@ -10,25 +10,20 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update software module window
  */
-public class UpdateSmWindowController extends AbstractEntityWindowController<ProxySoftwareModule, ProxySoftwareModule> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateSmWindowController.class);
+public class UpdateSmWindowController
+        extends AbstractUpdateEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
     private final SmWindowLayout layout;
@@ -43,8 +38,8 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
      * @param layout
      *            SmWindowLayout
      */
-    public UpdateSmWindowController(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final SmWindowLayout layout) {
+    public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
+            final SoftwareModuleManagement smManagement, final SmWindowLayout layout) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
@@ -78,21 +73,30 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
     }
 
     @Override
-    protected void persistEntity(final ProxySoftwareModule entity) {
+    protected SoftwareModule persistEntityInRepository(final ProxySoftwareModule entity) {
         final SoftwareModuleUpdate smUpdate = getEntityFactory().softwareModule().update(entity.getId())
                 .vendor(entity.getVendor()).description(entity.getDescription());
+        return smManagement.update(smUpdate);
+    }
 
-        try {
-            final SoftwareModule updatedSm = smManagement.update(smUpdate);
+    @Override
+    protected String getDisplayableName(final ProxySoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
 
-            displaySuccess("message.update.success", updatedSm.getName() + ":" + updatedSm.getVersion());
-            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class, updatedSm.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of software module failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.software.module");
-            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
-        }
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.software.module";
+    }
+
+    @Override
+    protected Long getId(final SoftwareModule entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxySoftwareModule.class;
     }
 
     @Override

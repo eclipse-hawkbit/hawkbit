@@ -13,21 +13,20 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
  * Add distribution set type window controller
  */
-public class AddDsTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
+public class AddDsTypeWindowController
+        extends AbstractAddEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
 
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DsTypeWindowLayout layout;
@@ -63,7 +62,7 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    protected void persistEntity(final ProxyType entity) {
+    protected DistributionSetType persistEntityInRepository(final ProxyType entity) {
         final List<Long> mandatorySmTypeIds = entity.getSelectedSmTypes().stream().filter(ProxyType::isMandatory)
                 .map(ProxyType::getId).collect(Collectors.toList());
 
@@ -71,13 +70,34 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
                 .filter(selectedSmType -> !selectedSmType.isMandatory()).map(ProxyType::getId)
                 .collect(Collectors.toList());
 
-        final DistributionSetType newDsType = dsTypeManagement.create(getEntityFactory().distributionSetType().create()
-                .key(entity.getKey()).name(entity.getName()).description(entity.getDescription())
-                .colour(entity.getColour()).mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
+        return dsTypeManagement.create(getEntityFactory().distributionSetType().create().key(entity.getKey())
+                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour())
+                .mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
+    }
 
-        displaySuccess("message.save.success", newDsType.getName());
-        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, ProxyType.class, newDsType.getId()));
+    @Override
+    protected String getDisplayableName(final ProxyType entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected Long getId(final DistributionSetType entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyType.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxyDistributionSet.class;
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.entity.distribution.type";
     }
 
     @Override

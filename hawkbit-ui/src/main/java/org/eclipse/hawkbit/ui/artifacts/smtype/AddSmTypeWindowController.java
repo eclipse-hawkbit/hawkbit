@@ -10,21 +10,20 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for Add software module type window
  */
-public class AddSmTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
+public class AddSmTypeWindowController
+        extends AbstractAddEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
 
     private final SoftwareModuleTypeManagement smTypeManagement;
     private final SmTypeWindowLayout layout;
@@ -60,16 +59,37 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    protected void persistEntity(final ProxyType entity) {
+    protected SoftwareModuleType persistEntityInRepository(final ProxyType entity) {
         final int assignNumber = entity.getSmTypeAssign() == SmTypeAssign.SINGLE ? 1 : Integer.MAX_VALUE;
 
-        final SoftwareModuleType newSmType = smTypeManagement
+        return smTypeManagement
                 .create(getEntityFactory().softwareModuleType().create().key(entity.getKey()).name(entity.getName())
                         .description(entity.getDescription()).colour(entity.getColour()).maxAssignments(assignNumber));
+    }
 
-        displaySuccess("message.save.success", newSmType.getName());
-        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, ProxyType.class, newSmType.getId()));
+    @Override
+    protected String getDisplayableName(final ProxyType entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected Long getId(final SoftwareModuleType entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyType.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxySoftwareModule.class;
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.entity.software.module.type";
     }
 
     @Override

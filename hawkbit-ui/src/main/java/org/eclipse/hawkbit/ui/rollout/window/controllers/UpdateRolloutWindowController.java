@@ -15,35 +15,29 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.RolloutGroupToAdvancedDefinitionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow.GroupDefinitionMode;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.rollout.event.RolloutEvent;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.UpdateRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for populating and editing/saving data in Update Rollout Window.
  */
-public class UpdateRolloutWindowController extends AbstractEntityWindowController<ProxyRollout, ProxyRolloutWindow> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateRolloutWindowController.class);
+public class UpdateRolloutWindowController
+        extends AbstractUpdateEntityWindowController<ProxyRollout, ProxyRolloutWindow, Rollout> {
 
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     protected final RolloutManagement rolloutManagement;
@@ -121,27 +115,41 @@ public class UpdateRolloutWindowController extends AbstractEntityWindowControlle
     }
 
     @Override
-    protected void persistEntity(final ProxyRolloutWindow entity) {
+    protected Rollout persistEntityInRepository(final ProxyRolloutWindow entity) {
         final RolloutUpdate rolloutUpdate = getEntityFactory().rollout().update(entity.getId()).name(entity.getName())
                 .description(entity.getDescription()).set(entity.getDistributionSetId())
                 .actionType(entity.getActionType())
                 .forcedTime(entity.getActionType() == ActionType.TIMEFORCED ? entity.getForcedTime()
                         : RepositoryModelConstants.NO_FORCE_TIME)
                 .startAt(entity.getStartAtByOption());
+        return rolloutManagement.update(rolloutUpdate);
+    }
 
-        try {
-            final Rollout updatedRollout = rolloutManagement.update(rolloutUpdate);
+    @Override
+    protected void handleEntityPersistFailed(final ProxyRolloutWindow entity, final RuntimeException ex) {
+        super.handleEntityPersistFailed(entity, ex);
 
-            displaySuccess("message.update.success", updatedRollout.getName());
-            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxyRollout.class, updatedRollout.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of rollout failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.rollout");
-            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
+        getEventBus().publish(this, RolloutEvent.SHOW_ROLLOUTS);
+    }
 
-            getEventBus().publish(this, RolloutEvent.SHOW_ROLLOUTS);
-        }
+    @Override
+    protected String getDisplayableName(final ProxyRolloutWindow entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.rollout";
+    }
+
+    @Override
+    protected Long getId(final Rollout entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyRollout.class;
     }
 
     @Override

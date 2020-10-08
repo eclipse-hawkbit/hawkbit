@@ -10,27 +10,19 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update target filter
  */
-public class UpdateTargetFilterController
-        extends AbstractEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateTargetFilterController.class);
+public class UpdateTargetFilterController extends
+        AbstractUpdateEntityWindowController<ProxyTargetFilterQuery, ProxyTargetFilterQuery, TargetFilterQuery> {
 
     private final TargetFilterQueryManagement targetFilterManagement;
     private final TargetFilterAddUpdateLayout layout;
@@ -79,23 +71,35 @@ public class UpdateTargetFilterController
     }
 
     @Override
-    protected void persistEntity(final ProxyTargetFilterQuery entity) {
+    protected TargetFilterQuery persistEntityInRepository(final ProxyTargetFilterQuery entity) {
         final TargetFilterQueryUpdate targetFilterUpdate = getEntityFactory().targetFilterQuery().update(entity.getId())
                 .name(entity.getName()).query(entity.getQuery());
+        return targetFilterManagement.update(targetFilterUpdate);
+    }
 
-        try {
-            final TargetFilterQuery updatedTargetFilter = targetFilterManagement.update(targetFilterUpdate);
+    @Override
+    protected void postPersist() {
+        closeFormCallback.run();
+    }
 
-            displaySuccess("message.update.success", updatedTargetFilter.getName());
-            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxyTargetFilterQuery.class, updatedTargetFilter.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of target filter failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.target.filter");
-            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
-        } finally {
-            closeFormCallback.run();
-        }
+    @Override
+    protected String getDisplayableName(final ProxyTargetFilterQuery entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.target.filter";
+    }
+
+    @Override
+    protected Long getId(final TargetFilterQuery entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyTargetFilterQuery.class;
     }
 
     @Override

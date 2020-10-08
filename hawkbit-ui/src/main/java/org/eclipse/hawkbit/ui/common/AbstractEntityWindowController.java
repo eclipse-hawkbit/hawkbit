@@ -8,21 +8,36 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import javax.validation.ConstraintViolationException;
+
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.common.event.CommandTopics;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for abstract entity window
  *
  * @param <T>
- *            Generic type entity
+ *            Type of proxy entity
  * @param <E>
- *            Generic type entity
+ *            Second type of proxy entity
+ * @param <R>
+ *            Type of repository entity
  */
-public abstract class AbstractEntityWindowController<T, E> {
+public abstract class AbstractEntityWindowController<T, E, R> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractEntityWindowController.class);
 
     private final CommonUiDependencies uiDependencies;
 
@@ -82,7 +97,63 @@ public abstract class AbstractEntityWindowController<T, E> {
         };
     }
 
-    protected abstract void persistEntity(final E entity);
+    protected void persistEntity(final E entity) {
+        try {
+
+            final R createdEntity = persistEntityInRepository(entity);
+
+            handleEntityPersistedSuccessfully(entity, createdEntity);
+
+            selectPersistedEntity(createdEntity);
+
+        } catch (final ConstraintViolationException | EntityNotFoundException | EntityReadOnlyException ex) {
+
+            handleEntityPersistFailed(entity, ex);
+
+        } finally {
+
+            postPersist();
+        }
+    }
+
+    protected abstract R persistEntityInRepository(E entity);
+
+    protected void handleEntityPersistedSuccessfully(final E entity, final R persistedEntity) {
+        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(entity));
+        publishModifiedEvent(createModifiedEventPayload(persistedEntity));
+    }
+
+    protected void handleEntityPersistFailed(final E entity, final RuntimeException ex) {
+        final String entityType = getI18n().getMessage(getDisplayableEntityTypeMessageKey());
+        LOG.trace("Persist of {} failed in UI: {}", entityType, ex.getMessage());
+        displayWarning(getPersistFailureMessageKey(), getDisplayableName(entity));
+    }
+
+    protected abstract EntityModifiedEventPayload createModifiedEventPayload(final R entity);
+
+    protected abstract Long getId(R entity);
+
+    protected abstract String getDisplayableName(E entity);
+
+    protected abstract String getDisplayableEntityTypeMessageKey();
+
+    protected abstract String getPersistSuccessMessageKey();
+
+    protected abstract String getPersistFailureMessageKey();
+
+    protected abstract Class<? extends ProxyIdentifiableEntity> getEntityClass();
+
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return null;
+    }
+
+    protected void selectPersistedEntity(final R entity) {
+        // entity is not selected by default
+    }
+
+    protected void postPersist() {
+        // empty default implementation
+    }
 
     protected abstract boolean isEntityValid(final E entity);
 
@@ -117,4 +188,13 @@ public abstract class AbstractEntityWindowController<T, E> {
     protected void displayWarning(final String messageKey, final Object... args) {
         getUiNotification().displayWarning(getI18n().getMessage(messageKey, args));
     }
+
+    protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
+        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, eventPayload);
+    }
+
+    protected void publishSelectionEvent(final SelectionChangedEventPayload<E> eventPayload) {
+        getEventBus().publish(CommandTopics.SELECT_GRID_ENTITY, this, eventPayload);
+    }
+
 }

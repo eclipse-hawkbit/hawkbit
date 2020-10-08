@@ -11,17 +11,14 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
-import org.eclipse.hawkbit.ui.common.event.CommandTopics;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
@@ -30,7 +27,8 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for add distribution set window
  */
-public class AddDsWindowController extends AbstractEntityWindowController<ProxyDistributionSet, ProxyDistributionSet> {
+public class AddDsWindowController
+        extends AbstractAddEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
 
     private final SystemManagement systemManagement;
     private final DistributionSetManagement dsManagement;
@@ -80,18 +78,37 @@ public class AddDsWindowController extends AbstractEntityWindowController<ProxyD
     }
 
     @Override
-    protected void persistEntity(final ProxyDistributionSet entity) {
-        final DistributionSet newDs = dsManagement.create(getEntityFactory().distributionSet().create()
-                .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
-                .description(entity.getDescription()).requiredMigrationStep(entity.isRequiredMigrationStep()));
+    protected DistributionSet persistEntityInRepository(final ProxyDistributionSet entity) {
+        return dsManagement.create(getEntityFactory().distributionSet().create().type(entity.getTypeInfo().getKey())
+                .name(entity.getName()).version(entity.getVersion()).description(entity.getDescription())
+                .requiredMigrationStep(entity.isRequiredMigrationStep()));
+    }
 
-        displaySuccess("message.save.success", newDs.getName() + ":" + newDs.getVersion());
-        getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, newDs.getId()));
+    @Override
+    protected String getDisplayableName(final ProxyDistributionSet entity) {
+        return entity.getName() + ":" + entity.getVersion();
+    }
 
-        final ProxyDistributionSet addedItem = new DistributionSetToProxyDistributionMapper().map(newDs);
-        getEventBus().publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
-                SelectionChangedEventType.ENTITY_SELECTED, addedItem, EventLayout.DS_LIST, view));
+    @Override
+    protected Long getId(final DistributionSet entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyDistributionSet.class;
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.distribution";
+    }
+
+    @Override
+    protected void selectPersistedEntity(final DistributionSet entity) {
+        final ProxyDistributionSet addedItem = new DistributionSetToProxyDistributionMapper().map(entity);
+        publishSelectionEvent(new SelectionChangedEventPayload<>(SelectionChangedEventType.ENTITY_SELECTED, addedItem,
+                EventLayout.DS_LIST, view));
     }
 
     @Override

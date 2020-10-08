@@ -10,30 +10,24 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update target window
  */
-public class UpdateTargetWindowController extends AbstractEntityWindowController<ProxyTarget, ProxyTarget> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateTargetWindowController.class);
+public class UpdateTargetWindowController
+        extends AbstractUpdateEntityWindowController<ProxyTarget, ProxyTarget, Target> {
 
     private final TargetManagement targetManagement;
     private final TargetWindowLayout layout;
 
     private String controllerIdBeforeEdit;
+    private final ProxyTargetValidator proxyTargetValidator;
 
     /**
      * Constructor for UpdateTargetWindowController
@@ -45,12 +39,13 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
      * @param layout
      *            TargetWindowLayout
      */
-    public UpdateTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final TargetWindowLayout layout) {
+    public UpdateTargetWindowController(final CommonUiDependencies uiDependencies,
+            final TargetManagement targetManagement, final TargetWindowLayout layout) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;
+        this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
     }
 
     @Override
@@ -79,37 +74,37 @@ public class UpdateTargetWindowController extends AbstractEntityWindowController
     }
 
     @Override
-    protected void persistEntity(final ProxyTarget entity) {
+    protected Target persistEntityInRepository(final ProxyTarget entity) {
         final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId())
                 .name(entity.getName()).description(entity.getDescription());
 
-        try {
-            final Target updatedTarget = targetManagement.update(targetUpdate);
+        return targetManagement.update(targetUpdate);
+    }
 
-            displaySuccess("message.update.success", updatedTarget.getName());
-            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class, updatedTarget.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of target failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.target");
-            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
-        }
+    @Override
+    protected String getDisplayableName(final ProxyTarget entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected Long getId(final Target entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.target";
+    }
+
+    @Override
+    protected Class<ProxyTarget> getEntityClass() {
+        return ProxyTarget.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
-        if (!StringUtils.hasText(entity.getControllerId())) {
-            displayValidationError("message.error.missing.controllerId");
-            return false;
-        }
-
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
-        if (!controllerIdBeforeEdit.equals(trimmedControllerId)
-                && targetManagement.getByControllerID(trimmedControllerId).isPresent()) {
-            displayValidationError("message.target.duplicate.check", trimmedControllerId);
-            return false;
-        }
-
-        return true;
+        return proxyTargetValidator.isEntityValid(entity, !controllerIdBeforeEdit.equals(trimmedControllerId),
+                targetManagement.getByControllerID(trimmedControllerId).isPresent());
     }
 }

@@ -10,27 +10,20 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update distribution set window
  */
 public class UpdateDsWindowController
-        extends AbstractEntityWindowController<ProxyDistributionSet, ProxyDistributionSet> {
-
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateDsWindowController.class);
+        extends AbstractUpdateEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
 
     private final DistributionSetManagement dsManagement;
     private final DsWindowLayout layout;
@@ -45,8 +38,8 @@ public class UpdateDsWindowController
      * @param layout
      *            DsWindowLayout
      */
-    public UpdateDsWindowController(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement,
-            final DsWindowLayout layout) {
+    public UpdateDsWindowController(final CommonUiDependencies uiDependencies,
+            final DistributionSetManagement dsManagement, final DsWindowLayout layout) {
         super(uiDependencies);
 
         this.dsManagement = dsManagement;
@@ -78,22 +71,31 @@ public class UpdateDsWindowController
     }
 
     @Override
-    protected void persistEntity(final ProxyDistributionSet entity) {
+    protected DistributionSet persistEntityInRepository(final ProxyDistributionSet entity) {
         final DistributionSetUpdate dsUpdate = getEntityFactory().distributionSet().update(entity.getId())
                 .name(entity.getName()).version(entity.getVersion()).description(entity.getDescription())
                 .requiredMigrationStep(entity.isRequiredMigrationStep());
+        return dsManagement.update(dsUpdate);
+    }
 
-        try {
-            final DistributionSet updatedDs = dsManagement.update(dsUpdate);
+    @Override
+    protected String getDisplayableName(final ProxyDistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
 
-            displaySuccess("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion());
-            getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class, updatedDs.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of distribution set failed in UI: {}", e.getMessage());
-            final String entityType = getI18n().getMessage("caption.distribution");
-            displayWarning("message.deleted.or.notAllowed", entityType, entity.getName());
-        }
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.distribution";
+    }
+
+    @Override
+    protected Long getId(final DistributionSet entity) {
+        return entity.getId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyDistributionSet.class;
     }
 
     @Override

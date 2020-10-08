@@ -12,16 +12,18 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller to add meta data window
  */
-public class AddMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
+public class AddMetaDataWindowController
+        extends AbstractAddEntityWindowController<ProxyMetaData, ProxyMetaData, MetaData> {
     private final MetaDataAddUpdateWindowLayout layout;
 
     private final Function<ProxyMetaData, MetaData> createMetaDataCallback;
@@ -39,8 +41,8 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
      * @param duplicateCheckCallback
      *            Duplicate check callback
      */
-    public AddMetaDataWindowController(final CommonUiDependencies uiDependencies, final MetaDataAddUpdateWindowLayout layout,
-            final Function<ProxyMetaData, MetaData> createMetaDataCallback,
+    public AddMetaDataWindowController(final CommonUiDependencies uiDependencies,
+            final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
         super(uiDependencies);
 
@@ -68,9 +70,39 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     }
 
     @Override
-    protected void persistEntity(final ProxyMetaData entity) {
-        final MetaData newMetaData = createMetaDataCallback.apply(entity);
-        displaySuccess("message.metadata.saved", newMetaData.getKey());
+    protected String getPersistSuccessMessageKey() {
+        return "message.metadata.saved";
+    }
+
+    @Override
+    protected MetaData persistEntityInRepository(final ProxyMetaData entity) {
+        return createMetaDataCallback.apply(entity);
+    }
+
+    @Override
+    protected String getDisplayableName(final ProxyMetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected void handleEntityPersistedSuccessfully(final ProxyMetaData entity, final MetaData persistedEntity) {
+        // override to not publish event
+        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(entity));
+    }
+
+    @Override
+    protected Long getId(final MetaData entity) {
+        return entity.getEntityId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyMetaData.class;
+    }
+
+    @Override
+    protected String getDisplayableEntityTypeMessageKey() {
+        return "caption.metadata";
     }
 
     @Override
