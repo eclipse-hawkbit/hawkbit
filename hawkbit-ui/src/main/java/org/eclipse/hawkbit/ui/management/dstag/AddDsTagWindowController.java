@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
+import org.eclipse.hawkbit.ui.common.tag.ProxyTagValidator;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.springframework.util.StringUtils;
 
@@ -26,6 +27,7 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
 
     private final DistributionSetTagManagement dsTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
+    private final ProxyTagValidator validator;
 
     /**
      * Constructor for AddDsTagWindowController
@@ -43,6 +45,7 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
 
         this.dsTagManagement = dsTagManagement;
         this.layout = layout;
+        this.validator = new ProxyTagValidator(uiDependencies);
     }
 
     @Override
@@ -90,17 +93,7 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
 
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.error.missing.tagname");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (dsTagManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.tag.duplicate.check", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, true, () -> dsTagManagement.getByName(trimmedName).isPresent());
     }
 }

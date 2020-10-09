@@ -44,6 +44,7 @@ public class UpdateRolloutWindowController
     private final RolloutGroupManagement rolloutGroupManagement;
     private final QuotaManagement quotaManagement;
     private final UpdateRolloutWindowLayout layout;
+    private final ProxyRolloutValidator validator;
 
     private String nameBeforeEdit;
 
@@ -64,6 +65,7 @@ public class UpdateRolloutWindowController
         this.rolloutGroupManagement = dependencies.getRolloutGroupManagement();
         this.quotaManagement = dependencies.getQuotaManagement();
         this.layout = layout;
+        this.validator = new ProxyRolloutValidator(dependencies.getuiDependencies());
     }
 
     @Override
@@ -154,22 +156,8 @@ public class UpdateRolloutWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
-        if (entity == null) {
-            displayValidationError("message.save.fail", getI18n().getMessage("caption.rollout"));
-            return false;
-        }
-
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.rollout.name.empty");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (!nameBeforeEdit.equals(trimmedName) && rolloutManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.rollout.duplicate.check", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
+                () -> rolloutManagement.getByName(trimmedName).isPresent());
     }
 }

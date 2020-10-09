@@ -108,7 +108,7 @@ public class AddTargetWindowController extends AbstractAddEntityWindowController
     protected boolean isEntityValid(final ProxyTarget entity) {
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
         return proxyTargetValidator.isEntityValid(entity, true,
-                targetManagement.getByControllerID(trimmedControllerId).isPresent());
+                () -> targetManagement.getByControllerID(trimmedControllerId).isPresent());
     }
 
 }

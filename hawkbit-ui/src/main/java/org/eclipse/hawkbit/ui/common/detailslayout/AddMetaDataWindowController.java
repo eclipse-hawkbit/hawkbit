@@ -28,6 +28,7 @@ public class AddMetaDataWindowController
 
     private final Function<ProxyMetaData, MetaData> createMetaDataCallback;
     private final Predicate<String> duplicateCheckCallback;
+    private final ProxyMetadataValidator validator;
 
     /**
      * Constructor for AddMetaDataWindowController
@@ -47,9 +48,9 @@ public class AddMetaDataWindowController
         super(uiDependencies);
 
         this.layout = layout;
-
         this.createMetaDataCallback = createMetaDataCallback;
         this.duplicateCheckCallback = duplicateCheckCallback;
+        this.validator = new ProxyMetadataValidator(uiDependencies);
     }
 
     @Override
@@ -107,23 +108,8 @@ public class AddMetaDataWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
-        if (!StringUtils.hasText(entity.getKey())) {
-            displayValidationError("message.key.missing");
-            return false;
-        }
-
-        if (!StringUtils.hasText(entity.getValue())) {
-            displayValidationError("message.value.missing");
-            return false;
-        }
-
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (duplicateCheckCallback.test(trimmedKey)) {
-            displayValidationError("message.metadata.duplicate.check", trimmedKey);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValidForAdd(entity, () -> duplicateCheckCallback.test(trimmedKey));
     }
 
     @Override

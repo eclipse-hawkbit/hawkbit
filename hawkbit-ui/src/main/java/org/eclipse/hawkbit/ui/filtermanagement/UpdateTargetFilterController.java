@@ -27,6 +27,7 @@ public class UpdateTargetFilterController extends
     private final TargetFilterQueryManagement targetFilterManagement;
     private final TargetFilterAddUpdateLayout layout;
     private final Runnable closeFormCallback;
+    private final ProxyTargetFilterValidator validator;
 
     private String nameBeforeEdit;
 
@@ -50,6 +51,7 @@ public class UpdateTargetFilterController extends
         this.targetFilterManagement = targetFilterManagement;
         this.layout = layout;
         this.closeFormCallback = closeFormCallback;
+        this.validator = new ProxyTargetFilterValidator(uiDependencies);
     }
 
     @Override
@@ -104,17 +106,8 @@ public class UpdateTargetFilterController extends
 
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.error.missing.filtername");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (!nameBeforeEdit.equals(trimmedName) && targetFilterManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.target.filter.duplicate", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
+                () -> targetFilterManagement.getByName(trimmedName).isPresent());
     }
 }

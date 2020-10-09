@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
+import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
 /**
@@ -28,6 +29,7 @@ public class UpdateSmTypeWindowController
 
     private final SoftwareModuleTypeManagement smTypeManagement;
     private final SmTypeWindowLayout layout;
+    private final ProxyTypeValidator validator;
 
     private String nameBeforeEdit;
     private String keyBeforeEdit;
@@ -48,6 +50,7 @@ public class UpdateSmTypeWindowController
 
         this.smTypeManagement = smTypeManagement;
         this.layout = layout;
+        this.validator = new ProxyTypeValidator(uiDependencies);
     }
 
     @Override
@@ -119,23 +122,10 @@ public class UpdateSmTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
-                || entity.getSmTypeAssign() == null) {
-            displayValidationError("message.error.missing.typenameorkeyorsmtype");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (!nameBeforeEdit.equals(trimmedName) && smTypeManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.type.duplicate.check", trimmedName);
-            return false;
-        }
-        if (!keyBeforeEdit.equals(trimmedKey) && smTypeManagement.getByKey(trimmedKey).isPresent()) {
-            displayValidationError("message.type.key.swmodule.duplicate.check", trimmedKey);
-            return false;
-        }
-
-        return true;
+        return validator.isSmTypeValid(entity, !keyBeforeEdit.equals(trimmedKey), !nameBeforeEdit.equals(trimmedName),
+                () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> smTypeManagement.getByName(trimmedName).isPresent());
     }
 }

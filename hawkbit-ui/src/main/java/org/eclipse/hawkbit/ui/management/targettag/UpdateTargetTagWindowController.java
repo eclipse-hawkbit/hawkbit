@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.tag.ProxyTagValidator;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +28,7 @@ public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowC
 
     private final TargetTagManagement targetTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
+    private final ProxyTagValidator validator;
 
     private String nameBeforeEdit;
 
@@ -46,6 +48,7 @@ public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowC
 
         this.targetTagManagement = targetTagManagement;
         this.layout = layout;
+        this.validator = new ProxyTagValidator(uiDependencies);
     }
 
     @Override
@@ -106,17 +109,8 @@ public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowC
 
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.error.missing.tagname");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (!nameBeforeEdit.equals(trimmedName) && targetTagManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.tag.duplicate.check", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
+                () -> targetTagManagement.getByName(trimmedName).isPresent());
     }
 }

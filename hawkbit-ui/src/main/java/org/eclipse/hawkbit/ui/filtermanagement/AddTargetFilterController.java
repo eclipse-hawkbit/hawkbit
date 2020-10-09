@@ -29,6 +29,7 @@ public class AddTargetFilterController
     private final TargetFilterQueryManagement targetFilterManagement;
     private final TargetFilterAddUpdateLayout layout;
     private final Runnable closeFormCallback;
+    private final ProxyTargetFilterValidator validator;
 
     /**
      * Constructor for AddTargetFilterController
@@ -50,6 +51,7 @@ public class AddTargetFilterController
         this.targetFilterManagement = targetFilterManagement;
         this.layout = layout;
         this.closeFormCallback = closeFormCallback;
+        this.validator = new ProxyTargetFilterValidator(uiDependencies);
     }
 
     @Override
@@ -95,17 +97,7 @@ public class AddTargetFilterController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.error.missing.filtername");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (targetFilterManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.target.filter.duplicate", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, true, () -> targetFilterManagement.getByName(trimmedName).isPresent());
     }
 }

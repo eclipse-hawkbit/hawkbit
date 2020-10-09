@@ -27,6 +27,7 @@ public class UpdateSmWindowController
 
     private final SoftwareModuleManagement smManagement;
     private final SmWindowLayout layout;
+    private final ProxySmValidator validator;
 
     /**
      * Constructor for UpdateSmWindowController
@@ -44,6 +45,7 @@ public class UpdateSmWindowController
 
         this.smManagement = smManagement;
         this.layout = layout;
+        this.validator = new ProxySmValidator(uiDependencies);
     }
 
     @Override
@@ -101,12 +103,10 @@ public class UpdateSmWindowController
 
     @Override
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())
-                || entity.getTypeInfo() == null) {
-            displayValidationError("message.error.missing.nameorversionortype");
-            return false;
-        }
-
-        return true;
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
+        final Long typeId = entity.getTypeInfo().getId();
+        return validator.isEntityValid(entity,
+                () -> smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
     }
 }

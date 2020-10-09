@@ -6,19 +6,20 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management.targettable;
+package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.function.BooleanSupplier;
 
 import org.eclipse.hawkbit.ui.common.AbstractValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.springframework.util.StringUtils;
 
 /**
- * Validator used in target window controllers to validate {@link ProxyTarget}.
+ * Validator used in targetfilter window controllers to validate
+ * {@link ProxyTargetFilterQuery}.
  */
-public class ProxyTargetValidator extends AbstractValidator {
+public class ProxyTargetFilterValidator extends AbstractValidator {
 
     /**
      * Constructor
@@ -26,20 +27,20 @@ public class ProxyTargetValidator extends AbstractValidator {
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public ProxyTargetValidator(final CommonUiDependencies uiDependencies) {
+    public ProxyTargetFilterValidator(final CommonUiDependencies uiDependencies) {
         super(uiDependencies);
     }
 
-    boolean isEntityValid(final ProxyTarget entity, final boolean hasEntityChanged,
+    boolean isEntityValid(final ProxyTargetFilterQuery entity, final boolean hasEntityChanged,
             final BooleanSupplier duplicateCheck) {
-        if (!StringUtils.hasText(entity.getControllerId())) {
-            displayValidationError("message.error.missing.controllerId");
+        if (!StringUtils.hasText(entity.getName())) {
+            displayValidationError("message.error.missing.filtername");
             return false;
         }
 
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (hasEntityChanged && duplicateCheck.getAsBoolean()) {
-            final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
-            displayValidationError("message.target.duplicate.check", trimmedControllerId);
+            displayValidationError("message.target.filter.duplicate", trimmedName);
             return false;
         }
 

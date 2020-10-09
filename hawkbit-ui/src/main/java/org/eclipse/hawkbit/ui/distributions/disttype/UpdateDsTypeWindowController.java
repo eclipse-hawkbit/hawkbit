@@ -25,7 +25,7 @@ import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
-import org.springframework.util.CollectionUtils;
+import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
 /**
@@ -38,6 +38,7 @@ public class UpdateDsTypeWindowController
     private final DistributionSetManagement dsManagement;
     private final TypeToProxyTypeMapper<SoftwareModuleType> smTypeToProxyTypeMapper;
     private final DsTypeWindowLayout layout;
+    private final ProxyTypeValidator validator;
 
     private String nameBeforeEdit;
     private String keyBeforeEdit;
@@ -64,6 +65,7 @@ public class UpdateDsTypeWindowController
         this.dsManagement = dsManagement;
         this.smTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
         this.layout = layout;
+        this.validator = new ProxyTypeValidator(uiDependencies);
     }
 
     @Override
@@ -166,23 +168,10 @@ public class UpdateDsTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
-                || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            displayValidationError("message.error.missing.typenameorkeyorsmtype");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (!nameBeforeEdit.equals(trimmedName) && dsTypeManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.type.duplicate.check", trimmedName);
-            return false;
-        }
-        if (!keyBeforeEdit.equals(trimmedKey) && dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            displayValidationError("message.type.key.ds.duplicate.check", trimmedKey);
-            return false;
-        }
-
-        return true;
+        return validator.isDsTypeValid(entity, !keyBeforeEdit.equals(trimmedKey), !nameBeforeEdit.equals(trimmedName),
+                () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> dsTypeManagement.getByName(trimmedName).isPresent());
     }
 }

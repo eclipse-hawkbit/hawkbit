@@ -44,6 +44,7 @@ public class AddRolloutWindowController
         extends AbstractAddEntityWindowController<ProxyRollout, ProxyRolloutWindow, Rollout> {
     private final RolloutManagement rolloutManagement;
     protected final AddRolloutWindowLayout layout;
+    private final ProxyRolloutValidator validator;
 
     /**
      * Controller for AddRolloutWindowController
@@ -59,6 +60,7 @@ public class AddRolloutWindowController
 
         this.rolloutManagement = dependencies.getRolloutManagement();
         this.layout = layout;
+        this.validator = new ProxyRolloutValidator(dependencies.getuiDependencies());
     }
 
     @Override
@@ -151,22 +153,7 @@ public class AddRolloutWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
-        if (entity == null) {
-            displayValidationError("message.save.fail", getI18n().getMessage("caption.rollout"));
-            return false;
-        }
-
-        if (!StringUtils.hasText(entity.getName())) {
-            displayValidationError("message.rollout.name.empty");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (rolloutManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.rollout.duplicate.check", trimmedName);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, true, () -> rolloutManagement.getByName(trimmedName).isPresent());
     }
 }

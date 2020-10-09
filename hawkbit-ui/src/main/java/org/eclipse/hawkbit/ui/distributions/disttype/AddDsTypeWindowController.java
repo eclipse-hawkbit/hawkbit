@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
-import org.springframework.util.CollectionUtils;
+import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
 /**
@@ -30,6 +30,7 @@ public class AddDsTypeWindowController
 
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DsTypeWindowLayout layout;
+    private final ProxyTypeValidator validator;
 
     /**
      * Constructor for AddDsTypeWindowController
@@ -47,6 +48,7 @@ public class AddDsTypeWindowController
 
         this.dsTypeManagement = dsTypeManagement;
         this.layout = layout;
+        this.validator = new ProxyTypeValidator(uiDependencies);
     }
 
     @Override
@@ -102,23 +104,9 @@ public class AddDsTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
-                || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            displayValidationError("message.error.missing.typenameorkeyorsmtype");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (dsTypeManagement.getByName(trimmedName).isPresent()) {
-            displayValidationError("message.type.duplicate.check", trimmedName);
-            return false;
-        }
-        if (dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            displayValidationError("message.type.key.ds.duplicate.check", trimmedKey);
-            return false;
-        }
-
-        return true;
+        return validator.isDsTypeValid(entity, true, true, () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> dsTypeManagement.getByName(trimmedName).isPresent());
     }
 }

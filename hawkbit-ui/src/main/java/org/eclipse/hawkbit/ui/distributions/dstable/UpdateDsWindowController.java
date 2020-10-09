@@ -27,6 +27,7 @@ public class UpdateDsWindowController
 
     private final DistributionSetManagement dsManagement;
     private final DsWindowLayout layout;
+    private final ProxyDsValidator validator;
 
     /**
      * Constructor for UpdateDsWindowController
@@ -44,6 +45,7 @@ public class UpdateDsWindowController
 
         this.dsManagement = dsManagement;
         this.layout = layout;
+        this.validator = new ProxyDsValidator(uiDependencies);
     }
 
     @Override
@@ -100,18 +102,9 @@ public class UpdateDsWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())) {
-            displayValidationError("message.error.missing.nameorversion");
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
-        if (dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent()) {
-            displayValidationError("message.duplicate.dist", trimmedName, trimmedVersion);
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity,
+                () -> dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
     }
 }
