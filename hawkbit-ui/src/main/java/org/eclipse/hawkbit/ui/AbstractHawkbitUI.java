@@ -23,6 +23,8 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.support.AbstractApplicationContext;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.annotations.Theme;
@@ -100,6 +102,21 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
 
         if (pushStrategy != null) {
             pushStrategy.clean();
+            clearContextListener();
+        }
+
+        SpringContextHelper.clearContext();
+    }
+
+    private void clearContextListener() {
+        if (pushStrategy instanceof ApplicationListener && context instanceof AbstractApplicationContext) {
+            final ApplicationListener<?> listener = (ApplicationListener<?>) pushStrategy;
+            ((AbstractApplicationContext) context).getApplicationListeners().remove(listener);
+
+            // we do not need to explicitly remove the listener from
+            // ApplicationEventMulticaster because it is done by
+            // UIBeanStore#destroy delegating to
+            // ApplicationListenerDetector#postProcessBeforeDestruction
         }
     }
 

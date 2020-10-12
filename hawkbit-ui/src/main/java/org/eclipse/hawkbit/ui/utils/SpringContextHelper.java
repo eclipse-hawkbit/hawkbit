@@ -12,9 +12,6 @@ import org.springframework.context.ApplicationContext;
 
 /**
  * Singleton for the spring application context.
- *
- *
- *
  */
 public final class SpringContextHelper {
 
@@ -27,6 +24,12 @@ public final class SpringContextHelper {
         // Utility class
     }
 
+    /**
+     * method to set application context.
+     * 
+     * @param context
+     *            ApplicationContext
+     */
     public static void setContext(final ApplicationContext context) {
         SpringContextHelper.context = context;
     }
@@ -70,4 +73,11 @@ public final class SpringContextHelper {
         return context.getBean(beanName, beanClazz);
     }
 
+    /**
+     * method to clear application context.
+     * 
+     */
+    public static void clearContext() {
+        context = null;
+    }
 }
