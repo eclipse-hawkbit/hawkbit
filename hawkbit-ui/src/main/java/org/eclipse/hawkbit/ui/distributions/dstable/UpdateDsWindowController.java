@@ -29,6 +29,9 @@ public class UpdateDsWindowController
     private final DsWindowLayout layout;
     private final ProxyDsValidator validator;
 
+    private String nameBeforeEdit;
+    private String versionBeforeEdit;
+
     /**
      * Constructor for UpdateDsWindowController
      *
@@ -58,6 +61,9 @@ public class UpdateDsWindowController
         ds.setVersion(proxyEntity.getVersion());
         ds.setDescription(proxyEntity.getDescription());
         ds.setRequiredMigrationStep(proxyEntity.isRequiredMigrationStep());
+
+        nameBeforeEdit = proxyEntity.getName();
+        versionBeforeEdit = proxyEntity.getVersion();
 
         return ds;
     }
@@ -99,7 +105,11 @@ public class UpdateDsWindowController
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
-        return validator.isEntityValid(entity,
-                () -> dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
+                && dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
+    }
+
+    private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {
+        return !nameBeforeEdit.equals(trimmedName) || !versionBeforeEdit.equals(trimmedVersion);
     }
 }

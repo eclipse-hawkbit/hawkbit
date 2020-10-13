@@ -89,6 +89,6 @@ public class AddTargetTagWindowController extends AbstractAddEntityWindowControl
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, true, () -> targetTagManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> targetTagManagement.getByName(trimmedName).isPresent());
     }
 }

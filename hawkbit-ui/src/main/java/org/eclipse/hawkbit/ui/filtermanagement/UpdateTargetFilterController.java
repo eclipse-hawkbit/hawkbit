@@ -102,7 +102,11 @@ public class UpdateTargetFilterController extends
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
-                () -> targetFilterManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity,
+                () -> hasNamedChanged(trimmedName) && targetFilterManagement.getByName(trimmedName).isPresent());
+    }
+
+    private boolean hasNamedChanged(final String trimmedName) {
+        return !nameBeforeEdit.equals(trimmedName);
     }
 }

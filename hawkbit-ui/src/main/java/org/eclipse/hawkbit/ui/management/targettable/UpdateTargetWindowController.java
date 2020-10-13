@@ -99,7 +99,11 @@ public class UpdateTargetWindowController
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
-        return proxyTargetValidator.isEntityValid(entity, !controllerIdBeforeEdit.equals(trimmedControllerId),
-                () -> targetManagement.getByControllerID(trimmedControllerId).isPresent());
+        return proxyTargetValidator.isEntityValid(entity, () -> hasControllerIdChanged(trimmedControllerId)
+                && targetManagement.getByControllerID(trimmedControllerId).isPresent());
+    }
+
+    private boolean hasControllerIdChanged(final String trimmedControllerId) {
+        return !controllerIdBeforeEdit.equals(trimmedControllerId);
     }
 }

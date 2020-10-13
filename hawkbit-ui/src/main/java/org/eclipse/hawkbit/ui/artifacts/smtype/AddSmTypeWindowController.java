@@ -94,7 +94,7 @@ public class AddSmTypeWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isSmTypeValid(entity, true, true, () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
+        return validator.isSmTypeValid(entity, () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
                 () -> smTypeManagement.getByName(trimmedName).isPresent());
     }
 }

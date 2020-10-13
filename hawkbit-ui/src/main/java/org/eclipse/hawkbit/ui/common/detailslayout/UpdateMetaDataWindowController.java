@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
@@ -17,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
+import org.springframework.util.StringUtils;
 
 /**
  * Controller for update meta data window
@@ -26,7 +28,10 @@ public class UpdateMetaDataWindowController
 
     private final MetaDataAddUpdateWindowLayout layout;
     private final Function<ProxyMetaData, MetaData> updateMetaDataCallback;
+    private final Predicate<String> duplicateCheckCallback;
     private final ProxyMetadataValidator validator;
+
+    private String keyBeforeEdit;
 
     /**
      * Constructor for UpdateMetaDataWindowController
@@ -40,12 +45,13 @@ public class UpdateMetaDataWindowController
      *
      */
     public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies,
-            final MetaDataAddUpdateWindowLayout layout,
-            final Function<ProxyMetaData, MetaData> updateMetaDataCallback) {
+            final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> updateMetaDataCallback,
+            final Predicate<String> duplicateCheckCallback) {
         super(uiDependencies);
 
         this.layout = layout;
         this.updateMetaDataCallback = updateMetaDataCallback;
+        this.duplicateCheckCallback = duplicateCheckCallback;
         this.validator = new ProxyMetadataValidator(uiDependencies);
     }
 
@@ -57,6 +63,8 @@ public class UpdateMetaDataWindowController
         metaData.setValue(proxyEntity.getValue());
         metaData.setEntityId(proxyEntity.getEntityId());
         metaData.setVisibleForTargets(proxyEntity.isVisibleForTargets());
+
+        keyBeforeEdit = proxyEntity.getKey();
 
         return metaData;
     }
@@ -119,6 +127,12 @@ public class UpdateMetaDataWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
-        return validator.isEntityValidForUpdate(entity);
+        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        return validator.isEntityValid(entity,
+                () -> hasKeyChanged(trimmedKey) && duplicateCheckCallback.test(trimmedKey));
+    }
+
+    private boolean hasKeyChanged(final String trimmedKey) {
+        return !keyBeforeEdit.equals(trimmedKey);
     }
 }

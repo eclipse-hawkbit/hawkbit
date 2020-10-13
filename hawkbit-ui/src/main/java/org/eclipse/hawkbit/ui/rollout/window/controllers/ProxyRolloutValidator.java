@@ -31,8 +31,7 @@ public class ProxyRolloutValidator extends AbstractValidator {
         super(uiDependencies);
     }
 
-    boolean isEntityValid(final ProxyRolloutWindow entity, final boolean hasEntityChanged,
-            final BooleanSupplier duplicateCheck) {
+    boolean isEntityValid(final ProxyRolloutWindow entity, final BooleanSupplier duplicateCheck) {
         if (entity == null) {
             displayValidationError("message.save.fail", getI18n().getMessage("caption.rollout"));
             return false;
@@ -44,7 +43,7 @@ public class ProxyRolloutValidator extends AbstractValidator {
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (hasEntityChanged && duplicateCheck.getAsBoolean()) {
+        if (duplicateCheck.getAsBoolean()) {
             displayValidationError("message.rollout.duplicate.check", trimmedName);
             return false;
         }

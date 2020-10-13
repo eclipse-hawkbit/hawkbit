@@ -31,24 +31,7 @@ public class ProxyMetadataValidator extends AbstractValidator {
         super(uiDependencies);
     }
 
-    boolean isEntityValidForAdd(final ProxyMetaData entity, final BooleanSupplier duplicateCheck) {
-        return mandatoryAttributesPresent(entity) && keyValid(entity, duplicateCheck);
-    }
-
-    boolean isEntityValidForUpdate(final ProxyMetaData entity) {
-        return mandatoryAttributesPresent(entity);
-    }
-
-    private boolean keyValid(final ProxyMetaData entity, final BooleanSupplier duplicateCheck) {
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.metadata.duplicate.check", trimmedKey);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean mandatoryAttributesPresent(final ProxyMetaData entity) {
+    boolean isEntityValid(final ProxyMetaData entity, final BooleanSupplier duplicateCheck) {
         if (!StringUtils.hasText(entity.getValue())) {
             displayValidationError("message.value.missing");
             return false;
@@ -56,6 +39,12 @@ public class ProxyMetadataValidator extends AbstractValidator {
 
         if (!StringUtils.hasText(entity.getKey())) {
             displayValidationError("message.key.missing");
+            return false;
+        }
+
+        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        if (duplicateCheck.getAsBoolean()) {
+            displayValidationError("message.metadata.duplicate.check", trimmedKey);
             return false;
         }
 

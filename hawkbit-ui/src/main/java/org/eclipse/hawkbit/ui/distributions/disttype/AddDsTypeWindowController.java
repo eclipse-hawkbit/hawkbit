@@ -101,7 +101,7 @@ public class AddDsTypeWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isDsTypeValid(entity, true, true, () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
+        return validator.isDsTypeValid(entity, () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
                 () -> dsTypeManagement.getByName(trimmedName).isPresent());
     }
 }

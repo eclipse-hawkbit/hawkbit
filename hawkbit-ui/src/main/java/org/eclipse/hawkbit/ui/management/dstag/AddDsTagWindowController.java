@@ -89,6 +89,6 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, true, () -> dsTagManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> dsTagManagement.getByName(trimmedName).isPresent());
     }
 }

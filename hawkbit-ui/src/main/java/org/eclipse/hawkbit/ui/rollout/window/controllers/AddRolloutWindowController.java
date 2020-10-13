@@ -149,6 +149,6 @@ public class AddRolloutWindowController
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, true, () -> rolloutManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> rolloutManagement.getByName(trimmedName).isPresent());
     }
 }

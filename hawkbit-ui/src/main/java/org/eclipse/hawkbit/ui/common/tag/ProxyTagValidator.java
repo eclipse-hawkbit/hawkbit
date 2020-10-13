@@ -35,21 +35,18 @@ public class ProxyTagValidator extends AbstractValidator {
      *
      * @param entity
      *            {@link ProxyTag}
-     * @param entityHasChanged
-     *            <code>true</code> if the entity has changed
-     * @param entityExistsInRepository
+     * @param duplicateCheck
      *            <code>true</code> if the entity already exists in the
      *            repository
      * @return <code>true</code> if the entity is valid
      */
-    public boolean isEntityValid(final ProxyTag entity, final boolean entityHasChanged,
-            final BooleanSupplier entityExistsInRepository) {
+    public boolean isEntityValid(final ProxyTag entity, final BooleanSupplier duplicateCheck) {
         if (!StringUtils.hasText(entity.getName())) {
             displayValidationError("message.error.missing.tagname");
             return false;
         }
 
-        if (entityHasChanged && entityExistsInRepository.getAsBoolean()) {
+        if (duplicateCheck.getAsBoolean()) {
             final String trimmedName = StringUtils.trimWhitespace(entity.getName());
             displayValidationError("message.tag.duplicate.check", trimmedName);
             return false;

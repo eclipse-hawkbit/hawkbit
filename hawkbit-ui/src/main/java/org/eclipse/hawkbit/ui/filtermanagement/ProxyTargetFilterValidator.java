@@ -31,15 +31,14 @@ public class ProxyTargetFilterValidator extends AbstractValidator {
         super(uiDependencies);
     }
 
-    boolean isEntityValid(final ProxyTargetFilterQuery entity, final boolean hasEntityChanged,
-            final BooleanSupplier duplicateCheck) {
+    boolean isEntityValid(final ProxyTargetFilterQuery entity, final BooleanSupplier duplicateCheck) {
         if (!StringUtils.hasText(entity.getName())) {
             displayValidationError("message.error.missing.filtername");
             return false;
         }
 
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        if (hasEntityChanged && duplicateCheck.getAsBoolean()) {
+        if (duplicateCheck.getAsBoolean()) {
             displayValidationError("message.target.filter.duplicate", trimmedName);
             return false;
         }

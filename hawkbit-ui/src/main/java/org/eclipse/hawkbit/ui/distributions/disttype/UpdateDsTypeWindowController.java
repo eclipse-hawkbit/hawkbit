@@ -165,8 +165,16 @@ public class UpdateDsTypeWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isDsTypeValid(entity, !keyBeforeEdit.equals(trimmedKey), !nameBeforeEdit.equals(trimmedName),
-                () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
-                () -> dsTypeManagement.getByName(trimmedName).isPresent());
+        return validator.isDsTypeValid(entity,
+                () -> hasKeyChanged(trimmedKey) && dsTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> hasNameChanged(trimmedName) && dsTypeManagement.getByName(trimmedName).isPresent());
+    }
+
+    private boolean hasNameChanged(final String trimmedName) {
+        return !nameBeforeEdit.equals(trimmedName);
+    }
+
+    private boolean hasKeyChanged(final String trimmedKey) {
+        return !keyBeforeEdit.equals(trimmedKey);
     }
 }

@@ -104,7 +104,7 @@ public class AddMetaDataWindowController
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isEntityValidForAdd(entity, () -> duplicateCheckCallback.test(trimmedKey));
+        return validator.isEntityValid(entity, () -> duplicateCheckCallback.test(trimmedKey));
     }
 
     @Override

@@ -47,7 +47,8 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
      * @param dsManagement
      *            DistributionSetManagement
      */
-    public DsMetaDataWindowLayout(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement) {
+    public DsMetaDataWindowLayout(final CommonUiDependencies uiDependencies,
+            final DistributionSetManagement dsManagement) {
         super(uiDependencies);
 
         this.dsManagement = dsManagement;
@@ -56,10 +57,10 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
                 this::deleteMetaData);
 
         this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
-        this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiDependencies, metaDataAddUpdateWindowLayout,
-                this::createMetaData, this::isDuplicate);
+        this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
+                metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
-                metaDataAddUpdateWindowLayout, this::updateMetaData);
+                metaDataAddUpdateWindowLayout, this::updateMetaData, this::isDuplicate);
 
         buildLayout();
         addGridSelectionListener();

@@ -105,7 +105,11 @@ public class UpdateDsTagWindowController extends AbstractUpdateEntityWindowContr
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
-                () -> dsTagManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity,
+                () -> hasNamedChanged(trimmedName) && dsTagManagement.getByName(trimmedName).isPresent());
+    }
+
+    private boolean hasNamedChanged(final String trimmedName) {
+        return !nameBeforeEdit.equals(trimmedName);
     }
 }

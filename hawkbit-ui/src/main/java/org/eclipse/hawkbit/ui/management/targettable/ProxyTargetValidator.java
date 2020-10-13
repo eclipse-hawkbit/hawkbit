@@ -30,14 +30,13 @@ public class ProxyTargetValidator extends AbstractValidator {
         super(uiDependencies);
     }
 
-    boolean isEntityValid(final ProxyTarget entity, final boolean hasEntityChanged,
-            final BooleanSupplier duplicateCheck) {
+    boolean isEntityValid(final ProxyTarget entity, final BooleanSupplier duplicateCheck) {
         if (!StringUtils.hasText(entity.getControllerId())) {
             displayValidationError("message.error.missing.controllerId");
             return false;
         }
 
-        if (hasEntityChanged && duplicateCheck.getAsBoolean()) {
+        if (duplicateCheck.getAsBoolean()) {
             final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
             displayValidationError("message.target.duplicate.check", trimmedControllerId);
             return false;

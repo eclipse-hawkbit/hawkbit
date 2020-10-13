@@ -152,7 +152,11 @@ public class UpdateRolloutWindowController
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, !nameBeforeEdit.equals(trimmedName),
-                () -> rolloutManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity,
+                () -> hasNamedChanged(trimmedName) && rolloutManagement.getByName(trimmedName).isPresent());
+    }
+
+    private boolean hasNamedChanged(final String trimmedName) {
+        return !nameBeforeEdit.equals(trimmedName);
     }
 }

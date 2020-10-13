@@ -39,22 +39,18 @@ public class ProxyTypeValidator extends AbstractValidator {
      *
      * @param entity
      *            {@link ProxyTag}
-     * @param keyHasChanged
-     *            <code>true</code> if the entity key has changed
-     * @param nameHasChanged
-     *            <code>true</code> if the entity name has changed
-     * @param keyExistsInRepository
+     * @param keyDuplicateCheck
      *            <code>true</code> if the entity key already exists in the
      *            repository
-     * @param nameExistsInRepository
+     * @param nameDuplicateCheck
      *            <code>true</code> if the entity name already exists in the
      *            repository
      * @return <code>true</code> if the entity is valid
      */
-    public boolean isDsTypeValid(final ProxyType entity, final boolean keyHasChanged, final boolean nameHasChanged,
-            final BooleanSupplier keyExistsInRepository, final BooleanSupplier nameExistsInRepository) {
-        return mandatoryDsAttributesPresent(entity) && nameValid(entity, nameHasChanged, nameExistsInRepository)
-                && keyValid(entity, keyHasChanged, keyExistsInRepository, "message.type.key.ds.duplicate.check");
+    public boolean isDsTypeValid(final ProxyType entity, final BooleanSupplier keyDuplicateCheck,
+            final BooleanSupplier nameDuplicateCheck) {
+        return mandatoryDsAttributesPresent(entity) && nameValid(entity, nameDuplicateCheck)
+                && keyValid(entity, keyDuplicateCheck, "message.type.key.ds.duplicate.check");
     }
 
     /**
@@ -62,22 +58,18 @@ public class ProxyTypeValidator extends AbstractValidator {
      *
      * @param entity
      *            {@link ProxyTag}
-     * @param keyHasChanged
-     *            <code>true</code> if the entity key has changed
-     * @param nameHasChanged
-     *            <code>true</code> if the entity name has changed
-     * @param keyExistsInRepository
+     * @param keyDuplicateCheck
      *            <code>true</code> if the entity key already exists in the
      *            repository
-     * @param nameExistsInRepository
+     * @param nameDuplicateCheck
      *            <code>true</code> if the entity name already exists in the
      *            repository
      * @return <code>true</code> if the entity is valid
      */
-    public boolean isSmTypeValid(final ProxyType entity, final boolean keyHasChanged, final boolean nameHasChanged,
-            final BooleanSupplier keyExistsInRepository, final BooleanSupplier nameExistsInRepository) {
-        return mandatorySmAttributesPresent(entity) && nameValid(entity, nameHasChanged, nameExistsInRepository)
-                && keyValid(entity, keyHasChanged, keyExistsInRepository, "message.type.key.swmodule.duplicate.check");
+    public boolean isSmTypeValid(final ProxyType entity, final BooleanSupplier keyDuplicateCheck,
+            final BooleanSupplier nameDuplicateCheck) {
+        return mandatorySmAttributesPresent(entity) && nameValid(entity, nameDuplicateCheck)
+                && keyValid(entity, keyDuplicateCheck, "message.type.key.swmodule.duplicate.check");
     }
 
     private boolean mandatorySmAttributesPresent(final ProxyType entity) {
@@ -98,9 +90,9 @@ public class ProxyTypeValidator extends AbstractValidator {
         return true;
     }
 
-    private boolean keyValid(final ProxyType entity, final boolean keyHasChanged,
-            final BooleanSupplier keyExistsInRepository, final String duplicateKeyMessageKey) {
-        if (keyHasChanged && keyExistsInRepository.getAsBoolean()) {
+    private boolean keyValid(final ProxyType entity, final BooleanSupplier keyExistsInRepository,
+            final String duplicateKeyMessageKey) {
+        if (keyExistsInRepository.getAsBoolean()) {
             final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
             displayValidationError(duplicateKeyMessageKey, trimmedKey);
             return false;
@@ -108,9 +100,8 @@ public class ProxyTypeValidator extends AbstractValidator {
         return true;
     }
 
-    private boolean nameValid(final ProxyType entity, final boolean nameHasChanged,
-            final BooleanSupplier nameExistsInRepository) {
-        if (nameHasChanged && nameExistsInRepository.getAsBoolean()) {
+    private boolean nameValid(final ProxyType entity, final BooleanSupplier nameExistsInRepository) {
+        if (nameExistsInRepository.getAsBoolean()) {
             final String trimmedName = StringUtils.trimWhitespace(entity.getName());
             displayValidationError("message.type.duplicate.check", trimmedName);
             return false;

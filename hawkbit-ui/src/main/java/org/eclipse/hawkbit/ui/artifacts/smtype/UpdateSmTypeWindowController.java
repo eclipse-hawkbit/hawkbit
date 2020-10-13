@@ -119,8 +119,16 @@ public class UpdateSmTypeWindowController
     protected boolean isEntityValid(final ProxyType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isSmTypeValid(entity, !keyBeforeEdit.equals(trimmedKey), !nameBeforeEdit.equals(trimmedName),
-                () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
-                () -> smTypeManagement.getByName(trimmedName).isPresent());
+        return validator.isSmTypeValid(entity,
+                () -> hasKeyChanged(trimmedKey) && smTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> hasNameChanged(trimmedName) && smTypeManagement.getByName(trimmedName).isPresent());
+    }
+
+    private boolean hasNameChanged(final String trimmedName) {
+        return !nameBeforeEdit.equals(trimmedName);
+    }
+
+    private boolean hasKeyChanged(final String trimmedKey) {
+        return !keyBeforeEdit.equals(trimmedKey);
     }
 }

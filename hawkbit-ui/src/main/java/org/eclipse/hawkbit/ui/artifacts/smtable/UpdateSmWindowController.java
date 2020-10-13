@@ -29,6 +29,9 @@ public class UpdateSmWindowController
     private final SmWindowLayout layout;
     private final ProxySmValidator validator;
 
+    private String nameBeforeEdit;
+    private String versionBeforeEdit;
+
     /**
      * Constructor for UpdateSmWindowController
      *
@@ -58,6 +61,9 @@ public class UpdateSmWindowController
         sm.setVersion(proxyEntity.getVersion());
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
+
+        nameBeforeEdit = proxyEntity.getName();
+        versionBeforeEdit = proxyEntity.getVersion();
 
         return sm;
     }
@@ -101,7 +107,11 @@ public class UpdateSmWindowController
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         final Long typeId = entity.getTypeInfo().getId();
-        return validator.isEntityValid(entity,
-                () -> smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
+                && smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
+    }
+
+    private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {
+        return !nameBeforeEdit.equals(trimmedName) || !versionBeforeEdit.equals(trimmedVersion);
     }
 }

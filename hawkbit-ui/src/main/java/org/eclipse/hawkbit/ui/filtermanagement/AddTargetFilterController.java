@@ -93,6 +93,6 @@ public class AddTargetFilterController
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, true, () -> targetFilterManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> targetFilterManagement.getByName(trimmedName).isPresent());
     }
 }
