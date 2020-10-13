@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.themes.HawkbitTheme;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -117,7 +116,6 @@ public abstract class AbstractHawkbitLoginUI extends UI {
     @Override
     protected void init(final VaadinRequest request) {
         HawkbitCommonUtil.initLocalization(this, uiProperties.getLocalization(), i18n);
-        SpringContextHelper.setContext(context);
 
         params = UriComponentsBuilder.fromUri(Page.getCurrent().getLocation()).build().getQueryParams();
 
