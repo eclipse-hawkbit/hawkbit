@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -78,9 +78,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             final Lock uploadLock) {
         this.artifactManagement = artifactManagement;
         this.i18n = i18n;
-        this.eventBus = SpringContextHelper.getBean(EventBus.UIEventBus.class);
-        this.artifactUploadState = SpringContextHelper.getBean(ArtifactUploadState.class);
-        this.uiNotification = SpringContextHelper.getBean(UINotification.class);
+        this.eventBus = SpringContextHolder.getInstance().getBean(EventBus.UIEventBus.class);
+        this.artifactUploadState = SpringContextHolder.getInstance().getBean(ArtifactUploadState.class);
+        this.uiNotification = SpringContextHolder.getInstance().getBean(UINotification.class);
         this.uploadLock = uploadLock;
     }
 
@@ -103,8 +103,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        SpringContextHelper.getBean("uiExecutor", Executor.class).execute(new TransferArtifactToRepositoryRunnable(
-                inputStream, fileUploadId, mimeType, UI.getCurrent(), uploadLock));
+        SpringContextHolder.getInstance().getBean("uiExecutor", Executor.class)
+                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(),
+                        uploadLock));
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -241,15 +242,15 @@ public abstract class AbstractFileTransferHandler implements Serializable {
          * Constructor for TransferArtifactToRepositoryRunnable
          *
          * @param inputStream
-         *          InputStream
+         *            InputStream
          * @param fileUploadId
-         *          FileUploadId
+         *            FileUploadId
          * @param mimeType
-         *          String
+         *            String
          * @param vaadinUi
-         *          UI
+         *            UI
          * @param uploadLock
-         *          Lock
+         *            Lock
          */
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
                 final String mimeType, final UI vaadinUi, final Lock uploadLock) {

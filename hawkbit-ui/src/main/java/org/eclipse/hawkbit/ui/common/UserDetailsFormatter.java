@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.User;
@@ -179,10 +179,10 @@ public final class UserDetailsFormatter {
     public static UserDetails getCurrentUser() {
         final SecurityContext context = (SecurityContext) VaadinService.getCurrentRequest().getWrappedSession()
                 .getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        Authentication authentication = context.getAuthentication();
+        final Authentication authentication = context.getAuthentication();
         if (authentication instanceof OAuth2AuthenticationToken) {
-            OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-            Object details = authentication.getDetails();
+            final OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
+            final Object details = authentication.getDetails();
             String tenant = "DEFAULT";
             if (details instanceof TenantAwareAuthenticationDetails) {
                 tenant = ((TenantAwareAuthenticationDetails) details).getTenant();
@@ -207,7 +207,8 @@ public final class UserDetailsFormatter {
     // Exception squid:S1166 - exception has to be hidden
     @SuppressWarnings({ "squid:S1166" })
     private static UserDetails loadUserByUsername(final String username) {
-        final UserDetailsService userDetailsService = SpringContextHelper.getBean(UserDetailsService.class);
+        final UserDetailsService userDetailsService = SpringContextHolder.getInstance()
+                .getBean(UserDetailsService.class);
         try {
             return userDetailsService.loadUserByUsername(username);
         } catch (final UsernameNotFoundException e) {

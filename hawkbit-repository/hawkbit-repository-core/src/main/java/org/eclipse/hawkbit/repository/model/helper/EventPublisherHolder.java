@@ -35,7 +35,7 @@ public final class EventPublisherHolder {
     }
 
     /**
-     * @return the cache manager holder singleton instance
+     * @return the event publisher holder singleton instance
      */
     public static EventPublisherHolder getInstance() {
         return SINGLETON;

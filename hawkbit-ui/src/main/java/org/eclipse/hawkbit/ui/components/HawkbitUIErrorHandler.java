@@ -17,7 +17,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHelper;
+import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -106,7 +106,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         LOG.error("Error in UI: ", ex);
 
         final String errorMessage = extractMessageFrom(ex);
-        final VaadinMessageSource i18n = SpringContextHelper.getBean(VaadinMessageSource.class);
+        final VaadinMessageSource i18n = SpringContextHolder.getInstance().getBean(VaadinMessageSource.class);
 
         return buildErrorNotification(i18n.getMessage("caption.error"), errorMessage);
     }
