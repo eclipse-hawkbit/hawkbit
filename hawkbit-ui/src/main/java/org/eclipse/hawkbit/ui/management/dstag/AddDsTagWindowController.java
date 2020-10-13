@@ -72,11 +72,6 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.entity.distribution.tag";
-    }
-
-    @Override
     protected Long getId(final Tag entity) {
         return entity.getId();
     }

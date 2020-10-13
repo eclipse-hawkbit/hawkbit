@@ -140,11 +140,6 @@ public class UpdateRolloutWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.rollout";
-    }
-
-    @Override
     protected Long getId(final Rollout entity) {
         return entity.getId();
     }

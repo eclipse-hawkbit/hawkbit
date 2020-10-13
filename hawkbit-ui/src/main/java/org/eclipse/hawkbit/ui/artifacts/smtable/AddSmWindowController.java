@@ -94,11 +94,6 @@ public class AddSmWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.software.module";
-    }
-
-    @Override
     protected void selectPersistedEntity(final SoftwareModule entity) {
         final ProxySoftwareModule addedItem = new SoftwareModuleToProxyMapper().map(entity);
         publishSelectionEvent(new SelectionChangedEventPayload<>(SelectionChangedEventType.ENTITY_SELECTED, addedItem,

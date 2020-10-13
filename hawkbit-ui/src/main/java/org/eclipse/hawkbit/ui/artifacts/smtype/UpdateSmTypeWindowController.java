@@ -101,11 +101,6 @@ public class UpdateSmTypeWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.entity.software.module.type";
-    }
-
-    @Override
     protected Long getId(final SoftwareModuleType entity) {
         return entity.getId();
     }

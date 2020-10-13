@@ -103,11 +103,6 @@ public class UpdateMetaDataWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.metadata";
-    }
-
-    @Override
     protected Long getId(final MetaData entity) {
         return entity.getEntityId();
     }

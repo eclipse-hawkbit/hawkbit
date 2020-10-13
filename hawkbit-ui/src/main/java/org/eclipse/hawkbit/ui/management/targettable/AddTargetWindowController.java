@@ -79,7 +79,7 @@ public class AddTargetWindowController extends AbstractAddEntityWindowController
 
     @Override
     protected String getDisplayableName(final ProxyTarget entity) {
-        return entity.getName();
+        return entity.getName() == null ? entity.getControllerId() : entity.getName();
     }
 
     @Override
@@ -90,11 +90,6 @@ public class AddTargetWindowController extends AbstractAddEntityWindowController
     @Override
     protected Class<ProxyTarget> getEntityClass() {
         return ProxyTarget.class;
-    }
-
-    @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.target";
     }
 
     @Override

@@ -91,11 +91,6 @@ public class AddSmTypeWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.entity.software.module.type";
-    }
-
-    @Override
     protected boolean isEntityValid(final ProxyType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());

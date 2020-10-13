@@ -147,11 +147,6 @@ public class UpdateDsTypeWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.entity.distribution.type";
-    }
-
-    @Override
     protected Long getId(final DistributionSetType entity) {
         return entity.getId();
     }

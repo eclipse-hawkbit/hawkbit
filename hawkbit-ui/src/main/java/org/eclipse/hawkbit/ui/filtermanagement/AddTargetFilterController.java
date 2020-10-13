@@ -81,11 +81,6 @@ public class AddTargetFilterController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.target.filter";
-    }
-
-    @Override
     protected Long getId(final TargetFilterQuery entity) {
         return entity.getId();
     }

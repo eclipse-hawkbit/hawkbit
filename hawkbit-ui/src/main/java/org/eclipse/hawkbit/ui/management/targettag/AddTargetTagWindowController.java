@@ -72,11 +72,6 @@ public class AddTargetTagWindowController extends AbstractAddEntityWindowControl
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.entity.target.tag";
-    }
-
-    @Override
     protected Long getId(final Tag entity) {
         return entity.getId();
     }

@@ -102,11 +102,6 @@ public class AddDsWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.distribution";
-    }
-
-    @Override
     protected void selectPersistedEntity(final DistributionSet entity) {
         final ProxyDistributionSet addedItem = new DistributionSetToProxyDistributionMapper().map(entity);
         publishSelectionEvent(new SelectionChangedEventPayload<>(SelectionChangedEventType.ENTITY_SELECTED, addedItem,

@@ -140,11 +140,6 @@ public class AutoAssignmentWindowController extends
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return null;
-    }
-
-    @Override
     protected Long getId(final TargetFilterQuery entity) {
         return entity.getId();
     }

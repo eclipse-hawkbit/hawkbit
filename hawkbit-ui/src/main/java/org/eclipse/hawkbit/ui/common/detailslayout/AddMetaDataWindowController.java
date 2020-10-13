@@ -102,11 +102,6 @@ public class AddMetaDataWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.metadata";
-    }
-
-    @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         return validator.isEntityValidForAdd(entity, () -> duplicateCheckCallback.test(trimmedKey));

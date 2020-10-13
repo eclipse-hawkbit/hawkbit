@@ -92,11 +92,6 @@ public class UpdateTargetWindowController
     }
 
     @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.target";
-    }
-
-    @Override
     protected Class<ProxyTarget> getEntityClass() {
         return ProxyTarget.class;
     }

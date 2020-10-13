@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.Objects;
+
 import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -124,9 +126,12 @@ public abstract class AbstractEntityWindowController<T, E, R> {
     }
 
     protected void handleEntityPersistFailed(final E entity, final RuntimeException ex) {
-        final String entityType = getI18n().getMessage(getDisplayableEntityTypeMessageKey());
-        LOG.trace("Persist of {} failed in UI: {}", entityType, ex.getMessage());
-        displayWarning(getPersistFailureMessageKey(), getDisplayableName(entity));
+        final String name = getDisplayableName(entity);
+        final String id = Objects.toString(entity);
+        final String type = getEntityClass().getSimpleName();
+        LOG.warn("Persist of entity name:{}, id:{}, type:{} failed in UI with reason: {}", name, id, type,
+                ex.getMessage());
+        displayWarning(getPersistFailureMessageKey(), name);
     }
 
     protected abstract EntityModifiedEventPayload createModifiedEventPayload(final R entity);
@@ -134,8 +139,6 @@ public abstract class AbstractEntityWindowController<T, E, R> {
     protected abstract Long getId(R entity);
 
     protected abstract String getDisplayableName(E entity);
-
-    protected abstract String getDisplayableEntityTypeMessageKey();
 
     protected abstract String getPersistSuccessMessageKey();
 

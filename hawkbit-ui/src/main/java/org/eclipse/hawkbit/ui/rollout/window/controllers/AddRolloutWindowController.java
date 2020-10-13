@@ -138,11 +138,6 @@ public class AddRolloutWindowController
         return ProxyRollout.class;
     }
 
-    @Override
-    protected String getDisplayableEntityTypeMessageKey() {
-        return "caption.rollout";
-    }
-
     private List<RolloutGroupCreate> getRolloutGroupsCreateFromDefinitions(
             final List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions) {
         final AdvancedRolloutGroupDefinitionToCreateMapper mapper = new AdvancedRolloutGroupDefinitionToCreateMapper(
