@@ -1,1 +1,1 @@
-CREATE INDEX sp_idx_target_05 ON sp_target (last_modified_at);
+CREATE INDEX sp_idx_target_05 ON sp_target (tenant, last_modified_at);
