@@ -51,15 +51,16 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      * @param eventView
      *            EventView
      */
-    public AbstractDistributionSetGridLayout(final CommonUiDependencies uiDependencies, final SystemManagement systemManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantConfigurationManagement configManagement,
+    public AbstractDistributionSetGridLayout(final CommonUiDependencies uiDependencies,
+            final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement configManagement,
             final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final EventView eventView) {
 
         this.eventView = eventView;
 
         dsWindowBuilder = new DsWindowBuilder(uiDependencies, systemManagement, systemSecurityContext, configManagement,
-                distributionSetManagement, distributionSetTypeManagement, EventView.DEPLOYMENT);
+                distributionSetManagement, distributionSetTypeManagement, eventView);
         dsMetaDataWindowBuilder = new DsMetaDataWindowBuilder(uiDependencies, distributionSetManagement);
     }
 
