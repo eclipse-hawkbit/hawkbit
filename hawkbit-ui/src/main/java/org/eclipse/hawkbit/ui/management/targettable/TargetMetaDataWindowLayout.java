@@ -47,7 +47,8 @@ public class TargetMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Str
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetMetaDataWindowLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement) {
+    public TargetMetaDataWindowLayout(final CommonUiDependencies uiDependencies,
+            final TargetManagement targetManagement) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
@@ -59,7 +60,7 @@ public class TargetMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Str
         this.addTargetMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateTargetMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
-                metaDataAddUpdateWindowLayout, this::updateMetaData);
+                metaDataAddUpdateWindowLayout, this::updateMetaData, this::isDuplicate);
 
         buildLayout();
         addGridSelectionListener();

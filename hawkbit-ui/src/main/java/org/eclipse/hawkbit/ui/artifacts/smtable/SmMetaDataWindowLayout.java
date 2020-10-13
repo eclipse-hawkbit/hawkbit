@@ -45,7 +45,8 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
      * @param smManagement
      *            SoftwareModuleManagement
      */
-    public SmMetaDataWindowLayout(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement) {
+    public SmMetaDataWindowLayout(final CommonUiDependencies uiDependencies,
+            final SoftwareModuleManagement smManagement) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
@@ -54,10 +55,10 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
                 this::deleteMetaData);
 
         this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n);
-        this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiDependencies, smMetaDataAddUpdateWindowLayout,
-                this::createMetaData, this::isDuplicate);
+        this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
+                smMetaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
-                smMetaDataAddUpdateWindowLayout, this::updateMetaData);
+                smMetaDataAddUpdateWindowLayout, this::updateMetaData, this::isDuplicate);
 
         buildLayout();
         addGridSelectionListener();

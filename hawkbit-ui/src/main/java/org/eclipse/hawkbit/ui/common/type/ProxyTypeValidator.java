@@ -82,7 +82,7 @@ public class ProxyTypeValidator extends AbstractValidator {
     }
 
     private boolean mandatoryDsAttributesPresent(final ProxyType entity) {
-        if (StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
+        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
                 || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
             displayValidationError(KEY_MISSING_NAME_OR_KEY);
             return false;
