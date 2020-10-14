@@ -51,23 +51,26 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
      *            SoftwareModuleTypeManagement
      * @param smTypeFilterLayoutUiState
      *            SMTypeFilterLayoutUiState
+     * @param eventView
+     *            {@link EventView}
      */
     public SMTypeFilterLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final EventView eventView) {
-        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(uiDependencies, softwareModuleTypeManagement);
+        final SmTypeWindowBuilder smTypeWindowBuilder = new SmTypeWindowBuilder(uiDependencies,
+                softwareModuleTypeManagement);
 
         this.smTypeFilterHeader = new SMTypeFilterHeader(uiDependencies, smTypeWindowBuilder, smTypeFilterLayoutUiState,
                 eventView);
-        this.smTypeFilterButtons = new SMTypeFilterButtons(uiDependencies, softwareModuleTypeManagement, smTypeWindowBuilder,
-                smTypeFilterLayoutUiState, eventView);
+        this.smTypeFilterButtons = new SMTypeFilterButtons(uiDependencies, softwareModuleTypeManagement,
+                smTypeWindowBuilder, smTypeFilterLayoutUiState, eventView);
 
         this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.SM_TYPE_FILTER, eventView), smTypeFilterButtons::hideActionColumns,
                 smTypeFilterButtons::showEditColumn, smTypeFilterButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyType.class)
-                .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
-                .parentEntityType(ProxySoftwareModule.class).build();
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
+                ProxyType.class).entityModifiedAwareSupports(getEntityModifiedAwareSupports())
+                        .parentEntityType(ProxySoftwareModule.class).build();
 
         buildLayout();
     }

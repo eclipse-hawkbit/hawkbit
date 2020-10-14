@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.springframework.util.StringUtils;
@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 /**
  * Validator used in target window controllers to validate {@link ProxyTarget}.
  */
-public class ProxyTargetValidator extends AbstractValidator {
+public class ProxyTargetValidator extends EntityValidator {
 
     /**
      * Constructor

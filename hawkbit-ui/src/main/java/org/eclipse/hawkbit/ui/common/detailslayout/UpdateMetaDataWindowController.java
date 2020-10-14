@@ -42,7 +42,8 @@ public class UpdateMetaDataWindowController
      *            MetaDataAddUpdateWindowLayout
      * @param updateMetaDataCallback
      *            Update meta data call back function for event listener
-     *
+     * @param duplicateCheckCallback
+     *            call back to check if entity already exists in repository
      */
     public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies,
             final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> updateMetaDataCallback,

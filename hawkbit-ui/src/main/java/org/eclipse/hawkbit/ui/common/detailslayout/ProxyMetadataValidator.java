@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.util.StringUtils;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Validator used in Metadata window controllers to validate
  * {@link ProxyMetaData}.
  */
-public class ProxyMetadataValidator extends AbstractValidator {
+public class ProxyMetadataValidator extends EntityValidator {
 
     /**
      * Constructor

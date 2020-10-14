@@ -36,9 +36,11 @@ public class CommonUiDependencies {
      *            UIEventBus
      * @param uiNotification
      *            UINotification
+     * @param permChecker
+     *            {@link SpPermissionChecker}
      */
-    public CommonUiDependencies(final VaadinMessageSource i18n, final EntityFactory entityFactory, final UIEventBus eventBus,
-            final UINotification uiNotification, final SpPermissionChecker permChecker) {
+    public CommonUiDependencies(final VaadinMessageSource i18n, final EntityFactory entityFactory,
+            final UIEventBus eventBus, final UINotification uiNotification, final SpPermissionChecker permChecker) {
         super();
         this.i18n = i18n;
         this.entityFactory = entityFactory;

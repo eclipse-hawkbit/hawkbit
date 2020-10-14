@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.window.controllers;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.springframework.util.StringUtils;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Validator used in rollout window controllers to validate
  * {@link ProxyRolloutWindow}.
  */
-public class ProxyRolloutValidator extends AbstractValidator {
+public class ProxyRolloutValidator extends EntityValidator {
 
     /**
      * Constructor

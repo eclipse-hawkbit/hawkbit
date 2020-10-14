@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.springframework.util.StringUtils;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Validator used in SoftwareModule window controllers to validate
  * {@link ProxySoftwareModule}.
  */
-public class ProxySmValidator extends AbstractValidator {
+public class ProxySmValidator extends EntityValidator {
 
     /**
      * Constructor

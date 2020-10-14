@@ -38,8 +38,8 @@ public class DSTypeFilterButtons extends AbstractTypeFilterButtons {
     /**
      * Constructor
      *
-     * @param eventBus
-     *            UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetTypeManagement
      *            DistributionSetTypeManagement
      * @param systemManagement

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.type;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
@@ -20,7 +20,7 @@ import org.springframework.util.StringUtils;
 /**
  * Validator used in *Type window controllers to validate {@link ProxyType}.
  */
-public class ProxyTypeValidator extends AbstractValidator {
+public class ProxyTypeValidator extends EntityValidator {
 
     private static final String KEY_MISSING_NAME_OR_KEY = "message.error.missing.typenameorkeyorsmtype";
 

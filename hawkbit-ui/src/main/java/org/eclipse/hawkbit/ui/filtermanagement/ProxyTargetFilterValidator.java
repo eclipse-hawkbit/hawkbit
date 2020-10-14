@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.springframework.util.StringUtils;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * Validator used in targetfilter window controllers to validate
  * {@link ProxyTargetFilterQuery}.
  */
-public class ProxyTargetFilterValidator extends AbstractValidator {
+public class ProxyTargetFilterValidator extends EntityValidator {
 
     /**
      * Constructor

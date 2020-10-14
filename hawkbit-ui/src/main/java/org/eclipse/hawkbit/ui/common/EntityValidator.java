@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 /**
  * Base function for a validator used in window controllers.
  */
-public abstract class AbstractValidator {
+public class EntityValidator {
 
     private final CommonUiDependencies uiDependencies;
 
@@ -23,7 +23,7 @@ public abstract class AbstractValidator {
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractValidator(final CommonUiDependencies uiDependencies) {
+    protected EntityValidator(final CommonUiDependencies uiDependencies) {
         this.uiDependencies = uiDependencies;
 
     }

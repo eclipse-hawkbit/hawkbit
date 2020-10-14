@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
@@ -39,10 +39,8 @@ public class DistributionSetsToTargetAssignmentSupport
     /**
      * Constructor for DistributionSetsToTargetAssignmentSupport
      *
-     * @param notification
-     *            UINotification
-     * @param i18n
-     *            VaadinMessageSource
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param configManagement

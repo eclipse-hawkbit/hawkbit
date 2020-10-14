@@ -10,16 +10,15 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.AbstractValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.springframework.util.StringUtils;
 
 /**
- * Validator used in target window controllers to validate {@link ProxyTarget}.
+ * Validator used in target window controllers to validate {@link ProxyDistributionSet}.
  */
-public class ProxyDsValidator extends AbstractValidator {
+public class ProxyDsValidator extends EntityValidator {
 
     /**
      * Constructor
