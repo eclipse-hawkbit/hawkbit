@@ -119,7 +119,8 @@ public class UpdateDsTypeWindowController
         layout.disableTypeKey();
 
         if (isDsTypeAssigned) {
-            displayValidationError(nameBeforeEdit + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
+            getUiNotification().displayValidationError(
+                    nameBeforeEdit + "  " + getI18n().getMessage("message.error.dist.set.type.update"));
             layout.disableDsTypeSmSelectLayout();
         }
     }
