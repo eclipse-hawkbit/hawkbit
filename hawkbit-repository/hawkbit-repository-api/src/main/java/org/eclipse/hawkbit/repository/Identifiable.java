@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.repository;
 
 import java.io.Serializable;
 
+/**
+ * @param <T> the parameter of the class
+ */
 @FunctionalInterface
 public interface Identifiable<T extends Serializable> {
 

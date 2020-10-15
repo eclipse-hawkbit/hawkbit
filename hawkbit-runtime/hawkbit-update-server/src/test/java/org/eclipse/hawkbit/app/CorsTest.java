@@ -41,7 +41,6 @@ import io.qameta.allure.Story;
         "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + "," + CorsTest.ALLOWED_ORIGIN_SECOND})
 @TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class },
         mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
-@DirtiesContext
 @Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest {

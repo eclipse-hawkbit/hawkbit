@@ -55,6 +55,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
         final DefaultMockMvcBuilder createMvcWebAppContext = MockMvcBuilders.webAppContextSetup(context);
 
+        // CharacterEncodingFilter is needed for the encoding properties to be imported properly
         createMvcWebAppContext.addFilter(characterEncodingFilter);
         createMvcWebAppContext.addFilter(
                 new ExcludePathAwareShallowETagFilter("/rest/v1/softwaremodules/{smId}/artifacts/{artId}/download",
