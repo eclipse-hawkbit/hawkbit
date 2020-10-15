@@ -142,7 +142,7 @@
       <!-- Newer version contains new rule that we violate. Needs to be fixed first -->
       <hibernate-validator.version>6.0.20.Final</hibernate-validator.version>
       <!-- Newer community version does not support MySQL 5.6 anymore -->
-      <flyway-core.version>5.2.4</flyway-core.version>
+      <flyway.version>5.2.4</flyway.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
@@ -423,13 +423,6 @@
                      <exclude>**/Abstract*.java</exclude>
                   </excludes>
                </configuration>
-               <dependencies>
-                  <dependency>
-                     <groupId>org.aspectj</groupId>
-                     <artifactId>aspectjweaver</artifactId>
-                     <version>${aspectj.version}</version>
-                  </dependency>
-               </dependencies>
             </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
@@ -445,13 +438,6 @@
                      </property>
                   </properties>
                </configuration>
-               <dependencies>
-                  <dependency>
-                     <groupId>org.aspectj</groupId>
-                     <artifactId>aspectjweaver</artifactId>
-                     <version>${aspectj.version}</version>
-                  </dependency>
-               </dependencies>
                <executions>
                   <execution>
                      <id>integration-test</id>
@@ -600,11 +586,6 @@
                   <artifactId>vaadin-server</artifactId>
                </exclusion>
             </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>${flyway-core.version}</version>
          </dependency>
          <!-- Misc -->
          <dependency>
