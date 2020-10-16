@@ -10,31 +10,33 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetTypeDataProvider;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigDsType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.tenantconfiguration.window.SystemConfigWindowDependencies;
 import org.eclipse.hawkbit.ui.tenantconfiguration.window.SystemConfigWindowLayoutComponentBuilder;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Binder;
 import com.vaadin.data.HasValue;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Default DistributionSet Panel.
  */
-public class DefaultDistributionSetTypeLayout extends CustomComponent {
+public class DefaultDistributionSetTypeLayout extends BaseConfigurationView<ProxySystemConfigDsType> {
 
     private static final long serialVersionUID = 1L;
 
@@ -43,25 +45,24 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
     private final SpPermissionChecker permissionChecker;
     private Long currentDefaultDistSetTypeId;
     private ComboBox<ProxyTypeInfo> dsSetTypeComboBox;
-    private final Binder<ProxySystemConfigWindow> binder;
     private final transient SystemConfigWindowLayoutComponentBuilder builder;
     private Label changeIcon;
 
-    DefaultDistributionSetTypeLayout(final SystemManagement systemManagement, final VaadinMessageSource i18n,
-            final SpPermissionChecker permChecker, final DistributionSetTypeManagement dsTypeManagement,
-            final Binder<ProxySystemConfigWindow> binder) {
+    DefaultDistributionSetTypeLayout(final VaadinMessageSource i18n,
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
+            final SecurityTokenGenerator securityTokenGenerator, final SpPermissionChecker permissionChecker,
+            final DistributionSetTypeManagement dsTypeManagement) {
+        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
         this.i18n = i18n;
-        this.permissionChecker = permChecker;
-        this.binder = binder;
+        this.permissionChecker = permissionChecker;
         final DistributionSetTypeDataProvider<ProxyTypeInfo> dataProvider = new DistributionSetTypeDataProvider<>(
-                dsTypeManagement, new TypeToTypeInfoMapper<DistributionSetType>());
+                dsTypeManagement, new TypeToTypeInfoMapper<>());
         final SystemConfigWindowDependencies dependencies = new SystemConfigWindowDependencies(systemManagement, i18n,
-                permChecker, dsTypeManagement, dataProvider);
+                permissionChecker, dsTypeManagement, dataProvider);
         this.builder = new SystemConfigWindowLayoutComponentBuilder(dependencies);
-
-        initDsSetTypeComponent();
     }
 
+    @PostConstruct
     private void initDsSetTypeComponent() {
         if (!permissionChecker.hasReadRepositoryPermission()) {
             return;
@@ -101,12 +102,12 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
     }
 
     private void initDsSetTypeComboBox() {
-        dsSetTypeComboBox = builder.createDistributionSetTypeCombo(binder);
+        dsSetTypeComboBox = builder.createDistributionSetTypeCombo(getBinder());
         dsSetTypeComboBox.addValueChangeListener(this::selectDistributionSetTypeValue);
     }
 
     private Long getCurrentDistributionSetTypeId() {
-        return binder.getBean().getDsTypeInfo().getId();
+        return getBinderBean().getDsTypeInfo().getId();
     }
 
     /**
@@ -118,4 +119,17 @@ public class DefaultDistributionSetTypeLayout extends CustomComponent {
         changeIcon.setVisible(!event.getValue().getId().equals(currentDefaultDistSetTypeId));
     }
 
+    @Override
+    protected ProxySystemConfigDsType populateSystemConfig() {
+        final ProxySystemConfigDsType configBean = new ProxySystemConfigDsType();
+        configBean.setDsTypeInfo(new TypeToTypeInfoMapper<DistributionSetType>()
+                .map(getSystemManagement().getTenantMetadata().getDefaultDsType()));
+        return configBean;
+    }
+
+    @Override
+    public void save() {
+        getSystemManagement().updateTenantMetadata(getBinderBean().getDsTypeInfo().getId());
+
+    }
 }

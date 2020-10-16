@@ -8,47 +8,50 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRollout;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.rollout.ApprovalConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Provides configuration of the RolloutManagement including enabling/disabling
  * of the approval workflow.
  */
-public class RolloutConfigurationView extends CustomComponent {
+public class RolloutConfigurationView extends BaseConfigurationView<ProxySystemConfigRollout> {
 
     private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
     private final UiProperties uiProperties;
-    private final Binder<ProxySystemConfigWindow> binder;
     private final ApprovalConfigurationItem approvalConfigurationItem;
 
     RolloutConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final Binder<ProxySystemConfigWindow> binder) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
+            final SecurityTokenGenerator securityTokenGenerator) {
+        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
         this.i18n = i18n;
         this.approvalConfigurationItem = new ApprovalConfigurationItem(i18n);
         this.uiProperties = uiProperties;
-        this.binder = binder;
-        this.init();
-
     }
 
+    @PostConstruct
     private void init() {
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();
@@ -69,8 +72,8 @@ public class RolloutConfigurationView extends CustomComponent {
         gridLayout.setSizeFull();
 
         final CheckBox approvalCheckbox = FormComponentBuilder.getCheckBox(
-                UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX, binder,
-                ProxySystemConfigWindow::isRolloutApproval, ProxySystemConfigWindow::setRolloutApproval);
+                UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX, getBinder(),
+                ProxySystemConfigRollout::isRolloutApproval, ProxySystemConfigRollout::setRolloutApproval);
 
         gridLayout.addComponent(approvalCheckbox, 0, 0);
         gridLayout.addComponent(approvalConfigurationItem, 1, 0);
@@ -83,4 +86,19 @@ public class RolloutConfigurationView extends CustomComponent {
         rootPanel.setContent(vLayout);
         setCompositionRoot(rootPanel);
     }
+
+    @Override
+    protected ProxySystemConfigRollout populateSystemConfig() {
+        ProxySystemConfigRollout configBean = new ProxySystemConfigRollout();
+        configBean.setRolloutApproval(
+                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED));
+        return configBean;
+    }
+
+    @Override
+    public void save() {
+        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED,
+                getBinderBean().isRolloutApproval());
+    }
+
 }

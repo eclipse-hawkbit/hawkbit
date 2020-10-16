@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigAuthentication;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -41,7 +41,7 @@ public class CertificateAuthenticationConfigurationItem extends VerticalLayout {
      *            System config window binder
      */
     public CertificateAuthenticationConfigurationItem(final VaadinMessageSource i18n,
-            final Binder<ProxySystemConfigWindow> binder) {
+            final Binder<ProxySystemConfigAuthentication> binder) {
         this.setSpacing(false);
         this.setMargin(false);
         addComponent(SPUIComponentProvider.generateLabel(i18n, "label.configuration.auth.header"));
@@ -59,8 +59,8 @@ public class CertificateAuthenticationConfigurationItem extends VerticalLayout {
 
         caRootAuthorityTextField = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();
         caRootAuthorityTextField.setWidth("100%");
-        binder.bind(caRootAuthorityTextField, ProxySystemConfigWindow::getCaRootAuthority,
-                ProxySystemConfigWindow::setCaRootAuthority);
+        binder.bind(caRootAuthorityTextField, ProxySystemConfigAuthentication::getCaRootAuthority,
+                ProxySystemConfigAuthentication::setCaRootAuthority);
         caRootAuthorityLayout.addComponent(caRootAuthorityLabel);
         caRootAuthorityLayout.setExpandRatio(caRootAuthorityLabel, 0);
         caRootAuthorityLayout.addComponent(caRootAuthorityTextField);

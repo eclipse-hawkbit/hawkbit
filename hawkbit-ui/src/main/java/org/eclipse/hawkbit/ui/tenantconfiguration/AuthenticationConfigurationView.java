@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
+import org.eclipse.hawkbit.repository.SystemManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigAuthentication;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.AnonymousDownloadAuthenticationConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.CertificateAuthenticationConfigurationItem;
@@ -20,20 +23,21 @@ import org.eclipse.hawkbit.ui.tenantconfiguration.authentication.TargetSecurityT
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Binder;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
 
 /**
  * View to configure the authentication mode.
  */
-public class AuthenticationConfigurationView extends CustomComponent {
+public class AuthenticationConfigurationView extends BaseConfigurationView<ProxySystemConfigAuthentication> {
 
     private static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
 
@@ -48,24 +52,23 @@ public class AuthenticationConfigurationView extends CustomComponent {
 
     private final UiProperties uiProperties;
 
-    private final Binder<ProxySystemConfigWindow> binder;
-
-    AuthenticationConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final SecurityTokenGenerator securityTokenGenerator, final Binder<ProxySystemConfigWindow> binder) {
+    public AuthenticationConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
+            final SecurityTokenGenerator securityTokenGenerator) {
+        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
         this.i18n = i18n;
         this.targetSecurityTokenAuthenticationConfigurationItem = new TargetSecurityTokenAuthenticationConfigurationItem(
                 i18n);
-        this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(i18n, binder);
+        this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(i18n,
+                getBinder());
         this.gatewaySecurityTokenAuthenticationConfigurationItem = new GatewaySecurityTokenAuthenticationConfigurationItem(
-                i18n, securityTokenGenerator, binder);
+                i18n, securityTokenGenerator, getBinder());
         this.anonymousDownloadAuthenticationConfigurationItem = new AnonymousDownloadAuthenticationConfigurationItem(
                 i18n);
         this.uiProperties = uiProperties;
-        this.binder = binder;
-
-        init();
     }
 
+    @PostConstruct
     private void init() {
 
         final Panel rootPanel = new Panel();
@@ -88,9 +91,21 @@ public class AuthenticationConfigurationView extends CustomComponent {
         gridLayout.setSizeFull();
         gridLayout.setColumnExpandRatio(1, 1.0F);
 
+        initCertificateAuthConfiguration(gridLayout, 0);
+        initTargetTokenConfiguration(gridLayout, 1);
+        initGatewayTokenConfiguration(gridLayout, 2);
+        initAnonymousDownloadConfiguration(gridLayout, 3);
+
+        vLayout.addComponent(gridLayout);
+        rootPanel.setContent(vLayout);
+        setCompositionRoot(rootPanel);
+    }
+
+    protected void initCertificateAuthConfiguration(GridLayout gridLayout, int row) {
         final CheckBox certificateAuthCheckbox = FormComponentBuilder.getCheckBox(
-                UIComponentIdProvider.CERT_AUTH_ALLOWED_CHECKBOX, binder, ProxySystemConfigWindow::isCertificateAuth,
-                ProxySystemConfigWindow::setCertificateAuth);
+                UIComponentIdProvider.CERT_AUTH_ALLOWED_CHECKBOX, getBinder(),
+                ProxySystemConfigAuthentication::isCertificateAuth,
+                ProxySystemConfigAuthentication::setCertificateAuth);
         certificateAuthCheckbox.setStyleName(DIST_CHECKBOX_STYLE);
         certificateAuthCheckbox.addValueChangeListener(valueChangeEvent -> {
             if (valueChangeEvent.getValue()) {
@@ -99,19 +114,24 @@ public class AuthenticationConfigurationView extends CustomComponent {
                 certificateAuthenticationConfigurationItem.hideDetails();
             }
         });
-        gridLayout.addComponent(certificateAuthCheckbox, 0, 0);
-        gridLayout.addComponent(certificateAuthenticationConfigurationItem, 1, 0);
+        gridLayout.addComponent(certificateAuthCheckbox, 0, row);
+        gridLayout.addComponent(certificateAuthenticationConfigurationItem, 1, row);
+    }
 
+    protected void initTargetTokenConfiguration(GridLayout gridLayout, int row) {
         final CheckBox targetSecTokenCheckBox = FormComponentBuilder.getCheckBox(
-                UIComponentIdProvider.TARGET_SEC_TOKEN_ALLOWED_CHECKBOX, binder,
-                ProxySystemConfigWindow::isTargetSecToken, ProxySystemConfigWindow::setTargetSecToken);
+                UIComponentIdProvider.TARGET_SEC_TOKEN_ALLOWED_CHECKBOX, getBinder(),
+                ProxySystemConfigAuthentication::isTargetSecToken, ProxySystemConfigAuthentication::setTargetSecToken);
         targetSecTokenCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
-        gridLayout.addComponent(targetSecTokenCheckBox, 0, 1);
-        gridLayout.addComponent(targetSecurityTokenAuthenticationConfigurationItem, 1, 1);
+        gridLayout.addComponent(targetSecTokenCheckBox, 0, row);
+        gridLayout.addComponent(targetSecurityTokenAuthenticationConfigurationItem, 1, row);
+    }
 
+    protected void initGatewayTokenConfiguration(GridLayout gridLayout, int row) {
         final CheckBox gatewaySecTokenCheckBox = FormComponentBuilder.getCheckBox(
-                UIComponentIdProvider.GATEWAY_SEC_TOKEN_ALLOWED_CHECKBOX, binder,
-                ProxySystemConfigWindow::isGatewaySecToken, ProxySystemConfigWindow::setGatewaySecToken);
+                UIComponentIdProvider.GATEWAY_SEC_TOKEN_ALLOWED_CHECKBOX, getBinder(),
+                ProxySystemConfigAuthentication::isGatewaySecToken,
+                ProxySystemConfigAuthentication::setGatewaySecToken);
         gatewaySecTokenCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
         gatewaySecTokenCheckBox.addValueChangeListener(valueChangeEvent -> {
             if (valueChangeEvent.getValue()) {
@@ -120,23 +140,81 @@ public class AuthenticationConfigurationView extends CustomComponent {
                 gatewaySecurityTokenAuthenticationConfigurationItem.hideDetails();
             }
         });
-        gridLayout.addComponent(gatewaySecTokenCheckBox, 0, 2);
-        gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, 2);
+        gridLayout.addComponent(gatewaySecTokenCheckBox, 0, row);
+        gridLayout.addComponent(gatewaySecurityTokenAuthenticationConfigurationItem, 1, row);
+    }
 
+    protected void initAnonymousDownloadConfiguration(GridLayout gridLayout, int row) {
         final CheckBox downloadAnonymousCheckBox = FormComponentBuilder.getCheckBox(
-                UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX, binder, ProxySystemConfigWindow::isDownloadAnonymous,
-                ProxySystemConfigWindow::setDownloadAnonymous);
+                UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX, getBinder(),
+                ProxySystemConfigAuthentication::isDownloadAnonymous,
+                ProxySystemConfigAuthentication::setDownloadAnonymous);
         downloadAnonymousCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
-        gridLayout.addComponent(downloadAnonymousCheckBox, 0, 3);
-        gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, 3);
+        gridLayout.addComponent(downloadAnonymousCheckBox, 0, row);
+        gridLayout.addComponent(anonymousDownloadAuthenticationConfigurationItem, 1, row);
 
         final Link linkToSecurityHelp = SPUIComponentProvider.getHelpLink(i18n,
                 uiProperties.getLinks().getDocumentation().getSecurity());
-        gridLayout.addComponent(linkToSecurityHelp, 2, 3);
+        gridLayout.addComponent(linkToSecurityHelp, 2, row);
         gridLayout.setComponentAlignment(linkToSecurityHelp, Alignment.BOTTOM_RIGHT);
-
-        vLayout.addComponent(gridLayout);
-        rootPanel.setContent(vLayout);
-        setCompositionRoot(rootPanel);
     }
+
+    @Override
+    public void save() {
+        writeConfigOption(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED,
+                getBinderBean().isTargetSecToken());
+        writeConfigOption(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED,
+                getBinderBean().isGatewaySecToken());
+        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
+                getBinderBean().isDownloadAnonymous());
+
+        if (getBinderBean().isGatewaySecToken()) {
+            writeConfigOption(
+                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                    getBinderBean().getGatewaySecurityToken());
+        }
+
+        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED,
+                getBinderBean().isCertificateAuth());
+        if (getBinderBean().isCertificateAuth()) {
+            final String value = getBinderBean().getCaRootAuthority() != null ? getBinderBean().getCaRootAuthority()
+                    : "";
+            writeConfigOption(
+                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME,
+                    value);
+        }
+    }
+
+    @Override
+    protected ProxySystemConfigAuthentication populateSystemConfig() {
+        final ProxySystemConfigAuthentication configBean = new ProxySystemConfigAuthentication();
+        configBean.setCertificateAuth(readConfigOption(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED));
+        configBean.setTargetSecToken(readConfigOption(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED));
+        configBean.setGatewaySecToken(readConfigOption(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED));
+        configBean.setDownloadAnonymous(
+                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED));
+
+        String securityToken = getTenantConfigurationManagement().getConfigurationValue(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                String.class).getValue();
+        if (StringUtils.isEmpty(securityToken)) {
+            securityToken = getSecurityTokenGenerator().generateToken();
+        }
+        configBean.setGatewaySecurityToken(securityToken);
+        configBean.setCaRootAuthority(getCaRootAuthorityValue());
+
+        return configBean;
+    }
+
+    private String getCaRootAuthorityValue() {
+        return getTenantConfigurationManagement().getConfigurationValue(
+                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME,
+                String.class).getValue();
+    }
+
 }
