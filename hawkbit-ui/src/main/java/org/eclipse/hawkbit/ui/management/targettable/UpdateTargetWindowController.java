@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
  * Controller for update target window
  */
 public class UpdateTargetWindowController
-        extends AbstractUpdateEntityWindowController<ProxyTarget, ProxyTarget, Target> {
+        extends AbstractUpdateNamedEntityWindowController<ProxyTarget, ProxyTarget, Target> {
 
     private final TargetManagement targetManagement;
     private final TargetWindowLayout layout;
@@ -79,16 +79,6 @@ public class UpdateTargetWindowController
                 .name(entity.getName()).description(entity.getDescription());
 
         return targetManagement.update(targetUpdate);
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyTarget entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final Target entity) {
-        return entity.getId();
     }
 
     @Override

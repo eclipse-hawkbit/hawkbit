@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
@@ -24,7 +24,8 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for add target window
  */
-public class AddTargetWindowController extends AbstractAddEntityWindowController<ProxyTarget, ProxyTarget, Target> {
+public class AddTargetWindowController
+        extends AbstractAddNamedEntityWindowController<ProxyTarget, ProxyTarget, Target> {
 
     private final TargetManagement targetManagement;
     private final TargetWindowLayout layout;
@@ -78,13 +79,13 @@ public class AddTargetWindowController extends AbstractAddEntityWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxyTarget entity) {
+    protected String getDisplayableName(final Target entity) {
         return entity.getName() == null ? entity.getControllerId() : entity.getName();
     }
 
     @Override
-    protected Long getId(final Target entity) {
-        return entity.getId();
+    protected String getDisplayableNameForFailedMessage(final ProxyTarget entity) {
+        return entity.getName() == null ? entity.getControllerId() : entity.getName();
     }
 
     @Override

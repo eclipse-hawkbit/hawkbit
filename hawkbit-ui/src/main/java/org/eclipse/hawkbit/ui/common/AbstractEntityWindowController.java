@@ -104,7 +104,7 @@ public abstract class AbstractEntityWindowController<T, E, R> {
 
             final R createdEntity = persistEntityInRepository(entity);
 
-            handleEntityPersistedSuccessfully(entity, createdEntity);
+            handleEntityPersistedSuccessfully(createdEntity);
 
             selectPersistedEntity(createdEntity);
 
@@ -120,13 +120,13 @@ public abstract class AbstractEntityWindowController<T, E, R> {
 
     protected abstract R persistEntityInRepository(E entity);
 
-    protected void handleEntityPersistedSuccessfully(final E entity, final R persistedEntity) {
-        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(entity));
+    protected void handleEntityPersistedSuccessfully(final R persistedEntity) {
+        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(persistedEntity));
         publishModifiedEvent(createModifiedEventPayload(persistedEntity));
     }
 
     protected void handleEntityPersistFailed(final E entity, final RuntimeException ex) {
-        final String name = getDisplayableName(entity);
+        final String name = getDisplayableNameForFailedMessage(entity);
         final String id = Objects.toString(entity);
         final String type = getEntityClass().getSimpleName();
         LOG.warn("Persist of entity name:{}, id:{}, type:{} failed in UI with reason: {}", name, id, type,
@@ -138,7 +138,9 @@ public abstract class AbstractEntityWindowController<T, E, R> {
 
     protected abstract Long getId(R entity);
 
-    protected abstract String getDisplayableName(E entity);
+    protected abstract String getDisplayableNameForFailedMessage(E entity);
+
+    protected abstract String getDisplayableName(R entity);
 
     protected abstract String getPersistSuccessMessageKey();
 

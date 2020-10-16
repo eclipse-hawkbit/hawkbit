@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
  * Controller for Add software module type window
  */
 public class AddSmTypeWindowController
-        extends AbstractAddEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
+        extends AbstractAddNamedEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
 
     private final SoftwareModuleTypeManagement smTypeManagement;
     private final SmTypeWindowLayout layout;
@@ -68,16 +68,6 @@ public class AddSmTypeWindowController
         return smTypeManagement
                 .create(getEntityFactory().softwareModuleType().create().key(entity.getKey()).name(entity.getName())
                         .description(entity.getDescription()).colour(entity.getColour()).maxAssignments(assignNumber));
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyType entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final SoftwareModuleType entity) {
-        return entity.getId();
     }
 
     @Override

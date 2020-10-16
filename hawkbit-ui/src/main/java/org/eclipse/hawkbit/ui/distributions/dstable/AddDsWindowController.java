@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
@@ -22,13 +22,14 @@ import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for add distribution set window
  */
 public class AddDsWindowController
-        extends AbstractAddEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
+        extends AbstractAddNamedEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
 
     private final SystemManagement systemManagement;
     private final DistributionSetManagement dsManagement;
@@ -87,13 +88,13 @@ public class AddDsWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxyDistributionSet entity) {
-        return entity.getName() + ":" + entity.getVersion();
+    protected String getDisplayableName(final DistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override
-    protected Long getId(final DistributionSet entity) {
-        return entity.getId();
+    protected String getDisplayableNameForFailedMessage(final ProxyDistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override

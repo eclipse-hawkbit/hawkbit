@@ -85,7 +85,12 @@ public class UpdateTargetFilterController extends
     }
 
     @Override
-    protected String getDisplayableName(final ProxyTargetFilterQuery entity) {
+    protected String getDisplayableName(final TargetFilterQuery entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyTargetFilterQuery entity) {
         return entity.getName();
     }
 

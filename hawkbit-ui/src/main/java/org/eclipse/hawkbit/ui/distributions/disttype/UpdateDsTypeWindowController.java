@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -32,7 +32,7 @@ import org.springframework.util.StringUtils;
  * Controller for update distribution set type window
  */
 public class UpdateDsTypeWindowController
-        extends AbstractUpdateEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
+        extends AbstractUpdateNamedEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
 
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DistributionSetManagement dsManagement;
@@ -140,16 +140,6 @@ public class UpdateDsTypeWindowController
         dsTypeUpdate.mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds);
 
         return dsTypeManagement.update(dsTypeUpdate);
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyType entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final DistributionSetType entity) {
-        return entity.getId();
     }
 
     @Override

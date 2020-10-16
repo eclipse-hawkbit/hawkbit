@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.SoftwareModuleToProxyMapper;
@@ -28,7 +28,7 @@ import org.springframework.util.StringUtils;
  * Controller for populating and saving data in Add Software Module Window.
  */
 public class AddSmWindowController
-        extends AbstractAddEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
+        extends AbstractAddNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
     private final SmWindowLayout layout;
@@ -79,13 +79,13 @@ public class AddSmWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxySoftwareModule entity) {
+    protected String getDisplayableName(final SoftwareModule entity) {
         return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override
-    protected Long getId(final SoftwareModule entity) {
-        return entity.getId();
+    protected String getDisplayableNameForFailedMessage(final ProxySoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override

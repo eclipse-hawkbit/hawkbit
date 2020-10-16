@@ -91,9 +91,9 @@ public class UpdateMetaDataWindowController
     }
 
     @Override
-    protected void handleEntityPersistedSuccessfully(final ProxyMetaData entity, final MetaData persistedEntity) {
+    protected void handleEntityPersistedSuccessfully(final MetaData persistedEntity) {
         // override to not publish event
-        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(entity));
+        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(persistedEntity));
     }
 
     @Override
@@ -107,7 +107,12 @@ public class UpdateMetaDataWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxyMetaData entity) {
+    protected String getDisplayableName(final MetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyMetaData entity) {
         return entity.getKey();
     }
 

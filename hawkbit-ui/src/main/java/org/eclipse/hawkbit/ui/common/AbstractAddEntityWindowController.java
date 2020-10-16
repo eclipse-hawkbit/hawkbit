@@ -48,5 +48,4 @@ public abstract class AbstractAddEntityWindowController<T, E, R> extends Abstrac
         return new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_ADDED, getParentEntityClass(),
                 getEntityClass(), getId(entity));
     }
-
 }

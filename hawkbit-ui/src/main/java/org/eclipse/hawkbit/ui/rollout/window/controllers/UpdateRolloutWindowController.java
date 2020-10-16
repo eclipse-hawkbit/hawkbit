@@ -135,7 +135,12 @@ public class UpdateRolloutWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxyRolloutWindow entity) {
+    protected String getDisplayableName(final Rollout entity) {
+        return entity.getName();
+    }
+
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyRolloutWindow entity) {
         return entity.getName();
     }
 

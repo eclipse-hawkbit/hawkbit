@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -24,7 +24,7 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for update distribution set tag window
  */
-public class UpdateDsTagWindowController extends AbstractUpdateEntityWindowController<ProxyTag, ProxyTag, Tag> {
+public class UpdateDsTagWindowController extends AbstractUpdateNamedEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final DistributionSetTagManagement dsTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
@@ -80,16 +80,6 @@ public class UpdateDsTagWindowController extends AbstractUpdateEntityWindowContr
         final TagUpdate tagUpdate = getEntityFactory().tag().update(entity.getId()).name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour());
         return dsTagManagement.update(tagUpdate);
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyTag entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final Tag entity) {
-        return entity.getId();
     }
 
     @Override

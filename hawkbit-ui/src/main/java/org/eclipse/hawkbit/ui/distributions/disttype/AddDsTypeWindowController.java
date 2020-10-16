@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -26,7 +26,7 @@ import org.springframework.util.StringUtils;
  * Add distribution set type window controller
  */
 public class AddDsTypeWindowController
-        extends AbstractAddEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
+        extends AbstractAddNamedEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
 
     private final DistributionSetTypeManagement dsTypeManagement;
     private final DsTypeWindowLayout layout;
@@ -75,16 +75,6 @@ public class AddDsTypeWindowController
         return dsTypeManagement.create(getEntityFactory().distributionSetType().create().key(entity.getKey())
                 .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour())
                 .mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyType entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final DistributionSetType entity) {
-        return entity.getId();
     }
 
     @Override

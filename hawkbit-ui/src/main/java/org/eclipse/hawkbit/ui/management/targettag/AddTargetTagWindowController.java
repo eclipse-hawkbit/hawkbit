@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for add target tag window
  */
-public class AddTargetTagWindowController extends AbstractAddEntityWindowController<ProxyTag, ProxyTag, Tag> {
+public class AddTargetTagWindowController extends AbstractAddNamedEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final TargetTagManagement targetTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
@@ -64,16 +64,6 @@ public class AddTargetTagWindowController extends AbstractAddEntityWindowControl
     protected Tag persistEntityInRepository(final ProxyTag entity) {
         return targetTagManagement.create(getEntityFactory().tag().create().name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour()));
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyTag entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final Tag entity) {
-        return entity.getId();
     }
 
     @Override

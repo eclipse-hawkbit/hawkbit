@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtype;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -25,7 +25,7 @@ import org.springframework.util.StringUtils;
  * Controller for update software module type window
  */
 public class UpdateSmTypeWindowController
-        extends AbstractUpdateEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
+        extends AbstractUpdateNamedEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
 
     private final SoftwareModuleTypeManagement smTypeManagement;
     private final SmTypeWindowLayout layout;
@@ -93,16 +93,6 @@ public class UpdateSmTypeWindowController
         final SoftwareModuleTypeUpdate smTypeUpdate = getEntityFactory().softwareModuleType().update(entity.getId())
                 .description(entity.getDescription()).colour(entity.getColour());
         return smTypeManagement.update(smTypeUpdate);
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyType entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final SoftwareModuleType entity) {
-        return entity.getId();
     }
 
     @Override

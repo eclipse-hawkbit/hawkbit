@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * Controller for update distribution set window
  */
 public class UpdateDsWindowController
-        extends AbstractUpdateEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
+        extends AbstractUpdateNamedEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
 
     private final DistributionSetManagement dsManagement;
     private final DsWindowLayout layout;
@@ -87,13 +87,13 @@ public class UpdateDsWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxyDistributionSet entity) {
+    protected String getDisplayableName(final DistributionSet entity) {
         return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override
-    protected Long getId(final DistributionSet entity) {
-        return entity.getId();
+    protected String getDisplayableNameForFailedMessage(final ProxyDistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
  * Controller for update software module window
  */
 public class UpdateSmWindowController
-        extends AbstractUpdateEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
+        extends AbstractUpdateNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
     private final SmWindowLayout layout;
@@ -88,13 +88,13 @@ public class UpdateSmWindowController
     }
 
     @Override
-    protected String getDisplayableName(final ProxySoftwareModule entity) {
+    protected String getDisplayableName(final SoftwareModule entity) {
         return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override
-    protected Long getId(final SoftwareModule entity) {
-        return entity.getId();
+    protected String getDisplayableNameForFailedMessage(final ProxySoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
     }
 
     @Override

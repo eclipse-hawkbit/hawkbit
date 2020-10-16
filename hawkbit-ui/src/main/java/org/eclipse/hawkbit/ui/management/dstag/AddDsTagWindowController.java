@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.management.dstag;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.model.Tag;
-import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -23,7 +23,7 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for add distribution tag window
  */
-public class AddDsTagWindowController extends AbstractAddEntityWindowController<ProxyTag, ProxyTag, Tag> {
+public class AddDsTagWindowController extends AbstractAddNamedEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final DistributionSetTagManagement dsTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
@@ -64,16 +64,6 @@ public class AddDsTagWindowController extends AbstractAddEntityWindowController<
     protected Tag persistEntityInRepository(final ProxyTag entity) {
         return dsTagManagement.create(getEntityFactory().tag().create().name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour()));
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyTag entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final Tag entity) {
-        return entity.getId();
     }
 
     @Override

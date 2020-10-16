@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
@@ -24,7 +24,8 @@ import org.springframework.util.StringUtils;
 /**
  * Controller for Update target tag window
  */
-public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowController<ProxyTag, ProxyTag, Tag> {
+public class UpdateTargetTagWindowController
+        extends AbstractUpdateNamedEntityWindowController<ProxyTag, ProxyTag, Tag> {
 
     private final TargetTagManagement targetTagManagement;
     private final TagWindowLayout<ProxyTag> layout;
@@ -80,16 +81,6 @@ public class UpdateTargetTagWindowController extends AbstractUpdateEntityWindowC
         final TagUpdate tagUpdate = getEntityFactory().tag().update(entity.getId()).name(entity.getName())
                 .description(entity.getDescription()).colour(entity.getColour());
         return targetTagManagement.update(tagUpdate);
-    }
-
-    @Override
-    protected String getDisplayableName(final ProxyTag entity) {
-        return entity.getName();
-    }
-
-    @Override
-    protected Long getId(final Tag entity) {
-        return entity.getId();
     }
 
     @Override
