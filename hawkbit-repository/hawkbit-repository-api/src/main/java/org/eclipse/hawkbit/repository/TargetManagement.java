@@ -462,6 +462,9 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    void validateQuery(@NotNull String rsqlParam);
+
     /**
      * Retrieves all target based on {@link TargetFilterQuery}.
      * 

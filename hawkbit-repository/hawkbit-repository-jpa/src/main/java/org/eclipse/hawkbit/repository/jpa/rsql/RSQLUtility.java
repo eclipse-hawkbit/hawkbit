@@ -149,7 +149,7 @@ public final class RSQLUtility {
         parseRsql(rsql);
     }
 
-    private static Node parseRsql(final String rsql) {
+    public static Node parseRsql(final String rsql) {
         try {
             LOGGER.debug("parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
