@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -98,6 +99,43 @@ public class RSQLUtilityTest {
             .<String> builder().value("00:05:00").build();
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
+
+    @Test(expected = RSQLParameterUnsupportedFieldException.class)
+    @Description("Testing throwing exception in case of not allowed RSQL key")
+    public void rsqlUnsupportedFieldExceptionTest(){
+        final String rsql = "wrongfield == abcd";
+        RSQLUtility.isValid(rsql);
+    }
+
+    @Test(expected = RSQLParameterUnsupportedFieldException.class)
+    @Description("Testing exception in case of not allowed subkey")
+    public void rsqlUnsupportedSubkeyThrowException(){
+        final String rsql = "ASSIGNEDDS.unsupported == abcd and ASSIGNEDDS.version == 0123";
+        RSQLUtility.isValid(rsql);
+    }
+
+    @Test
+    @Description("Testing allowed RSQL keys based on TargetFields.class")
+    public void rsqlValidTargetFields(){
+        final String rsql1 = "ID == '0123' and NAME == abcd and DESCRIPTION == absd" +
+                " and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123" +
+                " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING" +
+                " and IPADDRESS == 0123 and LASTCONTROLLERREQUESTAT == 0123" +
+                " and tag == beta";
+
+        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql1));
+
+        final String rsql2 = "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123" +
+                " and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123";
+        assertTrue(RSQLUtility.isValid(rsql2));
+
+        final String rsql3 = "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test" +
+                " and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg";
+        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql3));
+
+        final String rsql4 = "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}";
+        assertTrue(RSQLUtility.isValid(rsql4));
+    }
 
     @Test
     public void wrongRsqlSyntaxThrowSyntaxException() {
