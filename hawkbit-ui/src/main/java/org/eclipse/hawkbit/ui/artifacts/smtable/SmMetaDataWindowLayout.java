@@ -67,9 +67,10 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
         this.entityFactory = entityFactory;
 
         this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new SmMetaDataDataProvider(smManagement), this::deleteMetaData);
+                new SmMetaDataDataProvider(smManagement), this::hasMetadataChangePermission, this::deleteMetaData);
 
-        this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n);
+        this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n,
+                this::hasMetadataChangePermission);
         this.addSmMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
                 smMetaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,

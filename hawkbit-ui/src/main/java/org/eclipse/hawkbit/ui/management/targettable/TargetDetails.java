@@ -87,7 +87,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
                 new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
                 new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
 
-        if (permissionChecker.hasCreateRepositoryPermission()) {
+        if (permissionChecker.hasReadRepositoryPermission()) {
             this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, eventBus,
                     UIComponentIdProvider.TARGET_TYPE_PREFIX, this::showMetadataDetails,
                     new TargetMetaDataDataProvider(targetManagement));

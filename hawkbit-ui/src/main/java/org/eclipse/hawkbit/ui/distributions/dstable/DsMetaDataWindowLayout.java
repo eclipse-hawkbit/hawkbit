@@ -69,9 +69,9 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
         this.entityFactory = entityFactory;
 
         this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new DsMetaDataDataProvider(dsManagement), this::deleteMetaData);
+                new DsMetaDataDataProvider(dsManagement), this::hasMetadataChangePermission, this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n, this::hasMetadataChangePermission);
         this.addDsMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,

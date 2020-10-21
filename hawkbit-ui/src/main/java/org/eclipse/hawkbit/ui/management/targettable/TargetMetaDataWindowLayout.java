@@ -70,9 +70,10 @@ public class TargetMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Str
         this.entityFactory = entityFactory;
 
         this.targetMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new TargetMetaDataDataProvider(targetManagement), this::deleteMetaData);
+                new TargetMetaDataDataProvider(targetManagement), this::hasMetadataChangePermission,
+                this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n, this::hasMetadataChangePermission);
         this.addTargetMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateTargetMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,

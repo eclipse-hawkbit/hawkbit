@@ -35,13 +35,13 @@ public class AddHeaderSupport implements HeaderSupport {
      * Constructor for AddHeaderSupport
      *
      * @param i18n
-     *          AddHeaderSupport
+     *            VaadinMessageSource
      * @param addIconId
-     *          Add icon id
+     *            Add icon id
      * @param addItemCallback
-     *          Runnable
+     *            callback method to add new entities
      * @param maximizedStateSupplier
-     *          BooleanSupplier
+     *            provides the max/min state of the grid
      */
     public AddHeaderSupport(final VaadinMessageSource i18n, final String addIconId, final Runnable addItemCallback,
             final BooleanSupplier maximizedStateSupplier) {

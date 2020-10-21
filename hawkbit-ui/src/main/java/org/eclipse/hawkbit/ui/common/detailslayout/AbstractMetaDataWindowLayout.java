@@ -38,6 +38,7 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     protected final VaadinMessageSource i18n;
     protected final transient UIEventBus eventBus;
     protected final UINotification uiNotification;
+    protected final SpPermissionChecker permChecker;
 
     private final MetadataWindowGridHeader metadataWindowGridHeader;
 
@@ -62,9 +63,23 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.uiNotification = uiNotification;
+        this.permChecker = permChecker;
 
         this.metadataWindowGridHeader = new MetadataWindowGridHeader(i18n, permChecker, eventBus,
-                this::showAddMetaDataLayout);
+                this::hasMetadataChangePermission, this::showAddMetaDataLayout);
+    }
+
+    // can be overriden in child classes for entity-specific permission
+    protected boolean hasMetadataChangePermission() {
+        return permChecker.hasUpdateRepositoryPermission();
+    }
+
+    private void showAddMetaDataLayout() {
+        getMetaDataWindowGrid().deselectAll();
+        getAddMetaDataWindowController().populateWithData(null);
+        saveCallback.accept(getAddMetaDataWindowController().getSaveDialogCloseListener());
+
+        resetSaveButton();
     }
 
     protected MetaData createMetaData(final ProxyMetaData entity) {
@@ -128,14 +143,6 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
     protected abstract String getEntityType();
 
     protected abstract void doDeleteMetaDataByKey(final String metaDataKey);
-
-    private void showAddMetaDataLayout() {
-        getMetaDataWindowGrid().deselectAll();
-        getAddMetaDataWindowController().populateWithData(null);
-        saveCallback.accept(getAddMetaDataWindowController().getSaveDialogCloseListener());
-
-        resetSaveButton();
-    }
 
     /**
      * @return add meta data window controller
