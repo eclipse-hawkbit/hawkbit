@@ -83,7 +83,7 @@ public class MetadataDetailsGrid<F> extends AbstractGrid<ProxyMetaData, F> imple
 
     @Override
     public String getGridId() {
-        return typePrefix + "." + UIComponentIdProvider.METDATA_DETAILS_TABLE_ID;
+        return typePrefix + "." + UIComponentIdProvider.METADATA_DETAILS_TABLE_ID;
     }
 
     @Override

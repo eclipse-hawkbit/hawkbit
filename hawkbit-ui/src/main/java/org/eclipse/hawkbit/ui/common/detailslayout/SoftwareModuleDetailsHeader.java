@@ -96,11 +96,6 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
     }
 
     @Override
-    protected boolean hasEditPermission() {
-        return permChecker.hasUpdateRepositoryPermission();
-    }
-
-    @Override
     protected String getEditIconId() {
         return UIComponentIdProvider.UPLOAD_SW_MODULE_EDIT_BUTTON;
     }

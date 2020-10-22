@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.hawkbit.ui.common.detailslayout.MetaDataAddUpdateWindowLayout;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComponentContainer;
+import com.vaadin.ui.VerticalLayout;
 
 /**
  * Class for sm metadata add/update window layout.
@@ -24,23 +26,28 @@ public class SmMetaDataAddUpdateWindowLayout extends MetaDataAddUpdateWindowLayo
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
-     *            I18N
+     *            VaadinMessageSource
+     * @param hasMetadataChangePermission
+     *            checks the permission allowing to change metadata entities
      */
-    public SmMetaDataAddUpdateWindowLayout(final VaadinMessageSource i18n) {
-        super(i18n);
+    public SmMetaDataAddUpdateWindowLayout(final VaadinMessageSource i18n,
+            final BooleanSupplier hasMetadataChangePermission) {
+        super(i18n, hasMetadataChangePermission);
 
         this.isVisibleForTarget = metaDataComponentBuilder.createVisibleForTargetsField(binder);
     }
 
-    /**
-     * @return form layout checkbox container for software module
-     */
     @Override
-    public ComponentContainer getRootComponent() {
-        final ComponentContainer formLayout = super.getRootComponent();
+    protected VerticalLayout getMetadataAddUpdateLayout() {
+        final VerticalLayout addUpdateLayout = super.getMetadataAddUpdateLayout();
+        addUpdateLayout.addComponent(isVisibleForTarget);
 
-        formLayout.addComponent(isVisibleForTarget);
+        return addUpdateLayout;
+    }
 
-        return formLayout;
+    @Override
+    protected void disableMetadataInputComponents() {
+        super.disableMetadataInputComponents();
+        isVisibleForTarget.setEnabled(false);
     }
 }

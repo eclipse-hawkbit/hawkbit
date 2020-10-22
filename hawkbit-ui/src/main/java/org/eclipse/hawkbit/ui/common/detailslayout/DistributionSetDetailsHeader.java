@@ -34,17 +34,17 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
      * Constructor for DistributionSetDetailsHeader
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      * @param dsWindowBuilder
-     *          DsWindowBuilder
+     *            DsWindowBuilder
      * @param dsMetaDataWindowBuilder
-     *          DsMetaDataWindowBuilder
+     *            DsMetaDataWindowBuilder
      */
     public DistributionSetDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification uiNotification, final DsWindowBuilder dsWindowBuilder,
@@ -70,11 +70,6 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     @Override
     protected String getMasterEntityName(final ProxyDistributionSet masterEntity) {
         return masterEntity.getNameVersion();
-    }
-
-    @Override
-    protected boolean hasEditPermission() {
-        return permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override
