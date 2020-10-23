@@ -117,19 +117,19 @@
             </configuration>
             <dependencies>
                <dependency>
-                  <!-- 
+                  <!--
                       Required for Java 11 since plugin version is build on
-                      EclipseLink 2.7.5 (which doesn't have latest fixes for Java 11) 
+                      EclipseLink 2.7.5 (which doesn't have latest fixes for Java 11)
                    -->
                   <groupId>org.eclipse.persistence</groupId>
                   <artifactId>org.eclipse.persistence.jpa</artifactId>
                   <version>${eclipselink.version}</version>
                </dependency>
                <dependency>
-                  <!--  
-                        Required for Java 11 since plugin uses older version (4.8.21) 
+                  <!--
+                        Required for Java 11 since plugin uses older version (4.8.21)
                         which suffer from NPE while weaving. We require at least 4.8.48
-                        see: https://github.com/ethlo/eclipselink-maven-plugin/issues/31 
+                        see: https://github.com/ethlo/eclipselink-maven-plugin/issues/31
                   -->
                   <groupId>io.github.classgraph</groupId>
                   <artifactId>classgraph</artifactId>
