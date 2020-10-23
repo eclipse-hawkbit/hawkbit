@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.push.HawkbitEventPermissionChecker;
 import org.eclipse.hawkbit.ui.push.HawkbitEventProvider;
 import org.eclipse.hawkbit.ui.push.UIEventPermissionChecker;
 import org.eclipse.hawkbit.ui.push.UIEventProvider;
+import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -79,6 +80,16 @@ public class MgmtUiAutoConfiguration {
     @ConditionalOnMissingBean
     UIEventPermissionChecker eventPermissionChecker(final SpPermissionChecker permChecker) {
         return new HawkbitEventPermissionChecker(permChecker);
+    }
+
+    /**
+     * Bean for creating a singleton instance of the {@link SpringContextHolder}
+     * 
+     * @return the singleton instance of the {@link SpringContextHolder}
+     */
+    @Bean
+    SpringContextHolder springContextHolder() {
+        return SpringContextHolder.getInstance();
     }
 
     /**

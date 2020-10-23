@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.common.grid.header.support.AddHeaderSupport;
@@ -35,15 +37,18 @@ public class MetadataWindowGridHeader extends AbstractGridHeader {
      *            SpPermissionChecker
      * @param eventBus
      *            UIEventBus
+     * @param hasMetadataChangePermission
+     *            checks the permission allowing to change metadata entities
      * @param addNewItemCallback
-     *            Runnable
+     *            callback method to add new metadata entities
      */
     public MetadataWindowGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final Runnable addNewItemCallback) {
+            final UIEventBus eventBus, final BooleanSupplier hasMetadataChangePermission,
+            final Runnable addNewItemCallback) {
         super(i18n, permChecker, eventBus);
 
-        if (permChecker.hasCreateRepositoryPermission()) {
-            this.addHeaderSupport = new AddHeaderSupport(i18n, UIComponentIdProvider.METADTA_ADD_ICON_ID,
+        if (hasMetadataChangePermission.getAsBoolean()) {
+            this.addHeaderSupport = new AddHeaderSupport(i18n, UIComponentIdProvider.METADATA_ADD_ICON_ID,
                     addNewItemCallback, () -> false);
         } else {
             this.addHeaderSupport = null;

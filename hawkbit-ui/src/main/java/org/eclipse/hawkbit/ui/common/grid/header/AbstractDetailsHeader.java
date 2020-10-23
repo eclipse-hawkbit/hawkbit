@@ -21,7 +21,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  * Header for entity details with edit and metadata support.
  *
  * @param <T>
- *          Generic type
+ *            Generic type
  */
 public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHeader<T> {
     private static final long serialVersionUID = 1L;
@@ -37,13 +37,13 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
      * Constructor for AbstractDetailsHeader
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param permChecker
-     *          SpPermissionChecker
+     *            SpPermissionChecker
      * @param eventBus
-     *          UIEventBus
+     *            UIEventBus
      * @param uiNotification
-     *          UINotification
+     *            UINotification
      */
     public AbstractDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification uiNotification) {
@@ -53,17 +53,29 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
 
         if (hasEditPermission()) {
             this.editDetailsHeaderSupport = new EditDetailsHeaderSupport(i18n, getEditIconId(), this::onEdit);
+        } else {
+            this.editDetailsHeaderSupport = null;
+        }
+
+        if (hasMetadataReadPermission()) {
             this.metaDataDetailsHeaderSupport = new MetaDataDetailsHeaderSupport(i18n, getMetaDataIconId(),
                     this::showMetaData);
         } else {
-            this.editDetailsHeaderSupport = null;
             this.metaDataDetailsHeaderSupport = null;
         }
 
         addHeaderSupports(Arrays.asList(editDetailsHeaderSupport, metaDataDetailsHeaderSupport));
     }
 
-    protected abstract boolean hasEditPermission();
+    // can be overriden in child classes for entity-specific permission
+    protected boolean hasEditPermission() {
+        return permChecker.hasUpdateRepositoryPermission();
+    }
+
+    // can be overriden in child classes for entity-specific permission
+    protected boolean hasMetadataReadPermission() {
+        return permChecker.hasReadRepositoryPermission();
+    }
 
     protected abstract String getEditIconId();
 
