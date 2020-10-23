@@ -127,7 +127,11 @@
    </repositories>
 
    <properties>
+            
       <java.version>1.8</java.version>
+      <!--       Developer preview         -->
+      <!-- <java.version>11</java.version> -->
+
       <spring.boot.version>2.1.4.RELEASE</spring.boot.version>
       <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
 
@@ -162,8 +166,8 @@
       <!-- Misc libraries versions - START -->
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.11.2</jsoup.version>
-      <allure.version>2.7.0</allure.version>
-      <eclipselink.version>2.7.3</eclipselink.version>
+      <allure.version>2.13.6</allure.version>
+      <eclipselink.version>2.7.7</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <guava.version>25.0-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
