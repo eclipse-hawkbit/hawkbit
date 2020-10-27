@@ -129,7 +129,7 @@
                   <!--  
                         Required for Java 11 since plugin uses older version (4.8.21) 
                         which suffer from NPE while weaving. We require at least 4.8.48
-                        see: https://github.com/classgraph/classgraph/issues/370 
+                        see: https://github.com/ethlo/eclipselink-maven-plugin/issues/31 
                   -->
                   <groupId>io.github.classgraph</groupId>
                   <artifactId>classgraph</artifactId>
