@@ -52,9 +52,9 @@ public class SmMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
         this.smManagement = smManagement;
 
         this.smMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies, new SmMetaDataDataProvider(smManagement),
-                this::deleteMetaData);
+                this::hasMetadataChangePermission,  this::deleteMetaData);
 
-        this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n);
+        this.smMetaDataAddUpdateWindowLayout = new SmMetaDataAddUpdateWindowLayout(i18n,this::hasMetadataChangePermission);
         this.addSmMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 smMetaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateSmMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,

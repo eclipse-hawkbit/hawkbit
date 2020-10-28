@@ -15,10 +15,16 @@ jobs:
 
     docker:
     - image: circleci/openjdk:8u181-jdk-stretch
+      auth:
+        username: $DOCKERHUB_USER
+        password: $DOCKERHUB_ACCESSTOKEN
       environment:
         _JAVA_OPTIONS: "-Xms512m -Xmx1024m"
 
     - image: rabbitmq:3-management
+      auth:
+        username: $DOCKERHUB_USER
+        password: $DOCKERHUB_ACCESSTOKEN
       environment:
         RABBITMQ_DEFAULT_VHOST: "/"
 

@@ -35,9 +35,10 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
      * @param dsMetaDataWindowBuilder
      *            DsMetaDataWindowBuilder
      */
-    public DistributionSetDetailsHeader(final CommonUiDependencies uiDependencies, final DsWindowBuilder dsWindowBuilder,
-            final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
-        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(), uiDependencies.getUiNotification());
+    public DistributionSetDetailsHeader(final CommonUiDependencies uiDependencies,
+            final DsWindowBuilder dsWindowBuilder, final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(),
+                uiDependencies.getUiNotification());
 
         this.dsWindowBuilder = dsWindowBuilder;
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;
@@ -58,11 +59,6 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     @Override
     protected String getMasterEntityName(final ProxyDistributionSet masterEntity) {
         return masterEntity.getNameVersion();
-    }
-
-    @Override
-    protected boolean hasEditPermission() {
-        return permChecker.hasUpdateRepositoryPermission();
     }
 
     @Override

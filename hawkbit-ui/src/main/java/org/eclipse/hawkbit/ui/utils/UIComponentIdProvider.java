@@ -1244,15 +1244,15 @@ public final class UIComponentIdProvider {
     /**
      * Metadata add icon id.
      */
-    public static final String METADTA_ADD_ICON_ID = "metadata.add.icon.id";
+    public static final String METADATA_ADD_ICON_ID = "metadata.add.icon.id";
     /**
      * Metadata details table id.
      */
-    public static final String METDATA_DETAILS_TABLE_ID = "metadata.details.table.id";
+    public static final String METADATA_DETAILS_TABLE_ID = "metadata.details.table.id";
     /**
      * Metadata window table id.
      */
-    public static final String METDATA_WINDOW_TABLE_ID = "metadata.window.table.id";
+    public static final String METADATA_WINDOW_TABLE_ID = "metadata.window.table.id";
 
     /**
      * Distribution set table - Manage metadata id.

@@ -64,7 +64,13 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
         this.permChecker = uiDependencies.getPermChecker();
         this.entityFactory = uiDependencies.getEntityFactory();
 
-        this.metadataWindowGridHeader = new MetadataWindowGridHeader(uiDependencies, this::showAddMetaDataLayout);
+        this.metadataWindowGridHeader = new MetadataWindowGridHeader(uiDependencies, this::hasMetadataChangePermission,
+                this::showAddMetaDataLayout);
+    }
+
+    // can be overriden in child classes for entity-specific permission
+    protected boolean hasMetadataChangePermission() {
+        return permChecker.hasUpdateRepositoryPermission();
     }
 
     protected MetaData createMetaData(final ProxyMetaData entity) {

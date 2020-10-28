@@ -23,6 +23,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -102,11 +103,12 @@ public class NoCountPagingRepository {
         }
 
         @Override
-        protected Page<T> readPage(final TypedQuery<T> query, final Pageable pageable, final Specification<T> spec) {
+        protected <S extends T> Page<S> readPage(final TypedQuery<S> query, final Class<S> domainClass,
+                final Pageable pageable, @Nullable final Specification<S> spec) {
             query.setFirstResult((int) pageable.getOffset());
             query.setMaxResults(pageable.getPageSize());
 
-            final List<T> content = query.getResultList();
+            final List<S> content = query.getResultList();
 
             return new PageImpl<>(content, pageable, content.size());
         }

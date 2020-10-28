@@ -54,9 +54,9 @@ public class TargetMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Str
         this.targetManagement = targetManagement;
 
         this.targetMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies,
-                new TargetMetaDataDataProvider(targetManagement), this::deleteMetaData);
+                new TargetMetaDataDataProvider(targetManagement), this::hasMetadataChangePermission,this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n,this::hasMetadataChangePermission);
         this.addTargetMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateTargetMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,

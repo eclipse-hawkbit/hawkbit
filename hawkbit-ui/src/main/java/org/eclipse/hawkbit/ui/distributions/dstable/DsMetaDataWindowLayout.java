@@ -54,9 +54,9 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
         this.dsManagement = dsManagement;
 
         this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies, new DsMetaDataDataProvider(dsManagement),
-                this::deleteMetaData);
+                this::hasMetadataChangePermission,this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n);
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n,this::hasMetadataChangePermission);
         this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
         this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,

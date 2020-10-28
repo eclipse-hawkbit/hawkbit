@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.Collection;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -35,6 +36,7 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
     public static final String META_DATA_VALUE_ID = "metaDataValue";
     public static final String META_DATA_DELETE_BUTTON_ID = "metaDataDeleteButton";
 
+    private final transient BooleanSupplier hasMetadataChangePermission;
     private final transient DeleteSupport<ProxyMetaData> metaDataDeleteSupport;
 
     /**
@@ -43,15 +45,18 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param dataProvider
-     *            AbstractMetaDataDataProvider for filter support
+     *            provides entity-specific metadata entities
+     * @param hasMetadataChangePermission
+     *            checks the permission allowing to change metadata entities
      * @param itemsDeletionCallback
-     *            Grid item deletion Call back for event listener
+     *            callback method to delete metadata entities
      *
      */
-    public MetaDataWindowGrid(final CommonUiDependencies uiDependencies, final AbstractMetaDataDataProvider<?, F> dataProvider,
+    public MetaDataWindowGrid(final CommonUiDependencies uiDependencies, final AbstractMetaDataDataProvider<?, F> dataProvider,final BooleanSupplier hasMetadataChangePermission,
             final Predicate<Collection<ProxyMetaData>> itemsDeletionCallback) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
+        this.hasMetadataChangePermission = hasMetadataChangePermission;
         this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiDependencies.getUiNotification(), "caption.metadata",
                 "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
                 UIComponentIdProvider.METADATA_DELETE_CONFIRMATION_DIALOG);
@@ -68,7 +73,7 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
 
     @Override
     public String getGridId() {
-        return UIComponentIdProvider.METDATA_WINDOW_TABLE_ID;
+        return UIComponentIdProvider.METADATA_WINDOW_TABLE_ID;
     }
 
     @Override
@@ -80,7 +85,7 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
                 .setCaption(i18n.getMessage("header.value")).setHidden(true).setHidable(true);
 
         GridComponentBuilder.addDeleteColumn(this, i18n, META_DATA_DELETE_BUTTON_ID, metaDataDeleteSupport,
-                UIComponentIdProvider.META_DATA_DELET_ICON, e -> permissionChecker.hasDeleteRepositoryPermission());
+                UIComponentIdProvider.META_DATA_DELET_ICON, e -> hasMetadataChangePermission.getAsBoolean());
     }
 
     @Override

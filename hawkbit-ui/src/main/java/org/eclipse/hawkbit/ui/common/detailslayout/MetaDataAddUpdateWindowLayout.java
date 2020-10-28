@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
+import java.util.function.BooleanSupplier;
+
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -21,6 +23,7 @@ import com.vaadin.ui.VerticalLayout;
  * Class for metadata add/update window layout.
  */
 public class MetaDataAddUpdateWindowLayout extends AbstractEntityWindowLayout<ProxyMetaData> {
+    private final BooleanSupplier hasMetadataChangePermission;
     protected final MetaDataAddUpdateWindowLayoutComponentBuilder metaDataComponentBuilder;
 
     private final TextField metadataKey;
@@ -30,11 +33,15 @@ public class MetaDataAddUpdateWindowLayout extends AbstractEntityWindowLayout<Pr
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
-     *            I18N
+     *            VaadinMessageSource
+     * @param hasMetadataChangePermission
+     *            checks the permission allowing to change metadata entities
      */
-    public MetaDataAddUpdateWindowLayout(final VaadinMessageSource i18n) {
+    public MetaDataAddUpdateWindowLayout(final VaadinMessageSource i18n,
+            final BooleanSupplier hasMetadataChangePermission) {
         super();
 
+        this.hasMetadataChangePermission = hasMetadataChangePermission;
         this.metaDataComponentBuilder = new MetaDataAddUpdateWindowLayoutComponentBuilder(i18n);
 
         this.metadataKey = metaDataComponentBuilder.createKeyField(binder);
@@ -43,6 +50,16 @@ public class MetaDataAddUpdateWindowLayout extends AbstractEntityWindowLayout<Pr
 
     @Override
     public ComponentContainer getRootComponent() {
+        final VerticalLayout addUpdateLayout = getMetadataAddUpdateLayout();
+
+        if (!hasMetadataChangePermission.getAsBoolean()) {
+            disableMetadataInputComponents();
+        }
+
+        return addUpdateLayout;
+    }
+
+    protected VerticalLayout getMetadataAddUpdateLayout() {
         final VerticalLayout addUpdateLayout = new VerticalLayout();
         addUpdateLayout.setSpacing(true);
         addUpdateLayout.setMargin(false);
@@ -57,11 +74,18 @@ public class MetaDataAddUpdateWindowLayout extends AbstractEntityWindowLayout<Pr
         return addUpdateLayout;
     }
 
+    protected void disableMetadataInputComponents() {
+        metadataKey.setEnabled(false);
+        metadataValue.setEnabled(false);
+    }
+
     /**
      * Enable meta data key
      */
     public void enableMetadataKey() {
-        metadataKey.setEnabled(true);
+        if (hasMetadataChangePermission.getAsBoolean()) {
+            metadataKey.setEnabled(true);
+        }
     }
 
     /**
