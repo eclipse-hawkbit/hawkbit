@@ -153,7 +153,6 @@ public final class RSQLUtility {
         try {
             LOGGER.debug("parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            operators.add(new ComparisonOperator("=li=", false));
             return new RSQLParser(operators).parse(rsql);
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
