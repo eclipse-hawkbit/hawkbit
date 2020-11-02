@@ -44,7 +44,7 @@ public abstract class AbstractMetaDataWindowBuilder<F> extends AbstractEntityWin
             final F selectedEntityFilter, final String selectedEntityName, final ProxyMetaData proxyMetaData) {
         final CommonDialogWindow window = createWindow(metaDataWindowLayout, null);
 
-        window.setAssistivePrefix(i18n.getMessage("caption.metadata.popup") + " " + "<b>");
+        window.setAssistivePrefix(getI18n().getMessage("caption.metadata.popup") + " " + "<b>");
         window.setCaptionAsHtml(false);
         window.setCaption(selectedEntityName);
         window.setAssistivePostfix("</b>");

@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.springframework.util.StringUtils;
 
 /**
@@ -91,9 +92,9 @@ public class AddMetaDataWindowController
     }
 
     @Override
-    protected void handleEntityPersistedSuccessfully(final MetaData persistedEntity) {
-        // override to not publish event
-        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(persistedEntity));
+    protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
+        // do not publish entity created because it is already managed by the
+        // update callback that sends the event for parent entity of metadata
     }
 
     @Override

@@ -64,7 +64,7 @@ public class AutoAssignmentWindowBuilder extends AbstractEntityWindowBuilder<Pro
      */
     public Window getWindowForAutoAssignment(final ProxyTargetFilterQuery proxyTargetFilter) {
         return getWindowForEntity(proxyTargetFilter, new AutoAssignmentWindowController(uiDependencies, targetManagement,
-                targetFilterQueryManagement, new AutoAssignmentWindowLayout(i18n, dsManagement)));
+                targetFilterQueryManagement, new AutoAssignmentWindowLayout(getI18n(), dsManagement)));
     }
 
     @Override

@@ -91,12 +91,6 @@ public class UpdateMetaDataWindowController
     }
 
     @Override
-    protected void handleEntityPersistedSuccessfully(final MetaData persistedEntity) {
-        // override to not publish event
-        displaySuccess(getPersistSuccessMessageKey(), getDisplayableName(persistedEntity));
-    }
-
-    @Override
     protected String getPersistSuccessMessageKey() {
         return "message.metadata.updated";
     }
@@ -123,7 +117,8 @@ public class UpdateMetaDataWindowController
 
     @Override
     protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
-        // do not publish entity updated
+        // do not publish entity updated because it is already managed by the
+        // update callback that sends the event for parent entity of metadata
     }
 
     @Override

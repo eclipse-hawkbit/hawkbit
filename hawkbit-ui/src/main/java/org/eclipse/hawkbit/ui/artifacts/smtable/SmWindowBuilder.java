@@ -61,7 +61,7 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(
-                new AddSmWindowController(uiDependencies, smManagement, new SmWindowLayout(i18n, smTypeManagement), view));
+                new AddSmWindowController(uiDependencies, smManagement, new SmWindowLayout(getI18n(), smTypeManagement), view));
 
     }
 
@@ -74,6 +74,6 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForUpdate(final ProxySoftwareModule proxySm) {
         return getWindowForEntity(proxySm,
-                new UpdateSmWindowController(uiDependencies, smManagement, new SmWindowLayout(i18n, smTypeManagement)));
+                new UpdateSmWindowController(uiDependencies, smManagement, new SmWindowLayout(getI18n(), smTypeManagement)));
     }
 }

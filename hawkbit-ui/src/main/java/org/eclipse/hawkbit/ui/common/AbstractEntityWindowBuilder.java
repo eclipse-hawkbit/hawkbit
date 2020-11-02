@@ -24,11 +24,9 @@ import com.vaadin.ui.Window;
  */
 public abstract class AbstractEntityWindowBuilder<T> {
     protected final CommonUiDependencies uiDependencies;
-    protected final VaadinMessageSource i18n;
 
     protected AbstractEntityWindowBuilder(final CommonUiDependencies uiDependencies) {
         this.uiDependencies = uiDependencies;
-        this.i18n = uiDependencies.getI18n();
     }
 
     protected CommonDialogWindow getWindowForNewEntity(final AbstractEntityWindowController<T, ?, ?> controller) {
@@ -85,5 +83,9 @@ public abstract class AbstractEntityWindowBuilder<T> {
     protected String getHelpLink() {
         // can be overriden to provide help link to documentation
         return null;
+    }
+
+    protected VaadinMessageSource getI18n() {
+        return uiDependencies.getI18n();
     }
 }

@@ -131,6 +131,8 @@ public class AutoAssignmentWindowController extends
 
     @Override
     protected TargetFilterQuery persistEntityInRepository(final ProxyTargetFilterQuery entity) {
+        // this subclass cares itself for persisting the entity because of
+        // special requirements (multiple confirmation dialogs).
         return null;
     }
 
@@ -151,11 +153,15 @@ public class AutoAssignmentWindowController extends
 
     @Override
     protected String getPersistSuccessMessageKey() {
+        // this subclass cares itself for persisting the entity because of
+        // special requirements (multiple confirmation dialogs)
         return null;
     }
 
     @Override
     protected String getPersistFailureMessageKey() {
+        // this subclass cares itself for persisting the entity because of
+        // special requirements (multiple confirmation dialogs)
         return null;
     }
 

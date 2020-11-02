@@ -89,6 +89,6 @@ public class DsWindowBuilder extends AbstractEntityWindowBuilder<ProxyDistributi
     @Override
     public Window getWindowForUpdate(final ProxyDistributionSet proxyDs) {
         return getWindowForEntity(proxyDs, new UpdateDsWindowController(uiDependencies, dsManagement,
-                new DsWindowLayout(i18n, systemSecurityContext, tenantConfigurationManagement, dsTypeManagement)));
+                new DsWindowLayout(getI18n(), systemSecurityContext, tenantConfigurationManagement, dsTypeManagement)));
     }
 }

@@ -49,8 +49,8 @@ public class ProxyTypeValidator extends EntityValidator {
      */
     public boolean isDsTypeValid(final ProxyType entity, final BooleanSupplier keyDuplicateCheck,
             final BooleanSupplier nameDuplicateCheck) {
-        return mandatoryDsAttributesPresent(entity) && nameValid(entity, nameDuplicateCheck)
-                && keyValid(entity, keyDuplicateCheck, "message.type.key.ds.duplicate.check");
+        return mandatoryDsAttributesPresent(entity) && nameDoesNotExistInRepo(entity, nameDuplicateCheck)
+                && keyDoesNotExistInRepo(entity, keyDuplicateCheck, "message.type.key.ds.duplicate.check");
     }
 
     /**
@@ -68,8 +68,8 @@ public class ProxyTypeValidator extends EntityValidator {
      */
     public boolean isSmTypeValid(final ProxyType entity, final BooleanSupplier keyDuplicateCheck,
             final BooleanSupplier nameDuplicateCheck) {
-        return mandatorySmAttributesPresent(entity) && nameValid(entity, nameDuplicateCheck)
-                && keyValid(entity, keyDuplicateCheck, "message.type.key.swmodule.duplicate.check");
+        return mandatorySmAttributesPresent(entity) && nameDoesNotExistInRepo(entity, nameDuplicateCheck)
+                && keyDoesNotExistInRepo(entity, keyDuplicateCheck, "message.type.key.swmodule.duplicate.check");
     }
 
     private boolean mandatorySmAttributesPresent(final ProxyType entity) {
@@ -90,7 +90,7 @@ public class ProxyTypeValidator extends EntityValidator {
         return true;
     }
 
-    private boolean keyValid(final ProxyType entity, final BooleanSupplier keyExistsInRepository,
+    private boolean keyDoesNotExistInRepo(final ProxyType entity, final BooleanSupplier keyExistsInRepository,
             final String duplicateKeyMessageKey) {
         if (keyExistsInRepository.getAsBoolean()) {
             final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
@@ -100,7 +100,7 @@ public class ProxyTypeValidator extends EntityValidator {
         return true;
     }
 
-    private boolean nameValid(final ProxyType entity, final BooleanSupplier nameExistsInRepository) {
+    private boolean nameDoesNotExistInRepo(final ProxyType entity, final BooleanSupplier nameExistsInRepository) {
         if (nameExistsInRepository.getAsBoolean()) {
             final String trimmedName = StringUtils.trimWhitespace(entity.getName());
             displayValidationError("message.type.duplicate.check", trimmedName);
