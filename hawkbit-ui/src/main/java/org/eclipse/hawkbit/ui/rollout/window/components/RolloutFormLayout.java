@@ -71,7 +71,7 @@ public class RolloutFormLayout extends ValidatableLayout {
     private Long rolloutId;
     private Long totalTargets;
 
-    private Consumer<String> filterQueryChangedListener;
+    private Consumer<ProxyTargetFilterQuery> filterQueryChangedListener;
 
     /**
      * Constructor for RolloutFormLayout
@@ -192,7 +192,7 @@ public class RolloutFormLayout extends ValidatableLayout {
     private void addValueChangeListeners() {
         targetFilterQueryCombo.getComponent().addValueChangeListener(event -> {
             if (filterQueryChangedListener != null) {
-                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue().getQuery() : null);
+                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue() : null);
             }
         });
 
@@ -281,7 +281,7 @@ public class RolloutFormLayout extends ValidatableLayout {
      * @param filterQueryChangedListener
      *          Changed listener
      */
-    public void setFilterQueryChangedListener(final Consumer<String> filterQueryChangedListener) {
+    public void setFilterQueryChangedListener(final Consumer<ProxyTargetFilterQuery> filterQueryChangedListener) {
         this.filterQueryChangedListener = filterQueryChangedListener;
     }
 

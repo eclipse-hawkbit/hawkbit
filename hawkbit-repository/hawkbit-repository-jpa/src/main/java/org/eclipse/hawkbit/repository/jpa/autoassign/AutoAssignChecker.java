@@ -142,9 +142,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
                 Isolation.READ_COMMITTED.value(), status -> {
-                    final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(
-                            targetFilterQuery.getQuery(), dsId, targetFilterQuery.getAutoAssignActionType(),
-                            targetFilterQuery.getAutoAssignWeight().orElse(null), PAGE_SIZE);
+                    final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(targetFilterQuery, dsId,
+                            PAGE_SIZE);
                     final int count = deploymentRequests.size();
                     if (count > 0) {
                         deploymentManagement.assignDistributionSets(getAutoAssignmentInitiatedBy(targetFilterQuery),
@@ -168,22 +167,27 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      *            the query the targets have to match
      * @param dsId
      *            dsId the targets are not allowed to have in their action history
-     * @param type
-     *            action type for targets auto assignment
      * @param count
      *            maximum amount of targets to retrieve
      * @return list of targets with action type
      */
-    private List<DeploymentRequest> createAssignmentRequests(final String targetFilterQuery, final Long dsId,
-            final ActionType type, final Integer weight, final int count) {
+    private List<DeploymentRequest> createAssignmentRequests(final TargetFilterQuery targetFilterQuery, final Long dsId,
+            final int count) {
         final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNonDS(PageRequest.of(0, count), dsId,
                 targetFilterQuery);
         // the action type is set to FORCED per default (when not explicitly
         // specified)
-        final ActionType autoAssignActionType = type == null ? ActionType.FORCED : type;
+        final ActionType autoAssignActionType = targetFilterQuery.getAutoAssignActionType() == null ?
+                ActionType.FORCED :
+                targetFilterQuery.getAutoAssignActionType();
 
-        return targets.getContent().stream().map(t -> DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
-                .setActionType(autoAssignActionType).setWeight(weight).build()).collect(Collectors.toList());
+        return targets.getContent()
+                .stream()
+                .map(t -> DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
+                        .setActionType(autoAssignActionType)
+                        .setWeight(targetFilterQuery.getAutoAssignWeight().orElse(null))
+                        .build())
+                .collect(Collectors.toList());
     }
 
 }

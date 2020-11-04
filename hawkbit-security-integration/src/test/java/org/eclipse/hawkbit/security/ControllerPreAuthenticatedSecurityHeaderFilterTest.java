@@ -18,6 +18,7 @@ import java.util.Collection;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,10 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Mock
     private DmfTenantSecurityToken tenantSecurityTokenMock;
 
-    private final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
+    private final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
 
     private static final String CA_COMMON_NAME = "ca-cn";
     private static final String CA_COMMON_NAME_VALUE = "box1";

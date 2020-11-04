@@ -8,16 +8,24 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.eclipse.hawkbit.autoconfigure.security.MultiUserProperties.User;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
+import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,18 +41,42 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
  * {@link EnableAutoConfiguration Auto-configuration} for security.
  */
 @Configuration
-@EnableConfigurationProperties({ DdiSecurityProperties.class, HawkbitSecurityProperties.class })
+@EnableConfigurationProperties({SecurityProperties.class, DdiSecurityProperties.class, HawkbitSecurityProperties.class})
 public class SecurityAutoConfiguration {
 
     /**
      * @return the {@link TenantAware} singleton bean which holds the current
      *         {@link TenantAware} service and make it accessible in beans which
      *         cannot access the service directly, e.g. JPA entities.
+     *
+     * @param authoritiesResolver
+     *             The user authorities/roles resolver
      */
     @Bean
     @ConditionalOnMissingBean
-    public TenantAware tenantAware() {
-        return new SecurityContextTenantAware();
+    public TenantAware tenantAware(final UserAuthoritiesResolver authoritiesResolver) {
+        return new SecurityContextTenantAware(authoritiesResolver);
+    }
+
+    /**
+     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for resolving user authorities/roles
+     *
+     * @param securityProperties
+     *            The Spring {@link SecurityProperties} for the security user
+     * @param multiUserProperties
+     *            The {@link MultiUserProperties} for the managed users
+     *
+     * @return    an {@link InMemoryUserAuthoritiesResolver} bean
+     */
+    @Bean
+    public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
+            final MultiUserProperties multiUserProperties) {
+        final Map<String, List<String>> usersToPermissions = multiUserProperties.getUsers().stream() //
+                .collect(Collectors.toMap(User::getUsername, User::getPermissions));
+
+        usersToPermissions.put(securityProperties.getUser().getName(), securityProperties.getUser().getRoles());
+
+        return new InMemoryUserAuthoritiesResolver(usersToPermissions);
     }
 
     /**

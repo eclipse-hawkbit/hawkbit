@@ -234,7 +234,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
-            @NotNull String rsqlParam);
+            @NotNull TargetFilterQuery rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -267,7 +267,7 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+            @NotEmpty Collection<RolloutGroup> groups, @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -280,7 +280,7 @@ public interface TargetManagement {
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<RolloutGroup> groups, @NotNull String rsqlParam);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no
@@ -296,7 +296,7 @@ public interface TargetManagement {
      *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, long group);
+    Page<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, @NotNull RolloutGroup group);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet}.

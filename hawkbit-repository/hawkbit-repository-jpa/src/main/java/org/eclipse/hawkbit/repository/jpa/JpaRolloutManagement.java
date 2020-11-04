@@ -382,7 +382,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
         }
 
-        final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
+        final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                 RolloutGroupStatus.READY, group);
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
@@ -428,7 +428,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
-            final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
+            final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
                     readyGroups, targetFilter);
@@ -449,6 +449,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
+        // TODO
         final long totalTargets = targetManagement.countByRsql(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
@@ -564,8 +565,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         try {
             long actionsCreated;
             do {
-                actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group.getId(),
-                        TRANSACTION_TARGETS);
+                actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group, TRANSACTION_TARGETS);
                 totalActionsCreated += actionsCreated;
             } while (actionsCreated > 0);
 
@@ -576,19 +576,19 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         return totalActionsCreated;
     }
 
-    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
+    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final RolloutGroup rolloutGroup, final int limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
             final PageRequest pageRequest = PageRequest.of(0, limit);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
                     .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-            final RolloutGroup group = rolloutGroupRepository.findById(groupId)
-                    .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, groupId));
+            final RolloutGroup group = rolloutGroupRepository.findById(rolloutGroup.getId())
+                    .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutGroup));
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest, groupId);
+            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest, group);
             if (targets.getTotalElements() > 0) {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
