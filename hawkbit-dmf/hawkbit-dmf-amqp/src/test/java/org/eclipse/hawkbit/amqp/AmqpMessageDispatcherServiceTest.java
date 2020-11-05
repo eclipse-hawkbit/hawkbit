@@ -11,15 +11,17 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
+import java.io.Serializable;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,6 +37,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -46,9 +49,11 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -88,6 +93,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private Target testTarget;
 
+    protected TenantConfigurationValue<Serializable> anonymousDownloadEnabled;
+
     @Override
     public void before() throws Exception {
         super.before();
@@ -101,7 +108,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(any(), any()))
-                .thenReturn(Arrays.asList(new ArtifactUrl("http", "download", "http://mockurl")));
+                .thenReturn(Collections.singletonList(new ArtifactUrl("http", "download", "http://mockurl")));
 
         systemManagement = Mockito.mock(SystemManagement.class);
         final TenantMetaData tenantMetaData = Mockito.mock(TenantMetaData.class);
@@ -114,13 +121,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 artifactUrlHandlerMock, systemSecurityContext, systemManagement, targetManagement, serviceMatcher,
                 distributionSetManagement, softwareModuleManagement, deploymentManagement, tenantConfigurationManagement);
 
+        anonymousDownloadEnabled = TenantConfigurationValue.builder().value(false).build();
     }
 
-    private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+    private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
                 .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
-        final Message sendMessage = createArgumentCapture(target.getAddress());
-        return sendMessage;
+        return createArgumentCapture(target.getAddress());
     }
 
     private Action createAction(final DistributionSet testDs) {
@@ -128,8 +135,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that download and install event with 3 software moduls and no artifacts works")
-    public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
+    @Description("Verifies that download and install event with 3 software modules and no artifacts works")
+    public void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
@@ -139,20 +146,19 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
+        final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
         assertThat(createDistributionSet.getModules()).hasSameSizeAs(downloadAndUpdateRequest.getSoftwareModules());
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
-        for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
-                .getSoftwareModules()) {
+
+        for (final DmfSoftwareModule softwareModule : downloadAndUpdateRequest.getSoftwareModules()) {
             assertTrue("Artifact list for softwaremodule should be empty", softwareModule.getArtifacts().isEmpty());
 
             assertThat(softwareModule.getMetadata()).containsExactly(
                     new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE));
 
             for (final SoftwareModule softwareModule2 : action.getDistributionSet().getModules()) {
-                assertNotNull("Sofware module ID should be set", softwareModule.getModuleId());
+                assertNotNull("Software module ID should be set", softwareModule.getModuleId());
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {
                     continue;
                 }
@@ -164,6 +170,20 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                         softwareModule.getModuleVersion(), softwareModule2.getVersion());
             }
         }
+    }
+
+    @Test
+    @Description("Verifies that download and install event with 3 software modules and no artifacts works")
+    public void testSendDownloadRequestWithSoftwareModulesAndNoArtifactsForAnonymousDownload() {
+        // enable anonymous download
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
+
+        testSendDownloadRequestWithSoftwareModulesAndNoArtifacts();
+
+        // disable anonymous download for next tests
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
     }
 
     @Test
@@ -186,16 +206,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
+        final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
 
         assertEquals("DownloadAndUpdateRequest event should contains 3 software modules", 3,
                 downloadAndUpdateRequest.getSoftwareModules().size());
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
 
-        for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
-                .getSoftwareModules()) {
+        for (final DmfSoftwareModule softwareModule : downloadAndUpdateRequest.getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
             }
@@ -212,6 +230,20 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());
             });
         }
+    }
+
+    @Test
+    @Description("Verifies that download and install event with software modules and artifacts works")
+    public void testSendDownloadRequestForAnonymousDownload() {
+        // enable anonymous download
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
+
+        testSendDownloadRequest();
+
+        // disable anonymous download for next tests
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
     }
 
     @Test
@@ -259,7 +291,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that a delete message is not send if the address is not an amqp address.")
-    public void sendDeleteRequestWithNoAmqpAdress() {
+    public void sendDeleteRequestWithNoAmqpAddress() {
 
         // setup
         final String noAmqpUri = "http://anyhost";
@@ -274,8 +306,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a delete message is not send if the address is null.")
-    public void sendDeleteRequestWithNullAdress() {
+    @Description("Verifies that a delete message is not send if the address is null.")
+    public void sendDeleteRequestWithNullAddress() {
 
         // setup
         final String noAmqpUri = null;
@@ -293,7 +325,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertEventMessage(sendMessage);
         final DmfActionRequest actionId = convertMessage(sendMessage, DmfActionRequest.class);
         assertEquals("Action ID should be 1", actionId.getActionId(), Long.valueOf(1));
-        assertEquals("The topc in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
+        assertEquals("The topic in the message should be a CANCEL_DOWNLOAD value", EventTopic.CANCEL_DOWNLOAD,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
     }
 
@@ -314,10 +346,13 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertEquals(downloadAndUpdateRequest.getActionId(), action);
         assertEquals("The topic of the event should contain DOWNLOAD_AND_INSTALL", EventTopic.DOWNLOAD_AND_INSTALL,
                 sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC));
-        assertEquals("Security token of target", TEST_TOKEN, downloadAndUpdateRequest.getTargetSecurityToken());
-
+        if ((Boolean) anonymousDownloadEnabled.getValue()) {
+            // If anonymous download is enabled, the token shall not be returned
+            assertNull(downloadAndUpdateRequest.getTargetSecurityToken());
+        } else {
+            assertEquals("Security token of target", TEST_TOKEN, downloadAndUpdateRequest.getTargetSecurityToken());
+        }
         return downloadAndUpdateRequest;
-
     }
 
     private void assertUpdateAttributesMessage(final Message sendMessage) {

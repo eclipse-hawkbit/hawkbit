@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
@@ -90,6 +91,27 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment send a download and install message with anonymous download enabled.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
+    public void sendDownloadAndInstallStatusForAnonymousDownload() {
+        // enable anonymous download
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
+
+        sendDownloadAndInstallStatus();
+
+        // disable anonymous download for next tests
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
     }
 
     @Test
@@ -179,7 +201,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final Long actionId1 = assignNewDsToTarget(controllerId, 450);
         final Entry<Long, EventTopic> action1Install = new SimpleEntry<>(actionId1, EventTopic.DOWNLOAD_AND_INSTALL);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        assertLatestMultiActionMessage(controllerId, Arrays.asList(action1Install));
+        assertLatestMultiActionMessage(controllerId, Collections.singletonList(action1Install));
 
         final Long actionId2 = assignNewDsToTarget(controllerId, 111);
         final Entry<Long, EventTopic> action2Install = new SimpleEntry<>(actionId2, EventTopic.DOWNLOAD_AND_INSTALL);
@@ -236,6 +258,20 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 controllerId);
     }
 
+    @Test
+    @Description("Verify payload of multi action messages with anonymous download enabled.")
+    public void assertMultiActionMessagePayloadsForAnonymousDownload() {
+        // enable anonymous download
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
+
+        assertMultiActionMessagePayloads();
+
+        // disable anonymous download for next tests
+        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
+                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
+    }
+
     private List<DmfMultiActionElement> getLatestMultiActionMessages(final String expectedControllerId) {
         final Message multiactionMessage = replyToListener.getLatestEventMessage(EventTopic.MULTI_ACTION);
         assertThat(multiactionMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
@@ -273,7 +309,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.CANCELED);
 
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
+        assertLatestMultiActionMessage(controllerId, Collections.singletonList(action2Install));
     }
 
     @Test
@@ -300,7 +336,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         updateActionViaDmfClient(controllerId, actionId1, DmfActionStatus.FINISHED);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);
         assertRequestAttributesUpdateMessage(controllerId);
-        assertLatestMultiActionMessage(controllerId, Arrays.asList(action2Install));
+        assertLatestMultiActionMessage(controllerId, Collections.singletonList(action2Install));
     }
 
     @Test
@@ -371,7 +407,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         createAndStartRollout(ds, filterQuery, 122);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
-        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds));
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Collections.singletonList(smIds));
 
         createAndStartRollout(ds, filterQuery, 43);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.MULTI_ACTION);
@@ -418,7 +454,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         updateActionViaDmfClient(controllerId, installActions.get(1), DmfActionStatus.FINISHED);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.REQUEST_ATTRIBUTES_UPDATE, EventTopic.MULTI_ACTION);
-        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Arrays.asList(smIds1));
+        assertLatestMultiActionMessageContainsInstallMessages(controllerId, Collections.singletonList(smIds1));
     }
 
     private Set<Long> getSoftwareModuleIds(final DistributionSet ds) {
