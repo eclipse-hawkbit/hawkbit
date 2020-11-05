@@ -15,16 +15,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.tagdetails.AbstractTagToken;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Target tag layout in bulk upload popup.
@@ -35,9 +32,8 @@ public class TargetBulkTokenTags extends AbstractTagToken<ProxyTarget> {
 
     private final TagToProxyTagMapper<TargetTag> tagMapper;
 
-    TargetBulkTokenTags(final VaadinMessageSource i18n, final UIEventBus eventBus, final SpPermissionChecker checker,
-            final UINotification uinotification, final TargetTagManagement tagManagement) {
-        super(checker, i18n, uinotification, eventBus);
+    TargetBulkTokenTags(final CommonUiDependencies uiDependencies, final TargetTagManagement tagManagement) {
+        super(uiDependencies);
 
         this.tagManagement = tagManagement;
         this.tagMapper = new TagToProxyTagMapper<>();

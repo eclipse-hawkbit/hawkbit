@@ -8,75 +8,47 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update software module window
  */
-public class UpdateSmWindowController extends AbstractEntityWindowController<ProxySoftwareModule, ProxySoftwareModule> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateSmWindowController.class);
-
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class UpdateSmWindowController
+        extends AbstractUpdateNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
-
     private final SmWindowLayout layout;
+    private final ProxySmValidator validator;
+
+    private String nameBeforeEdit;
+    private String versionBeforeEdit;
 
     /**
      * Constructor for UpdateSmWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smManagement
      *            SoftwareModuleManagement
      * @param layout
      *            SmWindowLayout
      */
-    public UpdateSmWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final SoftwareModuleManagement smManagement,
-            final SmWindowLayout layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+    public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
+            final SoftwareModuleManagement smManagement, final SmWindowLayout layout) {
+        super(uiDependencies);
 
         this.smManagement = smManagement;
-
         this.layout = layout;
-    }
-
-    /**
-     * @return Software module layout
-     */
-    @Override
-    public AbstractEntityWindowLayout<ProxySoftwareModule> getLayout() {
-        return layout;
+        this.validator = new ProxySmValidator(uiDependencies);
     }
 
     @Override
@@ -90,7 +62,15 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
 
+        nameBeforeEdit = proxyEntity.getName();
+        versionBeforeEdit = proxyEntity.getVersion();
+
         return sm;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxySoftwareModule> getLayout() {
+        return layout;
     }
 
     @Override
@@ -101,33 +81,37 @@ public class UpdateSmWindowController extends AbstractEntityWindowController<Pro
     }
 
     @Override
-    protected void persistEntity(final ProxySoftwareModule entity) {
-        final SoftwareModuleUpdate smUpdate = entityFactory.softwareModule().update(entity.getId())
+    protected SoftwareModule persistEntityInRepository(final ProxySoftwareModule entity) {
+        final SoftwareModuleUpdate smUpdate = getEntityFactory().softwareModule().update(entity.getId())
                 .vendor(entity.getVendor()).description(entity.getDescription());
+        return smManagement.update(smUpdate);
+    }
 
-        try {
-            final SoftwareModule updatedSm = smManagement.update(smUpdate);
+    @Override
+    protected String getDisplayableName(final SoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
 
-            uiNotification.displaySuccess(
-                    i18n.getMessage("message.update.success", updatedSm.getName() + ":" + updatedSm.getVersion()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class, updatedSm.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of software module failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.software.module");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
-        }
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxySoftwareModule entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxySoftwareModule.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())
-                || entity.getTypeInfo() == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.nameorversionortype"));
-            return false;
-        }
+        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
+        final Long typeId = entity.getTypeInfo().getId();
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
+                && smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
+    }
 
-        return true;
+    private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {
+        return !nameBeforeEdit.equals(trimmedName) || !versionBeforeEdit.equals(trimmedVersion);
     }
 }

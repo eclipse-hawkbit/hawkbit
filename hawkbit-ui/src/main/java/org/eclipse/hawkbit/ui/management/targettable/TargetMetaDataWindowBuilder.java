@@ -8,14 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.detailslayout.AbstractMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -23,38 +19,19 @@ import com.vaadin.ui.Window;
  * Builder for target meta data window
  */
 public class TargetMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<String> {
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
-    private final SpPermissionChecker permChecker;
 
     private final TargetManagement targetManagement;
 
     /**
      * Constructor for TargetMetaDataWindowBuilder
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
-     * @param permChecker
-     *            SpPermissionChecker
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetMetaDataWindowBuilder(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final SpPermissionChecker permChecker,
-            final TargetManagement targetManagement) {
-        super(i18n);
-
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
-        this.permChecker = permChecker;
+    public TargetMetaDataWindowBuilder(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement) {
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
     }
@@ -87,7 +64,7 @@ public class TargetMetaDataWindowBuilder extends AbstractMetaDataWindowBuilder<S
      */
     public Window getWindowForShowTargetMetaData(final String controllerId, final String name,
             final ProxyMetaData proxyMetaData) {
-        return getWindowForShowMetaData(new TargetMetaDataWindowLayout(i18n, eventBus, permChecker, uiNotification,
-                entityFactory, targetManagement), controllerId, name, proxyMetaData);
+        return getWindowForShowMetaData(new TargetMetaDataWindowLayout(uiDependencies, targetManagement), controllerId, name,
+                proxyMetaData);
     }
 }

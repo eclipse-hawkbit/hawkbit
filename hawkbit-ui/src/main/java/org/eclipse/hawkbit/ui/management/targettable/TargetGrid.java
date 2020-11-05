@@ -22,8 +22,8 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetPollingStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
@@ -57,11 +57,8 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
@@ -98,16 +95,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     /**
      * Constructor for TargetGrid
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param notification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
-     * @param permChecker
-     *            SpPermissionChecker
      * @param deploymentManagement
      *            DeploymentManagement
      * @param configManagement
@@ -123,14 +114,13 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      * @param targetTagFilterLayoutUiState
      *            TargetTagFilterLayoutUiState
      */
-    public TargetGrid(final UIEventBus eventBus, final VaadinMessageSource i18n, final UINotification notification,
-            final TargetManagement targetManagement, final SpPermissionChecker permChecker,
+    public TargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
-        super(i18n, eventBus, permChecker);
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.targetManagement = targetManagement;
         this.targetGridLayoutUiState = targetGridLayoutUiState;
@@ -147,8 +137,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             getSelectionSupport().enableMultiSelection();
         }
 
-        this.targetDeleteSupport = new DeleteSupport<>(this, i18n, notification, "target.details.header",
-                "caption.targets", ProxyTarget::getName, this::deleteTargets,
+        this.targetDeleteSupport = new DeleteSupport<>(this, i18n, uiDependencies.getUiNotification(),
+                "target.details.header", "caption.targets", ProxyTarget::getName, this::deleteTargets,
                 UIComponentIdProvider.TARGET_DELETE_CONFIRMATION_DIALOG);
 
         this.pinSupport = new PinSupport<>(this::refreshItem, this::publishPinningChangedEvent,
@@ -157,18 +147,18 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
 
         final Map<String, AssignmentSupport<?, ProxyTarget>> sourceTargetAssignmentStrategies = new HashMap<>();
 
-        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(i18n,
-                uiProperties, eventBus, notification, deploymentManagement);
+        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
+                uiDependencies, uiProperties, deploymentManagement);
         final DistributionSetsToTargetAssignmentSupport distributionsToTargetAssignment = new DistributionSetsToTargetAssignmentSupport(
-                notification, i18n, systemSecurityContext, configManagement, permChecker, assignmentController);
+                uiDependencies, systemSecurityContext, configManagement, assignmentController);
         final TargetTagsToTargetAssignmentSupport targetTagsToTargetAssignment = new TargetTagsToTargetAssignmentSupport(
-                notification, i18n, targetManagement, eventBus, permChecker);
+                uiDependencies, targetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.DIST_TABLE_ID, distributionsToTargetAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToTargetAssignment);
 
-        setDragAndDropSupportSupport(
-                new DragAndDropSupport<>(this, i18n, notification, sourceTargetAssignmentStrategies, eventBus));
+        setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiDependencies.getUiNotification(),
+                sourceTargetAssignmentStrategies, eventBus));
         if (!targetGridLayoutUiState.isMaximized()) {
             getDragAndDropSupportSupport().addDragAndDrop();
         }

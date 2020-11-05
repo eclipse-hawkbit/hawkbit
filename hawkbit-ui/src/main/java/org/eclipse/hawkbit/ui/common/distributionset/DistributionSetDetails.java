@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.common.detailslayout;
+package org.eclipse.hawkbit.ui.common.distributionset;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -22,16 +22,17 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.DsMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
+import org.eclipse.hawkbit.ui.common.detailslayout.AbstractGridDetailsLayout;
+import org.eclipse.hawkbit.ui.common.detailslayout.MetadataDetailsGrid;
+import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsGrid;
+import org.eclipse.hawkbit.ui.common.detailslayout.TargetFilterQueryDetailsGrid;
 import org.eclipse.hawkbit.ui.common.tagdetails.DistributionTagToken;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -59,14 +60,8 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
     /**
      * Constructor for DistributionSetDetails
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      * @param smManagement
@@ -82,27 +77,25 @@ public class DistributionSetDetails extends AbstractGridDetailsLayout<ProxyDistr
      * @param dsMetaDataWindowBuilder
      *            DsMetaDataWindowBuilder
      */
-    public DistributionSetDetails(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permissionChecker, final UINotification uiNotification,
-            final DistributionSetManagement dsManagement, final SoftwareModuleManagement smManagement,
-            final DistributionSetTypeManagement dsTypeManagement, final DistributionSetTagManagement dsTagManagement,
+    public DistributionSetDetails(final CommonUiDependencies uiDependencies, final DistributionSetManagement dsManagement,
+            final SoftwareModuleManagement smManagement, final DistributionSetTypeManagement dsTypeManagement,
+            final DistributionSetTagManagement dsTagManagement,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
-        super(i18n);
+        super(uiDependencies.getI18n());
 
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
-        this.permissionChecker = permissionChecker;
+        this.permissionChecker = uiDependencies.getPermChecker();
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;
 
-        this.smDetailsGrid = new SoftwareModuleDetailsGrid(i18n, eventBus, uiNotification, permissionChecker,
-                dsManagement, smManagement, dsTypeManagement);
+        this.smDetailsGrid = new SoftwareModuleDetailsGrid(uiDependencies, dsManagement, smManagement, dsTypeManagement);
 
-        this.distributionTagToken = new DistributionTagToken(permissionChecker, i18n, uiNotification, eventBus,
-                dsTagManagement, dsManagement);
+        this.distributionTagToken = new DistributionTagToken(uiDependencies, dsTagManagement, dsManagement);
 
-        this.dsMetadataGrid = new MetadataDetailsGrid<>(i18n, eventBus, UIComponentIdProvider.DS_TYPE_PREFIX,
-                this::showMetadataDetails, new DsMetaDataDataProvider(dsManagement));
+        this.dsMetadataGrid = new MetadataDetailsGrid<>(uiDependencies.getI18n(), uiDependencies.getEventBus(),
+                UIComponentIdProvider.DS_TYPE_PREFIX, this::showMetadataDetails,
+                new DsMetaDataDataProvider(dsManagement));
 
         addDetailsComponents(Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
                 new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),

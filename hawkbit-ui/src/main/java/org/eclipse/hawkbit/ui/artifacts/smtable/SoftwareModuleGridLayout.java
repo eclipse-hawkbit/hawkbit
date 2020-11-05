@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetails;
 import org.eclipse.hawkbit.ui.common.detailslayout.SoftwareModuleDetailsHeader;
@@ -24,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
-import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.EntityModifiedAwareSupport;
@@ -34,16 +32,14 @@ import org.eclipse.hawkbit.ui.common.layout.listener.SelectGridEntityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectionChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
+import org.eclipse.hawkbit.ui.common.softwaremodule.AbstractSoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Software module table layout. (Upload Management)
  */
-public class SoftwareModuleGridLayout extends AbstractGridComponentLayout {
+public class SoftwareModuleGridLayout extends AbstractSoftwareModuleGridLayout {
     private static final long serialVersionUID = 1L;
 
     private final SoftwareModuleGridHeader softwareModuleGridHeader;
@@ -51,71 +47,51 @@ public class SoftwareModuleGridLayout extends AbstractGridComponentLayout {
     private final SoftwareModuleDetailsHeader softwareModuleDetailsHeader;
     private final SoftwareModuleDetails softwareModuleDetails;
 
-    private final transient FilterChangedListener<ProxySoftwareModule> smFilterListener;
-    private final transient SelectionChangedListener<ProxySoftwareModule> masterSmChangedListener;
-    private final transient SelectGridEntityListener<ProxySoftwareModule> selectSmListener;
-    private final transient EntityModifiedListener<ProxySoftwareModule> smModifiedListener;
-    private final transient GenericEventListener<FileUploadProgress> fileUploadChangedListener;
-
     /**
      * Constructor for SoftwareModuleGridLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param eventBus
-     *            UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleManagement
      *            SoftwareModuleManagement
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
-     * @param entityFactory
-     *            EntityFactory
      * @param smTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      * @param smGridLayoutUiState
      *            GridLayoutUiState
      */
-    public SoftwareModuleGridLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UINotification uiNotification, final UIEventBus eventBus,
+    public SoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState) {
-        super();
+        super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, EventView.UPLOAD);
 
-        final SmWindowBuilder smWindowBuilder = new SmWindowBuilder(i18n, entityFactory, eventBus, uiNotification,
-                softwareModuleManagement, softwareModuleTypeManagement, EventView.UPLOAD);
-        final SmMetaDataWindowBuilder smMetaDataWindowBuilder = new SmMetaDataWindowBuilder(i18n, entityFactory,
-                eventBus, uiNotification, permChecker, softwareModuleManagement);
-
-        this.softwareModuleGridHeader = new SoftwareModuleGridHeader(i18n, permChecker, eventBus,
-                smTypeFilterLayoutUiState, smGridLayoutUiState, smWindowBuilder, EventView.UPLOAD);
+        this.softwareModuleGridHeader = new SoftwareModuleGridHeader(uiDependencies, smTypeFilterLayoutUiState,
+                smGridLayoutUiState, getSmWindowBuilder(), getEventView());
         this.softwareModuleGridHeader.buildHeader();
-        this.softwareModuleGrid = new SoftwareModuleGrid(eventBus, i18n, permChecker, uiNotification,
-                smTypeFilterLayoutUiState, smGridLayoutUiState, softwareModuleManagement, EventView.UPLOAD);
+        this.softwareModuleGrid = new SoftwareModuleGrid(uiDependencies, smTypeFilterLayoutUiState, smGridLayoutUiState,
+                softwareModuleManagement, getEventView());
         this.softwareModuleGrid.init();
 
-        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(i18n, permChecker, eventBus, uiNotification,
-                smWindowBuilder, smMetaDataWindowBuilder);
+        this.softwareModuleDetailsHeader = new SoftwareModuleDetailsHeader(uiDependencies, getSmWindowBuilder(),
+                getSmMetaDataWindowBuilder());
         this.softwareModuleDetailsHeader.buildHeader();
-        this.softwareModuleDetails = new SoftwareModuleDetails(i18n, eventBus, softwareModuleManagement,
-                softwareModuleTypeManagement, smMetaDataWindowBuilder);
+        this.softwareModuleDetails = new SoftwareModuleDetails(uiDependencies, softwareModuleManagement,
+                softwareModuleTypeManagement, getSmMetaDataWindowBuilder());
         this.softwareModuleDetails.buildDetails();
 
-        this.smFilterListener = new FilterChangedListener<>(eventBus, ProxySoftwareModule.class,
-                new EventViewAware(EventView.UPLOAD), softwareModuleGrid.getFilterSupport());
-        this.masterSmChangedListener = new SelectionChangedListener<>(eventBus,
-                new EventLayoutViewAware(EventLayout.SM_LIST, EventView.UPLOAD), getMasterSmAwareComponents());
-        this.selectSmListener = new SelectGridEntityListener<>(eventBus,
-                new EventLayoutViewAware(EventLayout.SM_LIST, EventView.UPLOAD),
-                softwareModuleGrid.getSelectionSupport());
-        this.smModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxySoftwareModule.class)
-                .entityModifiedAwareSupports(getSmModifiedAwareSupports()).build();
-        this.fileUploadChangedListener = new GenericEventListener<>(eventBus, EventTopics.FILE_UPLOAD_CHANGED,
-                this::onUploadChanged);
+        addEventListener(new FilterChangedListener<>(uiDependencies.getEventBus(), ProxySoftwareModule.class,
+                new EventViewAware(getEventView()), softwareModuleGrid.getFilterSupport()));
+        addEventListener(new SelectionChangedListener<>(uiDependencies.getEventBus(),
+                new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()), getMasterSmAwareComponents()));
+        addEventListener(new SelectGridEntityListener<>(uiDependencies.getEventBus(),
+                new EventLayoutViewAware(EventLayout.SM_LIST, getEventView()),
+                softwareModuleGrid.getSelectionSupport()));
+        addEventListener(new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxySoftwareModule.class)
+                .entityModifiedAwareSupports(getSmModifiedAwareSupports()).build());
+        addEventListener(new GenericEventListener<>(uiDependencies.getEventBus(), EventTopics.FILE_UPLOAD_CHANGED,
+                this::onUploadChanged));
 
         buildLayout(softwareModuleGridHeader, softwareModuleGrid, softwareModuleDetailsHeader, softwareModuleDetails);
     }
@@ -134,58 +110,20 @@ public class SoftwareModuleGridLayout extends AbstractGridComponentLayout {
      * Verifies when file upload is in progress
      *
      * @param fileUploadProgress
-     *          FileUploadProgress
+     *            FileUploadProgress
      */
     public void onUploadChanged(final FileUploadProgress fileUploadProgress) {
         softwareModuleGrid.onUploadChanged(fileUploadProgress);
     }
 
-    /**
-     * Show software module grid header
-     */
-    public void showSmTypeHeaderIcon() {
-        softwareModuleGridHeader.showFilterIcon();
+    @Override
+    protected SoftwareModuleGridHeader getSoftwareModuleGridHeader() {
+        return softwareModuleGridHeader;
     }
 
-    /**
-     * Hide software module grid header
-     */
-    public void hideSmTypeHeaderIcon() {
-        softwareModuleGridHeader.hideFilterIcon();
+    @Override
+    protected SoftwareModuleGrid getSoftwareModuleGrid() {
+        return softwareModuleGrid;
     }
 
-    /**
-     * Maximize the software module grid
-     */
-    public void maximize() {
-        softwareModuleGrid.createMaximizedContent();
-        hideDetailsLayout();
-    }
-
-    /**
-     * Minimize the software module grid
-     */
-    public void minimize() {
-        softwareModuleGrid.createMinimizedContent();
-        showDetailsLayout();
-    }
-
-    /**
-     * Is called when view is shown to the user
-     */
-    public void restoreState() {
-        softwareModuleGridHeader.restoreState();
-        softwareModuleGrid.restoreState();
-    }
-
-    /**
-     * Unsubscribe all the events listeners
-     */
-    public void unsubscribeListener() {
-        smFilterListener.unsubscribe();
-        masterSmChangedListener.unsubscribe();
-        selectSmListener.unsubscribe();
-        smModifiedListener.unsubscribe();
-        fileUploadChangedListener.unsubscribe();
-    }
 }

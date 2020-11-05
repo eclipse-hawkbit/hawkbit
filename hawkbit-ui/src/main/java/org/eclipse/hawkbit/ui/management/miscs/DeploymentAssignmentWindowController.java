@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAssignmentWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -56,23 +57,18 @@ public class DeploymentAssignmentWindowController {
     /**
      * Constructor for DeploymentAssignmentWindowController
      *
-     * @param i18n
-     *          VaadinMessageSource
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiProperties
-     *          UiProperties
-     * @param eventBus
-     *          UIEventBus
-     * @param notification
-     *          UINotification
+     *            UiProperties
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      */
-    public DeploymentAssignmentWindowController(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final UIEventBus eventBus, final UINotification notification,
+    public DeploymentAssignmentWindowController(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
             final DeploymentManagement deploymentManagement) {
-        this.i18n = i18n;
-        this.eventBus = eventBus;
-        this.notification = notification;
+        this.i18n = uiDependencies.getI18n();
+        this.eventBus = uiDependencies.getEventBus();
+        this.notification = uiDependencies.getUiNotification();
         this.deploymentManagement = deploymentManagement;
 
         this.assignmentWindowLayout = new AssignmentWindowLayout(i18n, uiProperties);
@@ -100,7 +96,7 @@ public class DeploymentAssignmentWindowController {
 
     /**
      * Save the given distribution sets to targets assignments
-     * 
+     *
      * @param proxyTargets
      *            to assign the given distribution sets to
      * @param proxyDistributionSets
@@ -163,7 +159,7 @@ public class DeploymentAssignmentWindowController {
 
     /**
      * Check if the maintenance window is valid or not
-     * 
+     *
      * @return boolean if maintenance window is valid or not
      */
     public boolean isMaintenanceWindowValid() {
@@ -183,7 +179,7 @@ public class DeploymentAssignmentWindowController {
 
     /**
      * Check if the time-forced date is valid
-     * 
+     *
      * @return boolean if time-forced date is valid or not
      */
     public boolean isForceTimeValid() {

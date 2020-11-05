@@ -8,12 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -24,9 +23,6 @@ import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.FilterChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.ShowEntityFormLayoutListener;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterDetailsLayoutUiState;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * DistributionSet table layout.
@@ -43,19 +39,11 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
 
     /**
      * TargetFilterDetailsLayout constructor
-     * 
-     * @param i18n
-     *            MessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            Bus to publish UI events
-     * @param uiNotification
-     *            helper to display messages
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiProperties
      *            properties
-     * @param entityFactory
-     *            entity factory
      * @param rsqlValidationOracle
      *            to get RSQL validation and suggestions
      * @param targetManagement
@@ -65,24 +53,23 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      * @param uiState
      *            to persist the user interaction
      */
-    public TargetFilterDetailsLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification uiNotification, final UiProperties uiProperties,
-            final EntityFactory entityFactory, final RsqlValidationOracle rsqlValidationOracle,
-            final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterManagement,
-            final TargetFilterDetailsLayoutUiState uiState) {
+    public TargetFilterDetailsLayout(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
+            final RsqlValidationOracle rsqlValidationOracle, final TargetManagement targetManagement,
+            final TargetFilterQueryManagement targetFilterManagement, final TargetFilterDetailsLayoutUiState uiState) {
 
-        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(i18n, permChecker, eventBus,
-                uiNotification, entityFactory, targetFilterManagement, uiProperties, rsqlValidationOracle, uiState);
-        this.targetFilterTargetGrid = new TargetFilterTargetGrid(i18n, eventBus, targetManagement, uiState);
-        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(i18n);
+        this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(uiDependencies, targetFilterManagement,
+                uiProperties, rsqlValidationOracle, uiState);
+        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetManagement, uiState);
+        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
 
         initGridDataUpdatedListener();
 
-        this.showFilterQueryFormListener = new ShowEntityFormLayoutListener<>(eventBus, ProxyTargetFilterQuery.class,
+        this.showFilterQueryFormListener = new ShowEntityFormLayoutListener<>(uiDependencies.getEventBus(),
+                ProxyTargetFilterQuery.class,
                 new EventLayoutViewAware(EventLayout.TARGET_FILTER_QUERY_FORM, EventView.TARGET_FILTER),
                 targetFilterDetailsGridHeader::showAddFilterLayout,
                 targetFilterDetailsGridHeader::showEditFilterLayout);
-        this.targetFilterListener = new FilterChangedListener<>(eventBus, ProxyTarget.class,
+        this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
                 new EventViewAware(EventView.TARGET_FILTER), targetFilterTargetGrid.getFilterSupport());
 
         buildLayout(targetFilterDetailsGridHeader, targetFilterTargetGrid, targetFilterCountMessageLabel);

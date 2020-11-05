@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -93,21 +94,24 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         this.permChecker = permChecker;
         this.manageDistUIState = manageDistUIState;
 
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
+                permChecker);
+
         if (permChecker.hasReadRepositoryPermission()) {
-            this.dsTypeFilterLayout = new DSTypeFilterLayout(i18n, permChecker, eventBus, entityFactory, uiNotification,
-                    softwareModuleTypeManagement, distributionSetTypeManagement, distributionSetManagement,
-                    systemManagement, manageDistUIState.getDsTypeFilterLayoutUiState());
-            this.distributionSetGridLayout = new DistributionSetGridLayout(i18n, eventBus, permChecker, uiNotification,
-                    entityFactory, targetManagement, targetFilterQueryManagement, distributionSetManagement,
-                    softwareModuleManagement, distributionSetTypeManagement, distributionSetTagManagement,
-                    softwareModuleTypeManagement, systemManagement, configManagement, systemSecurityContext,
+            this.dsTypeFilterLayout = new DSTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
+                    distributionSetTypeManagement, distributionSetManagement, systemManagement,
+                    manageDistUIState.getDsTypeFilterLayoutUiState());
+            this.distributionSetGridLayout = new DistributionSetGridLayout(uiDependencies, targetManagement,
+                    targetFilterQueryManagement, distributionSetManagement, softwareModuleManagement,
+                    distributionSetTypeManagement, distributionSetTagManagement, softwareModuleTypeManagement,
+                    systemManagement, configManagement, systemSecurityContext,
                     manageDistUIState.getDsTypeFilterLayoutUiState(),
                     manageDistUIState.getDistributionSetGridLayoutUiState());
-            this.swModuleGridLayout = new SwModuleGridLayout(i18n, uiNotification, eventBus, softwareModuleManagement,
-                    softwareModuleTypeManagement, entityFactory, permChecker, artifactManagement,
-                    manageDistUIState.getSmTypeFilterLayoutUiState(), manageDistUIState.getSwModuleGridLayoutUiState());
-            this.distSMTypeFilterLayout = new DistSMTypeFilterLayout(eventBus, i18n, permChecker, entityFactory,
-                    uiNotification, softwareModuleTypeManagement, manageDistUIState.getSmTypeFilterLayoutUiState());
+            this.swModuleGridLayout = new SwModuleGridLayout(uiDependencies, softwareModuleManagement,
+                    softwareModuleTypeManagement, artifactManagement, manageDistUIState.getSmTypeFilterLayoutUiState(),
+                    manageDistUIState.getSwModuleGridLayoutUiState());
+            this.distSMTypeFilterLayout = new DistSMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
+                    manageDistUIState.getSmTypeFilterLayoutUiState());
 
             final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
             layoutVisibilityHandlers.put(EventLayout.DS_TYPE_FILTER,
@@ -201,12 +205,12 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
 
     private void showDsTypeLayout() {
         dsTypeFilterLayout.setVisible(true);
-        distributionSetGridLayout.hideDsTypeHeaderIcon();
+        distributionSetGridLayout.hideDsFilterHeaderIcon();
     }
 
     private void hideDsTypeLayout() {
         dsTypeFilterLayout.setVisible(false);
-        distributionSetGridLayout.showDsTypeHeaderIcon();
+        distributionSetGridLayout.showDsFilterHeaderIcon();
     }
 
     private void maximizeDsGridLayout() {

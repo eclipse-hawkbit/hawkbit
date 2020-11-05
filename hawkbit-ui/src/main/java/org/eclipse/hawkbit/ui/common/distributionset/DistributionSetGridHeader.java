@@ -6,9 +6,9 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.distributions.dstable;
+package org.eclipse.hawkbit.ui.common.distributionset;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -17,8 +17,6 @@ import org.eclipse.hawkbit.ui.common.grid.header.AbstractEntityGridHeader;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.HidableLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Distribution table header.
@@ -32,27 +30,22 @@ public class DistributionSetGridHeader extends AbstractEntityGridHeader {
     /**
      * Constructor for DistributionSetGridHeader
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param eventBus
-     *          UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dSTypeFilterLayoutUiState
-     *          HidableLayoutUiState
+     *            HidableLayoutUiState
      * @param distributionSetGridLayoutUiState
-     *          GridLayoutUiState
+     *            GridLayoutUiState
      * @param filterLayout
-     *          EventLayout
+     *            EventLayout
      * @param view
-     *          EventView
+     *            EventView
      */
-    public DistributionSetGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final HidableLayoutUiState dSTypeFilterLayoutUiState,
+    public DistributionSetGridHeader(final CommonUiDependencies uiDependencies,
+            final HidableLayoutUiState dSTypeFilterLayoutUiState,
             final GridLayoutUiState distributionSetGridLayoutUiState, final EventLayout filterLayout,
             final EventView view) {
-        super(i18n, permChecker, eventBus, dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState, filterLayout,
-                view);
+        super(uiDependencies, dSTypeFilterLayoutUiState, distributionSetGridLayoutUiState, filterLayout, view);
     }
 
     @Override

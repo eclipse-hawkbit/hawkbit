@@ -9,58 +9,51 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller for update meta data window
  */
-public class UpdateMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateMetaDataWindowController.class);
-
-    private final VaadinMessageSource i18n;
-    private final UINotification uiNotification;
+public class UpdateMetaDataWindowController
+        extends AbstractUpdateEntityWindowController<ProxyMetaData, ProxyMetaData, MetaData> {
 
     private final MetaDataAddUpdateWindowLayout layout;
-
     private final Function<ProxyMetaData, MetaData> updateMetaDataCallback;
+    private final Predicate<String> duplicateCheckCallback;
+    private final ProxyMetadataValidator validator;
+
+    private String keyBeforeEdit;
 
     /**
      * Constructor for UpdateMetaDataWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param updateMetaDataCallback
      *            Update meta data call back function for event listener
-     *
+     * @param duplicateCheckCallback
+     *            call back to check if entity already exists in repository
      */
-    public UpdateMetaDataWindowController(final VaadinMessageSource i18n, final UINotification uiNotification,
-            final MetaDataAddUpdateWindowLayout layout,
-            final Function<ProxyMetaData, MetaData> updateMetaDataCallback) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
+    public UpdateMetaDataWindowController(final CommonUiDependencies uiDependencies,
+            final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> updateMetaDataCallback,
+            final Predicate<String> duplicateCheckCallback) {
+        super(uiDependencies);
 
         this.layout = layout;
-
         this.updateMetaDataCallback = updateMetaDataCallback;
-    }
-
-    @Override
-    public MetaDataAddUpdateWindowLayout getLayout() {
-        return layout;
+        this.duplicateCheckCallback = duplicateCheckCallback;
+        this.validator = new ProxyMetadataValidator(uiDependencies);
     }
 
     @Override
@@ -72,7 +65,14 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
         metaData.setEntityId(proxyEntity.getEntityId());
         metaData.setVisibleForTargets(proxyEntity.isVisibleForTargets());
 
+        keyBeforeEdit = proxyEntity.getKey();
+
         return metaData;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyMetaData> getLayout() {
+        return layout;
     }
 
     @Override
@@ -81,35 +81,59 @@ public class UpdateMetaDataWindowController extends AbstractEntityWindowControll
     }
 
     @Override
-    protected void persistEntity(final ProxyMetaData entity) {
-        try {
-            final MetaData updatedMetaData = updateMetaDataCallback.apply(entity);
-            uiNotification.displaySuccess(i18n.getMessage("message.metadata.updated", updatedMetaData.getKey()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of meta data failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.metadata");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.key.deleted.or.notAllowed", entityType, entity.getKey()));
-        }
+    protected boolean closeWindowAfterSave() {
+        return false;
+    }
+
+    @Override
+    protected MetaData persistEntityInRepository(final ProxyMetaData entity) {
+        return updateMetaDataCallback.apply(entity);
+    }
+
+    @Override
+    protected String getPersistSuccessMessageKey() {
+        return "message.metadata.updated";
+    }
+
+    @Override
+    protected String getPersistFailureMessageKey() {
+        return "message.key.deleted.or.notAllowed";
+    }
+
+    @Override
+    protected String getDisplayableName(final MetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyMetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected Long getId(final MetaData entity) {
+        return entity.getEntityId();
+    }
+
+    @Override
+    protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
+        // do not publish entity updated because it is already managed by the
+        // update callback that sends the event for parent entity of metadata
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyMetaData.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
-        if (!StringUtils.hasText(entity.getKey())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.key.missing"));
-            return false;
-        }
-
-        if (!StringUtils.hasText(entity.getValue())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.value.missing"));
-            return false;
-        }
-
-        return true;
+        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        return validator.isEntityValid(entity,
+                () -> hasKeyChanged(trimmedKey) && duplicateCheckCallback.test(trimmedKey));
     }
 
-    @Override
-    protected boolean closeWindowAfterSave() {
-        return false;
+    private boolean hasKeyChanged(final String trimmedKey) {
+        return !keyBeforeEdit.equals(trimmedKey);
     }
 }

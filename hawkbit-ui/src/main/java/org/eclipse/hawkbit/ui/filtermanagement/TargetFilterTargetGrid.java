@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
@@ -19,8 +20,6 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterDetailsLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Shows the targets as a result of the executed filter query.
@@ -36,9 +35,9 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
     private final TargetFilterDetailsLayoutUiState uiState;
 
-    TargetFilterTargetGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final TargetManagement targetManagement, final TargetFilterDetailsLayoutUiState uiState) {
-        super(i18n, eventBus);
+    TargetFilterTargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
+            final TargetFilterDetailsLayoutUiState uiState) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus());
 
         this.uiState = uiState;
 
