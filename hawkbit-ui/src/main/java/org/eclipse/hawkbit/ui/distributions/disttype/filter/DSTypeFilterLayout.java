@@ -13,10 +13,9 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -30,9 +29,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGener
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.distributions.disttype.DsTypeWindowBuilder;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.ComponentContainer;
 
@@ -50,17 +46,9 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
 
     /**
      * Constructor
-     * 
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
-     * @param entityFactory
-     *            EntityFactory
-     * @param uiNotification
-     *            UINotification
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param softwareModuleTypeManagement
      *            SoftwareModuleTypeManagement
      * @param distributionSetTypeManagement
@@ -72,25 +60,23 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
      * @param dSTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      */
-    public DSTypeFilterLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final EntityFactory entityFactory, final UINotification uiNotification,
+    public DSTypeFilterLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final DistributionSetManagement distributionSetManagement, final SystemManagement systemManagement,
             final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
-        final DsTypeWindowBuilder dsTypeWindowBuilder = new DsTypeWindowBuilder(i18n, entityFactory, eventBus,
-                uiNotification, distributionSetTypeManagement, distributionSetManagement, softwareModuleTypeManagement);
+        final DsTypeWindowBuilder dsTypeWindowBuilder = new DsTypeWindowBuilder(uiDependencies, distributionSetTypeManagement,
+                distributionSetManagement, softwareModuleTypeManagement);
 
-        this.dsTypeFilterHeader = new DSTypeFilterHeader(eventBus, i18n, permChecker, dsTypeWindowBuilder,
-                dSTypeFilterLayoutUiState);
-        this.dSTypeFilterButtons = new DSTypeFilterButtons(eventBus, i18n, uiNotification, permChecker,
-                distributionSetTypeManagement, systemManagement, dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
+        this.dsTypeFilterHeader = new DSTypeFilterHeader(uiDependencies, dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
+        this.dSTypeFilterButtons = new DSTypeFilterButtons(uiDependencies, distributionSetTypeManagement, systemManagement,
+                dsTypeWindowBuilder, dSTypeFilterLayoutUiState);
 
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus,
+        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.DS_TYPE_FILTER, EventView.DISTRIBUTIONS),
                 dSTypeFilterButtons::hideActionColumns, dSTypeFilterButtons::showEditColumn,
                 dSTypeFilterButtons::showDeleteColumn);
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyType.class)
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyType.class)
                 .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
                 .parentEntityType(ProxyDistributionSet.class).build();
 

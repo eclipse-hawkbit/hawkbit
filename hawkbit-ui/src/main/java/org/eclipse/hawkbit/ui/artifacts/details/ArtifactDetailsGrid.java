@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.ArtifactToProxyArtifactMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.ArtifactDataProvider;
@@ -33,8 +33,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
@@ -65,23 +63,15 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     /**
      * Constructor
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param notification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param artifactManagement
      *            ArtifactManagement
      */
-    public ArtifactDetailsGrid(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final ArtifactManagement artifactManagement) {
-        super(i18n, eventBus, permissionChecker);
+    public ArtifactDetailsGrid(final CommonUiDependencies uiDependencies, final ArtifactManagement artifactManagement) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        this.notification = notification;
+        this.notification = uiDependencies.getUiNotification();
         this.artifactManagement = artifactManagement;
 
         this.artifactDeleteSupport = new DeleteSupport<>(this, i18n, notification, "artifact.details.header",

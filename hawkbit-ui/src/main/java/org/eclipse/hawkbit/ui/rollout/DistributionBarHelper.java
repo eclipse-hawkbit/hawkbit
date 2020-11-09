@@ -23,6 +23,7 @@ import org.vaadin.alump.distributionbar.gwt.client.GwtDistributionBar;
  *
  */
 public final class DistributionBarHelper {
+    private static final String HTML_DIV_CLASS_START = "<div class=\"";
     private static final String HTML_DIV_END = "</div>";
     private static final int PARENT_SIZE_IN_PCT = 100;
     private static final double MINIMUM_PART_SIZE = 10;
@@ -83,7 +84,7 @@ public final class DistributionBarHelper {
      *
      * @param i18n
      *            the i18n
-     * 
+     *
      * @return tool tip
      */
     public static String getTooltip(final Map<Status, Long> statusCountMap, final VaadinMessageSource i18n) {
@@ -130,13 +131,13 @@ public final class DistributionBarHelper {
 
     private static String getPart(final int partIndex, final Status status, final Long value, final Long totalValue,
             final int noOfParts) {
-        return "<div class=\"" + getPartStyle(partIndex, noOfParts, status) + "\" style=\"width: "
+        return HTML_DIV_CLASS_START + getPartStyle(partIndex, noOfParts, status) + "\" style=\"width: "
                 + getPartWidth(value, totalValue, noOfParts) + ";\"><span class=\""
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">" + value + "</span></div>";
     }
 
     private static String getUnintialisedBar() {
-        return "<div class=\"" + UNINITIALIZED_VALUE_CLASSNAME + "\" style=\"width: 100%;\"><span class=\""
+        return HTML_DIV_CLASS_START + UNINITIALIZED_VALUE_CLASSNAME + "\" style=\"width: 100%;\"><span class=\""
                 + DISTRIBUTION_BAR_PART_VALUE_CLASSNAME + "\">uninitialized</span></div>";
     }
 
@@ -149,7 +150,7 @@ public final class DistributionBarHelper {
     }
 
     private static String getParentDivStart() {
-        return "<div class=\"" + GwtDistributionBar.CLASSNAME
+        return HTML_DIV_CLASS_START + GwtDistributionBar.CLASSNAME
                 + "\" style=\"width: 100%; height: 95%;\" id=\"rollout.status.progress.bar.id\">";
     }
 }

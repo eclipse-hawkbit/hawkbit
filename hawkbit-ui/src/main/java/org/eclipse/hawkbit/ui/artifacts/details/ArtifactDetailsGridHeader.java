@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.details;
 
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -19,8 +20,6 @@ import org.eclipse.hawkbit.ui.common.grid.header.support.ResizeHeaderSupport;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Header for ArtifactDetails with maximize-support.
@@ -35,16 +34,14 @@ public class ArtifactDetailsGridHeader extends AbstractMasterAwareGridHeader<Pro
     /**
      * Constructor
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param eventBus
-     *          UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param artifactDetailsGridLayoutUiState
-     *          ArtifactDetailsGridLayoutUiState
+     *            ArtifactDetailsGridLayoutUiState
      */
-    public ArtifactDetailsGridHeader(final VaadinMessageSource i18n, final UIEventBus eventBus,
+    public ArtifactDetailsGridHeader(final CommonUiDependencies uiDependencies,
             final ArtifactDetailsGridLayoutUiState artifactDetailsGridLayoutUiState) {
-        super(i18n, null, eventBus);
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.artifactDetailsGridLayoutUiState = artifactDetailsGridLayoutUiState;
 

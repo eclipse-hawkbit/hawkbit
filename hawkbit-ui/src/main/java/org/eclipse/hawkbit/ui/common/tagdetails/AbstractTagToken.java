@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
@@ -42,12 +43,11 @@ public abstract class AbstractTagToken<T extends ProxyNamedEntity>
 
     private T masterEntity;
 
-    protected AbstractTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final UIEventBus eventBus) {
-        this.checker = checker;
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
-        this.eventBus = eventBus;
+    protected AbstractTagToken(final CommonUiDependencies uiDependencies) {
+        this.checker = uiDependencies.getPermChecker();
+        this.i18n = uiDependencies.getI18n();
+        this.uiNotification = uiDependencies.getUiNotification();
+        this.eventBus = uiDependencies.getEventBus();
 
         buildTagPanel();
         tagPanelLayout.setVisible(false);

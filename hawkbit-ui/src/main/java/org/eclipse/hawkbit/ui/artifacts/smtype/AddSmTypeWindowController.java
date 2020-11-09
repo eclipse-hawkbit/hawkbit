@@ -8,71 +8,49 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtype;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for Add software module type window
  */
-public class AddSmTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class AddSmTypeWindowController
+        extends AbstractAddNamedEntityWindowController<ProxyType, ProxyType, SoftwareModuleType> {
 
     private final SoftwareModuleTypeManagement smTypeManagement;
-
     private final SmTypeWindowLayout layout;
+    private final ProxyTypeValidator validator;
 
     /**
      * Constructor for AddSmTypeWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeManagement
      *            SoftwareModuleTypeManagement
      * @param layout
      *            SmTypeWindowLayout
      */
-    public AddSmTypeWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public AddSmTypeWindowController(final CommonUiDependencies uiDependencies,
             final SoftwareModuleTypeManagement smTypeManagement, final SmTypeWindowLayout layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiDependencies);
 
         this.smTypeManagement = smTypeManagement;
-
         this.layout = layout;
+        this.validator = new ProxyTypeValidator(uiDependencies);
     }
 
-    /**
-     * Getter for Software module type Window Layout
-     *
-     * @return AbstractEntityWindowLayout
-     */
     @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
+    public EntityWindowLayout<ProxyType> getLayout() {
         return layout;
     }
 
@@ -84,38 +62,29 @@ public class AddSmTypeWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    protected void persistEntity(final ProxyType entity) {
+    protected SoftwareModuleType persistEntityInRepository(final ProxyType entity) {
         final int assignNumber = entity.getSmTypeAssign() == SmTypeAssign.SINGLE ? 1 : Integer.MAX_VALUE;
 
-        final SoftwareModuleType newSmType = smTypeManagement
-                .create(entityFactory.softwareModuleType().create().key(entity.getKey()).name(entity.getName())
+        return smTypeManagement
+                .create(getEntityFactory().softwareModuleType().create().key(entity.getKey()).name(entity.getName())
                         .description(entity.getDescription()).colour(entity.getColour()).maxAssignments(assignNumber));
+    }
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newSmType.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxySoftwareModule.class, ProxyType.class, newSmType.getId()));
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyType.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxySoftwareModule.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
-                || entity.getSmTypeAssign() == null) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkeyorsmtype"));
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (smTypeManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.duplicate.check", trimmedName));
-            return false;
-        }
-        if (smTypeManagement.getByKey(trimmedKey).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.type.key.swmodule.duplicate.check", trimmedKey));
-            return false;
-        }
-
-        return true;
+        return validator.isSmTypeValid(entity, () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> smTypeManagement.getByName(trimmedName).isPresent());
     }
 }

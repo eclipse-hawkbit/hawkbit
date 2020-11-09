@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModuleDetails;
@@ -51,7 +52,7 @@ import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Software module details table.
- * 
+ *
  */
 public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
         implements MasterEntityAwareComponent<ProxyDistributionSet> {
@@ -77,15 +78,9 @@ public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
 
     /**
      * Initialize software module table- to be displayed in details layout.
-     * 
-     * @param i18n
-     *            I18N
-     * @param eventBus
-     *            SessionEventBus
-     * @param uiNotification
-     *            UINotification for displaying error and success notifications
-     * @param permissionChecker
-     *            SpPermissionChecker
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetManagement
      *            DistributionSetManagement
      * @param smManagement
@@ -93,14 +88,13 @@ public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
      */
-    public SoftwareModuleDetailsGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final UINotification uiNotification, final SpPermissionChecker permissionChecker,
+    public SoftwareModuleDetailsGrid(final CommonUiDependencies uiDependencies,
             final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement smManagement,
             final DistributionSetTypeManagement dsTypeManagement) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
-        this.eventBus = eventBus;
-        this.permissionChecker = permissionChecker;
+        this.i18n = uiDependencies.getI18n();
+        this.uiNotification = uiDependencies.getUiNotification();
+        this.eventBus = uiDependencies.getEventBus();
+        this.permissionChecker = uiDependencies.getPermChecker();
 
         this.distributionSetManagement = distributionSetManagement;
         this.smManagement = smManagement;

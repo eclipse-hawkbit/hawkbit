@@ -127,7 +127,11 @@
    </repositories>
 
    <properties>
+
       <java.version>1.8</java.version>
+      <!--       Developer preview         -->
+      <!-- <java.version>11</java.version> -->
+
       <spring.boot.version>2.3.4.RELEASE</spring.boot.version>
       <spring.cloud.version>Hoxton.SR7</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
@@ -162,8 +166,8 @@
       <!-- Misc libraries versions - START -->
       <cron-utils.version>5.0.5</cron-utils.version>
       <jsoup.version>1.11.2</jsoup.version>
-      <allure.version>2.13.5</allure.version>
-      <eclipselink.version>2.7.6</eclipselink.version>
+      <allure.version>2.13.6</allure.version>
+      <eclipselink.version>2.7.7</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <guava.version>25.0-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
@@ -198,6 +202,7 @@
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
          ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
       </sonar.coverage.jacoco.xmlReportPaths>
+
       <!-- Sonar - END -->
 
       <!-- ************************ -->
@@ -372,7 +377,7 @@
                               </goals>
                            </pluginExecutionFilter>
                            <action>
-                              <ignore/>
+                              <ignore />
                            </action>
                         </pluginExecution>
                         <pluginExecution>
@@ -407,7 +412,9 @@
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>${jacoco.agent.ut.arg}</argLine>
+                  <argLine>
+                     ${jacoco.agent.ut.arg}
+                  </argLine>
                   <properties>
                      <property>
                         <name>listener</name>
@@ -552,7 +559,7 @@
                   <groupId>com.vaadin</groupId>
                   <artifactId>vaadin-server</artifactId>
                </exclusion>
-            </exclusions>
+            </exclusions>            
          </dependency>
          <dependency>
             <groupId>org.vaadin.spring.addons</groupId>
@@ -573,7 +580,7 @@
                <exclusion>
                   <groupId>com.vaadin</groupId>
                   <artifactId>vaadin-spring</artifactId>
-               </exclusion>
+               </exclusion>            
             </exclusions>
          </dependency>
          <dependency>
@@ -587,6 +594,7 @@
                </exclusion>
             </exclusions>
          </dependency>
+
          <!-- Misc -->
          <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -642,9 +650,9 @@
                <exclusion>
                   <groupId>javax.validation</groupId>
                   <artifactId>validation-api</artifactId>
-               </exclusion>
+               </exclusion>               
             </exclusions>
-          </dependency>
+          </dependency>           
          <!-- Spring -->
          <dependency>
             <groupId>org.springframework.cloud</groupId>

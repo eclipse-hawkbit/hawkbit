@@ -11,9 +11,8 @@ package org.eclipse.hawkbit.ui.distributions.dstable;
 import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.DsMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
@@ -25,9 +24,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.UpdateMetaDataWindowControlle
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Class for metadata add/update window layout.
@@ -36,7 +32,6 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
     private static final long serialVersionUID = 1L;
 
     private final transient DistributionSetManagement dsManagement;
-    private final transient EntityFactory entityFactory;
 
     private final MetaDataWindowGrid<Long> dsMetaDataWindowGrid;
 
@@ -46,36 +41,26 @@ public class DsMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Long> {
 
     /**
      * Constructor for AbstractTagWindowLayout
-     * 
-     * @param i18n
-     *            I18N
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param entityFactory
-     *            EntityFactory
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      */
-    public DsMetaDataWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final EntityFactory entityFactory, final DistributionSetManagement dsManagement) {
-        super(i18n, eventBus, uiNotification, permChecker);
+    public DsMetaDataWindowLayout(final CommonUiDependencies uiDependencies,
+            final DistributionSetManagement dsManagement) {
+        super(uiDependencies);
 
         this.dsManagement = dsManagement;
-        this.entityFactory = entityFactory;
 
-        this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new DsMetaDataDataProvider(dsManagement), this::hasMetadataChangePermission, this::deleteMetaData);
+        this.dsMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies, new DsMetaDataDataProvider(dsManagement),
+                this::hasMetadataChangePermission,this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n, this::hasMetadataChangePermission);
-        this.addDsMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n,this::hasMetadataChangePermission);
+        this.addDsMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
-        this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,
-                metaDataAddUpdateWindowLayout, this::updateMetaData);
+        this.updateDsMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
+                metaDataAddUpdateWindowLayout, this::updateMetaData, this::isDuplicate);
 
         buildLayout();
         addGridSelectionListener();

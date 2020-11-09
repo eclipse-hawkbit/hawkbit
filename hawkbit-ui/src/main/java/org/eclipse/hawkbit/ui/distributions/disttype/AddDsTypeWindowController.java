@@ -12,65 +12,47 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.CollectionUtils;
+import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Add distribution set type window controller
  */
-public class AddDsTypeWindowController extends AbstractEntityWindowController<ProxyType, ProxyType> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class AddDsTypeWindowController
+        extends AbstractAddNamedEntityWindowController<ProxyType, ProxyType, DistributionSetType> {
 
     private final DistributionSetTypeManagement dsTypeManagement;
-
     private final DsTypeWindowLayout layout;
+    private final ProxyTypeValidator validator;
 
     /**
      * Constructor for AddDsTypeWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
      * @param layout
      *            DsTypeWindowLayout
      */
-    public AddDsTypeWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public AddDsTypeWindowController(final CommonUiDependencies uiDependencies,
             final DistributionSetTypeManagement dsTypeManagement, final DsTypeWindowLayout layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiDependencies);
 
         this.dsTypeManagement = dsTypeManagement;
-
         this.layout = layout;
+        this.validator = new ProxyTypeValidator(uiDependencies);
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
+    public EntityWindowLayout<ProxyType> getLayout() {
         return layout;
     }
 
@@ -82,7 +64,7 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
-    protected void persistEntity(final ProxyType entity) {
+    protected DistributionSetType persistEntityInRepository(final ProxyType entity) {
         final List<Long> mandatorySmTypeIds = entity.getSelectedSmTypes().stream().filter(ProxyType::isMandatory)
                 .map(ProxyType::getId).collect(Collectors.toList());
 
@@ -90,34 +72,26 @@ public class AddDsTypeWindowController extends AbstractEntityWindowController<Pr
                 .filter(selectedSmType -> !selectedSmType.isMandatory()).map(ProxyType::getId)
                 .collect(Collectors.toList());
 
-        final DistributionSetType newDsType = dsTypeManagement.create(entityFactory.distributionSetType().create()
-                .key(entity.getKey()).name(entity.getName()).description(entity.getDescription())
-                .colour(entity.getColour()).mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
+        return dsTypeManagement.create(getEntityFactory().distributionSetType().create().key(entity.getKey())
+                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour())
+                .mandatory(mandatorySmTypeIds).optional(optionalSmTypeIds));
+    }
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newDsType.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyDistributionSet.class, ProxyType.class, newDsType.getId()));
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyType.class;
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
+        return ProxyDistributionSet.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getKey())
-                || CollectionUtils.isEmpty(entity.getSelectedSmTypes())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.typenameorkeyorsmtype"));
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (dsTypeManagement.getByName(trimmedName).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.duplicate.check", trimmedName));
-            return false;
-        }
-        if (dsTypeManagement.getByKey(trimmedKey).isPresent()) {
-            uiNotification.displayValidationError(i18n.getMessage("message.type.key.ds.duplicate.check", trimmedKey));
-            return false;
-        }
-
-        return true;
+        return validator.isDsTypeValid(entity, () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
+                () -> dsTypeManagement.getByName(trimmedName).isPresent());
     }
 }

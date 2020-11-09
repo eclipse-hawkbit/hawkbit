@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutGroup;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -27,8 +27,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.SelectionChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Groups List View.
@@ -44,33 +42,27 @@ public class RolloutGroupGridLayout extends AbstractGridComponentLayout {
 
     /**
      * Constructor for RolloutGroupsListView
-     * 
-     * @param i18n
-     *            I18N
-     * @param eventBus
-     *            UIEventBus
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param rolloutGroupManagement
      *            RolloutGroupManagement
      * @param rolloutManagementUIState
      *            UIState
-     * @param permissionChecker
-     *            SpPermissionChecker
      */
-    public RolloutGroupGridLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final RolloutGroupManagement rolloutGroupManagement,
-            final RolloutManagementUIState rolloutManagementUIState, final SpPermissionChecker permissionChecker) {
-        this.rolloutGroupsListHeader = new RolloutGroupGridHeader(eventBus, rolloutManagementUIState, i18n);
-        this.rolloutGroupListGrid = new RolloutGroupGrid(i18n, eventBus, permissionChecker, rolloutGroupManagement,
-                rolloutManagementUIState);
+    public RolloutGroupGridLayout(final CommonUiDependencies uiDependencies, final RolloutGroupManagement rolloutGroupManagement,
+            final RolloutManagementUIState rolloutManagementUIState) {
+        this.rolloutGroupsListHeader = new RolloutGroupGridHeader(uiDependencies, rolloutManagementUIState);
+        this.rolloutGroupListGrid = new RolloutGroupGrid(uiDependencies, rolloutGroupManagement, rolloutManagementUIState);
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.ROLLOUT_LIST,
                 EventView.ROLLOUT);
 
-        this.masterEntityChangedListener = new SelectionChangedListener<>(eventBus, masterLayoutView,
+        this.masterEntityChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
                 getMasterEntityAwareComponents());
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyRolloutGroup.class)
-                .entityModifiedAwareSupports(getEntityModifiedAwareSupports()).parentEntityType(ProxyRollout.class)
-                .parentEntityIdProvider(this::getMasterEntityId).build();
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
+                ProxyRolloutGroup.class).entityModifiedAwareSupports(getEntityModifiedAwareSupports())
+                        .parentEntityType(ProxyRollout.class).parentEntityIdProvider(this::getMasterEntityId).build();
 
         buildLayout(rolloutGroupsListHeader, rolloutGroupListGrid);
     }

@@ -10,13 +10,11 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractGridHeader;
 import org.eclipse.hawkbit.ui.common.grid.header.support.AddHeaderSupport;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Component;
 
@@ -31,21 +29,15 @@ public class MetadataWindowGridHeader extends AbstractGridHeader {
     /**
      * Constructor for MetadataWindowGridHeader
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param hasMetadataChangePermission
      *            checks the permission allowing to change metadata entities
      * @param addNewItemCallback
-     *            callback method to add new metadata entities
+     *            Runnable
      */
-    public MetadataWindowGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final BooleanSupplier hasMetadataChangePermission,
-            final Runnable addNewItemCallback) {
-        super(i18n, permChecker, eventBus);
+    public MetadataWindowGridHeader(final CommonUiDependencies uiDependencies,final BooleanSupplier hasMetadataChangePermission, final Runnable addNewItemCallback) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         if (hasMetadataChangePermission.getAsBoolean()) {
             this.addHeaderSupport = new AddHeaderSupport(i18n, UIComponentIdProvider.METADATA_ADD_ICON_ID,

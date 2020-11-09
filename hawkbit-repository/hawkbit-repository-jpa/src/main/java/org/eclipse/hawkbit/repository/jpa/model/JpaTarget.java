@@ -16,7 +16,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -161,7 +160,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @MapKeyColumn(name = "attribute_key", nullable = false, length = Target.CONTROLLER_ATTRIBUTE_KEY_SIZE)
     @CollectionTable(name = "sp_target_attributes", joinColumns = {
             @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
-    private final Map<String, String> controllerAttributes = Collections.synchronizedMap(new HashMap<String, String>());
+    private Map<String, String> controllerAttributes;
 
     // set default request controller attributes to true, because we want to
     // request them the first

@@ -8,77 +8,50 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.common.event.CommandTopics;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for add target window
  */
-public class AddTargetWindowController extends AbstractEntityWindowController<ProxyTarget, ProxyTarget> {
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+public class AddTargetWindowController
+        extends AbstractAddNamedEntityWindowController<ProxyTarget, ProxyTarget, Target> {
 
     private final TargetManagement targetManagement;
-
     private final TargetWindowLayout layout;
-
     private final EventView view;
+    private final ProxyTargetValidator proxyTargetValidator;
 
     /**
      * Constructor for AddTargetWindowController
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param entityFactory
-     *          EntityFactory
-     * @param eventBus
-     *          UIEventBus
-     * @param uiNotification
-     *          UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param layout
-     *          TargetWindowLayout
+     *            TargetWindowLayout
      * @param view
-     *          EventView
+     *            EventView
      */
-    public AddTargetWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification, final TargetManagement targetManagement,
+    public AddTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetWindowLayout layout, final EventView view) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
-
         this.layout = layout;
-
         this.view = view;
-    }
-
-    @Override
-    public AbstractEntityWindowLayout<ProxyTarget> getLayout() {
-        return layout;
+        this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
     }
 
     @Override
@@ -89,39 +62,49 @@ public class AddTargetWindowController extends AbstractEntityWindowController<Pr
     }
 
     @Override
+    public EntityWindowLayout<ProxyTarget> getLayout() {
+        return layout;
+    }
+
+    @Override
     protected void adaptLayout(final ProxyTarget proxyEntity) {
         layout.setControllerIdEnabled(true);
         layout.setNameRequired(false);
     }
 
     @Override
-    protected void persistEntity(final ProxyTarget entity) {
-        final Target newTarget = targetManagement.create(entityFactory.target().create()
-                .controllerId(entity.getControllerId()).name(entity.getName()).description(entity.getDescription()));
+    protected Target persistEntityInRepository(final ProxyTarget entity) {
+        return targetManagement.create(getEntityFactory().target().create().controllerId(entity.getControllerId())
+                .name(entity.getName()).description(entity.getDescription()));
+    }
 
-        uiNotification.displaySuccess(i18n.getMessage("message.save.success", newTarget.getName()));
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                EntityModifiedEventType.ENTITY_ADDED, ProxyTarget.class, newTarget.getId()));
+    @Override
+    protected String getDisplayableName(final Target entity) {
+        return entity.getName() == null ? entity.getControllerId() : entity.getName();
+    }
 
-        final ProxyTarget addedItem = new TargetToProxyTargetMapper(i18n).map(newTarget);
-        eventBus.publish(CommandTopics.SELECT_GRID_ENTITY, this, new SelectionChangedEventPayload<>(
-                SelectionChangedEventType.ENTITY_SELECTED, addedItem, EventLayout.TARGET_LIST, view));
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyTarget entity) {
+        return entity.getName() == null ? entity.getControllerId() : entity.getName();
+    }
+
+    @Override
+    protected Class<ProxyTarget> getEntityClass() {
+        return ProxyTarget.class;
+    }
+
+    @Override
+    protected void selectPersistedEntity(final Target entity) {
+        final ProxyTarget addedItem = new TargetToProxyTargetMapper(getI18n()).map(entity);
+        publishSelectionEvent(new SelectionChangedEventPayload<>(SelectionChangedEventType.ENTITY_SELECTED, addedItem,
+                EventLayout.TARGET_LIST, view));
     }
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
-        if (!StringUtils.hasText(entity.getControllerId())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.controllerId"));
-            return false;
-        }
-
         final String trimmedControllerId = StringUtils.trimWhitespace(entity.getControllerId());
-        if (targetManagement.getByControllerID(trimmedControllerId).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.target.duplicate.check", trimmedControllerId));
-            return false;
-        }
-
-        return true;
+        return proxyTargetValidator.isEntityValid(entity,
+                () -> targetManagement.getByControllerID(trimmedControllerId).isPresent());
     }
+
 }
