@@ -42,7 +42,7 @@ public interface TenantAware {
      * @throws any
      *             kind of {@link RuntimeException}
      */
-    <T> T runAsTenant(final String tenant, TenantRunner<T> tenantRunner);
+    <T> T runAsTenant(String tenant, TenantRunner<T> tenantRunner);
 
     /**
      * Gives the possibility to run a certain code under a specific given
@@ -62,7 +62,7 @@ public interface TenantAware {
      * @throws any
      *             kind of {@link RuntimeException}
      */
-    <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner);
+    <T> T runAsTenantAsUser(String tenant, String username, TenantRunner<T> tenantRunner);
 
     /**
      * An {@link TenantRunner} interface which allows to run specific code under
