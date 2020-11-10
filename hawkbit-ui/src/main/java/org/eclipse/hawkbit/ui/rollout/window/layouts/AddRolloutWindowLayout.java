@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow.GroupDefinitionMode;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AdvancedGroupsLayout;
 import org.eclipse.hawkbit.ui.rollout.window.components.RolloutFormLayout;
@@ -42,7 +41,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     private final TabSheet groupsDefinitionTabs;
     private final VisualGroupDefinitionLayout visualGroupDefinitionLayout;
 
-    private ProxyTargetFilterQuery filterQuery;
+    private String filterQuery;
     private Long totalTargets;
     private int noOfGroups;
     private List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions;
@@ -89,16 +88,14 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         advancedGroupsLayout.setAdvancedGroupDefinitionsChangedListener(this::onAdvancedGroupsChanged);
     }
 
-    private void onTargetFilterQueryChange(final ProxyTargetFilterQuery filterQuery) {
+    private void onTargetFilterQueryChange(final String filterQuery) {
         this.filterQuery = filterQuery;
 
-        totalTargets = !StringUtils.isEmpty(filterQuery) ?
-                targetManagement.countByTargetFilterQuery(filterQuery.getId()) :
-                null;
+        totalTargets = !StringUtils.isEmpty(filterQuery) ? targetManagement.countByRsql(filterQuery) : null;
         updateTotalTargetsAwareComponents();
 
         if (isAdvancedGroupsTabSelected()) {
-            advancedGroupsLayout.setTargetFilter(filterQuery.getQuery());
+            advancedGroupsLayout.setTargetFilter(filterQuery);
         }
     }
 
@@ -131,7 +128,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         if (isAdvancedGroupsTabSelected()) {
             adaptAdvancedGroupsValidation();
 
-            advancedGroupsLayout.setTargetFilter(filterQuery.getQuery());
+            advancedGroupsLayout.setTargetFilter(filterQuery);
 
             visualGroupDefinitionLayout.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
             visualGroupDefinitionLayout.setAdvancedRolloutGroupDefinitions(advancedRolloutGroupDefinitions);

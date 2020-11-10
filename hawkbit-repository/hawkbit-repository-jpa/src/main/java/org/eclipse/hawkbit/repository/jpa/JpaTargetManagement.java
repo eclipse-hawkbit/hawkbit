@@ -26,8 +26,6 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -650,10 +648,10 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
-            final TargetFilterQuery targetFilterQuery) {
+            final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
 
         return findTargetsBySpec(
@@ -666,35 +664,33 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(final Pageable pageRequest,
-            final Collection<RolloutGroup> groups, final String targetFilterQuery) {
+            final Collection<Long> groups, final String targetFilterQuery) {
 
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
 
-        final List<Long> groupIds = groups.stream().map(RolloutGroup::getId).collect(Collectors.toList());
         return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
-                TargetSpecifications.isNotInRolloutGroups(groupIds).toPredicate(root, cq, cb)), pageRequest);
+                TargetSpecifications.isNotInRolloutGroups(groups).toPredicate(root, cq, cb)), pageRequest);
 
     }
 
     @Override
-    public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final RolloutGroup group) {
-        if (!rolloutGroupRepository.existsById(group.getId())) {
-            throw new EntityNotFoundException(RolloutGroup.class, group.getId());
+    public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
+        if (!rolloutGroupRepository.existsById(group)) {
+            throw new EntityNotFoundException(RolloutGroup.class, group);
         }
 
-        return findTargetsBySpec((root, cq, cb) -> TargetSpecifications.hasNoActionInRolloutGroup(group.getId())
-                .toPredicate(root, cq, cb), pageRequest);
+        return findTargetsBySpec(
+                (root, cq, cb) -> TargetSpecifications.hasNoActionInRolloutGroup(group).toPredicate(root, cq, cb),
+                pageRequest);
     }
 
     @Override
-    public long countByRsqlAndNotInRolloutGroups(final Collection<RolloutGroup> groups, final String targetFilterQuery) {
+    public long countByRsqlAndNotInRolloutGroups(final Collection<Long> groups, final String targetFilterQuery) {
         final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
-
-        final List<Long> groupIds = groups.stream().map(RolloutGroup::getId).collect(Collectors.toList());
         final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
-                TargetSpecifications.isNotInRolloutGroups(groupIds));
+                TargetSpecifications.isNotInRolloutGroups(groups));
 
         return countByCriteriaAPI(specList);
     }
