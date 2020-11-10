@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+import com.vaadin.server.FileDownloader;
+import com.vaadin.server.StreamResource;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -37,6 +41,11 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
 
+import java.io.ByteArrayInputStream;
+import java.util.List;
+
+import static com.vaadin.server.StreamResource.StreamSource;
+
 /**
  * Target add/update window layout.
  */
@@ -55,6 +64,9 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
     private final Button saveButton;
     private final TargetFilterDetailsLayoutUiState uiState;
     private final UIEventBus eventBus;
+    private final Button exportButton;
+    private final TargetManagement targetManagement;
+    private FileDownloader fileDownloader;
 
     private Registration saveListener;
 
@@ -76,7 +88,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      */
     public TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UiProperties uiProperties, final TargetFilterDetailsLayoutUiState uiState, final UIEventBus eventBus,
-            final RsqlValidationOracle rsqlValidationOracle) {
+            final RsqlValidationOracle rsqlValidationOracle, TargetManagement targetManagement) {
         super();
 
         this.i18n = i18n;
@@ -91,6 +103,8 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         this.helpLink = filterComponentBuilder.createFilterHelpLink();
         this.searchButton = filterComponentBuilder.createSearchTargetsByFilterButton();
         this.saveButton = filterComponentBuilder.createSaveButton();
+        this.exportButton = filterComponentBuilder.createExportButton();
+        this.targetManagement = targetManagement;
 
         addValueChangeListeners();
     }
@@ -119,6 +133,8 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         actionsLayout.addComponent(searchButton);
         saveButton.setEnabled(false);
         actionsLayout.addComponent(saveButton);
+        actionsLayout.addComponent(exportButton);
+        exportButton.setEnabled(false);
 
         final HorizontalLayout filterQueryLayout = new HorizontalLayout();
         filterQueryLayout.setSpacing(true);
@@ -135,9 +151,33 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         return filterQueryLayout;
     }
 
+    protected void setCSVExportCallback(final ProxyTargetFilterQuery proxyEntity){
+        StreamResource csvResource = getStreamResourceToCSV(proxyEntity);
+        fileDownloader = new FileDownloader(csvResource);
+        fileDownloader.extend(exportButton);
+    }
+
+    protected void removeDownloaderExtension(){
+        if(fileDownloader != null){
+            fileDownloader.remove();
+        }
+    }
+
+    private StreamResource getStreamResourceToCSV(final ProxyTargetFilterQuery proxyEntity){
+
+        StreamSource streamSource =  () -> {
+            List<Target> targets = targetManagement.findAllByTargetFilterQuery(proxyEntity.getId());
+            return new ByteArrayInputStream(TargetDataExporter.toCSV(targets).toString().getBytes());
+        };
+
+        StreamResource streamResource = new StreamResource(streamSource, proxyEntity.getName() + ".csv");
+        return streamResource;
+    }
+
     private void addValueChangeListeners() {
         searchButton.addClickListener(event -> onSearchIconClick());
         autoCompleteComponent.addValidationListener((valid, message) -> searchButton.setEnabled(valid));
+        autoCompleteComponent.addValidationListener((valid, msg) -> exportButton.setEnabled(valid));
         autoCompleteComponent.addTextfieldChangedListener(this::onFilterQueryTextfieldChanged);
         autoCompleteComponent
                 .addShortcutListener(new ShortcutListener("List Filtered Targets", ShortcutAction.KeyCode.ENTER, null) {
