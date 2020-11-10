@@ -831,42 +831,41 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         try {
             rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
-                    status -> executeFittingHandler(rolloutId)));
+                    status -> handleRollout(rolloutId)));
         } finally {
             lock.unlock();
         }
     }
 
-    private long executeFittingHandler(final long rolloutId) {
-        LOGGER.debug("handle rollout {}", rolloutId);
+    private long handleRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-
-        // make sure we are running in the right user context
-        runInUserContext(rollout, () -> {
-            switch (rollout.getStatus()) {
-            case CREATING:
-                handleCreateRollout(rollout);
-                break;
-            case DELETING:
-                handleDeleteRollout(rollout);
-                break;
-            case READY:
-                handleReadyRollout(rollout);
-                break;
-            case STARTING:
-                handleStartingRollout(rollout);
-                break;
-            case RUNNING:
-                handleRunningRollout(rollout);
-                break;
-            default:
-                LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
-                break;
-            }
-        });
-
+        runInUserContext(rollout, () -> handleRollout(rollout));
         return 0;
+    }
+
+    private void handleRollout(final JpaRollout rollout) {
+        LOGGER.debug("Handle rollout {}", rollout.getId());
+        switch (rollout.getStatus()) {
+        case CREATING:
+            handleCreateRollout(rollout);
+            break;
+        case DELETING:
+            handleDeleteRollout(rollout);
+            break;
+        case READY:
+            handleReadyRollout(rollout);
+            break;
+        case STARTING:
+            handleStartingRollout(rollout);
+            break;
+        case RUNNING:
+            handleRunningRollout(rollout);
+            break;
+        default:
+            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+            break;
+        }
     }
 
     private void handleStartingRollout(final Rollout rollout) {

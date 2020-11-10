@@ -79,6 +79,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      *            to assign distribution sets to targets
      * @param transactionManager
      *            to run transactions
+     * @param tenantAware
+     *            to handle the tenant context
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
