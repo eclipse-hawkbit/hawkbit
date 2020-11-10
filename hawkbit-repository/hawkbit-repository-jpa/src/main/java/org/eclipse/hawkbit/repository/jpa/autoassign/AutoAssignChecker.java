@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -45,14 +46,6 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignChecker.class);
 
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
-
-    private final TargetManagement targetManagement;
-
-    private final DeploymentManagement deploymentManagement;
-
-    private final PlatformTransactionManager transactionManager;
-
     /**
      * Maximum for target filter queries with auto assign DS Maximum for targets
      * that are fetched in one turn
@@ -64,6 +57,16 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      * assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
+
+    private final TargetFilterQueryManagement targetFilterQueryManagement;
+
+    private final TargetManagement targetManagement;
+
+    private final DeploymentManagement deploymentManagement;
+
+    private final PlatformTransactionManager transactionManager;
+
+    private final TenantAware tenantAware;
 
     /**
      * Instantiates a new auto assign checker
@@ -79,11 +82,13 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+            final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
+        this.tenantAware = tenantAware;
+        
     }
 
     @Override
@@ -95,10 +100,9 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
         final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(pageRequest);
 
-        // we should ensure that the filter queries are executed
-        // in the order of weights
+        // ensure that the filter queries are executed in the order of weights
         for (final TargetFilterQuery filterQuery : filterQueries) {
-            checkByTargetFilterQueryAndAssignDS(filterQuery);
+            runInUserContext(filterQuery, () -> checkByTargetFilterQueryAndAssignDS(filterQuery));
         }
 
     }
@@ -127,7 +131,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
         }
 
     }
-
+    
     /**
      * Runs one page of target assignments within a dedicated transaction
      *
@@ -151,12 +155,6 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                     }
                     return count;
                 });
-    }
-
-    private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
-        return StringUtils.isEmpty(targetFilterQuery.getAutoAssignInitiatedBy()) ?
-                targetFilterQuery.getCreatedBy() :
-                targetFilterQuery.getAutoAssignInitiatedBy();
     }
 
     /**
@@ -188,6 +186,27 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                         .setWeight(targetFilterQuery.getAutoAssignWeight().orElse(null))
                         .build())
                 .collect(Collectors.toList());
+    }
+    
+    private void runInUserContext(final TargetFilterQuery targetFilterQuery, final Runnable handler) {        
+        
+        final String user = tenantAware.getCurrentUsername();
+        if (!StringUtils.isEmpty(user)) {
+            handler.run();
+            return;
+        }
+        
+        // establish the user context
+        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), getAutoAssignmentInitiatedBy(targetFilterQuery), () -> {
+            handler.run();
+            return null;
+        });        
+    }
+
+    private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
+        return StringUtils.isEmpty(targetFilterQuery.getAutoAssignInitiatedBy()) ?
+                targetFilterQuery.getCreatedBy() :
+                targetFilterQuery.getAutoAssignInitiatedBy();
     }
 
 }

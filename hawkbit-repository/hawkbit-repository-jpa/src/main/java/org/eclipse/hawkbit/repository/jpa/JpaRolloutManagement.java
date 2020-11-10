@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -428,8 +430,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
-            final List<RolloutGroup> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
-                    RolloutGroupStatus.READY, group);
+            final List<RolloutGroup> readyGroups = RolloutHelper
+                    .getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(), RolloutGroupStatus.READY, group);
             final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
                     readyGroups, targetFilter);
 
@@ -576,7 +578,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         return totalActionsCreated;
     }
 
-    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final RolloutGroup rolloutGroup, final int limit) {
+    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final RolloutGroup rolloutGroup,
+            final int limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
             final PageRequest pageRequest = PageRequest.of(0, limit);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
@@ -839,26 +842,29 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         final JpaRollout rollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
-        switch (rollout.getStatus()) {
-        case CREATING:
-            handleCreateRollout(rollout);
-            break;
-        case DELETING:
-            handleDeleteRollout(rollout);
-            break;
-        case READY:
-            handleReadyRollout(rollout);
-            break;
-        case STARTING:
-            handleStartingRollout(rollout);
-            break;
-        case RUNNING:
-            handleRunningRollout(rollout);
-            break;
-        default:
-            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
-            break;
-        }
+        // make sure we are running in the right user context
+        runInUserContext(rollout, () -> {
+            switch (rollout.getStatus()) {
+            case CREATING:
+                handleCreateRollout(rollout);
+                break;
+            case DELETING:
+                handleDeleteRollout(rollout);
+                break;
+            case READY:
+                handleReadyRollout(rollout);
+                break;
+            case STARTING:
+                handleStartingRollout(rollout);
+                break;
+            case RUNNING:
+                handleRunningRollout(rollout);
+                break;
+            default:
+                LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+                break;
+            }
+        });
 
         return 0;
     }
@@ -1147,4 +1153,24 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
+
+    private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
+
+        final String user = tenantAware.getCurrentUsername();
+        if (!StringUtils.isEmpty(user)) {
+            handler.run();
+            return;
+        }
+
+        // establish the user context
+        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), getUser(rollout), () -> {
+            handler.run();
+            return null;
+        });
+    }
+
+    private static String getUser(final BaseEntity rollout) {
+        return Objects.requireNonNull(rollout.getCreatedBy());
+    }
+
 }
