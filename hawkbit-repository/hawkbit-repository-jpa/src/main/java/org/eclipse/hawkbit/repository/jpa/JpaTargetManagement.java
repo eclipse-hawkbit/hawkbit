@@ -680,7 +680,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final RolloutGroup group) {
         if (!rolloutGroupRepository.existsById(group.getId())) {
-            throw new EntityNotFoundException(RolloutGroup.class, group);
+            throw new EntityNotFoundException(RolloutGroup.class, group.getId());
         }
 
         return findTargetsBySpec((root, cq, cb) -> TargetSpecifications.hasNoActionInRolloutGroup(group.getId())

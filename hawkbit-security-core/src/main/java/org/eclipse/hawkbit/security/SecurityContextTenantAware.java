@@ -126,7 +126,7 @@ public class SecurityContextTenantAware implements TenantAware {
         private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
-            this.principal = new UserPrincipal(username, null, null, null, username,
+            this.principal = new UserPrincipal(username, username, null, null, username,
                     null, tenant, authorities);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
