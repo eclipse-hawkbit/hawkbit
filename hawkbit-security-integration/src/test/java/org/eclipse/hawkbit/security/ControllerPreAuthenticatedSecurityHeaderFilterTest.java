@@ -24,7 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -34,19 +34,6 @@ import io.qameta.allure.Story;
 @Story("Issuer hash based authentication")
 @RunWith(MockitoJUnitRunner.class)
 public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
-
-    private ControllerPreAuthenticatedSecurityHeaderFilter underTest;
-
-    @Mock
-    private TenantConfigurationManagement tenantConfigurationManagementMock;
-
-    @Mock
-    private DmfTenantSecurityToken tenantSecurityTokenMock;
-
-    @Mock
-    private UserAuthoritiesResolver authoritiesResolver;
-
-    private final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
 
     private static final String CA_COMMON_NAME = "ca-cn";
     private static final String CA_COMMON_NAME_VALUE = "box1";
@@ -66,8 +53,18 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private static final TenantConfigurationValue<String> CONFIG_VALUE_MULTI_HASH = TenantConfigurationValue
             .<String> builder().value(MULTI_HASH).build();
 
+    private ControllerPreAuthenticatedSecurityHeaderFilter underTest;
+
+    @Mock
+    private TenantConfigurationManagement tenantConfigurationManagementMock;
+    @Mock
+    private DmfTenantSecurityToken tenantSecurityTokenMock;
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
     @Before
     public void before() {
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
                 tenantConfigurationManagementMock, tenantAware, new SystemSecurityContext(tenantAware));
     }

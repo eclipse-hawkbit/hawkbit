@@ -120,7 +120,8 @@ public class TestConfiguration implements AsyncConfigurer {
         return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
     }
 
-    @Bean UserAuthoritiesResolver authoritiesResolver() {
+    @Bean
+    UserAuthoritiesResolver authoritiesResolver() {
         return (tenant, username) -> Collections.emptyList();
     }
 
