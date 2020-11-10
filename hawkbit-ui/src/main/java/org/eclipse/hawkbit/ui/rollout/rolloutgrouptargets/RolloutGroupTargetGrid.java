@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets;
 
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutActionStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetWithActionStatusToProxyTargetMapper;
@@ -22,8 +23,6 @@ import org.eclipse.hawkbit.ui.common.grid.support.MasterEntitySupport;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Grid component with targets of rollout group.
@@ -37,22 +36,9 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
 
     private final transient MasterEntitySupport<ProxyRolloutGroup> masterEntitySupport;
 
-    /**
-     * Constructor for RolloutGroupTargetsListGrid
-     * 
-     * @param i18n
-     *            I18N
-     * @param eventBus
-     *            UIEventBus
-     * @param rolloutGroupManagement
-     *            RolloutGroupManagement
-     * @param rolloutManagementUIState
-     *            RolloutUIState
-     */
-    public RolloutGroupTargetGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final RolloutGroupManagement rolloutGroupManagement,
+    RolloutGroupTargetGrid(final CommonUiDependencies uiDependencies, final RolloutGroupManagement rolloutGroupManagement,
             final RolloutManagementUIState rolloutManagementUIState) {
-        super(i18n, eventBus, null);
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
         this.rolloutManagementUIState = rolloutManagementUIState;
 
         setFilterSupport(new FilterSupport<>(new RolloutGroupTargetsDataProvider(rolloutGroupManagement,

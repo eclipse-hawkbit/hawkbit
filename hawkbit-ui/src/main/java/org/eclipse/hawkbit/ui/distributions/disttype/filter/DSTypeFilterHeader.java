@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.distributions.disttype.filter;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
@@ -16,8 +16,6 @@ import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.distributions.disttype.DsTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -36,20 +34,16 @@ public class DSTypeFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor
      *
-     * @param eventBus
-     *          DsTypeWindowBuilder
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsTypeWindowBuilder
-     *          DsTypeWindowBuilder
+     *            DsTypeWindowBuilder
      * @param dSTypeFilterLayoutUiState
-     *          TypeFilterLayoutUiState
+     *            TypeFilterLayoutUiState
      */
-    DSTypeFilterHeader(final UIEventBus eventBus, final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final DsTypeWindowBuilder dsTypeWindowBuilder, final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
-        super(i18n, permChecker, eventBus);
+    DSTypeFilterHeader(final CommonUiDependencies uiDependencies, final DsTypeWindowBuilder dsTypeWindowBuilder,
+            final TypeFilterLayoutUiState dSTypeFilterLayoutUiState) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.dSTypeFilterLayoutUiState = dSTypeFilterLayoutUiState;
         this.dsTypeWindowBuilder = dsTypeWindowBuilder;

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.Arrays;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -26,8 +26,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterGridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Component;
 
@@ -44,19 +42,14 @@ public class TargetFilterGridHeader extends AbstractGridHeader {
 
     /**
      * Constructor for TargetFilterHeader
-     * 
-     * @param eventBus
-     *            UIEventBus
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiState
      *            TargetFilterGridLayoutUiState
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param i18n
-     *            VaadinMessageSource
      */
-    public TargetFilterGridHeader(final UIEventBus eventBus, final TargetFilterGridLayoutUiState uiState,
-            final SpPermissionChecker permissionChecker, final VaadinMessageSource i18n) {
-        super(i18n, permissionChecker, eventBus);
+    public TargetFilterGridHeader(final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.uiState = uiState;
 

@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.rollout.rollout;
 
 import java.util.Arrays;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -23,8 +23,6 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Component;
 import com.vaadin.ui.UI;
@@ -42,10 +40,9 @@ public class RolloutGridHeader extends AbstractGridHeader {
     private final transient SearchHeaderSupport searchHeaderSupport;
     private final transient AddHeaderSupport addHeaderSupport;
 
-    RolloutGridHeader(final SpPermissionChecker permissionChecker,
-            final RolloutManagementUIState rolloutManagementUIState, final UIEventBus eventBus,
-            final VaadinMessageSource i18n, final RolloutWindowBuilder windowBuilder) {
-        super(i18n, permissionChecker, eventBus);
+    RolloutGridHeader(final CommonUiDependencies uiDependencies, final RolloutManagementUIState rolloutManagementUIState,
+            final RolloutWindowBuilder windowBuilder) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutWindowBuilder = windowBuilder;

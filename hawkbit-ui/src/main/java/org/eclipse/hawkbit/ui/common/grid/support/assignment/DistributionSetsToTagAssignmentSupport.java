@@ -18,20 +18,19 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Support for assigning the {@link ProxyDistributionSet} items to
  * {@link ProxyTag}.
- * 
+ *
  */
 public class DistributionSetsToTagAssignmentSupport
         extends ToTagAssignmentSupport<ProxyDistributionSet, DistributionSet> {
@@ -42,25 +41,18 @@ public class DistributionSetsToTagAssignmentSupport
     /**
      * Constructor for DistributionSetsToTagAssignmentSupport
      *
-     * @param notification
-     *            UINotification
-     * @param i18n
-     *            VaadinMessageSource
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param distributionSetManagement
      *            DistributionSetManagement
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
      */
-    public DistributionSetsToTagAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
-            final DistributionSetManagement distributionSetManagement, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker) {
-        super(notification, i18n);
+    public DistributionSetsToTagAssignmentSupport(final CommonUiDependencies uiDependencies,
+            final DistributionSetManagement distributionSetManagement) {
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
         this.distributionSetManagement = distributionSetManagement;
-        this.eventBus = eventBus;
-        this.permChecker = permChecker;
+        this.eventBus = uiDependencies.getEventBus();
+        this.permChecker = uiDependencies.getPermChecker();
     }
 
     @Override

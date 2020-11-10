@@ -12,31 +12,30 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
+import org.eclipse.hawkbit.ui.common.AbstractAddEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.springframework.util.StringUtils;
 
 /**
  * Controller to add meta data window
  */
-public class AddMetaDataWindowController extends AbstractEntityWindowController<ProxyMetaData, ProxyMetaData> {
-    private final VaadinMessageSource i18n;
-    private final UINotification uiNotification;
-
+public class AddMetaDataWindowController
+        extends AbstractAddEntityWindowController<ProxyMetaData, ProxyMetaData, MetaData> {
     private final MetaDataAddUpdateWindowLayout layout;
 
     private final Function<ProxyMetaData, MetaData> createMetaDataCallback;
     private final Predicate<String> duplicateCheckCallback;
+    private final ProxyMetadataValidator validator;
 
     /**
      * Constructor for AddMetaDataWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param layout
      *            MetaDataAddUpdateWindowLayout
      * @param createMetaDataCallback
@@ -44,21 +43,15 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
      * @param duplicateCheckCallback
      *            Duplicate check callback
      */
-    public AddMetaDataWindowController(final VaadinMessageSource i18n, final UINotification uiNotification,
+    public AddMetaDataWindowController(final CommonUiDependencies uiDependencies,
             final MetaDataAddUpdateWindowLayout layout, final Function<ProxyMetaData, MetaData> createMetaDataCallback,
             final Predicate<String> duplicateCheckCallback) {
-        this.i18n = i18n;
-        this.uiNotification = uiNotification;
+        super(uiDependencies);
 
         this.layout = layout;
-
         this.createMetaDataCallback = createMetaDataCallback;
         this.duplicateCheckCallback = duplicateCheckCallback;
-    }
-
-    @Override
-    public MetaDataAddUpdateWindowLayout getLayout() {
-        return layout;
+        this.validator = new ProxyMetadataValidator(uiDependencies);
     }
 
     @Override
@@ -69,35 +62,55 @@ public class AddMetaDataWindowController extends AbstractEntityWindowController<
     }
 
     @Override
+    public EntityWindowLayout<ProxyMetaData> getLayout() {
+        return layout;
+    }
+
+    @Override
     protected void adaptLayout(final ProxyMetaData proxyEntity) {
         layout.enableMetadataKey();
     }
 
     @Override
-    protected void persistEntity(final ProxyMetaData entity) {
-        final MetaData newMetaData = createMetaDataCallback.apply(entity);
-        uiNotification.displaySuccess(i18n.getMessage("message.metadata.saved", newMetaData.getKey()));
+    protected String getPersistSuccessMessageKey() {
+        return "message.metadata.saved";
+    }
+
+    @Override
+    protected MetaData persistEntityInRepository(final ProxyMetaData entity) {
+        return createMetaDataCallback.apply(entity);
+    }
+
+    @Override
+    protected String getDisplayableName(final MetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyMetaData entity) {
+        return entity.getKey();
+    }
+
+    @Override
+    protected void publishModifiedEvent(final EntityModifiedEventPayload eventPayload) {
+        // do not publish entity created because it is already managed by the
+        // update callback that sends the event for parent entity of metadata
+    }
+
+    @Override
+    protected Long getId(final MetaData entity) {
+        return entity.getEntityId();
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyMetaData.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
-        if (!StringUtils.hasText(entity.getKey())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.key.missing"));
-            return false;
-        }
-
-        if (!StringUtils.hasText(entity.getValue())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.value.missing"));
-            return false;
-        }
-
         final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        if (duplicateCheckCallback.test(trimmedKey)) {
-            uiNotification.displayValidationError(i18n.getMessage("message.metadata.duplicate.check", trimmedKey));
-            return false;
-        }
-
-        return true;
+        return validator.isEntityValid(entity, () -> duplicateCheckCallback.test(trimmedKey));
     }
 
     @Override

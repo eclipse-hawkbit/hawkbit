@@ -9,18 +9,15 @@
 package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGrid;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmMetaDataWindowBuilder;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SmWindowBuilder;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.shared.ui.window.WindowMode;
 import com.vaadin.ui.UI;
@@ -34,6 +31,7 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
 
     private final transient SmWindowBuilder smWindowBuilder;
     private final transient SmMetaDataWindowBuilder smMetaDataWindowBuilder;
+    private final transient CommonUiDependencies uiDependencies;
 
     private transient ArtifactDetailsHeaderSupport artifactDetailsHeaderSupport;
     private transient ArtifactManagement artifactManagement;
@@ -42,23 +40,17 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
     /**
      * Constructor for SoftwareModuleDetailsHeader
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smWindowBuilder
      *            SmWindowBuilder
      * @param smMetaDataWindowBuilder
      *            SmMetaDataWindowBuilder
      */
-    public SoftwareModuleDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification uiNotification, final SmWindowBuilder smWindowBuilder,
+    public SoftwareModuleDetailsHeader(final CommonUiDependencies uiDependencies, final SmWindowBuilder smWindowBuilder,
             final SmMetaDataWindowBuilder smMetaDataWindowBuilder) {
-        super(i18n, permChecker, eventBus, uiNotification);
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(), uiDependencies.getUiNotification());
+        this.uiDependencies = uiDependencies;
 
         this.smWindowBuilder = smWindowBuilder;
         this.smMetaDataWindowBuilder = smMetaDataWindowBuilder;
@@ -156,8 +148,7 @@ public class SoftwareModuleDetailsHeader extends AbstractDetailsHeader<ProxySoft
         }
 
         if (artifactDetailsGrid == null) {
-            artifactDetailsGrid = new ArtifactDetailsGrid(eventBus, i18n, permChecker, uiNotification,
-                    artifactManagement);
+            artifactDetailsGrid = new ArtifactDetailsGrid(uiDependencies, artifactManagement);
         }
         setInitialArtifactDetailsGridSize(artifactDetailsGrid);
         artifactDetailsGrid.getMasterEntitySupport().masterEntityChanged(selectedEntity);

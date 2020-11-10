@@ -59,7 +59,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
     protected ProxyRolloutWindow buildEntityFromProxy(final ProxyRollout proxyEntity) {
         final ProxyRolloutWindow proxyRolloutWindow = new ProxyRolloutWindow(proxyEntity);
 
-        proxyRolloutWindow.setName(i18n.getMessage("textfield.rollout.copied.name", proxyRolloutWindow.getName()));
+        proxyRolloutWindow.setName(getI18n().getMessage("textfield.rollout.copied.name", proxyRolloutWindow.getName()));
 
         setTargetFilterId(proxyRolloutWindow);
 
