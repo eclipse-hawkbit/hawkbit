@@ -88,7 +88,6 @@ public class AutoAssignChecker implements AutoAssignExecutor {
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
         this.tenantAware = tenantAware;
-        
     }
 
     @Override
@@ -100,7 +99,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
         final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(pageRequest);
 
-        // ensure that the filter queries are executed in the order of weights
+        // make sure the filter queries are executed in the order of weights
         for (final TargetFilterQuery filterQuery : filterQueries) {
             runInUserContext(filterQuery, () -> checkByTargetFilterQueryAndAssignDS(filterQuery));
         }
