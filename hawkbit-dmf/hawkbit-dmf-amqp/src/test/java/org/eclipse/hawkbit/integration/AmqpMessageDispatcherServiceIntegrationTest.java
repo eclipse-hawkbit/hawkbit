@@ -49,7 +49,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
@@ -91,27 +90,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertDownloadAndInstallMessage(getDistributionSet().getModules(), controllerId);
-    }
-
-    @Test
-    @Description("Verify that a distribution assignment send a download and install message with anonymous download enabled.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void sendDownloadAndInstallStatusForAnonymousDownload() {
-        // enable anonymous download
-        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
-
-        sendDownloadAndInstallStatus();
-
-        // disable anonymous download for next tests
-        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
     }
 
     @Test
@@ -256,20 +234,6 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 controllerId);
         assertDmfDownloadAndUpdateRequest((DmfDownloadAndUpdateRequest) downloadMessage.getAction(), ds.getModules(),
                 controllerId);
-    }
-
-    @Test
-    @Description("Verify payload of multi action messages with anonymous download enabled.")
-    public void assertMultiActionMessagePayloadsForAnonymousDownload() {
-        // enable anonymous download
-        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, true);
-
-        assertMultiActionMessagePayloads();
-
-        // disable anonymous download for next tests
-        anonymousDownloadEnabled = tenantConfigurationManagement.addOrUpdateConfiguration(
-                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, false);
     }
 
     private List<DmfMultiActionElement> getLatestMultiActionMessages(final String expectedControllerId) {

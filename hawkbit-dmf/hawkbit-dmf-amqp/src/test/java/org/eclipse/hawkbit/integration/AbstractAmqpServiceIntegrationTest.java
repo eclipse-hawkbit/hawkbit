@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNull;
 
-import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
@@ -43,7 +41,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.util.IpUtil;
@@ -77,8 +74,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     private DeadletterListener deadletterListener;
     private DistributionSet distributionSet;
 
-    protected TenantConfigurationValue<Serializable> anonymousDownloadEnabled;
-
     @Autowired
     private RabbitListenerTestHarness harness;
 
@@ -95,7 +90,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         replyToListener.purge();
         Mockito.reset(replyToListener);
         getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
-        anonymousDownloadEnabled = TenantConfigurationValue.builder().value(false).build();
     }
 
     private <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
@@ -199,13 +193,8 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         request.getSoftwareModules().forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
                 new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
-        assert updatedTarget != null;
-        if ((Boolean) anonymousDownloadEnabled.getValue()) {
-            // If anonymous download is enabled, the token shall not be returned
-            assertNull(request.getTargetSecurityToken());
-        } else {
-            assertThat(request.getTargetSecurityToken()).isEqualTo(updatedTarget.getSecurityToken());
-        }
+        assertThat(updatedTarget).isNotNull();
+        assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
 
     protected void assertDownloadAndInstallMessage(final Set<SoftwareModule> softwareModules,
@@ -281,7 +270,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         createAndSendThingCreated(target, TENANT_EXIST);
         final Target registeredTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(target));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assert registeredTarget != null;
+        assertThat(registeredTarget).isNotNull();
         assertTarget(registeredTarget, expectedTargetStatus, createdBy);
     }
 
@@ -291,7 +280,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         final Target registeredTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(controllerId, version));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assert registeredTarget != null;
+        assertThat(registeredTarget).isNotNull();
         assertThat(registeredTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 

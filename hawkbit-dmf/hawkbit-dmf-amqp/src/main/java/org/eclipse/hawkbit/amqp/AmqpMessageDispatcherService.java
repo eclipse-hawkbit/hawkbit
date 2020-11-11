@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -43,7 +42,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +87,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final DistributionSetManagement distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
-    private final TenantConfigurationManagement tenantConfigurationManagement;
 
     /**
      * Constructor.
@@ -117,8 +114,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
             final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -129,8 +125,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.deploymentManagement = deploymentManagement;
-        this.tenantConfigurationManagement = tenantConfigurationManagement;
-
     }
 
     /**
@@ -145,18 +139,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(assignedEvent)) {
             return;
         }
-
         LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-
         distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
-
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
-
             targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
                     target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
                             target, softwareModules));
-
         });
     }
 
@@ -192,7 +181,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                 action -> action.getDistributionSet().getModules().stream()
                                         .collect(Collectors.toMap(m -> m, softwareModuleMetadata::get)));
                     }
-
                 });
 
     }
@@ -216,7 +204,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final Message message = getMessageConverter().toMessage(multiActionRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
         amqpSenderService.sendMessage(message, targetAddress);
-
     }
 
     private DmfActionRequest createDmfActionRequest(final Target target, final Action action,
@@ -225,7 +212,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return createPlainActionRequest(action);
         }
         return createDownloadAndUpdateRequest(target, action.getId(), softwareModules);
-
     }
 
     private static DmfActionRequest createPlainActionRequest(final Action action) {
@@ -234,14 +220,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return actionRequest;
     }
 
-    private DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Long actionId,
+    protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Long actionId,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
         request.setActionId(actionId);
-        // Don't send the target token when anonymous download is enabled
-        if (!isAnonymousDownload()) {
-            request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
-        }
+        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+
         if (softwareModules != null) {
             softwareModules.entrySet()
                     .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
@@ -357,7 +341,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
-
         if (!hasValidAddress(targetAddress)) {
             return;
         }
@@ -485,9 +468,4 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId()).getContent();
     }
 
-    protected boolean isAnonymousDownload() {
-        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement.getConfigurationValue(
-                TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED, Boolean.class)
-                .getValue());
-    }
 }
