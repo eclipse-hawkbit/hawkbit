@@ -1,0 +1,48 @@
+#
+# Copyright (c) 2020 Microsoft and others.
+#
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+
+# Build your hawkBit Extensions and run tests with Apache Maven.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/java
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#maven
+
+strategy:
+  matrix:
+    java-18:
+      jdkVersionOption: "1.8"
+    java-11:
+      jdkVersionOption: "1.11"
+
+pool:
+  vmImage: "ubuntu-18.04"
+
+variables:
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  
+steps:
+  - task: Cache@2
+    inputs:
+      key: 'maven | "$(Agent.OS)" | **/pom.xml'
+      restoreKeys: |
+        maven | "$(Agent.OS)"
+        maven
+      path: $(MAVEN_CACHE_FOLDER)
+    displayName: Cache Maven local repo
+  - task: Maven@3
+    inputs:
+      mavenPomFile: "pom.xml"
+      mavenOptions: "-Xmx3072m"
+      javaHomeOption: "JDKVersion"
+      jdkVersionOption: $(jdkVersionOption)
+      jdkArchitectureOption: "x64"
+      publishJUnitResults: true
+      testResultsFiles: "**/surefire-reports/TEST-*.xml"
+      goals: "package license:check $(MAVEN_OPTS)"
