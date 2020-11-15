@@ -1,6 +1,5 @@
-# Build your hawkBit Extensions and run tests with Apache Maven.
-# Runs a matrix of varois DB versions for Java 8 and 11. RabbitMQ versions 
-# are not a matrix on its own but rather distributed over the other matrixes.
+# Build hawkBit and run tests with Apache Maven.
+# Runs a matrix of various DB,JDK,RabbitMQ versions that are supported by hawkBit
 
 # Add steps that analyze code, save build artifacts, deploy, and more:
 # https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/java
@@ -12,15 +11,23 @@ pool:
 
 jobs:
   - job:
-    displayName: H2_RABBIT36
+    displayName: JDK-8
+    steps:
+      - template: rabbitmq-template.yml
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "package license:check"
+          jdkVersionOption: "1.8"
+  - job:
+    displayName: RABBIT
     strategy:
       matrix:
-        java-8 3.6:
-          jdkVersionOption: "1.8"
+        3.6:
           rabbitmqVersion: "3.6"
-        java-11 3.6:
-          jdkVersionOption: "1.11"
-          rabbitmqVersion: "3.6"
+        3.7:
+          rabbitmqVersion: "3.7"
+        3.8:
+          rabbitmqVersion: "3.8"
     steps:
       - template: rabbitmq-template.yml
         parameters:
@@ -28,61 +35,33 @@ jobs:
       - template: maven-template.yml
         parameters:
           mavenGoals: "package license:check"
-          jdkVersionOption: $(jdkVersionOption)
   - job:
-    displayName: MYSQL_RABBIT37
+    displayName: MYSQL
     strategy:
       matrix:
-        java-8 5.6:
-          jdkVersionOption: "1.8"
+        5.6:
           dbVersion: "5.6"
-          rabbitmqVersion: "3.7"
-        java-11 5.6:
-          jdkVersionOption: "1.11"
-          dbVersion: "5.6"
-          rabbitmqVersion: "3.7"
-        java-8 5.7:
-          jdkVersionOption: "1.8"
+        5.7:
           dbVersion: "5.7"
-          rabbitmqVersion: "3.7"
-        java-11 5.7:
-          jdkVersionOption: "1.11"
-          dbVersion: "5.7"
-          rabbitmqVersion: "3.7"
+        8.0:
+          dbVersion: "8.0"
     steps:
       - template: rabbitmq-template.yml
-        parameters:
-          rabbitmqVersion: $(rabbitmqVersion)
       - script: "docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=8236472364 -e MYSQL_DATABASE=hawkbit -d mysql:$(dbVersion)"
         displayName: "Setup MYSQL Database docker instance"
       - template: maven-template.yml
         parameters:
           mavenGoals: "package license:check -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
-          jdkVersionOption: $(jdkVersionOption)
   - job:
-    displayName: MSSQL_RABBIT38
+    displayName: MSSQL
     strategy:
       matrix:
-        java-8 2017:
-          jdkVersionOption: "1.8"
+        2017:
           dbVersion: "2017-latest"
-          rabbitmqVersion: "3.8"
-        java-11 2017:
-          jdkVersionOption: "1.11"
-          dbVersion: "2017-latest"
-          rabbitmqVersion: "3.8"
-        java-8 2019:
-          jdkVersionOption: "1.8"
+        2019:
           dbVersion: "2019-latest"
-          rabbitmqVersion: "3.8"
-        java-11 2019:
-          jdkVersionOption: "1.11"
-          dbVersion: "2019-latest"
-          rabbitmqVersion: "3.8"
     steps:
       - template: rabbitmq-template.yml
-        parameters:
-          rabbitmqVersion: $(rabbitmqVersion)
       - script: |
           docker run --name sql1 -p 1433:1433 -e ACCEPT_EULA=Y -e SA_PASSWORD=1234567890. -d mcr.microsoft.com/mssql/server:$(dbVersion)
           sleep 60
@@ -91,4 +70,3 @@ jobs:
       - template: maven-template.yml
         parameters:
           mavenGoals: "package license:check -Dspring.jpa.database=SQL_SERVER -Dspring.datasource.url=jdbc:sqlserver://localhost:1433;database=hawkbit -Dspring.datasource.username=SA -Dspring.datasource.password=1234567890. -Dspring.datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver"
-          jdkVersionOption: $(jdkVersionOption)
