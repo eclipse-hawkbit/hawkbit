@@ -1,0 +1,32 @@
+parameters:
+  - name: mavenGoals
+    displayName: Maven Goal
+    type: string
+  - name: jdkVersionOption
+    displayName: JDK Version
+    type: string
+    default: "1.11"
+  - name: mavenCacheFolder
+    displayName: Maven Cache Folder
+    type: string
+    default: $(Pipeline.Workspace)/.m2/repository
+
+steps:
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | **/pom.xml'
+    restoreKeys: |
+      maven | "$(Agent.OS)"
+      maven
+    path: $(mavenCacheFolder)
+    displayName: Cache Maven local repo
+- task: Maven@3
+  inputs:
+    mavenPomFile: "pom.xml"
+    mavenOptions: "-Xmx3072m"
+    javaHomeOption: "JDKVersion"
+    jdkVersionOption: $(jdkVersionOption)
+    jdkArchitectureOption: "x64"
+    publishJUnitResults: true
+    testResultsFiles: "**/surefire-reports/TEST-*.xml"
+    goals: "$(mavenGoals) -Dmaven.repo.local=$(mavenCacheFolder)"
