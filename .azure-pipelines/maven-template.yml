@@ -18,15 +18,15 @@ steps:
     restoreKeys: |
       maven | "$(Agent.OS)"
       maven
-    path: $(mavenCacheFolder)
+    path: ${{ parameters.mavenCacheFolder }}
     displayName: Cache Maven local repo
 - task: Maven@3
   inputs:
     mavenPomFile: "pom.xml"
     mavenOptions: "-Xmx3072m"
     javaHomeOption: "JDKVersion"
-    jdkVersionOption: $(jdkVersionOption)
+    jdkVersionOption: ${{ parameters.jdkVersionOption }}
     jdkArchitectureOption: "x64"
     publishJUnitResults: true
     testResultsFiles: "**/surefire-reports/TEST-*.xml"
-    goals: "$(mavenGoals) -Dmaven.repo.local=$(mavenCacheFolder)"
+    goals: "${{ parameters.mavenGoals }} -Dmaven.repo.local=${{ parameters.mavenCacheFolder }}"
