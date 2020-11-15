@@ -15,7 +15,7 @@
 
 strategy:
   matrix:
-    java-18:
+    java-8:
       jdkVersionOption: "1.8"
     java-11:
       jdkVersionOption: "1.11"
@@ -26,8 +26,16 @@ pool:
 variables:
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  DB_PASSWD: 'dshfjhdsjfhsdjkf'
   
 steps:
+  - script: |
+      docker run --name mysql -p 13306:3306 -e MYSQL_ROOT_PASSWORD=8236472364 -d mysql:5.7
+      sleep 60
+      docker exec mysql mysql -u root -p8236472364 -e "GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION; FLUSH PRIVILEGES;"
+      docker exec mysql mysql -u root -p8236472364 -e "create database hawkbit;"
+    workingDirectory: "./"
+    displayName: "Setup mysql docker instance"
   - task: Cache@2
     inputs:
       key: 'maven | "$(Agent.OS)" | **/pom.xml'
@@ -45,4 +53,4 @@ steps:
       jdkArchitectureOption: "x64"
       publishJUnitResults: true
       testResultsFiles: "**/surefire-reports/TEST-*.xml"
-      goals: "package license:check $(MAVEN_OPTS)"
+      goals: "package license:check $(MAVEN_OPTS) -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
