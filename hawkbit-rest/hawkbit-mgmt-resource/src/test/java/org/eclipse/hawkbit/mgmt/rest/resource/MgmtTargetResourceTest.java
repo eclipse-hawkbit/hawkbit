@@ -1742,7 +1742,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerTarget();
 
         final JSONArray metaData2 = new JSONArray();
-        for (int i = 0; i < ((maxMetaData - metaData1.length()) + 1); ++i) {
+        for (int i = 0; i < maxMetaData - metaData1.length() + 1; ++i) {
             metaData2.put(new JSONObject().put("key", knownKey1 + i).put("value", knownValue1 + i));
         }
 
