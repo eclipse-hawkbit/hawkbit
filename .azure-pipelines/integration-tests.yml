@@ -13,7 +13,6 @@ jobs:
   - job: JDK_11
     displayName: Build with JDK-11
     steps:
-      - template: rabbitmq-template.yml
       - template: maven-template.yml
         parameters:
           mavenGoals: "package license:check"
@@ -22,7 +21,6 @@ jobs:
   - job: JDK_8
     displayName: Build with JDK-8
     steps:
-      - template: rabbitmq-template.yml
       - template: maven-template.yml
         parameters:
           mavenGoals: "package license:check"
@@ -75,8 +73,8 @@ jobs:
     steps:
       - template: rabbitmq-template.yml
       - script: |
-          docker run --name mssql -p 1433:1433 -e ACCEPT_EULA=Y -e SA_PASSWORD=1234567890. -d mcr.microsoft.com/mssql/server:$(dbVersion)
-          sleep 120
+          docker run --name mssql -p 1433:1433 -e ACCEPT_EULA=Y -e SA_PASSWORD=1234567890. -d mcr.microsoft.com/mssql/server:$(dbVersion)          
+          until [ "`/usr/bin/docker inspect -f {{.State.Running}} mssql`" == "true" ]; do sleep 0.1; done;
           docker exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1234567890." -Q "CREATE DATABASE hawkbit"
         displayName: "Setup MSSQL Database docker instance"
       - template: maven-template.yml
