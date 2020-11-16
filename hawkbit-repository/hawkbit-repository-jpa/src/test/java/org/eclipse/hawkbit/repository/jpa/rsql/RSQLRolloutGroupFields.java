@@ -55,7 +55,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + -1, 4);
 
         // Not supported for numbers
-        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+        if (Database.POSTGRESQL.equals(getDatabase())) {
             return;
         }
 

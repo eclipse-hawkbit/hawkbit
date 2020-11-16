@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
@@ -103,7 +104,11 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected RolloutTestApprovalStrategy approvalStrategy;
 
     @Autowired
-    protected JpaProperties jpaProperties;
+    private JpaProperties jpaProperties;
+
+    protected Database getDatabase() {
+        return jpaProperties.getDatabase();
+    }
 
     @Transactional(readOnly = true)
     protected List<Action> findActionsByRolloutAndStatus(final Rollout rollout, final Action.Status actionStatus) {

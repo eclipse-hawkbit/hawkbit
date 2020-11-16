@@ -56,7 +56,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             final JpaAction newAction = new JpaAction();
             newAction.setActionType(ActionType.SOFT);
             newAction.setDistributionSet(dsA);
-            newAction.setActive(i % 2 == 0);
+            newAction.setActive((i % 2) == 0);
             newAction.setStatus(Status.RUNNING);
             newAction.setTarget(target);
             newAction.setWeight(45);
@@ -76,7 +76,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(ActionFields.ID.name() + "!=" + -1, 11);
 
         // Not supported for numbers
-        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+        if (Database.POSTGRESQL.equals(getDatabase())) {
             return;
         }
 

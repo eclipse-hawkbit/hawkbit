@@ -64,7 +64,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + -1, 5);
 
         // Not supported for numbers
-        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+        if (Database.POSTGRESQL.equals(getDatabase())) {
             return;
         }
 

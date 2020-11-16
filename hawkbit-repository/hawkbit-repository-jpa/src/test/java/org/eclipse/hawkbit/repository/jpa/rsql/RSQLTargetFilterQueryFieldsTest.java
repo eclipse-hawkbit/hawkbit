@@ -61,7 +61,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
         assertRSQLQuery(TargetFilterQueryFields.ID.name() + "!=" + -1, 3);
 
         // Not supported for numbers
-        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+        if (Database.POSTGRESQL.equals(getDatabase())) {
             return;
         }
 
