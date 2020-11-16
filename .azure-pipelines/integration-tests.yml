@@ -19,7 +19,7 @@ jobs:
           mavenGoals: "package license:check"
           jdkVersionOption: "1.11"
 
-  - job:
+  - job: JDK_8
     displayName: Build with JDK-8
     steps:
       - template: rabbitmq-template.yml
@@ -28,7 +28,7 @@ jobs:
           mavenGoals: "package license:check"
           jdkVersionOption: "1.8"
   - job:
-    dependsOn: JDK_11
+    dependsOn: JDK_8
     condition: succeeded()
     displayName: RABBIT
     strategy:
@@ -47,7 +47,7 @@ jobs:
         parameters:
           mavenGoals: "verify"
   - job:
-    dependsOn: JDK_11
+    dependsOn: JDK_8
     condition: succeeded()
     displayName: MYSQL
     strategy:
@@ -64,7 +64,7 @@ jobs:
         parameters:
           mavenGoals: "verify -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
   - job:
-    dependsOn: JDK_11
+    dependsOn: JDK_8
     condition: succeeded()
     displayName: MSSQL
     strategy:
@@ -84,7 +84,7 @@ jobs:
         parameters:
           mavenGoals: "verify -Dspring.jpa.database=SQL_SERVER -Dspring.datasource.url=jdbc:sqlserver://localhost:1433;database=hawkbit -Dspring.datasource.username=SA -Dspring.datasource.password=1234567890. -Dspring.datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver"
   - job:
-    dependsOn: JDK_11
+    dependsOn: JDK_8
     condition: succeeded()
     displayName: POSTGRESQL
     strategy:
