@@ -5,7 +5,7 @@ parameters:
   - name: jdkVersionOption
     displayName: JDK Version
     type: string
-    default: "1.11"
+    default: "1.8"
   - name: mavenCacheFolder
     displayName: Maven Cache Folder
     type: string
