@@ -78,6 +78,7 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -1156,13 +1157,15 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
 
         final String user = tenantAware.getCurrentUsername();
-        if (!StringUtils.isEmpty(user)) {
+        if (!(StringUtils.isEmpty(user) || SecurityContextTenantAware.SYSTEM_USER.equals(user))) {
             handler.run();
             return;
         }
 
-        // establish the user context
-        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), getUser(rollout), () -> {
+        // switch the user context
+        final String rolloutUser = getUser(rollout);
+        LOGGER.debug("Switching user context from '{}' to '{}'", user, rolloutUser);
+        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), rolloutUser, () -> {
             handler.run();
             return null;
         });

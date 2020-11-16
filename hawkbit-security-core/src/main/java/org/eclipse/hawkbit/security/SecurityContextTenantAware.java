@@ -35,7 +35,7 @@ import org.springframework.security.core.context.SecurityContextImpl;
 // todo: create test
 public class SecurityContextTenantAware implements TenantAware {
 
-    private static final String SYSTEM_USER = "system";
+    public static final String SYSTEM_USER = "system";
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections.singletonList(
             new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
