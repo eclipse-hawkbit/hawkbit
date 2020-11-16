@@ -452,7 +452,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final String targetFilter, final Long createdAt) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        // TODO
         final long totalTargets = targetManagement.countByRsql(baseFilter);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
