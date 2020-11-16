@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.jpa.vendor.Database;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -29,7 +30,20 @@ public class RSQLSoftwareModuleTypeFieldsTest extends AbstractJpaIntegrationTest
     @Test
     @Description("Test filter software module test type by id")
     public void testFilterByParameterId() {
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + osType.getId(), 1);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "!=" + osType.getId(), 2);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==" + -1, 0);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "!=" + -1, 3);
+
+        // Not supported for numbers
+        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+            return;
+        }
+
         assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==*", 3);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "==noexist*", 0);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "=in=(" + osType.getId() + ",1000000)", 1);
+        assertRSQLQuery(SoftwareModuleTypeFields.ID.name() + "=out=(" + osType.getId() + ",1000000)", 2);
     }
 
     @Test

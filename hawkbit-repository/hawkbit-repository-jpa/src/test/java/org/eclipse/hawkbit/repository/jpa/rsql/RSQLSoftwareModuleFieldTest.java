@@ -20,6 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.jpa.vendor.Database;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -29,10 +30,12 @@ import io.qameta.allure.Story;
 @Story("RSQL filter software module")
 public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
+    private SoftwareModule ah;
+
     @Before
     public void setupBeforeTest() {
-        final SoftwareModule ah = softwareModuleManagement.create(entityFactory.softwareModule().create().type(appType)
-                .name("agent-hub").version("1.0.1").description("agent-hub"));
+        ah = softwareModuleManagement.create(entityFactory.softwareModule().create().type(appType).name("agent-hub")
+                .version("1.0.1").description("agent-hub"));
         softwareModuleManagement.create(entityFactory.softwareModule().create().type(runtimeType).name("oracle-jre")
                 .version("1.7.2").description("aa"));
         softwareModuleManagement.create(
@@ -55,7 +58,20 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter software module by id")
     public void testFilterByParameterId() {
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + ah.getId(), 1);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + ah.getId(), 4);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + -1, 0);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + -1, 5);
+
+        // Not supported for numbers
+        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+            return;
+        }
+
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 5);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==noexist*", 0);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "=in=(" + ah.getId() + ",1000000)", 1);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "=out=(" + ah.getId() + ",1000000)", 4);
     }
 
     @Test
