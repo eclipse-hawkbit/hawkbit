@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.persistence.PersistenceException;
@@ -20,7 +21,6 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -185,20 +185,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
     }
     
     private void runInUserContext(final TargetFilterQuery targetFilterQuery, final Runnable handler) {        
-        
-        final String user = tenantAware.getCurrentUsername();
-        if (!(StringUtils.isEmpty(user) || SecurityContextTenantAware.SYSTEM_USER.equals(user))) {
-            handler.run();
-            return;
-        }
-        
-        // switch the user context
-        final String autoAssignUser = getAutoAssignmentInitiatedBy(targetFilterQuery);
-        LOGGER.debug("Switching user context from '{}' to '{}'", user, autoAssignUser);
-        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), autoAssignUser, () -> {
-            handler.run();
-            return null;
-        });
+        DeploymentHelper.runInNonSystemContext(handler,
+                () -> Objects.requireNonNull(getAutoAssignmentInitiatedBy(targetFilterQuery)), tenantAware);
     }
 
     private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {

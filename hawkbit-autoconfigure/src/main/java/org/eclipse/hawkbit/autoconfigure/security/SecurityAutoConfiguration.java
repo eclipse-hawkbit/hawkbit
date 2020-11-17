@@ -46,12 +46,15 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
 public class SecurityAutoConfiguration {
 
     /**
+     * Creates a {@link TenantAware} bean based on the given
+     * {@link UserAuthoritiesResolver}.
+     * 
+     * @param authoritiesResolver
+     *            The user authorities/roles resolver
+     * 
      * @return the {@link TenantAware} singleton bean which holds the current
      *         {@link TenantAware} service and make it accessible in beans which
      *         cannot access the service directly, e.g. JPA entities.
-     *
-     * @param authoritiesResolver
-     *             The user authorities/roles resolver
      */
     @Bean
     @ConditionalOnMissingBean
@@ -60,14 +63,15 @@ public class SecurityAutoConfiguration {
     }
 
     /**
-     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for resolving user authorities/roles
+     * Creates a {@link UserAuthoritiesResolver} bean that is responsible for
+     * resolving user authorities/roles.
      *
      * @param securityProperties
      *            The Spring {@link SecurityProperties} for the security user
      * @param multiUserProperties
      *            The {@link MultiUserProperties} for the managed users
      *
-     * @return    an {@link InMemoryUserAuthoritiesResolver} bean
+     * @return an {@link InMemoryUserAuthoritiesResolver} bean
      */
     @Bean
     public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
