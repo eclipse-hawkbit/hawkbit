@@ -128,10 +128,6 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
         return hlayout;
     }
 
-    private void saveSystemConfigBean() {
-        autowiredConfigurationViews.forEach(ConfigurationGroup::save);
-    }
-
     private void saveConfiguration() {
         final boolean isUserInputValid = filteredConfigurationViews.stream()
                 .allMatch(ConfigurationGroup::isUserInputValid);
@@ -140,8 +136,9 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
             uINotification.displayValidationError(i18n.getMessage("notification.configuration.save.notpossible"));
             return;
         }
-        saveSystemConfigBean();
+        // Iterate through all View Beans and call their save implementation
         filteredConfigurationViews.forEach(ConfigurationGroup::save);
+
         // More methods
         saveConfigurationBtn.setEnabled(false);
         undoConfigurationBtn.setEnabled(false);
