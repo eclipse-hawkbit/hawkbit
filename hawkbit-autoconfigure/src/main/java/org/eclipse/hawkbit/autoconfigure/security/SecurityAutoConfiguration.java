@@ -41,7 +41,8 @@ import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuc
  * {@link EnableAutoConfiguration Auto-configuration} for security.
  */
 @Configuration
-@EnableConfigurationProperties({SecurityProperties.class, DdiSecurityProperties.class, HawkbitSecurityProperties.class})
+@EnableConfigurationProperties({ SecurityProperties.class, DdiSecurityProperties.class, HawkbitSecurityProperties.class,
+        MultiUserProperties.class })
 public class SecurityAutoConfiguration {
 
     /**

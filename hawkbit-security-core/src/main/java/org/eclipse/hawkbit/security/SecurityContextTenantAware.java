@@ -26,18 +26,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
- * A {@link TenantAware} implementation which retrieves the ID of the tenant from
- * the {@link SecurityContext#getAuthentication()}
+ * A {@link TenantAware} implementation which retrieves the ID of the tenant
+ * from the {@link SecurityContext#getAuthentication()}
  * {@link Authentication#getDetails()} which holds the
  * {@link TenantAwareAuthenticationDetails} object.
  *
  */
-// todo: create test
 public class SecurityContextTenantAware implements TenantAware {
 
     public static final String SYSTEM_USER = "system";
-    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections.singletonList(
-            new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
+    private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections
+            .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
     private final UserAuthoritiesResolver authoritiesResolver;
 
@@ -73,9 +72,20 @@ public class SecurityContextTenantAware implements TenantAware {
 
     @Override
     public <T> T runAsTenant(final String tenant, final TenantRunner<T> tenantRunner) {
+        return runInContext(buildSystemSecurityContext(tenant), tenantRunner);
+    }
+
+    @Override
+    public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
+        final List<SimpleGrantedAuthority> authorities = authoritiesResolver.getUserAuthorities(tenant, username)
+                .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner);
+    }
+
+    private static <T> T runInContext(final SecurityContext context, final TenantRunner<T> tenantRunner) {
         final SecurityContext originalContext = SecurityContextHolder.getContext();
         try {
-            SecurityContextHolder.setContext(buildSystemSecurityContext(tenant));
+            SecurityContextHolder.setContext(context);
             return tenantRunner.run();
         } finally {
             SecurityContextHolder.setContext(originalContext);
@@ -86,26 +96,11 @@ public class SecurityContextTenantAware implements TenantAware {
         return buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES);
     }
 
-    @Override
-    public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
-        final SecurityContext originalContext = SecurityContextHolder.getContext();
-        try {
-            final List<SimpleGrantedAuthority> authorities = authoritiesResolver.getUserAuthorities(tenant, username) //
-                    .stream().map(SimpleGrantedAuthority::new) //
-                    .collect(Collectors.toList());
-            SecurityContextHolder.setContext(buildUserSecurityContext(tenant, username, authorities));
-            return tenantRunner.run();
-        } finally {
-            SecurityContextHolder.setContext(originalContext);
-        }
-    }
-
     private static SecurityContext buildUserSecurityContext(final String tenant, final String username,
             final Collection<? extends GrantedAuthority> authorities) {
         final SecurityContextImpl securityContext = new SecurityContextImpl();
-        securityContext.setAuthentication(
-                new AuthenticationDelegate(SecurityContextHolder.getContext().getAuthentication(), tenant, username,
-                        authorities));
+        securityContext.setAuthentication(new AuthenticationDelegate(
+                SecurityContextHolder.getContext().getAuthentication(), tenant, username, authorities));
         return securityContext;
     }
 
@@ -126,8 +121,7 @@ public class SecurityContextTenantAware implements TenantAware {
         private AuthenticationDelegate(final Authentication delegate, final String tenant, final String username,
                 final Collection<? extends GrantedAuthority> authorities) {
             this.delegate = delegate;
-            this.principal = new UserPrincipal(username, username, null, null, username,
-                    null, tenant, authorities);
+            this.principal = new UserPrincipal(username, username, null, null, username, null, tenant, authorities);
             tenantAwareAuthenticationDetails = new TenantAwareAuthenticationDetails(tenant, false);
         }
 
