@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TargetDataExporterTest {
 
-    private static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ";";
 
     private static final String[] HEADER = {
             "Name", SEPARATOR,
@@ -61,19 +61,19 @@ public class TargetDataExporterTest {
         ((AbstractJpaBaseEntity)t1).setLastModifiedBy("User2");
         ((AbstractJpaBaseEntity)t1).setLastModifiedAt(100L);
 
-        line1.append("0123")
-                .append(",")
-                .append("TestTargetDescription1")
-                .append(",")
-                .append("PENDING")
-                .append(",")
-                .append("User1")
-                .append(",")
-                .append(toReadableDate(0L))
-                .append(",")
-                .append("User2")
-                .append(",")
-                .append(toReadableDate(100L));
+        line1.append("\"0123\"")
+                .append(SEPARATOR)
+                .append("\"TestTargetDescription1\"")
+                .append(SEPARATOR)
+                .append("\"PENDING\"")
+                .append(SEPARATOR)
+                .append("\"User1\"")
+                .append(SEPARATOR)
+                .append("\"" + toReadableDate(0L) + "\"")
+                .append(SEPARATOR)
+                .append("\"User2\"")
+                .append(SEPARATOR)
+                .append("\"" + toReadableDate(100L) + "\"");
 
         targetList.add(t1);
 

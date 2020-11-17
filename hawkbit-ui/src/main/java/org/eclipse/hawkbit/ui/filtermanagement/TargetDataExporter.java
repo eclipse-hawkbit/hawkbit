@@ -22,7 +22,7 @@ import java.util.Optional;
  */
 public class TargetDataExporter {
 
-    private static final String SEPARATOR = ",";
+    private static final String SEPARATOR = ";";
     private static final String EMPTY_STRING = "";
 
     private static final String[] HEADER = {
@@ -52,19 +52,19 @@ public class TargetDataExporter {
     }
 
     private static void assemble(StringBuilder builder, Target target){
-        builder.append(target.getControllerId())
+        builder.append(quote(target.getControllerId()))
                 .append(SEPARATOR)
-                .append(Optional.ofNullable(target.getDescription()).orElse(EMPTY_STRING))
+                .append(quote(Optional.ofNullable(target.getDescription()).orElse(EMPTY_STRING)))
                 .append(SEPARATOR)
-                .append(target.getUpdateStatus())
+                .append(quote(target.getUpdateStatus().name()))
                 .append(SEPARATOR)
-                .append(Optional.ofNullable(target.getCreatedBy()).orElse(EMPTY_STRING))
+                .append(quote(Optional.ofNullable(target.getCreatedBy()).orElse(EMPTY_STRING)))
                 .append(SEPARATOR)
-                .append(toReadableDate(target.getCreatedAt()))
+                .append(quote(toReadableDate(target.getCreatedAt())))
                 .append(SEPARATOR)
-                .append(Optional.ofNullable(target.getLastModifiedBy()).orElse(EMPTY_STRING))
+                .append(quote(Optional.ofNullable(target.getLastModifiedBy()).orElse(EMPTY_STRING)))
                 .append(SEPARATOR)
-                .append(toReadableDate(target.getLastModifiedAt()))
+                .append(quote(toReadableDate(target.getLastModifiedAt())))
                 .append('\n');
     }
 
@@ -72,5 +72,9 @@ public class TargetDataExporter {
         DateFormat simpleDate = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy");
         Date date = new Date(millis);
         return simpleDate.format(date);
+    }
+
+    private static String quote(String input) {
+        return new StringBuilder().append("\"").append(input).append("\"").toString();
     }
 }
