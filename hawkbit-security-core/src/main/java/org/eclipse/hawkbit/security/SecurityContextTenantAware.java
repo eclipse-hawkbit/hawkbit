@@ -40,6 +40,14 @@ public class SecurityContextTenantAware implements TenantAware {
 
     private final UserAuthoritiesResolver authoritiesResolver;
 
+    /**
+     * Creates the {@link SecurityContextTenantAware} based on the given
+     * {@link UserAuthoritiesResolver}.
+     * 
+     * @param authoritiesResolver
+     *            Resolver to retrieve the authorities for a given user. Must
+     *            not be <code>null</code>.
+     */
     public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver) {
         this.authoritiesResolver = authoritiesResolver;
     }
