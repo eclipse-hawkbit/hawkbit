@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.autoconfigure.security;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +37,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler;
+import org.springframework.util.CollectionUtils;
 
 /**
  * {@link EnableAutoConfiguration Auto-configuration} for security.
@@ -76,11 +78,14 @@ public class SecurityAutoConfiguration {
     @Bean
     public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
             final MultiUserProperties multiUserProperties) {
-        final Map<String, List<String>> usersToPermissions = multiUserProperties.getUsers().stream() //
-                .collect(Collectors.toMap(User::getUsername, User::getPermissions));
-
-        usersToPermissions.put(securityProperties.getUser().getName(), securityProperties.getUser().getRoles());
-
+        final List<User> multiUsers = multiUserProperties.getUsers();
+        final Map<String, List<String>> usersToPermissions;
+        if (!CollectionUtils.isEmpty(multiUsers)) {
+            usersToPermissions = multiUsers.stream().collect(Collectors.toMap(User::getUsername, User::getPermissions));
+        } else {
+            usersToPermissions = Collections.singletonMap(securityProperties.getUser().getName(),
+                    securityProperties.getUser().getRoles());
+        }
         return new InMemoryUserAuthoritiesResolver(usersToPermissions);
     }
 
