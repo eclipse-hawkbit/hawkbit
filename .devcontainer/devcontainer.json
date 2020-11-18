@@ -3,13 +3,8 @@
     "build": {
         "dockerfile": "Dockerfile",
         "args": {
-            // Update the VARIANT arg to pick a Java version: 11, 15
-            "VARIANT": "11",
-            // Options
-            "INSTALL_MAVEN": "true",
-            "INSTALL_GRADLE": "false",
-            "INSTALL_NODE": "false",
-            "NODE_VERSION": "lts/*"
+            // Update the VARIANT arg to pick a Java version: 8, 11, 15
+            "VARIANT": "8"
         }
     },
     // Set *default* container specific settings.json values on container create.
