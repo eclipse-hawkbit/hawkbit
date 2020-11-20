@@ -525,8 +525,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final Long distributionSetId, final Long rolloutGroupParentId) {
         try {
             return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId,
-                    status -> startScheduledActions(rolloutId, distributionSetId, rolloutGroupParentId,
-                            JpaDeploymentManagement.ACTION_PAGE_LIMIT));
+                    status -> startScheduledActions(rolloutId, distributionSetId, rolloutGroupParentId));
         } catch (final TransactionExecutionException e) {
             LOG.error("Caught exception in startScheduledActions-{} during "
                     + "startScheduledActionsByRolloutGroupParentInNewTransaction", rolloutId, e);
@@ -535,9 +534,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Long startScheduledActions(final Long rolloutId, final Long distributionSetId,
-            final Long rolloutGroupParentId, final int limit) {
+            final Long rolloutGroupParentId) {
         final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
-                rolloutGroupParentId, limit);
+                rolloutGroupParentId);
 
         if (rolloutGroupActions.getContent().isEmpty()) {
             return 0L;
@@ -556,9 +555,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
-            final Long rolloutGroupParentId, final int limit) {
+            final Long rolloutGroupParentId) {
 
-        final PageRequest pageRequest = PageRequest.of(0, limit);
+        final PageRequest pageRequest = PageRequest.of(0, ACTION_PAGE_LIMIT);
         if (rolloutGroupParentId == null) {
             return actionRepository.findByRolloutIdAndRolloutGroupParentIsNullAndStatus(pageRequest, rolloutId,
                     Action.Status.SCHEDULED);
