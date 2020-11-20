@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigPolling;
 import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
@@ -135,15 +134,12 @@ public class PollingConfigurationView extends BaseConfigurationView<ProxySystemC
     protected ProxySystemConfigPolling populateSystemConfig() {
         ProxySystemConfigPolling configBean = new ProxySystemConfigPolling();
         final TenantConfigurationValue<String> pollingTimeConfValue = getTenantConfigurationManagement()
-                .getConfigurationValue(TenantConfigurationProperties.TenantConfigurationKey.POLLING_TIME_INTERVAL,
-                        String.class);
+                .getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL, String.class);
         configBean.setPollingTime(!pollingTimeConfValue.isGlobal());
         configBean.setPollingTimeDuration(DurationHelper.formattedStringToDuration(pollingTimeConfValue.getValue()));
 
         final TenantConfigurationValue<String> overdueTimeConfValue = getTenantConfigurationManagement()
-                .getConfigurationValue(
-                        TenantConfigurationProperties.TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL,
-                        String.class);
+                .getConfigurationValue(TenantConfigurationKey.POLLING_OVERDUE_TIME_INTERVAL, String.class);
         configBean.setPollingOverdue(!overdueTimeConfValue.isGlobal());
         configBean.setPollingOverdueDuration(DurationHelper.formattedStringToDuration(overdueTimeConfValue.getValue()));
 

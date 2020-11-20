@@ -54,8 +54,7 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     private final UINotification uINotification;
 
     private final List<BaseConfigurationView<? extends ProxySystemConfigWindow>> autowiredConfigurationViews;
-    private final List<BaseConfigurationView<? extends ProxySystemConfigWindow>> filteredConfigurationViews = Lists
-            .newArrayList();
+    private List<BaseConfigurationView<? extends ProxySystemConfigWindow>> filteredConfigurationViews;
 
     private Button saveConfigurationBtn;
     private Button undoConfigurationBtn;
@@ -64,7 +63,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
 
     @Autowired
     TenantConfigurationDashboardView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final UINotification uINotification, final List<BaseConfigurationView<? extends ProxySystemConfigWindow>> configurationViews) {
+            final UINotification uINotification,
+            final List<BaseConfigurationView<? extends ProxySystemConfigWindow>> configurationViews) {
         this.i18n = i18n;
         this.uiProperties = uiProperties;
         this.uINotification = uINotification;
@@ -77,8 +77,8 @@ public class TenantConfigurationDashboardView extends CustomComponent implements
     @PostConstruct
     public void init() {
         // filter the autowired views
-        filteredConfigurationViews.addAll(autowiredConfigurationViews.stream().filter(c -> c.getComponentCount() > 0)
-                .filter(ConfigurationGroup::show).collect(Collectors.toList()));
+        filteredConfigurationViews = autowiredConfigurationViews.stream().filter(c -> c.getComponentCount() > 0)
+                .filter(ConfigurationGroup::show).collect(Collectors.toList());
         // get and add the binders
         filteredConfigurationViews.forEach(entry -> binders.add(entry.getBinder()));
 

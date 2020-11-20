@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRepository;
@@ -67,7 +67,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
     private CheckBox multiAssignmentsCheckBox;
 
     RepositoryConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-                                final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement, final SecurityTokenGenerator securityTokenGenerator) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
+            final SecurityTokenGenerator securityTokenGenerator) {
         super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
         this.i18n = i18n;
         this.uiProperties = uiProperties;
@@ -117,7 +118,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         multiAssignmentsCheckBox.addValueChangeListener(event -> {
             actionAutoCloseCheckBox.setEnabled(!event.getValue());
             actionAutocloseConfigurationItem.setEnabled(!event.getValue());
-            if (Boolean.TRUE.equals(event.getValue())) {
+            if (event.getValue()) {
                 multiAssignmentsConfigurationItem.showSettings();
             } else {
                 multiAssignmentsConfigurationItem.hideSettings();
@@ -131,7 +132,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
                 ProxySystemConfigRepository::isActionAutocleanup, ProxySystemConfigRepository::setActionAutocleanup);
         actionAutoCleanupCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
         actionAutoCleanupCheckBox.addValueChangeListener(event -> {
-            if (Boolean.TRUE.equals(event.getValue())) {
+            if (event.getValue()) {
                 actionAutocleanupConfigurationItem.showSettings();
             } else {
                 actionAutocleanupConfigurationItem.hideSettings();
@@ -160,22 +161,21 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
 
     @Override
     public void save() {
-        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ENABLED,
-                getBinderBean().isActionAutocleanup());
+        writeConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED, getBinderBean().isActionAutocleanup());
         if (getBinderBean().isActionAutocleanup()) {
             writeConfigOption(ACTION_CLEANUP_ACTION_STATUS, getBinderBean().getActionCleanupStatus().getStatus()
                     .stream().map(Action.Status::name).collect(Collectors.joining(",")));
 
-            writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
+            writeConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
                     TimeUnit.DAYS.toMillis(Long.parseLong(getBinderBean().getActionExpiryDays())));
         }
-        if (!readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
-            writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED,
+        if (!readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
+            writeConfigOption(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED,
                     getBinderBean().isActionAutoclose());
         }
         if (getBinderBean().isMultiAssignments()
-                && !readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
-            writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, getBinderBean().isMultiAssignments());
+                && !readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
+            writeConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, getBinderBean().isMultiAssignments());
             this.disableMultipleAssignmentOption();
         }
     }
@@ -183,12 +183,9 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
     @Override
     protected ProxySystemConfigRepository populateSystemConfig() {
         final ProxySystemConfigRepository configBean = new ProxySystemConfigRepository();
-        configBean.setActionAutoclose(readConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED));
-        configBean.setMultiAssignments(
-                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED));
-        configBean.setActionAutocleanup(
-                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ENABLED));
+        configBean.setActionAutoclose(readConfigOption(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED));
+        configBean.setMultiAssignments(readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED));
+        configBean.setActionAutocleanup(readConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED));
         configBean.setActionCleanupStatus(getActionStatusOption());
         configBean.setActionExpiryDays(String.valueOf(getActionExpiry()));
         return configBean;
@@ -197,6 +194,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
     private long getActionExpiry() {
         return TimeUnit.MILLISECONDS.toDays(readConfigValue(ACTION_CLEANUP_ACTION_EXPIRY, Long.class).getValue());
     }
+
     private ActionAutoCleanupConfigurationItem.ActionStatusOption getActionStatusOption() {
         final Set<Action.Status> actionStatus = getActionStatus();
         final Collection<ActionAutoCleanupConfigurationItem.ActionStatusOption> actionStatusOptions = ActionAutoCleanupConfigurationItem

@@ -34,11 +34,11 @@ public class TenantConfigurationAutoConfiguration {
     @Bean
     @ViewScope
     @Order(value = 1)
-    DefaultDistributionSetTypeLayout defaultDistributionSetTypeLayout(final VaadinMessageSource i18n,
+    DefaultDistributionSetTypeView defaultDistributionSetTypeLayout(final VaadinMessageSource i18n,
             final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
             final SecurityTokenGenerator securityTokenGenerator, final SpPermissionChecker permissionCheckerChecker,
             final DistributionSetTypeManagement distributionSetTypeManagement) {
-        return new DefaultDistributionSetTypeLayout(i18n, tenantConfigurationManagement, systemManagement,
+        return new DefaultDistributionSetTypeView(i18n, tenantConfigurationManagement, systemManagement,
                 securityTokenGenerator, permissionCheckerChecker, distributionSetTypeManagement);
     }
 

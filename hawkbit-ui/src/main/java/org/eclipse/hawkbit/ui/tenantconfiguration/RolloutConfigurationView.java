@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRollout;
@@ -90,15 +90,13 @@ public class RolloutConfigurationView extends BaseConfigurationView<ProxySystemC
     @Override
     protected ProxySystemConfigRollout populateSystemConfig() {
         ProxySystemConfigRollout configBean = new ProxySystemConfigRollout();
-        configBean.setRolloutApproval(
-                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED));
+        configBean.setRolloutApproval(readConfigOption(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED));
         return configBean;
     }
 
     @Override
     public void save() {
-        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED,
-                getBinderBean().isRolloutApproval());
+        writeConfigOption(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, getBinderBean().isRolloutApproval());
     }
 
 }

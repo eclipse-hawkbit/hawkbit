@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
-import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigAuthentication;
@@ -161,47 +161,39 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
 
     @Override
     public void save() {
-        writeConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED,
+        writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED,
                 getBinderBean().isTargetSecToken());
-        writeConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED,
+        writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED,
                 getBinderBean().isGatewaySecToken());
-        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
+        writeConfigOption(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 getBinderBean().isDownloadAnonymous());
 
         if (getBinderBean().isGatewaySecToken()) {
-            writeConfigOption(
-                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+            writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
                     getBinderBean().getGatewaySecurityToken());
         }
 
-        writeConfigOption(TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED,
+        writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED,
                 getBinderBean().isCertificateAuth());
         if (getBinderBean().isCertificateAuth()) {
             final String value = getBinderBean().getCaRootAuthority() != null ? getBinderBean().getCaRootAuthority()
                     : "";
-            writeConfigOption(
-                    TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME,
-                    value);
+            writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, value);
         }
     }
 
     @Override
     protected ProxySystemConfigAuthentication populateSystemConfig() {
         final ProxySystemConfigAuthentication configBean = new ProxySystemConfigAuthentication();
-        configBean.setCertificateAuth(readConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED));
-        configBean.setTargetSecToken(readConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED));
-        configBean.setGatewaySecToken(readConfigOption(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED));
-        configBean.setDownloadAnonymous(
-                readConfigOption(TenantConfigurationProperties.TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED));
+        configBean.setCertificateAuth(readConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED));
+        configBean.setTargetSecToken(
+                readConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED));
+        configBean.setGatewaySecToken(
+                readConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED));
+        configBean.setDownloadAnonymous(readConfigOption(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED));
 
         String securityToken = getTenantConfigurationManagement().getConfigurationValue(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
-                String.class).getValue();
+                TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
         if (StringUtils.isEmpty(securityToken)) {
             securityToken = getSecurityTokenGenerator().generateToken();
         }
@@ -212,9 +204,9 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
     }
 
     private String getCaRootAuthorityValue() {
-        return getTenantConfigurationManagement().getConfigurationValue(
-                TenantConfigurationProperties.TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME,
-                String.class).getValue();
+        return getTenantConfigurationManagement()
+                .getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class)
+                .getValue();
     }
 
 }

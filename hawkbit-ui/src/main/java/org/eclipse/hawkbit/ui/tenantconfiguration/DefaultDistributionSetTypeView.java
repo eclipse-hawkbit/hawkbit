@@ -36,7 +36,7 @@ import javax.annotation.PostConstruct;
 /**
  * Default DistributionSet Panel.
  */
-public class DefaultDistributionSetTypeLayout extends BaseConfigurationView<ProxySystemConfigDsType> {
+public class DefaultDistributionSetTypeView extends BaseConfigurationView<ProxySystemConfigDsType> {
 
     private static final long serialVersionUID = 1L;
 
@@ -48,7 +48,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView<Prox
     private final transient SystemConfigWindowLayoutComponentBuilder builder;
     private Label changeIcon;
 
-    DefaultDistributionSetTypeLayout(final VaadinMessageSource i18n,
+    DefaultDistributionSetTypeView(final VaadinMessageSource i18n,
             final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
             final SecurityTokenGenerator securityTokenGenerator, final SpPermissionChecker permissionChecker,
             final DistributionSetTypeManagement dsTypeManagement) {
@@ -113,7 +113,7 @@ public class DefaultDistributionSetTypeLayout extends BaseConfigurationView<Prox
     /**
      * Method that is called when combobox event is performed.
      *
-     * @param event
+     * @param event ValueChangeEvent
      */
     private void selectDistributionSetTypeValue(final HasValue.ValueChangeEvent<ProxyTypeInfo> event) {
         changeIcon.setVisible(!event.getValue().getId().equals(currentDefaultDistSetTypeId));
