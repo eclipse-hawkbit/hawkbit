@@ -24,10 +24,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+/**
+ * Enables UI components for the Tenant Configuration view
+ */
 @Configuration
 @ConditionalOnClass(MgmtUiConfiguration.class)
 public class TenantConfigurationAutoConfiguration {
-
 
     @Bean
     @ViewScope

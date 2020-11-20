@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
-import java.io.Serializable;
-
-public class ProxySystemConfigDsType extends ProxySystemConfigWindow implements Serializable {
+/**
+ * Proxy for the DistributionSetType view of system config window
+ */
+public class ProxySystemConfigDsType extends ProxySystemConfigWindow {
     private static final long serialVersionUID = 1L;
 
     private ProxyTypeInfo dsTypeInfo;

@@ -10,9 +10,10 @@ package org.eclipse.hawkbit.ui.common.data.proxies;
 
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCleanupConfigurationItem;
 
-import java.io.Serializable;
-
-public class ProxySystemConfigRepository extends ProxySystemConfigWindow implements Serializable {
+/**
+ * Proxy for the Repository view of system config window
+ */
+public class ProxySystemConfigRepository extends ProxySystemConfigWindow {
     private static final long serialVersionUID = 1L;
 
     private boolean actionAutoclose;

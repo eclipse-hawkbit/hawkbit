@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
-import java.io.Serializable;
-
-public class ProxySystemConfigAuthentication extends ProxySystemConfigWindow implements Serializable {
+/**
+ * Proxy for the Authentication view of system config window
+ */
+public class ProxySystemConfigAuthentication extends ProxySystemConfigWindow {
     private static final long serialVersionUID = 1L;
 
     private Long caRootAuthorityId;

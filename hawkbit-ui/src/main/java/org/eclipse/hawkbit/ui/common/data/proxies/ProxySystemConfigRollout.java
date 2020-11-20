@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
-import java.io.Serializable;
-
-public class ProxySystemConfigRollout extends ProxySystemConfigWindow implements Serializable {
+/**
+ * Proxy for the Rollout view of system config window
+ */
+public class ProxySystemConfigRollout extends ProxySystemConfigWindow {
     private static final long serialVersionUID = 1L;
 
     private boolean rolloutApproval;

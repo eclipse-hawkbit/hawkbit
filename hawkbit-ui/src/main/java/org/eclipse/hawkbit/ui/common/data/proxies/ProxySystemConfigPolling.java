@@ -8,10 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
-import java.io.Serializable;
 import java.time.Duration;
 
-public class ProxySystemConfigPolling extends ProxySystemConfigWindow implements Serializable {
+/**
+ * Proxy for the Authentication view of system config window
+ */
+public class ProxySystemConfigPolling extends ProxySystemConfigWindow {
     private static final long serialVersionUID = 1L;
 
     private boolean pollingOverdue;
