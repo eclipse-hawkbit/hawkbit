@@ -36,10 +36,10 @@ public class TenantConfigurationAutoConfiguration {
     @Order(value = 1)
     DefaultDistributionSetTypeView defaultDistributionSetTypeLayout(final VaadinMessageSource i18n,
             final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator, final SpPermissionChecker permissionCheckerChecker,
+            final SpPermissionChecker permissionCheckerChecker,
             final DistributionSetTypeManagement distributionSetTypeManagement) {
         return new DefaultDistributionSetTypeView(i18n, tenantConfigurationManagement, systemManagement,
-                securityTokenGenerator, permissionCheckerChecker, distributionSetTypeManagement);
+                permissionCheckerChecker, distributionSetTypeManagement);
     }
 
     @Bean
@@ -47,10 +47,8 @@ public class TenantConfigurationAutoConfiguration {
     @ViewScope
     @Order(value = 2)
     RepositoryConfigurationView repositoryConfigurationView(final VaadinMessageSource i18n,
-            final UiProperties uiProperties, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemManagement systemManagement, final SecurityTokenGenerator securityTokenGenerator) {
-        return new RepositoryConfigurationView(i18n, uiProperties, tenantConfigurationManagement, systemManagement,
-                securityTokenGenerator);
+            final UiProperties uiProperties, final TenantConfigurationManagement tenantConfigurationManagement) {
+        return new RepositoryConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
     }
 
     @Bean
@@ -58,10 +56,8 @@ public class TenantConfigurationAutoConfiguration {
     @ViewScope
     @Order(value = 3)
     RolloutConfigurationView rolloutConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        return new RolloutConfigurationView(i18n, uiProperties, tenantConfigurationManagement, systemManagement,
-                securityTokenGenerator);
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        return new RolloutConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
     }
 
     @Bean
@@ -70,8 +66,8 @@ public class TenantConfigurationAutoConfiguration {
     @Order(value = 4)
     AuthenticationConfigurationView authConfigurationView(final VaadinMessageSource i18n,
             final UiProperties uiProperties, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemManagement systemManagement, final SecurityTokenGenerator securityTokenGenerator) {
-        return new AuthenticationConfigurationView(i18n, uiProperties, tenantConfigurationManagement, systemManagement,
+            final SecurityTokenGenerator securityTokenGenerator) {
+        return new AuthenticationConfigurationView(i18n, uiProperties, tenantConfigurationManagement,
                 securityTokenGenerator);
     }
 
@@ -81,10 +77,8 @@ public class TenantConfigurationAutoConfiguration {
     @Order(value = 5)
     PollingConfigurationView pollingConfigurationView(final VaadinMessageSource i18n,
             final ControllerPollProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        return new PollingConfigurationView(i18n, uiProperties, tenantConfigurationManagement, systemManagement,
-                securityTokenGenerator);
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        return new PollingConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
     }
 
 }

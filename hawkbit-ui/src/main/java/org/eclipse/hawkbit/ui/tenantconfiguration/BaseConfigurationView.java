@@ -14,11 +14,10 @@ import java.util.List;
 
 import com.vaadin.data.Binder;
 import com.vaadin.ui.CustomComponent;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.springframework.beans.factory.InitializingBean;
 
 /**
  * Base class for all configuration views. This class implements the logic for
@@ -26,22 +25,21 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
  * 
  */
 public abstract class BaseConfigurationView<B extends ProxySystemConfigWindow> extends CustomComponent
-        implements ConfigurationGroup {
+        implements ConfigurationGroup, InitializingBean {
 
     private static final long serialVersionUID = 1L;
 
     private final List<ConfigurationItemChangeListener> configurationChangeListeners = new ArrayList<>();
     private final transient TenantConfigurationManagement tenantConfigurationManagement;
-    private final transient SecurityTokenGenerator securityTokenGenerator;
-    private final transient SystemManagement systemManagement;
     private final Binder<B> binder;
 
-    public BaseConfigurationView(final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemManagement systemManagement, final SecurityTokenGenerator securityTokenGenerator) {
+    public BaseConfigurationView(final TenantConfigurationManagement tenantConfigurationManagement) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.systemManagement = systemManagement;
-        this.securityTokenGenerator = securityTokenGenerator;
         binder = new Binder<>();
+    }
+
+    @Override
+    public void afterPropertiesSet() {
         binder.setBean(populateSystemConfig());
     }
 
@@ -81,14 +79,6 @@ public abstract class BaseConfigurationView<B extends ProxySystemConfigWindow> e
 
     protected TenantConfigurationManagement getTenantConfigurationManagement() {
         return tenantConfigurationManagement;
-    }
-
-    protected SystemManagement getSystemManagement() {
-        return systemManagement;
-    }
-
-    protected SecurityTokenGenerator getSecurityTokenGenerator() {
-        return securityTokenGenerator;
     }
 
     protected Binder<B> getBinder() {

@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
@@ -43,9 +41,8 @@ public class RolloutConfigurationView extends BaseConfigurationView<ProxySystemC
     private final ApprovalConfigurationItem approvalConfigurationItem;
 
     RolloutConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(tenantConfigurationManagement);
         this.i18n = i18n;
         this.approvalConfigurationItem = new ApprovalConfigurationItem(i18n);
         this.uiProperties = uiProperties;

@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
@@ -32,7 +30,6 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,29 +52,30 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
     private static final long serialVersionUID = 1L;
 
     private final VaadinMessageSource i18n;
-
     private final UiProperties uiProperties;
 
-    private final ActionAutoCloseConfigurationItem actionAutocloseConfigurationItem;
-
-    private final ActionAutoCleanupConfigurationItem actionAutocleanupConfigurationItem;
-
-    private final MultiAssignmentsConfigurationItem multiAssignmentsConfigurationItem;
+    private ActionAutoCloseConfigurationItem actionAutocloseConfigurationItem;
+    private ActionAutoCleanupConfigurationItem actionAutocleanupConfigurationItem;
+    private MultiAssignmentsConfigurationItem multiAssignmentsConfigurationItem;
 
     private CheckBox multiAssignmentsCheckBox;
 
     RepositoryConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(tenantConfigurationManagement);
         this.i18n = i18n;
         this.uiProperties = uiProperties;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
         this.actionAutocloseConfigurationItem = new ActionAutoCloseConfigurationItem(i18n);
         this.actionAutocleanupConfigurationItem = new ActionAutoCleanupConfigurationItem(getBinder(), i18n);
         this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(i18n, getBinder());
+        init();
     }
 
-    @PostConstruct
     private void init() {
 
         final Panel rootPanel = new Panel();

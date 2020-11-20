@@ -17,10 +17,8 @@ import java.time.ZoneOffset;
 import java.util.Date;
 
 import org.eclipse.hawkbit.ControllerPollProperties;
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
-import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigPolling;
@@ -49,9 +47,8 @@ public class PollingConfigurationView extends BaseConfigurationView<ProxySystemC
     private final Binder<ProxySystemConfigPolling> binder;
 
     PollingConfigurationView(final VaadinMessageSource i18n, final ControllerPollProperties controllerPollProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
-            final SecurityTokenGenerator securityTokenGenerator) {
-        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
+            final TenantConfigurationManagement tenantConfigurationManagement) {
+        super(tenantConfigurationManagement);
         this.controllerPollProperties = controllerPollProperties;
         this.i18n = i18n;
         this.binder = getBinder();

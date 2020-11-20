@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration;
 
-import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -32,8 +31,6 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-
 /**
  * View to configure the authentication mode.
  */
@@ -45,18 +42,26 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
 
     private final VaadinMessageSource i18n;
 
-    private final CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
-    private final TargetSecurityTokenAuthenticationConfigurationItem targetSecurityTokenAuthenticationConfigurationItem;
-    private final GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
-    private final AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
+    private final transient SecurityTokenGenerator securityTokenGenerator;
+    private CertificateAuthenticationConfigurationItem certificateAuthenticationConfigurationItem;
+    private TargetSecurityTokenAuthenticationConfigurationItem targetSecurityTokenAuthenticationConfigurationItem;
+    private GatewaySecurityTokenAuthenticationConfigurationItem gatewaySecurityTokenAuthenticationConfigurationItem;
+    private AnonymousDownloadAuthenticationConfigurationItem anonymousDownloadAuthenticationConfigurationItem;
 
     private final UiProperties uiProperties;
 
     public AuthenticationConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement, final SystemManagement systemManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement,
             final SecurityTokenGenerator securityTokenGenerator) {
-        super(tenantConfigurationManagement, systemManagement, securityTokenGenerator);
+        super(tenantConfigurationManagement);
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.securityTokenGenerator = securityTokenGenerator;
+    }
+
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
         this.targetSecurityTokenAuthenticationConfigurationItem = new TargetSecurityTokenAuthenticationConfigurationItem(
                 i18n);
         this.certificateAuthenticationConfigurationItem = new CertificateAuthenticationConfigurationItem(i18n,
@@ -65,10 +70,9 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
                 i18n, securityTokenGenerator, getBinder());
         this.anonymousDownloadAuthenticationConfigurationItem = new AnonymousDownloadAuthenticationConfigurationItem(
                 i18n);
-        this.uiProperties = uiProperties;
+        init();
     }
 
-    @PostConstruct
     private void init() {
 
         final Panel rootPanel = new Panel();
@@ -195,7 +199,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
         String securityToken = getTenantConfigurationManagement().getConfigurationValue(
                 TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue();
         if (StringUtils.isEmpty(securityToken)) {
-            securityToken = getSecurityTokenGenerator().generateToken();
+            securityToken = securityTokenGenerator.generateToken();
         }
         configBean.setGatewaySecurityToken(securityToken);
         configBean.setCaRootAuthority(getCaRootAuthorityValue());
