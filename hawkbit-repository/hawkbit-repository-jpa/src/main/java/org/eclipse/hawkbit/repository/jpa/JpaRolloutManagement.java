@@ -99,7 +99,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -416,30 +415,39 @@ public class JpaRolloutManagement implements RolloutManagement {
             return rolloutGroupRepository.save(group);
         }
 
-        try {
-
-            long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
-
-            do {
-                // Add up to TRANSACTION_TARGETS of the left targets
-                // In case a TransactionException is thrown this loop aborts
-                targetsLeftToAdd -= assignTargetsToGroupInNewTransaction(rollout, group, groupTargetFilter,
-                        Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
-            } while (targetsLeftToAdd > 0);
-
+        final boolean isSuccessfulAssignment = assignTargetsToGroup(rollout, group, groupTargetFilter, expectedInGroup,
+                currentlyInGroup);
+        if (!isSuccessfulAssignment) {
+            LOGGER.warn("Transaction assigning Targets to RolloutGroup {} failed", group.getId());
+            return group;
+        } else {
             group.setStatus(RolloutGroupStatus.READY);
             group.setTotalTargets(
                     DeploymentHelper.runInNewTransaction(txManager, "countRolloutTargetGroupByRolloutGroup",
                             count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).orElse(0L).intValue());
             return rolloutGroupRepository.save(group);
-
-        } catch (final TransactionException e) {
-            LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
-            return group;
         }
     }
 
-    private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
+    private boolean assignTargetsToGroup(final JpaRollout rollout, final JpaRolloutGroup group,
+            final String groupTargetFilter, final long expectedInGroup, final long currentlyInGroup) {
+        long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
+
+        do {
+            // Add up to TRANSACTION_TARGETS of the left targets
+            // In case a TransactionException is thrown the assignmentResult would be empty, and the loop aborts
+            final Optional<Long> assignmentResult = assignTargetsToGroupInNewTransaction(rollout, group,
+                    groupTargetFilter, Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
+            if (!assignmentResult.isPresent()) {
+                return false;
+            }
+            targetsLeftToAdd -= assignmentResult.get();
+        } while (targetsLeftToAdd > 0);
+
+        return true;
+    }
+
+    private Optional<Long> assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
             final String targetFilter, final long limit) {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
@@ -452,7 +460,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             createAssignmentOfTargetsToGroup(targets, group);
 
             return Long.valueOf(targets.getNumberOfElements());
-        }).orElse(0L);
+        });
     }
 
     private void createAssignmentOfTargetsToGroup(final Page<Target> targets, final RolloutGroup group) {
