@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.jpa.TransactionExecutionException;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -123,8 +122,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
             } while (count == PAGE_SIZE);
 
-        } catch (PersistenceException | AbstractServerRtException | TransactionExecutionException e) {
-            LOGGER.error("Error during auto assign check of target filter query " + targetFilterQuery.getId(), e);
+        } catch (PersistenceException | AbstractServerRtException e) {
+            LOGGER.error("Error during auto assign check of target filter query {}", targetFilterQuery.getId(), e);
         }
 
     }
@@ -138,8 +137,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      *            distribution set id to assign
      * @return count of targets
      */
-    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId)
-            throws TransactionExecutionException {
+    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId) {
         final String actionMessage = String.format(ACTION_MESSAGE, targetFilterQuery.getName());
 
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
@@ -153,7 +151,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                                 deploymentRequests, actionMessage);
                     }
                     return count;
-                });
+                }).orElse(0);
     }
 
     private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {

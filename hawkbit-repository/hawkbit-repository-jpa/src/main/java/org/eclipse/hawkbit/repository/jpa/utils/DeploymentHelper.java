@@ -9,18 +9,20 @@
 package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.TargetRepository;
-import org.eclipse.hawkbit.repository.jpa.TransactionExecutionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -33,6 +35,8 @@ import org.springframework.transaction.support.TransactionTemplate;
  *
  */
 public final class DeploymentHelper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentHelper.class);
 
     private DeploymentHelper() {
         // utility class
@@ -83,9 +87,8 @@ public final class DeploymentHelper {
      *
      * @return the result of the action
      */
-    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
-            final String transactionName, @NotNull final TransactionCallback<T> action)
-            throws TransactionExecutionException {
+    public static <T> Optional<T> runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
+            final String transactionName, @NotNull final TransactionCallback<T> action) {
         return runInNewTransaction(txManager, transactionName, Isolation.DEFAULT.value(), action);
     }
 
@@ -103,9 +106,8 @@ public final class DeploymentHelper {
      *
      * @return the result of the action
      */
-    public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
-            final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action) throws
-            TransactionExecutionException {
+    public static <T> Optional<T> runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
+            final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action) {
         final DefaultTransactionDefinition def = new DefaultTransactionDefinition();
         def.setName(transactionName);
         def.setReadOnly(false);
@@ -114,9 +116,10 @@ public final class DeploymentHelper {
         final TransactionTemplate transactionTemplate = new TransactionTemplate(txManager, def);
 
         try {
-            return transactionTemplate.execute(action);
+            return Optional.of(transactionTemplate.execute(action));
         } catch (final Exception e) {
-            throw new TransactionExecutionException("Caught exception during transaction execution!", e);
+            LOGGER.error("Caught exception during transaction execution, transactionName: {}!", transactionName, e);
+            return Optional.empty();
         }
     }
 }
