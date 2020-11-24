@@ -99,9 +99,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -113,6 +115,7 @@ import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
+import org.springframework.jdbc.datasource.IsolationLevelDataSourceAdapter;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
@@ -122,9 +125,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
 import com.google.common.collect.Maps;
+import com.zaxxer.hikari.HikariDataSource;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -148,6 +153,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
             final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
+    }
+
+    @Configuration
+    static class IsolationLevelDataSourceConfig {
+
+        @Bean
+        @ConfigurationProperties(prefix = "spring.datasource.hikari")
+        IsolationLevelDataSourceAdapter dataSource(final DataSourceProperties properties) {
+            final HikariDataSource dataSource = properties.initializeDataSourceBuilder().type(HikariDataSource.class)
+                    .build();
+            if (StringUtils.hasText(properties.getName())) {
+                dataSource.setPoolName(properties.getName());
+            }
+
+            final IsolationLevelDataSourceAdapter adapter = new IsolationLevelDataSourceAdapter();
+            adapter.setTargetDataSource(dataSource);
+            return adapter;
+        }
     }
 
     @Bean
@@ -760,8 +783,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
-                                         final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-                                         final PlatformTransactionManager transactionManager) {
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
