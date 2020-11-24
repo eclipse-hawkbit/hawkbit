@@ -524,35 +524,25 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
             final Long distributionSetId, final Long rolloutGroupParentId) {
-        try {
-            return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId,
-                    status -> startScheduledActions(rolloutId, distributionSetId, rolloutGroupParentId));
-        } catch (final TransactionExecutionException e) {
-            LOG.error("Caught exception in startScheduledActions-{} during "
-                    + "startScheduledActionsByRolloutGroupParentInNewTransaction", rolloutId, e);
-            return 0L;
-        }
-    }
+        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
+            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
+                    rolloutGroupParentId);
 
-    private Long startScheduledActions(final Long rolloutId, final Long distributionSetId,
-            final Long rolloutGroupParentId) {
-        final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
-                rolloutGroupParentId);
+            if (rolloutGroupActions.getContent().isEmpty()) {
+                return 0L;
+            }
 
-        if (rolloutGroupActions.getContent().isEmpty()) {
-            return 0L;
-        }
+            final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
+                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
+                    .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
+                    .filter(Objects::nonNull).collect(Collectors.toList());
 
-        final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
-                .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
-                .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
-                .filter(Objects::nonNull).collect(Collectors.toList());
+            if (!targetAssignments.isEmpty()) {
+                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
+            }
 
-        if (!targetAssignments.isEmpty()) {
-            onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
-        }
-
-        return rolloutGroupActions.getTotalElements();
+            return rolloutGroupActions.getTotalElements();
+        }).orElse(0L);
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,

@@ -232,7 +232,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-                }), tenant);
+                }), tenant).orElse(null);
     }
 
     @Override
