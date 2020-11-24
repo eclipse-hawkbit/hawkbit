@@ -76,6 +76,7 @@ public class SecurityAutoConfiguration {
      * @return an {@link InMemoryUserAuthoritiesResolver} bean
      */
     @Bean
+    @ConditionalOnMissingBean
     public UserAuthoritiesResolver inMemoryAuthoritiesResolver(final SecurityProperties securityProperties,
             final MultiUserProperties multiUserProperties) {
         final List<User> multiUsers = multiUserProperties.getUsers();
