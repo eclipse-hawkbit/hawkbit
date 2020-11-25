@@ -26,8 +26,6 @@ import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 
-import javax.annotation.PostConstruct;
-
 /**
  * Provides configuration of the RolloutManagement including enabling/disabling
  * of the approval workflow.
@@ -44,11 +42,16 @@ public class RolloutConfigurationView extends BaseConfigurationView<ProxySystemC
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(tenantConfigurationManagement);
         this.i18n = i18n;
-        this.approvalConfigurationItem = new ApprovalConfigurationItem(i18n);
         this.uiProperties = uiProperties;
+        this.approvalConfigurationItem = new ApprovalConfigurationItem(i18n);
     }
 
-    @PostConstruct
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        init();
+    }
+
     private void init() {
         final Panel rootPanel = new Panel();
         rootPanel.setSizeFull();

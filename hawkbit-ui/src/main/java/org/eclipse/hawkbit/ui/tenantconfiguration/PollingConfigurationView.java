@@ -26,12 +26,9 @@ import org.eclipse.hawkbit.ui.tenantconfiguration.polling.DurationConfigField;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.data.Binder;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
-
-import javax.annotation.PostConstruct;
 
 /**
  * View to configure the polling interval and the overdue time.
@@ -44,17 +41,20 @@ public class PollingConfigurationView extends BaseConfigurationView<ProxySystemC
 
     private final VaadinMessageSource i18n;
     private final ControllerPollProperties controllerPollProperties;
-    private final Binder<ProxySystemConfigPolling> binder;
 
     PollingConfigurationView(final VaadinMessageSource i18n, final ControllerPollProperties controllerPollProperties,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         super(tenantConfigurationManagement);
         this.controllerPollProperties = controllerPollProperties;
         this.i18n = i18n;
-        this.binder = getBinder();
     }
 
-    @PostConstruct
+    @Override
+    public void afterPropertiesSet() {
+        super.afterPropertiesSet();
+        init();
+    }
+
     private void init() {
 
         final Duration minDuration = DurationHelper
@@ -84,10 +84,10 @@ public class PollingConfigurationView extends BaseConfigurationView<ProxySystemC
                 .checkBoxTooltip(i18n.getMessage("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalPollTime).build();
 
-        binder.forField(fieldPollTime.getCheckBox()).bind(ProxySystemConfigPolling::isPollingTime,
+        getBinder().forField(fieldPollTime.getCheckBox()).bind(ProxySystemConfigPolling::isPollingTime,
                 ProxySystemConfigPolling::setPollingTime);
 
-        binder.forField(fieldPollTime.getDurationField())
+        getBinder().forField(fieldPollTime.getDurationField())
                 .withConverter(PollingConfigurationView::localDateTimeToDuration,
                         PollingConfigurationView::durationToLocalDateTime)
                 .bind(ProxySystemConfigPolling::getPollingTimeDuration,
@@ -100,10 +100,10 @@ public class PollingConfigurationView extends BaseConfigurationView<ProxySystemC
                 .caption(i18n.getMessage("configuration.polling.overduetime"))
                 .checkBoxTooltip(i18n.getMessage("configuration.polling.custom.value")).range(minDuration, maxDuration)
                 .globalDuration(globalOverdueTime).build();
-        binder.forField(fieldPollingOverdueTime.getCheckBox()).bind(ProxySystemConfigPolling::isPollingOverdue,
+        getBinder().forField(fieldPollingOverdueTime.getCheckBox()).bind(ProxySystemConfigPolling::isPollingOverdue,
                 ProxySystemConfigPolling::setPollingOverdue);
 
-        binder.forField(fieldPollingOverdueTime.getDurationField())
+        getBinder().forField(fieldPollingOverdueTime.getDurationField())
                 .withConverter(PollingConfigurationView::localDateTimeToDuration,
                         PollingConfigurationView::durationToLocalDateTime)
                 .bind(ProxySystemConfigPolling::getPollingOverdueDuration,
