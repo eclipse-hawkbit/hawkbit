@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -56,6 +57,9 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
+import java.util.Arrays;
+import java.util.List;
+
 @RunWith(SpringRunner.class)
 @Feature("Component Tests - Repository")
 @Story("RSQL search utility")
@@ -100,41 +104,44 @@ public class RSQLUtilityTest {
     private static final TenantConfigurationValue<String> TEST_POLLING_OVERDUE_TIME_INTERVAL = TenantConfigurationValue
             .<String> builder().value("00:07:37").build();
 
-    @Test(expected = RSQLParameterUnsupportedFieldException.class)
+    @Test
     @Description("Testing throwing exception in case of not allowed RSQL key")
     public void rsqlUnsupportedFieldExceptionTest(){
-        final String rsql = "wrongfield == abcd";
-        RSQLUtility.isValid(rsql);
-    }
+        final String rsql1 = "wrongfield == abcd";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(()-> RSQLUtility.isValid(rsql1, TestFieldEnum.class));
 
-    @Test(expected = RSQLParameterUnsupportedFieldException.class)
-    @Description("Testing exception in case of not allowed subkey")
-    public void rsqlUnsupportedSubkeyThrowException(){
-        final String rsql = "ASSIGNEDDS.unsupported == abcd and ASSIGNEDDS.version == 0123";
-        RSQLUtility.isValid(rsql);
+        final String rsql2 = "wrongfield == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity11 == 0123";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(()-> RSQLUtility.isValid(rsql2, TestFieldEnum.class));
     }
 
     @Test
-    @Description("Testing allowed RSQL keys based on TargetFields.class")
-    public void rsqlValidTargetFields(){
-        final String rsql1 = "ID == '0123' and NAME == abcd and DESCRIPTION == absd" +
-                " and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123" +
-                " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING" +
-                " and IPADDRESS == 0123 and LASTCONTROLLERREQUESTAT == 0123" +
-                " and tag == beta";
+    @Description("Testing exception in case of not allowed subkey")
+    public void rsqlUnsupportedSubkeyThrowException(){
+        final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(()-> RSQLUtility.isValid(rsql1, TestFieldEnum.class));
 
-        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql1));
+        final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(()-> RSQLUtility.isValid(rsql2, TestFieldEnum.class));
 
-        final String rsql2 = "ASSIGNEDDS.name == abcd and ASSIGNEDDS.version == 0123" +
-                " and INSTALLEDDS.name == abcd and INSTALLEDDS.version == 0123";
-        assertTrue(RSQLUtility.isValid(rsql2));
+        final String rsql3 = "TESTFIELD == abcd or TESTFIELD_WITH_SUB_ENTITIES.unsupported == 0123";
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(()-> RSQLUtility.isValid(rsql3, TestFieldEnum.class));
+    }
 
-        final String rsql3 = "ATTRIBUTE.subkey1 == test and ATTRIBUTE.subkey2 == test" +
-                " and METADATA.metakey1 == abcd and METADATA.metavalue2 == asdfg";
-        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql3));
+    @Test
+    @Description("Testing valid RSQL keys based on TestFieldEnum.class")
+    public void rsqlFieldValidation(){
+        final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
+        final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
+        final String rsql3 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123 and TESTFIELD == any";
 
-        final String rsql4 = "CREATEDAT =lt= ${NOW_TS} and LASTMODIFIEDAT =ge= ${OVERDUE_TS}";
-        assertTrue(RSQLUtility.isValid(rsql4));
+        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql1, TestFieldEnum.class));
+        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql2, TestFieldEnum.class));
+        assertTrue("All fields should be valid", RSQLUtility.isValid(rsql3, TestFieldEnum.class));
     }
 
     @Test
@@ -460,23 +467,33 @@ public class RSQLUtilityTest {
     }
 
     private enum TestFieldEnum implements FieldNameProvider {
-        TESTFIELD;
+        TESTFIELD("testfield"),
+        TESTFIELD_WITH_SUB_ENTITIES("testfieldWithSubEntities", "subentity11", "subentity22");
 
-        /*
-         * (non-Javadoc)
-         *
-         * @see
-         * org.eclipse.hawkbit.server.rest.resource.model.FieldNameProvider#
-         * getFieldName()
-         */
+        private final String fieldName;
+        private List<String> subEntityAttributes;
+
+        TestFieldEnum(final String fieldName){
+            this(fieldName,  new String[0]);
+        }
+
+        TestFieldEnum(final String fieldName, final String... subEntityAttributes) {
+            this.fieldName = fieldName;
+            this.subEntityAttributes = (Arrays.asList(subEntityAttributes));
+        }
+
         @Override
         public String getFieldName() {
-            return "testfield";
+            return this.fieldName;
+        }
+
+        @Override
+        public List<String> getSubEntityAttributes() {
+            return subEntityAttributes;
         }
     }
 
     private enum TestValueEnum {
         BUMLUX;
     }
-
 }
