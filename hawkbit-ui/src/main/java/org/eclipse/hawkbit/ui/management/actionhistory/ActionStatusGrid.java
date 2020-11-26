@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.actionhistory;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.ActionStatusToProxyActionStatusMapper;
@@ -25,8 +26,6 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * This grid presents the action states for a selected action.
@@ -44,16 +43,13 @@ public class ActionStatusGrid extends AbstractGrid<ProxyActionStatus, Long> {
     /**
      * Constructor.
      *
-     * @param i18n
-     *            i18n
-     * @param eventBus
-     *            eventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param deploymentManagement
      *            deploymentManagement
      */
-    protected ActionStatusGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final DeploymentManagement deploymentManagement) {
-        super(i18n, eventBus, null);
+    protected ActionStatusGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         setSelectionSupport(new SelectionSupport<ProxyActionStatus>(this, eventBus,
                 EventLayout.ACTION_HISTORY_STATUS_LIST, EventView.DEPLOYMENT, null, null, null));

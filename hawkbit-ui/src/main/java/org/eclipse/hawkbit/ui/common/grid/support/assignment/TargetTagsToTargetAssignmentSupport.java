@@ -15,50 +15,39 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Support for assigning target tags to target.
- * 
+ *
  */
 public class TargetTagsToTargetAssignmentSupport extends TagsAssignmentSupport<ProxyTarget, Target> {
     private final TargetManagement targetManagement;
-    private final UIEventBus eventBus;
-    private final SpPermissionChecker permChecker;
+    private final CommonUiDependencies uiDependencies;
 
     /**
      * Constructor for TargetTagsToTargetAssignmentSupport
      *
-     * @param notification
-     *            UINotification
-     * @param i18n
-     *            VaadinMessageSource
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
      */
-    public TargetTagsToTargetAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
-            final TargetManagement targetManagement, final UIEventBus eventBus, final SpPermissionChecker permChecker) {
-        super(notification, i18n);
+    public TargetTagsToTargetAssignmentSupport(final CommonUiDependencies uiDependencies,
+            final TargetManagement targetManagement) {
+        super(uiDependencies);
+        this.uiDependencies = uiDependencies;
 
         this.targetManagement = targetManagement;
-        this.eventBus = eventBus;
-        this.permChecker = permChecker;
     }
 
     @Override
     public List<String> getMissingPermissionsForDrop() {
-        return permChecker.hasUpdateTargetPermission() ? Collections.emptyList()
+        return uiDependencies.getPermChecker().hasUpdateTargetPermission() ? Collections.emptyList()
                 : Collections.singletonList(SpPermission.UPDATE_TARGET);
     }
 
@@ -74,7 +63,7 @@ public class TargetTagsToTargetAssignmentSupport extends TagsAssignmentSupport<P
 
     @Override
     protected void publishTagAssignmentEvent(final ProxyTarget targetItem) {
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+        uiDependencies.getEventBus().publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
                 EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class, targetItem.getId()));
     }
 }

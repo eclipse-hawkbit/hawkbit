@@ -6,17 +6,12 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.common.detailslayout;
+package org.eclipse.hawkbit.ui.common.distributionset;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractDetailsHeader;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsMetaDataWindowBuilder;
-import org.eclipse.hawkbit.ui.distributions.dstable.DsWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
@@ -33,23 +28,17 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     /**
      * Constructor for DistributionSetDetailsHeader
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsWindowBuilder
      *            DsWindowBuilder
      * @param dsMetaDataWindowBuilder
      *            DsMetaDataWindowBuilder
      */
-    public DistributionSetDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final UINotification uiNotification, final DsWindowBuilder dsWindowBuilder,
-            final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
-        super(i18n, permChecker, eventBus, uiNotification);
+    public DistributionSetDetailsHeader(final CommonUiDependencies uiDependencies,
+            final DsWindowBuilder dsWindowBuilder, final DsMetaDataWindowBuilder dsMetaDataWindowBuilder) {
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus(),
+                uiDependencies.getUiNotification());
 
         this.dsWindowBuilder = dsWindowBuilder;
         this.dsMetaDataWindowBuilder = dsMetaDataWindowBuilder;

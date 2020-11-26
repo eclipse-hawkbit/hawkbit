@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -13,7 +13,7 @@ import com.vaadin.data.Binder;
 /**
  * Layout for input validation
  */
-public abstract class ValidatableLayout {
+public class ValidatableLayout {
 
     protected ValidationStatus validationStatus;
     protected ValidationListener validationListener;
@@ -75,7 +75,7 @@ public abstract class ValidatableLayout {
     public interface ValidationListener {
         /**
          * Is called after user input
-         * 
+         *
          * @param validationStatus
          *            whether the input of the group rows is valid
          */

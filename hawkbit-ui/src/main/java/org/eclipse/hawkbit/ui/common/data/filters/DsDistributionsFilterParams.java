@@ -8,18 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.common.data.filters;
 
-import java.io.Serializable;
-
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetDistributionsStateDataProvider;
-import org.springframework.util.StringUtils;
 
 /**
  * Filter params for {@link DistributionSetDistributionsStateDataProvider}.
  */
-public class DsDistributionsFilterParams implements Serializable {
+public class DsDistributionsFilterParams extends DsFilterParams {
     private static final long serialVersionUID = 1L;
 
-    private String searchText;
     private Long dsTypeId;
 
     /**
@@ -31,34 +27,15 @@ public class DsDistributionsFilterParams implements Serializable {
 
     /**
      * Constructor.
-     * 
+     *
      * @param searchText
-     *          String
+     *            String
      * @param dsTypeId
-     *          Long
+     *            Long
      */
     public DsDistributionsFilterParams(final String searchText, final Long dsTypeId) {
-        this.searchText = searchText;
+        super(searchText);
         this.dsTypeId = dsTypeId;
-    }
-
-    /**
-     * Gets the searchText
-     *
-     * @return SearchText
-     */
-    public String getSearchText() {
-        return searchText;
-    }
-
-    /**
-     * Sets the SearchText
-     *
-     * @param searchText
-     *          String
-     */
-    public void setSearchText(final String searchText) {
-        this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
     }
 
     /**
@@ -72,7 +49,7 @@ public class DsDistributionsFilterParams implements Serializable {
      * Setter for DsTypeId
      *
      * @param dsTypeId
-     *          Long
+     *            Long
      */
     public void setDsTypeId(final Long dsTypeId) {
         this.dsTypeId = dsTypeId;

@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TagToProxyTagMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -25,9 +25,6 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Implementation of Target tag token.
@@ -43,23 +40,16 @@ public class TargetTagToken extends AbstractTagToken<ProxyTarget> {
     /**
      * Constructor for TargetTagToken
      *
-     * @param checker
-     *            SpPermissionChecker
-     * @param i18n
-     *            VaadinMessageSource
-     * @param uinotification
-     *            UINotification
-     * @param eventBus
-     *            UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagManagement
      *            TargetTagManagement
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetTagToken(final SpPermissionChecker checker, final VaadinMessageSource i18n,
-            final UINotification uinotification, final UIEventBus eventBus,
-            final TargetTagManagement targetTagManagement, final TargetManagement targetManagement) {
-        super(checker, i18n, uinotification, eventBus);
+    public TargetTagToken(final CommonUiDependencies uiDependencies, final TargetTagManagement targetTagManagement,
+            final TargetManagement targetManagement) {
+        super(uiDependencies);
 
         this.targetTagManagement = targetTagManagement;
         this.targetManagement = targetManagement;

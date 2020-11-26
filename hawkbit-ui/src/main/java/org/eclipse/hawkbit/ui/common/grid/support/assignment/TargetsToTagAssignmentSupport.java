@@ -18,19 +18,18 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Support for assigning the {@link ProxyTarget} items to {@link ProxyTag}.
- * 
+ *
  */
 public class TargetsToTagAssignmentSupport extends ToTagAssignmentSupport<ProxyTarget, Target> {
     private final TargetManagement targetManagement;
@@ -40,23 +39,16 @@ public class TargetsToTagAssignmentSupport extends ToTagAssignmentSupport<ProxyT
     /**
      * Constructor for TargetsToTagAssignmentSupport
      *
-     * @param notification
-     *            UINotification
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetsToTagAssignmentSupport(final UINotification notification, final VaadinMessageSource i18n,
-            final UIEventBus eventBus, final SpPermissionChecker permChecker, final TargetManagement targetManagement) {
-        super(notification, i18n);
+    public TargetsToTagAssignmentSupport(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement) {
+        super(uiDependencies.getUiNotification(), uiDependencies.getI18n());
 
-        this.eventBus = eventBus;
-        this.permChecker = permChecker;
+        this.eventBus = uiDependencies.getEventBus();
+        this.permChecker = uiDependencies.getPermChecker();
         this.targetManagement = targetManagement;
     }
 

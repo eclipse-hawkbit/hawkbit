@@ -19,18 +19,18 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.DsManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.common.distributionset.AbstractDsGrid;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.event.PinningChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.PinningChangedEventPayload.PinningChangedEventType;
-import org.eclipse.hawkbit.ui.common.grid.AbstractDsGrid;
 import org.eclipse.hawkbit.ui.common.grid.support.DragAndDropSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.PinSupport;
@@ -45,10 +45,7 @@ import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
@@ -73,14 +70,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     /**
      * Constructor for DistributionGrid
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param notification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      * @param distributionSetManagement
@@ -96,15 +87,12 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      * @param distributionTagLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public DistributionGrid(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState,
+    public DistributionGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
+            final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
+            final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        super(i18n, eventBus, permissionChecker, notification, distributionSetManagement, distributionGridLayoutUiState,
-                EventView.DEPLOYMENT);
+        super(uiDependencies, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
 
         this.targetGridLayoutUiState = targetGridLayoutUiState;
         this.distributionGridLayoutUiState = distributionGridLayoutUiState;
@@ -117,14 +105,14 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
         final Map<String, AssignmentSupport<?, ProxyDistributionSet>> sourceTargetAssignmentStrategies = new HashMap<>();
 
-        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(i18n,
-                uiProperties, eventBus, notification, deploymentManagement);
+        final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
+                uiDependencies, uiProperties, deploymentManagement);
         final TargetsToDistributionSetAssignmentSupport targetsToDsAssignment = new TargetsToDistributionSetAssignmentSupport(
-                notification, i18n, permissionChecker, assignmentController);
+                uiDependencies, assignmentController);
         final TargetTagsToDistributionSetAssignmentSupport targetTagsToDsAssignment = new TargetTagsToDistributionSetAssignmentSupport(
-                notification, i18n, targetManagement, targetsToDsAssignment);
+                uiDependencies, targetManagement, targetsToDsAssignment);
         final DsTagsToDistributionSetAssignmentSupport dsTagsToDsAssignment = new DsTagsToDistributionSetAssignmentSupport(
-                notification, i18n, distributionSetManagement, eventBus, permissionChecker);
+                uiDependencies, distributionSetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TABLE_ID, targetsToDsAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToDsAssignment);

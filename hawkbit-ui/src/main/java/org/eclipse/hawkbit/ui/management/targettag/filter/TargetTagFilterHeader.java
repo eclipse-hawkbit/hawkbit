@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -33,21 +31,17 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     /**
      * Constructor for TargetTagFilterHeader
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param permChecker
-     *          SpPermissionChecker
-     * @param eventBus
-     *          UIEventBus
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetTagFilterLayoutUiState
-     *          TargetTagFilterLayoutUiState
+     *            TargetTagFilterLayoutUiState
      * @param targetTagWindowBuilder
-     *          TargetTagWindowBuilder
+     *            TargetTagWindowBuilder
      */
-    public TargetTagFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
-            final UIEventBus eventBus, final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+    public TargetTagFilterHeader(final CommonUiDependencies uiDependencies,
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetTagWindowBuilder targetTagWindowBuilder) {
-        super(i18n, permChecker, eventBus);
+        super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
         this.targetTagWindowBuilder = targetTagWindowBuilder;

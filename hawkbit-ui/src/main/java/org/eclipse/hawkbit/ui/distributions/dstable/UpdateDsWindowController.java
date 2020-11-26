@@ -9,72 +9,46 @@
 package org.eclipse.hawkbit.ui.distributions.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowController;
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
-import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.springframework.util.StringUtils;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Controller for update distribution set window
  */
 public class UpdateDsWindowController
-        extends AbstractEntityWindowController<ProxyDistributionSet, ProxyDistributionSet> {
-    private static final Logger LOG = LoggerFactory.getLogger(UpdateDsWindowController.class);
-
-    private final VaadinMessageSource i18n;
-    private final EntityFactory entityFactory;
-    private final UIEventBus eventBus;
-    private final UINotification uiNotification;
+        extends AbstractUpdateNamedEntityWindowController<ProxyDistributionSet, ProxyDistributionSet, DistributionSet> {
 
     private final DistributionSetManagement dsManagement;
-
     private final DsWindowLayout layout;
+    private final ProxyDsValidator validator;
+
+    private String nameBeforeEdit;
+    private String versionBeforeEdit;
 
     /**
      * Constructor for UpdateDsWindowController
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param entityFactory
-     *            EntityFactory
-     * @param eventBus
-     *            UIEventBus
-     * @param uiNotification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param dsManagement
      *            DistributionSetManagement
      * @param layout
      *            DsWindowLayout
      */
-    public UpdateDsWindowController(final VaadinMessageSource i18n, final EntityFactory entityFactory,
-            final UIEventBus eventBus, final UINotification uiNotification,
+    public UpdateDsWindowController(final CommonUiDependencies uiDependencies,
             final DistributionSetManagement dsManagement, final DsWindowLayout layout) {
-        this.i18n = i18n;
-        this.entityFactory = entityFactory;
-        this.eventBus = eventBus;
-        this.uiNotification = uiNotification;
+        super(uiDependencies);
 
         this.dsManagement = dsManagement;
-
         this.layout = layout;
-    }
-
-    @Override
-    public AbstractEntityWindowLayout<ProxyDistributionSet> getLayout() {
-        return layout;
+        this.validator = new ProxyDsValidator(uiDependencies);
     }
 
     @Override
@@ -88,7 +62,15 @@ public class UpdateDsWindowController
         ds.setDescription(proxyEntity.getDescription());
         ds.setRequiredMigrationStep(proxyEntity.isRequiredMigrationStep());
 
+        nameBeforeEdit = proxyEntity.getName();
+        versionBeforeEdit = proxyEntity.getVersion();
+
         return ds;
+    }
+
+    @Override
+    public EntityWindowLayout<ProxyDistributionSet> getLayout() {
+        return layout;
     }
 
     @Override
@@ -97,41 +79,37 @@ public class UpdateDsWindowController
     }
 
     @Override
-    protected void persistEntity(final ProxyDistributionSet entity) {
-        final DistributionSetUpdate dsUpdate = entityFactory.distributionSet().update(entity.getId())
+    protected DistributionSet persistEntityInRepository(final ProxyDistributionSet entity) {
+        final DistributionSetUpdate dsUpdate = getEntityFactory().distributionSet().update(entity.getId())
                 .name(entity.getName()).version(entity.getVersion()).description(entity.getDescription())
                 .requiredMigrationStep(entity.isRequiredMigrationStep());
+        return dsManagement.update(dsUpdate);
+    }
 
-        try {
-            final DistributionSet updatedDs = dsManagement.update(dsUpdate);
+    @Override
+    protected String getDisplayableName(final DistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
 
-            uiNotification.displaySuccess(
-                    i18n.getMessage("message.update.success", updatedDs.getName() + ":" + updatedDs.getVersion()));
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
-                    EntityModifiedEventType.ENTITY_UPDATED, ProxyDistributionSet.class, updatedDs.getId()));
-        } catch (final EntityNotFoundException | EntityReadOnlyException e) {
-            LOG.trace("Update of distribution set failed in UI: {}", e.getMessage());
-            final String entityType = i18n.getMessage("caption.distribution");
-            uiNotification
-                    .displayWarning(i18n.getMessage("message.deleted.or.notAllowed", entityType, entity.getName()));
-        }
+    @Override
+    protected String getDisplayableNameForFailedMessage(final ProxyDistributionSet entity) {
+        return HawkbitCommonUtil.getFormattedNameVersion(entity.getName(), entity.getVersion());
+    }
+
+    @Override
+    protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
+        return ProxyDistributionSet.class;
     }
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
-        if (!StringUtils.hasText(entity.getName()) || !StringUtils.hasText(entity.getVersion())) {
-            uiNotification.displayValidationError(i18n.getMessage("message.error.missing.nameorversion"));
-            return false;
-        }
-
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
-        if (dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent()) {
-            uiNotification
-                    .displayValidationError(i18n.getMessage("message.duplicate.dist", trimmedName, trimmedVersion));
-            return false;
-        }
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
+                && dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
+    }
 
-        return true;
+    private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {
+        return !nameBeforeEdit.equals(trimmedName) || !versionBeforeEdit.equals(trimmedVersion);
     }
 }

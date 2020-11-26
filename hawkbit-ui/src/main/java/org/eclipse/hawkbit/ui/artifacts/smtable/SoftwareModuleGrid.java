@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.SwFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.AssignedSoftwareModuleToProxyMapper;
@@ -42,8 +42,6 @@ import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Button;
 
@@ -75,14 +73,8 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
     /**
      * Constructor for SoftwareModuleGrid
      *
-     * @param eventBus
-     *            UIEventBus
-     * @param i18n
-     *            VaadinMessageSource
-     * @param permissionChecker
-     *            SpPermissionChecker
-     * @param notification
-     *            UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param smTypeFilterLayoutUiState
      *            TypeFilterLayoutUiState
      * @param smGridLayoutUiState
@@ -92,15 +84,14 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
      * @param view
      *            EventView
      */
-    public SoftwareModuleGrid(final UIEventBus eventBus, final VaadinMessageSource i18n,
-            final SpPermissionChecker permissionChecker, final UINotification notification,
-            final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState,
-            final SoftwareModuleManagement softwareModuleManagement, final EventView view) {
-        super(i18n, eventBus, permissionChecker);
+    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
+            final GridLayoutUiState smGridLayoutUiState, final SoftwareModuleManagement softwareModuleManagement,
+            final EventView view) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
         this.smGridLayoutUiState = smGridLayoutUiState;
-        this.notification = notification;
+        this.notification = uiDependencies.getUiNotification();
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleToProxyMapper = new SoftwareModuleToProxyMapper();
 

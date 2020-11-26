@@ -10,11 +10,10 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Collections;
 
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -26,9 +25,6 @@ import org.eclipse.hawkbit.ui.common.detailslayout.UpdateMetaDataWindowControlle
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Class for metadata add/update window layout.
@@ -37,47 +33,34 @@ public class TargetMetaDataWindowLayout extends AbstractMetaDataWindowLayout<Str
     private static final long serialVersionUID = 1L;
 
     private final transient TargetManagement targetManagement;
-    private final transient EntityFactory entityFactory;
-
-    private final MetaDataWindowGrid<String> targetMetaDataWindowGrid;
-
     private final transient MetaDataAddUpdateWindowLayout metaDataAddUpdateWindowLayout;
     private final transient AddMetaDataWindowController addTargetMetaDataWindowController;
     private final transient UpdateMetaDataWindowController updateTargetMetaDataWindowController;
 
+    private final MetaDataWindowGrid<String> targetMetaDataWindowGrid;
+
     /**
      * Constructor for TargetMetaDataWindowLayout
      *
-     * @param i18n
-     *            VaadinMessageSource
-     * @param eventBus
-     *            UIEventBus
-     * @param permChecker
-     *            SpPermissionChecker
-     * @param uiNotification
-     *            UINotification
-     * @param entityFactory
-     *            EntityFactory
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
      */
-    public TargetMetaDataWindowLayout(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker permChecker, final UINotification uiNotification,
-            final EntityFactory entityFactory, final TargetManagement targetManagement) {
-        super(i18n, eventBus, uiNotification, permChecker);
+    public TargetMetaDataWindowLayout(final CommonUiDependencies uiDependencies,
+            final TargetManagement targetManagement) {
+        super(uiDependencies);
 
         this.targetManagement = targetManagement;
-        this.entityFactory = entityFactory;
 
-        this.targetMetaDataWindowGrid = new MetaDataWindowGrid<>(i18n, eventBus, permChecker, uiNotification,
-                new TargetMetaDataDataProvider(targetManagement), this::hasMetadataChangePermission,
-                this::deleteMetaData);
+        this.targetMetaDataWindowGrid = new MetaDataWindowGrid<>(uiDependencies,
+                new TargetMetaDataDataProvider(targetManagement), this::hasMetadataChangePermission,this::deleteMetaData);
 
-        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n, this::hasMetadataChangePermission);
-        this.addTargetMetaDataWindowController = new AddMetaDataWindowController(i18n, uiNotification,
+        this.metaDataAddUpdateWindowLayout = new MetaDataAddUpdateWindowLayout(i18n,this::hasMetadataChangePermission);
+        this.addTargetMetaDataWindowController = new AddMetaDataWindowController(uiDependencies,
                 metaDataAddUpdateWindowLayout, this::createMetaData, this::isDuplicate);
-        this.updateTargetMetaDataWindowController = new UpdateMetaDataWindowController(i18n, uiNotification,
-                metaDataAddUpdateWindowLayout, this::updateMetaData);
+        this.updateTargetMetaDataWindowController = new UpdateMetaDataWindowController(uiDependencies,
+                metaDataAddUpdateWindowLayout, this::updateMetaData, this::isDuplicate);
 
         buildLayout();
         addGridSelectionListener();

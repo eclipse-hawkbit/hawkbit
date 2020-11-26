@@ -13,17 +13,13 @@ import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
-import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UINotification;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -31,17 +27,13 @@ import com.vaadin.ui.Window;
  * Builder for bulk upload window
  */
 public class BulkUploadWindowBuilder {
-    private final VaadinMessageSource i18n;
-    private final UIEventBus eventBus;
-    private final SpPermissionChecker checker;
-    private final UINotification uinotification;
     private final UiProperties uiproperties;
     private final Executor uiExecutor;
     private final TargetManagement targetManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetTagManagement tagManagement;
     private final DistributionSetManagement distributionSetManagement;
-    private final EntityFactory entityFactory;
+    private final CommonUiDependencies uiDependencies;
 
     private final TargetBulkUploadUiState targetBulkUploadUiState;
 
@@ -50,48 +42,35 @@ public class BulkUploadWindowBuilder {
     /**
      * Constructor for BulkUploadWindowBuilder
      *
-     * @param i18n
-     *          VaadinMessageSource
-     * @param eventBus
-     *          UIEventBus
-     * @param checker
-     *          SpPermissionChecker
-     * @param uinotification
-     *          UINotification
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
      * @param uiproperties
-     *          UiProperties
+     *            UiProperties
      * @param uiExecutor
-     *          Executor
+     *            Executor
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param tagManagement
-     *          TargetTagManagement
+     *            TargetTagManagement
      * @param distributionSetManagement
-     *          DistributionSetManagement
-     * @param entityFactory
-     *          EntityFactory
+     *            DistributionSetManagement
      * @param targetBulkUploadUiState
-     *          TargetBulkUploadUiState
+     *            TargetBulkUploadUiState
      */
-    public BulkUploadWindowBuilder(final VaadinMessageSource i18n, final UIEventBus eventBus,
-            final SpPermissionChecker checker, final UINotification uinotification, final UiProperties uiproperties,
+    public BulkUploadWindowBuilder(final CommonUiDependencies uiDependencies, final UiProperties uiproperties,
             final Executor uiExecutor, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TargetTagManagement tagManagement,
-            final DistributionSetManagement distributionSetManagement, final EntityFactory entityFactory,
+            final DistributionSetManagement distributionSetManagement,
             final TargetBulkUploadUiState targetBulkUploadUiState) {
-        this.i18n = i18n;
-        this.eventBus = eventBus;
-        this.checker = checker;
-        this.uinotification = uinotification;
+        this.uiDependencies = uiDependencies;
         this.uiproperties = uiproperties;
         this.uiExecutor = uiExecutor;
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
         this.tagManagement = tagManagement;
         this.distributionSetManagement = distributionSetManagement;
-        this.entityFactory = entityFactory;
         this.targetBulkUploadUiState = targetBulkUploadUiState;
     }
 
@@ -100,9 +79,9 @@ public class BulkUploadWindowBuilder {
      */
     public Window getWindowForTargetBulkUpload() {
         if (!targetBulkUploadUiState.isInProgress() || targetBulkUpdateWindowLayout == null) {
-            targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(i18n, eventBus, checker, uinotification,
-                    targetManagement, deploymentManagement, tagManagement, distributionSetManagement, entityFactory,
-                    uiproperties, uiExecutor, targetBulkUploadUiState);
+            targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiDependencies, targetManagement,
+                    deploymentManagement, tagManagement, distributionSetManagement, uiproperties, uiExecutor,
+                    targetBulkUploadUiState);
         }
 
         final Window bulkUploadWindow = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
@@ -127,9 +106,9 @@ public class BulkUploadWindowBuilder {
      * Restore target bulk update window layout
      */
     public void restoreState() {
-        targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(i18n, eventBus, checker, uinotification,
-                targetManagement, deploymentManagement, tagManagement, distributionSetManagement, entityFactory,
-                uiproperties, uiExecutor, targetBulkUploadUiState);
+        targetBulkUpdateWindowLayout = new TargetBulkUpdateWindowLayout(uiDependencies, targetManagement,
+                deploymentManagement, tagManagement, distributionSetManagement, uiproperties, uiExecutor,
+                targetBulkUploadUiState);
         targetBulkUpdateWindowLayout.restoreComponentsValue();
     }
 
