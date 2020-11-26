@@ -45,10 +45,6 @@ public abstract class BaseConfigurationView<B extends ProxySystemConfigWindow> e
 
     protected abstract B populateSystemConfig();
 
-    protected void notifyConfigurationChanged() {
-        configurationChangeListeners.forEach(ConfigurationItemChangeListener::configurationHasChanged);
-    }
-
     @Override
     public void addChangeListener(final ConfigurationItemChangeListener listener) {
         configurationChangeListeners.add(listener);

@@ -31,6 +31,22 @@ import org.springframework.core.annotation.Order;
 @ConditionalOnClass(MgmtUiConfiguration.class)
 public class TenantConfigurationAutoConfiguration {
 
+    /**
+     * Bean of configuration view to set the default distributionSet type.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
+     * @param systemManagement
+     *            SystemManagement
+     * @param permissionCheckerChecker
+     *            SpPermissionChecker
+     * @param distributionSetTypeManagement
+     *            DistributionSetTypeManagement
+     * @return DefaultDistributionSetTypeView to be shown in the Tenant
+     *         Configuration Page
+     */
     @Bean
     @ViewScope
     @Order(value = 1)
@@ -42,6 +58,19 @@ public class TenantConfigurationAutoConfiguration {
                 permissionCheckerChecker, distributionSetTypeManagement);
     }
 
+    /**
+     * Default Bean of configuration view to set the Repository specific
+     * configurations
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param uiProperties
+     *            UiProperties
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
+     * @return RepositoryConfigurationView to be shown in the Tenant Configuration
+     *         Page
+     */
     @Bean
     @ConditionalOnMissingBean
     @ViewScope
@@ -51,6 +80,17 @@ public class TenantConfigurationAutoConfiguration {
         return new RepositoryConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
     }
 
+    /**
+     * Default Bean of configuration view to set the Rollout specific configurations
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @param uiProperties
+     *            UiProperties
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
+     * @return RolloutConfigurationView to be shown in the Tenant Configuration Page
+     */
     @Bean
     @ConditionalOnMissingBean
     @ViewScope
@@ -60,6 +100,21 @@ public class TenantConfigurationAutoConfiguration {
         return new RolloutConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
     }
 
+    /**
+     * Default Bean of configuration view to set the Authentication specific
+     * configurations
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @param uiProperties
+     *            UiProperties
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
+     * @param securityTokenGenerator
+     *            SecurityTokenGenerator
+     * @return AuthenticationConfigurationView to be shown in the Tenant
+     *         Configuration Page
+     */
     @Bean
     @ConditionalOnMissingBean
     @ViewScope
@@ -71,6 +126,17 @@ public class TenantConfigurationAutoConfiguration {
                 securityTokenGenerator);
     }
 
+    /**
+     * Default Bean of configuration view to set the Polling specific configurations
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @param uiProperties
+     *            UiProperties
+     * @param tenantConfigurationManagement
+     *            TenantConfigurationManagement
+     * @return PollingConfigurationView to be shown in the Tenant Configuration Page
+     */
     @Bean
     @ConditionalOnMissingBean
     @ViewScope

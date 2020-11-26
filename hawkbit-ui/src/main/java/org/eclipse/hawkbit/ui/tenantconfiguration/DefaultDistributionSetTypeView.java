@@ -134,6 +134,5 @@ public class DefaultDistributionSetTypeView extends BaseConfigurationView<ProxyS
     @Override
     public void save() {
         systemManagement.updateTenantMetadata(getBinderBean().getDsTypeInfo().getId());
-
     }
 }
