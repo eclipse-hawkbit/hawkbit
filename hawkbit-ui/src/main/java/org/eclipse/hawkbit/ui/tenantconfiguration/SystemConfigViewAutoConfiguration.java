@@ -29,7 +29,7 @@ import org.springframework.core.annotation.Order;
  */
 @Configuration
 @ConditionalOnClass(MgmtUiConfiguration.class)
-public class TenantConfigurationAutoConfiguration {
+public class SystemConfigViewAutoConfiguration {
 
     /**
      * Bean of configuration view to set the default distributionSet type.
