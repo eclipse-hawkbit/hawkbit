@@ -58,7 +58,7 @@ public final class MaintenanceScheduleHelper {
      * @return { @link Optional<ZonedDateTime>} of the next available window. In
      *         case there is none, or there are maintenance window validation
      *         errors, returns empty value.
-     * 
+     *
      */
     // Exception squid:S1166 - if there are validation error(format of cron
     // expression or duration is wrong), we simply return empty value
@@ -69,8 +69,7 @@ public final class MaintenanceScheduleHelper {
             final ExecutionTime scheduleExecutor = ExecutionTime.forCron(getCronFromExpression(cronSchedule));
             final ZonedDateTime now = ZonedDateTime.now(ZoneOffset.of(timezone));
             final ZonedDateTime after = now.minus(convertToISODuration(duration));
-            final ZonedDateTime next = scheduleExecutor.nextExecution(after);
-            return Optional.of(next);
+            return scheduleExecutor.nextExecution(after);
         } catch (final RuntimeException ignored) {
             return Optional.empty();
         }
@@ -85,7 +84,7 @@ public final class MaintenanceScheduleHelper {
      *            year".
      *
      * @return {@link Cron} object, that corresponds to the expression.
-     * 
+     *
      * @throws IllegalArgumentException
      *             if the cron expression doesn't have a valid format.
      */
