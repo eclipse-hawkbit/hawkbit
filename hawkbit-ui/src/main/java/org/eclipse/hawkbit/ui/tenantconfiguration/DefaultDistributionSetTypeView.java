@@ -63,10 +63,10 @@ public class DefaultDistributionSetTypeView extends BaseConfigurationView<ProxyS
     @Override
     public void afterPropertiesSet() {
         super.afterPropertiesSet();
-        initDsSetTypeComponent();
+        init();
     }
 
-    private void initDsSetTypeComponent() {
+    private void init() {
         if (!permissionChecker.hasReadRepositoryPermission()) {
             return;
         }
