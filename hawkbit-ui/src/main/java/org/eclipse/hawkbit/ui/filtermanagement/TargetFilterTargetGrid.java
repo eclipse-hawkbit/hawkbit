@@ -27,7 +27,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
     private static final long serialVersionUID = 1L;
 
-    private static final String TARGET_CONTROLLER_ID = "controllerId";
+    private static final String TARGET_CONTROLLER_ID = "targetControllerId";
     private static final String TARGET_NAME_ID = "targetName";
     private static final String TARGET_DESCRIPTION_ID = "targetDescription";
     private static final String TARGET_STATUS_ID = "targetStatus";
@@ -73,7 +73,7 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
     @Override
     public void addColumns() {
-        addControllerIdColumn();
+        GridComponentBuilder.addControllerIdColumn(this, i18n, TARGET_CONTROLLER_ID);
 
         GridComponentBuilder.addNameColumn(this, i18n, TARGET_NAME_ID);
 
@@ -87,8 +87,4 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
         getColumns().forEach(column -> column.setHidable(true));
     }
 
-    private Column<ProxyTarget, String> addControllerIdColumn() {
-        return GridComponentBuilder.addColumn(this, ProxyTarget::getControllerId).setId(TARGET_CONTROLLER_ID)
-                .setCaption(i18n.getMessage("header.controllerId"));
-    }
 }

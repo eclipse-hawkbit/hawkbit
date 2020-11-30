@@ -73,7 +73,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     private static final long serialVersionUID = 1L;
 
     private static final String TARGET_STATUS_ID = "targetStatus";
-    private static final String TARGET_CONTROLLER_ID = "controllerId";
+    private static final String TARGET_CONTROLLER_ID = "targetControllerId";
     private static final String TARGET_NAME_ID = "targetName";
     private static final String TARGET_POLLING_STATUS_ID = "targetPolling";
     private static final String TARGET_DESC_ID = "targetDescription";
@@ -312,8 +312,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     }
 
     private Column<ProxyTarget, String> addControllerIdColumn() {
-        return GridComponentBuilder.addColumn(this, ProxyTarget::getControllerId).setId(TARGET_CONTROLLER_ID)
-                .setCaption(i18n.getMessage("header.controllerId"));
+        return GridComponentBuilder.addControllerIdColumn(this, i18n, TARGET_CONTROLLER_ID);
     }
 
     private Column<ProxyTarget, String> addNameColumn() {

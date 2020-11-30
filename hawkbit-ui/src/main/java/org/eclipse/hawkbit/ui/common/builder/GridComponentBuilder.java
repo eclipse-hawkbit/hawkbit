@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -118,6 +119,22 @@ public final class GridComponentBuilder {
     public static <E extends ProxyNamedEntity> Column<E, String> addNameColumn(final Grid<E> grid,
             final VaadinMessageSource i18n, final String columnId) {
         return addColumn(i18n, grid, E::getName, "header.name", columnId, 100D);
+    }
+
+    /**
+     * Add controllerId column to grid
+     *
+     * @param grid
+     *            to add the column to
+     * @param i18n
+     *            message source for internationalization
+     * @param columnId
+     *            column ID
+     * @return the created column
+     */
+    public static Column<ProxyTarget, String> addControllerIdColumn(final Grid<ProxyTarget> grid,
+            final VaadinMessageSource i18n, final String columnId) {
+        return addColumn(i18n, grid, ProxyTarget::getControllerId, "header.controllerId", columnId, 100D);
     }
 
     /**
