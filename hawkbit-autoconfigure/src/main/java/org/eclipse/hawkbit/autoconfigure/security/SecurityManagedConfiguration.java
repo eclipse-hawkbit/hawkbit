@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -91,9 +92,12 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -716,6 +720,18 @@ public class SecurityManagedConfiguration {
             // UI logout
             httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
                     .logoutSuccessHandler(logoutSuccessHandler);
+        }
+
+        @Bean
+        public HttpFirewall httpFirewall() {
+            final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
+            final StrictHttpFirewall firewall = new StrictHttpFirewall();
+
+            if (allowedHostNames != null && !CollectionUtils.isEmpty(allowedHostNames)) {
+                firewall.setAllowedHostnames(hostName -> allowedHostNames.stream()
+                        .anyMatch(allowedHostName -> allowedHostName.equals(hostName)));
+            }
+            return firewall;
         }
 
         @Override

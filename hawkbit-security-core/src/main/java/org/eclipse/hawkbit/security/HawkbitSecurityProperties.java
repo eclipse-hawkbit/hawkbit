@@ -35,6 +35,8 @@ public class HawkbitSecurityProperties {
      */
     private boolean requireSsl;
 
+    private List<String> allowedHostNames;
+
     /**
      * Basic authentication realm, see
      * https://tools.ietf.org/html/rfc2617#page-3 .
@@ -47,6 +49,14 @@ public class HawkbitSecurityProperties {
 
     public void setRequireSsl(final boolean requireSsl) {
         this.requireSsl = requireSsl;
+    }
+
+    public List<String> getAllowedHostNames() {
+        return allowedHostNames;
+    }
+
+    public void setAllowedHostNames(final List<String> allowedHostNames) {
+        this.allowedHostNames = allowedHostNames;
     }
 
     public String getBasicRealm() {
