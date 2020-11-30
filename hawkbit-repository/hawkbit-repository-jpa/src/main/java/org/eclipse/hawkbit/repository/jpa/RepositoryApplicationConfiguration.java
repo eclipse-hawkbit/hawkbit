@@ -95,6 +95,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -155,7 +156,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
     }
 
+    /**
+     * Datasource configuration that adapts the connection properties based on
+     * the configured Spring transaction's isolation level and readOnly flag.
+     * Used to fix read-only database connections by EclipseLink for read
+     * replication (see
+     * https://github.com/spring-projects/spring-framework/issues/12547).
+     *
+     */
     @Configuration
+    @ConditionalOnClass(HikariDataSource.class)
+    @ConditionalOnProperty(prefix = "hawkbit.datasource.isolation.level", name = "enabled", matchIfMissing = false)
     static class IsolationLevelDataSourceConfig {
 
         @Bean
