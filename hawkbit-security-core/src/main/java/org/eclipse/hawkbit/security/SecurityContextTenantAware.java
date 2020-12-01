@@ -85,8 +85,9 @@ public class SecurityContextTenantAware implements TenantAware {
 
     @Override
     public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
-        final List<SimpleGrantedAuthority> authorities = authoritiesResolver.getUserAuthorities(tenant, username)
-                .stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        final List<SimpleGrantedAuthority> authorities = runAsSystem(
+                () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList()));
         return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner);
     }
 
@@ -102,6 +103,16 @@ public class SecurityContextTenantAware implements TenantAware {
 
     private static SecurityContext buildSystemSecurityContext(final String tenant) {
         return buildUserSecurityContext(tenant, SYSTEM_USER, SYSTEM_AUTHORITIES);
+    }
+
+    private static <T> T runAsSystem(final TenantRunner<T> tenantRunner) {
+        final SecurityContext currentContext = SecurityContextHolder.getContext();
+        try {
+            SystemSecurityContext.setSystemContext(currentContext);
+            return tenantRunner.run();
+        } finally {
+            SecurityContextHolder.setContext(currentContext);
+        }
     }
 
     private static SecurityContext buildUserSecurityContext(final String tenant, final String username,
