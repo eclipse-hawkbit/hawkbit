@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -25,7 +24,10 @@ import org.eclipse.hawkbit.ui.common.event.FilterChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterDetailsLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.HasValue.ValueChangeEvent;
@@ -41,8 +43,10 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.TextField;
 
-import java.io.ByteArrayInputStream;
-import java.util.List;
+import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
+import java.util.concurrent.Executor;
 
 import static com.vaadin.server.StreamResource.StreamSource;
 
@@ -69,6 +73,8 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
     private FileDownloader fileDownloader;
 
     private Registration saveListener;
+
+    private static final Logger LOG = LoggerFactory.getLogger(TargetFilterAddUpdateLayout.class);
 
     /**
      * Constructor for AbstractTagWindowLayout
@@ -165,19 +171,32 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
 
     private StreamResource getStreamResourceToCSV(final ProxyTargetFilterQuery proxyEntity){
 
-        StreamSource streamSource =  () -> {
-            List<Target> targets = targetManagement.findAllByTargetFilterQuery(proxyEntity.getId());
-            return new ByteArrayInputStream(TargetDataExporter.toCSV(targets).toString().getBytes());
+        final StreamSource streamSource = () -> {
+            final PipedInputStream in = new PipedInputStream();
+
+            try {
+                final PipedOutputStream out = new PipedOutputStream(in);
+                final TargetDataCsvExporter csvExporter = new TargetDataCsvExporter(targetManagement, ";",
+                        "E MMM dd HH:mm:ss z yyyy");
+
+                SpringContextHolder.getInstance().getBean("uiExecutor", Executor.class)
+                        .execute(() -> csvExporter.writeTargetsByFilterId(proxyEntity.getId(), out));
+
+            } catch (final IOException ex) {
+                LOG.warn("Creating piped Stream failed: ", ex);
+            }
+            return in;
         };
 
-        StreamResource streamResource = new StreamResource(streamSource, proxyEntity.getName() + ".csv");
-        return streamResource;
+        return new StreamResource(streamSource, proxyEntity.getName() + ".csv");
     }
 
     private void addValueChangeListeners() {
         searchButton.addClickListener(event -> onSearchIconClick());
-        autoCompleteComponent.addValidationListener((valid, message) -> searchButton.setEnabled(valid));
-        autoCompleteComponent.addValidationListener((valid, msg) -> exportButton.setEnabled(valid));
+        autoCompleteComponent.addValidationListener((valid, message) -> {
+            searchButton.setEnabled(valid);
+            exportButton.setEnabled(valid);
+        });
         autoCompleteComponent.addTextfieldChangedListener(this::onFilterQueryTextfieldChanged);
         autoCompleteComponent
                 .addShortcutListener(new ShortcutListener("List Filtered Targets", ShortcutAction.KeyCode.ENTER, null) {

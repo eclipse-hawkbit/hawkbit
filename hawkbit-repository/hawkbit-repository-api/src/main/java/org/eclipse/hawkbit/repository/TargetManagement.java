@@ -484,25 +484,6 @@ public interface TargetManagement {
     Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
 
     /**
-     * Retrieves all targets based on {@link TargetFilterQuery}.
-     *
-     * @param targetFilterQueryId
-     *            {@link TargetFilterQuery#getId()}
-     *
-     * @return the found {@link Target}s, never {@code null}
-     *
-     * @throws EntityNotFoundException
-     *             if {@link TargetFilterQuery} with given ID does not exist.
-     * @throws RSQLParameterUnsupportedFieldException
-     *             if a field in the RSQL string is used but not provided by the
-     *             given {@code fieldNameProvider}
-     * @throws RSQLParameterSyntaxException
-     *             if the RSQL syntax is wrong
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    List<Target> findAllByTargetFilterQuery(long targetFilterQueryId);
-
-    /**
      * method retrieves all {@link Target}s from the repo in the following
      * order:
      * <p>

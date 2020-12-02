@@ -314,16 +314,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public List<Target> findAllByTargetFilterQuery(final long targetFilterQueryId) {
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
-
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
-                virtualPropertyReplacer, database);
-        return Collections.unmodifiableList(targetRepository.findAll(spec));
-    }
-
-    @Override
     public Page<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
         return findTargetsBySpec(
                 RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database), pageable);
