@@ -631,7 +631,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         deploymentManagement.cancelInactiveScheduledActionsForTargets(targetIds);
         targets.forEach(target -> {
 
-            assertAtLeastOneActionPerTargetQuota(target);
+            assertSingleActionAssignmentPerTargetQuota(target);
 
             final JpaAction action = new JpaAction();
             action.setTarget(target);
@@ -1156,7 +1156,7 @@ public class JpaRolloutManagement implements RolloutManagement {
      * @param target
      *            The target
      */
-    private void assertAtLeastOneActionPerTargetQuota(final Target target) {
+    private void assertSingleActionAssignmentPerTargetQuota(final Target target) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), 1, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
