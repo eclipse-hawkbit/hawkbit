@@ -728,8 +728,10 @@ public class SecurityManagedConfiguration {
             final StrictHttpFirewall firewall = new StrictHttpFirewall();
 
             if (allowedHostNames != null && !CollectionUtils.isEmpty(allowedHostNames)) {
-                firewall.setAllowedHostnames(hostName -> allowedHostNames.stream()
-                        .anyMatch(allowedHostName -> allowedHostName.equals(hostName)));
+                firewall.setAllowedHostnames(hostName -> {
+                    LOG.info("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                    return allowedHostNames.stream()
+                        .anyMatch(allowedHostName -> allowedHostName.equals(hostName));});
             }
             return firewall;
         }
