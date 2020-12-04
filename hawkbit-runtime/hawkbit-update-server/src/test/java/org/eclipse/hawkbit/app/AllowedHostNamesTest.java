@@ -8,33 +8,38 @@
  */
 package org.eclipse.hawkbit.app;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.web.firewall.RequestRejectedException;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.springframework.test.context.TestPropertySource;
 
-@SpringBootTest(properties = { "hawkbit.server.security.allowedHostNames=localhost" })
+@TestPropertySource(properties = { "hawkbit.server.security.allowedHostNames=localhost",
+        "hawkbit.server.security.httpFirewallIgnoredPaths=/index.html" })
 @Feature("Integration Test - Security")
 @Story("Allowed Host Names")
 public class AllowedHostNamesTest extends AbstractSecurityTest {
 
     @Test
-    public void allowedHostNameWithNotAllowedHost() throws Exception {
-        try {
-            mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com"));
-        } catch (final RequestRejectedException e) {
-            // do nothing as this exception is expected
-        }
+    public void allowedHostNameWithNotAllowedHost() {
+        assertThatExceptionOfType(RequestRejectedException.class).isThrownBy(
+                () -> mvc.perform(get("/").header(HttpHeaders.HOST, "www.google.com")));
     }
 
     @Test
     public void allowedHostNameWithAllowedHost() throws Exception {
         mvc.perform(get("/").header(HttpHeaders.HOST, "localhost")).andExpect(status().is3xxRedirection());
     }
-} 
+
+    @Test
+    public void notAllowedHostnameWithIgnoredPath() throws Exception {
+        mvc.perform(get("/index.html").header(HttpHeaders.HOST, "www.google.com"))
+                .andExpect(status().is4xxClientError());
+    }
+}

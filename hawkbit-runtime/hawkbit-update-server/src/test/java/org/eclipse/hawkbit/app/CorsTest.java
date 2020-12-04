@@ -24,6 +24,7 @@ import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,7 +37,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@SpringBootTest(properties = { "hawkbit.server.security.cors.enabled=true",
+@TestPropertySource(properties = { "hawkbit.server.security.cors.enabled=true",
         "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + ","
                 + CorsTest.ALLOWED_ORIGIN_SECOND })
 @Feature("Integration Test - Security")

@@ -35,7 +35,16 @@ public class HawkbitSecurityProperties {
      */
     private boolean requireSsl;
 
+    /**
+     * With this property a list of allowed hostnames can be configured. All
+     * requests with different Host headers will be rejected.
+     */
     private List<String> allowedHostNames;
+
+    /**
+     * Add paths that will be ignored by {@link StrictHttpFirewall}.
+     */
+    private List<String> httpFirewallIgnoredPaths;
 
     /**
      * Basic authentication realm, see
@@ -57,6 +66,14 @@ public class HawkbitSecurityProperties {
 
     public void setAllowedHostNames(final List<String> allowedHostNames) {
         this.allowedHostNames = allowedHostNames;
+    }
+
+    public List<String> getHttpFirewallIgnoredPaths() {
+        return httpFirewallIgnoredPaths;
+    }
+
+    public void setHttpFirewallIgnoredPaths(final List<String> httpFirewallIgnoredPaths) {
+        this.httpFirewallIgnoredPaths = httpFirewallIgnoredPaths;
     }
 
     public String getBasicRealm() {

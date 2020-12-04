@@ -20,6 +20,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -92,6 +93,7 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.security.web.firewall.HttpFirewall;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
@@ -725,15 +727,37 @@ public class SecurityManagedConfiguration {
         @Bean
         public HttpFirewall httpFirewall() {
             final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
-            final StrictHttpFirewall firewall = new StrictHttpFirewall();
+            final IgnorePathsStrictHttpFirewall firewall = new IgnorePathsStrictHttpFirewall(
+                    hawkbitSecurityProperties.getHttpFirewallIgnoredPaths());
 
-            if (allowedHostNames != null && !CollectionUtils.isEmpty(allowedHostNames)) {
+            if (!CollectionUtils.isEmpty(allowedHostNames)) {
                 firewall.setAllowedHostnames(hostName -> {
-                    LOG.info("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
-                    return allowedHostNames.stream()
-                        .anyMatch(allowedHostName -> allowedHostName.equals(hostName));});
+                    LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                    return allowedHostNames.contains(hostName);});
             }
             return firewall;
+        }
+
+        private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {
+
+            private final Collection<String> pathsToIgnore;
+
+            public IgnorePathsStrictHttpFirewall(final Collection<String> pathsToIgnore) {
+                super();
+                this.pathsToIgnore = pathsToIgnore;
+            }
+
+            @Override
+            public FirewalledRequest getFirewalledRequest(final HttpServletRequest request) {
+                if (pathsToIgnore != null && pathsToIgnore.contains(request.getRequestURI())) {
+                    return new FirewalledRequest(request) {
+                        @Override
+                        public void reset() {
+                        }
+                    };
+                }
+                return super.getFirewalledRequest(request);
+            }
         }
 
         @Override
