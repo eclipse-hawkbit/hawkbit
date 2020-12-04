@@ -117,7 +117,7 @@ public final class DeploymentHelper {
 
         try {
             return Optional.ofNullable(transactionTemplate.execute(action));
-        } catch (final Exception e) {
+        } catch (final RuntimeException e) {
             LOGGER.error("Caught exception during transaction execution, transactionName: {}!", transactionName, e);
             return Optional.empty();
         }
