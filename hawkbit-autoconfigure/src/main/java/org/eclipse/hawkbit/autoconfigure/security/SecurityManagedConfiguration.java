@@ -753,6 +753,7 @@ public class SecurityManagedConfiguration {
                     return new FirewalledRequest(request) {
                         @Override
                         public void reset() {
+                            //nothing to do
                         }
                     };
                 }
