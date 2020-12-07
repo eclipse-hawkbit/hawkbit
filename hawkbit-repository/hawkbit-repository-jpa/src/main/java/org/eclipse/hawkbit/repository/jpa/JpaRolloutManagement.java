@@ -344,7 +344,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
     }
 
-    private void handleCreateRollout(final JpaRollout rollout) {
+    private void handleCreateRollout(final JpaRollout rollout) throws TransactionExecutionException {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
 
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
@@ -384,7 +384,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
     }
 
-    private RolloutGroup fillRolloutGroupWithTargets(final JpaRollout rollout, final RolloutGroup group1) {
+    private RolloutGroup fillRolloutGroupWithTargets(final JpaRollout rollout, final RolloutGroup group1)
+            throws TransactionExecutionException {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
 
         final JpaRolloutGroup group = (JpaRolloutGroup) group1;
@@ -402,11 +403,11 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter)).orElse(0L);
+                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
         final long expectedInGroup = Math.round(group.getTargetPercentage() / 100 * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
                 "countRolloutTargetGroupByRolloutGroup",
-                count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).orElse(0L);
+                count -> rolloutTargetGroupRepository.countByRolloutGroup(group));
 
         // Switch the Group status to READY, when there are enough Targets in
         // the Group
@@ -415,40 +416,23 @@ public class JpaRolloutManagement implements RolloutManagement {
             return rolloutGroupRepository.save(group);
         }
 
-        final boolean isSuccessfulAssignment = assignTargetsToGroup(rollout, group, groupTargetFilter, expectedInGroup,
-                currentlyInGroup);
-        if (!isSuccessfulAssignment) {
-            LOGGER.warn("Transaction assigning Targets to RolloutGroup {} failed", group.getId());
-            return group;
-        } else {
-            group.setStatus(RolloutGroupStatus.READY);
-            group.setTotalTargets(
-                    DeploymentHelper.runInNewTransaction(txManager, "countRolloutTargetGroupByRolloutGroup",
-                            count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).orElse(0L).intValue());
-            return rolloutGroupRepository.save(group);
-        }
-    }
-
-    private boolean assignTargetsToGroup(final JpaRollout rollout, final JpaRolloutGroup group,
-            final String groupTargetFilter, final long expectedInGroup, final long currentlyInGroup) {
         long targetsLeftToAdd = expectedInGroup - currentlyInGroup;
 
         do {
             // Add up to TRANSACTION_TARGETS of the left targets
-            // In case a TransactionException is thrown the assignmentResult would be empty, and the loop aborts
-            final Optional<Long> assignmentResult = assignTargetsToGroupInNewTransaction(rollout, group,
-                    groupTargetFilter, Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
-            if (!assignmentResult.isPresent()) {
-                return false;
-            }
-            targetsLeftToAdd -= assignmentResult.get();
+            // In case a TransactionException is thrown this loop aborts
+            targetsLeftToAdd -= assignTargetsToGroupInNewTransaction(rollout, group, groupTargetFilter,
+                    Math.min(TRANSACTION_TARGETS, targetsLeftToAdd));
         } while (targetsLeftToAdd > 0);
 
-        return true;
+        group.setStatus(RolloutGroupStatus.READY);
+        group.setTotalTargets(DeploymentHelper.runInNewTransaction(txManager, "countRolloutTargetGroupByRolloutGroup",
+                count -> rolloutTargetGroupRepository.countByRolloutGroup(group)).intValue());
+        return rolloutGroupRepository.save(group);
     }
 
-    private Optional<Long> assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
-            final String targetFilter, final long limit) {
+    private Long assignTargetsToGroupInNewTransaction(final JpaRollout rollout, final RolloutGroup group,
+            final String targetFilter, final long limit) throws TransactionExecutionException {
 
         return DeploymentHelper.runInNewTransaction(txManager, "assignTargetsToRolloutGroup", status -> {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
@@ -459,7 +443,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             createAssignmentOfTargetsToGroup(targets, group);
 
-            return Long.valueOf(targets.getNumberOfElements());
+            return (long) targets.getNumberOfElements();
         });
     }
 
@@ -585,18 +569,24 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private long createActionsForRolloutGroup(final Rollout rollout, final RolloutGroup group) {
         long totalActionsCreated = 0;
-        long actionsCreated;
-        do {
-            actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group.getId());
-            totalActionsCreated += actionsCreated;
-        } while (actionsCreated > 0);
+        try {
+            long actionsCreated;
+            do {
+                actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group.getId());
+                totalActionsCreated += actionsCreated;
+            } while (actionsCreated > 0);
 
+        } catch (final TransactionExecutionException e) {
+            LOGGER.warn("Transaction assigning Targets to RolloutGroup failed", e);
+            return 0;
+        }
         return totalActionsCreated;
     }
 
-    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId) {
+    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId)
+            throws TransactionExecutionException {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
-            final PageRequest pageRequest = PageRequest.of(0, TRANSACTION_TARGETS);
+            final PageRequest pageRequest = PageRequest.of(0, JpaRolloutManagement.TRANSACTION_TARGETS);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
                     .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
             final RolloutGroup group = rolloutGroupRepository.findById(groupId)
@@ -611,8 +601,8 @@ public class JpaRolloutManagement implements RolloutManagement {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
 
-            return Long.valueOf(targets.getNumberOfElements());
-        }).orElse(0L);
+            return (long) targets.getNumberOfElements();
+        });
     }
 
     /**
@@ -843,8 +833,14 @@ public class JpaRolloutManagement implements RolloutManagement {
         }
 
         try {
-            rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
-                    status -> executeFittingHandler(rolloutId)));
+            rollouts.forEach(rolloutId -> {
+                try {
+                    DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
+                            status -> executeFittingHandler(rolloutId));
+                } catch (TransactionExecutionException e) {
+                    LOGGER.error("Caught exception during rollout handling", e);
+                }
+            });
         } finally {
             lock.unlock();
         }
@@ -854,26 +850,29 @@ public class JpaRolloutManagement implements RolloutManagement {
         LOGGER.debug("handle rollout {}", rolloutId);
         final JpaRollout rollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-
-        switch (rollout.getStatus()) {
-        case CREATING:
-            handleCreateRollout(rollout);
-            break;
-        case DELETING:
-            handleDeleteRollout(rollout);
-            break;
-        case READY:
-            handleReadyRollout(rollout);
-            break;
-        case STARTING:
-            handleStartingRollout(rollout);
-            break;
-        case RUNNING:
-            handleRunningRollout(rollout);
-            break;
-        default:
-            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
-            break;
+        try {
+            switch (rollout.getStatus()) {
+            case CREATING:
+                handleCreateRollout(rollout);
+                break;
+            case DELETING:
+                handleDeleteRollout(rollout);
+                break;
+            case READY:
+                handleReadyRollout(rollout);
+                break;
+            case STARTING:
+                handleStartingRollout(rollout);
+                break;
+            case RUNNING:
+                handleRunningRollout(rollout);
+                break;
+            default:
+                LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
+                break;
+            }
+        } catch (final TransactionExecutionException e) {
+            LOGGER.error("Caught exception during rollout handling", e);
         }
 
         return null;

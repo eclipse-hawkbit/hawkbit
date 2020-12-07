@@ -11,13 +11,11 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.PersistenceException;
-
-import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
+import org.eclipse.hawkbit.repository.jpa.TransactionExecutionException;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -122,7 +120,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
 
             } while (count == PAGE_SIZE);
 
-        } catch (PersistenceException | AbstractServerRtException e) {
+        } catch (TransactionExecutionException e) {
             LOGGER.error("Error during auto assign check of target filter query {}", targetFilterQuery.getId(), e);
         }
 
@@ -137,7 +135,8 @@ public class AutoAssignChecker implements AutoAssignExecutor {
      *            distribution set id to assign
      * @return count of targets
      */
-    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId) {
+    private int runTransactionalAssignment(final TargetFilterQuery targetFilterQuery, final Long dsId)
+            throws TransactionExecutionException {
         final String actionMessage = String.format(ACTION_MESSAGE, targetFilterQuery.getName());
 
         return DeploymentHelper.runInNewTransaction(transactionManager, "autoAssignDSToTargets",
@@ -151,7 +150,7 @@ public class AutoAssignChecker implements AutoAssignExecutor {
                                 deploymentRequests, actionMessage);
                     }
                     return count;
-                }).orElse(0);
+                });
     }
 
     private static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {

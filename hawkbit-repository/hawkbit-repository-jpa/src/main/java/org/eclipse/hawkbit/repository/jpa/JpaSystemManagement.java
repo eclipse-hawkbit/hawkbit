@@ -228,11 +228,17 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * @return the initial created {@link TenantMetaData}
      */
     private TenantMetaData createInitialTenantMetaData(final String tenant) {
-        return systemSecurityContext.runAsSystemAsTenant(
-                () -> DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
+        return systemSecurityContext.runAsSystemAsTenant(() -> {
+            try {
+                return DeploymentHelper.runInNewTransaction(txManager, "initial-tenant-creation", status -> {
                     final DistributionSetType defaultDsType = createStandardSoftwareDataSetup();
                     return tenantMetaDataRepository.save(new JpaTenantMetaData(defaultDsType, tenant));
-                }), tenant).orElse(null);
+                });
+            } catch (final TransactionExecutionException e) {
+                LOGGER.error("Failed to create initial tenant metadata for tenant {}", tenant, e);
+                return null;
+            }
+        }, tenant);
     }
 
     @Override

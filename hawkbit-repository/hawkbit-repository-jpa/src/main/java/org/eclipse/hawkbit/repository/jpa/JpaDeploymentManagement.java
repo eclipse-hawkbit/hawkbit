@@ -524,25 +524,35 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private long startScheduledActionsByRolloutGroupParentInNewTransaction(final Long rolloutId,
             final Long distributionSetId, final Long rolloutGroupParentId) {
-        return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId, status -> {
-            final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
-                    rolloutGroupParentId);
+        try {
+            return DeploymentHelper.runInNewTransaction(txManager, "startScheduledActions-" + rolloutId,
+                    status -> startScheduledActions(rolloutId, distributionSetId, rolloutGroupParentId));
+        } catch (final TransactionExecutionException e) {
+            LOG.error("Caught exception in startScheduledActions-{} during "
+                    + "startScheduledActionsByRolloutGroupParentInNewTransaction", rolloutId, e);
+            return 0L;
+        }
+    }
 
-            if (rolloutGroupActions.getContent().isEmpty()) {
-                return 0L;
-            }
+    private Long startScheduledActions(final Long rolloutId, final Long distributionSetId,
+            final Long rolloutGroupParentId) {
+        final Page<Action> rolloutGroupActions = findActionsByRolloutAndRolloutGroupParent(rolloutId,
+                rolloutGroupParentId);
 
-            final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
-                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
-                    .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
-                    .filter(Objects::nonNull).collect(Collectors.toList());
+        if (rolloutGroupActions.getContent().isEmpty()) {
+            return 0L;
+        }
 
-            if (!targetAssignments.isEmpty()) {
-                onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
-            }
+        final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
+                .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
+                .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
+                .filter(Objects::nonNull).collect(Collectors.toList());
 
-            return rolloutGroupActions.getTotalElements();
-        }).orElse(0L);
+        if (!targetAssignments.isEmpty()) {
+            onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
+        }
+
+        return rolloutGroupActions.getTotalElements();
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,

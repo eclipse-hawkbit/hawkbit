@@ -438,7 +438,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private void updateLastTargetQuery(final String tenant, final List<TargetPoll> polls) {
         final TransactionCallback<Void> transactionCallback = status -> updateLastTargetQueries(tenant, polls);
         tenantAware.runAsTenant(tenant,
-                () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", transactionCallback));
+                () -> {
+                    try {
+                        DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", transactionCallback);
+                    } catch (final TransactionExecutionException e) {
+                        LOG.error("Caught exception in 'flushUpdateQueue' during lastTargetQuery update", e);
+                    }
+                    return null;
+                });
     }
 
     private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
