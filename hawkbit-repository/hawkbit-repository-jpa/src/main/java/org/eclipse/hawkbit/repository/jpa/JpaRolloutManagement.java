@@ -586,7 +586,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId)
             throws TransactionExecutionException {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
-            final PageRequest pageRequest = PageRequest.of(0, JpaRolloutManagement.TRANSACTION_TARGETS);
+            final PageRequest pageRequest = PageRequest.of(0, TRANSACTION_TARGETS);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
                     .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
             final RolloutGroup group = rolloutGroupRepository.findById(groupId)

@@ -107,6 +107,7 @@ public final class DeploymentHelper {
      *
      * @return the result of the action
      */
+    @SuppressWarnings("squid:S2221") // for catching the generic Exception instead of specific ones
     public static <T> T runInNewTransaction(@NotNull final PlatformTransactionManager txManager,
             final String transactionName, final int isolationLevel, @NotNull final TransactionCallback<T> action) throws
             TransactionExecutionException {
