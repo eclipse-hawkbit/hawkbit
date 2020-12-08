@@ -58,6 +58,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -652,8 +653,10 @@ public class SecurityManagedConfiguration {
         }
 
         /**
+         * Overwriting VaadinAuthenticationSuccessHandler of default VaadinSharedSecurityConfiguration
          * @return the vaadin success authentication handler
          */
+        @Primary
         @Bean(name = VaadinSharedSecurityConfiguration.VAADIN_AUTHENTICATION_SUCCESS_HANDLER_BEAN)
         public VaadinAuthenticationSuccessHandler redirectSaveHandler(final HttpService httpService,
                 final VaadinRedirectStrategy redirectStrategy) {
