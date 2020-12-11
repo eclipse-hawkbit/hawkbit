@@ -38,6 +38,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
@@ -499,7 +501,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void multiOfflineAssignment() {
         final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
@@ -530,7 +533,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
+            @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
     public void assignDistributionSetAndAutoCloseActiveActions() {
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
@@ -568,7 +573,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = MultiActionCancelEvent.class, count = 0),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void previousAssignmentsAreNotCanceledInMultiAssignMode() {
         enableMultiAssignments();
         final List<Target> targets = testdataFactory.createTargets(10);
@@ -609,8 +615,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = MultiActionAssignEvent.class, count = 1),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
-    public void multiassignmentInOneRequest() {
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    public void multiAssignmentInOneRequest() {
         final List<Target> targets = testdataFactory.createTargets(2);
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
         final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
@@ -640,7 +647,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = MultiActionCancelEvent.class, count = 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void cancelMultiAssignmentActions() {
         final List<Target> targets = testdataFactory.createTargets(2);
         final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
@@ -732,7 +740,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = MultiActionAssignEvent.class, count = 1) })
+            @Expect(type = MultiActionAssignEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void duplicateAssignmentsInRequestAreOnlyRemovedIfMultiassignmentDisabled() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -759,7 +768,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0) })
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void maxActionsPerTargetIsCheckedBeforeAssignmentExecution() {
         final int maxActions = quotaManagement.getMaxActionsPerTarget();
         final String controllerId = testdataFactory.createTarget().getControllerId();
@@ -810,7 +820,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
-            @Expect(type = MultiActionAssignEvent.class, count = 2) })
+            @Expect(type = MultiActionAssignEvent.class, count = 2),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     public void weightValidatedAndSaved() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
