@@ -418,7 +418,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>io.qameta.allure.junit5.AllureJunit5</value>
                      </property>
                   </properties>
                   <includes>
@@ -441,7 +441,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>io.qameta.allure.junit5.AllureJunit5</value>
                      </property>
                   </properties>
                </configuration>
@@ -765,7 +765,7 @@
          </dependency>
          <dependency>
             <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit4</artifactId>
+            <artifactId>allure-junit5</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>

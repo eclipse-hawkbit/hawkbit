@@ -17,21 +17,21 @@ import java.util.List;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
 import org.eclipse.hawkbit.api.URLPlaceholder.SoftwareData;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 /**
  * Tests for creating urls to download artifacts.
  */
 @Feature("Unit Tests - Artifact URL Handler")
 @Story("Test to generate the artifact download URL")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PropertyBasedArtifactUrlHandlerTest {
 
     private static final String TEST_PROTO = "coap";
@@ -58,7 +58,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
     private static URLPlaceholder placeholder = new URLPlaceholder(TENANT, TENANT_ID, CONTROLLER_ID, TARGETID,
             new SoftwareData(SOFTWAREMODULEID, FILENAME_DECODE, ARTIFACTID, SHA1HASH));
 
-    @Before
+    @BeforeEach
     public void setup() {
         properties = new ArtifactUrlHandlerProperties();
         urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties);
