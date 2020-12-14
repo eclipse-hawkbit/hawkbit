@@ -16,19 +16,12 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-
-import java.util.List;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
