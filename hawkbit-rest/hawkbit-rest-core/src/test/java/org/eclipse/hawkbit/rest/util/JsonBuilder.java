@@ -225,14 +225,11 @@ public abstract class JsonBuilder {
     public static String deploymentActionFeedback(final String id, final String execution, final String finished,
             final Collection<String> messages) throws JSONException {
 
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
-                .put("status",
-                        new JSONObject().put("execution", execution)
-                                .put("result",
-                                        new JSONObject().put("finished", finished).put("progress",
-                                                new JSONObject().put("cnt", 2).put("of", 5)))
-                                .put("details", new JSONArray(messages)))
-                .toString();
+        return new JSONObject().put("id", id).put("status", new JSONObject().put("execution", execution)
+                .put("result",
+                        new JSONObject().put("finished", finished).put("progress",
+                                new JSONObject().put("cnt", 2).put("of", 5)))
+                .put("details", new JSONArray(messages))).toString();
     }
 
     /**
@@ -566,7 +563,7 @@ public abstract class JsonBuilder {
 
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return new JSONObject().put("id", id).put("time", "20140511T121314")
+        return new JSONObject().put("id", id)
                 .put("status",
                         new JSONObject().put("execution", execution)
                                 .put("result", new JSONObject().put("finished", "success"))
