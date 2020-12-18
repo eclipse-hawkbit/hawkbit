@@ -647,6 +647,13 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public boolean existsByInstalledOrAssignedDistributionSet(final long distId) {
+        throwEntityNotFoundIfDsDoesNotExist(distId);
+
+        return targetRepository.existsByInstalledOrAssignedDistributionSet(distId);
+    }
+
+    @Override
     public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
             final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
