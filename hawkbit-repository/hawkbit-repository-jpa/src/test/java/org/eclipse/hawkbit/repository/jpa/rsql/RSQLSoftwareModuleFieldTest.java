@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -29,7 +29,7 @@ import io.qameta.allure.Story;
 @Story("RSQL filter software module")
 public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final SoftwareModule ah = softwareModuleManagement.create(entityFactory.softwareModule().create().type(appType)
                 .name("agent-hub").version("1.0.1").description("agent-hub"));

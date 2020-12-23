@@ -9,16 +9,15 @@
 package org.eclipse.hawkbit.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.support.SimpleValueWrapper;
@@ -29,7 +28,7 @@ import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Cache")
 @Story("Download ID Cache")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DefaultDownloadIdCacheTest {
 
     @Mock
@@ -51,11 +50,10 @@ public class DefaultDownloadIdCacheTest {
 
     private final String knownKey = "12345";
 
-    @Before
+    @BeforeEach
     public void before() {
         underTest = new DefaultDownloadIdCache(cacheManagerMock);
-        when(cacheManagerMock.getCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE)).thenReturn(cacheMock);
-        when(tenancyCacheManagerMock.getDirectCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE)).thenReturn(cacheMock);
+        lenient().when(cacheManagerMock.getCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE)).thenReturn(cacheMock);
     }
 
     @Test
@@ -110,7 +108,9 @@ public class DefaultDownloadIdCacheTest {
     @Description("Verifies that TenancyCacheManager is using direct cache because download-ids are global unique and don't need to run as tenant aware")
     public void tenancyCacheManagerIsUsingDirectCache() {
 
+        when(tenancyCacheManagerMock.getDirectCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE)).thenReturn(cacheMock);
         underTest = new DefaultDownloadIdCache(tenancyCacheManagerMock);
+
         final DownloadArtifactCache value = new DownloadArtifactCache(DownloadType.BY_SHA1, knownKey);
 
         underTest.put(knownKey, value);

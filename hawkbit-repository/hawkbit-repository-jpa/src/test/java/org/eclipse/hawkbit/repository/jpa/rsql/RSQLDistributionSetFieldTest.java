@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -32,8 +32,8 @@ import io.qameta.allure.Story;
 @Story("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
-    @Before
-    public void seuptBeforeTest() {
+    @BeforeEach
+    public void setupBeforeTest() {
 
         DistributionSet ds = testdataFactory.createDistributionSet("DS");
         ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));

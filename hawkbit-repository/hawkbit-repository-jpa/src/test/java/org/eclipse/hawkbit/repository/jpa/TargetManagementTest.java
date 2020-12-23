@@ -8,10 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -58,7 +58,7 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -167,7 +167,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
-        final String securityTokenWithReadPermission = securityRule.runAs(
+        final String securityTokenWithReadPermission = WithSpringAuthorityRule.runAs(
                 WithSpringAuthorityRule.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
                 createdTarget::getSecurityToken);
 
@@ -175,7 +175,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
 
         // retrieve security token without any permissions
-        final String securityTokenWithoutPermission = securityRule
+        final String securityTokenWithoutPermission = WithSpringAuthorityRule
                 .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), createdTarget::getSecurityToken);
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
@@ -580,18 +580,18 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String myCtrlID = "myCtrlID";
 
         Target savedTarget = testdataFactory.createTarget(myCtrlID);
-        assertNotNull("The target should not be null", savedTarget);
+        assertThat(savedTarget).isNotNull().as("The target should not be null");
         final Long createdAt = savedTarget.getCreatedAt();
         Long modifiedAt = savedTarget.getLastModifiedAt();
 
         assertThat(createdAt).as("CreatedAt compared with modifiedAt").isEqualTo(modifiedAt);
-        assertNotNull("The createdAt attribute of the target should no be null", savedTarget.getCreatedAt());
-        assertNotNull("The lastModifiedAt attribute of the target should no be null", savedTarget.getLastModifiedAt());
+        assertThat(savedTarget.getCreatedAt()).isNotNull().as("The createdAt attribute of the target should no be null");
+        assertThat(savedTarget.getLastModifiedAt()).isNotNull().as("The lastModifiedAt attribute of the target should no be null");
 
         Thread.sleep(1);
         savedTarget = targetManagement.update(
                 entityFactory.target().update(savedTarget.getControllerId()).description("changed description"));
-        assertNotNull("The lastModifiedAt attribute of the target should not be null", savedTarget.getLastModifiedAt());
+        assertThat(savedTarget.getLastModifiedAt()).isNotNull().as("The lastModifiedAt attribute of the target should not be null");
         assertThat(createdAt).as("CreatedAt compared with saved modifiedAt")
                 .isNotEqualTo(savedTarget.getLastModifiedAt());
         assertThat(modifiedAt).as("ModifiedAt compared with saved modifiedAt")
@@ -599,7 +599,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         modifiedAt = savedTarget.getLastModifiedAt();
 
         final Target foundTarget = targetManagement.getByControllerID(savedTarget.getControllerId()).get();
-        assertNotNull("The target should not be null", foundTarget);
+        assertThat(foundTarget).isNotNull().as("The target should not be null");
         assertThat(myCtrlID).as("ControllerId compared with saved controllerId")
                 .isEqualTo(foundTarget.getControllerId());
         assertThat(savedTarget).as("Target compared with saved target").isEqualTo(foundTarget);
@@ -861,7 +861,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String knownTargetControllerId = "readTarget";
         controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
-        securityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();
             assertThat(findTargetByControllerID).isNotNull();
             assertThat(findTargetByControllerID.getPollStatus()).isNotNull();

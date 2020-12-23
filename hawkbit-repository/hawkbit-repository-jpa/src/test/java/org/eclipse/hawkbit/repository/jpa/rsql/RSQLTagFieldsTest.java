@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -28,7 +28,7 @@ import io.qameta.allure.Story;
 @Story("RSQL filter target and distribution set tags")
 public class RSQLTagFieldsTest extends AbstractJpaIntegrationTest {
 
-    @Before
+    @BeforeEach
     public void seuptBeforeTest() {
 
         for (int i = 0; i < 5; i++) {

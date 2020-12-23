@@ -13,7 +13,7 @@ import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
@@ -45,8 +45,7 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
-    @Override
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         super.before();
         mvc = createMvcWebAppContext(webApplicationContext).build();

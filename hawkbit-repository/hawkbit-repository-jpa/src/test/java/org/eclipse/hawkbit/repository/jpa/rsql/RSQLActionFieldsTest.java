@@ -20,8 +20,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 
@@ -36,7 +36,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     private JpaTarget target;
     private JpaAction action;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final DistributionSet dsA = testdataFactory.createDistributionSet("daA");
         target = (JpaTarget) targetManagement

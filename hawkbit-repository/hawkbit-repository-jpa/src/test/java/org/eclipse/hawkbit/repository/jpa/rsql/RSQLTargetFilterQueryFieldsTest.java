@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 
 import io.qameta.allure.Description;
@@ -32,7 +32,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
     private TargetFilterQuery filter1;
     private TargetFilterQuery filter2;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() throws InterruptedException {
         final String filterName1 = "filter_a";
         final String filterName2 = "filter_b";

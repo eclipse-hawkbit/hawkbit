@@ -31,8 +31,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
@@ -50,7 +50,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Autowired
     private MyEventListener eventListener;
 
-    @Before
+    @BeforeEach
     public void beforeTest() {
         eventListener.queue.clear();
     }

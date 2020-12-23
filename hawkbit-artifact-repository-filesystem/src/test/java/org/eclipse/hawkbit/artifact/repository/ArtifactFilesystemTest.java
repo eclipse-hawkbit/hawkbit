@@ -17,11 +17,12 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.junit.Test;
+
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Artifact File System Repository")
 @Story("Test storing artifact binaries in the file-system")
