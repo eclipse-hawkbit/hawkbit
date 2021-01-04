@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.ui.UI;

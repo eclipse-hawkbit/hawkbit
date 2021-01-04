@@ -13,11 +13,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import io.qameta.allure.Feature;
@@ -28,7 +28,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Unit Tests - Security")
 @Story("Exclude path aware shallow ETag filter")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ControllerPreAuthenticatedAnonymousDownloadTest {
 
     private ControllerPreAuthenticatedAnonymousDownload underTest;
@@ -39,7 +39,7 @@ public class ControllerPreAuthenticatedAnonymousDownloadTest {
     @Mock
     private TenantAware tenantAwareMock;
 
-    @Before
+    @BeforeEach
     public void before() {
         underTest = new ControllerPreAuthenticatedAnonymousDownload(tenantConfigurationManagementMock, tenantAwareMock,
                 new SystemSecurityContext(tenantAwareMock));
