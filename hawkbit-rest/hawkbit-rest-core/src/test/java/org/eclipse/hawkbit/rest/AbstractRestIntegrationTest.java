@@ -47,7 +47,6 @@ public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTes
 
     @BeforeEach
     public void before() throws Exception {
-        super.before();
         mvc = createMvcWebAppContext(webApplicationContext).build();
     }
 

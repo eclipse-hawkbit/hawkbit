@@ -347,7 +347,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     @BeforeEach
-    public void before() throws Exception {
+    public void beforeAll() throws Exception {
 
         final String description = "Updated description.";
 
