@@ -190,7 +190,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI interface against to many
          * requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -306,7 +306,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI download interface against
          * to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -396,7 +396,7 @@ public class SecurityManagedConfiguration {
     /**
      * Filter to protect the hawkBit server system management interface against
      * to many requests.
-     * 
+     *
      * @param securityProperties
      *            for filter configuration
      *
@@ -497,7 +497,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -625,7 +625,7 @@ public class SecurityManagedConfiguration {
 
         /**
          * Filter to protect the hawkBit management UI against to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -727,6 +727,11 @@ public class SecurityManagedConfiguration {
                     .logoutSuccessHandler(logoutSuccessHandler);
         }
 
+        /**
+         * HttpFirewall which enables to define a list of allowed host names.
+         *
+         * @return the http firewall.
+         */
         @Bean
         public HttpFirewall httpFirewall() {
             final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
@@ -736,7 +741,8 @@ public class SecurityManagedConfiguration {
             if (!CollectionUtils.isEmpty(allowedHostNames)) {
                 firewall.setAllowedHostnames(hostName -> {
                     LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
-                    return allowedHostNames.contains(hostName);});
+                    return allowedHostNames.contains(hostName);
+                });
             }
             return firewall;
         }
