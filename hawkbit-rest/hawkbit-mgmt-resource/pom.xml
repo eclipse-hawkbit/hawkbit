@@ -40,7 +40,6 @@
       <dependency>
          <groupId>org.springframework.plugin</groupId>
          <artifactId>spring-plugin-core</artifactId>
-         <version>${spring.plugin.core.version}</version>
       </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>
