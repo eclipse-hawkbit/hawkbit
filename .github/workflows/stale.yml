@@ -1,0 +1,23 @@
+name: Mark & close stale issues
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          repo-token: ${{ secrets.PAT_SECRET }}
+          days-before-stale: -1
+          days-before-close: 15
+          stale-issue-label: 'awaiting'
+          close-issue-message: |-
+            There has been no response from the original author so I closed this issue.
+            Please reach out if you have or find the answers we need so that we can investigate further.
+          only-labels: 'awaiting'
+          skip-stale-issue-message: 'true'
+          skip-stale-pr-message: 'true'
