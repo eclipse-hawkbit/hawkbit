@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: actions/stale@v3
         with:
-          repo-token: ${{ secrets.HAWKBIT_BOT_PAT }}
+          repo-token: ${{ secrets.PAT_SECRET }}
           days-before-stale: -1
           days-before-close: 15
           stale-issue-label: 'awaiting'
