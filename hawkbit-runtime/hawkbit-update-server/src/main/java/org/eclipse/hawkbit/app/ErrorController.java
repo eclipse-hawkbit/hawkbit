@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.app;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -23,22 +25,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 /**
  * Error page controller that ensures that ocet stream does not return text in
  * case of an error.
- *
  */
 @Controller
 // Exception squid:S3752 - errors need handling for all methods
 @SuppressWarnings("squid:S3752")
-public class StreamAwareErrorController extends BasicErrorController {
+public class ErrorController extends BasicErrorController {
+
+    private static final String PATH = "path";
 
     /**
-     * A new {@link StreamAwareErrorController}.
+     * A new {@link ErrorController}.
      * 
      * @param errorAttributes
      *            the error attributes
      * @param serverProperties
      *            configuration properties
      */
-    public StreamAwareErrorController(final ErrorAttributes errorAttributes, final ServerProperties serverProperties) {
+    public ErrorController(final ErrorAttributes errorAttributes, final ServerProperties serverProperties) {
         super(errorAttributes, serverProperties.getError());
     }
 
@@ -48,4 +51,19 @@ public class StreamAwareErrorController extends BasicErrorController {
         return new ResponseEntity<>(status);
     }
 
+    @Override
+    @RequestMapping
+    public ResponseEntity<Map<String, Object>> error(final HttpServletRequest request) {
+        final HttpStatus status = getStatus(request);
+        final Map<String, Object> body = getErrorAttributesWithoutPath(request);
+        return new ResponseEntity<>(body, status);
+    }
+
+    private Map<String, Object> getErrorAttributesWithoutPath(final HttpServletRequest request) {
+        final Map<String, Object> body = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.ALL));
+        if (body != null && body.containsKey(PATH)) {
+            body.remove(PATH);
+        }
+        return body;
+    }
 }
