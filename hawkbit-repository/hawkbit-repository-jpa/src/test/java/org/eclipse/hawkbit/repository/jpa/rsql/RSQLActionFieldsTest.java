@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.orm.jpa.vendor.Database;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -55,7 +56,7 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
             final JpaAction newAction = new JpaAction();
             newAction.setActionType(ActionType.SOFT);
             newAction.setDistributionSet(dsA);
-            newAction.setActive(i % 2 == 0);
+            newAction.setActive((i % 2) == 0);
             newAction.setStatus(Status.RUNNING);
             newAction.setTarget(target);
             newAction.setWeight(45);
@@ -71,9 +72,18 @@ public class RSQLActionFieldsTest extends AbstractJpaIntegrationTest {
     public void testFilterByParameterId() {
         assertRSQLQuery(ActionFields.ID.name() + "==" + action.getId(), 1);
         assertRSQLQuery(ActionFields.ID.name() + "!=" + action.getId(), 10);
-        assertRSQLQuery(ActionFields.ID.name() + "==noExist*", 0);
-        assertRSQLQuery(ActionFields.ID.name() + "=in=(" + action.getId() + ",1000000)", 1);
-        assertRSQLQuery(ActionFields.ID.name() + "=out=(" + action.getId() + ",1000000)", 10);
+        assertRSQLQuery(ActionFields.ID.name() + "==" + -1, 0);
+        assertRSQLQuery(ActionFields.ID.name() + "!=" + -1, 11);
+
+        // Not supported for numbers
+        if (Database.POSTGRESQL.equals(getDatabase())) {
+            return;
+        }
+
+        assertRSQLQuery(ActionFields.ID.name() + "==*", 11);
+        assertRSQLQuery(ActionFields.ID.name() + "==noexist*", 0);
+        assertRSQLQuery(ActionFields.ID.name() + "=in=(" + action.getId() + ",10000000)", 1);
+        assertRSQLQuery(ActionFields.ID.name() + "=out=(" + action.getId() + ",10000000)", 10);
     }
 
     @Test

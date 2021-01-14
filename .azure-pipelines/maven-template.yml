@@ -1,0 +1,50 @@
+parameters:
+  - name: mavenGoals
+    displayName: Maven Goal
+    type: string
+  - name: jdkVersionOption
+    displayName: JDK Version
+    type: string
+    default: "1.8"
+  - name: sonarQubeRunAnalysis
+    displayName: Enable SonarQube analysis
+    type: boolean
+    default: false
+  - name: sonarCloudConnection
+    displayName: Optional SonarCloud connection
+    type: string
+    default: ''
+  - name: sonarCloudOrganization
+    displayName: Optional SonarCloud organization
+    type: string
+    default: '' 
+  - name: mavenCacheFolder
+    displayName: Maven Cache Folder
+    type: string
+    default: $(Pipeline.Workspace)/.m2/repository
+
+steps:
+- task: SonarCloudPrepare@1
+  condition: eq('${{ parameters.sonarQubeRunAnalysis }}', true)
+  displayName: 'Prepare SonarCloud analysis configuration'
+  inputs:
+    SonarCloud: ${{ parameters.sonarCloudConnection }}
+    organization: ${{ parameters.sonarCloudOrganization }}
+    scannerMode: Other
+- task: Cache@2
+  inputs:
+    key: 'maven | "$(Agent.OS)" | "${{ parameters.jdkVersionOption }}" | **/pom.xml'
+    path: ${{ parameters.mavenCacheFolder }}
+    displayName: Cache Maven local repo
+- task: Maven@3
+  inputs:
+    mavenPomFile: "pom.xml"
+    mavenOptions: "-Xmx3072m"
+    javaHomeOption: "JDKVersion"
+    jdkVersionOption: ${{ parameters.jdkVersionOption }}
+    jdkArchitectureOption: "x64"
+    publishJUnitResults: true    
+    sonarQubeRunAnalysis: ${{ parameters.sonarQubeRunAnalysis }}
+    sqMavenPluginVersionChoice: 'latest'
+    testResultsFiles: "**/surefire-reports/TEST-*.xml"
+    goals: "${{ parameters.mavenGoals }} -Dmaven.repo.local=${{ parameters.mavenCacheFolder }}"

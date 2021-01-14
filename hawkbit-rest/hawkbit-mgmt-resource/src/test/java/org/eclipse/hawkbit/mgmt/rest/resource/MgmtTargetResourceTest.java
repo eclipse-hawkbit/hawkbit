@@ -64,12 +64,15 @@ import org.eclipse.hawkbit.util.IpUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
@@ -112,6 +115,9 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
+
+    @Autowired
+    private JpaProperties jpaProperties;
 
     @Test
     @Description("Ensures that actions list is in exptected order.")
@@ -2015,11 +2021,22 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assignDistributionSet(dsId, targetId, customWeightHigh);
         assignDistributionSet(dsId, targetId, customWeightLow);
 
-        mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC")).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("content.[0].weight").doesNotExist())
-                .andExpect(jsonPath("content.[1].weight", equalTo(customWeightLow)))
-                .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
+        // POSTGRESQL sets null values at the end, not the beginning
+        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
+            mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
+                    .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("content.[0].weight", equalTo(customWeightLow)))
+                    .andExpect(jsonPath("content.[1].weight", equalTo(customWeightHigh)))
+                    .andExpect(jsonPath("content.[2].weight").doesNotExist());
+        } else {
+            mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
+                    .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("content.[0].weight").doesNotExist())
+                    .andExpect(jsonPath("content.[1].weight", equalTo(customWeightLow)))
+                    .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
+        }
 
     }
 
