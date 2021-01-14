@@ -15,6 +15,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import com.google.common.collect.Maps;
+
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -123,8 +125,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
-
-import com.google.common.collect.Maps;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -426,8 +426,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    SystemManagement systemManagement() {
-        return new JpaSystemManagement();
+    SystemManagement systemManagement(final JpaProperties properties) {
+        return new JpaSystemManagement(properties);
     }
 
     /**
@@ -760,8 +760,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
-                                         final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-                                         final PlatformTransactionManager transactionManager) {
+            final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
+            final PlatformTransactionManager transactionManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager);
     }
