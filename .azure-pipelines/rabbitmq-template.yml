@@ -1,0 +1,9 @@
+parameters:
+  - name: rabbitmqVersion
+    displayName: RabbitMQ Version
+    type: string
+    default: "3.8"
+
+steps:
+  - script: docker run -d --name rabbit -p 15672:15672 -p 5672:5672 -e RABBITMQ_DEFAULT_VHOST=/ rabbitmq:${{ parameters.rabbitmqVersion }}-management
+    displayName: "Setup RabbitMQ docker instance"

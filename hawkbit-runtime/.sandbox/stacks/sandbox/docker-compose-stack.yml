@@ -37,8 +37,8 @@ services:
     - 'SPRING_RABBITMQ_HOST=rabbitmq'
     - 'SPRING_RABBITMQ_USERNAME=guest'
     - 'SPRING_RABBITMQ_PASSWORD=guest'
-    - 'VIRTUAL_HOST=hawkbit.eclipse.org'
-    - 'LETSENCRYPT_HOST=hawkbit.eclipse.org'
+    - 'VIRTUAL_HOST=hawkbit.eclipseprojects.io'
+    - 'LETSENCRYPT_HOST=hawkbit.eclipseprojects.io'
 
   # ---------------------
   # hawkBit simulator

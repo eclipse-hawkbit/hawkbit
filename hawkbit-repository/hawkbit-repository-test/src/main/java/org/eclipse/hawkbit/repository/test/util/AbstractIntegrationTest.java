@@ -107,7 +107,8 @@ import com.google.common.io.Files;
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
-        MySqlTestDatabase.class, MsSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+        MySqlTestDatabase.class, MsSqlTestDatabase.class,
+        PostgreSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);

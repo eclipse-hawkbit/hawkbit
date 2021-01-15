@@ -182,7 +182,6 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID_CANCELED)),
                         requestFields(optionalRequestFieldWithPath("id").description(DdiApiModelProperties.ACTION_ID),
-                                optionalRequestFieldWithPath("time").description(DdiApiModelProperties.TARGET_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
@@ -386,7 +385,6 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID)),
 
                         requestFields(optionalRequestFieldWithPath("id").description(DdiApiModelProperties.ACTION_ID),
-                                optionalRequestFieldWithPath("time").description(DdiApiModelProperties.TARGET_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")

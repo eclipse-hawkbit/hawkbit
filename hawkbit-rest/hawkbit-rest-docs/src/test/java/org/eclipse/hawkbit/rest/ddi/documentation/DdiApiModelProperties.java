@@ -16,8 +16,6 @@ final class DdiApiModelProperties {
     // Direct Device Integration API
     static final String CONTROLLER_ID = "id of the controller";
 
-    static final String TARGET_TIME = "time on the target device";
-
     static final String TARGET_STATUS = "target action status";
 
     static final String TARGET_EXEC_STATUS = "status of the action execution";
