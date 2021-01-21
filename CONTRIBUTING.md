@@ -95,6 +95,21 @@ You do this by adding the `-s` flag when you make the commit(s), e.g.
 
     git commit -s -m "Shave the yak some more"
 
+### License Header
+
+Please make sure newly created files contain a proper license header like this:
+
+```
+/**
+ * Copyright (c) <year> <author> and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ */
+```
+
 ## Making your changes
 
 * Fork the repository on GitHub
