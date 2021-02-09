@@ -22,3 +22,19 @@
 ## Milestone 0.3.0M6
 ### Configuration Property changes
 - hawkbit.server.security.dos.maxTargetsPerManualAssignment has changed to hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment
+
+## Bug in migration script V1_12_16
+The PR #1017 added the DB migartion script V1_12_16 which contained a bug. An error is thrown if it is applied to a
+- DB2 database
+- MSSQL database if the sp_action table is not empty
+- PostgreSql database if the sp_action table is not empty
+
+The bug was fixed with PR #1061.
+
+### Upgrading Hawkbit version that contains the bug
+In case you are using PostgreSQL or MSSQL, run a version of the Hawkbit containing the bug and want to upgrade to a version that contains the fix, the startup will fail with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
+This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version "1.12.16" has to be changed:
+- -1684307461 for MSSQL
+- -596342656 for PostgreSql
+
+Example for MSSQL: `UPDATE schema_version SET checksum=-1684307461 WHERE version='1.12.16'`
