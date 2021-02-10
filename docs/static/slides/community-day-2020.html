@@ -1,0 +1,185 @@
+<!--
+  ~ Copyright (c) 2020 Bosch.IO GmbH and others.
+  ~
+  ~ All rights reserved. This program and the accompanying materials
+  ~ are made available under the terms of the Eclipse Public License v1.0
+  ~ which accompanies this distribution, and is available at
+  ~ http://www.eclipse.org/legal/epl-v10.html
+  -->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Eclipse hawkBit</title>
+
+    <meta name="description" content="Eclipse hawkBit - Community Day 2020">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/hawkBit.css" id="theme">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.3.1/css/all.css"
+        integrity="sha384-mzrmE5qonljUremFsqc01SB46JvROS7bZs3IO2EmfFsd15uHvIt+Y8vEf7N7fWAU" crossorigin="anonymous">
+
+<body>
+    <div class="reveal">
+        <div class="header">
+            <img src="resources/images/hawkbit_logo.png" width="120px" align="right" />
+        </div>
+        <div class="slides">
+            <section>
+                <div class="intro">
+                    <h1>Community Day - Eclipse hawkBit</h1>
+                    <h6>EclipseCon Europe 2020</h6>
+                </div>
+            </section>
+            <section>
+                <h1>About</h1>
+                <p>
+                    Eclipse hawkBit aims to create a <b>domain independent</b> back end solution for rolling out
+                    <b>software
+                        updates</b>
+                    to constrained edge devices as well as more powerful controllers and gateways connected to IP based
+                    networking infrastructure
+                </p>
+            </section>
+            <section>
+                <h1>Big picture</h1>
+                <img src="resources/images/hawkBit_overview.jpg">
+            </section>
+            <section>
+                <h1>Statistics (10/2020)</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit">hawkbit Core</a>: 261
+                        (+54)
+                        stars, 797 (+80) PRs, 185 (+13) issues</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit-extensions">hawkbit
+                            Extensions</a>: 46 (+5) PRs</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://github.com/eclipse/hawkbit-examples">hawkbit
+                            Examples</a>: 39 (+4) PRs</li>
+                    <li style="margin-bottom: 0.5em"><a href="https://hub.docker.com/u/hawkbit/">Docker Hub</a>: 100K+
+                        (+50K)
+                        PULLS</li>
+                </ul>
+            </section>
+            <section>
+                <h1>We have been busy</h1>
+                <ul style="position:absolute; left:2em;">
+                    <li style="margin-bottom: 0.5em">Migrate hawkBit UI to VAADIN 8 (<a
+                            href="https://github.com/eclipse/hawkbit/pull/980">#980</a>)</li>
+                    <li style="margin-bottom: 0.5em">Support PostgreSQL (<a
+                            href="https://github.com/eclipse/hawkbit/pull/932">#932</a>)</li>
+                    <li style="margin-bottom: 0.5em">Allowing artifact download from within the UI (<a
+                            href="https://github.com/eclipse/hawkbit/pull/944">#944</a>)</li>
+                    <li style="margin-bottom: 0.5em">Fix XSS Vulnerability (<a
+                            href="https://github.com/eclipse/hawkbit/pull/924">#924</a>)</li>
+                    <li style="margin-bottom: 0.5em">Management API supports SHA256 file hashes of artifacts (<a
+                            href="https://github.com/eclipse/hawkbit/pull/918">#918</a>)</li>
+                    <li style="margin-bottom: 0.5em">Add Stackoverflow tag for hawkBit (<a
+                            href="https://github.com/eclipse/hawkbit/issues/923">#923</a>)</li>
+                    <li style="margin-bottom: 0.5em">... and <a
+                            href="https://github.com/eclipse/hawkbit/pulls?utf8=✓&q=created%3A%3E%3D2019-10-25">many
+                            smaller enhancements and bug fixes </a></li>
+                </ul>
+            </section>
+
+            <section>
+                <h1>Current challenges and next steps</h1>
+                <ul style="position:absolute; left:2em;">
+
+                    <li style="margin-bottom: 0.5em">Release 0.3.0 (<a
+                            href="https://github.com/eclipse/hawkbit/issues/784">#784</a>)</li>
+                    <li style="margin-bottom: 0.5em">Update from EPL-1.0 to EPL-2.0 (<a
+                            href="https://github.com/eclipse/hawkbit/issues/1008">#1008</a>)</li>
+                    <li style="margin-bottom: 0.5em">Migrate hawkBit to Spring Boot 2.3.x (<a
+                            href="https://github.com/eclipse/hawkbit/issues/999">#999</a>)</li>
+                    <li style="margin-bottom: 0.5em">Integration with other device inventories (<a
+                            href="https://github.com/eclipse/hawkbit/issues/796">#796</a>)</li>
+                </ul>
+            </section>
+
+
+            <section>
+                <h1>Thank you</h1>
+                <div style="font-size: 1.5em; position:absolute; left:2em;">
+                    <p><i class="fab fa-gitter fa-fw"></i>&nbsp;<a
+                            href="https://gitter.im/eclipse/hawkbit">eclipse/hawkbit</a></p>
+                    <p><i class="fab fa-github fa-fw"></i>&nbsp;<a
+                            href="https://github.com/eclipse/hawkbit">eclipse/hawkbit</a></p>
+                    <p><i class="fa fa-book-open fa-fw"></i>&nbsp;<a
+                            href="http://www.eclipse.org/hawkbit">eclipse.org/hawkbit</a></p>
+                    <p><i class="fab fa-stack-overflow fa-fw"></i>&nbsp;<a
+                            href="https://stackoverflow.com/questions/tagged/eclipse-hawkbit">eclipse-hawkbit</a></p>
+                </div>
+            </section>
+        </div>
+    </div>
+    <div class="footer">
+        <a href="http://www.eclipse.org" target="_blank">Eclipse Foundation</a> |
+        <a href="http://www.eclipse.org/legal/privacy.php" target="_blank">Privacy Policy</a> |
+        <a href="http://www.eclipse.org/legal/termsofuse.php" target="_blank">Terms of Use</a> |
+        <a href="http://www.eclipse.org/legal/copyright.php" target="_blank">Copyright Agent</a> |
+        <a href="http://www.eclipse.org/legal" target="_blank">Legal</a>
+    </div>
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.js"></script>
+
+    <script>
+        // Full list of configuration options available at:
+        // https://github.com/hakimel/reveal.js#configuration
+        Reveal.initialize({
+            controls: false,
+            progress: true,
+            history: true,
+            center: true,
+
+            transition: 'convex', // none/fade/slide/convex/concave/zoom
+
+            // Optional reveal.js plugins
+            dependencies: [{
+                src: 'lib/js/classList.js',
+                condition: function () {
+                    return !document.body.classList;
+                }
+            }, {
+                src: 'plugin/markdown/marked.js',
+                condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            }, {
+                src: 'plugin/markdown/markdown.js',
+                condition: function () {
+                    return !!document.querySelector('[data-markdown]');
+                }
+            }, {
+                src: 'plugin/highlight/highlight.js',
+                async: true,
+                condition: function () {
+                    return !!document.querySelector('pre code');
+                },
+                callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }, {
+                src: 'plugin/zoom-js/zoom.js',
+                async: true
+            }, {
+                src: 'plugin/notes/notes.js',
+                async: true
+            }]
+        });
+
+        Reveal.configure({
+            slideNumber: true
+        });
+    </script>
+
+</body>
+
+</html>
