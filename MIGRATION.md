@@ -1,3 +1,4 @@
+
 # hawkBit Migration Guides
 ## Release 0.2
 ### Configuration Property changes
@@ -23,17 +24,17 @@
 ### Configuration Property changes
 - hawkbit.server.security.dos.maxTargetsPerManualAssignment has changed to hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment
 
-## Bug in migration script V1_12_16
-The PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) added the DB migartion script V1_12_16 which contained a bug. An error is thrown if it is applied to a
-- DB2 database
-- MSSQL database if the sp_action table is not empty
-- PostgreSql database if the sp_action table is not empty
+## Upgrade from Master Branch between 0.3.0M6 and 0.3.0M7 to 0.3.0M7
+Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) the Hawkbit will not start up if one of the following cases is true:
+- DB2 database is used
+- MSSQL database is used and the sp_action table is not empty
+- PostgreSql database is used and the sp_action table is not empty
 
-The bug was fixed with PR [#1061](https://github.com/eclipse/hawkbit/pull/1061).
+The script was fixed with PR [#1061](https://github.com/eclipse/hawkbit/pull/1061).
 
-### Upgrading Hawkbit version that contains the bug
-In case you are using PostgreSQL or MSSQL, run a version of the Hawkbit containing the bug and want to upgrade to a version that contains the fix, the startup will fail with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
-This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version 1.12.16 has to be changed:
+In case you upgrade from 0.3.0M6 to 0.3.0M7 there is no issue. But if you have built the Hawkbit from the master branch between PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) and PR [#1061](https://github.com/eclipse/hawkbit/pull/1061), use PostgreSQL or MSSQL and upgrade to 0.3.0M7, it will fail at startup with the message: `Validate failed: Migration checksum mismatch for migration version 1.12.16`
+
+This can be fixed by adapting the schema_version table of the database. The checksum field of the entry with the version 1.12.16 has to be changed (mind the minus):
 - -1684307461 for MSSQL
 - -596342656 for PostgreSql
 
