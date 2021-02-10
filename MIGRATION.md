@@ -24,7 +24,7 @@
 ### Configuration Property changes
 - hawkbit.server.security.dos.maxTargetsPerManualAssignment has changed to hawkbit.server.security.dos.maxTargetDistributionSetAssignmentsPerManualAssignment
 
-## Upgrade from Master Branch between 0.3.0M6 and 0.3.0M7 to 0.3.0M7
+## Upgrade from Master Branch (after 0.3.0M6) to 0.3.0M7
 Due to changes in the DB migration scripts within PR [#1017](https://github.com/eclipse/hawkbit/pull/1017) the Hawkbit will not start up if one of the following cases is true:
 - DB2 database is used
 - MSSQL database is used and the sp_action table is not empty
