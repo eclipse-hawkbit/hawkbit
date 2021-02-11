@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
@@ -32,6 +33,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @ContextConfiguration(classes = { RestConfiguration.class, RepositoryApplicationConfiguration.class,
         TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @AutoConfigureMockMvc
+@TestPropertySource(locations = { "classpath:/rest-test.properties" })
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
     protected MockMvc mvc;

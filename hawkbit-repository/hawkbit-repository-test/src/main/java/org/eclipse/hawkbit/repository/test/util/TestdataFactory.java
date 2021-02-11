@@ -1138,8 +1138,8 @@ public class TestdataFactory {
      * @return created {@link Rollout}
      */
     public Rollout createRollout(final String prefix) {
-        createTargets(10, prefix);
-        return createRolloutByVariables(prefix, prefix + " description", 10, "controllerId==" + prefix + "*",
+        createTargets(5, prefix);
+        return createRolloutByVariables(prefix, prefix + " description", 5, "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
     }
 
