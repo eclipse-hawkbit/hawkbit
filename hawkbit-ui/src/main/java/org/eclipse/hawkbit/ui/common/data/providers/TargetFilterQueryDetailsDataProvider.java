@@ -38,7 +38,7 @@ public class TargetFilterQueryDetailsDataProvider
      */
     public TargetFilterQueryDetailsDataProvider(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetFilterQueryToProxyTargetFilterMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.ASC, "name"));
+        super(entityMapper, Sort.by(Direction.ASC, "name"));
 
         this.targetFilterQueryManagement = targetFilterQueryManagement;
     }

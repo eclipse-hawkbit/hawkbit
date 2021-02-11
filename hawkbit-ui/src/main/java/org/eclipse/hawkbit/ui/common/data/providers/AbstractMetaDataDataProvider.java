@@ -31,7 +31,7 @@ public abstract class AbstractMetaDataDataProvider<U extends MetaData, F>
     private static final long serialVersionUID = 1L;
 
     protected AbstractMetaDataDataProvider() {
-        this(new Sort(Direction.DESC, "key"));
+        this(Sort.by(Direction.DESC, "key"));
     }
 
     protected AbstractMetaDataDataProvider(final Sort defaultSortOrder) {

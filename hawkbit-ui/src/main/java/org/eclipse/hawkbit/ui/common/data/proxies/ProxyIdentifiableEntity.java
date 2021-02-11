@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import java.io.Serializable;
-
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Proxy entity representing the {@link Identifiable} entity, fetched from
@@ -88,6 +87,6 @@ public abstract class ProxyIdentifiableEntity implements Serializable {
 
     @Override
     public String toString() {
-        return id.toString();
+        return String.valueOf(id);
     }
 }

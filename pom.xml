@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.1.4.RELEASE</version>
+      <version>2.3.7.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -127,13 +127,14 @@
    </repositories>
 
    <properties>
-            
+
       <java.version>1.8</java.version>
       <!--       Developer preview         -->
       <!-- <java.version>11</java.version> -->
 
-      <spring.boot.version>2.1.4.RELEASE</spring.boot.version>
-      <spring.cloud.version>Greenwich.RELEASE</spring.cloud.version>
+      <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
+      <spring.cloud.version>Hoxton.SR7</spring.cloud.version>
+      <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
@@ -141,13 +142,11 @@
          upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
-      <rabbitmq.http-client.version>2.1.0.RELEASE</rabbitmq.http-client.version>
-      <!-- Older versions needed than defined in Boot -->
-      <!-- Piggy back existing Eclipse CQs -->
-      <commons-lang3.version>3.7</commons-lang3.version>
-      <classmate.version>1.3.4</classmate.version>
-      <!-- Newer versions (tested 4.5.7) do not seem to work with RabbitMQ management plugin -->
-      <httpclient.version>4.5.6</httpclient.version>
+      <rabbitmq.http-client.version>3.5.0.RELEASE</rabbitmq.http-client.version>
+      <!-- Newer version contains new rule that we violate. Needs to be fixed first -->
+      <hibernate-validator.version>6.0.20.Final</hibernate-validator.version>
+      <!-- Newer community version does not support MySQL 5.6 anymore -->
+      <flyway.version>5.2.4</flyway.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
@@ -162,12 +161,13 @@
 
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
+      <maven.site.plugin.version>3.9.0</maven.site.plugin.version>
 
       <!-- Misc libraries versions - START -->      
       <cron-utils.version>9.1.3</cron-utils.version>
       <jsoup.version>1.11.2</jsoup.version>
       <allure.version>2.13.6</allure.version>
-      <eclipselink.version>2.7.7</eclipselink.version>
+      <eclipselink.version>2.7.3</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <guava.version>25.0-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
@@ -329,12 +329,17 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
                   </validHeaders>
                   <excludes>
+                     <exclude>.azure-pipelines/*</exclude>
+                     <exclude>.devcontainer/*</exclude>
                      <exclude>**/banner.txt</exclude>
                      <exclude>**/helm/**</exclude>
                      <exclude>**/README</exclude>
@@ -458,6 +463,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-site-plugin</artifactId>
+               <version>${maven.site.plugin.version}</version>
                <configuration>
                   <skip>true</skip>
                   <skipDeploy>true</skipDeploy>
@@ -728,6 +734,11 @@
             <artifactId>org.eclipse.persistence.jpa</artifactId>
             <version>${eclipselink.version}</version>
          </dependency>
+         <dependency>
+            <groupId>org.springframework.plugin</groupId>
+            <artifactId>spring-plugin-core</artifactId>
+            <version>${spring.plugin.core.version}</version>
+         </dependency>
 
          <!-- Protostuff Io -->
          <dependency>
@@ -760,6 +771,20 @@
                <exclusion>
                   <groupId>org.springframework.boot</groupId>
                   <artifactId>spring-boot-starter-logging</artifactId>
+               </exclusion>
+               <!-- As long as JUnit 5 is not used, these dependencies can be excluded -->
+               <exclusion>
+                  <groupId>org.junit.jupiter</groupId>
+                  <artifactId>junit-jupiter</artifactId>
+               </exclusion>
+               <!-- Allure JUnit4 does not work with junit-vintage-engine -->
+               <exclusion>
+                  <groupId>org.junit.vintage</groupId>
+                  <artifactId>junit-vintage-engine</artifactId>
+               </exclusion>
+               <exclusion>
+                  <groupId>org.mockito</groupId>
+                  <artifactId>mockito-junit-jupiter</artifactId>
                </exclusion>
             </exclusions>
          </dependency>

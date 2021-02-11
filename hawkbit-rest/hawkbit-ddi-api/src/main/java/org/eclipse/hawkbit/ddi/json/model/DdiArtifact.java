@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * .
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DdiArtifact extends ResourceSupport {
+public class DdiArtifact extends RepresentationModel<DdiArtifact> {
 
     @NotNull
     @JsonProperty

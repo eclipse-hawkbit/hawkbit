@@ -107,12 +107,13 @@ import com.google.common.io.Files;
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
 @TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
-        MySqlTestDatabase.class, MsSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+        MySqlTestDatabase.class, MsSqlTestDatabase.class,
+        PostgreSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable PAGE = PageRequest.of(0, 400, new Sort(Direction.ASC, "id"));
+    protected static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
 

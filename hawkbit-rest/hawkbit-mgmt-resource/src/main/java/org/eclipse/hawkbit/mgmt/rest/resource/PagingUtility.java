@@ -56,106 +56,106 @@ public final class PagingUtility {
     static Sort sanitizeTargetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TargetFields.CONTROLLERID.getFieldName());
+            return Sort.by(Direction.ASC, TargetFields.CONTROLLERID.getFieldName());
         }
-        return new Sort(SortUtility.parse(TargetFields.class, sortParam));
+        return Sort.by(SortUtility.parse(TargetFields.class, sortParam));
     }
 
     static Sort sanitizeTagSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TagFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, TagFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(TagFields.class, sortParam));
+        return Sort.by(SortUtility.parse(TagFields.class, sortParam));
     }
 
     static Sort sanitizeTargetFilterQuerySortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, TargetFilterQueryFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, TargetFilterQueryFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
+        return Sort.by(SortUtility.parse(TargetFilterQueryFields.class, sortParam));
     }
 
     static Sort sanitizeSoftwareModuleSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, SoftwareModuleFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(SoftwareModuleFields.class, sortParam));
+        return Sort.by(SortUtility.parse(SoftwareModuleFields.class, sortParam));
     }
 
     static Sort sanitizeSoftwareModuleTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, SoftwareModuleTypeFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleTypeFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(SoftwareModuleTypeFields.class, sortParam));
+        return Sort.by(SortUtility.parse(SoftwareModuleTypeFields.class, sortParam));
     }
 
     static Sort sanitizeDistributionSetSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, DistributionSetFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(DistributionSetFields.class, sortParam));
+        return Sort.by(SortUtility.parse(DistributionSetFields.class, sortParam));
     }
 
     static Sort sanitizeDistributionSetTypeSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, DistributionSetTypeFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetTypeFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(DistributionSetTypeFields.class, sortParam));
+        return Sort.by(SortUtility.parse(DistributionSetTypeFields.class, sortParam));
     }
 
     static Sort sanitizeActionSortParam(final String sortParam) {
         if (sortParam == null) {
             // default sort is DESC in case of action to match behavior
             // of management UI (last entry on top)
-            return new Sort(Direction.DESC, ActionFields.ID.getFieldName());
+            return Sort.by(Direction.DESC, ActionFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(ActionFields.class, sortParam));
+        return Sort.by(SortUtility.parse(ActionFields.class, sortParam));
     }
 
     static Sort sanitizeActionStatusSortParam(final String sortParam) {
         if (sortParam == null) {
             // default sort is DESC in case of action status to match behavior
             // of management UI (last entry on top)
-            return new Sort(Direction.DESC, ActionStatusFields.ID.getFieldName());
+            return Sort.by(Direction.DESC, ActionStatusFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(ActionStatusFields.class, sortParam));
+        return Sort.by(SortUtility.parse(ActionStatusFields.class, sortParam));
     }
 
     static Sort sanitizeDistributionSetMetadataSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, DistributionSetMetadataFields.KEY.getFieldName());
+            return Sort.by(Direction.ASC, DistributionSetMetadataFields.KEY.getFieldName());
         }
-        return new Sort(SortUtility.parse(DistributionSetMetadataFields.class, sortParam));
+        return Sort.by(SortUtility.parse(DistributionSetMetadataFields.class, sortParam));
     }
 
     static Sort sanitizeSoftwareModuleMetadataSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, SoftwareModuleMetadataFields.KEY.getFieldName());
+            return Sort.by(Direction.ASC, SoftwareModuleMetadataFields.KEY.getFieldName());
         }
-        return new Sort(SortUtility.parse(SoftwareModuleMetadataFields.class, sortParam));
+        return Sort.by(SortUtility.parse(SoftwareModuleMetadataFields.class, sortParam));
     }
 
     static Sort sanitizeRolloutSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, RolloutFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, RolloutFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(RolloutFields.class, sortParam));
+        return Sort.by(SortUtility.parse(RolloutFields.class, sortParam));
     }
 
     static Sort sanitizeRolloutGroupSortParam(final String sortParam) {
         if (sortParam == null) {
             // default
-            return new Sort(Direction.ASC, RolloutGroupFields.ID.getFieldName());
+            return Sort.by(Direction.ASC, RolloutGroupFields.ID.getFieldName());
         }
-        return new Sort(SortUtility.parse(RolloutGroupFields.class, sortParam));
+        return Sort.by(SortUtility.parse(RolloutGroupFields.class, sortParam));
     }
 }

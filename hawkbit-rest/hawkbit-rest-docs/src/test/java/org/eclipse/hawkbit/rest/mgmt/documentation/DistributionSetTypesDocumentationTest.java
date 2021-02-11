@@ -71,7 +71,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(
                 get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.total", equalTo(4)))
                 .andDo(this.document.document(responseFields(
                         fieldWithPath("size").type(JsonFieldType.NUMBER).description(ApiModelPropertiesGeneric.SIZE),
@@ -99,7 +99,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON)
                 .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==a*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(getFilterRequestParamter()));
     }
 
@@ -117,7 +117,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
 
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
                 .content(JsonBuilder.distributionSetTypesCreateValidFieldsOnly(types))
-                .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andDo(
                         this.document.document(
                                 requestFields(
@@ -213,7 +213,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
 
         this.mockMvc
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
-                        testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionSetTypeId")
@@ -249,7 +249,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/mandatorymoduletypes", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
 
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionSetTypeId")
@@ -281,7 +281,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
 
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/mandatorymoduletypes", testType.getId())
-                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .content("{\"id\":" + osType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionSetTypeId")
@@ -299,7 +299,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(delete(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}",
-                testType.getId(), osType.getId()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                testType.getId(), osType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -317,7 +317,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}",
-                testType.getId(), osType.getId()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                testType.getId(), osType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -346,7 +346,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/optionalmoduletypes", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionSetTypeId")
                                 .description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -375,7 +375,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                 entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1"));
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/optionalmoduletypes", testType.getId())
-                        .content("{\"id\":" + appType.getId() + "}").contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .content("{\"id\":" + appType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionSetTypeId")
@@ -394,7 +394,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(delete(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/optionalmoduletypes/{softwareModuleTypeId}",
-                testType.getId(), appType.getId()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                testType.getId(), appType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -411,7 +411,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/optionalmoduletypes/{softwareModuleTypeId}",
-                testType.getId(), appType.getId()).contentType(MediaType.APPLICATION_JSON_UTF8))
+                testType.getId(), appType.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),

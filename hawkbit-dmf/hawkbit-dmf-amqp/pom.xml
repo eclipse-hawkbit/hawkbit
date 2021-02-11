@@ -21,7 +21,6 @@
    <name>hawkBit :: DMF :: AMQP 0.9 Implementation</name>
 
    <dependencies>
-
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-api</artifactId>

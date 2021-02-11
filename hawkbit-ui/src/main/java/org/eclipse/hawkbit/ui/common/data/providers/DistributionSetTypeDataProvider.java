@@ -41,7 +41,7 @@ public class DistributionSetTypeDataProvider<T extends ProxyIdentifiableEntity>
      */
     public DistributionSetTypeDataProvider(final DistributionSetTypeManagement distributionSetTypeManagement,
             final IdentifiableEntityToProxyIdentifiableEntityMapper<T, DistributionSetType> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by(Direction.ASC, "name"));
 
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }

@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.tenantconfiguration.repository;
 
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRepository;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -39,7 +39,7 @@ public class MultiAssignmentsConfigurationItem extends VerticalLayout {
      *            System config window binder
      */
     public MultiAssignmentsConfigurationItem(final VaadinMessageSource i18n,
-            final Binder<ProxySystemConfigWindow> binder) {
+            final Binder<ProxySystemConfigRepository> binder) {
         this.i18n = i18n;
         this.setSpacing(false);
         this.setMargin(false);

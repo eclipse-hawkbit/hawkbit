@@ -114,8 +114,8 @@ public class SwModulesToDistributionSetAssignmentSupport
             return false;
         }
 
-        if (targetManagement.countByFilters(null, null, null, ds.getId(), Boolean.FALSE, "") > 0) {
-            /* Distribution is already assigned */
+        if (targetManagement.existsByInstalledOrAssignedDistributionSet(ds.getId())) {
+            /* Distribution is already assigned/installed */
             notification.displayValidationError(i18n.getMessage("message.dist.inuse", ds.getNameVersion()));
             return false;
         }

@@ -10,12 +10,12 @@ package org.eclipse.hawkbit.ui.common.data.providers;
 
 import java.util.stream.Stream;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.ui.common.data.mappers.IdentifiableEntityToProxyIdentifiableEntityMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Base class for loading a batch of {@link Identifiable} entities from backend
@@ -41,7 +41,7 @@ public abstract class AbstractProxyDataProvider<T extends ProxyIdentifiableEntit
      *          IdentifiableEntityToProxyIdentifiableEntityMapper of generic type
      */
     public AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper) {
-        this(mapper, new Sort(Direction.ASC, "id"));
+        this(mapper, Sort.by(Direction.ASC, "id"));
     }
 
     /**

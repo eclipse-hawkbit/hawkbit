@@ -37,7 +37,7 @@ public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, T
      */
     public TargetTagDataProvider(final TargetTagManagement tagManagementService,
             final TagToProxyTagMapper<TargetTag> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by(Direction.ASC, "name"));
 
         this.tagManagementService = tagManagementService;
     }

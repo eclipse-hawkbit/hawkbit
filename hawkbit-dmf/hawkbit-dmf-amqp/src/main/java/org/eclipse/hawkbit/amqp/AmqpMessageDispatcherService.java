@@ -139,18 +139,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(assignedEvent)) {
             return;
         }
-
         LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-
         distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
-
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
-
             targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
                     target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
                             target, softwareModules));
-
         });
     }
 
@@ -186,7 +181,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                                 action -> action.getDistributionSet().getModules().stream()
                                         .collect(Collectors.toMap(m -> m, softwareModuleMetadata::get)));
                     }
-
                 });
 
     }
@@ -194,8 +188,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     protected void sendMultiActionRequestToTarget(final String tenant, final Target target, final List<Action> actions,
             final Function<Action, Map<SoftwareModule, List<SoftwareModuleMetadata>>> getSoftwareModuleMetaData) {
 
-        final URI targetAdress = target.getAddress();
-        if (!IpUtil.isAmqpUri(targetAdress) || CollectionUtils.isEmpty(actions)) {
+        final URI targetAddress = target.getAddress();
+        if (!IpUtil.isAmqpUri(targetAddress) || CollectionUtils.isEmpty(actions)) {
             return;
         }
 
@@ -209,8 +203,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         final Message message = getMessageConverter().toMessage(multiActionRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), EventTopic.MULTI_ACTION));
-        amqpSenderService.sendMessage(message, targetAdress);
-
+        amqpSenderService.sendMessage(message, targetAddress);
     }
 
     private DmfActionRequest createDmfActionRequest(final Target target, final Action action,
@@ -218,8 +211,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (action.isCancelingOrCanceled()) {
             return createPlainActionRequest(action);
         }
-        return createDownloadAndUpdateRequest(target, action, softwareModules);
-
+        return createDownloadAndUpdateRequest(target, action.getId(), softwareModules);
     }
 
     private static DmfActionRequest createPlainActionRequest(final Action action) {
@@ -228,11 +220,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return actionRequest;
     }
 
-    private DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Action action,
+    protected DmfDownloadAndUpdateRequest createDownloadAndUpdateRequest(final Target target, final Long actionId,
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         final DmfDownloadAndUpdateRequest request = new DmfDownloadAndUpdateRequest();
-        request.setActionId(action.getId());
+        request.setActionId(actionId);
         request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+
         if (softwareModules != null) {
             softwareModules.entrySet()
                     .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
@@ -325,26 +318,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         final String tenant = action.getTenant();
 
-        final URI targetAdress = target.getAddress();
-        if (!IpUtil.isAmqpUri(targetAdress)) {
+        final URI targetAddress = target.getAddress();
+        if (!IpUtil.isAmqpUri(targetAddress)) {
             return;
         }
 
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = new DmfDownloadAndUpdateRequest();
-        downloadAndUpdateRequest.setActionId(action.getId());
-
-        final String targetSecurityToken = systemSecurityContext.runAsSystem(target::getSecurityToken);
-        downloadAndUpdateRequest.setTargetSecurityToken(targetSecurityToken);
-
-        modules.entrySet().forEach(entry -> {
-
-            final DmfSoftwareModule amqpSoftwareModule = convertToAmqpSoftwareModule(target, entry);
-            downloadAndUpdateRequest.addSoftwareModule(amqpSoftwareModule);
-        });
-
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = createDownloadAndUpdateRequest(target, action.getId(), modules);
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), getEventTypeForTarget(action)));
-        amqpSenderService.sendMessage(message, targetAdress);
+        amqpSenderService.sendMessage(message, targetAddress);
     }
 
     protected void sendPingReponseToDmfReceiver(final Message ping, final String tenant, final String virtualHost) {
@@ -359,7 +341,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private void sendDeleteMessage(final String tenant, final String controllerId, final String targetAddress) {
-
         if (!hasValidAddress(targetAddress)) {
             return;
         }
