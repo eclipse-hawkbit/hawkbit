@@ -28,7 +28,6 @@ import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.hateoas.Identifiable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -70,7 +69,7 @@ public interface ArtifactManagement {
 
     /**
      * Garbage collects artifact binaries if only referenced by given
-     * {@link SoftwareModule#getId()} or {@link SoftwareModules} that are marged
+     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are marked
      * as deleted.
      * 
      *

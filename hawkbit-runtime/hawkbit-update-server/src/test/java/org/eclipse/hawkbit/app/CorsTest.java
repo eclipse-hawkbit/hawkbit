@@ -23,8 +23,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -36,33 +38,19 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(properties = { "hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
-        "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + ","
-                + CorsTest.ALLOWED_ORIGIN_SECOND })
-@TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class,
-        PostgreSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
+@SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
+        "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + "," + CorsTest.ALLOWED_ORIGIN_SECOND})
+@TestExecutionListeners(listeners = { MySqlTestDatabase.class, MsSqlTestDatabase.class }, 
+        mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @Feature("Integration Test - Security")
 @Story("CORS")
-public class CorsTest {
+public class CorsTest extends AbstractSecurityTest {
 
     final static String ALLOWED_ORIGIN_FIRST = "http://test.first.origin";
     final static String ALLOWED_ORIGIN_SECOND = "http://test.second.origin";
 
     private final static String INVALID_ORIGIN = "http://test.invalid.origin";
     private final static String INVALID_CORS_REQUEST = "Invalid CORS request";
-
-    @Autowired
-    private WebApplicationContext context;
-
-    private MockMvc mvc;
-
-    @Before
-    public void setup() {
-        final DefaultMockMvcBuilder builder = MockMvcBuilders.webAppContextSetup(context)
-                .apply(SecurityMockMvcConfigurers.springSecurity()).dispatchOptions(true);
-        mvc = builder.build();
-    }
 
     @WithUserDetails("admin")
     @Test

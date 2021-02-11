@@ -145,9 +145,8 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     protected RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties properties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
+        super(dataSource, properties, jtaTransactionManagerProvider);
     }
 
     @Bean
@@ -410,12 +409,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link MultiTenantJpaTransactionManager} bean.
      *
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager()
+     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
      * @return a new {@link PlatformTransactionManager}
      */
     @Override
     @Bean
-    public PlatformTransactionManager transactionManager() {
+    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         return new MultiTenantJpaTransactionManager();
     }
 

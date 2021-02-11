@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class DdiControllerBase extends ResourceSupport {
+public class DdiControllerBase extends RepresentationModel<DdiControllerBase> {
 
     @JsonProperty
     private DdiConfig config;

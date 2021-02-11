@@ -8,10 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.repository.Identifiable;
+
 import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
-
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Core information of all entities.

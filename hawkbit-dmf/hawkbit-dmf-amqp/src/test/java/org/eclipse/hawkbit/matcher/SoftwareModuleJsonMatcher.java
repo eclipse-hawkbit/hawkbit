@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
-import org.hamcrest.Factory;
 
 /**
  * Set matcher for {@link SoftwareModule} and a list of
@@ -44,7 +43,6 @@ public final class SoftwareModuleJsonMatcher {
      * @param expectedModules
      *            the json sofware modules.
      */
-    @Factory
     public static SoftwareModulesMatcher containsExactly(final List<DmfSoftwareModule> expectedModules) {
         return new SoftwareModulesMatcher(expectedModules);
     }

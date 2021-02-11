@@ -65,7 +65,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyTagMatcherOnPagedResult(assigned)).andExpect(applyTagMatcherOnPagedResult(unassigned))
                 .andExpect(applySelfLinkMatcherOnPagedResult(assigned, TARGETTAGS_ROOT + assigned.getId()))
                 .andExpect(applySelfLinkMatcherOnPagedResult(unassigned, TARGETTAGS_ROOT + unassigned.getId()))
@@ -84,7 +84,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
 
         mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(TARGETTAGS_ROOT + assigned.getId()))
                 .andExpect(jsonPath("_links.assignedTargets.href",
@@ -106,7 +106,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(JsonBuilder.tags(Arrays.asList(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag createdOne = targetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
@@ -136,7 +136,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                         .content(JsonBuilder.tag(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag updated = targetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
@@ -258,7 +258,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                                         targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
                                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
@@ -276,7 +276,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                                 targets.stream().map(Target::getControllerId).collect(Collectors.toList())))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final List<Target> updated = targetManagement.findByTag(PAGE, tag.getId()).getContent();
 

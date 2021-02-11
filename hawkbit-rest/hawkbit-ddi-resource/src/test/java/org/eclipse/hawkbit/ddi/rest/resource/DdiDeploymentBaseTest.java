@@ -187,7 +187,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON_UTF8, ds, artifact,
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
 
@@ -287,7 +287,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON_UTF8, ds,
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds,
                 visibleMetadataOsKey, visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt",
                 "attempt", getOsModule(findDistributionSetByAction));
 
@@ -347,11 +347,11 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON_UTF8, ds, artifact,
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON_UTF8, ds, artifact,
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact,
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
 
@@ -415,7 +415,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON_UTF8, ds, "metaDataVisible",
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, "metaDataVisible",
                 "withValue", artifact, artifactSignature, action.getId(), "forced", "skip",
                 getOsModule(findDistributionSetByAction));
 
