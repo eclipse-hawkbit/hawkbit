@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRepository;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -68,7 +68,7 @@ public class ActionAutoCleanupConfigurationItem extends VerticalLayout {
      * @param i18n
      *            VaadinMessageSource
      */
-    public ActionAutoCleanupConfigurationItem(final Binder<ProxySystemConfigWindow> binder,
+    public ActionAutoCleanupConfigurationItem(final Binder<ProxySystemConfigRepository> binder,
             final VaadinMessageSource i18n) {
         this.i18n = i18n;
         this.setSpacing(false);
@@ -84,8 +84,8 @@ public class ActionAutoCleanupConfigurationItem extends VerticalLayout {
         actionStatusCombobox.removeStyleName(ValoTheme.COMBOBOX_SMALL);
         actionStatusCombobox.addStyleName(ValoTheme.COMBOBOX_TINY);
         actionStatusCombobox.setWidth(200.0F, Unit.PIXELS);
-        binder.bind(actionStatusCombobox, ProxySystemConfigWindow::getActionCleanupStatus,
-                ProxySystemConfigWindow::setActionCleanupStatus);
+        binder.bind(actionStatusCombobox, ProxySystemConfigRepository::getActionCleanupStatus,
+                ProxySystemConfigRepository::setActionCleanupStatus);
         actionExpiryInput = new TextFieldBuilder(TenantConfiguration.VALUE_MAX_SIZE).buildTextComponent();
         actionExpiryInput.setId(UIComponentIdProvider.SYSTEM_CONFIGURATION_ACTION_CLEANUP_ACTION_EXPIRY);
         actionExpiryInput.setWidth(55, Unit.PIXELS);
@@ -97,7 +97,7 @@ public class ActionAutoCleanupConfigurationItem extends VerticalLayout {
                     } catch (final NumberFormatException ex) {
                         return ValidationResult.error(i18n.getMessage(MSG_KEY_INVALID_EXPIRY));
                     }
-                }).bind(ProxySystemConfigWindow::getActionExpiryDays, ProxySystemConfigWindow::setActionExpiryDays);
+                }).bind(ProxySystemConfigRepository::getActionExpiryDays, ProxySystemConfigRepository::setActionExpiryDays);
 
         row1.addComponent(newLabel(MSG_KEY_PREFIX));
         row1.addComponent(actionStatusCombobox);

@@ -93,9 +93,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     private <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
-        createConditionFactory().until(() -> {
-            return securityRule.runAsPrivileged(() -> callable.call().isPresent());
-        });
+        createConditionFactory().until(() -> securityRule.runAsPrivileged(() -> callable.call().isPresent()));
 
         try {
             return securityRule.runAsPrivileged(() -> callable.call().get());
@@ -105,10 +103,8 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void waitUntilEventMessagesAreDispatchedToTarget(final EventTopic... eventTopics) {
-        createConditionFactory().untilAsserted(() -> {
-            assertThat(replyToListener.getLatestEventMessageTopics())
-                    .containsExactlyInAnyOrderElementsOf(Arrays.asList(eventTopics));
-        });
+        createConditionFactory().untilAsserted(() -> assertThat(replyToListener.getLatestEventMessageTopics())
+                .containsExactlyInAnyOrderElementsOf(Arrays.asList(eventTopics)));
         replyToListener.resetLatestEventMessageTopics();
     }
 
@@ -194,10 +190,10 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     protected void assertDmfDownloadAndUpdateRequest(final DmfDownloadAndUpdateRequest request,
             final Set<SoftwareModule> softwareModules, final String controllerId) {
         Assert.assertThat(softwareModules, SoftwareModuleJsonMatcher.containsExactly(request.getSoftwareModules()));
-        request.getSoftwareModules()
-                .forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
-                        new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
+        request.getSoftwareModules().forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
+                new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
+        assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
 
@@ -223,9 +219,8 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     }
 
     protected void verifyReplyToListener() {
-        createConditionFactory().untilAsserted(() -> {
-            Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any());
-        });
+        createConditionFactory()
+                .untilAsserted(() -> Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any()));
     }
 
     protected Long cancelAction(final Long actionId, final String controllerId) {
@@ -273,9 +268,10 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final String createdBy) {
         createAndSendThingCreated(target, TENANT_EXIST);
-        final Target registerdTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(target));
+        final Target registeredTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(target));
         assertAllTargetsCount(existingTargetsAfterCreation);
-        assertTarget(registerdTarget, expectedTargetStatus, createdBy);
+        assertThat(registeredTarget).isNotNull();
+        assertTarget(registeredTarget, expectedTargetStatus, createdBy);
     }
 
     protected void registerSameTargetAndAssertBasedOnVersion(final String controllerId,
@@ -284,6 +280,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         final Target registeredTarget = waitUntilIsPresent(() -> findTargetBasedOnNewVersion(controllerId, version));
         assertAllTargetsCount(existingTargetsAfterCreation);
+        assertThat(registeredTarget).isNotNull();
         assertThat(registeredTarget.getUpdateStatus()).isEqualTo(expectedTargetStatus);
     }
 
