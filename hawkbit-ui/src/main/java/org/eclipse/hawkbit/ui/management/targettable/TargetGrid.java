@@ -73,6 +73,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     private static final long serialVersionUID = 1L;
 
     private static final String TARGET_STATUS_ID = "targetStatus";
+    private static final String TARGET_CONTROLLER_ID = "targetControllerId";
     private static final String TARGET_NAME_ID = "targetName";
     private static final String TARGET_POLLING_STATUS_ID = "targetPolling";
     private static final String TARGET_DESC_ID = "targetDescription";
@@ -310,6 +311,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 Arrays.asList(addPinColumn(), addDeleteColumn()));
     }
 
+    private Column<ProxyTarget, String> addControllerIdColumn() {
+        return GridComponentBuilder.addControllerIdColumn(this, i18n, TARGET_CONTROLLER_ID);
+    }
+
     private Column<ProxyTarget, String> addNameColumn() {
         return GridComponentBuilder.addNameColumn(this, i18n, TARGET_NAME_ID);
     }
@@ -340,6 +345,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     @Override
     protected void addMaxColumns() {
         addNameColumn().setExpandRatio(2);
+        addControllerIdColumn().setExpandRatio(2);
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, TARGET_DESC_ID).setExpandRatio(2);
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
