@@ -764,31 +764,6 @@
             <version>${commons-io.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-               <!-- As long as JUnit 5 is not used, these dependencies can be excluded -->
-               <exclusion>
-                  <groupId>org.junit.jupiter</groupId>
-                  <artifactId>junit-jupiter</artifactId>
-               </exclusion>
-               <!-- Allure JUnit4 does not work with junit-vintage-engine -->
-               <exclusion>
-                  <groupId>org.junit.vintage</groupId>
-                  <artifactId>junit-vintage-engine</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.mockito</groupId>
-                  <artifactId>mockito-junit-jupiter</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
             <groupId>io.qameta.allure</groupId>
             <artifactId>allure-junit5</artifactId>
             <version>${allure.version}</version>
