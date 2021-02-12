@@ -167,7 +167,7 @@
       <cron-utils.version>9.1.3</cron-utils.version>
       <jsoup.version>1.11.2</jsoup.version>
       <allure.version>2.13.6</allure.version>
-      <eclipselink.version>2.7.7</eclipselink.version>
+      <eclipselink.version>2.7.3</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <guava.version>25.0-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
@@ -329,12 +329,17 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_KIWIGRID_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
                   </validHeaders>
                   <excludes>
+                     <exclude>.azure-pipelines/*</exclude>
+                     <exclude>.devcontainer/*</exclude>
                      <exclude>**/banner.txt</exclude>
                      <exclude>**/helm/**</exclude>
                      <exclude>**/README</exclude>
@@ -418,7 +423,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>io.qameta.allure.junit5.AllureJunit5</value>
                      </property>
                   </properties>
                   <includes>
@@ -441,7 +446,7 @@
                   <properties>
                      <property>
                         <name>listener</name>
-                        <value>io.qameta.allure.junit4.AllureJunit4</value>
+                        <value>io.qameta.allure.junit5.AllureJunit5</value>
                      </property>
                   </properties>
                </configuration>
@@ -759,21 +764,8 @@
             <version>${commons-io.version}</version>
          </dependency>
          <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-logging</artifactId>
-               </exclusion>
-               <!-- As long as JUnit 5 is not used, these dependencies can be excluded -->
-
-            </exclusions>
-         </dependency>
-         <dependency>
             <groupId>io.qameta.allure</groupId>
-            <artifactId>allure-junit4</artifactId>
+            <artifactId>allure-junit5</artifactId>
             <version>${allure.version}</version>
             <scope>test</scope>
          </dependency>

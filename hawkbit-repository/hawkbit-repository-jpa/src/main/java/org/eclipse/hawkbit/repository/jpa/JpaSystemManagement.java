@@ -38,6 +38,7 @@ import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -45,6 +46,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -59,6 +61,7 @@ import org.springframework.validation.annotation.Validated;
 @Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaSystemManagement.class);
 
     private static final int MAX_TENANTS_QUERY = 1000;
@@ -123,12 +126,28 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     @Autowired
     private ArtifactRepository artifactRepository;
 
+    private final String countArtifactQuery;
+    private final String countSoftwareModulesQuery;
+
+    /**
+     * Constructor.
+     * 
+     * @param properties
+     *            properties to get the underlying database
+     */
+    public JpaSystemManagement(final JpaProperties properties) {
+
+        final String isDeleted = isPostgreSql(properties) ? "false" : "0";
+        countArtifactQuery = "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = "
+                + isDeleted;
+        countSoftwareModulesQuery = "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = "
+                + isDeleted;
+    }
+
     @Override
     public SystemUsageReport getSystemUsageStatistics() {
 
-        final Number count = (Number) entityManager.createNativeQuery(
-                "select SUM(file_size) from sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
-                .getSingleResult();
+        final Number count = (Number) entityManager.createNativeQuery(countSoftwareModulesQuery).getSingleResult();
 
         long sumOfArtifacts = 0;
         if (count != null) {
@@ -140,15 +159,18 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final long targets = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_target")
                 .getSingleResult()).longValue();
 
-        final long artifacts = ((Number) entityManager.createNativeQuery(
-                "SELECT COUNT(a.id) FROM sp_artifact a INNER JOIN sp_base_software_module sm ON a.software_module = sm.id WHERE sm.deleted = 0")
-                .getSingleResult()).longValue();
+        final long artifacts = ((Number) entityManager.createNativeQuery(countArtifactQuery).getSingleResult())
+                .longValue();
 
         final long actions = ((Number) entityManager.createNativeQuery("SELECT COUNT(id) FROM sp_action")
                 .getSingleResult()).longValue();
 
         return new SystemUsageReportWithTenants(targets, artifacts, actions, sumOfArtifacts,
                 tenantMetaDataRepository.count());
+    }
+
+    private static boolean isPostgreSql(final JpaProperties properties) {
+        return Database.POSTGRESQL == properties.getDatabase();
     }
 
     @Override

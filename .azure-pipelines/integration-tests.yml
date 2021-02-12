@@ -1,0 +1,119 @@
+# Build hawkBit and run tests with Apache Maven.
+# Runs a matrix of various DB,JDK,RabbitMQ versions that are supported by hawkBit
+# 
+# Requires the SonarCloud plugin and connection setup
+# https://kaizimmerm.com/post/azure-pipelines-for-the-oss-developer/#analyze-the-code-with-sonarcloud
+# 
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/java
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema
+# https://docs.microsoft.com/en-us/azure/devops/pipelines/release/caching?view=azure-devops#maven
+
+pool:
+  vmImage: "ubuntu-18.04"
+
+# Default values for the hawbit build. Can be overriden in the variable group 'hawkbit'
+# see https://docs.microsoft.com/en-us/azure/devops/pipelines/library/variable-groups
+variables:
+  # Defines defaults
+  - name: sonarCloudConnection
+    value: 'hawkBitSonar'
+  - name: sonarCloudOrganization
+    value: 'hawkbit'
+  - name: sonarProjectKey
+    value: 'org.eclipse:hawkbit'
+  # Override defaults
+  - group: hawkbit
+
+jobs:
+  - job: JDK_11
+    displayName: Verify with JDK-11 and SonarCloud analysis
+    steps:
+      - template: rabbitmq-template.yml
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "verify -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=$(sonarCloudOrganization) -Dsonar.projectKey=$(sonarProjectKey)"
+          jdkVersionOption: "1.11"
+          sonarQubeRunAnalysis: true
+          sonarCloudConnection: $(sonarCloudConnection)
+          sonarCloudOrganization: $(sonarCloudOrganization)
+  - job: JDK_8
+    displayName: Build with JDK-8 (hawkBit default)
+    steps:
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "install license:check"
+  - job:
+    dependsOn: JDK_8
+    condition: succeeded()
+    displayName: RABBIT
+    strategy:
+      matrix:
+        3.6:
+          rabbitmqVersion: "3.6"
+        3.7:
+          rabbitmqVersion: "3.7"
+        3.8:
+          rabbitmqVersion: "3.8"
+    steps:
+      - template: rabbitmq-template.yml
+        parameters:
+          rabbitmqVersion: $(rabbitmqVersion)
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "verify"
+  - job:
+    dependsOn: JDK_8
+    condition: succeeded()
+    displayName: MYSQL
+    strategy:
+      matrix:
+        5.6:
+          dbVersion: "5.6"
+        5.7:
+          dbVersion: "5.7"
+    steps:
+      - template: rabbitmq-template.yml
+      - script: "docker run --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=8236472364 -e MYSQL_DATABASE=hawkbit -d mysql:$(dbVersion)"
+        displayName: "Setup MYSQL Database docker instance"
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "verify -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
+  - job:
+    dependsOn: JDK_8
+    condition: succeeded()
+    displayName: MSSQL
+    strategy:
+      matrix:
+        2017:
+          dbVersion: "2017-latest"
+        2019:
+          dbVersion: "2019-latest"
+    steps:
+      - template: rabbitmq-template.yml
+      - script: |
+          docker run --name mssql -p 1433:1433 -e ACCEPT_EULA=Y -e SA_PASSWORD=1234567890.Ab -d mcr.microsoft.com/mssql/server:$(dbVersion)
+          until [ "`/usr/bin/docker inspect -f {{.State.Running}} mssql`" == "true" ]; do sleep 1; done
+          sleep 120
+          until docker exec mssql /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "1234567890.Ab" -Q "CREATE DATABASE hawkbit"; do sleep 1; done
+        displayName: "Setup MSSQL Database docker instance"
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "verify -Dspring.jpa.database=SQL_SERVER -Dspring.datasource.url=jdbc:sqlserver://localhost:1433;database=hawkbit -Dspring.datasource.username=SA -Dspring.datasource.password=1234567890.Ab -Dspring.datasource.driverClassName=com.microsoft.sqlserver.jdbc.SQLServerDriver"
+  - job:
+    dependsOn: JDK_8
+    condition: succeeded()
+    displayName: POSTGRESQL
+    strategy:
+      matrix:
+        12:
+          dbVersion: "12"
+        13:
+          dbVersion: "13"
+    steps:
+      - template: rabbitmq-template.yml
+      - script: "docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=1234567890 -e POSTGRES_DB=hawkbit -d postgres:$(dbVersion)"
+        displayName: "Setup POSTGRESQL Database docker instance"
+      - template: maven-template.yml
+        parameters:
+          mavenGoals: "verify -Dspring.jpa.database=POSTGRESQL -Dspring.datasource.url=jdbc:postgresql://localhost:5432/hawkbit?currentSchema=hawkbit -Dspring.datasource.username=postgres -Dspring.datasource.password=1234567890 -Dspring.datasource.driverClassName=org.postgresql.Driver"

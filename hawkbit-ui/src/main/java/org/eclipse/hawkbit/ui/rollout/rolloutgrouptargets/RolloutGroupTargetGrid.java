@@ -30,6 +30,8 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
     private static final long serialVersionUID = 1L;
 
+    private static final String TARGET_CONTROLLER_ID = "targetControllerId";
+
     private final RolloutManagementUIState rolloutManagementUIState;
 
     private final RolloutActionStatusIconSupplier<ProxyTarget> actionStatusIconSupplier;
@@ -65,9 +67,11 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addNameColumn(this, i18n, SPUILabelDefinitions.VAR_NAME).setExpandRatio(3);
+        GridComponentBuilder.addControllerIdColumn(this, i18n, TARGET_CONTROLLER_ID).setExpandRatio(2);
 
-        GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setExpandRatio(3);
+        GridComponentBuilder.addNameColumn(this, i18n, SPUILabelDefinitions.VAR_NAME).setExpandRatio(2);
+
+        GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setExpandRatio(2);
 
         GridComponentBuilder.addIconColumn(this, actionStatusIconSupplier::getLabel, SPUILabelDefinitions.VAR_STATUS,
                 i18n.getMessage("header.status"));
@@ -91,4 +95,5 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
     public MasterEntitySupport<ProxyRolloutGroup> getMasterEntitySupport() {
         return masterEntitySupport;
     }
+
 }

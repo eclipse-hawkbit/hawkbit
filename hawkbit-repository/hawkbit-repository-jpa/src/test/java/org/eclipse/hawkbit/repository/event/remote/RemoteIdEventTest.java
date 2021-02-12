@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;

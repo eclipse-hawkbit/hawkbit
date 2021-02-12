@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.jpa.vendor.Database;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -32,10 +33,12 @@ import io.qameta.allure.Story;
 @Story("RSQL filter distribution set")
 public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
+    private DistributionSet ds;
+
     @BeforeEach
     public void setupBeforeTest() {
 
-        DistributionSet ds = testdataFactory.createDistributionSet("DS");
+        ds = testdataFactory.createDistributionSet("DS");
         ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));
         createDistributionSetMetadata(ds.getId(), entityFactory.generateDsMetadata("metaKey", "metaValue"));
 
@@ -59,7 +62,20 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set by id")
     public void testFilterByParameterId() {
+        assertRSQLQuery(DistributionSetFields.ID.name() + "==" + ds.getId(), 1);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "!=" + ds.getId(), 4);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "==" + -1, 0);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "!=" + -1, 5);
+
+        // Not supported for numbers
+        if (Database.POSTGRESQL.equals(getDatabase())) {
+            return;
+        }
+
         assertRSQLQuery(DistributionSetFields.ID.name() + "==*", 5);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "==noexist*", 0);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "=in=(" + ds.getId() + ",10000000)", 1);
+        assertRSQLQuery(DistributionSetFields.ID.name() + "=out=(" + ds.getId() + ",10000000)", 4);
     }
 
     @Test

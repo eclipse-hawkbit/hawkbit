@@ -306,13 +306,17 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("Handles the GET request of retrieving all targets within SP based by parameter. Required Permission: READ_TARGET.")
-    public void deleteActionsFromTargetWithParameters() throws Exception {
-        generateActionForTarget(targetId);
-
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "?force=true")).andExpect(status().isOk())
-                .andDo(MockMvcResultPrinter.print()).andDo(this.document.document(
+    @Description("Optionally force quits an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET.")
+    public void deleteActionFromTargetWithParameters() throws Exception {
+        final Action action = generateActionForTarget(targetId, false);
+        deploymentManagement.cancelAction(action.getId());
+        
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}?force=true", targetId, action.getId()))
+                .andExpect(status().isNoContent()).andDo(MockMvcResultPrinter.print())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("force").description(MgmtApiModelProperties.FORCE))));
     }
 

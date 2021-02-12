@@ -58,6 +58,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -189,7 +190,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI interface against to many
          * requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -305,7 +306,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI download interface against
          * to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -395,7 +396,7 @@ public class SecurityManagedConfiguration {
     /**
      * Filter to protect the hawkBit server system management interface against
      * to many requests.
-     * 
+     *
      * @param securityProperties
      *            for filter configuration
      *
@@ -496,7 +497,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -624,7 +625,7 @@ public class SecurityManagedConfiguration {
 
         /**
          * Filter to protect the hawkBit management UI against to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -652,8 +653,10 @@ public class SecurityManagedConfiguration {
         }
 
         /**
+         * Overwriting VaadinAuthenticationSuccessHandler of default VaadinSharedSecurityConfiguration
          * @return the vaadin success authentication handler
          */
+        @Primary
         @Bean(name = VaadinSharedSecurityConfiguration.VAADIN_AUTHENTICATION_SUCCESS_HANDLER_BEAN)
         public VaadinAuthenticationSuccessHandler redirectSaveHandler(final HttpService httpService,
                 final VaadinRedirectStrategy redirectStrategy) {
@@ -724,6 +727,11 @@ public class SecurityManagedConfiguration {
                     .logoutSuccessHandler(logoutSuccessHandler);
         }
 
+        /**
+         * HttpFirewall which enables to define a list of allowed host names.
+         *
+         * @return the http firewall.
+         */
         @Bean
         public HttpFirewall httpFirewall() {
             final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
@@ -733,7 +741,8 @@ public class SecurityManagedConfiguration {
             if (!CollectionUtils.isEmpty(allowedHostNames)) {
                 firewall.setAllowedHostnames(hostName -> {
                     LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
-                    return allowedHostNames.contains(hostName);});
+                    return allowedHostNames.contains(hostName);
+                });
             }
             return firewall;
         }

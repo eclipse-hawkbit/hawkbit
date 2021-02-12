@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -115,7 +118,7 @@ public class DefaultDownloadIdCacheTest {
 
         underTest.put(knownKey, value);
 
-        verify(cacheMock).put(cacheManagerKeyCaptor.capture(), cacheManagerValueCaptor.capture());
+        verify(cacheMock).put(cacheManagerKeyCaptor.capture (), cacheManagerValueCaptor.capture());
 
         verify(tenancyCacheManagerMock).getDirectCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE);
         assertThat(cacheManagerKeyCaptor.getValue()).isEqualTo(knownKey);

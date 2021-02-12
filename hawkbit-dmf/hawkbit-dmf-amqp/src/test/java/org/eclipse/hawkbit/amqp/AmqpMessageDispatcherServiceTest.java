@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,6 +32,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -100,7 +100,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
         final ArtifactUrlHandler artifactUrlHandlerMock = Mockito.mock(ArtifactUrlHandler.class);
         when(artifactUrlHandlerMock.getUrls(any(), any()))
-                .thenReturn(Arrays.asList(new ArtifactUrl("http", "download", "http://mockurl")));
+                .thenReturn(Collections.singletonList(new ArtifactUrl("http", "download", "http://mockurl")));
 
         systemManagement = Mockito.mock(SystemManagement.class);
         final TenantMetaData tenantMetaData = Mockito.mock(TenantMetaData.class);
@@ -115,7 +115,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     }
 
-    private Message getCaptureAdressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
+    private Message getCaptureAddressEvent(final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent) {
         final Target target = targetManagement
                 .getByControllerID(targetAssignDistributionSetEvent.getActions().keySet().iterator().next()).get();
         return createArgumentCapture(target.getAddress());
@@ -126,8 +126,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verifies that download and install event with 3 software moduls and no artifacts works")
-    public void testSendDownloadRequesWithSoftwareModulesAndNoArtifacts() {
+    @Description("Verifies that download and install event with 3 software modules and no artifacts works")
+    public void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
@@ -137,7 +137,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
+        final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
         assertThat(createDistributionSet.getModules()).hasSameSizeAs(downloadAndUpdateRequest.getSoftwareModules());
@@ -150,7 +150,6 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                     new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE));
 
             for (final SoftwareModule softwareModule2 : action.getDistributionSet().getModules()) {
-                assertThat(softwareModule.getModuleId()).as("Sofware module ID should be set").isNotNull();
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {
                     continue;
                 }
@@ -182,15 +181,14 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final TargetAssignDistributionSetEvent targetAssignDistributionSetEvent = new TargetAssignDistributionSetEvent(
                 action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService.targetAssignDistributionSet(targetAssignDistributionSetEvent);
-        final Message sendMessage = getCaptureAdressEvent(targetAssignDistributionSetEvent);
+        final Message sendMessage = getCaptureAddressEvent(targetAssignDistributionSetEvent);
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
 
         assertThat(downloadAndUpdateRequest.getSoftwareModules()).hasSize(3).as("DownloadAndUpdateRequest event should contains 3 software modules");
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
 
-        for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
-                .getSoftwareModules()) {
+        for (final DmfSoftwareModule softwareModule : downloadAndUpdateRequest.getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
             }
@@ -254,7 +252,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that a delete message is not send if the address is not an amqp address.")
-    public void sendDeleteRequestWithNoAmqpAdress() {
+    public void sendDeleteRequestWithNoAmqpAddress() {
 
         // setup
         final String noAmqpUri = "http://anyhost";
@@ -269,8 +267,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a delete message is not send if the address is null.")
-    public void sendDeleteRequestWithNullAdress() {
+    @Description("Verifies that a delete message is not send if the address is null.")
+    public void sendDeleteRequestWithNullAddress() {
 
         // setup
         final String noAmqpUri = null;

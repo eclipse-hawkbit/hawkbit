@@ -51,6 +51,10 @@
       	<groupId>com.microsoft.sqlserver</groupId>
        	<artifactId>mssql-jdbc</artifactId>
       </dependency>
+      <dependency>
+		<groupId>org.postgresql</groupId>
+    	<artifactId>postgresql</artifactId>
+	  </dependency>
       <!-- Add a JDBC DB2 compatabile driver if you want to run tests against DB2, e.g. -->
 <!--       <dependency> -->
 <!--          <groupId>com.ibm.db2.jcc</groupId> -->
