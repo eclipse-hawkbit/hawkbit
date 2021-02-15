@@ -16,10 +16,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import io.qameta.allure.Story;
-import org.junit.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Description;
 
 @Story("Retrieve all open action ids")

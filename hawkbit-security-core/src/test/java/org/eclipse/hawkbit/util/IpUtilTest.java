@@ -10,10 +10,6 @@ package org.eclipse.hawkbit.util;
 
 import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +24,7 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties.Clients;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -115,10 +112,10 @@ public class IpUtilTest {
     }
 
     private void assertHttpUri(final String host, final URI httpUri) {
-        assertTrue("The given URI has an http scheme", IpUtil.isHttpUri(httpUri));
-        assertFalse("The given URI is not an AMQP scheme", IpUtil.isAmqpUri(httpUri));
-        assertEquals("The URI hosts matches the given host", host, httpUri.getHost());
-        assertEquals("The given URI scheme is http", "http", httpUri.getScheme());
+        assertThat(IpUtil.isHttpUri(httpUri)).as("The given URI has an http scheme").isTrue();
+        assertThat(IpUtil.isAmqpUri(httpUri)).as("The given URI is not an AMQP scheme").isFalse();
+        assertThat(host).as("The URI hosts matches the given host").isEqualTo(httpUri.getHost());
+        assertThat(httpUri.getScheme()).as("The given URI scheme is http").isEqualTo("http");
     }
 
     @Test
@@ -140,11 +137,11 @@ public class IpUtilTest {
 
     private void assertAmqpUri(final String host, final URI amqpUri) {
 
-        assertTrue("The given URI is an AMQP scheme", IpUtil.isAmqpUri(amqpUri));
-        assertFalse("The given URI is not an HTTP scheme", IpUtil.isHttpUri(amqpUri));
-        assertEquals("The given host matches the URI host", host, amqpUri.getHost());
-        assertEquals("The given URI has an AMQP scheme", "amqp", amqpUri.getScheme());
-        assertEquals("The given URI has an AMQP path", "/path", amqpUri.getRawPath());
+        assertThat(IpUtil.isAmqpUri(amqpUri)).as("The given URI is an AMQP scheme").isTrue();
+        assertThat(IpUtil.isHttpUri(amqpUri)).as("The given URI is not an HTTP scheme").isFalse();
+        assertThat(amqpUri.getHost()).as("The given host matches the URI host").isEqualTo(host);
+        assertThat(amqpUri.getScheme()).as("The given URI has an AMQP scheme").isEqualTo("amqp");
+        assertThat(amqpUri.getRawPath()).as("The given URI has an AMQP path").isEqualTo("/path");
     }
 
     @Test
@@ -154,13 +151,13 @@ public class IpUtilTest {
         final String host = "10.99.99.1";
         final URI testUri = IpUtil.createUri("test", host);
 
-        assertFalse("The given URI is not an AMQP address", IpUtil.isAmqpUri(testUri));
-        assertFalse("The given URI is not an HTTP address", IpUtil.isHttpUri(testUri));
-        assertEquals("The given host matches the URI host", host, testUri.getHost());
+        assertThat(IpUtil.isAmqpUri(testUri)).as("The given URI is not an AMQP address").isFalse();
+        assertThat(IpUtil.isHttpUri(testUri)).as("The given URI is not an HTTP address").isFalse();
+        assertThat(host).as("The given host matches the URI host").isEqualTo(testUri.getHost());
 
         try {
             IpUtil.createUri(":/", host);
-            fail("Missing expected IllegalArgumentException due invalid URI");
+            Assertions.fail("Missing expected IllegalArgumentException due invalid URI");
         } catch (final IllegalArgumentException e) {
             // expected
         }

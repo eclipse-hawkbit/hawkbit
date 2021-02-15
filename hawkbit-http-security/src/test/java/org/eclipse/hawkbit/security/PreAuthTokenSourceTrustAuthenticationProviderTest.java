@@ -10,11 +10,11 @@ package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,7 +55,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         // test, should throw authentication exception
         try {
             underTestWithoutSourceIpCheck.authenticate(token);
-            fail("Should not work with wrong credentials");
+            Assertions.fail("Should not work with wrong credentials");
         } catch (final BadCredentialsException e) {
 
         }
@@ -91,7 +91,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
         try {
             underTestWithSourceIpCheck.authenticate(token);
-            fail("as source is not trusted.");
+            Assertions.fail("as source is not trusted.");
         } catch (final InsufficientAuthenticationException e) {
 
         }

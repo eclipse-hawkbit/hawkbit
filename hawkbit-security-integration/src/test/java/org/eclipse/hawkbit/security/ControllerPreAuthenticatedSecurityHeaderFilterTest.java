@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -126,8 +125,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         assertThat(credentials1.contains(expected1)).isTrue();
         assertThat(credentials2.contains(expected2)).isTrue();
 
-        assertEquals("hash1 expected in principal!", expected1, principal1);
-        assertEquals("hash2 expected in principal!", expected2, principal2);
+        assertThat(expected1).as("hash1 expected in principal!").isEqualTo(principal1);
+        assertThat(expected2).as("hash2 expected in principal!").isEqualTo(principal2);
 
     }
 
