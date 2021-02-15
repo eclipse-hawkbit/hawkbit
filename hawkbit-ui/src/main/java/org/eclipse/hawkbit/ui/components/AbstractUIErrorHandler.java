@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.ClientConnector;
+import com.vaadin.server.DefaultErrorHandler;
+import com.vaadin.server.ErrorEvent;
+import com.vaadin.server.Page;
+import com.vaadin.shared.Connector;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.UI;
 import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
@@ -22,38 +23,43 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.NestedExceptionUtils;
 import org.springframework.util.StringUtils;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
-import com.vaadin.server.DefaultErrorHandler;
-import com.vaadin.server.ErrorEvent;
-import com.vaadin.server.Page;
-import com.vaadin.server.UploadException;
-import com.vaadin.shared.Connector;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Default handler for Hawkbit UI.
+ * Abstract error handler for the UI.
  */
-public class HawkbitUIErrorHandler extends DefaultErrorHandler {
+public abstract class AbstractUIErrorHandler extends DefaultErrorHandler {
 
     private static final long serialVersionUID = 1L;
-    private static final Logger LOG = LoggerFactory.getLogger(HawkbitUIErrorHandler.class);
+    private final transient Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Override
-    public void error(final ErrorEvent event) {
+    /**
+     * Create and print a notification by the root cause of the problem.
+     * 
+     * @param event the error event
+     */
+    protected void showNotification(final ErrorEvent event) {
+        showNotification(event, buildNotification(event));
+    }
 
-        // filter upload exceptions
-        if (event.getThrowable() instanceof UploadException) {
-            return;
-        }
-
-        final Notification notification = buildNotification(getRootExceptionFrom(event));
-        if (event instanceof ConnectorErrorEvent) {
-            final Connector connector = ((ConnectorErrorEvent) event).getConnector();
+    /**
+     * Print the given notification.
+     * 
+     * @param event
+     *            the error event
+     * @param notification
+     *            the notification
+     */
+    protected void showNotification(final ErrorEvent event, final ParallelNotification notification) {
+        if (event instanceof ClientConnector.ConnectorErrorEvent) {
+            final Connector connector = ((ClientConnector.ConnectorErrorEvent) event).getConnector();
             if (connector instanceof UI) {
                 final UI uiInstance = (UI) connector;
                 uiInstance.access(() -> notification.show(uiInstance.getPage()));
@@ -70,20 +76,15 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         notification.show(Page.getCurrent());
     }
 
-    private static Throwable getRootExceptionFrom(final ErrorEvent event) {
+    protected static Throwable getRootExceptionFrom(final ErrorEvent event) {
         return getRootCauseOf(event.getThrowable());
     }
 
-    private static Throwable getRootCauseOf(final Throwable ex) {
-
-        if (ex.getCause() != null) {
-            return getRootCauseOf(ex.getCause());
-        }
-
-        return ex;
+    protected static Throwable getRootCauseOf(final Throwable ex) {
+        return NestedExceptionUtils.getRootCause(ex);
     }
 
-    private static Optional<Page> getPageOriginError(final ErrorEvent event) {
+    protected static Optional<Page> getPageOriginError(final ErrorEvent event) {
 
         final Component errorOrigin = findAbstractComponent(event);
 
@@ -95,17 +96,18 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
     }
 
     /**
-     * Method to build a notification based on an exception.
-     * 
-     * @param ex
-     *            the throwable
+     * Method to build a notification based on an {@link ErrorEvent}.
+     *
+     * @param event
+     *            the error event
      * @return a hawkbit error notification message
      */
-    protected ParallelNotification buildNotification(final Throwable ex) {
+    protected ParallelNotification buildNotification(final ErrorEvent event) {
+        final Throwable rootException = getRootExceptionFrom(event);
 
-        LOG.error("Error in UI: ", ex);
+        logger.error("Error in UI: ", rootException);
 
-        final String errorMessage = extractMessageFrom(ex);
+        final String errorMessage = extractMessageFrom(rootException);
         final VaadinMessageSource i18n = SpringContextHolder.getInstance().getBean(VaadinMessageSource.class);
 
         return buildErrorNotification(i18n.getMessage("caption.error"), errorMessage);
@@ -113,7 +115,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
 
     /**
      * Method to build a error notification based on caption and description.
-     * 
+     *
      * @param caption
      *            Caption
      * @param description
