@@ -37,6 +37,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
+    /**
+     * @deprecated
+     * This ID is always given by the actionId path variable.
+     * Will be removed in future versions.
+     */
+    @Deprecated
     private final Long id;
     private final String time;
 
