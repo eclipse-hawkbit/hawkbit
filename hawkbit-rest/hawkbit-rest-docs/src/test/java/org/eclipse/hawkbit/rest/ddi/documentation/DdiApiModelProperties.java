@@ -26,13 +26,15 @@ final class DdiApiModelProperties {
 
     static final String TARGET_RESULT_FINISHED = "defined status of the result";
 
-    static final String TARGET_RESULT_PROGRESS = "progress assumption of the device";
+    static final String TARGET_RESULT_PROGRESS = "progress assumption of the device (currently not supported).";
 
     static final String TARGET_PROGRESS_CNT = "current progress level";
 
     static final String TARGET_PROGRESS_OF = "assumption concerning max progress level";
 
     static final String ACTION_ID = "id of the action";
+
+    static final String FEEDBACK_ACTION_ID = "(@deprecated) id of the action";
 
     static final String CANCEL_ACTION = "action that needs to be canceled";
 
