@@ -8,28 +8,25 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-
+import org.eclipse.hawkbit.ui.UiErrorDetails;
+import org.eclipse.hawkbit.ui.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.ClientConnector.ConnectorErrorEvent;
 import com.vaadin.server.DefaultErrorHandler;
 import com.vaadin.server.ErrorEvent;
+import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Page;
-import com.vaadin.server.UploadException;
 import com.vaadin.shared.Connector;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Notification;
@@ -38,54 +35,52 @@ import com.vaadin.ui.UI;
 /**
  * Default handler for Hawkbit UI.
  */
-public class HawkbitUIErrorHandler extends DefaultErrorHandler {
-
+public class HawkbitUIErrorHandler implements ErrorHandler {
     private static final long serialVersionUID = 1L;
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUIErrorHandler.class);
 
+    private final VaadinMessageSource i18n;
+    private final transient List<UiErrorDetailsExtractor> uiErrorDetailsExtractor;
+
+    public HawkbitUIErrorHandler(final VaadinMessageSource i18n,
+            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractor) {
+        this.i18n = i18n;
+        this.uiErrorDetailsExtractor = uiErrorDetailsExtractor;
+    }
+
     @Override
     public void error(final ErrorEvent event) {
+        final Page currentPage = getPageFrom(event);
+        final List<UiErrorDetails> errorDetails = extractErrorDetails(event);
 
-        // filter upload exceptions
-        if (event.getThrowable() instanceof UploadException) {
+        if (errorDetails.isEmpty()) {
+            showGenericErrorNotification(currentPage, event);
             return;
         }
 
-        final Notification notification = buildNotification(getRootExceptionFrom(event));
+        errorDetails.stream().filter(UiErrorDetails::isPresent)
+                .forEach(details -> showSpecificErrorNotification(currentPage, details));
+    }
+
+    protected Page getPageFrom(final ErrorEvent event) {
         if (event instanceof ConnectorErrorEvent) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
             if (connector instanceof UI) {
                 final UI uiInstance = (UI) connector;
-                uiInstance.access(() -> notification.show(uiInstance.getPage()));
-                return;
+                return uiInstance.getPage();
             }
         }
 
         final Optional<Page> originError = getPageOriginError(event);
         if (originError.isPresent()) {
-            notification.show(originError.get());
-            return;
+            return originError.get();
         }
 
-        notification.show(Page.getCurrent());
-    }
-
-    private static Throwable getRootExceptionFrom(final ErrorEvent event) {
-        return getRootCauseOf(event.getThrowable());
-    }
-
-    private static Throwable getRootCauseOf(final Throwable ex) {
-
-        if (ex.getCause() != null) {
-            return getRootCauseOf(ex.getCause());
-        }
-
-        return ex;
+        return Page.getCurrent();
     }
 
     private static Optional<Page> getPageOriginError(final ErrorEvent event) {
-
-        final Component errorOrigin = findAbstractComponent(event);
+        final Component errorOrigin = DefaultErrorHandler.findAbstractComponent(event);
 
         if (errorOrigin != null && errorOrigin.getUI() != null) {
             return Optional.ofNullable(errorOrigin.getUI().getPage());
@@ -94,21 +89,23 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
         return Optional.empty();
     }
 
-    /**
-     * Method to build a notification based on an exception.
-     * 
-     * @param ex
-     *            the throwable
-     * @return a hawkbit error notification message
-     */
-    protected ParallelNotification buildNotification(final Throwable ex) {
+    private List<UiErrorDetails> extractErrorDetails(final ErrorEvent event) {
+        return uiErrorDetailsExtractor.stream()
+                .map(extractor -> extractor.extractErrorDetailsFrom(event.getThrowable()))
+                .filter(UiErrorDetails::isKnown).collect(Collectors.toList());
+    }
 
-        LOG.error("Error in UI: ", ex);
+    private void showGenericErrorNotification(final Page page, final ErrorEvent event) {
+        LOG.warn("Unexpected Ui error occured", event.getThrowable());
 
-        final String errorMessage = extractMessageFrom(ex);
-        final VaadinMessageSource i18n = SpringContextHolder.getInstance().getBean(VaadinMessageSource.class);
+        final Notification notification = buildErrorNotification(i18n.getMessage("caption.error"),
+                i18n.getMessage("message.error"));
+        showErrorNotification(page, notification);
+    }
 
-        return buildErrorNotification(i18n.getMessage("caption.error"), errorMessage);
+    private void showSpecificErrorNotification(final Page page, final UiErrorDetails details) {
+        final Notification notification = buildErrorNotification(details.getCaption(), details.getDescription());
+        showErrorNotification(page, notification);
     }
 
     /**
@@ -125,22 +122,7 @@ public class HawkbitUIErrorHandler extends DefaultErrorHandler {
                 description, VaadinIcons.EXCLAMATION_CIRCLE, true);
     }
 
-    private static String extractMessageFrom(final Throwable ex) {
-
-        if (!(ex instanceof ConstraintViolationException)) {
-            if (!StringUtils.isEmpty(ex.getMessage())) {
-                return ex.getMessage();
-            }
-            return ex.getClass().getSimpleName();
-        }
-
-        final Set<ConstraintViolation<?>> violations = ((ConstraintViolationException) ex).getConstraintViolations();
-
-        if (violations == null) {
-            return ex.getClass().getSimpleName();
-        } else {
-            return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
-                    .collect(Collectors.joining(System.lineSeparator()));
-        }
+    protected void showErrorNotification(final Page page, final Notification notification) {
+        page.getUI().access(() -> notification.show(page));
     }
 }
