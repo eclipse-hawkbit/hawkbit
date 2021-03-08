@@ -8,7 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.Link;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -17,7 +18,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * A json annotated rest model for BaseEntity to RESTful API representation.
  *
  */
-public abstract class MgmtBaseEntity extends ResourceSupport {
+public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
 
     @JsonProperty
     private String createdBy;
@@ -30,6 +31,16 @@ public abstract class MgmtBaseEntity extends ResourceSupport {
 
     @JsonProperty
     private Long lastModifiedAt;
+
+    /**
+     * Added for backwards compatibility
+     *
+     * @return the unique identifier of the {@link MgmtBaseEntity}.
+     */
+    @JsonIgnore
+    public Link getId() {
+        return this.getRequiredLink("self");
+    }
 
     /**
      * @return the createdBy

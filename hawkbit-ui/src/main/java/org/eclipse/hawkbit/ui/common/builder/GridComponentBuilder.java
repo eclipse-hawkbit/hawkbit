@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -40,6 +41,8 @@ import com.vaadin.ui.themes.ValoTheme;
  * Builder class for grid components
  */
 public final class GridComponentBuilder {
+    public static final double DEFAULT_MIN_WIDTH = 100D;
+
     public static final String CREATED_BY_ID = "createdBy";
     public static final String CREATED_DATE_ID = "createdDate";
     public static final String MODIFIED_BY_ID = "modifiedBy";
@@ -117,7 +120,23 @@ public final class GridComponentBuilder {
      */
     public static <E extends ProxyNamedEntity> Column<E, String> addNameColumn(final Grid<E> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, E::getName, "header.name", columnId, 100D);
+        return addColumn(i18n, grid, E::getName, "header.name", columnId, DEFAULT_MIN_WIDTH);
+    }
+
+    /**
+     * Add controllerId column to grid
+     *
+     * @param grid
+     *            to add the column to
+     * @param i18n
+     *            message source for internationalization
+     * @param columnId
+     *            column ID
+     * @return the created column
+     */
+    public static Column<ProxyTarget, String> addControllerIdColumn(final Grid<ProxyTarget> grid,
+            final VaadinMessageSource i18n, final String columnId) {
+        return addColumn(i18n, grid, ProxyTarget::getControllerId, "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
     }
 
     /**
@@ -135,7 +154,7 @@ public final class GridComponentBuilder {
      */
     public static <E extends ProxyNamedEntity> Column<E, String> addDescriptionColumn(final Grid<E> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, E::getDescription, "header.description", columnId, 100D);
+        return addColumn(i18n, grid, E::getDescription, "header.description", columnId, DEFAULT_MIN_WIDTH);
     }
 
     /**
@@ -152,10 +171,10 @@ public final class GridComponentBuilder {
     public static <E extends ProxyNamedEntity> List<Column<E, String>> addCreatedAndModifiedColumns(final Grid<E> grid,
             final VaadinMessageSource i18n) {
         final List<Column<E, String>> columns = new ArrayList<>();
-        columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, 100D));
-        columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, 100D));
-        columns.add(addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, 100D));
-        columns.add(addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, 100D));
+        columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, DEFAULT_MIN_WIDTH));
+        columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH));
+        columns.add(addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
+        columns.add(addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
         return columns;
     }
 
@@ -176,7 +195,7 @@ public final class GridComponentBuilder {
      */
     public static <E> Column<E, String> addVersionColumn(final Grid<E> grid, final VaadinMessageSource i18n,
             final ValueProvider<E, String> valueProvider, final String columnId) {
-        return addColumn(i18n, grid, valueProvider, "header.version", columnId, 100D);
+        return addColumn(i18n, grid, valueProvider, "header.version", columnId, DEFAULT_MIN_WIDTH);
     }
 
     private static <E, T> Column<E, T> addColumn(final VaadinMessageSource i18n, final Grid<E> grid,

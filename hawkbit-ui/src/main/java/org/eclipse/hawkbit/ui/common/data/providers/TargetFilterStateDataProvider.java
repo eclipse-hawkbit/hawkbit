@@ -40,7 +40,7 @@ public class TargetFilterStateDataProvider extends AbstractProxyDataProvider<Pro
      */
     public TargetFilterStateDataProvider(final TargetManagement targetManagement,
             final TargetToProxyTargetMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.ASC, "name"));
+        super(entityMapper, Sort.by(Direction.ASC, "name"));
 
         this.targetManagement = targetManagement;
     }

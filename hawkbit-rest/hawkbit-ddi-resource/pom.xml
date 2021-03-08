@@ -19,7 +19,7 @@
   </parent>
   <artifactId>hawkbit-ddi-resource</artifactId>
   <name>hawkBit :: REST :: DDI Resources</name>
- 
+
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
@@ -39,7 +39,7 @@
       <dependency>
          <groupId>org.springframework.plugin</groupId>
          <artifactId>spring-plugin-core</artifactId>
-      </dependency>      
+      </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
@@ -49,10 +49,10 @@
          <artifactId>javax.servlet-api</artifactId>
          <scope>provided</scope>
       </dependency>
-     
-      
-       <!-- Test -->
-       <dependency>
+
+
+      <!-- Test -->
+      <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-repository-test</artifactId>
          <version>${project.version}</version>
@@ -104,13 +104,13 @@
       </dependency>
       <dependency>
          <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit4</artifactId>
+         <artifactId>allure-junit5</artifactId>
          <scope>test</scope>
       </dependency>
-     <dependency>
+      <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>
          <scope>test</scope>
-      </dependency> 
+      </dependency>
    </dependencies>
 </project>

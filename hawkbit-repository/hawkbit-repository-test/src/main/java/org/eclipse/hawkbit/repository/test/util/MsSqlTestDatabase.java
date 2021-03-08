@@ -16,53 +16,31 @@ import java.sql.SQLException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.test.context.TestContext;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.test.context.support.AbstractTestExecutionListener;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping MS SQL Server
  * schemas if tests are setup with MS SQL Server.
  */
-public class MsSqlTestDatabase extends AbstractTestExecutionListener {
+public class MsSqlTestDatabase extends AbstractSqlTestDatabase {
 
     private static final Logger LOG = LoggerFactory.getLogger(MsSqlTestDatabase.class);
-    private String schemaName;
-    private String uri;
-    private String username;
-    private String password;
 
     @Override
-    public void beforeTestClass(final TestContext testContext) throws Exception {
-        if (isRunningWithMsSql()) {
-            LOG.info("Setting up mysql schema for test class {}", testContext.getTestClass().getName());
-            this.username = System.getProperty("spring.datasource.username");
-            this.password = System.getProperty("spring.datasource.password");
-            this.uri = System.getProperty("spring.datasource.url");
-            createSchemaUri();
-            createSchema();
-        }
-    }
-
-    @Override
-    public void afterTestClass(final TestContext testContext) throws Exception {
-        if (isRunningWithMsSql()) {
-            dropSchema();
-        }
-    }
-
-    private void createSchemaUri() {
+    protected void createSchemaUri() {
         schemaName = "SP" + RandomStringUtils.randomAlphanumeric(10);
         this.uri = this.uri.substring(0, uri.indexOf(';'));
 
         System.setProperty("spring.datasource.url", uri + ";database=" + schemaName);
     }
 
-    private static boolean isRunningWithMsSql() {
+    @Override
+    protected boolean isRunningWithSql() {
         return "SQL_SERVER".equals(System.getProperty("spring.jpa.database"));
     }
 
-    private void createSchema() {
+    @Override
+    protected void createSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("CREATE DATABASE " + schemaName + ";")) {
                 LOG.info("Creating schema {} on uri {}", schemaName, uri);
@@ -75,7 +53,8 @@ public class MsSqlTestDatabase extends AbstractTestExecutionListener {
 
     }
 
-    private void dropSchema() {
+    @Override
+    protected void dropSchema() {
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             // Needed to avoid the DROP is rejected with "database still in use"
             try (PreparedStatement statement = connection

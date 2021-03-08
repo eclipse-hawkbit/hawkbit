@@ -105,8 +105,8 @@ public class AmqpConfiguration {
     }
 
     /**
-     * @return {@link RabbitTemplate} with automatic retry, published confirms
-     *         and {@link Jackson2JsonMessageConverter}.
+     * @return {@link RabbitTemplate} with automatic retry, published confirms and
+     *         {@link Jackson2JsonMessageConverter}.
      */
     @Bean
     public RabbitTemplate rabbitTemplate() {
@@ -140,8 +140,8 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the DMF API receiver queue for authentication requests called by
-     * 3rd party artifact storages for download authorization by devices.
+     * Create the DMF API receiver queue for authentication requests called by 3rd
+     * party artifact storages for download authorization by devices.
      *
      * @return the receiver queue
      */
@@ -183,8 +183,7 @@ public class AmqpConfiguration {
     }
 
     /**
-     * Create the Binding
-     * {@link AmqpConfiguration#authenticationReceiverQueue()} to
+     * Create the Binding {@link AmqpConfiguration#authenticationReceiverQueue()} to
      * {@link AmqpConfiguration#authenticationExchange()}.
      *
      * @return the binding and create the queue and exchange

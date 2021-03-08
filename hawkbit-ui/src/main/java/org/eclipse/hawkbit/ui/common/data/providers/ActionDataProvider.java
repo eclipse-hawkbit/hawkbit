@@ -42,7 +42,7 @@ public class ActionDataProvider extends AbstractProxyDataProvider<ProxyAction, A
      */
     public ActionDataProvider(final DeploymentManagement deploymentManagement,
             final ActionToProxyActionMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "id"));
+        super(entityMapper, Sort.by(Direction.DESC, "id"));
 
         this.deploymentManagement = deploymentManagement;
     }

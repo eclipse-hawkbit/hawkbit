@@ -21,6 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.jpa.vendor.Database;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -47,11 +48,21 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter rollout group by  id")
     public void testFilterByParameterId() {
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "==noExist*", 0);
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "=in=(" + rolloutGroupId + ")", 1);
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ")", 3);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + -1, 4);
+
+        // Not supported for numbers
+        if (Database.POSTGRESQL.equals(getDatabase())) {
+            return;
+        }
+
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 4);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "==noexist*", 0);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "=in=(" + rolloutGroupId + ",10000000)", 1);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ",10000000)", 2);
     }
 
     @Test

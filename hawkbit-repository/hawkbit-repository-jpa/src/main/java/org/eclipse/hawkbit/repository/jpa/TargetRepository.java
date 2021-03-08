@@ -209,6 +209,16 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     Long countByInstalledDistributionSetId(Long distId);
 
     /**
+     * Checks if there is already a {@link Target} that has the given distribution set Id assigned or installed.
+     *
+     * @param distId
+     *            to check
+     * @return <code>true</code> if a {@link Target} exists.
+     */
+    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.installedDistributionSet.id=:distId OR t.assignedDistributionSet.id=:distId")
+    boolean existsByInstalledOrAssignedDistributionSet(@Param("distId") Long distId);
+
+    /**
      * Finds all {@link Target}s in the repository.
      *
      * @return {@link List} of {@link Target}s

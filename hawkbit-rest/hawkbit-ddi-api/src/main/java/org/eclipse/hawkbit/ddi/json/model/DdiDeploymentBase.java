@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
-import org.springframework.hateoas.ResourceSupport;
+import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "id", "deployment", "actionHistory" })
-public class DdiDeploymentBase extends ResourceSupport {
+public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
 
     @JsonProperty("id")
     @NotNull

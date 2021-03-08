@@ -39,7 +39,7 @@ public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifac
      */
     public ArtifactDataProvider(final ArtifactManagement artifactManagement,
             final ArtifactToProxyArtifactMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.DESC, "filename"));
+        super(entityMapper, Sort.by(Direction.DESC, "filename"));
 
         this.artifactManagement = artifactManagement;
     }

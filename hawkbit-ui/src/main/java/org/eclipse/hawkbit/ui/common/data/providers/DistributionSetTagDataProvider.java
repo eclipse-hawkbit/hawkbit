@@ -38,7 +38,7 @@ public class DistributionSetTagDataProvider extends AbstractProxyDataProvider<Pr
      */
     public DistributionSetTagDataProvider(final DistributionSetTagManagement distributionSetTagManagement,
             final TagToProxyTagMapper<DistributionSetTag> mapper) {
-        super(mapper, new Sort(Direction.ASC, "name"));
+        super(mapper, Sort.by(Direction.ASC, "name"));
         this.distributionSetTagManagement = distributionSetTagManagement;
     }
 

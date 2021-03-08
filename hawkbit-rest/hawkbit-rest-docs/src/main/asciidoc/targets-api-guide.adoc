@@ -373,11 +373,11 @@ include::{snippets}/targets/delete-action-from-target/path-parameters.adoc[]
 
 ==== Request query parameter
 
-include::{snippets}/targets/delete-actions-from-target-with-parameters/request-parameters.adoc[]
+include::{snippets}/targets/delete-action-from-target-with-parameters/request-parameters.adoc[]
 
 ==== Request parameter example
 
-include::{snippets}/targets/delete-actions-from-target-with-parameters/http-request.adoc[]
+include::{snippets}/targets/delete-action-from-target-with-parameters/http-request.adoc[]
 
 === Response (Status 204)
 

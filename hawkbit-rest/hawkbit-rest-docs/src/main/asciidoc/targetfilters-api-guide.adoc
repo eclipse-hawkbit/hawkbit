@@ -255,25 +255,25 @@ Handles the GET request of retrieving the auto assign distribution set. Required
 
 ==== Curl
 
-include::{snippets}/targetfilters/get-assign-d-s/curl-request.adoc[]
+include::{snippets}/targetfilters/get-assign-ds/curl-request.adoc[]
 
 ==== Request URL
 
-include::{snippets}/targetfilters/get-assign-d-s/http-request.adoc[]
+include::{snippets}/targetfilters/get-assign-ds/http-request.adoc[]
 
 ==== Request path parameter
 
-include::{snippets}/targetfilters/get-assign-d-s/path-parameters.adoc[]
+include::{snippets}/targetfilters/get-assign-ds/path-parameters.adoc[]
 
 === Response (Status 200)
 
 ==== Response fields
 
-include::{snippets}/targetfilters/get-assign-d-s/response-fields.adoc[]
+include::{snippets}/targetfilters/get-assign-ds/response-fields.adoc[]
 
 ==== Response example
 
-include::{snippets}/targetfilters/get-assign-d-s/http-response.adoc[]
+include::{snippets}/targetfilters/get-assign-ds/http-response.adoc[]
 
 === Error responses
 
@@ -300,29 +300,29 @@ Required permissions: UPDATE_TARGET and READ_REPOSITORY
 
 ==== Curl
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/curl-request.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/curl-request.adoc[]
 
 ==== Request URL
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/http-request.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/http-request.adoc[]
 
 ==== Request path parameter
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/path-parameters.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/path-parameters.adoc[]
 
 ==== Request fields
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/request-fields.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/request-fields.adoc[]
 
 === Response (Status 200)
 
 ==== Response fields
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/response-fields.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/response-fields.adoc[]
 
 ==== Response example
 
-include::{snippets}/targetfilters/post-auto-assign-d-s/http-response.adoc[]
+include::{snippets}/targetfilters/post-auto-assign-ds/http-response.adoc[]
 
 === Error responses
 
@@ -350,21 +350,21 @@ Removes the auto assign distribution set from the target filter query. Required 
 
 ==== Curl
 
-include::{snippets}/targetfilters/delete-auto-assign-d-s/curl-request.adoc[]
+include::{snippets}/targetfilters/delete-auto-assign-ds/curl-request.adoc[]
 
 ==== Request URL
 
-include::{snippets}/targetfilters/delete-auto-assign-d-s/http-request.adoc[]
+include::{snippets}/targetfilters/delete-auto-assign-ds/http-request.adoc[]
 
 ==== Request path parameter
 
-include::{snippets}/targetfilters/delete-auto-assign-d-s/path-parameters.adoc[]
+include::{snippets}/targetfilters/delete-auto-assign-ds/path-parameters.adoc[]
 
 === Response (Status 204)
 
 ==== Response example
 
-include::{snippets}/targetfilters/delete-auto-assign-d-s/http-response.adoc[]
+include::{snippets}/targetfilters/delete-auto-assign-ds/http-response.adoc[]
 
 === Error responses
 
