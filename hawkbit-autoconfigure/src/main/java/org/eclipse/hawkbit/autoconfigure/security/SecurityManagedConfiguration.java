@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -19,6 +20,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -56,6 +58,7 @@ import org.springframework.boot.web.servlet.ServletListenerRegistrationBean;
 import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -91,9 +94,13 @@ import org.springframework.security.web.authentication.logout.LogoutSuccessHandl
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.FirewalledRequest;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -183,7 +190,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI interface against to many
          * requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -299,7 +306,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server DDI download interface against
          * to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -389,7 +396,7 @@ public class SecurityManagedConfiguration {
     /**
      * Filter to protect the hawkBit server system management interface against
      * to many requests.
-     * 
+     *
      * @param securityProperties
      *            for filter configuration
      *
@@ -490,7 +497,7 @@ public class SecurityManagedConfiguration {
         /**
          * Filter to protect the hawkBit server Management interface against to
          * many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -523,9 +530,8 @@ public class SecurityManagedConfiguration {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
             }
 
-            httpSec.authorizeRequests().anyRequest().authenticated()
-                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
-                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN);
+            httpSec.authorizeRequests().antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                    .hasAnyAuthority(SpPermission.SYSTEM_ADMIN).anyRequest().authenticated();
 
             if (oidcBearerTokenAuthenticationFilter != null) {
 
@@ -619,7 +625,7 @@ public class SecurityManagedConfiguration {
 
         /**
          * Filter to protect the hawkBit management UI against to many requests.
-         * 
+         *
          * @param securityProperties
          *            for filter configuration
          *
@@ -647,8 +653,10 @@ public class SecurityManagedConfiguration {
         }
 
         /**
+         * Overwriting VaadinAuthenticationSuccessHandler of default VaadinSharedSecurityConfiguration
          * @return the vaadin success authentication handler
          */
+        @Primary
         @Bean(name = VaadinSharedSecurityConfiguration.VAADIN_AUTHENTICATION_SUCCESS_HANDLER_BEAN)
         public VaadinAuthenticationSuccessHandler redirectSaveHandler(final HttpService httpService,
                 final VaadinRedirectStrategy redirectStrategy) {
@@ -717,6 +725,49 @@ public class SecurityManagedConfiguration {
             // UI logout
             httpSec.logout().logoutUrl("/UI/logout*").addLogoutHandler(logoutHandler)
                     .logoutSuccessHandler(logoutSuccessHandler);
+        }
+
+        /**
+         * HttpFirewall which enables to define a list of allowed host names.
+         *
+         * @return the http firewall.
+         */
+        @Bean
+        public HttpFirewall httpFirewall() {
+            final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
+            final IgnorePathsStrictHttpFirewall firewall = new IgnorePathsStrictHttpFirewall(
+                    hawkbitSecurityProperties.getHttpFirewallIgnoredPaths());
+
+            if (!CollectionUtils.isEmpty(allowedHostNames)) {
+                firewall.setAllowedHostnames(hostName -> {
+                    LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                    return allowedHostNames.contains(hostName);
+                });
+            }
+            return firewall;
+        }
+
+        private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {
+
+            private final Collection<String> pathsToIgnore;
+
+            public IgnorePathsStrictHttpFirewall(final Collection<String> pathsToIgnore) {
+                super();
+                this.pathsToIgnore = pathsToIgnore;
+            }
+
+            @Override
+            public FirewalledRequest getFirewalledRequest(final HttpServletRequest request) {
+                if (pathsToIgnore != null && pathsToIgnore.contains(request.getRequestURI())) {
+                    return new FirewalledRequest(request) {
+                        @Override
+                        public void reset() {
+                            //nothing to do
+                        }
+                    };
+                }
+                return super.getFirewalledRequest(request);
+            }
         }
 
         @Override

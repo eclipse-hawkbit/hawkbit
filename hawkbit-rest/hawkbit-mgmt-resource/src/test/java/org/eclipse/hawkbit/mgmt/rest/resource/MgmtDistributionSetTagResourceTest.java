@@ -63,7 +63,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(assigned))
                 .andExpect(applyBaseEntityMatcherOnPagedResult(unassigned))
                 .andExpect(applySelfLinkMatcherOnPagedResult(assigned, DISTRIBUTIONSETTAGS_ROOT + assigned.getId()))
@@ -82,7 +82,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/" + assigned.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(DISTRIBUTIONSETTAGS_ROOT + assigned.getId()))
                 .andExpect(jsonPath("_links.assignedDistributionSets.href",
@@ -103,7 +103,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                         .content(JsonBuilder.tags(Arrays.asList(tagOne, tagTwo)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag createdOne = distributionSetTagManagement.findByRsql(PAGE, "name==thetest1").getContent().get(0);
         assertThat(createdOne.getName()).isEqualTo(tagOne.getName());
@@ -133,7 +133,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                         .content(JsonBuilder.tag(update)).contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final Tag updated = distributionSetTagManagement.findByRsql(PAGE, "name==updatedName").getContent().get(0);
         assertThat(updated.getName()).isEqualTo(update.getName());
@@ -260,7 +260,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                                 JsonBuilder.ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
                                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
@@ -280,7 +280,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                                         .ids(sets.stream().map(DistributionSet::getId).collect(Collectors.toList())))
                                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
 
         final List<DistributionSet> updated = distributionSetManagement.findByTag(PAGE, tag.getId()).getContent();
 

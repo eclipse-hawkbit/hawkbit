@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.springframework.hateoas.Identifiable;
 
 /**
  * 

@@ -34,7 +34,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.hateoas.Link;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpRequest;
 import org.springframework.util.CollectionUtils;
 
@@ -115,8 +115,8 @@ public final class DataConversionHelper {
 
         if (action != null) {
             if (action.isCancelingOrCanceled()) {
-                result.add(ControllerLinkBuilder
-                        .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                result.add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerCancelAction(tenantAware.getCurrentTenant(), target.getControllerId(),
                                         action.getId()))
                         .withRel(DdiRestConstants.CANCEL_ACTION));
@@ -126,8 +126,8 @@ public final class DataConversionHelper {
                 // have changed from 'soft' to 'forced' type and we need to
                 // change the payload of the
                 // response because of eTags.
-                result.add(ControllerLinkBuilder
-                        .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                result.add(WebMvcLinkBuilder
+                        .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(),
                                         target.getControllerId(), action.getId(), calculateEtag(action), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
@@ -135,8 +135,8 @@ public final class DataConversionHelper {
         }
 
         if (target.isRequestControllerAttributes()) {
-            result.add(ControllerLinkBuilder
-                    .linkTo(ControllerLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+            result.add(WebMvcLinkBuilder
+                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
                     .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
         }

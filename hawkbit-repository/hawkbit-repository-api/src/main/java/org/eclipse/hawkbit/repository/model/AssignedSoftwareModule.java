@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import org.eclipse.hawkbit.repository.Identifiable;
+
 import java.io.Serializable;
 
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Use to display software modules for the selected distribution.

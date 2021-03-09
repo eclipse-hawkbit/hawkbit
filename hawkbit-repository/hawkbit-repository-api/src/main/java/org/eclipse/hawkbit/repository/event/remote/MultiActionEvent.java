@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.springframework.hateoas.Identifiable;
 
 import java.util.ArrayList;
 import java.util.Iterator;

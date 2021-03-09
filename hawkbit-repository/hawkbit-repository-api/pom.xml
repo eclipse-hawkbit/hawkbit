@@ -26,6 +26,10 @@
          <version>${project.version}</version>
       </dependency>
       <dependency>
+         <groupId>com.fasterxml.jackson.core</groupId>
+         <artifactId>jackson-annotations</artifactId>
+      </dependency>
+      <dependency>
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
       </dependency>
@@ -67,7 +71,7 @@
       <!-- TEST -->
       <dependency>
          <groupId>io.qameta.allure</groupId>
-         <artifactId>allure-junit4</artifactId>
+         <artifactId>allure-junit5</artifactId>
          <scope>test</scope>
       </dependency>
       <dependency>

@@ -35,6 +35,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.text.StrLookup;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
@@ -375,7 +376,8 @@ public final class RSQLUtility {
          */
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             return (Path<Object>) getFieldPath(root, getSubAttributesFrom(finalProperty), enumField.isMap(),
-                    this::getJoinFieldPath).orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
+                    this::getJoinFieldPath).orElseThrow(
+                            () -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
         }
 
         private Path<?> getJoinFieldPath(final Path<?> fieldPath, final String fieldNameSplit) {
@@ -396,8 +398,8 @@ public final class RSQLUtility {
             return fieldPath;
         }
 
-        private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
-                                                      final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
+        private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split,
+                final boolean isMapKeyField, final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
             Path<?> fieldPath = null;
             for (int i = 0; i < split.length; i++) {
                 if (!(isMapKeyField && i == (split.length - 1))) {
@@ -685,17 +687,17 @@ public final class RSQLUtility {
         }
 
         private Predicate getEqualToPredicate(final Object transformedValue, final Path<Object> fieldPath) {
-            if (transformedValue instanceof String) {
+            if (transformedValue == null) {
+                return cb.isNull(pathOfString(fieldPath));
+            }
+
+            if ((transformedValue instanceof String) && !NumberUtils.isCreatable((String) transformedValue)) {
                 if (StringUtils.isEmpty(transformedValue)) {
                     return cb.or(cb.isNull(pathOfString(fieldPath)), cb.equal(pathOfString(fieldPath), ""));
                 }
 
                 final String sqlValue = toSQL((String) transformedValue);
                 return cb.like(cb.upper(pathOfString(fieldPath)), sqlValue, ESCAPE_CHAR);
-            }
-
-            if (transformedValue == null) {
-                return cb.isNull(pathOfString(fieldPath));
             }
 
             return cb.equal(fieldPath, transformedValue);
@@ -708,7 +710,7 @@ public final class RSQLUtility {
                 return toNotNullPredicate(fieldPath);
             }
 
-            if (transformedValue instanceof String) {
+            if ((transformedValue instanceof String) && !NumberUtils.isCreatable((String) transformedValue)) {
                 if (StringUtils.isEmpty(transformedValue)) {
                     return toNotNullAndNotEmptyPredicate(fieldPath);
                 }
@@ -725,7 +727,7 @@ public final class RSQLUtility {
                 return toNotEqualWithSubQueryPredicate(enumField, sqlValue, fieldNames);
             }
 
-            return toNotEqualPredicate(fieldPath, transformedValue);
+            return toNullOrNotEqualPredicate(fieldPath, transformedValue);
         }
 
         private void clearOuterJoinsIfNotNeeded() {
@@ -738,13 +740,13 @@ public final class RSQLUtility {
             return cb.isNotNull(pathOfString(fieldPath));
         }
 
-        private Predicate toNotEqualPredicate(final Path<Object> fieldPath, final Object transformedValue) {
-            return cb.notEqual(fieldPath, transformedValue);
-        }
-
         private Predicate toNullOrNotLikePredicate(final Path<Object> fieldPath, final String sqlValue) {
             return cb.or(cb.isNull(pathOfString(fieldPath)),
                     cb.notLike(cb.upper(pathOfString(fieldPath)), sqlValue, ESCAPE_CHAR));
+        }
+
+        private Predicate toNullOrNotEqualPredicate(final Path<Object> fieldPath, final Object transformedValue) {
+            return cb.or(cb.isNull(pathOfString(fieldPath)), cb.notEqual(fieldPath, transformedValue));
         }
 
         private Predicate toNotNullAndNotEmptyPredicate(final Path<Object> fieldPath) {
@@ -797,9 +799,11 @@ public final class RSQLUtility {
         }
 
         private static Path<?> getInnerFieldPath(final Root<?> subqueryRoot, final String[] split,
-                                                 final boolean isMapKeyField) {
+                final boolean isMapKeyField) {
             return getFieldPath(subqueryRoot, split, isMapKeyField,
-                    (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit)).orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
+                    (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit))
+                            .orElseThrow(() -> new RSQLParameterUnsupportedFieldException(
+                                    "RSQL field path cannot be empty", null));
         }
 
         private static Path<?> getInnerJoinFieldPath(final Root<?> subqueryRoot, final Path<?> fieldPath,

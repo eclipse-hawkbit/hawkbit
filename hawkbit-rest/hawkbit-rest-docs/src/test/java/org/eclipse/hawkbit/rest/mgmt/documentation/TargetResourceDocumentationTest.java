@@ -124,7 +124,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String target = createTargetJsonForPostRequest("123456", "controllerId", "test");
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
-                .contentType(MediaType.APPLICATION_JSON_UTF8).content(target)).andExpect(status().isCreated())
+                .contentType(MediaType.APPLICATION_JSON).content(target)).andExpect(status().isCreated())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(requestFields(
                         requestFieldWithPath("[]controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -183,7 +183,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final String targetAsJson = createJsonTarget(targetId, "newTargetName", "I've been updated");
 
         mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId())
-                .contentType(MediaType.APPLICATION_JSON_UTF8).content(targetAsJson)).andExpect(status().isOk())
+                .contentType(MediaType.APPLICATION_JSON).content(targetAsJson)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -308,13 +308,17 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("Handles the GET request of retrieving all targets within SP based by parameter. Required Permission: READ_TARGET.")
-    public void deleteActionsFromTargetWithParameters() throws Exception {
-        generateActionForTarget(targetId);
-
-        mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS + "?force=true")).andExpect(status().isOk())
-                .andDo(MockMvcResultPrinter.print()).andDo(this.document.document(
+    @Description("Optionally force quits an active action, only active actions can be deleted. Required Permission: UPDATE_TARGET.")
+    public void deleteActionFromTargetWithParameters() throws Exception {
+        final Action action = generateActionForTarget(targetId, false);
+        deploymentManagement.cancelAction(action.getId());
+        
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}?force=true", targetId, action.getId()))
+                .andExpect(status().isNoContent()).andDo(MockMvcResultPrinter.print())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
+                                parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestParameters(parameterWithName("force").description(MgmtApiModelProperties.FORCE))));
     }
 
@@ -414,7 +418,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
                         + "/{actionId}", targetId, actionId).content(this.objectMapper.writeValueAsString(body))
-                                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -514,7 +518,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body)
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -558,7 +562,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         enableMultiAssignments();
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body.toString())
-                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -649,7 +653,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(
                 get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         responseFields(fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
@@ -678,7 +682,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                 get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId())
                         .param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q", "key==known*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         requestParameters(
                                 parameterWithName("limit").attributes(key("type").value("query"))
@@ -732,7 +736,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata/{metadatakey}",
                 testTarget.getControllerId(), knownKey)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonObject.toString()))
+                        .contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -782,9 +786,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         mockMvc.perform(
                 post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId())
-                        .contentType(MediaType.APPLICATION_JSON_UTF8).content(jsonArray.toString()))
+                        .contentType(MediaType.APPLICATION_JSON).content(jsonArray.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaTypes.HAL_JSON_UTF8))
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(requestFieldWithPath("[]key").description(MgmtApiModelProperties.META_DATA_KEY),

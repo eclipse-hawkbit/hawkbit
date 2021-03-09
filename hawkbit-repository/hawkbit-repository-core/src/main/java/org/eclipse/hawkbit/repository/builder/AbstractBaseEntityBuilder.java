@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import org.springframework.hateoas.Identifiable;
+import org.eclipse.hawkbit.repository.Identifiable;
 
 public abstract class AbstractBaseEntityBuilder implements Identifiable<Long> {
 

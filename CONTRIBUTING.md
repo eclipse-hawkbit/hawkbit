@@ -1,4 +1,4 @@
-# Contributing to eclipse hawkBit
+# Contributing to Eclipse hawkBit
 
 :+1: First off, thanks for taking the time to contribute! We really appreciate this. :+1:
 
@@ -32,22 +32,23 @@ So we kindly ask contributors:
 * use utility functions in general based in the following priority:
   * use utility functions from JDK if feasible
   * use Spring utility classes if feasible
-  * use [guava](https://github.com/google/guava) if feasible
+  * use [Guava](https://github.com/google/guava) if feasible
   * use [Apache commons lang](https://commons.apache.org/proper/commons-lang/) if feasible
 
 Note that the guava project for instance often documents where they think that JDK is having a similar functionality (e.g. their thoughts on  [Throwables.propagate](https://github.com/google/guava/wiki/Why-we-deprecated-Throwables.propagate)).
 
 Examples:
 
-* Prefer `Arrays.asList(...)` from JDK over guava's `Lists.newArrayList(...)`
-* Prefer `StringUtils` from Spring over guava's `Strings` Apache's `StringUtils`
+* Prefer `Arrays.asList(...)` from JDK over Guava's `Lists.newArrayList(...)`
+* Prefer `StringUtils` from Spring over Guava's `Strings` and Apache's `StringUtils`
 
 ### Test documentation
 
 Please documented the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
 
 All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and **@Story** annotations in the following format:
-```
+
+```java
 @Feature("TEST_TYPE - HAWKBIT_COMPONENT")
 @Story("Test class description")
 ```
@@ -87,13 +88,30 @@ additionally have an Eclipse Foundation account and must have a signed Eclipse
 Contributor Agreement (ECA) on file.
 
 For more information, please see the Eclipse Committer Handbook:
-https://www.eclipse.org/projects/handbook/#resources-commit
+[https://www.eclipse.org/projects/handbook/#resources-commit](https://www.eclipse.org/projects/handbook/#resources-commit)
 
 HowTo "Sign-off" your commits:
 
 You do this by adding the `-s` flag when you make the commit(s), e.g.
 
-    git commit -s -m "Shave the yak some more"
+```bash
+git commit -s -m "Shave the yak some more"
+```
+
+### License Header
+
+Please make sure newly created files contain a proper license header like this:
+
+```java
+/**
+ * Copyright (c) <year> <author> and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * https://www.eclipse.org/legal/epl-v10.html
+ */
+```
 
 ## Making your changes
 
@@ -115,6 +133,11 @@ Submit a pull request via the normal GitHub UI (desktop or web).
 ## After submitting
 
 * Do not use your branch for any other development, otherwise further changes that you make will be visible in the PR.
+
+## Reporting a security vulnerability
+
+If you find a vulnerability, **DO NOT** disclose it in the public immediately! Instead, give us the possibility to fix it beforehand.
+So please don’t report your finding using GitHub issues and better head over to [https://eclipse.org/security](https://eclipse.org/security) and learn how to disclose a vulnerability in a safe and responsible manner
 
 ## Further information
 

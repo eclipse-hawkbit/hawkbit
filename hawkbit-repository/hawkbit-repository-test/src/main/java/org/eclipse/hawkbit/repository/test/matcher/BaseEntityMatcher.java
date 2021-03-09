@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.repository.test.matcher;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.hamcrest.Factory;
 import org.hamcrest.FeatureMatcher;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -22,7 +21,6 @@ public final class BaseEntityMatcher {
     private BaseEntityMatcher() {
     }
 
-    @Factory
     public static Matcher<BaseEntity> hasId(final Long id) {
         return new HasIdMatcher(Matchers.equalTo(id));
     }

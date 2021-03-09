@@ -107,7 +107,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         final String json = mapper.writeValueAsString(Arrays.asList(bodyPut));
         this.mockMvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING).content(json)
-                        .contentType(MediaType.APPLICATION_JSON_UTF8))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(getRequestFieldsTag(true), getResponseFieldsTag(true)));
     }
@@ -123,7 +123,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         this.mockMvc
                 .perform(
                         put(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}", tagId)
-                                .content(json).contentType(MediaType.APPLICATION_JSON_UTF8))
+                                .content(json).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionsetTagId")
@@ -146,7 +146,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         final Long tagId = createDistributionSetTagId();
         this.mockMvc
                 .perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}",
-                        tagId).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        tagId).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionsetTagId").description(ApiModelPropertiesGeneric.ITEM_ID))));
@@ -162,7 +162,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         this.mockMvc
                 .perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
                         + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, tag.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionsetTagId")
@@ -187,7 +187,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         this.mockMvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
                         + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING
-                        + "/toggleTagAssignment", tagId).content(json).contentType(MediaType.APPLICATION_JSON_UTF8))
+                        + "/toggleTagAssignment", tagId).content(json).contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionsetTagId")
@@ -210,7 +210,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
         this.mockMvc
                 .perform(post(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
                         + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, tagId).content(json)
-                                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("distributionsetTagId")
@@ -227,7 +227,7 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
                 .perform(delete(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
                         + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING
                         + "/{distributionsetId}", tagId, distributionSet.getId())
-                                .contentType(MediaType.APPLICATION_JSON_UTF8))
+                                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionsetTagId").description(ApiModelPropertiesGeneric.ITEM_ID),

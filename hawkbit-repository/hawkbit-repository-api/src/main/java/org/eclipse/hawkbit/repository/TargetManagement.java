@@ -126,6 +126,20 @@ public interface TargetManagement {
     long countByInstalledDistributionSet(long distId);
 
     /**
+     * Checks if there is already a {@link Target} that has the given distribution set Id assigned or installed.
+     *
+     * @param distId
+     *            to search for
+     * @return <code>true</code> if a {@link Target} exists.
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
+                          + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    boolean existsByInstalledOrAssignedDistributionSet(long distId);
+
+    /**
      * Count {@link TargetFilterQuery}s for given target filter query.
      *
      * @param rsqlParam

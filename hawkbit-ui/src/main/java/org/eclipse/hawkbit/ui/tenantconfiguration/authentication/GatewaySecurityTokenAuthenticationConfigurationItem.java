@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.tenantconfiguration.authentication;
 
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.ui.common.builder.LabelBuilder;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigWindow;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigAuthentication;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -34,7 +34,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Vertica
 
     private final transient SecurityTokenGenerator securityTokenGenerator;
     private final VerticalLayout detailLayout;
-    private final Binder<ProxySystemConfigWindow> binder;
+    private final Binder<ProxySystemConfigAuthentication> binder;
 
     /**
      * Constructor for GatewaySecurityTokenAuthenticationConfigurationItem
@@ -47,7 +47,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Vertica
      *            System config window binder
      */
     public GatewaySecurityTokenAuthenticationConfigurationItem(final VaadinMessageSource i18n,
-            final SecurityTokenGenerator securityTokenGenerator, final Binder<ProxySystemConfigWindow> binder) {
+            final SecurityTokenGenerator securityTokenGenerator, final Binder<ProxySystemConfigAuthentication> binder) {
         this.securityTokenGenerator = securityTokenGenerator;
         this.binder = binder;
         this.setSpacing(false);
@@ -68,7 +68,7 @@ public class GatewaySecurityTokenAuthenticationConfigurationItem extends Vertica
         final Label gatewayTokenLabel = new LabelBuilder().id("gatewaysecuritytokenkey").name("").buildLabel();
         gatewayTokenLabel.addStyleName("gateway-token-label");
         final ReadOnlyHasValue<String> gatewayTokenFieldBindable = new ReadOnlyHasValue<>(gatewayTokenLabel::setValue);
-        binder.bind(gatewayTokenFieldBindable, ProxySystemConfigWindow::getGatewaySecurityToken, null);
+        binder.bind(gatewayTokenFieldBindable, ProxySystemConfigAuthentication::getGatewaySecurityToken, null);
 
         final HorizontalLayout keyGenerationLayout = new HorizontalLayout();
         keyGenerationLayout.setSpacing(true);

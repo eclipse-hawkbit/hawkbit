@@ -15,6 +15,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
+import com.google.common.collect.Maps;
+
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -124,8 +126,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
 
-import com.google.common.collect.Maps;
-
 /**
  * General configuration for hawkBit's Repository.
  *
@@ -145,9 +145,8 @@ import com.google.common.collect.Maps;
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     protected RepositoryApplicationConfiguration(final DataSource dataSource, final JpaProperties properties,
-            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider,
-            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
-        super(dataSource, properties, jtaTransactionManagerProvider, transactionManagerCustomizers);
+            final ObjectProvider<JtaTransactionManager> jtaTransactionManagerProvider) {
+        super(dataSource, properties, jtaTransactionManagerProvider);
     }
 
     @Bean
@@ -410,12 +409,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     /**
      * {@link MultiTenantJpaTransactionManager} bean.
      *
-     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager()
+     * @see org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration#transactionManager(ObjectProvider)
      * @return a new {@link PlatformTransactionManager}
      */
     @Override
     @Bean
-    public PlatformTransactionManager transactionManager() {
+    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         return new MultiTenantJpaTransactionManager();
     }
 
@@ -426,8 +425,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    SystemManagement systemManagement() {
-        return new JpaSystemManagement();
+    SystemManagement systemManagement(final JpaProperties properties) {
+        return new JpaSystemManagement(properties);
     }
 
     /**

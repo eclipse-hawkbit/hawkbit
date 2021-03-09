@@ -41,7 +41,7 @@ public class DistributionSetStatelessDataProvider
      */
     public DistributionSetStatelessDataProvider(final DistributionSetManagement distributionSetManagement,
             final DistributionSetToProxyDistributionMapper entityMapper) {
-        super(entityMapper, new Sort(Direction.ASC, "name", "version"));
+        super(entityMapper, Sort.by(Direction.ASC, "name", "version"));
 
         this.distributionSetManagement = distributionSetManagement;
     }

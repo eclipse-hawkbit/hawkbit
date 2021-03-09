@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common.data.mappers;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
-import org.springframework.hateoas.Identifiable;
 
 /**
  * Interface for mapping identifiable entities, fetched from backend, to the
