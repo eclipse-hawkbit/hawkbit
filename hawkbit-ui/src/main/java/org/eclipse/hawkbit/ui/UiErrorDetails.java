@@ -1,26 +1,18 @@
 package org.eclipse.hawkbit.ui;
 
 public class UiErrorDetails {
-    private static final UiErrorDetails UNKNOWN = new UiErrorDetails(UiErrorDetailsType.UNKNOWN);
-    private static final UiErrorDetails IGNORED = new UiErrorDetails(UiErrorDetailsType.IGNORED);
-
-    private final UiErrorDetailsType type;
+    private static final UiErrorDetails EMPTY = new UiErrorDetails();
 
     private final String caption;
     private final String description;
 
-    private UiErrorDetails(final UiErrorDetailsType type) {
-        this(type, null, null);
+    private UiErrorDetails() {
+        this(null, null);
     }
 
-    private UiErrorDetails(final UiErrorDetailsType type, final String caption, final String description) {
-        this.type = type;
+    private UiErrorDetails(final String caption, final String description) {
         this.caption = caption;
         this.description = description;
-    }
-
-    public UiErrorDetailsType getType() {
-        return type;
     }
 
     public String getCaption() {
@@ -31,27 +23,15 @@ public class UiErrorDetails {
         return description;
     }
 
-    public boolean isKnown() {
-        return type != UiErrorDetailsType.UNKNOWN;
-    }
-
     public boolean isPresent() {
-        return type == UiErrorDetailsType.PRESENT;
+        return caption != null && description != null;
     }
 
-    public static UiErrorDetails unknown() {
-        return UNKNOWN;
-    }
-
-    public static UiErrorDetails ignored() {
-        return IGNORED;
+    public static UiErrorDetails empty() {
+        return EMPTY;
     }
 
     public static UiErrorDetails create(final String caption, final String description) {
-        return new UiErrorDetails(UiErrorDetailsType.PRESENT, caption, description);
-    }
-
-    public enum UiErrorDetailsType {
-        PRESENT, IGNORED, UNKNOWN
+        return new UiErrorDetails(caption, description);
     }
 }

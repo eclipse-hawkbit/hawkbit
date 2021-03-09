@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -91,8 +92,8 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     private List<UiErrorDetails> extractErrorDetails(final ErrorEvent event) {
         return uiErrorDetailsExtractor.stream()
-                .map(extractor -> extractor.extractErrorDetailsFrom(event.getThrowable()))
-                .filter(UiErrorDetails::isKnown).collect(Collectors.toList());
+                .map(extractor -> extractor.extractErrorDetailsFrom(event.getThrowable())).flatMap(Collection::stream)
+                .collect(Collectors.toList());
     }
 
     private void showGenericErrorNotification(final Page page, final ErrorEvent event) {

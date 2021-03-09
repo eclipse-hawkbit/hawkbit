@@ -9,7 +9,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-public class ConstraintViolationErrorExtractor extends AbstractUiErrorDetailsExtractor {
+public class ConstraintViolationErrorExtractor extends AbstractSingleUiErrorDetailsExtractor {
     private final VaadinMessageSource i18n;
 
     public ConstraintViolationErrorExtractor(final VaadinMessageSource i18n) {
@@ -17,8 +17,8 @@ public class ConstraintViolationErrorExtractor extends AbstractUiErrorDetailsExt
     }
 
     @Override
-    protected Optional<UiErrorDetails> processError(final Throwable error) {
-        return findExceptionFrom(error, ConstraintViolationException.class).map(ex -> {
+    protected Optional<UiErrorDetails> findDetails(final Throwable error) {
+        return findExceptionOf(error, ConstraintViolationException.class).map(ex -> {
             final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
             final String description = violations == null ? error.getClass().getSimpleName()
                     : formatViolations(violations);
