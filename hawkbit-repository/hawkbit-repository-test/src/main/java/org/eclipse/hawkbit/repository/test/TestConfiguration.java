@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.test;
 
+import java.util.Collections;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,11 +39,13 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
 import org.springframework.aop.interceptor.SimpleAsyncUncaughtExceptionHandler;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
@@ -118,23 +121,30 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    TenantAware tenantAware() {
-        return new SecurityContextTenantAware();
+    UserAuthoritiesResolver authoritiesResolver() {
+        return (tenant, username) -> Collections.emptyList();
     }
 
     @Bean
-    TenantAwareCacheManager cacheManager() {
-        return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware());
+    TenantAware tenantAware(final UserAuthoritiesResolver authoritiesResolver) {
+        return new SecurityContextTenantAware(authoritiesResolver);
+    }
+
+    @Bean
+    TenantAwareCacheManager cacheManager(final TenantAware tenantAware) {
+        return new TenantAwareCacheManager(new CaffeineCacheManager(), tenantAware);
     }
 
     /**
      * Bean for the download id cache.
      *
+     * @param cacheManager
+     *              The {@link CacheManager}
      * @return the cache
      */
     @Bean
-    DownloadIdCache downloadIdCache() {
-        return new DefaultDownloadIdCache(cacheManager());
+    DownloadIdCache downloadIdCache(final CacheManager cacheManager) {
+        return new DefaultDownloadIdCache(cacheManager);
     }
 
     @Bean(name = AbstractApplicationContext.APPLICATION_EVENT_MULTICASTER_BEAN_NAME)

@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.Before;
 import org.junit.Test;
@@ -107,6 +108,9 @@ public class AmqpControllerAuthenticationTest {
     @Mock
     private Target targetMock;
 
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_FALSE = TenantConfigurationValue
             .<Boolean> builder().value(Boolean.FALSE).build();
 
@@ -139,7 +143,7 @@ public class AmqpControllerAuthenticationTest {
         when(targetMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
         when(targetMock.getControllerId()).thenReturn(CONTROLLER_ID);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         final TenantMetaData tenantMetaData = mock(TenantMetaData.class);
