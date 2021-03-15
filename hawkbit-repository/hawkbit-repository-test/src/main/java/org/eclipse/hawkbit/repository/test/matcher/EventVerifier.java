@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.test.matcher;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
 import java.util.Iterator;
@@ -20,10 +21,11 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.awaitility.Awaitility;
+import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
@@ -37,8 +39,6 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 import com.google.common.collect.ConcurrentHashMultiset;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
-import org.awaitility.Awaitility;
-import org.awaitility.core.ConditionTimeoutException;
 
 /**
  * Test rule to setup and verify the event count for a method.
@@ -107,7 +107,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
                         .until(() -> eventCaptor.getCountFor(expectedEvent.type()), equalTo(expectedEvent.count()));
 
             } catch (final ConditionTimeoutException ex) {
-                Assert.fail("Did not receive the expected amount of events form " + expectedEvent.type() + " Expected: "
+                fail("Did not receive the expected amount of events form " + expectedEvent.type() + " Expected: "
                         + expectedEvent.count() + " but was: " + eventCaptor.getCountFor(expectedEvent.type()));
             }
         }
@@ -124,7 +124,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
                 final int count = eventCaptor.getCountFor(element);
                 failMessage.append(element + " with count: " + count + " ");
             }
-            Assert.fail(failMessage.toString());
+            fail(failMessage.toString());
         }
 
     }

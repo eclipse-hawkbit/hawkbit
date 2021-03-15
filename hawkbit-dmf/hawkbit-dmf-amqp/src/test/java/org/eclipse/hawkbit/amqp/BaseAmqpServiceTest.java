@@ -9,20 +9,18 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -61,52 +59,46 @@ public class BaseAmqpServiceTest {
                 DmfActionUpdateStatus.class);
 
         assertThat(convertedActionUpdateStatus).isEqualToComparingFieldByField(actionUpdateStatus);
-
     }
 
     @Test
     @Description("Tests invalid null message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void convertMessageWithNullContent() {
-        try {
-            baseAmqpService.convertMessage(new Message(null, createJsonProperties()), DmfActionUpdateStatus.class);
-            fail("Expected MessageConversionException for inavlid JSON");
-        } catch (final MessageConversionException e) {
-            // expected
-        }
-
+        Message message = createMessage(null);
+        Assertions.assertThrows(MessageConversionException.class,
+                () -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class),
+                "Expected MessageConversionException for invalid JSON");
     }
 
     @Test
     @Description("Tests invalid empty message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithEmptyContent() {
-        try {
-            baseAmqpService.convertMessage(new Message("".getBytes(), createJsonProperties()),
-                    DmfActionUpdateStatus.class);
-            fail("Expected MessageConversionException for inavlid JSON");
-        } catch (final MessageConversionException e) {
-            // expected
-        }
-    }
-
-    private MessageProperties createJsonProperties() {
-        final MessageProperties messageProperties = new MessageProperties();
-        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-        return messageProperties;
+        Message message = createMessage("".getBytes());
+        Assertions.assertThrows(MessageConversionException.class,
+                () -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class),
+                "Expected MessageConversionException for invalid JSON");
     }
 
     @Test
     @Description("Tests invalid json message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidJsonContent() {
-        try {
-            baseAmqpService.convertMessage(new Message("Invalid Json".getBytes(), createJsonProperties()),
-                    DmfActionUpdateStatus.class);
-            fail("Expected MessageConversionException for inavlid JSON");
-        } catch (final MessageConversionException e) {
-            // expected
-        }
+        Message message = createMessage("Invalid Json".getBytes());
+        Assertions.assertThrows(MessageConversionException.class,
+                () -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class),
+                "Expected MessageConversionException for invalid JSON");
+    }
+
+    private Message createMessage(byte[] body) {
+        return new Message(body, createJsonProperties());
+    }
+
+    private MessageProperties createJsonProperties() {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        return messageProperties;
     }
 
     private DmfActionUpdateStatus createActionStatus() {

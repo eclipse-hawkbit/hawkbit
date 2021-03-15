@@ -9,10 +9,10 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,11 +43,12 @@ import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -69,7 +70,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpController Authentication Test")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AmqpControllerAuthenticationTest {
 
     private static final String SHA1 = "12345";
@@ -113,41 +114,41 @@ public class AmqpControllerAuthenticationTest {
     private static final TenantConfigurationValue<Boolean> CONFIG_VALUE_TRUE = TenantConfigurationValue
             .<Boolean> builder().value(Boolean.TRUE).build();
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
         final RabbitTemplate rabbitTemplate = mock(RabbitTemplate.class);
-        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
+        lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
-        final DdiSecurityProperties secruityProperties = mock(DdiSecurityProperties.class);
+        final DdiSecurityProperties securityProperties = mock(DdiSecurityProperties.class);
         final Rp rp = mock(Rp.class);
         final DdiSecurityProperties.Authentication ddiAuthentication = mock(DdiSecurityProperties.Authentication.class);
         final Anonymous anonymous = mock(Anonymous.class);
-        when(secruityProperties.getRp()).thenReturn(rp);
+        when(securityProperties.getRp()).thenReturn(rp);
         when(rp.getSslIssuerHashHeader()).thenReturn("X-Ssl-Issuer-Hash-%d");
-        when(secruityProperties.getAuthentication()).thenReturn(ddiAuthentication);
-        when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
-        when(anonymous.isEnabled()).thenReturn(false);
+        lenient().when(securityProperties.getAuthentication()).thenReturn(ddiAuthentication);
+        lenient().when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
+        lenient().when(anonymous.isEnabled()).thenReturn(false);
 
         when(tenantConfigurationManagementMock.getConfigurationValue(any(), eq(Boolean.class)))
                 .thenReturn(CONFIG_VALUE_FALSE);
 
         final ControllerManagement controllerManagement = mock(ControllerManagement.class);
-        when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targetMock));
-        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
+        lenient().when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targetMock));
+        lenient().when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
 
-        when(targetMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
-        when(targetMock.getControllerId()).thenReturn(CONTROLLER_ID);
+        lenient().when(targetMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
+        lenient().when(targetMock.getControllerId()).thenReturn(CONTROLLER_ID);
 
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         final TenantMetaData tenantMetaData = mock(TenantMetaData.class);
-        when(tenantMetaData.getTenant()).thenReturn(TENANT);
-        when(systemManagement.getTenantMetadata(TENANT_ID)).thenReturn(tenantMetaData);
+        lenient().when(tenantMetaData.getTenant()).thenReturn(TENANT);
+        lenient().when(systemManagement.getTenantMetadata(TENANT_ID)).thenReturn(tenantMetaData);
 
         authenticationManager = new AmqpControllerAuthentication(systemManagement, controllerManagement,
-                tenantConfigurationManagementMock, tenantAware, secruityProperties, systemSecurityContext);
+                tenantConfigurationManagementMock, tenantAware, securityProperties, systemSecurityContext);
 
         authenticationManager.postConstruct();
 
@@ -155,8 +156,8 @@ public class AmqpControllerAuthenticationTest {
                 new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
         testArtifact.setId(1L);
 
-        when(artifactManagementMock.get(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
-        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
+        lenient().when(artifactManagementMock.get(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
+        lenient().when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory(),
@@ -166,47 +167,40 @@ public class AmqpControllerAuthenticationTest {
                 authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,
                 controllerManagementMock, tenantAware);
 
-        when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
+        lenient().when(hostnameResolverMock.resolveHostname()).thenReturn(new URL("http://localhost"));
 
-        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
+        lenient().when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
+        lenient().when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
     }
 
     @Test
     @Description("Tests authentication manager without principal")
-    public void testAuthenticationeBadCredantialsWithoutPricipal() {
+    public void testAuthenticationBadCredentialsWithoutPricipal() {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
-        try {
-            authenticationManager.doAuthenticate(securityToken);
-            fail("BadCredentialsException was excepeted since principal was missing");
-        } catch (final BadCredentialsException exception) {
-            // test ok - exception was excepted
-        }
-
+        Assertions.assertThrows(BadCredentialsException.class,
+                () -> authenticationManager.doAuthenticate(securityToken),
+                "BadCredentialsException was expected since principal was missing");
     }
 
     @Test
     @Description("Tests authentication manager without wrong credential")
-    public void testAuthenticationBadCredantialsWithWrongCredential() {
+    public void testAuthenticationBadCredentialsWithWrongCredential() {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
         securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
-        try {
-            authenticationManager.doAuthenticate(securityToken);
-            fail("BadCredentialsException was excepeted due to wrong credential");
-        } catch (final BadCredentialsException exception) {
-            // test ok - exception was excepted
-        }
 
+        Assertions.assertThrows(BadCredentialsException.class,
+                () -> authenticationManager.doAuthenticate(securityToken),
+                "BadCredentialsException was expected due to wrong credential");
     }
 
     @Test
-    @Description("Tests authentication successfull")
-    public void testSuccessfullAuthentication() {
+    @Description("Tests authentication successful")
+    public void testsuccessfulAuthentication() {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
@@ -219,7 +213,7 @@ public class AmqpControllerAuthenticationTest {
 
     @Test
     @Description("Tests authentication message without principal")
-    public void testAuthenticationMessageBadCredantialsWithoutPricipal() {
+    public void testAuthenticationMessageBadCredentialsWithoutPricipal() {
         final MessageProperties messageProperties = createMessageProperties(null);
 
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
@@ -238,7 +232,7 @@ public class AmqpControllerAuthenticationTest {
 
     @Test
     @Description("Tests authentication message without wrong credential")
-    public void testAuthenticationMessageBadCredantialsWithWrongCredential() {
+    public void testAuthenticationMessageBadCredentialsWithWrongCredential() {
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
@@ -259,8 +253,8 @@ public class AmqpControllerAuthenticationTest {
     }
 
     @Test
-    @Description("Tests authentication message successfull")
-    public void successfullMessageAuthentication() {
+    @Description("Tests authentication message successful")
+    public void successfulMessageAuthentication() {
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, null, CONTROLLER_ID, null,
                 FileResource.createFileResourceBySha1(SHA1));
@@ -287,8 +281,8 @@ public class AmqpControllerAuthenticationTest {
     }
 
     @Test
-    @Description("Tests authentication message successfull with targetId intead of controllerId provided and artifactId instead of SHA1.")
-    public void successfullMessageAuthenticationWithTargetIdAndArtifactId() {
+    @Description("Tests authentication message successful with targetId intead of controllerId provided and artifactId instead of SHA1.")
+    public void successfulMessageAuthenticationWithTargetIdAndArtifactId() {
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, null, null, TARGET_ID,
                 FileResource.createFileResourceByArtifactId(ARTIFACT_ID));
@@ -315,8 +309,8 @@ public class AmqpControllerAuthenticationTest {
     }
 
     @Test
-    @Description("Tests authentication message successfull")
-    public void successfullMessageAuthenticationWithTenantid() {
+    @Description("Tests authentication message successful")
+    public void successfulMessageAuthenticationWithTenantid() {
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(null, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.rest.exception.SortParameterSyntaxErrorException;
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedDirectionException;
 import org.eclipse.hawkbit.rest.exception.SortParameterUnsupportedFieldException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Sort.Order;
 
 import io.qameta.allure.Description;

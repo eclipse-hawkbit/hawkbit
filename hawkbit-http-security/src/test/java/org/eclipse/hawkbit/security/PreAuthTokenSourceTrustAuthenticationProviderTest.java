@@ -52,14 +52,8 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
                 Arrays.asList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
-        // test, should throw authentication exception
-        try {
-            underTestWithoutSourceIpCheck.authenticate(token);
-            Assertions.fail("Should not work with wrong credentials");
-        } catch (final BadCredentialsException e) {
-
-        }
-
+        Assertions.assertThrows(BadCredentialsException.class, () -> underTestWithoutSourceIpCheck.authenticate(token),
+                "Should not work with wrong credentials");
     }
 
     @Test
@@ -77,7 +71,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header but the request are not coming from a trustful source.")
-    public void priniciapAndCredentialsAreTheSameButSourceIpRequestNotMatching() {
+    public void priniciapAndCredentialsAreTheSameButSourceIpRequestNotMatching2() {
         final String remoteAddress = "192.168.1.1";
         final String principal = "controllerId";
         final String credentials = "controllerId";
@@ -87,14 +81,9 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(remoteAddress);
 
-        // test, should throw authentication exception
-
-        try {
+        Assertions.assertThrows(InsufficientAuthenticationException.class, () -> {
             underTestWithSourceIpCheck.authenticate(token);
-            Assertions.fail("as source is not trusted.");
-        } catch (final InsufficientAuthenticationException e) {
-
-        }
+        }, "as source is not trusted.");
     }
 
     @Test
@@ -147,6 +136,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final PreAuthTokenSourceTrustAuthenticationProvider underTestWithList = new PreAuthTokenSourceTrustAuthenticationProvider(
                 trustedIPAddresses);
 
-        assertThatExceptionOfType(InsufficientAuthenticationException.class).isThrownBy(()-> underTestWithList.authenticate(token));
+        assertThatExceptionOfType(InsufficientAuthenticationException.class)
+                .isThrownBy(() -> underTestWithList.authenticate(token));
     }
 }
