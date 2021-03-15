@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;

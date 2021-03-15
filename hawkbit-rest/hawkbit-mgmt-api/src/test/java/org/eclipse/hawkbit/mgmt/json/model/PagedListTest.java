@@ -9,16 +9,15 @@
 package org.eclipse.hawkbit.mgmt.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Management API")
 @Story("Paged List Handling")
@@ -29,7 +28,7 @@ public class PagedListTest {
     public void createListWithNullContentThrowsException() {
         try {
             new PagedList<>(null, 0);
-            fail("as content is null");
+            Assertions.fail("as content is null");
         } catch (final NullPointerException e) {
         }
     }
@@ -60,6 +59,5 @@ public class PagedListTest {
         knownContentList.add("content2");
 
         assertListSize(knownTotal, knownContentList);
-
     }
 }

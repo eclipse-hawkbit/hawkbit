@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.qameta.allure.Description;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.web.firewall.RequestRejectedException;
 

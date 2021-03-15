@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;

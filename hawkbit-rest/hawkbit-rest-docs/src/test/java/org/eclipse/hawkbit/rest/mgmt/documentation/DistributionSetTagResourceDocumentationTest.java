@@ -32,8 +32,8 @@ import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.DocumenationResponseFieldsSnippet;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -56,11 +56,9 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
 
     private DistributionSet distributionSet;
 
-    @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         resourceName = "distributionsettag";
-        super.setUp();
         distributionSet = createDistributionSet();
     }
 

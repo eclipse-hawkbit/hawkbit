@@ -59,7 +59,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.junit.Test;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -966,7 +967,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
         createConditionFactory().await().untilAsserted(() -> {
             try {
-                securityRule.runAsPrivileged(() -> {
+                WithSpringAuthorityRule.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
                             .findActionStatusByAction(PAGE, actionId).getContent();
 

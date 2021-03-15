@@ -36,7 +36,7 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultActions;
 

@@ -14,8 +14,8 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.locks.LockRegistry;
 
@@ -36,7 +36,7 @@ public class AutoCleanupSchedulerTest extends AbstractJpaIntegrationTest {
     @Autowired
     private LockRegistry lockRegistry;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         counter.set(0);
     }

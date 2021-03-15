@@ -18,8 +18,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -35,7 +35,7 @@ public class RSQLSoftwareModuleMetadataFieldsTest extends AbstractJpaIntegration
 
     private Long softwareModuleId;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
 

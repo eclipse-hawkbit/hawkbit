@@ -14,7 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
 import io.qameta.allure.Description;

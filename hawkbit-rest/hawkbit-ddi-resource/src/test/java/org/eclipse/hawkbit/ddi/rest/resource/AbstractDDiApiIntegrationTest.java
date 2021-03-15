@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.io.Writer;
 
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;

@@ -10,12 +10,13 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -69,13 +70,14 @@ public class DdiChunkTest {
         assertThat(ddiChunk.getArtifacts().size()).isEqualTo(0);
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiChunk = "{\"part\":[\"1234\"],\"version\":\"1.0\",\"name\":\"Dummy-Artifact\",\"artifacts\":[]}";
 
         // Test
-        mapper.readValue(serializedDdiChunk, DdiChunk.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiChunk, DdiChunk.class));
     }
 }

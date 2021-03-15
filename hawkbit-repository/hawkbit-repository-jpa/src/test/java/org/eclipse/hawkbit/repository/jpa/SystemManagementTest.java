@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -102,7 +102,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "tenant" + i;
-            securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true, false,
+            WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
                         systemManagement.getTenantMetadata(tenantname);
                         if (artifactSize > 0) {

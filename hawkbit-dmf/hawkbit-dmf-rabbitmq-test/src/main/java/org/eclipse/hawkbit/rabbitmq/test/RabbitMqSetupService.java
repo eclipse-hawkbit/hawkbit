@@ -14,10 +14,11 @@ import java.util.UUID;
 
 import javax.annotation.PreDestroy;
 
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
+import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.junit.BrokerRunningSupport;
 import org.springframework.util.StringUtils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Throwables;
 import com.rabbitmq.http.client.Client;
 import com.rabbitmq.http.client.domain.UserPermissions;
@@ -25,17 +26,14 @@ import com.rabbitmq.http.client.domain.UserPermissions;
 /**
  * Creates and deletes a new virtual host if the rabbit mq management api is
  * available.
- * 
  */
 // exception squid:S2068 - Test instance passwd
 @SuppressWarnings("squid:S2068")
 public class RabbitMqSetupService {
 
-    private static final String GUEST = "guest";
-    private static final String DEFAULT_USER = GUEST;
-    private static final String DEFAULT_PASSWORD = GUEST;
-
     private Client rabbitmqHttpClient;
+
+    private final com.rabbitmq.client.ConnectionFactory connectionFactory;
 
     private String virtualHost;
 
@@ -45,18 +43,13 @@ public class RabbitMqSetupService {
 
     private String password;
 
-    public RabbitMqSetupService(final RabbitProperties properties) {
-        hostname = properties.getHost();
-        username = properties.getUsername();
-        if (StringUtils.isEmpty(username)) {
-            username = DEFAULT_USER;
-        }
+    public RabbitMqSetupService() {
 
-        password = properties.getPassword();
-        if (StringUtils.isEmpty(password)) {
-            password = DEFAULT_PASSWORD;
-        }
-
+        BrokerRunningSupport brokerSupport = BrokerRunningSupport.isRunning();
+        connectionFactory = brokerSupport.getConnectionFactory();
+        hostname = brokerSupport.getHostName();
+        username = brokerSupport.getUser();
+        password = brokerSupport.getPassword();
     }
 
     private synchronized Client getRabbitmqHttpClient() {
@@ -74,17 +67,12 @@ public class RabbitMqSetupService {
         return "http://" + getHostname() + ":15672/api/";
     }
 
-    @SuppressWarnings("squid:S1162")
-    public String createVirtualHost() throws JsonProcessingException {
-        if (!getRabbitmqHttpClient().alivenessTest("/")) {
-            throw new AlivenessException(getHostname());
-
-        }
+    public ConnectionFactory newVirtualHostWithConnectionFactory() {
         virtualHost = UUID.randomUUID().toString();
         getRabbitmqHttpClient().createVhost(virtualHost);
         getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
-        return virtualHost;
-
+        connectionFactory.setVirtualHost(virtualHost);
+        return new CachingConnectionFactory(connectionFactory);
     }
 
     @PreDestroy
@@ -95,15 +83,15 @@ public class RabbitMqSetupService {
         getRabbitmqHttpClient().deleteVhost(virtualHost);
     }
 
-    public String getHostname() {
+    private String getHostname() {
         return hostname;
     }
 
-    public String getPassword() {
+    private String getPassword() {
         return password;
     }
 
-    public String getUsername() {
+    private String getUsername() {
         return username;
     }
 
@@ -115,14 +103,4 @@ public class RabbitMqSetupService {
         permissions.setWrite(".*");
         return permissions;
     }
-
-    static class AlivenessException extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-
-        public AlivenessException(final String hostname) {
-            super("Aliveness test failed for " + hostname
-                    + ":15672 guest/quest; rabbit mq management api not available");
-        }
-    }
-
 }

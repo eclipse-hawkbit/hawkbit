@@ -25,8 +25,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -52,7 +52,7 @@ public class AmqpAuthenticationMessageHandlerIntegrationTest extends AbstractAmq
     @Autowired
     private AmqpProperties amqpProperties;
 
-    @Before
+    @BeforeEach
     public void testSetup() {
         enableTargetTokenAuthentication();
     }
