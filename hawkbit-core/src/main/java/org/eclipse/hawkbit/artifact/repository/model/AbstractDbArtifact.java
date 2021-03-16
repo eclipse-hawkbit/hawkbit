@@ -64,8 +64,16 @@ public abstract class AbstractDbArtifact {
     /**
      * Creates an {@link InputStream} on this artifact. Caller has to take care
      * of closing the stream. Repeatable calls open a new {@link InputStream}.
-     * 
+     *
      * @return {@link InputStream} to read from artifact.
      */
     public abstract InputStream getFileInputStream();
+
+    /**
+     * Used to abort the stream before it is finally closed. This is needed when the
+     * download is aborted, for example.
+     */
+    public void abortIfNeeded() {
+        // do abort input stream if needed
+    }
 }
