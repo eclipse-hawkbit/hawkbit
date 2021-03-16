@@ -75,7 +75,6 @@ public class AmqpControllerAuthenticationTest {
 
     private static final String SHA1 = "12345";
     private static final Long ARTIFACT_ID = 1123L;
-    private static final Long ARTIFACT_SIZE = 6666L;
     private static final String TENANT = "DEFAULT";
     private static final Long TENANT_ID = 123L;
     private static final String CONTROLLER_ID = "123";
@@ -175,7 +174,7 @@ public class AmqpControllerAuthenticationTest {
 
     @Test
     @Description("Tests authentication manager without principal")
-    public void testAuthenticationBadCredentialsWithoutPricipal() {
+    public void testAuthenticationBadCredentialsWithoutPrincipal() {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         Assertions.assertThrows(BadCredentialsException.class,
@@ -200,7 +199,7 @@ public class AmqpControllerAuthenticationTest {
 
     @Test
     @Description("Tests authentication successful")
-    public void testsuccessfulAuthentication() {
+    public void testSuccessfulAuthentication() {
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
         when(tenantConfigurationManagementMock.getConfigurationValue(
@@ -213,7 +212,7 @@ public class AmqpControllerAuthenticationTest {
 
     @Test
     @Description("Tests authentication message without principal")
-    public void testAuthenticationMessageBadCredentialsWithoutPricipal() {
+    public void testAuthenticationMessageBadCredentialsWithoutPrincipal() {
         final MessageProperties messageProperties = createMessageProperties(null);
 
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
