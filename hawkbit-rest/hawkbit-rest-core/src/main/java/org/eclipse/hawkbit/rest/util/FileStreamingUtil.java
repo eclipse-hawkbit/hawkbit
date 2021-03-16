@@ -215,6 +215,7 @@ public final class FileStreamingUtil {
             copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {
             artifact.abortIfNeeded();
+            throw e;
         } finally {
             from.close();
         }
