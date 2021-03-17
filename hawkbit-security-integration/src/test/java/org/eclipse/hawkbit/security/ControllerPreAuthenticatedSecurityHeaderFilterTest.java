@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -20,19 +19,19 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @Feature("Unit Tests - Security")
 @Story("Issuer hash based authentication")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
 
     private static final String CA_COMMON_NAME = "ca-cn";
@@ -62,7 +61,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Mock
     private UserAuthoritiesResolver authoritiesResolver;
 
-    @Before
+    @BeforeEach
     public void before() {
         final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
@@ -127,8 +126,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         assertThat(credentials1.contains(expected1)).isTrue();
         assertThat(credentials2.contains(expected2)).isTrue();
 
-        assertEquals("hash1 expected in principal!", expected1, principal1);
-        assertEquals("hash2 expected in principal!", expected2, principal2);
+        assertThat(expected1).as("hash1 expected in principal!").isEqualTo(principal1);
+        assertThat(expected2).as("hash2 expected in principal!").isEqualTo(principal2);
 
     }
 

@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
@@ -35,8 +35,8 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     private DistributionSet ds;
 
-    @Before
-    public void seuptBeforeTest() {
+    @BeforeEach
+    public void setupBeforeTest() {
 
         ds = testdataFactory.createDistributionSet("DS");
         ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));

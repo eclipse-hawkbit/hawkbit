@@ -13,12 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.eclipse.hawkbit.ui.components.SPUIButton;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleSmall;
-import org.junit.Test;
 
 import com.vaadin.ui.Button;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 /**
  * Unit Test block for UI Component provider. Dynamic Factory Testing.

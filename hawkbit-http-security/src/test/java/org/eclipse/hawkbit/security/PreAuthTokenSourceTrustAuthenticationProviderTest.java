@@ -9,15 +9,16 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,7 @@ import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Security")
 @Story("PreAuthToken Source TrustAuthentication Provider Test")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 // TODO: create description annotations
 public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
@@ -54,7 +55,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         // test, should throw authentication exception
         try {
             underTestWithoutSourceIpCheck.authenticate(token);
-            fail("Should not work with wrong credentials");
+            Assertions.fail("Should not work with wrong credentials");
         } catch (final BadCredentialsException e) {
 
         }
@@ -90,7 +91,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
         try {
             underTestWithSourceIpCheck.authenticate(token);
-            fail("as source is not trusted.");
+            Assertions.fail("as source is not trusted.");
         } catch (final InsufficientAuthenticationException e) {
 
         }
@@ -132,7 +133,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
-    @Test(expected = InsufficientAuthenticationException.class)
+    @Test
     public void principalAndCredentialsAreTheSameSourceIpListNotMatches() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", "192.168.1.3" };
         final String principal = "controllerId";
@@ -146,13 +147,6 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final PreAuthTokenSourceTrustAuthenticationProvider underTestWithList = new PreAuthTokenSourceTrustAuthenticationProvider(
                 trustedIPAddresses);
 
-        // test, should throw authentication exception
-        final Authentication authenticate = underTestWithList.authenticate(token);
-        try {
-            assertThat(authenticate.isAuthenticated()).isTrue();
-            fail("as source is not trusted.");
-        } catch (final InsufficientAuthenticationException e) {
-
-        }
+        assertThatExceptionOfType(InsufficientAuthenticationException.class).isThrownBy(()-> underTestWithList.authenticate(token));
     }
 }

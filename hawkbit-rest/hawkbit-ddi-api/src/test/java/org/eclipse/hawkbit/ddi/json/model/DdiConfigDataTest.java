@@ -10,12 +10,13 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -62,14 +63,15 @@ public class DdiConfigDataTest {
         assertThat(ddiConfigData.getMode()).isEqualTo(DdiUpdateMode.REPLACE);
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiConfigData = "{\"data\":{\"test\":\"data\"},\"mode\":[\"replace\"],\"unknownProperty\":\"test\"}";
 
         // Test
-        mapper.readValue(serializedDdiConfigData, DdiConfigData.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiConfigData, DdiConfigData.class));
     }
 
     @Test

@@ -62,14 +62,11 @@ import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.TestWatcher;
-import org.junit.runner.Description;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,12 +86,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.google.common.io.Files;
 
-@RunWith(SpringRunner.class)
 @ActiveProfiles({ "test" })
+@ExtendWith({JUnitTestLoggerExtension.class, WithSpringAuthorityRule.class})
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest
 @ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -208,28 +204,6 @@ public abstract class AbstractIntegrationTest {
     @Autowired
     protected ApplicationEventPublisher eventPublisher;
 
-    @Rule
-    public final WithSpringAuthorityRule securityRule = new WithSpringAuthorityRule();
-
-    @Rule
-    public TestWatcher testLifecycleLoggerRule = new TestWatcher() {
-
-        @Override
-        protected void starting(final Description description) {
-            LOG.info("Starting Test {}...", description.getMethodName());
-        }
-
-        @Override
-        protected void succeeded(final Description description) {
-            LOG.info("Test {} succeeded.", description.getMethodName());
-        }
-
-        @Override
-        protected void failed(final Throwable e, final Description description) {
-            LOG.error("Test {} failed with {}.", description.getMethodName(), e);
-        }
-    };
-
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final String controllerId) {
         return assignDistributionSet(dsID, controllerId, ActionType.FORCED);
     }
@@ -294,7 +268,7 @@ public abstract class AbstractIntegrationTest {
      * @param controllerId
      *            is the ID for the controller to which the distribution set is
      *            being assigned
-     * @param maintenanceSchedule
+     * @param maintenanceWindowSchedule
      *            is the cron expression to be used for scheduling the
      *            maintenance window. Expression has 6 mandatory fields and 1
      *            last optional field: "second minute hour dayofmonth month
@@ -373,27 +347,27 @@ public abstract class AbstractIntegrationTest {
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.FINISHED));
     }
 
-    @Before
-    public void before() throws Exception {
+    @BeforeEach
+    public void beforeAll() throws Exception {
 
         final String description = "Updated description.";
 
-        osType = securityRule
+        osType = WithSpringAuthorityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        osType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
-        appType = securityRule.runAsPrivileged(
+        appType = WithSpringAuthorityRule.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        appType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
-        runtimeType = securityRule
+        runtimeType = WithSpringAuthorityRule
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = securityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        runtimeType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
-        standardDsType = securityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+        standardDsType = WithSpringAuthorityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
 
         // publish the reset counter market event to reset the counters after
         // setup. The setup is transparent by the test and its @ExpectedEvent
@@ -408,7 +382,7 @@ public abstract class AbstractIntegrationTest {
     private static String artifactDirectory = Files.createTempDir().getAbsolutePath() + "/"
             + RandomStringUtils.randomAlphanumeric(20);
 
-    @After
+    @AfterEach
     public void cleanUp() {
         if (new File(artifactDirectory).exists()) {
             try {
@@ -419,12 +393,12 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         System.setProperty("org.eclipse.hawkbit.repository.file.path", artifactDirectory);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         if (new File(artifactDirectory).exists()) {
             try {

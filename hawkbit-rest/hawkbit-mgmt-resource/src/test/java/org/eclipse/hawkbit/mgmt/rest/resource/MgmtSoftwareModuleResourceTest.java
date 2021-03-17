@@ -52,8 +52,8 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -78,7 +78,7 @@ import io.qameta.allure.Story;
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
-    @Before
+    @BeforeEach
     public void assertPreparationOfRepo() {
         assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").hasSize(0);
     }

@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -34,7 +34,7 @@ public class RSQLDistributionSetMetadataFieldsTest extends AbstractJpaIntegratio
 
     private Long distributionSetId;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("DS");
         distributionSetId = distributionSet.getId();

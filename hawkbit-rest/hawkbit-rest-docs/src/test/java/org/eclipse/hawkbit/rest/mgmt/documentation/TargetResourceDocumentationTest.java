@@ -42,8 +42,8 @@ import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
@@ -68,11 +68,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
     private final String targetId = "137";
 
-    @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         resourceName = "targets";
-        super.setUp();
     }
 
     @Test

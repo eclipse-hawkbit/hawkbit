@@ -41,7 +41,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -143,12 +143,11 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         assertEquals("Retrieved newly created custom target filter", targetFilterQuery, results.get(0));
     }
 
-    @Test(expected = RSQLParameterUnsupportedFieldException.class)
+    @Test
     @Description("Test searching a target filter query with an invalid filter.")
     public void searchTargetFilterQueryInvalidField() {
-        // Should throw an exception
-        targetFilterQueryManagement.findByRsql(PageRequest.of(0, 10), "unknownField==testValue").getContent();
-
+        Assertions.assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class).isThrownBy(
+                () -> targetFilterQueryManagement.findByRsql(PageRequest.of(0, 10), "unknownField==testValue").getContent());
     }
 
     @Test

@@ -35,7 +35,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 

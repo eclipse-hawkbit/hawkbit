@@ -39,8 +39,8 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -53,17 +53,14 @@ import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Management API for {@link DistributionSet}.
- *
  */
 @Feature("Spring Rest Docs Tests - DistributionSet")
 @Story("DistributionSet Resource")
 public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentation {
 
-    @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         resourceName = "distributionsets";
-        super.setUp();
     }
 
     @Test

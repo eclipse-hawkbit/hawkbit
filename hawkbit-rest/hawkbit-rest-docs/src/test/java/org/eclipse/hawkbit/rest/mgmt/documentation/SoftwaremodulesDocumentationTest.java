@@ -40,8 +40,8 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
@@ -58,11 +58,9 @@ import io.qameta.allure.Story;
 @Story("Softwaremodule Resource")
 public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentation {
 
-    @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         resourceName = "softwaremodules";
-        super.setUp();
     }
 
     @Test

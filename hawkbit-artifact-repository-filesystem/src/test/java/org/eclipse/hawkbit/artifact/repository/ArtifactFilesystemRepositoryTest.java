@@ -19,9 +19,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +42,7 @@ public class ArtifactFilesystemRepositoryTest {
 
     private static ArtifactFilesystemRepository artifactFilesystemRepository;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() {
         artifactResourceProperties = new ArtifactFilesystemProperties();
         artifactResourceProperties.setPath(Files.createTempDir().getAbsolutePath());
@@ -50,7 +50,7 @@ public class ArtifactFilesystemRepositoryTest {
         artifactFilesystemRepository = new ArtifactFilesystemRepository(artifactResourceProperties);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         if (new File(artifactResourceProperties.getPath()).exists()) {
             try {

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.DdiMaintenanceWindowStatus.AVAILABLE;
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.ATTEMPT;
 import static org.eclipse.hawkbit.ddi.json.model.DdiDeployment.HandlingType.FORCED;
@@ -18,7 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -79,7 +80,7 @@ public class DdiDeploymentBaseTest {
                 AVAILABLE.getStatus());
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
@@ -89,6 +90,7 @@ public class DdiDeploymentBaseTest {
                 + "\"Action status message 2\"]},\"links\":[]}";
 
         // Test
-        mapper.readValue(serializedDdiDeploymentBase, DdiDeploymentBase.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiDeploymentBase, DdiDeploymentBase.class));
     }
 }

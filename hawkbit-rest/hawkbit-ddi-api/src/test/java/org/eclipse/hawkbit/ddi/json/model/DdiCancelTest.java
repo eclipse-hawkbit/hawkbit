@@ -10,10 +10,11 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -61,13 +62,14 @@ public class DdiCancelTest {
         assertThat(ddiCancel.getCancelAction().getStopId()).matches("1234");
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiCancel = "{\"id\":[\"1234\"],\"cancelAction\":{\"stopId\":\"1234\"}}";
 
         // Test
-        mapper.readValue(serializedDdiCancel, DdiCancel.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiCancel, DdiCancel.class));
     }
 }

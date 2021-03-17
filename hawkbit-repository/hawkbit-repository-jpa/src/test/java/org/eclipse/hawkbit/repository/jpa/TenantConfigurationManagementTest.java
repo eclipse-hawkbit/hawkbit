@@ -21,8 +21,8 @@ import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 
@@ -235,7 +235,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         try {
             tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                     Serializable.class);
-            Assert.fail("");
+            Assertions.fail("");
         } catch (final TenantConfigurationValidatorException e) {
 
         }

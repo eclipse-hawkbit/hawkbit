@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
@@ -17,11 +18,12 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -32,7 +34,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @Feature("Component Tests - Device Management Federation API")
 @Story("Base Amqp Service Test")
 public class BaseAmqpServiceTest {
@@ -42,11 +44,10 @@ public class BaseAmqpServiceTest {
 
     private BaseAmqpService baseAmqpService;
 
-    @Before
+    @BeforeEach
     public void setup() {
-        when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
+        lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(new Jackson2JsonMessageConverter());
         baseAmqpService = new BaseAmqpService(rabbitTemplate);
-
     }
 
     @Test
