@@ -42,6 +42,16 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that getSystemUsageStatisticsWithTenants returns the usage of all tenants and not only the first 1000 (max page size).")
+    public void systemUsageReportCollectsStatisticsOfManyTenants() throws Exception {
+        // Prepare tenants
+        createTestTenantsForSystemStatistics(1050, 0, 0, 0);
+
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
+        assertThat(tenants).hasSize(1051); // +1 from the setup
+    }
+
+    @Test
     @Description("Checks that the system report calculates correctly the artifact size of all tenants in the system. It ignores deleted software modules with their artifacts.")
     public void systemUsageReportCollectsArtifactsOfAllTenants() throws Exception {
         // Prepare tenants
