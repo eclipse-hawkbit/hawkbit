@@ -10,11 +10,11 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
 
 import org.assertj.core.util.Lists;
-import org.junit.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -22,6 +22,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test serializability of DDI api model 'DdiActionFeedback'
@@ -65,13 +66,13 @@ public class DdiActionFeedbackTest {
         assertThat(ddiActionFeedback.getTime()).matches("20190809T121314");
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
         String serializedDdiActionFeedback = "{\"id\": [1],\"time\":\"20190809T121314\",\"status\":{\"execution\":\"closed\",\"result\":null,\"details\":[]}}";
 
-        // Test
-        mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));
     }
 }

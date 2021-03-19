@@ -40,11 +40,12 @@ import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
-import org.springframework.restdocs.JUnitRestDocumentation;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
@@ -65,13 +66,11 @@ import io.qameta.allure.Feature;
  *
  */
 @Feature("Documentation Verfication - API")
+@ExtendWith(RestDocumentationExtension.class)
 @ContextConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {
-
-    @Rule
-    public final JUnitRestDocumentation restDocumentation = new JUnitRestDocumentation("target/generated-snippets");
 
     @Autowired
     protected ObjectMapper objectMapper;
@@ -89,12 +88,12 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected String host = "management-api.host";
 
-    @Before
-    protected void setUp() {
+    @BeforeEach
+    protected void setupMvc(RestDocumentationContextProvider restDocContext) {
         this.document = document(resourceName + "/{method-name}", preprocessRequest(prettyPrint()),
                 preprocessResponse(prettyPrint()));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(MockMvcRestDocumentation.documentationConfiguration(this.restDocumentation).uris()
+                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocContext).uris()
                         .withScheme("https").withHost(host + ".com").withPort(443))
                 .alwaysDo(this.document).addFilter(filterHttpResponse).build();
         arrayPrefix = "[]";

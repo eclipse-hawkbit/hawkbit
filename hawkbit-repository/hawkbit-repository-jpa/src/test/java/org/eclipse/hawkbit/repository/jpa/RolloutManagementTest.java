@@ -72,9 +72,9 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -92,8 +92,7 @@ import io.qameta.allure.Story;
 @Story("Rollout Management")
 public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
-    @Before
-    @After
+    @BeforeEach
     public void reset() {
         this.approvalStrategy.setApprovalNeeded(false);
     }

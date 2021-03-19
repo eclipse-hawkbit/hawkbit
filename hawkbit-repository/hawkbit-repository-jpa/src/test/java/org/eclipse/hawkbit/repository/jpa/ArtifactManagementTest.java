@@ -44,7 +44,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
@@ -259,7 +259,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(java.lang.Long)}
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(long)}
      * .
      * 
      * @throws IOException
@@ -507,7 +507,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
+        return WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
     }
 
     private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {

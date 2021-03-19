@@ -50,7 +50,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.junit.Test;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
@@ -540,7 +541,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     }
 
     private void waitUntil(final Callable<Boolean> callable) {
-        createConditionFactory().until(() -> securityRule.runAsPrivileged(callable));
+        createConditionFactory().until(() -> WithSpringAuthorityRule.runAsPrivileged(callable));
     }
 
     private void assertLatestMultiActionMessageContainsInstallMessages(final String controllerId,

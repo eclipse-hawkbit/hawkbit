@@ -16,14 +16,13 @@ import org.awaitility.core.ConditionFactory;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
-import org.junit.Before;
-import org.junit.Rule;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.junit.BrokerRunning;
+import org.springframework.amqp.rabbit.junit.RabbitAvailable;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
@@ -31,17 +30,15 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 
+@RabbitAvailable
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
         TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
-    private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
-    @Rule
-    @Autowired
-    public BrokerRunning brokerRunning;
+    private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
     @Autowired
     private ConnectionFactory connectionFactory;
@@ -51,7 +48,7 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
 
     private RabbitTemplate dmfClient;
 
-    @Before
+    @BeforeEach
     public void setup() {
         dmfClient = createDmfClient();
     }

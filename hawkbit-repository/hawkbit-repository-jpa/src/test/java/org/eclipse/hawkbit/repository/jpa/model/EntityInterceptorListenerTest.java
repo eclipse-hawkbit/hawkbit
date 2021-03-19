@@ -15,12 +15,12 @@ import org.eclipse.hawkbit.repository.jpa.EntityInterceptor;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.junit.After;
-import org.junit.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test the entity listener interceptor.
@@ -29,7 +29,7 @@ import io.qameta.allure.Story;
 @Story("Entity Listener Interceptor")
 public class EntityInterceptorListenerTest extends AbstractJpaIntegrationTest {
 
-    @After
+    @AfterEach
     public void tearDown() {
         EntityInterceptorHolder.getInstance().getEntityInterceptors().clear();
     }

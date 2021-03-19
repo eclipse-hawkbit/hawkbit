@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
@@ -34,7 +34,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     private Long rolloutGroupId;
     private Rollout rollout;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");

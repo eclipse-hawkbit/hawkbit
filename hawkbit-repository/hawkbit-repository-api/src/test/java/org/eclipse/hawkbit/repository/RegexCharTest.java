@@ -11,11 +11,11 @@ package org.eclipse.hawkbit.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
-import org.junit.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.junit.jupiter.api.Test;
 
 @Feature("Unit Tests - Repository")
 @Story("Regular expression helper")

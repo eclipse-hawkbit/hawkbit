@@ -15,8 +15,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.web.servlet.HttpEncodingAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.web.servlet.server.Encoding;
@@ -49,7 +49,7 @@ public class MgmtContentTypeTest extends AbstractManagementApiIntegrationTest {
     private DistributionSet ds;
     private final String dsName = "DS-ö";
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         ds = testdataFactory.generateDistributionSet(dsName);
     }

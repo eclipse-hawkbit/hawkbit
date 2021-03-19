@@ -22,8 +22,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 
 import io.qameta.allure.Description;
@@ -40,7 +40,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     private static final String OR = ",";
     private static final String AND = ";";
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() throws InterruptedException {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");

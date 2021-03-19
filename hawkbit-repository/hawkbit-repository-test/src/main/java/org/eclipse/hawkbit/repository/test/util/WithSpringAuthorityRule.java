@@ -19,49 +19,46 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
+import org.junit.jupiter.api.extension.AfterEachCallback;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class WithSpringAuthorityRule implements TestRule {
+public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCallback {
+
+    private  SecurityContext oldContext;
 
     @Override
-    public Statement apply(final Statement base, final Description description) {
-        return new Statement() {
-            @Override
-            // throwable comes from jnuit evaluate signature
-            @SuppressWarnings("squid:S00112")
-            public void evaluate() throws Throwable {
-                final SecurityContext oldContext = before(description);
-                try {
-                    base.evaluate();
-                } finally {
-                    after(oldContext);
-                }
-            }
-        };
-    }
-
-    private SecurityContext before(final Description description) {
-        final SecurityContext oldContext = SecurityContextHolder.getContext();
-        WithUser annotation = description.getAnnotation(WithUser.class);
-        if (annotation == null) {
-            annotation = description.getTestClass().getAnnotation(WithUser.class);
-        }
+    public void beforeEach(ExtensionContext context) throws Exception {
+        oldContext = SecurityContextHolder.getContext();
+        WithUser annotation = getWithUserAnnotation(context);
         if (annotation != null) {
             if (annotation.autoCreateTenant()) {
                 createTenant(annotation.tenantId());
             }
             setSecurityContext(annotation);
         }
-        return oldContext;
     }
 
-    private void setSecurityContext(final WithUser annotation) {
+    private WithUser getWithUserAnnotation(ExtensionContext context) {
+        if (context.getRequiredTestMethod().isAnnotationPresent(WithUser.class)) {
+            return context.getRequiredTestMethod().getAnnotation(WithUser.class);
+        }
+        if(context.getRequiredTestClass().isAnnotationPresent(WithUser.class)){
+            return context.getRequiredTestClass().getAnnotation(WithUser.class);
+        }
+        return null;
+    }
+
+    @Override
+    public void afterEach(ExtensionContext context) throws Exception {
+        SecurityContextHolder.setContext(oldContext);
+    }
+
+    private static  void setSecurityContext(final WithUser annotation) {
         SecurityContextHolder.setContext(new SecurityContext() {
             private static final long serialVersionUID = 1L;
 
@@ -121,34 +118,11 @@ public class WithSpringAuthorityRule implements TestRule {
         });
     }
 
-    private void after(final SecurityContext oldContext) {
-        SecurityContextHolder.setContext(oldContext);
-    }
-
-    /**
-     * Clears the current security context.
-     */
-    public void clear() {
-        SecurityContextHolder.clearContext();
-    }
-
-    /**
-     * @param callable
-     * @return the callable result
-     * @throws Exception
-     */
-    public <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
+    public static <T> T  runAsPrivileged(final Callable<T> callable) throws Exception {
         return runAs(privilegedUser(), callable);
     }
 
-    /**
-     *
-     * @param withUser
-     * @param callable
-     * @return callable result
-     * @throws Exception
-     */
-    public <T> T runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
+    public static <T> T  runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
         if (withUser.autoCreateTenant()) {
@@ -157,17 +131,17 @@ public class WithSpringAuthorityRule implements TestRule {
         try {
             return callable.call();
         } finally {
-            after(oldContext);
+            SecurityContextHolder.setContext(oldContext);
         }
     }
 
-    private void createTenant(final String tenantId) {
+    private static void createTenant(final String tenantId) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(privilegedUser());
         try {
             SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
         } finally {
-            after(oldContext);
+            SecurityContextHolder.setContext(oldContext);
         }
     }
 
