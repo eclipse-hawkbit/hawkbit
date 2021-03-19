@@ -139,6 +139,12 @@ public enum SpServerError {
             "Load of artifact failed with internal server error."),
 
     /**
+    *
+    */
+    SP_ARTIFACT_BINARY_DELETED("hawkbit.server.error.artifact.binaryDeleted",
+            "The artifact binary does not exist anymore."),
+
+    /**
      *
      */
     SP_QUOTA_EXCEEDED("hawkbit.server.error.quota.tooManyEntries", "Too many entries have been inserted."),
