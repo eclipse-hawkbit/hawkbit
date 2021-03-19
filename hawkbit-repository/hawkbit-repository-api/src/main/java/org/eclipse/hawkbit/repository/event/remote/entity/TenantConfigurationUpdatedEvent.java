@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
-import org.eclipse.hawkbit.repository.event.entity.EntityCreatedEvent;
+import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 
 /**
@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
  *
  */
 public class TenantConfigurationUpdatedEvent extends RemoteEntityEvent<TenantConfiguration>
-        implements EntityCreatedEvent {
+        implements EntityUpdatedEvent {
     private static final long serialVersionUID = 1L;
 
     /**
