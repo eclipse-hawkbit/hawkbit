@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
@@ -112,7 +111,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         assertEquals(dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                        .getTotalElements(), "filter works not correct");
+                        .getTotalElements(),
+                "filter works not correct");
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Arrays.asList(tagB.getName()));
@@ -120,19 +120,22 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
                 dsBs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                        .getTotalElements(), "filter works not correct");
+                        .getTotalElements(),
+                "filter works not correct");
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Arrays.asList(tagC.getName()));
-        assertEquals(                dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
+        assertEquals(dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                        .getTotalElements(), "filter works not correct");
+                        .getTotalElements(),
+                "filter works not correct");
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(true)
                 .setTagNames(Arrays.asList(tagX.getName()));
         assertEquals(0, distributionSetManagement
-                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).getTotalElements(), "filter works not correct");
+                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).getTotalElements(),
+                "filter works not correct");
 
         assertEquals(5, distributionSetTagRepository.findAll().spliterator().getExactSizeIfKnown(), "wrong tag size");
 
@@ -146,22 +149,25 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Arrays.asList(tagA.getName()));
-        assertEquals(                dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
+        assertEquals(dsAs.spliterator().getExactSizeIfKnown() + dsABs.spliterator().getExactSizeIfKnown()
                         + dsACs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                        .getTotalElements(), "filter works not correct");
+                        .getTotalElements(),
+                "filter works not correct");
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Arrays.asList(tagB.getName()));
         assertEquals(0, distributionSetManagement
-                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).getTotalElements(), "filter works not correct");
+                .findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build()).getTotalElements(),
+                "filter works not correct");
 
         distributionSetFilterBuilder = getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
                 .setTagNames(Arrays.asList(tagC.getName()));
-        assertEquals(                dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
+        assertEquals(dsCs.spliterator().getExactSizeIfKnown() + dsACs.spliterator().getExactSizeIfKnown()
                         + dsBCs.spliterator().getExactSizeIfKnown() + dsABCs.spliterator().getExactSizeIfKnown(),
                 distributionSetManagement.findByDistributionSetFilter(PAGE, distributionSetFilterBuilder.build())
-                        .getTotalElements(), "filter works not correct");
+                        .getTotalElements(),
+                "filter works not correct");
     }
 
     @Test
@@ -253,9 +259,8 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         final TagCreate tag = entityFactory.tag().create().name("A");
         distributionSetTagManagement.create(tag);
 
-        Assertions.assertThrows(EntityAlreadyExistsException.class,
-                () -> distributionSetTagManagement.create(tag),
-                "should not have worked as tag already exists");
+        assertThatExceptionOfType(EntityAlreadyExistsException.class).as("should not have worked as tag already exists")
+                .isThrownBy(() -> distributionSetTagManagement.create(tag));
     }
 
     @Test
@@ -264,9 +269,9 @@ public class DistributionSetTagManagementTest extends AbstractJpaIntegrationTest
         distributionSetTagManagement.create(entityFactory.tag().create().name("A"));
         final DistributionSetTag tag = distributionSetTagManagement.create(entityFactory.tag().create().name("B"));
 
-        Assertions.assertThrows(EntityAlreadyExistsException.class,
-                () -> distributionSetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A")),
-                "should not have worked as tag already exists");
+        assertThatExceptionOfType(EntityAlreadyExistsException.class).as("should not have worked as tag already exists")
+                .isThrownBy(
+                        () -> distributionSetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A")));
     }
 
     @Test

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,8 +22,8 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -42,7 +41,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -165,9 +163,9 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Create Software Module call fails when called for existing entity.")
     public void createModuleCallFailsForExistingModule() {
         testdataFactory.createSoftwareModuleOs();
-        Assertions.assertThrows(EntityAlreadyExistsException.class,
-                () -> testdataFactory.createSoftwareModuleOs(),
-                "Should not have worked as module already exists.");
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("Should not have worked as module already exists.")
+                .isThrownBy(() -> testdataFactory.createSoftwareModuleOs());
     }
 
     @Test

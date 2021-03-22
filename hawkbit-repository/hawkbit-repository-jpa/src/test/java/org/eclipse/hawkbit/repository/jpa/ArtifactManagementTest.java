@@ -43,7 +43,6 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
@@ -451,8 +450,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
-        Assertions.assertThrows(InsufficientPermissionException.class,
-                () -> artifactManagement.loadArtifactBinary("123"), "Should not have worked with missing permission.");
+        assertThatExceptionOfType(InsufficientPermissionException.class)
+                .as("Should not have worked with missing permission.")
+                .isThrownBy(() -> artifactManagement.loadArtifactBinary("123"));
     }
 
     @Test

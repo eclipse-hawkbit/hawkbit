@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -43,7 +44,6 @@ import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -185,9 +185,9 @@ public class AmqpControllerAuthenticationTest {
 
         mockAuthenticationWithoutPrincipal();
 
-        Assertions.assertThrows(BadCredentialsException.class,
-                () -> authenticationManager.doAuthenticate(securityToken),
-                "BadCredentialsException was expected since principal was missing");
+        assertThatExceptionOfType(BadCredentialsException.class)
+                .as("BadCredentialsException was expected since principal was missing")
+                .isThrownBy(() -> authenticationManager.doAuthenticate(securityToken));
     }
 
     @Test
@@ -202,9 +202,9 @@ public class AmqpControllerAuthenticationTest {
 
         securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
 
-        Assertions.assertThrows(BadCredentialsException.class,
-                () -> authenticationManager.doAuthenticate(securityToken),
-                "BadCredentialsException was expected due to wrong credential");
+        assertThatExceptionOfType(BadCredentialsException.class)
+                .as("BadCredentialsException was expected due to wrong credential")
+                .isThrownBy(() -> authenticationManager.doAuthenticate(securityToken));
     }
 
     @Test

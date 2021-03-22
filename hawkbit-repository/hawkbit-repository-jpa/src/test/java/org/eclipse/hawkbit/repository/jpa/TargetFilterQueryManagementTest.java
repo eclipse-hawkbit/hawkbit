@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,11 +27,11 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -108,8 +107,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final String filterName = "new target filter";
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
-        assertEquals(targetFilterQuery,
-                targetFilterQueryManagement.getByName(filterName).get(), "Retrieved newly created custom target filter");
+        assertEquals(targetFilterQuery, targetFilterQueryManagement.getByName(filterName).get(),
+                "Retrieved newly created custom target filter");
     }
 
     @Test
@@ -146,8 +145,9 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Test
     @Description("Test searching a target filter query with an invalid filter.")
     public void searchTargetFilterQueryInvalidField() {
-        Assertions.assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class).isThrownBy(
-                () -> targetFilterQueryManagement.findByRsql(PageRequest.of(0, 10), "unknownField==testValue").getContent());
+        Assertions.assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(() -> targetFilterQueryManagement
+                        .findByRsql(PageRequest.of(0, 10), "unknownField==testValue").getContent());
     }
 
     @Test
@@ -157,9 +157,10 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
 
-        org.junit.jupiter.api.Assertions.assertThrows(EntityAlreadyExistsException.class,
-                () -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001")),
-                "should not have worked as query already exists");
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("should not have worked as query already exists")
+                .isThrownBy(() -> targetFilterQueryManagement.create(
+                        entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001")));
     }
 
     @Test
@@ -169,8 +170,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name(filterName).query("name==PendingTargets001"));
         targetFilterQueryManagement.delete(targetFilterQuery.getId());
-        assertFalse(
-                targetFilterQueryManagement.get(targetFilterQuery.getId()).isPresent(), "Returns null as the target filter is deleted");
+        assertFalse(targetFilterQueryManagement.get(targetFilterQuery.getId()).isPresent(),
+                "Returns null as the target filter is deleted");
     }
 
     @Test
@@ -183,8 +184,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final String newQuery = "status==UNKNOWN";
         targetFilterQueryManagement
                 .update(entityFactory.targetFilterQuery().update(targetFilterQuery.getId()).query(newQuery));
-        assertEquals(newQuery,
-                targetFilterQueryManagement.getByName(filterName).get().getQuery(), "Returns updated target filter query");
+        assertEquals(newQuery, targetFilterQueryManagement.getByName(filterName).get().getQuery(),
+                "Returns updated target filter query");
     }
 
     @Test
@@ -365,8 +366,8 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         distributionSetManagement.delete(distributionSet.getId());
 
         // Check if distribution set is still in the database with deleted flag
-        assertTrue(
-                distributionSetManagement.get(distributionSet.getId()).get().isDeleted(), "Distribution set should be deleted");
+        assertTrue(distributionSetManagement.get(distributionSet.getId()).get().isDeleted(),
+                "Distribution set should be deleted");
 
         // Check if auto assign distribution set is null
         tfq = targetFilterQueryManagement.getByName(filterName).get();
