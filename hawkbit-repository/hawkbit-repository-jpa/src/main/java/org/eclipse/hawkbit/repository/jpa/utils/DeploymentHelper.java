@@ -135,16 +135,20 @@ public final class DeploymentHelper {
     public static void runInNonSystemContext(@NotNull final Runnable handler, @NotNull final Supplier<String> username,
             @NotNull final TenantAware tenantAware) {
         final String currentUser = tenantAware.getCurrentUsername();
-        if (!(StringUtils.isEmpty(currentUser) || SecurityContextTenantAware.SYSTEM_USER.equals(currentUser))) {
+        if (isNonSystemUser(currentUser)) {
             handler.run();
             return;
         }
         final String user = username.get();
-        LOG.debug("Switching user context from '{}' to '{}'", user, user);
+        LOG.debug("Switching user context from '{}' to '{}'", currentUser, user);
         tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), user, () -> {
             handler.run();
             return null;
         });
+    }
+
+    private static boolean isNonSystemUser(final String user) {
+        return (!(StringUtils.isEmpty(user) || SecurityContextTenantAware.SYSTEM_USER.equals(user)));
     }
 
 }
