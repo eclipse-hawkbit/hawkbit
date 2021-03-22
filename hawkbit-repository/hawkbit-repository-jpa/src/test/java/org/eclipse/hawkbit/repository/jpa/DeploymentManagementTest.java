@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
@@ -433,11 +432,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionStatusRepository.findAll()).as("wrong size of action status").hasSize(4);
 
         // force quit assignment
-        try {
-            deploymentManagement.forceQuitAction(assigningAction.getId());
-            fail("expected ForceQuitActionNotAllowedException");
-        } catch (final ForceQuitActionNotAllowedException ex) {
-        }
+        assertThatExceptionOfType(ForceQuitActionNotAllowedException.class)
+                .as("expected ForceQuitActionNotAllowedException")
+                .isThrownBy(() -> deploymentManagement.forceQuitAction(assigningAction.getId()));
     }
 
     private JpaAction assignSet(final Target target, final DistributionSet ds) {
@@ -482,8 +479,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(20);
         assertThat(actionRepository.findByDistributionSetId(PAGE, ds.getId())).as("Offline actions are not active")
-                .allMatch(action -> !action.isActive())
-                .as("Actions should be initiated by current user")
+                .allMatch(action -> !action.isActive()).as("Actions should be initiated by current user")
                 .allMatch(a -> a.getInitiatedBy().equals(tenantAware.getCurrentUsername()));
 
         assertThat(targetManagement.findByInstalledDistributionSet(PAGE, ds.getId()).getContent())
@@ -928,11 +924,9 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet incomplete = distributionSetManagement.create(entityFactory.distributionSet().create()
                 .name("incomplete").version("v1").type(standardDsType).modules(Collections.singletonList(ah.getId())));
 
-        try {
-            assignDistributionSet(incomplete, targets);
-            fail("expected IncompleteDistributionSetException");
-        } catch (final IncompleteDistributionSetException ex) {
-        }
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("expected IncompleteDistributionSetException")
+                .isThrownBy(() -> assignDistributionSet(incomplete, targets));
 
         final DistributionSet nowComplete = distributionSetManagement.assignSoftwareModules(incomplete.getId(),
                 Sets.newHashSet(os.getId()));
@@ -1224,32 +1218,35 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         targ = targetManagement.getByControllerID(targ.getControllerId()).get();
 
-        assertEquals("active target actions are wrong", 0,
-                deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements());
-        assertEquals("active actions are wrong", 1,
-                deploymentManagement.findInActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements());
+        assertEquals(0, deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements(),
+                "active target actions are wrong");
+        assertEquals(1,
+                deploymentManagement.findInActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements(),
+                "active actions are wrong");
 
-        assertEquals("tagret update status is not correct", TargetUpdateStatus.IN_SYNC, targ.getUpdateStatus());
-        assertEquals("wrong assigned ds", dsA,
-                deploymentManagement.getAssignedDistributionSet(targ.getControllerId()).get());
-        assertEquals("wrong installed ds", dsA,
-                deploymentManagement.getInstalledDistributionSet(targ.getControllerId()).get());
+        assertEquals(TargetUpdateStatus.IN_SYNC, targ.getUpdateStatus(), "tagret update status is not correct");
+        assertEquals(dsA, deploymentManagement.getAssignedDistributionSet(targ.getControllerId()).get(),
+                "wrong assigned ds");
+        assertEquals(dsA, deploymentManagement.getInstalledDistributionSet(targ.getControllerId()).get(),
+                "wrong installed ds");
 
         targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
 
         targ = targs.iterator().next();
 
-        assertEquals("active actions are wrong", 1,
-                deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements());
-        assertEquals("target status is wrong", TargetUpdateStatus.PENDING,
-                targetManagement.getByControllerID(targ.getControllerId()).get().getUpdateStatus());
-        assertEquals("wrong assigned ds", dsB,
-                deploymentManagement.getAssignedDistributionSet(targ.getControllerId()).get());
-        assertEquals("Installed ds is wrong", dsA.getId(),
-                deploymentManagement.getInstalledDistributionSet(targ.getControllerId()).get().getId());
-        assertEquals("Active ds is wrong", dsB, deploymentManagement
-                .findActiveActionsByTarget(PAGE, targ.getControllerId()).getContent().get(0).getDistributionSet());
+        assertEquals(1, deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getTotalElements(),
+                "active actions are wrong");
+        assertEquals(TargetUpdateStatus.PENDING,
+                targetManagement.getByControllerID(targ.getControllerId()).get().getUpdateStatus(),
+                "target status is wrong");
+        assertEquals(dsB, deploymentManagement.getAssignedDistributionSet(targ.getControllerId()).get(),
+                "wrong assigned ds");
+        assertEquals(dsA.getId(),
+                deploymentManagement.getInstalledDistributionSet(targ.getControllerId()).get().getId(),
+                "Installed ds is wrong");
+        assertEquals(dsB, deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getContent()
+                .get(0).getDistributionSet(), "Active ds is wrong");
 
     }
 

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -190,8 +190,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
-        assertTrue("The same file that was uploaded is expected when downloaded",
-                Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue(
+                Arrays.equals(result.getResponse().getContentAsByteArray(), random), "The same file that was uploaded is expected when downloaded");
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);
