@@ -9,11 +9,11 @@
 package org.eclipse.hawkbit.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -65,12 +65,11 @@ public class BusProtoStuffMessageConverterTest {
     @Description("Verifies that a MessageConversationException is thrown on missing event-type information encoding")
     public void missingEventTypeMappingThrowsMessageConversationException() {
         final DummyRemoteEntityEvent dummyEvent = new DummyRemoteEntityEvent(targetMock, "applicationId");
-        try {
-            underTest.convertToInternal(dummyEvent, new MessageHeaders(new HashMap<>()), null);
-            Assertions.fail("Missing MessageConversationException for un-defined event-type");
-        } catch (final MessageConversionException e) {
-            // expected exception
-        }
+        final MessageHeaders messageHeaders = new MessageHeaders(new HashMap<>());
+
+        assertThatExceptionOfType(MessageConversionException.class)
+                .as("Missing MessageConversationException for un-defined event-type")
+                .isThrownBy(() -> underTest.convertToInternal(dummyEvent, messageHeaders, null));
     }
 
     /**

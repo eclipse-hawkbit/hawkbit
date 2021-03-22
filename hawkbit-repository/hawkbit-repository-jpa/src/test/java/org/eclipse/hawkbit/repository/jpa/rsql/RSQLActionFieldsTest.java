@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;

@@ -8,9 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
+
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang3.text.StrSubstitutor;

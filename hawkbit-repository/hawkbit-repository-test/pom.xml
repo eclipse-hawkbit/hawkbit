@@ -9,7 +9,7 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
@@ -48,19 +48,19 @@
          <artifactId>mariadb-java-client</artifactId>
       </dependency>
       <dependency>
-      	<groupId>com.microsoft.sqlserver</groupId>
-       	<artifactId>mssql-jdbc</artifactId>
+         <groupId>com.microsoft.sqlserver</groupId>
+         <artifactId>mssql-jdbc</artifactId>
       </dependency>
       <dependency>
-		<groupId>org.postgresql</groupId>
-    	<artifactId>postgresql</artifactId>
-	  </dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+      </dependency>
       <!-- Add a JDBC DB2 compatabile driver if you want to run tests against DB2, e.g. -->
-<!--       <dependency> -->
-<!--          <groupId>com.ibm.db2.jcc</groupId> -->
-<!--          <artifactId>db2jcc4</artifactId> -->
-<!--          <version>11.1.2.2</version> -->
-<!--       </dependency> -->
+      <!--       <dependency> -->
+      <!--          <groupId>com.ibm.db2.jcc</groupId> -->
+      <!--          <artifactId>db2jcc4</artifactId> -->
+      <!--          <version>11.1.2.2</version> -->
+      <!--       </dependency> -->
       <dependency>
          <groupId>org.springframework.boot</groupId>
          <artifactId>spring-boot-starter-logging</artifactId>
@@ -76,7 +76,7 @@
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>
-      </dependency>      
+      </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
@@ -88,7 +88,7 @@
       <dependency>
          <groupId>net._01001111</groupId>
          <artifactId>jlorem</artifactId>
-      </dependency>      
+      </dependency>
       <dependency>
          <groupId>org.apache.commons</groupId>
          <artifactId>commons-lang3</artifactId>
@@ -116,6 +116,12 @@
       <dependency>
          <groupId>org.springframework.cloud</groupId>
          <artifactId>spring-cloud-stream-binder-test</artifactId>
+         <exclusions>
+            <exclusion>
+               <groupId>junit</groupId>
+               <artifactId>junit</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
       <dependency>
          <groupId>org.springframework.cloud</groupId>

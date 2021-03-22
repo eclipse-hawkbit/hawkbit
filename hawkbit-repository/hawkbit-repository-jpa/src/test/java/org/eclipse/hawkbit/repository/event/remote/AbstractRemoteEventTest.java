@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Map;
 

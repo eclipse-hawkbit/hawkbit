@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -199,8 +200,9 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
     @WithUser(principal = "knownpricipal", allSpPermissions = false)
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1) })
-    public void pollWithModifiedGloablPollingTime() throws Exception {
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    public void pollWithModifiedGlobalPollingTime() throws Exception {
         WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                     "00:02:00");
