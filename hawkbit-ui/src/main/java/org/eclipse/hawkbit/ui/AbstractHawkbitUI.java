@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui;
 
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.error.ErrorView;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;

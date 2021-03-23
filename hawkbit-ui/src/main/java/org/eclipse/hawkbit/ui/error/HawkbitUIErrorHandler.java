@@ -6,16 +6,15 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.components;
+package org.eclipse.hawkbit.ui.error;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.ui.UiErrorDetails;
-import org.eclipse.hawkbit.ui.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
+import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -41,12 +40,20 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HawkbitUIErrorHandler.class);
 
     private final VaadinMessageSource i18n;
-    private final transient List<UiErrorDetailsExtractor> uiErrorDetailsExtractor;
+    private final transient List<UiErrorDetailsExtractor> uiErrorDetailsExtractors;
 
+    /**
+     * Constructor for HawkbitUIErrorHandler
+     *
+     * @param i18n
+     *            Message source used for localization
+     * @param uiErrorDetailsExtractors
+     *            ui error details extractors
+     */
     public HawkbitUIErrorHandler(final VaadinMessageSource i18n,
-            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractor) {
+            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractors) {
         this.i18n = i18n;
-        this.uiErrorDetailsExtractor = uiErrorDetailsExtractor;
+        this.uiErrorDetailsExtractors = uiErrorDetailsExtractors;
     }
 
     @Override
@@ -63,6 +70,13 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
                 .forEach(details -> showSpecificErrorNotification(currentPage, details));
     }
 
+    /**
+     * Method to find the {@link Page} to show notification on.
+     * 
+     * @param event
+     *            error event
+     * @return current {@link Page} for error notification
+     */
     protected Page getPageFrom(final ErrorEvent event) {
         if (event instanceof ConnectorErrorEvent) {
             final Connector connector = ((ConnectorErrorEvent) event).getConnector();
@@ -91,13 +105,13 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
     }
 
     private List<UiErrorDetails> extractErrorDetails(final ErrorEvent event) {
-        return uiErrorDetailsExtractor.stream()
+        return uiErrorDetailsExtractors.stream()
                 .map(extractor -> extractor.extractErrorDetailsFrom(event.getThrowable())).flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 
     private void showGenericErrorNotification(final Page page, final ErrorEvent event) {
-        LOG.warn("Unexpected Ui error occured", event.getThrowable());
+        LOG.error("Unexpected Ui error occured", event.getThrowable());
 
         final Notification notification = buildErrorNotification(i18n.getMessage("caption.error"),
                 i18n.getMessage("message.error"));
@@ -110,12 +124,12 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
     }
 
     /**
-     * Method to build a error notification based on caption and description.
+     * Method to build an error notification based on caption and description.
      * 
      * @param caption
-     *            Caption
+     *            notification caption
      * @param description
-     *            Description
+     *            notification description
      * @return a hawkbit error notification message
      */
     protected static ParallelNotification buildErrorNotification(final String caption, final String description) {
@@ -123,6 +137,14 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
                 description, VaadinIcons.EXCLAMATION_CIRCLE, true);
     }
 
+    /**
+     * Method to show notification on the given page.
+     * 
+     * @param page
+     *            page to show notification on
+     * @param notification
+     *            notification to show
+     */
     protected void showErrorNotification(final Page page, final Notification notification) {
         page.getUI().access(() -> notification.show(page));
     }

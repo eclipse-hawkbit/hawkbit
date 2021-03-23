@@ -9,9 +9,9 @@
 package org.eclipse.hawkbit.app;
 
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
-import org.eclipse.hawkbit.ui.ErrorView;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.error.ErrorView;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.push.EventPushStrategy;
 import org.eclipse.hawkbit.ui.push.UIEventProvider;

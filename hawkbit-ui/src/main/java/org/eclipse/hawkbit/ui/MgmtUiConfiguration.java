@@ -11,7 +11,10 @@ package org.eclipse.hawkbit.ui;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
-import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
+import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
+import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
