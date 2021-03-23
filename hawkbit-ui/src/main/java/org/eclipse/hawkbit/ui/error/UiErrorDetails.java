@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.error;
 
+/**
+ * Details of UI errors for building the error notification.
+ */
 public class UiErrorDetails {
     private static final UiErrorDetails EMPTY = new UiErrorDetails();
 
@@ -31,14 +34,33 @@ public class UiErrorDetails {
         return description;
     }
 
+    /**
+     * Checks if error details are not empty.
+     * 
+     * @return if error details are populated
+     */
     public boolean isPresent() {
         return caption != null && description != null;
     }
 
+    /**
+     * Creates empty error details that should be ignored by error handler.
+     * 
+     * @return empty error details
+     */
     public static UiErrorDetails empty() {
         return EMPTY;
     }
 
+    /**
+     * Creates error details that should be processed by error handler.
+     * 
+     * @param caption
+     *            error details caption
+     * @param description
+     *            error details description
+     * @return error details
+     */
     public static UiErrorDetails create(final String caption, final String description) {
         return new UiErrorDetails(caption, description);
     }

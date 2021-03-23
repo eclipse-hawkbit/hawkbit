@@ -14,6 +14,9 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 
+/**
+ * Base class for single UI error details extractors.
+ */
 public abstract class AbstractSingleUiErrorDetailsExtractor implements UiErrorDetailsExtractor {
 
     @Override
@@ -21,5 +24,12 @@ public abstract class AbstractSingleUiErrorDetailsExtractor implements UiErrorDe
         return findDetails(error).map(Collections::singletonList).orElseGet(Collections::emptyList);
     }
 
+    /**
+     * Extracts single ui error details from given error.
+     * 
+     * @param error
+     *            error to extract details from
+     * @return ui error details if found
+     */
     protected abstract Optional<UiErrorDetails> findDetails(Throwable error);
 }

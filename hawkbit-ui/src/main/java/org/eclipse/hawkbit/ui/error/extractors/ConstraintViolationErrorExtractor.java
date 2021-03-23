@@ -18,9 +18,18 @@ import javax.validation.ConstraintViolationException;
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
+/**
+ * UI error details extractor for {@link ConstraintViolationException}.
+ */
 public class ConstraintViolationErrorExtractor extends AbstractSingleUiErrorDetailsExtractor {
     private final VaadinMessageSource i18n;
 
+    /**
+     * Constructor for ConstraintViolationErrorExtractor.
+     *
+     * @param i18n
+     *            Message source used for localization
+     */
     public ConstraintViolationErrorExtractor(final VaadinMessageSource i18n) {
         this.i18n = i18n;
     }

@@ -13,10 +13,29 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 
+/**
+ * Base interface for extracting ui error details from given error.
+ */
 public interface UiErrorDetailsExtractor {
 
+    /**
+     * Extracts ui error details from given error.
+     * 
+     * @param error
+     *            error to extract details from
+     * @return ui error details
+     */
     List<UiErrorDetails> extractErrorDetailsFrom(final Throwable error);
 
+    /**
+     * Tries to find out if error matches the given exception type.
+     * 
+     * @param error
+     *            error to match
+     * @param exceptionType
+     *            the type of exception to match
+     * @return casted error if matched
+     */
     default <T> Optional<T> findExceptionOf(final Throwable error, final Class<T> exceptionType) {
         if (error.getClass().isAssignableFrom(exceptionType)) {
             return Optional.of((T) error);

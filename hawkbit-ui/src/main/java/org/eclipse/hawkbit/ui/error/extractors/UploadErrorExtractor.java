@@ -14,10 +14,14 @@ import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 
 import com.vaadin.server.UploadException;
 
+/**
+ * UI error details extractor for {@link UploadException}.
+ */
 public class UploadErrorExtractor extends AbstractSingleUiErrorDetailsExtractor {
 
     @Override
     protected Optional<UiErrorDetails> findDetails(final Throwable error) {
+        // UploadException is ignored
         return findExceptionOf(error, UploadException.class).map(ex -> UiErrorDetails.empty());
     }
 }
