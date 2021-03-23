@@ -10,10 +10,11 @@ package org.eclipse.hawkbit.repository.exception;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
  * Exception indicating that an artifact's binary does not exist anymore. This
- * might be caused due to a soft deletion.
+ * might be caused due to the soft deletion of a {@link SoftwareModule}.
  *
  */
 public class ArtifactBinaryNoLongerExistsException extends AbstractServerRtException {
