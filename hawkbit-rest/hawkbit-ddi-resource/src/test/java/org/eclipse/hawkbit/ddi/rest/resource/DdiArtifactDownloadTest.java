@@ -27,6 +27,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.ddi.rest.resource.DdiArtifactDownloadTest.DownloadTestConfiguration;
@@ -39,11 +41,14 @@ import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
@@ -61,10 +66,10 @@ import io.qameta.allure.Story;
 @SpringBootTest(classes = { DownloadTestConfiguration.class })
 public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
-    private static volatile int downLoadProgress = 0;
-    private static volatile long shippedBytes = 0;
-
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
+
+    @Autowired
+    private Listener listener;
 
     @BeforeEach
     public void setup() {
@@ -158,8 +163,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
     public void downloadArtifactThroughFileName() throws Exception {
-        downLoadProgress = 1;
-        shippedBytes = 0;
+        listener.getDownLoadProgress().set(1);
+        listener.getShippedBytes().set(0);
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
 
         // create target
@@ -170,7 +175,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         // create artifact
-        final int artifactSize = 5 * 1024 * 1024;
+        final int artifactSize = (int) quotaManagement.getMaxArtifactSize();
         final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
@@ -194,8 +199,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 Arrays.equals(result.getResponse().getContentAsByteArray(), random), "The same file that was uploaded is expected when downloaded");
 
         // download complete
-        assertThat(downLoadProgress).isEqualTo(10);
-        assertThat(shippedBytes).isEqualTo(artifactSize);
+        assertThat(listener.getDownLoadProgress()).hasValue(10);
+        assertThat(listener.getShippedBytes()).hasValue(artifactSize);
     }
 
     @Test
@@ -238,7 +243,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        final int resultLength = 5 * 1000 * 1024;
+        final int resultLength = (int) quotaManagement.getMaxArtifactSize();
 
         // create artifact
         final byte random[] = RandomUtils.nextBytes(resultLength);
@@ -250,7 +255,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // now assign and download successful
         assignDistributionSet(ds, targets);
 
-        final int range = 100 * 1024;
+        final int range = resultLength / 50;
 
         // full file download with standard range request
         final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -358,11 +363,21 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private static class Listener {
 
-        @EventListener(classes = DownloadProgressEvent.class)
-        public static void listen(final DownloadProgressEvent event) {
-            downLoadProgress++;
-            shippedBytes += event.getShippedBytesSinceLast();
+        private final AtomicInteger downLoadProgress = new AtomicInteger(0);
+        private final AtomicLong shippedBytes = new AtomicLong(0);
 
+        @EventListener(classes = DownloadProgressEvent.class)
+        public void listen(final DownloadProgressEvent event) {
+            downLoadProgress.incrementAndGet();
+            shippedBytes.addAndGet(event.getShippedBytesSinceLast());
+        }
+
+        private AtomicInteger getDownLoadProgress() {
+            return downLoadProgress;
+        }
+
+        private AtomicLong getShippedBytes() {
+            return shippedBytes;
         }
     }
 

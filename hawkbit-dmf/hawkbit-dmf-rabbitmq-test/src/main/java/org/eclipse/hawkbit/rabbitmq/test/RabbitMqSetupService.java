@@ -35,7 +35,7 @@ public class RabbitMqSetupService {
 
     private final com.rabbitmq.client.ConnectionFactory connectionFactory;
 
-    private String virtualHost;
+    private static final String VIRTUAL_HOST = UUID.randomUUID().toString();
 
     private final String hostname;
 
@@ -50,6 +50,7 @@ public class RabbitMqSetupService {
         hostname = brokerSupport.getHostName();
         username = brokerSupport.getUser();
         password = brokerSupport.getPassword();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteVirtualHost()));
     }
 
     private synchronized Client getRabbitmqHttpClient() {
@@ -63,24 +64,23 @@ public class RabbitMqSetupService {
         return rabbitmqHttpClient;
     }
 
-    public String getHttpApiUrl() {
+    private String getHttpApiUrl() {
         return "http://" + getHostname() + ":15672/api/";
     }
 
     public ConnectionFactory newVirtualHostWithConnectionFactory() {
-        virtualHost = UUID.randomUUID().toString();
-        getRabbitmqHttpClient().createVhost(virtualHost);
-        getRabbitmqHttpClient().updatePermissions(virtualHost, getUsername(), createUserPermissionsFullAccess());
-        connectionFactory.setVirtualHost(virtualHost);
+        getRabbitmqHttpClient().createVhost(VIRTUAL_HOST);
+        getRabbitmqHttpClient().updatePermissions(VIRTUAL_HOST, getUsername(), createUserPermissionsFullAccess());
+        connectionFactory.setVirtualHost(VIRTUAL_HOST);
         return new CachingConnectionFactory(connectionFactory);
     }
 
     @PreDestroy
     public void deleteVirtualHost() {
-        if (StringUtils.isEmpty(virtualHost)) {
+        if (StringUtils.isEmpty(VIRTUAL_HOST)) {
             return;
         }
-        getRabbitmqHttpClient().deleteVhost(virtualHost);
+        getRabbitmqHttpClient().deleteVhost(VIRTUAL_HOST);
     }
 
     private String getHostname() {
@@ -97,7 +97,7 @@ public class RabbitMqSetupService {
 
     private UserPermissions createUserPermissionsFullAccess() {
         final UserPermissions permissions = new UserPermissions();
-        permissions.setVhost(virtualHost);
+        permissions.setVhost(VIRTUAL_HOST);
         permissions.setRead(".*");
         permissions.setConfigure(".*");
         permissions.setWrite(".*");

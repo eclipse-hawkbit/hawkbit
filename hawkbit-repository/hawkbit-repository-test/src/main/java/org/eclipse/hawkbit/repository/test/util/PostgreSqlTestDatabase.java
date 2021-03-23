@@ -8,15 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestExecutionListener;
+import org.springframework.util.StringUtils;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping MySql schemas if
@@ -24,45 +20,43 @@ import org.springframework.test.context.TestExecutionListener;
  */
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlTestDatabase.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSqlTestDatabase.class);
+    protected static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{path}?currentSchema={db}*";
 
     @Override
-    protected void createSchemaUri() {
-        schemaName = "sp" + RandomStringUtils.randomAlphanumeric(10).toLowerCase();
-        this.uri = this.uri.substring(0, uri.indexOf('?'));
-
-        System.setProperty("spring.datasource.url", uri + "?currentSchema=" + schemaName);
-    }
-
-    @Override
-    protected boolean isRunningWithSql() {
-        return "POSTGRESQL".equals(System.getProperty("spring.jpa.database"));
+    protected boolean isApplicable() {
+        return "POSTGRESQL".equals(System.getProperty("spring.jpa.database")) //
+                && MATCHER.match(POSTGRESQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))  //
+                && !StringUtils.isEmpty(getSchemaName());
     }
 
     @Override
     protected void createSchema() {
-        try (Connection connection = DriverManager.getConnection(uri, username, password)) {
-            try (PreparedStatement statement = connection.prepareStatement("CREATE schema " + schemaName + ";")) {
-                LOG.info("Creating schema {} on uri {}", schemaName, uri);
-                statement.execute();
-                LOG.info("Created schema {} on uri {}", schemaName, uri);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Schema creation failed!", e);
-        }
+        final String schemaName = getSchemaName();
+        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
+        LOGGER.info("\033[0;33m Creating postgreSql schema {} if not existing \033[0m", schemaName);
 
+        executeStatement(uri.split("\\?currentSchema=")[0], "CREATE SCHEMA IF NOT EXISTS " + schemaName + ";");
     }
 
     @Override
     protected void dropSchema() {
-        try (Connection connection = DriverManager.getConnection(uri, username, password)) {
-            try (PreparedStatement statement = connection.prepareStatement("DROP schema " + schemaName + " CASCADE;")) {
-                LOG.info("Dropping schema {} on uri {}", schemaName, uri);
-                statement.execute();
-                LOG.info("Dropped schema {} on uri {}", schemaName, uri);
-            }
-        } catch (final SQLException e) {
-            LOG.error("Schema drop failed!", e);
-        }
+        final String schemaName = getSchemaName();
+        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
+
+        executeStatement(uri.split("\\?currentSchema=")[0], "DROP schema " + schemaName + " CASCADE;");
+    }
+
+    @Override
+    protected String getRandomSchemaUri() {
+        final String schemaName = "HAWKBIT_TEST" + RandomStringUtils.randomAlphanumeric(10).toLowerCase();
+        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
+
+        return uri.substring(0, uri.indexOf('?')) + "?currentSchema=" + schemaName;
+    }
+
+    private static String getSchemaName() {
+        return MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))
+                .get("db");
     }
 }

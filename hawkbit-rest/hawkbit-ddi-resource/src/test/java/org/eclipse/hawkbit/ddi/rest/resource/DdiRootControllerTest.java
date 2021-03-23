@@ -108,10 +108,10 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that targets cannot be created e.g. in plug'n play scenarios when tenant does not exists but can be created if the tenant exists.")
     @WithUser(tenantId = "tenantDoesNotExists", allSpPermissions = true, authorities = { CONTROLLER_ROLE,
             SYSTEM_ROLE }, autoCreateTenant = false)
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents(value = { @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
-            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
+            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) }, inheritExpects = false)
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
