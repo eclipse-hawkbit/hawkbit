@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.qameta.allure.Description;
@@ -38,7 +38,7 @@ public class MgmtDownloadResourceTest extends AbstractManagementApiIntegrationTe
 
     private static final String DOWNLOAD_ID_NOT_AVAILABLE = "downloadIdNotAvailable";
 
-    @Before
+    @BeforeEach
     public void setupCache() {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("Test");

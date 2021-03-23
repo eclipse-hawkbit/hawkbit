@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
@@ -52,6 +53,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdat
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 
 /**
  * The {@link EventType} class declares the event-type and it's corresponding
@@ -138,6 +141,11 @@ public class EventType {
         // deployment event for assignments and /or cancellations
         TYPES.put(38, MultiActionAssignEvent.class);
         TYPES.put(39, MultiActionCancelEvent.class);
+
+        // tenant configuration
+        TYPES.put(40, TenantConfigurationCreatedEvent.class);
+        TYPES.put(41, TenantConfigurationUpdatedEvent.class);
+        TYPES.put(42, TenantConfigurationDeletedEvent.class);
     }
 
     private int value;

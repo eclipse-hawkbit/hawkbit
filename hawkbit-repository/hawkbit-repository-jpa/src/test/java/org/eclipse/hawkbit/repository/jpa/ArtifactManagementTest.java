@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -44,7 +43,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
@@ -259,8 +258,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * Test method for
-     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(java.lang.Long)}
-     * .
+     * {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(long)} .
      * 
      * @throws IOException
      */
@@ -452,12 +450,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @WithUser(allSpPermissions = true, removeFromAllPermission = { SpPermission.DOWNLOAD_REPOSITORY_ARTIFACT })
     @Description("Trys and fails to load an artifact without required permission. Checks if expected InsufficientPermissionException is thrown.")
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
-        try {
-            artifactManagement.loadArtifactBinary("123");
-            fail("Should not have worked with missing permission.");
-        } catch (final InsufficientPermissionException e) {
-
-        }
+        assertThatExceptionOfType(InsufficientPermissionException.class)
+                .as("Should not have worked with missing permission.")
+                .isThrownBy(() -> artifactManagement.loadArtifactBinary("123"));
     }
 
     @Test
@@ -507,7 +502,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
+        return WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
     }
 
     private SoftwareModule createSoftwareModuleForTenant(final String tenant) throws Exception {
@@ -527,8 +522,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             throws IOException {
         try (final InputStream inputStream = artifactManagement.loadArtifactBinary(artifact.get().getHashes().getSha1())
                 .get().getFileInputStream()) {
-            assertTrue("The stored binary matches the given binary",
-                    IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream));
+            assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream),
+                    "The stored binary matches the given binary");
         }
     }
 

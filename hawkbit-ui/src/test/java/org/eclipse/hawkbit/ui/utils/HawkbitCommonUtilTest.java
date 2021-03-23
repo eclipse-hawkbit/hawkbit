@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.ui.utils;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
 import java.util.Locale;
 
 import org.eclipse.hawkbit.ui.UiProperties;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import com.vaadin.ui.UI;
@@ -38,7 +38,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale currentLocale = HawkbitCommonUtil.getCurrentLocale();
         // THEN
-        assertEquals(Locale.getDefault(), currentLocale);
+        assertThat(Locale.getDefault()).isEqualTo(currentLocale);
 
         // GIVEN
         UI.setCurrent(ui);
@@ -46,7 +46,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale currentLocale2 = HawkbitCommonUtil.getCurrentLocale();
         // THEN
-        assertEquals(Locale.GERMAN, currentLocale2);
+        assertThat(Locale.GERMAN).isEqualTo(currentLocale2);
     }
 
     @Test
@@ -59,7 +59,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale localeToBeUsed = HawkbitCommonUtil.getLocaleToBeUsed(localizationProperties, Locale.CHINESE);
         // THEN
-        assertEquals(Locale.GERMAN, localeToBeUsed);
+        assertThat(Locale.GERMAN).isEqualTo(localeToBeUsed);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale localeToBeUsed = HawkbitCommonUtil.getLocaleToBeUsed(localizationProperties, Locale.GERMAN);
         // THEN
-        assertEquals(Locale.GERMAN, localeToBeUsed);
+        assertThat(Locale.GERMAN).isEqualTo(localeToBeUsed);
     }
 
 }

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 
@@ -33,7 +33,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
     private TargetFilterQuery filter1;
     private TargetFilterQuery filter2;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() throws InterruptedException {
         final String filterName1 = "filter_a";
         final String filterName2 = "filter_b";

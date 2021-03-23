@@ -19,8 +19,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -33,7 +33,7 @@ import io.qameta.allure.Story;
 public class RSQLTargetMetadataFieldsTest extends AbstractJpaIntegrationTest {
     private String controllerId;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         final Target target = testdataFactory.createTarget("target");
         controllerId = target.getControllerId();

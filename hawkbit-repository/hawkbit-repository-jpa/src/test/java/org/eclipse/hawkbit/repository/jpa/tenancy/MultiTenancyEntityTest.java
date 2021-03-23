@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
@@ -112,7 +112,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         // check that the cache is not getting in the way, i.e. "bumlux" results
         // in bumlux and not
         // mytenant
-        assertThat(securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "bumlux"),
+        assertThat(WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", "bumlux"),
                 () -> systemManagement.getTenantMetadata().getTenant().toUpperCase()))
                         .isEqualTo("bumlux".toUpperCase());
     }
@@ -166,7 +166,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
     }
 
     private <T> T runAsTenant(final String tenant, final Callable<T> callable) throws Exception {
-        return securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
+        return WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("user", tenant), callable);
     }
 
     private Target createTargetForTenant(final String controllerId, final String tenant) throws Exception {

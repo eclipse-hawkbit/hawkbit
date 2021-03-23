@@ -14,7 +14,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -52,8 +52,8 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -78,7 +78,7 @@ import io.qameta.allure.Story;
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
 public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
-    @Before
+    @BeforeEach
     public void assertPreparationOfRepo() {
         assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").hasSize(0);
     }
@@ -238,8 +238,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         try (InputStream fileInputStream = artifactManagement
                 .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
                 .get().getFileInputStream()) {
-            assertTrue("Wrong artifact content",
-                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream));
+            assertTrue(
+                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream), "Wrong artifact content");
         }
 
         // hashes
@@ -486,7 +486,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_OCTET_STREAM))
                 .andExpect(header().string("ETag", artifact.getSha1Hash())).andReturn();
 
-        assertTrue("Wrong response content", Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue(Arrays.equals(result.getResponse().getContentAsByteArray(), random), "Wrong response content");
     }
 
     @Test

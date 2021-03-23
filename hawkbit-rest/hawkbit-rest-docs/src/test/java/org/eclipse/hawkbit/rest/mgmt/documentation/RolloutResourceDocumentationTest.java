@@ -41,8 +41,8 @@ import org.eclipse.hawkbit.rest.documentation.DocumenationResponseFieldsSnippet;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
@@ -68,11 +68,9 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Autowired
     private RolloutTestApprovalStrategy approvalStrategy;
 
-    @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         this.resourceName = "rollouts";
-        super.setUp();
         arrayPrefix = "content[].";
         approvalStrategy.setApprovalNeeded(false);
     }

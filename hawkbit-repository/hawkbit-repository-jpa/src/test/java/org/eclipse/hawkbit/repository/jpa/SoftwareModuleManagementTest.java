@@ -10,8 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -23,8 +22,8 @@ import java.util.List;
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
-import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -42,7 +41,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -164,12 +163,9 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Description("Create Software Module call fails when called for existing entity.")
     public void createModuleCallFailsForExistingModule() {
         testdataFactory.createSoftwareModuleOs();
-        try {
-            testdataFactory.createSoftwareModuleOs();
-            fail("Should not have worked as module already exists.");
-        } catch (final EntityAlreadyExistsException e) {
-
-        }
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .as("Should not have worked as module already exists.")
+                .isThrownBy(() -> testdataFactory.createSoftwareModuleOs());
     }
 
     @Test
@@ -304,7 +300,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
         assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
-        assertTrue("The module should be flagged as deleted", assignedModule.isDeleted());
+        assertTrue(assignedModule.isDeleted(), "The module should be flagged as deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
@@ -344,7 +340,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // [VERIFY EXPECTED RESULT]:
         // verify: assignedModule is marked as deleted
         assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
-        assertTrue("The found module should be flagged deleted", assignedModule.isDeleted());
+        assertTrue(assignedModule.isDeleted(), "The found module should be flagged deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
@@ -451,8 +447,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // verify: SoftwareModuleX and SofwtareModule are marked as deleted
         assertThat(moduleX).isNotNull();
         assertThat(moduleY).isNotNull();
-        assertTrue("The module should be flagged deleted", moduleX.isDeleted());
-        assertTrue("The module should be flagged deleted", moduleY.isDeleted());
+        assertTrue(moduleX.isDeleted(), "The module should be flagged deleted");
+        assertTrue(moduleY.isDeleted(), "The module should be flagged deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
         assertThat(softwareModuleRepository.findAll()).hasSize(2);
 

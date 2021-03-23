@@ -183,12 +183,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     private void usageStatsPerTenant(final SystemUsageReportWithTenants report) {
-        final List<String> tenants = findTenants(PageRequest.of(0, MAX_TENANTS_QUERY)).getContent();
-
-        tenants.forEach(tenant -> tenantAware.runAsTenant(tenant, () -> {
-            report.addTenantData(systemStatsManagement.getStatsOfTenant());
-            return null;
-        }));
+        forEachTenant(tenant -> report.addTenantData(systemStatsManagement.getStatsOfTenant()));
     }
 
     @Override

@@ -17,16 +17,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.rabbitmq.test.RabbitMqSetupService.AlivenessException;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.rabbit.junit.BrokerRunning;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
-import org.springframework.boot.autoconfigure.amqp.RabbitProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -42,8 +36,6 @@ import com.google.common.base.Throwables;
  */
 @Configuration
 public class AmqpTestConfiguration {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpTestConfiguration.class);
 
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -82,26 +74,13 @@ public class AmqpTestConfiguration {
     }
 
     @Bean
-    ConnectionFactory rabbitConnectionFactory(final RabbitMqSetupService rabbitmqSetupService) {
-        final CachingConnectionFactory factory = new CachingConnectionFactory();
-        factory.setHost(rabbitmqSetupService.getHostname());
-        factory.setPort(5672);
-        factory.setUsername(rabbitmqSetupService.getUsername());
-        factory.setPassword(rabbitmqSetupService.getPassword());
-        try {
-            factory.setVirtualHost(rabbitmqSetupService.createVirtualHost());
-            // All exception are catched. The BrokerRunning decide if the
-            // test should break or not
-        } catch (@SuppressWarnings("squid:S2221") final Exception e) {
-            Throwables.propagateIfInstanceOf(e, AlivenessException.class);
-            LOG.error("Cannot create virtual host.", e);
-        }
-        return factory;
+    ConnectionFactory rabbitConnectionFactory(RabbitMqSetupService rabbitMqSetupService) {
+        return rabbitMqSetupService.newVirtualHostWithConnectionFactory();
     }
 
     @Bean
-    RabbitMqSetupService rabbitmqSetupService(final RabbitProperties properties) {
-        return new RabbitMqSetupService(properties);
+    RabbitMqSetupService rabbitMqSetupService(){
+        return new RabbitMqSetupService();
     }
 
     @Bean
@@ -113,14 +92,4 @@ public class AmqpTestConfiguration {
         rabbitTemplate.setReceiveTimeout(TimeUnit.SECONDS.toMillis(3));
         return rabbitTemplate;
     }
-
-    @Bean
-    BrokerRunning brokerRunning(final RabbitMqSetupService rabbitmqSetupService) {
-        final BrokerRunning brokerRunning = BrokerRunning.isRunning();
-        brokerRunning.setHostName(rabbitmqSetupService.getHostname());
-        brokerRunning.getConnectionFactory().setUsername(rabbitmqSetupService.getUsername());
-        brokerRunning.getConnectionFactory().setPassword(rabbitmqSetupService.getPassword());
-        return brokerRunning;
-    }
-
 }

@@ -10,13 +10,14 @@
 package org.eclipse.hawkbit.ddi.json.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.ddi.json.model.DdiResult.FinalResult.NONE;
 import static org.eclipse.hawkbit.ddi.json.model.DdiStatus.ExecutionStatus.PROCEEDING;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -72,7 +73,7 @@ public class DdiStatusTest {
         assertThat(ddiStatus.getResult().getProgress().getOf()).isEqualTo(100);
     }
 
-    @Test(expected = MismatchedInputException.class)
+    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
@@ -80,6 +81,7 @@ public class DdiStatusTest {
                 + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[]}";
 
         // Test
-        mapper.readValue(serializedDdiStatus, DdiStatus.class);
+        assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
+                () -> mapper.readValue(serializedDdiStatus, DdiStatus.class));
     }
 }

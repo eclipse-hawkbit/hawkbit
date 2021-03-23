@@ -21,7 +21,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -39,6 +39,16 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         createTestTenantsForSystemStatistics(2, 0, 0, 0);
 
         assertThat(systemManagement.findTenants(PAGE).getContent()).hasSize(3);
+    }
+
+    @Test
+    @Description("Ensures that getSystemUsageStatisticsWithTenants returns the usage of all tenants and not only the first 1000 (max page size).")
+    public void systemUsageReportCollectsStatisticsOfManyTenants() throws Exception {
+        // Prepare tenants
+        createTestTenantsForSystemStatistics(1050, 0, 0, 0);
+
+        final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
+        assertThat(tenants).hasSize(1051); // +1 from the setup
     }
 
     @Test
@@ -102,7 +112,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "tenant" + i;
-            securityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true, false,
+            WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
                         systemManagement.getTenantMetadata(tenantname);
                         if (artifactSize > 0) {

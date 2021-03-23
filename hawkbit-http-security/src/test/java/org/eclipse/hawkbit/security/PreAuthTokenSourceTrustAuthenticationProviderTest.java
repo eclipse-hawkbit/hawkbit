@@ -9,15 +9,15 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.Authentication;
@@ -29,8 +29,7 @@ import io.qameta.allure.Story;
 
 @Feature("Unit Tests - Security")
 @Story("PreAuthToken Source TrustAuthentication Provider Test")
-@RunWith(MockitoJUnitRunner.class)
-// TODO: create description annotations
+@ExtendWith(MockitoExtension.class)
 public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     private static final String REQUEST_SOURCE_IP = "127.0.0.1";
@@ -48,17 +47,11 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final String principal = "controllerIdURL";
         final String credentials = "controllerIdHeader";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
-        // test, should throw authentication exception
-        try {
-            underTestWithoutSourceIpCheck.authenticate(token);
-            fail("Should not work with wrong credentials");
-        } catch (final BadCredentialsException e) {
-
-        }
-
+        assertThatExceptionOfType(BadCredentialsException.class).as("Should not work with wrong credentials")
+                .isThrownBy(() -> underTestWithoutSourceIpCheck.authenticate(token));
     }
 
     @Test
@@ -67,7 +60,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         final Authentication authenticate = underTestWithoutSourceIpCheck.authenticate(token);
@@ -76,33 +69,27 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
 
     @Test
     @Description("Testing that the controllerId in the URI request match with the controllerId in the request header but the request are not coming from a trustful source.")
-    public void priniciapAndCredentialsAreTheSameButSourceIpRequestNotMatching() {
+    public void principalAndCredentialsAreTheSameButSourceIpRequestNotMatching2() {
         final String remoteAddress = "192.168.1.1";
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(remoteAddress);
 
-        // test, should throw authentication exception
-
-        try {
-            underTestWithSourceIpCheck.authenticate(token);
-            fail("as source is not trusted.");
-        } catch (final InsufficientAuthenticationException e) {
-
-        }
+        assertThatExceptionOfType(InsufficientAuthenticationException.class).as("as source is not trusted.")
+                .isThrownBy(() -> underTestWithSourceIpCheck.authenticate(token));
     }
 
     @Test
-    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source Ip is matching the allowed remote IP address.")
-    public void priniciapAndCredentialsAreTheSameAndSourceIpIsTrusted() {
+    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP is matching the allowed remote IP address.")
+    public void principalAndCredentialsAreTheSameAndSourceIpIsTrusted() {
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);
@@ -113,13 +100,14 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
     }
 
     @Test
-    public void priniciapAndCredentialsAreTheSameAndSourceIpIsWithinList() {
+    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP matches one of the allowed remote IP addresses.")
+    public void principalAndCredentialsAreTheSameAndSourceIpIsWithinList() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", REQUEST_SOURCE_IP,
                 "192.168.1.3" };
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);
@@ -132,13 +120,14 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         assertThat(authenticate.isAuthenticated()).isTrue();
     }
 
-    @Test(expected = InsufficientAuthenticationException.class)
+    @Test
+    @Description("Testing that the controllerId in the URI request match with the controllerId in the request header and the source IP does not match any of the allowed remote IP addresses.")
     public void principalAndCredentialsAreTheSameSourceIpListNotMatches() {
         final String[] trustedIPAddresses = new String[] { "192.168.1.1", "192.168.1.2", "192.168.1.3" };
         final String principal = "controllerId";
         final String credentials = "controllerId";
         final PreAuthenticatedAuthenticationToken token = new PreAuthenticatedAuthenticationToken(principal,
-                Arrays.asList(credentials));
+                Collections.singletonList(credentials));
         token.setDetails(webAuthenticationDetailsMock);
 
         when(webAuthenticationDetailsMock.getRemoteAddress()).thenReturn(REQUEST_SOURCE_IP);
@@ -146,13 +135,7 @@ public class PreAuthTokenSourceTrustAuthenticationProviderTest {
         final PreAuthTokenSourceTrustAuthenticationProvider underTestWithList = new PreAuthTokenSourceTrustAuthenticationProvider(
                 trustedIPAddresses);
 
-        // test, should throw authentication exception
-        final Authentication authenticate = underTestWithList.authenticate(token);
-        try {
-            assertThat(authenticate.isAuthenticated()).isTrue();
-            fail("as source is not trusted.");
-        } catch (final InsufficientAuthenticationException e) {
-
-        }
+        assertThatExceptionOfType(InsufficientAuthenticationException.class)
+                .isThrownBy(() -> underTestWithList.authenticate(token));
     }
 }

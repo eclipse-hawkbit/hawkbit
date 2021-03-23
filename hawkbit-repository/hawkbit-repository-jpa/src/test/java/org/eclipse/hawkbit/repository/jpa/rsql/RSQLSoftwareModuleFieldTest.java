@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.vendor.Database;
@@ -32,7 +32,7 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     private SoftwareModule ah;
 
-    @Before
+    @BeforeEach
     public void setupBeforeTest() {
         ah = softwareModuleManagement.create(entityFactory.softwareModule().create().type(appType).name("agent-hub")
                 .version("1.0.1").description("agent-hub"));

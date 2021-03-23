@@ -17,7 +17,7 @@ import java.io.IOException;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -33,6 +33,7 @@ public class ArtifactFilesystemTest {
         final File file = new File("fileWhichTotalDoesNotExists");
         final ArtifactFilesystem underTest = new ArtifactFilesystem(file, "fileWhichTotalDoesNotExists",
                 new DbArtifactHash("1", "2", "3"), 0L, null);
+
         try {
             underTest.getFileInputStream();
             Assertions.fail("Expected a FileNotFoundException because file does not exists");

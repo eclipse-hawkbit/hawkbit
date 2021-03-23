@@ -16,7 +16,12 @@ import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
+import org.eclipse.persistence.descriptors.DescriptorEvent;
 
 /**
  * A JPA entity which stores the tenant specific configuration.
@@ -28,7 +33,8 @@ import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity implements TenantConfiguration {
+public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
+        implements TenantConfiguration, EventAwareEntity {
     private static final long serialVersionUID = 1L;
 
     @Column(name = "conf_key", length = TenantConfiguration.KEY_MAX_SIZE, nullable = false, updatable = false)
@@ -79,4 +85,22 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity imp
         this.value = value;
     }
 
+    @Override
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TenantConfigurationCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TenantConfigurationUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
+    }
+
+    @Override
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
+        EventPublisherHolder.getInstance().getEventPublisher()
+                .publishEvent(new TenantConfigurationDeletedEvent(getTenant(), getId(), getKey(), getValue(),
+                        getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+    }
 }
