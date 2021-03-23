@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.error;
 /**
  * Details of UI errors for building the error notification.
  */
-public class UiErrorDetails {
+public final class UiErrorDetails {
     private static final UiErrorDetails EMPTY = new UiErrorDetails();
 
     private final String caption;

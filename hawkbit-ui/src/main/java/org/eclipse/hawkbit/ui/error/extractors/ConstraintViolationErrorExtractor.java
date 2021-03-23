@@ -45,7 +45,7 @@ public class ConstraintViolationErrorExtractor extends AbstractSingleUiErrorDeta
         });
     }
 
-    private String formatViolations(final Set<ConstraintViolation<?>> violations) {
+    private static String formatViolations(final Set<ConstraintViolation<?>> violations) {
         return violations.stream().map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
                 .collect(Collectors.joining(System.lineSeparator()));
     }

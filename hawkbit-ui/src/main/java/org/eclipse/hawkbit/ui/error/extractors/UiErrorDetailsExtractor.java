@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 /**
  * Base interface for extracting ui error details from given error.
  */
+@FunctionalInterface
 public interface UiErrorDetailsExtractor {
 
     /**
