@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
+import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -514,6 +515,31 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                                 + artifact.getId() + "/download")))
                 .andExpect(jsonPath("$._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact.getId())));
+    }
+
+    @Test
+    @Description("Verifies the listing of an artifact that belongs to a soft deleted software module.")
+    public void getArtifactSoftDeleted() throws Exception {
+        // prepare data for test
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("softDeleted");
+        final Artifact artifact = testdataFactory.createArtifacts(sm.getId()).get(0);
+        testdataFactory.createDistributionSet(Arrays.asList(sm));
+        softwareModuleManagement.delete(sm.getId());
+
+        // perform test
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$.size", equalTo((int) artifact.getSize())))
+                .andExpect(jsonPath("$.hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
+                .andExpect(jsonPath("$.providedFilename", equalTo(artifact.getFilename())))
+                .andExpect(jsonPath("$._links", Matchers.not(Matchers.hasKey("download"))))
+                .andExpect(jsonPath("$._links.self.href",
+                        equalTo(String.format("http://localhost/rest/v1/softwaremodules/%d/artifacts/%d", sm.getId(),
+                                artifact.getId()))));
     }
 
     @Test
