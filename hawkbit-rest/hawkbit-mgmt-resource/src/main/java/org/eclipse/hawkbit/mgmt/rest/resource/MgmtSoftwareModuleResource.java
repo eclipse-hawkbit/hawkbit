@@ -117,11 +117,12 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     @SuppressWarnings("squid:S3655")
     public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId) {
-
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
         final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
-        MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+        if (!module.isDeleted()) {
+            MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+        }
 
         return ResponseEntity.ok(reponse);
     }
