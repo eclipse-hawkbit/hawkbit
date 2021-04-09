@@ -86,6 +86,12 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected String host = "management-api.host";
 
+    /**
+     * The generated REST docs snippets will be outputted to an own resource folder.
+     * The child class has to specify the name of that output folder where to put its corresponding snippets.
+     *
+     * @return the name of the resource folder
+     */
     public abstract String getResourceName();
 
     @BeforeEach
