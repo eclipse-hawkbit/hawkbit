@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -95,9 +94,9 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Autowired
     protected TenantConfigurationProperties tenantConfigurationProperties;
 
-    @BeforeEach
-    public void setUp() {
-        resourceName = "tenant";
+    @Override
+    public String getResourceName() {
+        return "tenant";
     }
 
     @Test
