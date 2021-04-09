@@ -68,9 +68,13 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Autowired
     private RolloutTestApprovalStrategy approvalStrategy;
 
+    @Override
+    public String getResourceName() {
+        return "rollouts";
+    }
+
     @BeforeEach
     public void setUp() {
-        this.resourceName = "rollouts";
         arrayPrefix = "content[].";
         approvalStrategy.setApprovalNeeded(false);
     }

@@ -39,7 +39,6 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -58,9 +57,9 @@ import io.qameta.allure.Story;
 @Story("DistributionSet Resource")
 public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentation {
 
-    @BeforeEach
-    public void setUp() {
-        resourceName = "distributionsets";
+    @Override
+    public String getResourceName() {
+        return "distributionsets";
     }
 
     @Test
@@ -452,7 +451,6 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                         parameterWithName("softwareModuleId").description(ApiModelPropertiesGeneric.ITEM_ID))));
-        ;
     }
 
     @Test
@@ -591,7 +589,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
     }
 
     @Test
-    @Description("Update a single meta data value for speficic key." + " Required Permission: "
+    @Description("Update a single meta data value for specific key." + " Required Permission: "
             + SpPermission.UPDATE_REPOSITORY)
     public void updateMetadata() throws Exception {
         // prepare and create metadata for update

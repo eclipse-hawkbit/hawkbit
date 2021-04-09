@@ -55,10 +55,14 @@ import io.qameta.allure.Story;
 public class RootControllerDocumentationTest extends AbstractApiRestDocumentation {
     private static final String CONTROLLER_ID = "CONTROLLER_ID";
 
+    @Override
+    public String getResourceName() {
+        return "rootcontroller";
+    }
+
     @BeforeEach
     public void setUp() {
         host = "ddi-api.host";
-        resourceName = "rootcontroller";
     }
 
     @Test

@@ -57,9 +57,13 @@ public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumenta
 
     private DistributionSet distributionSet;
 
+    @Override
+    public String getResourceName() {
+        return "targettag";
+    }
+
     @BeforeEach
     public void setUp() {
-        resourceName = "targettag";
         distributionSet = createDistributionSet();
     }
 

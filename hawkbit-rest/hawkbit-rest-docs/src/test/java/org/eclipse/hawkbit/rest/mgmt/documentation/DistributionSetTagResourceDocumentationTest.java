@@ -56,9 +56,13 @@ public class DistributionSetTagResourceDocumentationTest extends AbstractApiRest
 
     private DistributionSet distributionSet;
 
+    @Override
+    public String getResourceName() {
+        return "distributionsettag";
+    }
+
     @BeforeEach
     public void setUp() {
-        resourceName = "distributionsettag";
         distributionSet = createDistributionSet();
     }
 
