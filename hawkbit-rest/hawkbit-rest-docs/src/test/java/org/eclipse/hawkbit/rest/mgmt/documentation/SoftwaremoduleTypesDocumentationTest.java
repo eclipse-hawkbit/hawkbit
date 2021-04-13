@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -47,9 +46,9 @@ import io.qameta.allure.Story;
 @Story("Softwaremoduletypes Resource")
 public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumentation {
 
-    @BeforeEach
-    public void setUp() {
-        this.resourceName = "softwaremoduletypes";
+    @Override
+    public String getResourceName() {
+        return "softwaremoduletypes";
     }
 
     @Test

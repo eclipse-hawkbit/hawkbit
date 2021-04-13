@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNoLongerExistsException;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -63,6 +64,9 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
 
         final SoftwareModule module = softwareModuleManagement.get(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+        if (module.isDeleted()) {
+            throw new ArtifactBinaryNoLongerExistsException();
+        }
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
