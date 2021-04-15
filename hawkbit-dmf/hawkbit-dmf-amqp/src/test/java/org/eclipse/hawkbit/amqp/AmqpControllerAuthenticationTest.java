@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,7 @@ import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -104,10 +106,10 @@ public class AmqpControllerAuthenticationTest {
     private ArtifactManagement artifactManagementMock;
 
     @Mock
-    private ControllerManagement controllerManagementMock;
+    private Target targetMock;
 
     @Mock
-    private Target targetMock;
+    private UserAuthoritiesResolver authoritiesResolver;
 
     @Mock
     private RabbitTemplate rabbitTemplate;
@@ -140,7 +142,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(any(), eq(Boolean.class)))
                 .thenReturn(CONFIG_VALUE_FALSE);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         authenticationManager = new AmqpControllerAuthentication(systemManagement, controllerManagement,
@@ -153,18 +155,18 @@ public class AmqpControllerAuthenticationTest {
         testArtifact.setId(1L);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
-                mock(AmqpMessageDispatcherService.class), controllerManagementMock, new JpaEntityFactory(),
+                mock(AmqpMessageDispatcherService.class), controllerManagement, new JpaEntityFactory(),
                 systemSecurityContext, tenantConfigurationManagementMock);
 
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
-                authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock,
-                controllerManagementMock, tenantAware);
+                authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock, controllerManagement,
+                tenantAware);
     }
 
     private void mockAuthenticationWithoutPrincipal() {
-        when(securityProperties.getAuthentication()).thenReturn(ddiAuthentication);
-        when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
-        when(anonymous.isEnabled()).thenReturn(false);
+        lenient().when(securityProperties.getAuthentication()).thenReturn(ddiAuthentication);
+        lenient().when(ddiAuthentication.getAnonymous()).thenReturn(anonymous);
+        lenient().when(anonymous.isEnabled()).thenReturn(false);
     }
 
     private void mockSuccessfulAuthentication() throws MalformedURLException {
@@ -210,13 +212,15 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication successful")
     public void testSuccessfulAuthentication() {
+
+        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
+
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
                         .thenReturn(CONFIG_VALUE_TRUE);
-        when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
         when(targetMock.getSecurityToken()).thenReturn(CONTROLLER_ID);
         when(targetMock.getControllerId()).thenReturn(CONTROLLER_ID);
 
@@ -256,7 +260,8 @@ public class AmqpControllerAuthenticationTest {
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
-                        .thenReturn(CONFIG_VALUE_TRUE);
+                .thenReturn(CONFIG_VALUE_TRUE);
+
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 
         securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken 12" + CONTROLLER_ID);
@@ -275,13 +280,14 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication message successful")
     public void successfulMessageAuthentication() throws Exception {
+
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(TENANT, null, CONTROLLER_ID, null,
                 FileResource.createFileResourceBySha1(SHA1));
 
         mockSuccessfulAuthentication();
         when(controllerManagement.getByControllerId(anyString())).thenReturn(Optional.of(targetMock));
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
+        when(controllerManagement.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
 
         securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
@@ -312,8 +318,8 @@ public class AmqpControllerAuthenticationTest {
 
         mockSuccessfulAuthentication();
         when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
+        when(controllerManagement.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
         when(artifactManagementMock.get(ARTIFACT_ID)).thenReturn(Optional.of(testArtifact));
-        when(controllerManagementMock.hasTargetArtifactAssigned(TARGET_ID, SHA1)).thenReturn(true);
 
         securityToken.putHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER, "TargetToken " + CONTROLLER_ID);
         final Message message = amqpMessageHandlerService.getMessageConverter().toMessage(securityToken,
@@ -337,6 +343,7 @@ public class AmqpControllerAuthenticationTest {
     @Test
     @Description("Tests authentication message successful")
     public void successfulMessageAuthenticationWithTenantId() throws Exception {
+
         final MessageProperties messageProperties = createMessageProperties(null);
         final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(null, TENANT_ID, CONTROLLER_ID,
                 TARGET_ID, FileResource.createFileResourceBySha1(SHA1));
@@ -344,7 +351,7 @@ public class AmqpControllerAuthenticationTest {
 
         mockSuccessfulAuthentication();
         when(controllerManagement.get(any(Long.class))).thenReturn(Optional.of(targetMock));
-        when(controllerManagementMock.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
+        when(controllerManagement.hasTargetArtifactAssigned(CONTROLLER_ID, SHA1)).thenReturn(true);
         when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.of(testArtifact));
         when(tenantMetaData.getTenant()).thenReturn(TENANT);
         when(systemManagement.getTenantMetadata(TENANT_ID)).thenReturn(tenantMetaData);
