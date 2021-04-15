@@ -1499,6 +1499,11 @@ public final class UIComponentIdProvider {
     public static final String DISTRIBUTION_SET_TYPE_ID_PREFIXS = "dist.set.type";
 
     /**
+     * Id of the file upload cancel confirmation window
+     */
+    public static final String UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG = "upload.queue.clear.confirmation.window";
+
+    /**
      * /* Private Constructor.
      */
     private UIComponentIdProvider() {
