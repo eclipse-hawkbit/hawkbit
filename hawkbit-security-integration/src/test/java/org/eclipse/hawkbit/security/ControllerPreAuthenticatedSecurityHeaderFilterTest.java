@@ -17,6 +17,7 @@ import java.util.Collection;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,16 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Story("Issuer hash based authentication")
 @ExtendWith(MockitoExtension.class)
 public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
-
-    private ControllerPreAuthenticatedSecurityHeaderFilter underTest;
-
-    @Mock
-    private TenantConfigurationManagement tenantConfigurationManagementMock;
-
-    @Mock
-    private DmfTenantSecurityToken tenantSecurityTokenMock;
-
-    private final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
 
     private static final String CA_COMMON_NAME = "ca-cn";
     private static final String CA_COMMON_NAME_VALUE = "box1";
@@ -61,8 +52,18 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private static final TenantConfigurationValue<String> CONFIG_VALUE_MULTI_HASH = TenantConfigurationValue
             .<String> builder().value(MULTI_HASH).build();
 
+    private ControllerPreAuthenticatedSecurityHeaderFilter underTest;
+
+    @Mock
+    private TenantConfigurationManagement tenantConfigurationManagementMock;
+    @Mock
+    private DmfTenantSecurityToken tenantSecurityTokenMock;
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
     @BeforeEach
     public void before() {
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
                 tenantConfigurationManagementMock, tenantAware, new SystemSecurityContext(tenantAware));
     }

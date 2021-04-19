@@ -60,6 +60,7 @@ import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -133,6 +134,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private TenantAware tenantAwareMock;
 
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
 
@@ -155,7 +159,7 @@ public class AmqpMessageHandlerServiceTest {
         lenient().when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
                 .thenReturn(multiAssignmentConfig);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,

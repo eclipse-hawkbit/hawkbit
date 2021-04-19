@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -54,9 +53,9 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     private static final String EXAMPLE_TFQ_NAME = "filter1";
     private static final String EXAMPLE_TFQ_QUERY = "name==*";
 
-    @BeforeEach
-    public void setUp() {
-        resourceName = "targetfilters";
+    @Override
+    public String getResourceName() {
+        return "targetfilters";
     }
 
     @Test

@@ -65,7 +65,7 @@ import io.qameta.allure.Feature;
  * Parent class for all Management API rest documentation classes.
  *
  */
-@Feature("Documentation Verfication - API")
+@Feature("Documentation Verification - API")
 @ExtendWith(RestDocumentationExtension.class)
 @ContextConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -80,17 +80,23 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected MockMvc mockMvc;
 
-    protected String resourceName = "output";
-
     protected RestDocumentationResultHandler document;
 
     protected String arrayPrefix;
 
     protected String host = "management-api.host";
 
+    /**
+     * The generated REST docs snippets will be outputted to an own resource folder.
+     * The child class has to specify the name of that output folder where to put its corresponding snippets.
+     *
+     * @return the name of the resource folder
+     */
+    public abstract String getResourceName();
+
     @BeforeEach
-    protected void setupMvc(RestDocumentationContextProvider restDocContext) {
-        this.document = document(resourceName + "/{method-name}", preprocessRequest(prettyPrint()),
+    protected void setupMvc(final RestDocumentationContextProvider restDocContext) {
+        this.document = document(getResourceName() + "/{method-name}", preprocessRequest(prettyPrint()),
                 preprocessResponse(prettyPrint()));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
                 .apply(MockMvcRestDocumentation.documentationConfiguration(restDocContext).uris()

@@ -522,8 +522,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *
      * @param targetFilterQueryRepository
      *            holding {@link TargetFilterQuery} entities
-     * @param targetRepository
-     *            holding {@link Target} entities
+     * @param targetManagement
+     *            managing {@link Target} entities
      * @param virtualPropertyReplacer
      *            for RSQL handling
      * @param distributionSetManagement
@@ -540,12 +540,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetFilterQueryManagement targetFilterQueryManagement(
-            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetManagement targetManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
-        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
+        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
                 tenantConfigurationManagement, systemSecurityContext, tenantAware);
     }
@@ -760,9 +760,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+            final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager);
+                transactionManager, tenantAware);
     }
 
     /**

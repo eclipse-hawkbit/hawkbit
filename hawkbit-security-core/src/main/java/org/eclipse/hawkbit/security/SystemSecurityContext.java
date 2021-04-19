@@ -171,7 +171,7 @@ public class SystemSecurityContext {
         SecurityContextHolder.setContext(securityContextImpl);
     }
 
-    private static void setSystemContext(final SecurityContext oldContext) {
+    static void setSystemContext(final SecurityContext oldContext) {
         final Authentication oldAuthentication = oldContext.getAuthentication();
         final SecurityContextImpl securityContextImpl = new SecurityContextImpl();
         securityContextImpl.setAuthentication(new SystemCodeAuthentication(oldAuthentication));

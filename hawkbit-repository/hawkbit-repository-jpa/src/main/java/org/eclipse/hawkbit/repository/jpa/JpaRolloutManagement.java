@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
@@ -62,6 +63,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -564,8 +566,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         try {
             long actionsCreated;
             do {
-                actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group.getId(),
-                        TRANSACTION_TARGETS);
+                actionsCreated = createActionsForTargetsInNewTransaction(rollout.getId(), group.getId(), TRANSACTION_TARGETS);
                 totalActionsCreated += actionsCreated;
             } while (actionsCreated > 0);
 
@@ -576,7 +577,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         return totalActionsCreated;
     }
 
-    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId, final int limit) {
+    private Long createActionsForTargetsInNewTransaction(final long rolloutId, final long groupId,
+            final int limit) {
         return DeploymentHelper.runInNewTransaction(txManager, "createActionsForTargets", status -> {
             final PageRequest pageRequest = PageRequest.of(0, limit);
             final Rollout rollout = rolloutRepository.findById(rolloutId)
@@ -828,17 +830,21 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         try {
             rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
-                    status -> executeFittingHandler(rolloutId)));
+                    status -> handleRollout(rolloutId)));
         } finally {
             lock.unlock();
         }
     }
 
-    private long executeFittingHandler(final long rolloutId) {
-        LOGGER.debug("handle rollout {}", rolloutId);
+    private long handleRollout(final long rolloutId) {
         final JpaRollout rollout = rolloutRepository.findById(rolloutId)
                 .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
+        runInUserContext(rollout, () -> handleRollout(rollout));
+        return 0;
+    }
 
+    private void handleRollout(final JpaRollout rollout) {
+        LOGGER.debug("Handle rollout {}", rollout.getId());
         switch (rollout.getStatus()) {
         case CREATING:
             handleCreateRollout(rollout);
@@ -859,8 +865,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
             break;
         }
-
-        return 0;
     }
 
     private void handleStartingRollout(final Rollout rollout) {
@@ -1147,4 +1151,9 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
     }
+
+    private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
+        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()), tenantAware);
+    }
+
 }

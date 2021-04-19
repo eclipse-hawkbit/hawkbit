@@ -42,7 +42,27 @@ public interface TenantAware {
      * @throws any
      *             kind of {@link RuntimeException}
      */
-    <T> T runAsTenant(final String tenant, TenantRunner<T> tenantRunner);
+    <T> T runAsTenant(String tenant, TenantRunner<T> tenantRunner);
+
+    /**
+     * Gives the possibility to run a certain code under a specific given
+     * {@code tenant} and {@code username}. Only the given {@link TenantRunner} is executed under the
+     * specific tenant and user e.g. under control of an {@link ThreadLocal}. After the
+     * {@link TenantRunner} it must be ensured that the original tenant before
+     * this invocation is reset.
+     *
+     * @param tenant
+     *            the tenant which the specific code should run with
+     * @param username
+     *            the username which the specific code should run with
+     * @param tenantRunner
+     *            the runner which is implemented to run this specific code
+     *            under the given tenant
+     * @return the return type of the {@link TenantRunner}
+     * @throws any
+     *             kind of {@link RuntimeException}
+     */
+    <T> T runAsTenantAsUser(String tenant, String username, TenantRunner<T> tenantRunner);
 
     /**
      * An {@link TenantRunner} interface which allows to run specific code under
