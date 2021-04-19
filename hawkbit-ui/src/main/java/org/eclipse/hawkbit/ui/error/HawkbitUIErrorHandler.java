@@ -86,15 +86,15 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
             }
         }
 
-        final Optional<Page> originError = getPageOriginError(event);
-        if (originError.isPresent()) {
-            return originError.get();
+        final Optional<Page> errorOriginPage = getErrorOriginPage(event);
+        if (errorOriginPage.isPresent()) {
+            return errorOriginPage.get();
         }
 
         return Page.getCurrent();
     }
 
-    private static Optional<Page> getPageOriginError(final ErrorEvent event) {
+    private static Optional<Page> getErrorOriginPage(final ErrorEvent event) {
         final Component errorOrigin = DefaultErrorHandler.findAbstractComponent(event);
 
         if (errorOrigin != null && errorOrigin.getUI() != null) {
