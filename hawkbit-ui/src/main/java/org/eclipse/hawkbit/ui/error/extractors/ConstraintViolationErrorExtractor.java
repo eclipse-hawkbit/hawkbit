@@ -15,8 +15,10 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.CollectionUtils;
 
 /**
  * UI error details extractor for {@link ConstraintViolationException}.
@@ -37,12 +39,25 @@ public class ConstraintViolationErrorExtractor extends AbstractSingleUiErrorDeta
     @Override
     protected Optional<UiErrorDetails> findDetails(final Throwable error) {
         return findExceptionOf(error, ConstraintViolationException.class).map(ex -> {
-            final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
-            final String description = violations == null ? error.getClass().getSimpleName()
-                    : formatViolations(violations);
+            final StringBuilder descriptionBuilder = new StringBuilder(getBasicDescription(ex, error));
+            getViolationsDescription(ex).ifPresent(violationsDescription -> descriptionBuilder.append(":")
+                    .append(System.lineSeparator()).append(violationsDescription));
 
-            return UiErrorDetails.create(i18n.getMessage("caption.error"), description);
+            return UiErrorDetails.create(i18n.getMessage("caption.error"), descriptionBuilder.toString());
         });
+    }
+
+    private static String getBasicDescription(final ConstraintViolationException ex, final Throwable error) {
+        return StringUtils.isEmpty(ex.getMessage()) ? error.getClass().getSimpleName() : ex.getMessage();
+    }
+
+    private static Optional<String> getViolationsDescription(final ConstraintViolationException ex) {
+        final Set<ConstraintViolation<?>> violations = ex.getConstraintViolations();
+        if (!CollectionUtils.isEmpty(violations)) {
+            return Optional.of(formatViolations(violations));
+        }
+
+        return Optional.empty();
     }
 
     private static String formatViolations(final Set<ConstraintViolation<?>> violations) {
