@@ -38,7 +38,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 
-@Feature("Unit Tests - UI error handler")
+@Feature("Unit Tests - Management UI")
 @Story("Test the UI error handling with different error extractors")
 @ExtendWith(MockitoExtension.class)
 class HawkbitUIErrorHandlerTest {

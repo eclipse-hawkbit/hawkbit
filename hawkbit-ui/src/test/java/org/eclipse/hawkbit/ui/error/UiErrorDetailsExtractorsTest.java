@@ -38,7 +38,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@Feature("Unit Tests - UI error details extractors")
+@Feature("Unit Tests - Management UI")
 @Story("Test correct behaviour of the UI error details extractors")
 @ExtendWith(MockitoExtension.class)
 class UiErrorDetailsExtractorsTest {

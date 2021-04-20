@@ -24,7 +24,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@Feature("Unit Tests - Localization helper")
+@Feature("Unit Tests - Management UI")
 @Story("Test the locale configuration and prioritization")
 public class HawkbitCommonUtilTest {
 
