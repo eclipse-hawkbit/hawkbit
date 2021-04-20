@@ -30,6 +30,7 @@ public class ReplyToListener implements TestRabbitListener {
     public static final String REPLY_TO_QUEUE = "reply_queue";
 
     private final Map<String, Map<EventTopic, List<Message>>> tenantEventMessages = new ConcurrentHashMap<>();
+    private final Map<String, List<EventTopic>> tenantEventMessageTopics = new ConcurrentHashMap<>();
     private final Map<String, Map<String, Message>> tenantDeleteMessages = new HashMap<>();
     private final Map<String, Map<String, Message>> tenantPingResponseMessages = new HashMap<>();
 
@@ -61,6 +62,10 @@ public class ReplyToListener implements TestRabbitListener {
         final EventTopic eventTopic = EventTopic.valueOf(
                 message.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC).toString());
 
+        final List<EventTopic> eventTopics = tenantEventMessageTopics.getOrDefault(tenant, new LinkedList<>());
+        eventTopics.add(eventTopic);
+        tenantEventMessageTopics.put(tenant, eventTopics);
+
         final Map<EventTopic, List<Message>> eventMessages = tenantEventMessages.getOrDefault(tenant, new ConcurrentHashMap<>());
         final List<Message> messages = eventMessages.getOrDefault(eventTopic, new LinkedList<>());
         messages.add(message);
@@ -84,12 +89,12 @@ public class ReplyToListener implements TestRabbitListener {
         tenantPingResponseMessages.put(tenant, pingResponseMessages);
     }
 
-    public Collection<EventTopic> getLatestEventMessageTopics(final String tenant) {
-        return tenantEventMessages.get(tenant).keySet();
+    public List<EventTopic> getLatestEventMessageTopics(final String tenant) {
+        return tenantEventMessageTopics.get(tenant);
     }
 
     public void resetLatestEventMessageTopics(final String tenant) {
-        tenantEventMessages.remove(tenant);
+        tenantEventMessageTopics.remove(tenant);
     }
 
     public Message getLatestEventMessage(final EventTopic eventTopic, final String tenant) {
@@ -98,15 +103,15 @@ public class ReplyToListener implements TestRabbitListener {
     }
 
     public Map<EventTopic, List<Message>> getTenantEventMessages(final String tenant) {
-        return tenantEventMessages.get(tenant);
+        return tenantEventMessages.getOrDefault(tenant, new HashMap<>());
     }
 
     public Map<String, Message> getTenantDeleteMessages(final String tenant) {
-        return tenantDeleteMessages.get(tenant);
+        return tenantDeleteMessages.getOrDefault(tenant, new HashMap<>());
     }
 
     public Map<String, Message> getTenantPingResponseMessages(final String tenant) {
-        return tenantPingResponseMessages.get(tenant);
+        return tenantPingResponseMessages.getOrDefault(tenant, new HashMap<>());
     }
 
 }

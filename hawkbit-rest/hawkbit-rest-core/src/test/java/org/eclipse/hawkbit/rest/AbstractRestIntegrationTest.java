@@ -33,7 +33,6 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 @ContextConfiguration(classes = { RestConfiguration.class, RepositoryApplicationConfiguration.class,
         TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
 @AutoConfigureMockMvc
-@TestPropertySource(locations = { "classpath:/rest-test.properties" })
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 
     protected MockMvc mvc;
