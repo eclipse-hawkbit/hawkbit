@@ -13,6 +13,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
@@ -44,7 +45,7 @@ public class AutoCleanupSchedulerTest {
     private final AtomicInteger counter = new AtomicInteger();
 
     private final LockRegistry lockRegistry = new DefaultLockRegistry();
-    private final TenantAware tenantAware = new SecurityContextTenantAware();
+    private final TenantAware tenantAware = new SecurityContextTenantAware((tenant, username) -> Collections.emptyList());
     private final SystemSecurityContext securityContext = new SystemSecurityContext(tenantAware);
 
     @Mock

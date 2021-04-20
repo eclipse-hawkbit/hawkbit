@@ -24,6 +24,11 @@ public class DisposableSqlTestDatabase extends SharedSqlTestDatabase implements 
 
     @Override
     public void beforeAll(final ExtensionContext extensionContext) {
+        if (StringUtils.isEmpty(System.getProperty("spring.jpa.database")) ||
+                StringUtils.isEmpty(System.getProperty(SPRING_DATASOURCE_KEY))) {
+            LOGGER.info("No database uri configured. Skipping...");
+            return;
+        }
         System.setProperty(SPRING_DATASOURCE_KEY, getRandomSchemaName());
         super.beforeAll(extensionContext);
     }

@@ -26,11 +26,8 @@ public class SharedSqlTestDatabase implements BeforeAllCallback {
         if (!StringUtils.isEmpty(System.getProperty("spring.jpa.database")) && !StringUtils.isEmpty(
                 System.getProperty(SPRING_DATASOURCE_KEY))) {
             System.setProperty(SPRING_DATASOURCE_KEY, getRandomSchemaName());
+            registerDropSchemaShutdownHook();
         }
-    }
-
-    public SharedSqlTestDatabase() {
-        registerDropSchemaShutdownHook();
     }
 
     @Override

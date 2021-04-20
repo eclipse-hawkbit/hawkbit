@@ -12,8 +12,6 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.UUID;
 
-import javax.annotation.PreDestroy;
-
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.junit.BrokerRunningSupport;
@@ -31,71 +29,50 @@ import com.rabbitmq.http.client.domain.UserPermissions;
 @SuppressWarnings("squid:S2068")
 public class RabbitMqSetupService {
 
-    private Client rabbitmqHttpClient;
-
-    private final com.rabbitmq.client.ConnectionFactory connectionFactory;
-
     private static final String VIRTUAL_HOST = UUID.randomUUID().toString();
+    private static final com.rabbitmq.client.ConnectionFactory connectionFactory;
+    private static final String HOSTNAME;
+    private static final String USERNAME;
+    private static final String PASSWORD;
 
-    private final String hostname;
+    private final Client rabbitmqHttpClient = createRabbitmqHttpClient();
 
-    private String username;
-
-    private String password;
-
-    public RabbitMqSetupService() {
-
+    static {
         BrokerRunningSupport brokerSupport = BrokerRunningSupport.isRunning();
         connectionFactory = brokerSupport.getConnectionFactory();
-        hostname = brokerSupport.getHostName();
-        username = brokerSupport.getUser();
-        password = brokerSupport.getPassword();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> deleteVirtualHost()));
+        HOSTNAME = brokerSupport.getHostName();
+        USERNAME = brokerSupport.getUser();
+        PASSWORD = brokerSupport.getPassword();
+        Runtime.getRuntime().addShutdownHook(new Thread(RabbitMqSetupService::deleteVirtualHost));
     }
 
-    private synchronized Client getRabbitmqHttpClient() {
-        if (rabbitmqHttpClient == null) {
-            try {
-                rabbitmqHttpClient = new Client(getHttpApiUrl(), getUsername(), getPassword());
-            } catch (MalformedURLException | URISyntaxException e) {
-                throw Throwables.propagate(e);
-            }
+    private static synchronized Client createRabbitmqHttpClient() {
+        try {
+            return new Client(getHttpApiUrl(), USERNAME, PASSWORD);
+        } catch (MalformedURLException | URISyntaxException e) {
+            throw Throwables.propagate(e);
         }
-        return rabbitmqHttpClient;
     }
 
-    private String getHttpApiUrl() {
-        return "http://" + getHostname() + ":15672/api/";
+    private static String getHttpApiUrl() {
+        return "http://" + HOSTNAME + ":15672/api/";
     }
 
     public ConnectionFactory newVirtualHostWithConnectionFactory() {
-        getRabbitmqHttpClient().createVhost(VIRTUAL_HOST);
-        getRabbitmqHttpClient().updatePermissions(VIRTUAL_HOST, getUsername(), createUserPermissionsFullAccess());
+        rabbitmqHttpClient.createVhost(VIRTUAL_HOST);
+        rabbitmqHttpClient.updatePermissions(VIRTUAL_HOST, USERNAME, createUserPermissionsFullAccess());
         connectionFactory.setVirtualHost(VIRTUAL_HOST);
         return new CachingConnectionFactory(connectionFactory);
     }
 
-    @PreDestroy
-    public void deleteVirtualHost() {
+    public static void deleteVirtualHost() {
         if (StringUtils.isEmpty(VIRTUAL_HOST)) {
             return;
         }
-        getRabbitmqHttpClient().deleteVhost(VIRTUAL_HOST);
+        createRabbitmqHttpClient().deleteVhost(VIRTUAL_HOST);
     }
 
-    private String getHostname() {
-        return hostname;
-    }
-
-    private String getPassword() {
-        return password;
-    }
-
-    private String getUsername() {
-        return username;
-    }
-
-    private UserPermissions createUserPermissionsFullAccess() {
+    private static UserPermissions createUserPermissionsFullAccess() {
         final UserPermissions permissions = new UserPermissions();
         permissions.setVhost(VIRTUAL_HOST);
         permissions.setRead(".*");
