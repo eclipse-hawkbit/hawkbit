@@ -38,7 +38,7 @@ public interface UiErrorDetailsExtractor {
      * @return casted error if matched
      */
     default <T> Optional<T> findExceptionOf(final Throwable error, final Class<T> exceptionType) {
-        if (error.getClass().isAssignableFrom(exceptionType)) {
+        if (exceptionType.isAssignableFrom(error.getClass())) {
             return Optional.of((T) error);
         }
 

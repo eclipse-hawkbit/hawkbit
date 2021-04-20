@@ -53,16 +53,30 @@ class UiErrorDetailsExtractorsTest {
     @Description("Extractor finds the matching exception in case of a nested error")
     void nestedExceptionIsFoundByExtractor() {
         final UiErrorDetailsExtractor extractor = (error) -> Collections.emptyList();
-        final MatchingException error = new MatchingException(new ParentException(new GrandparentException()));
+        final MatchingException error = new MatchingException(
+                new MatchingSecondLevelException(new MatchingThirdLevelException()));
 
         final Optional<MatchingException> matchingError = extractor.findExceptionOf(error, MatchingException.class);
-        final Optional<ParentException> parentError = extractor.findExceptionOf(error, ParentException.class);
-        final Optional<GrandparentException> grandparentError = extractor.findExceptionOf(error,
-                GrandparentException.class);
+        final Optional<MatchingSecondLevelException> parentError = extractor.findExceptionOf(error,
+                MatchingSecondLevelException.class);
+        final Optional<MatchingThirdLevelException> grandparentError = extractor.findExceptionOf(error,
+                MatchingThirdLevelException.class);
 
         assertThat(matchingError).isPresent().hasValue(error);
-        assertThat(parentError).isPresent().hasValue((ParentException) error.getCause());
-        assertThat(grandparentError).isPresent().hasValue((GrandparentException) error.getCause().getCause());
+        assertThat(parentError).isPresent().hasValue((MatchingSecondLevelException) error.getCause());
+        assertThat(grandparentError).isPresent().hasValue((MatchingThirdLevelException) error.getCause().getCause());
+    }
+
+    @Test
+    @Description("Extractor finds the matching exception in case of parent/child relationships between error classes")
+    void parentExceptionIsFoundByExtractor() {
+        final UiErrorDetailsExtractor extractor = (error) -> Collections.emptyList();
+        final MatchingException error = new MatchingException();
+
+        final Optional<ParentMatchingException> matchingError = extractor.findExceptionOf(error,
+                ParentMatchingException.class);
+
+        assertThat(matchingError).isPresent().hasValue(error);
     }
 
     @Test
@@ -117,23 +131,39 @@ class UiErrorDetailsExtractorsTest {
         return new HashSet<>(Arrays.asList(violation1, violation2));
     }
 
-    private static class MatchingException extends Exception {
+    private static class ParentMatchingException extends Exception {
         private static final long serialVersionUID = 1L;
+
+        public ParentMatchingException() {
+            super();
+        }
+
+        public ParentMatchingException(final Throwable cause) {
+            super(cause);
+        }
+    }
+
+    private static class MatchingException extends ParentMatchingException {
+        private static final long serialVersionUID = 1L;
+
+        public MatchingException() {
+            super();
+        }
 
         public MatchingException(final Throwable cause) {
             super(cause);
         }
     }
 
-    private static class ParentException extends Exception {
+    private static class MatchingSecondLevelException extends Exception {
         private static final long serialVersionUID = 1L;
 
-        public ParentException(final Throwable cause) {
+        public MatchingSecondLevelException(final Throwable cause) {
             super(cause);
         }
     }
 
-    private static class GrandparentException extends Exception {
+    private static class MatchingThirdLevelException extends Exception {
         private static final long serialVersionUID = 1L;
     }
 }
