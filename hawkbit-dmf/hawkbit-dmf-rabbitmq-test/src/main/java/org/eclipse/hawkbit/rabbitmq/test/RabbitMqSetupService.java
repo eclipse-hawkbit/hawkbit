@@ -46,7 +46,7 @@ public class RabbitMqSetupService {
         Runtime.getRuntime().addShutdownHook(new Thread(RabbitMqSetupService::deleteVirtualHost));
     }
 
-    private static synchronized Client createRabbitmqHttpClient() {
+    private static Client createRabbitmqHttpClient() {
         try {
             return new Client(getHttpApiUrl(), USERNAME, PASSWORD);
         } catch (MalformedURLException | URISyntaxException e) {
