@@ -70,6 +70,26 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         this.tenantAware = tenantAware;
     }
 
+    protected TargetFilterQueryManagement getTargetFilterQueryManagement() {
+        return targetFilterQueryManagement;
+    }
+
+    protected TargetManagement getTargetManagement() {
+        return targetManagement;
+    }
+
+    protected DeploymentManagement getDeploymentManagement() {
+        return deploymentManagement;
+    }
+
+    protected PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    protected TenantAware getTenantAware() {
+        return tenantAware;
+    }
+
     /**
      * Runs one page of target assignments within a dedicated transaction
      *
