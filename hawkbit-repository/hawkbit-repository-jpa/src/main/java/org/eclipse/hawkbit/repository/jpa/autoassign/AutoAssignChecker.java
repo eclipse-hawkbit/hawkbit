@@ -17,12 +17,12 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -38,12 +38,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoAssignChecker.class);
-
-    /**
-     * Maximum for target filter queries with auto assign DS Maximum for targets
-     * that are fetched in one turn
-     */
-    private static final int PAGE_SIZE = 1000;
 
     private final TargetManagement targetManagement;
 
@@ -73,15 +67,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
     public void check() {
         LOGGER.debug("Auto assigned check call");
 
-        final PageRequest pageRequest = PageRequest.of(0, PAGE_SIZE);
-
-        final Page<TargetFilterQuery> filterQueries = findWithAutoAssignDS(pageRequest);
-
-        // make sure the filter queries are executed in the order of weights
-        for (final TargetFilterQuery filterQuery : filterQueries) {
-            runInUserContext(filterQuery, () -> checkByTargetFilterQueryAndAssignDS(filterQuery));
-        }
-
+        forEachFilterWithAutoAssignDS(this::checkByTargetFilterQueryAndAssignDS);
     }
 
     /**
@@ -98,12 +84,12 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             do {
 
                 final List<String> controllerIds = targetManagement
-                        .findByTargetFilterQueryAndNonDS(PageRequest.of(0, PAGE_SIZE),
+                        .findByTargetFilterQueryAndNonDS(PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
                                 targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
                         .getContent().stream().map(Target::getControllerId).collect(Collectors.toList());
                 count = runTransactionalAssignment(targetFilterQuery, controllerIds);
 
-            } while (count == PAGE_SIZE);
+            } while (count == Constants.MAX_ENTRIES_IN_STATEMENT);
 
         } catch (PersistenceException | AbstractServerRtException e) {
             LOGGER.error("Error during auto assign check of target filter query " + targetFilterQuery.getId(), e);

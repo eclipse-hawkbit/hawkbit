@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
@@ -36,6 +38,12 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      * assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
+    
+    /**
+     * Maximum for target filter queries with auto assign DS Maximum for targets
+     * that are fetched in one turn
+     */
+    private static final int PAGE_SIZE = 1000;
 
     private final TargetFilterQueryManagement targetFilterQueryManagement;
 
@@ -82,6 +90,17 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         return tenantAware;
     }
 
+    protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
+        Page<TargetFilterQuery> filterQueries;
+        Pageable query = PageRequest.of(0, PAGE_SIZE);
+
+        do {
+            filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(query);
+
+            filterQueries.forEach(consumer);
+        } while ((query = filterQueries.nextPageable()) != Pageable.unpaged());
+    }
+
     /**
      * Runs target assignments within a dedicated transaction for a given list of
      * controllerIDs
@@ -99,7 +118,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         return DeploymentHelper.runInNewTransaction(getTransactionManager(), "autoAssignDSToTargets",
                 Isolation.READ_COMMITTED.value(), status -> {
 
-                    final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequest(controllerIds,
+                    final List<DeploymentRequest> deploymentRequests = mapToDeploymentRequests(controllerIds,
                             targetFilterQuery);
 
                     final int count = deploymentRequests.size();
@@ -121,7 +140,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      *            the query the targets have to match
      * @return list of deployment request
      */
-    protected List<DeploymentRequest> mapToDeploymentRequest(final List<String> controllerIds,
+    protected List<DeploymentRequest> mapToDeploymentRequests(final List<String> controllerIds,
             final TargetFilterQuery filterQuery) {
         // the action type is set to FORCED per default (when not explicitly
         // specified)
@@ -135,10 +154,6 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                         .setActionType(autoAssignActionType).setWeight(filterQuery.getAutoAssignWeight().orElse(null))
                         .build())
                 .collect(Collectors.toList());
-    }
-
-    protected Page<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageRequest) {
-        return targetFilterQueryManagement.findWithAutoAssignDS(pageRequest);
     }
 
     protected void runInUserContext(final TargetFilterQuery targetFilterQuery, final Runnable handler) {
