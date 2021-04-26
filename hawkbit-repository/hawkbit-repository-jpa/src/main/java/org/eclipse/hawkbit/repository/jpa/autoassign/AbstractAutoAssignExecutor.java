@@ -21,6 +21,8 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,8 @@ import org.springframework.util.StringUtils;
  */
 public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAutoAssignExecutor.class);
+
     /**
      * The message which is added to the action status when a distribution set is
      * assigned to an target. First %s is the name of the target filter.
@@ -40,8 +44,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
     
     /**
-     * Maximum for target filter queries with auto assign DS Maximum for targets
-     * that are fetched in one turn
+     * Maximum for target filter queries with auto assign DS activated.
      */
     private static final int PAGE_SIZE = 1000;
 
@@ -97,7 +100,19 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         do {
             filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(query);
 
-            filterQueries.forEach(consumer);
+            filterQueries.forEach(filterQuery -> {
+                try {
+                    runInUserContext(filterQuery, () -> consumer.accept(filterQuery));
+                } catch (final RuntimeException ex) {
+                    LOGGER.debug(
+                            "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {}. Continue with next filter query.",
+                            filterQuery.getTenant(), filterQuery.getId(), ex);
+                    LOGGER.error(
+                            "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {} and error message [{}]. "
+                                    + "Continue with next filter query.",
+                            filterQuery.getTenant(), filterQuery.getId(), ex.getMessage());
+                }
+            });
         } while ((query = filterQueries.nextPageable()) != Pageable.unpaged());
     }
 
