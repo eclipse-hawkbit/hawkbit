@@ -293,7 +293,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private boolean isAnyUploadInUploadQueue() {
         return artifactUploadState.getAllFileUploadProgressValuesFromOverallUploadProcessList().stream()
                 .map(FileUploadProgress::getFileUploadStatus)
-                .anyMatch(fileUploadStatus -> fileUploadStatus.equals(UPLOAD_STARTED));
+                .anyMatch(fileUploadStatus -> fileUploadStatus == UPLOAD_STARTED);
     }
 
 }
