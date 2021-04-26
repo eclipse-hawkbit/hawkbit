@@ -227,7 +227,7 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ARTIFACT_FILENAME = "artifact.filename.caption";
 
-    public static final String CAPTION_FILE_UPLOAD_INPROGRESS = "caption.file.upload.inprogress";
+    public static final String CAPTION_CLEAR_FILE_UPLOAD_QUEUE = "caption.clear.file.upload.queue";
 
     public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
 

@@ -275,7 +275,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     public void beforeLeave(final ViewBeforeLeaveEvent event) {
         if (isAnyUploadInUploadQueue()) {
             final ConfirmationDialog confirmDeleteDialog = new ConfirmationDialog(i18n,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_FILE_UPLOAD_INPROGRESS),
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_CLEAR_FILE_UPLOAD_QUEUE),
                     i18n.getMessage(UIMessageIdProvider.MESSAGE_CLEAR_FILE_UPLOAD_QUEUE), ok -> {
                         if (Boolean.TRUE.equals(ok)) {
                             // Clear all queued file uploads
