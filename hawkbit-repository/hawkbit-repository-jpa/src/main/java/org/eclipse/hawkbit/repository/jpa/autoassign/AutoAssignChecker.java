@@ -8,12 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.persistence.PersistenceException;
 
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
@@ -41,6 +45,8 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      */
     private static final int PAGE_SIZE = 1000;
 
+    private final TargetManagement targetManagement;
+
     /**
      * Instantiates a new auto assign checker
      *
@@ -58,7 +64,8 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
-        super(targetFilterQueryManagement, targetManagement, deploymentManagement, transactionManager, tenantAware);
+        super(targetFilterQueryManagement, deploymentManagement, transactionManager, tenantAware);
+        this.targetManagement = targetManagement;
     }
 
     @Override
@@ -90,7 +97,11 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             int count;
             do {
 
-                count = runTransactionalAssignment(targetFilterQuery, PageRequest.of(0, PAGE_SIZE));
+                final List<String> controllerIds = targetManagement
+                        .findByTargetFilterQueryAndNonDS(PageRequest.of(0, PAGE_SIZE),
+                                targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
+                        .getContent().stream().map(Target::getControllerId).collect(Collectors.toList());
+                count = runTransactionalAssignment(targetFilterQuery, controllerIds);
 
             } while (count == PAGE_SIZE);
 
