@@ -8,8 +8,8 @@
  */
 package org.eclipse.hawkbit.ui;
 
-import org.eclipse.hawkbit.ui.components.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
+import org.eclipse.hawkbit.ui.error.ErrorView;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
 import org.eclipse.hawkbit.ui.menu.DashboardMenu;
 import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
@@ -34,6 +34,7 @@ import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.navigator.ViewProvider;
 import com.vaadin.server.ClientConnector.DetachListener;
+import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.Responsive;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.spring.navigator.SpringViewProvider;
@@ -73,6 +74,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
     private final SpringViewProvider viewProvider;
     private final transient ApplicationContext context;
     private final transient EventPushStrategy pushStrategy;
+    private final transient ErrorHandler uiErrorHandler;
 
     private final transient HawkbitEntityEventListener entityEventsListener;
 
@@ -80,7 +82,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
             final UIEventProvider eventProvider, final SpringViewProvider viewProvider,
             final ApplicationContext context, final DashboardMenu dashboardMenu, final ErrorView errorview,
             final NotificationUnreadButton notificationUnreadButton, final UiProperties uiProperties,
-            final VaadinMessageSource i18n) {
+            final VaadinMessageSource i18n, final ErrorHandler uiErrorHandler) {
         this.pushStrategy = pushStrategy;
         this.viewProvider = viewProvider;
         this.context = context;
@@ -89,6 +91,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         this.notificationUnreadButton = notificationUnreadButton;
         this.uiProperties = uiProperties;
         this.i18n = i18n;
+        this.uiErrorHandler = uiErrorHandler;
 
         this.entityEventsListener = new HawkbitEntityEventListener(eventBus, eventProvider, notificationUnreadButton);
     }
@@ -184,7 +187,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         setNavigator(navigator);
 
         if (UI.getCurrent().getErrorHandler() == null) {
-            UI.getCurrent().setErrorHandler(new HawkbitUIErrorHandler());
+            UI.getCurrent().setErrorHandler(uiErrorHandler);
         }
 
         LOG.debug("Current locale of the application is : {}", getLocale());
