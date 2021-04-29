@@ -36,6 +36,9 @@ import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener.ResizeHandler;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener.VisibilityHandler;
+import org.eclipse.hawkbit.ui.menu.DashboardEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenu;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -72,6 +75,7 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private final SoftwareModuleGridLayout smGridLayout;
     private final ArtifactDetailsGridLayout artifactDetailsGridLayout;
     private final VaadinMessageSource i18n;
+    private final DashboardMenu dashboardMenu;
 
     private HorizontalLayout mainLayout;
 
@@ -83,10 +87,12 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
+            final DashboardMenu dashboardMenu) {
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;
+        this.dashboardMenu = dashboardMenu;
 
         final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
                 uiNotification, permChecker);
@@ -281,6 +287,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                             // Clear all queued file uploads
                             artifactUploadState.clearFileStates();
                             event.navigate();
+                        } else {
+                            // Send a PostViewChangeEvent to the DashboardMenu as if the navigation actually
+                            // happened to prevent the DashboardMenu navigation from getting stuck
+                            final DashboardMenuItem dashboardMenuItem = dashboardMenu.getByViewName(VIEW_NAME);
+                            dashboardMenu.postViewChange(DashboardEvent.createPostViewChangeEvent(dashboardMenuItem));
                         }
                     }, UIComponentIdProvider.UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG);
             UI.getCurrent().addWindow(confirmDeleteDialog.getWindow());
