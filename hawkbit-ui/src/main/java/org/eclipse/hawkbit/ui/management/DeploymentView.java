@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -96,23 +97,24 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
-            @Qualifier("uiExecutor") final Executor uiExecutor) {
+            @Qualifier("uiExecutor") final Executor uiExecutor,
+            final TargetManagementFilterDataProvider targetManagementFilterDataProvider) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permChecker);
 
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
                     targetFilterQueryManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState());
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement, uiProperties,
-                    targetTagManagement, distributionSetManagement, uiExecutor, configManagement, systemSecurityContext,
-                    managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
-                    managementUIState.getTargetBulkUploadUiState(),
-                    managementUIState.getDistributionGridLayoutUiState());
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
+                    uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
+                    systemSecurityContext, managementUIState.getTargetTagFilterLayoutUiState(),
+                    managementUIState.getTargetGridLayoutUiState(), managementUIState.getTargetBulkUploadUiState(),
+                    managementUIState.getDistributionGridLayoutUiState(), targetManagementFilterDataProvider);
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,

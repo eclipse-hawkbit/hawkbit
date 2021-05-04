@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -109,14 +110,15 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
+            final DistributionGridLayoutUiState distributionGridLayoutUiState,
+            final TargetManagementFilterDataProvider targetManagementFilterDataProvider) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
-        final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies, uiProperties,
-                uiExecutor, targetManagement, deploymentManagement, targetTagManagement, distributionSetManagement,
-                targetBulkUploadUiState);
+        final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,
+                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTagManagement,
+                distributionSetManagement, targetBulkUploadUiState);
 
         this.targetGridHeader = new TargetGridHeader(uiDependencies, targetWindowBuilder, bulkUploadWindowBuilder,
                 targetTagFilterLayoutUiState, targetGridLayoutUiState, targetBulkUploadUiState);
@@ -124,11 +126,12 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetGridHeader.addDsDroArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
                 systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
-                targetTagFilterLayoutUiState);
+                targetTagFilterLayoutUiState, targetManagementFilterDataProvider);
 
-        this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder, targetMetaDataWindowBuilder);
-        this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement, deploymentManagement,
+        this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder,
                 targetMetaDataWindowBuilder);
+        this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
+                deploymentManagement, targetMetaDataWindowBuilder);
 
         this.countMessageLabel = new CountMessageLabel(targetManagement, uiDependencies.getI18n());
 
@@ -138,16 +141,16 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);
         this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
                 new EventViewAware(EventView.DEPLOYMENT), targetGrid.getFilterSupport());
-        this.pinningChangedListener = new PinningChangedListener<>(uiDependencies.getEventBus(), ProxyDistributionSet.class,
-                targetGrid.getPinSupport());
+        this.pinningChangedListener = new PinningChangedListener<>(uiDependencies.getEventBus(),
+                ProxyDistributionSet.class, targetGrid.getPinSupport());
         this.targetChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.TARGET_LIST, EventView.DEPLOYMENT),
                 getMasterTargetAwareComponents());
         this.selectTargetListener = new SelectGridEntityListener<>(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.TARGET_LIST, EventView.DEPLOYMENT),
                 targetGrid.getSelectionSupport());
-        this.targetModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTarget.class)
-                .entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
+        this.targetModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
+                ProxyTarget.class).entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
         this.tagModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
                 .entityModifiedAwareSupports(getTagModifiedAwareSupports()).parentEntityType(ProxyTarget.class).build();
         this.bulkUploadListener = new BulkUploadChangedListener(uiDependencies.getEventBus(),

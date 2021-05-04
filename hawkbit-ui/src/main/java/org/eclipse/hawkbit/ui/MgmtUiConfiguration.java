@@ -11,6 +11,10 @@ package org.eclipse.hawkbit.ui;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementStateDataProvider;
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
@@ -28,6 +32,7 @@ import org.vaadin.spring.servlet.Vaadin4SpringServlet;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Enables UI components for the Management UI.
@@ -113,5 +118,18 @@ public class MgmtUiConfiguration {
     @Bean
     public VaadinServlet vaadinServlet() {
         return new Vaadin4SpringServlet();
+    }
+
+    @Bean
+    public TargetToProxyTargetMapper targetToProxyTargetMapper(final VaadinMessageSource i18n) {
+        return new TargetToProxyTargetMapper(i18n);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    @UIScope
+    public TargetManagementFilterDataProvider targetManagementFilterDataProvider(
+            final TargetManagement targetManagement, final TargetToProxyTargetMapper targetToProxyTargetMapper) {
+        return new TargetManagementStateDataProvider(targetManagement, targetToProxyTargetMapper);
     }
 }
