@@ -13,7 +13,6 @@ import static org.springframework.data.domain.Sort.Direction;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -43,7 +42,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -658,9 +656,5 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,
                 actionRepository::countByTargetId);
-    }
-
-    private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
-        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()), tenantAware);
     }
 }
