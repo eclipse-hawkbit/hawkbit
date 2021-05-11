@@ -65,6 +65,12 @@ public class MgmtAction extends MgmtBaseEntity {
 
     @JsonProperty
     private MgmtMaintenanceWindow maintenanceWindow;
+    
+    @JsonProperty
+    private Long rollout;
+
+    @JsonProperty
+    private String rolloutName;
 
     public MgmtMaintenanceWindow getMaintenanceWindow() {
         return maintenanceWindow;
@@ -121,4 +127,21 @@ public class MgmtAction extends MgmtBaseEntity {
     public void setType(final String type) {
         this.type = type;
     }
+
+    public Long getRollout() {
+        return rollout;
+    }
+
+    public void setRollout(Long rollout) {
+        this.rollout = rollout;
+    }
+
+    public String getRolloutName() {
+        return rolloutName;
+    }
+
+    public void setRolloutName(String rolloutName) {
+        this.rolloutName = rolloutName;
+    }
+
 }
