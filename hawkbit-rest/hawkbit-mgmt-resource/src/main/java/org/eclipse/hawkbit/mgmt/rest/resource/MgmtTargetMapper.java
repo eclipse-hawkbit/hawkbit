@@ -256,7 +256,7 @@ public final class MgmtTargetMapper {
                 ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
                         .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
 
-        Rollout rollout = action.getRollout();
+        final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId()))
                     .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT));
