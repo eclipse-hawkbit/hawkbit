@@ -27,7 +27,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter suggestion")
-public class RsqlParserValidationOracleTest extends AbstractJpaIntegrationTest {
+public class RSQLParserValidationOracleTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private RsqlValidationOracle rsqlValidationOracle;

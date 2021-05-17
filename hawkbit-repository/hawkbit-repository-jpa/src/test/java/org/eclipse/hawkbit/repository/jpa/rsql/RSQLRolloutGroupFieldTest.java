@@ -29,7 +29,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter rollout group")
-public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
+public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     private Long rolloutGroupId;
     private Rollout rollout;
@@ -48,7 +48,6 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter rollout group by  id")
     public void testFilterByParameterId() {
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
