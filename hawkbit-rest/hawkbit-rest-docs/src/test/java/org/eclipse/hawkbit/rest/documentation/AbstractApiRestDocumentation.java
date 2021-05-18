@@ -19,6 +19,7 @@ import static org.springframework.restdocs.snippet.Attributes.key;
 
 import java.io.ByteArrayInputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
@@ -161,28 +163,52 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
             final boolean timeforced, final DistributionSet distributionSet) {
-        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null);
+        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null, false);
+    }
+
+    protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
+            final boolean timeforced, final DistributionSet distributionSet, final boolean createRollout) {
+        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null, createRollout);
     }
 
     protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
             final boolean timeforced, final DistributionSet distributionSet, final String maintenanceWindowSchedule,
-            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone) {
+            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone, final boolean createRollout) {
 
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
                 .lastTargetQuery(System.currentTimeMillis()));
-        final DeploymentRequestBuilder deploymentRequestBuilder = DeploymentManagement
-                .deploymentRequest(savedTarget.getControllerId(), distributionSet.getId())
-                .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
-        if (timeforced) {
-            deploymentRequestBuilder.setActionType(ActionType.TIMEFORCED);
-        }
-        if (isMultiAssignmentsEnabled()) {
-            deploymentRequestBuilder.setWeight(600);
-        }
-        final List<Target> updatedTargets = makeAssignment(deploymentRequestBuilder.build()).getAssignedEntity()
-                .stream().map(Action::getTarget).collect(Collectors.toList());
+        
+        final List<Target> updatedTargets;
+        if (createRollout) {
 
+            final Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "rollout desc", 1,
+                    "name==" + name, distributionSet, "50", "5", timeforced ? ActionType.TIMEFORCED : ActionType.FORCED,
+                    isMultiAssignmentsEnabled() ? 600 : null);
+            
+            // start the rollout and handle it
+            rolloutManagement.start(rollout.getId());
+            rolloutManagement.handleRollouts();
+            
+            updatedTargets = Collections.singletonList(savedTarget);
+
+        } else {
+            final DeploymentRequestBuilder deploymentRequestBuilder = DeploymentManagement
+                    .deploymentRequest(savedTarget.getControllerId(), distributionSet.getId())
+                    .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
+
+            if (timeforced) {
+                deploymentRequestBuilder.setActionType(ActionType.TIMEFORCED);
+            }
+
+            if (isMultiAssignmentsEnabled()) {
+                deploymentRequestBuilder.setWeight(600);
+            }
+
+            updatedTargets = makeAssignment(deploymentRequestBuilder.build()).getAssignedEntity().stream()
+                    .map(Action::getTarget).collect(Collectors.toList());
+        }
+        
         if (inSync) {
             feedbackToByInSync(distributionSet);
         }

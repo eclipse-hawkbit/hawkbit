@@ -201,7 +201,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Handles the GET request of retrieving the full action history of a specific target. Required Permission: READ_TARGET.")
     public void getActionsFromTarget() throws Exception {
         enableMultiAssignments();
-        generateActionForTarget(targetId);
+        generateRolloutActionForTarget(targetId);
 
         mockMvc.perform(
                 get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS,
@@ -228,7 +228,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['finished', 'pending']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
-                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT))));
+                                fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
+                                fieldWithPath("content[].rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
+                                fieldWithPath("content[].rolloutName")
+                                        .description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME))));
     }
 
     @Test
@@ -323,7 +326,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getActionFromTarget() throws Exception {
         enableMultiAssignments();
-        final Action action = generateActionForTarget(targetId, true, true);
+        final Action action = generateRolloutActionForTarget(targetId, true, true);
         assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
                 .isEqualTo(ActionType.TIMEFORCED);
 
@@ -349,10 +352,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                               fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
+                               fieldWithPath("rolloutName")
+                                                .description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
-                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES))));
+                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                                fieldWithPath("_links.rollout")
+                                        .description(MgmtApiModelProperties.LINK_TO_ROLLOUT))));
     }
 
     @Test
@@ -820,8 +828,17 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         return generateActionForTarget(knownControllerId, true, false, null, null, null);
     }
 
+    private Action generateRolloutActionForTarget(final String knownControllerId) throws Exception {
+        return generateActionForTarget(knownControllerId, true, false, null, null, null, true);
+    }
+
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync) throws Exception {
         return generateActionForTarget(knownControllerId, inSync, false, null, null, null);
+    }
+
+    private Action generateRolloutActionForTarget(final String knownControllerId, final boolean inSync,
+            final boolean timeforced) throws Exception {
+        return generateActionForTarget(knownControllerId, inSync, timeforced, null, null, null, true);
     }
 
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
@@ -832,14 +849,22 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
             final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
             final String maintenanceWindowTimeZone) throws Exception {
+        return generateActionForTarget(knownControllerId, inSync, timeforced, maintenanceWindowSchedule,
+                maintenanceWindowDuration, maintenanceWindowTimeZone, false);
+    }
+
+    private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
+            final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
+            final String maintenanceWindowTimeZone, final boolean createRollout) throws Exception {
         final PageRequest pageRequest = PageRequest.of(0, 1, Direction.ASC, ActionStatusFields.ID.getFieldName());
 
         createTargetByGivenNameWithAttributes(knownControllerId, inSync, timeforced, createDistributionSet(),
-                maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
+                maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, createRollout);
 
         final List<Action> actions = deploymentManagement.findActionsAll(pageRequest).getContent();
 
         assertThat(actions).hasSize(1);
         return actions.get(0);
     }
+
 }
