@@ -51,6 +51,8 @@ import org.eclipse.hawkbit.ui.management.bulkupload.TargetBulkUploadUiState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutUiState;
 
+import com.vaadin.data.provider.DataCommunicator;
+
 /**
  * Target table layout.
  */
@@ -111,7 +113,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
-            final TargetManagementFilterDataProvider targetManagementFilterDataProvider) {
+            final TargetManagementFilterDataProvider targetManagementFilterDataProvider,
+            final DataCommunicator<ProxyTarget> targetDataCommunicator) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
@@ -126,7 +129,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetGridHeader.addDsDroArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
                 systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
-                targetTagFilterLayoutUiState, targetManagementFilterDataProvider);
+                targetTagFilterLayoutUiState, targetManagementFilterDataProvider, targetDataCommunicator);
 
         this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder,
                 targetMetaDataWindowBuilder);

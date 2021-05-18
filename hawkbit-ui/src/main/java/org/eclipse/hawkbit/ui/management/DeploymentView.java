@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -51,6 +52,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.navigator.View;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
@@ -98,7 +100,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
             @Qualifier("uiExecutor") final Executor uiExecutor,
-            final TargetManagementFilterDataProvider targetManagementFilterDataProvider) {
+            final TargetManagementFilterDataProvider targetManagementFilterDataProvider,
+            final DataCommunicator<ProxyTarget> targetDataCommunicator) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -114,7 +117,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
                     systemSecurityContext, managementUIState.getTargetTagFilterLayoutUiState(),
                     managementUIState.getTargetGridLayoutUiState(), managementUIState.getTargetBulkUploadUiState(),
-                    managementUIState.getDistributionGridLayoutUiState(), targetManagementFilterDataProvider);
+                    managementUIState.getDistributionGridLayoutUiState(), targetManagementFilterDataProvider,
+                    targetDataCommunicator);
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,

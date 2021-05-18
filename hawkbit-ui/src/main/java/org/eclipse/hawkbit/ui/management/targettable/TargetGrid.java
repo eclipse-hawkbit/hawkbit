@@ -61,6 +61,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.vaadin.data.ValueProvider;
+import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -121,8 +122,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetManagementFilterDataProvider targetManagementFilterDataProvider) {
-        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
+            final TargetManagementFilterDataProvider targetManagementFilterDataProvider,
+            final DataCommunicator<ProxyTarget> targetDataCommunicator) {
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker(),
+                targetDataCommunicator);
 
         this.targetManagement = targetManagement;
         this.targetGridLayoutUiState = targetGridLayoutUiState;
