@@ -45,7 +45,7 @@ public class TargetManagementStateDataProvider
      */
     public TargetManagementStateDataProvider(final TargetManagement targetManagement,
             final TargetToProxyTargetMapper entityMapper) {
-        super(entityMapper, Sort.by(Direction.DESC, "lastModifiedAt"));
+        super(entityMapper, Sort.by(Direction.DESC, "lastModifiedAt", "id"));
 
         this.targetManagement = targetManagement;
     }

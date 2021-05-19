@@ -28,7 +28,7 @@ public class SmMetaDataDataProvider extends AbstractMetaDataDataProvider<Softwar
      * Constructor for SmMetaDataDataProvider
      *
      * @param softwareModuleManagement
-     *          SoftwareModuleManagement
+     *            SoftwareModuleManagement
      */
     public SmMetaDataDataProvider(final SoftwareModuleManagement softwareModuleManagement) {
         super();
@@ -59,6 +59,6 @@ public class SmMetaDataDataProvider extends AbstractMetaDataDataProvider<Softwar
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, smId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), smId).getTotalElements();
     }
 }

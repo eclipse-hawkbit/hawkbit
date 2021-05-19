@@ -38,9 +38,9 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
      * Constructor for ActionStatusMsgDataProvider
      *
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param noMessageText
-     *          Message not available text
+     *            Message not available text
      */
     public ActionStatusMsgDataProvider(final DeploymentManagement deploymentManagement, final String noMessageText) {
         this(deploymentManagement, noMessageText, Sort.by(Direction.DESC, "id"));
@@ -50,11 +50,11 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
      * Constructor for ActionStatusMsgDataProvider to call super class
      *
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param noMessageText
-     *          Message not available text
+     *            Message not available text
      * @param defaultSortOrder
-     *          Sort
+     *            Sort
      */
     public ActionStatusMsgDataProvider(final DeploymentManagement deploymentManagement, final String noMessageText,
             final Sort defaultSortOrder) {
@@ -105,6 +105,6 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, actionStatusId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), actionStatusId).getTotalElements();
     }
 }

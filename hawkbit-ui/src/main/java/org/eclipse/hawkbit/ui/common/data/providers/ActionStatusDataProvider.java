@@ -34,9 +34,9 @@ public class ActionStatusDataProvider extends AbstractProxyDataProvider<ProxyAct
      * Constructor for ActionStatusDataProvider
      *
      * @param deploymentManagement
-     *          DeploymentManagement
+     *            DeploymentManagement
      * @param entityMapper
-     *          ActionStatusToProxyActionStatusMapper
+     *            ActionStatusToProxyActionStatusMapper
      */
     public ActionStatusDataProvider(final DeploymentManagement deploymentManagement,
             final ActionStatusToProxyActionStatusMapper entityMapper) {
@@ -61,6 +61,6 @@ public class ActionStatusDataProvider extends AbstractProxyDataProvider<ProxyAct
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, actionId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), actionId).getTotalElements();
     }
 }

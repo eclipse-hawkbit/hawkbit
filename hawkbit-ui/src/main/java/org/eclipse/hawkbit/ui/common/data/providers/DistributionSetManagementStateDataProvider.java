@@ -34,9 +34,9 @@ public class DistributionSetManagementStateDataProvider
      * Constructor for DistributionSetManagementStateDataProvider
      *
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param entityMapper
-     *          DistributionSetToProxyDistributionMapper
+     *            DistributionSetToProxyDistributionMapper
      */
     public DistributionSetManagementStateDataProvider(final DistributionSetManagement distributionSetManagement,
             final DistributionSetToProxyDistributionMapper entityMapper) {
@@ -67,7 +67,7 @@ public class DistributionSetManagementStateDataProvider
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final DsManagementFilterParams filter) {
-        return loadBackendEntities(pageRequest, filter).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
     }
 
 }

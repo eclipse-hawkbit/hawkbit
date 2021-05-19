@@ -32,9 +32,9 @@ public class TargetFilterQueryDetailsDataProvider
      * Constructor for TargetFilterQueryDetailsDataProvider
      *
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param entityMapper
-     *          TargetFilterQueryToProxyTargetFilterMapper
+     *            TargetFilterQueryToProxyTargetFilterMapper
      */
     public TargetFilterQueryDetailsDataProvider(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetFilterQueryToProxyTargetFilterMapper entityMapper) {
@@ -58,6 +58,6 @@ public class TargetFilterQueryDetailsDataProvider
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, dsId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), dsId).getTotalElements();
     }
 }
