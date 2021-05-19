@@ -8,11 +8,17 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import io.qameta.allure.Description;
-import org.eclipse.hawkbit.repository.TargetFields;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.eclipse.hawkbit.repository.TargetFields;
 import org.junit.jupiter.api.Test;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
+
+@Feature("Component Tests - Repository")
+@Story("RSQL target field validation")
 public class RSQLTargetFieldValidationTest {
     @Test
     @Description("Testing allowed RSQL keys based on TargetFields.class")
