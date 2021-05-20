@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.rest.data.ResponseList;
@@ -215,6 +217,12 @@ public final class MgmtTargetMapper {
             result.setStatus(MgmtAction.ACTION_FINISHED);
         }
 
+        Rollout rollout = action.getRollout();
+        if (rollout != null) {
+            result.setRollout(rollout.getId());
+            result.setRolloutName(rollout.getName());
+        }
+        
         if (action.hasMaintenanceSchedule()) {
             final MgmtMaintenanceWindow maintenanceWindow = new MgmtMaintenanceWindow();
             maintenanceWindow.setSchedule(action.getMaintenanceWindowSchedule());
@@ -248,6 +256,12 @@ public final class MgmtTargetMapper {
                 ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
                         .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
 
+        final Rollout rollout = action.getRollout();
+        if (rollout != null) {
+            result.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId()))
+                    .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT));
+        }
+        
         return result;
     }
 
