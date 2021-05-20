@@ -8,9 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -109,11 +108,11 @@ public class RSQLUtilityTest {
     public void rsqlUnsupportedFieldExceptionTest() {
         final String rsql1 = "wrongfield == abcd";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.isValid(rsql1, TestFieldEnum.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql1, TestFieldEnum.class));
 
         final String rsql2 = "wrongfield == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity11 == 0123";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.isValid(rsql2, TestFieldEnum.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql2, TestFieldEnum.class));
     }
 
     @Test
@@ -121,15 +120,15 @@ public class RSQLUtilityTest {
     public void rsqlUnsupportedSubkeyThrowException() {
         final String rsql1 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.isValid(rsql1, TestFieldEnum.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql1, TestFieldEnum.class));
 
         final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.unsupported == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.isValid(rsql2, TestFieldEnum.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql2, TestFieldEnum.class));
 
         final String rsql3 = "TESTFIELD == abcd or TESTFIELD_WITH_SUB_ENTITIES.unsupported == 0123";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
-                .isThrownBy(() -> RSQLUtility.isValid(rsql3, TestFieldEnum.class));
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql3, TestFieldEnum.class));
     }
 
     @Test
@@ -139,9 +138,9 @@ public class RSQLUtilityTest {
         final String rsql2 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd or TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123";
         final String rsql3 = "TESTFIELD_WITH_SUB_ENTITIES.subentity11 == abcd and TESTFIELD_WITH_SUB_ENTITIES.subentity22 == 0123 and TESTFIELD == any";
 
-        assertTrue(RSQLUtility.isValid(rsql1, TestFieldEnum.class), "All fields should be valid");
-        assertTrue(RSQLUtility.isValid(rsql2, TestFieldEnum.class), "All fields should be valid");
-        assertTrue(RSQLUtility.isValid(rsql3, TestFieldEnum.class), "All fields should be valid");
+        RSQLUtility.validateRsqlFor(rsql1, TestFieldEnum.class);
+        RSQLUtility.validateRsqlFor(rsql2, TestFieldEnum.class);
+        RSQLUtility.validateRsqlFor(rsql3, TestFieldEnum.class);
     }
 
     @Test

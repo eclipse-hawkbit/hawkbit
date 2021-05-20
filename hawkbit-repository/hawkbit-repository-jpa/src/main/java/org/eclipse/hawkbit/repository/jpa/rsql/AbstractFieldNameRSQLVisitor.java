@@ -20,9 +20,13 @@ import java.util.stream.Collectors;
 
 public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldNameProvider> {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractFieldNameRSQLVisitor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFieldNameRSQLVisitor.class);
 
-    protected Class<A>  fieldNameProvider;
+    private final Class<A> fieldNameProvider;
+
+    public AbstractFieldNameRSQLVisitor(final Class<A> fieldNameProvider) {
+        this.fieldNameProvider = fieldNameProvider;
+    }
 
     protected A getFieldEnumByName(final ComparisonNode node) {
         String enumName = node.getSelector();
@@ -31,7 +35,11 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
             enumName = graph[0];
         }
         LOGGER.debug("get field identifier by name {} of enum type {}", enumName, fieldNameProvider);
-        return Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
+        try {
+            return Enum.valueOf(fieldNameProvider, enumName.toUpperCase());
+        } catch (final IllegalArgumentException e) {
+            throw createRSQLParameterUnsupportedException(node, e);
+        }
     }
 
     protected static String[] getSubAttributesFrom(final String property) {
@@ -46,7 +54,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
         // sub entity need minimum 1 dot
         if (!propertyEnum.getSubEntityAttributes().isEmpty() && graph.length < 2) {
-            throw  createRSQLParameterUnsupportedException(node);
+            throw createRSQLParameterUnsupportedException(node);
         }
 
         final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
@@ -62,7 +70,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
             }
 
             if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
-                throw  createRSQLParameterUnsupportedException(node);
+                throw createRSQLParameterUnsupportedException(node);
             }
         }
 
@@ -90,18 +98,23 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
     protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
             final ComparisonNode node) {
-        return new RSQLParameterUnsupportedFieldException(
-                "The given search parameter field {" + node.getSelector()
-                        + "} does not exist, must be one of the following fields {" + getExpectedFieldList() + "}",
-                new Exception());
+        return createRSQLParameterUnsupportedException(node, new Exception());
     }
 
-    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
-            final ComparisonNode node, Exception rootException) {
-        return new RSQLParameterUnsupportedFieldException(
-                "The given search parameter field {" + node.getSelector()
-                        + "} does not exist, must be one of the following fields {" + getExpectedFieldList() + "}",
-                rootException);
+    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final ComparisonNode node,
+            final Exception rootException) {
+        return createRSQLParameterUnsupportedException(String.format(
+                "The given search parameter field {%s} does not exist, must be one of the following fields %s",
+                node.getSelector(), getExpectedFieldList()), rootException);
+    }
+
+    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final String message) {
+        return createRSQLParameterUnsupportedException(message, null);
+    }
+
+    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final String message,
+            final Exception rootException) {
+        return new RSQLParameterUnsupportedFieldException(message, rootException);
     }
 
     // Exception squid:S2095 - see
@@ -121,8 +134,8 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
         final List<String> expectedSubFieldList = Arrays.stream(fieldNameProvider.getEnumConstants())
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
-                    final List<String> subEntity = enumField.getSubEntityAttributes().stream()
-                            .map(fieldName -> enumField.name().toLowerCase()
+                    final List<String> subEntity = enumField
+                            .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
                                     + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
                             .collect(Collectors.toList());
 
