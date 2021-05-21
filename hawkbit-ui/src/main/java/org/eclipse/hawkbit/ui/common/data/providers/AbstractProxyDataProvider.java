@@ -22,11 +22,11 @@ import org.springframework.data.domain.Sort.Direction;
  * mapping them to {@link ProxyIdentifiableEntity} entities.
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            UI Proxy entity type
  * @param <U>
- *          Generic type of Identifiable
+ *            Backend entity Identifiable type
  * @param <F>
- *          Generic type
+ *            Filter type
  */
 public abstract class AbstractProxyDataProvider<T extends ProxyIdentifiableEntity, U extends Identifiable<Long>, F>
         extends AbstractGenericDataProvider<T, U, F> {
@@ -38,9 +38,9 @@ public abstract class AbstractProxyDataProvider<T extends ProxyIdentifiableEntit
      * Constructor for ProxyDataProvider with mapper
      *
      * @param mapper
-     *          IdentifiableEntityToProxyIdentifiableEntityMapper of generic type
+     *            mapper from backend entity to UI Proxy entity
      */
-    public AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper) {
+    protected AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper) {
         this(mapper, Sort.by(Direction.ASC, "id"));
     }
 
@@ -48,11 +48,11 @@ public abstract class AbstractProxyDataProvider<T extends ProxyIdentifiableEntit
      * Constructor for ProxyDataProvider with mapper and sorting order
      *
      * @param mapper
-     *          IdentifiableEntityToProxyIdentifiableEntityMapper of generic type
+     *            mapper from backend entity to UI Proxy entity
      * @param defaultSortOrder
-     *          Sort
+     *            Sort
      */
-    public AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper,
+    protected AbstractProxyDataProvider(final IdentifiableEntityToProxyIdentifiableEntityMapper<T, U> mapper,
             final Sort defaultSortOrder) {
         super(defaultSortOrder);
 

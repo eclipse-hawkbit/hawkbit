@@ -27,11 +27,11 @@ import com.vaadin.data.provider.Query;
  * {@link ProxyIdentifiableEntity} entities.
  *
  * @param <T>
- *          Generic type of ProxyIdentifiableEntity
+ *            UI Proxy entity type
  * @param <U>
- *          Generic type
+ *            Backend entity type
  * @param <F>
- *          Generic type
+ *            Filter type
  */
 public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEntity, U, F>
         extends AbstractBackEndDataProvider<T, F> {
@@ -45,9 +45,9 @@ public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEnt
      * Constructor for GenericDataProvider
      *
      * @param defaultSortOrder
-     *          Sort
+     *            Sort
      */
-    public AbstractGenericDataProvider(final Sort defaultSortOrder) {
+    protected AbstractGenericDataProvider(final Sort defaultSortOrder) {
         this.defaultSortOrder = defaultSortOrder;
     }
 
