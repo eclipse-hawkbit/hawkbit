@@ -224,7 +224,7 @@ public final class RolloutHelper {
      *            group for which the filter string should be created
      * @return the final target filter query for a rollout group
      */
-    public static String getGroupTargetFilter(final String baseFilter, final RolloutGroup group) {
+    static String getGroupTargetFilter(final String baseFilter, final RolloutGroup group) {
         if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         }

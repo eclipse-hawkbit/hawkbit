@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.TransactionExecutionException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -88,7 +89,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
             } while (count == Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        } catch (TransactionExecutionException e) {
+        } catch (final TransactionExecutionException e) {
             LOGGER.error("Error during auto assign check of target filter query {}", targetFilterQuery.getId(), e);
         }
 

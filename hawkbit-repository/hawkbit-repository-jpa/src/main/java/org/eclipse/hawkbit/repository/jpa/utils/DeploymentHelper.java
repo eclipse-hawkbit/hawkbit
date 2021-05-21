@@ -126,7 +126,7 @@ public final class DeploymentHelper {
         try {
             return transactionTemplate.execute(action);
         } catch (final Exception e) {
-            LOGGER.error("Caught exception during transaction execution, transactionName: {}!", transactionName, e);
+            LOG.error("Caught exception during transaction execution, transactionName: {}!", transactionName, e);
             throw new TransactionExecutionException("Caught exception during transaction execution!", e);
         }
     }
