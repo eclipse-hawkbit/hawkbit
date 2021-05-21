@@ -158,6 +158,7 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
         grid.deselectAll();
 
         boolean isDeletionSuccessfull = false;
+        RuntimeException deletionException = null;
         try {
             isDeletionSuccessfull = itemsDeletionCallback.test(itemsToBeDeleted);
         } catch (final RuntimeException ex) {
@@ -165,12 +166,16 @@ public class DeleteSupport<T extends ProxyIdentifiableEntity> {
                     .map(String::valueOf).collect(Collectors.joining(","));
             LOG.warn("Deletion of {} with ids '{}' failed: {}", localizedEntityTypeSing, itemsToBeDeletedIds,
                     ex.getMessage());
+            deletionException = ex;
         }
 
         if (isDeletionSuccessfull) {
             notification.displaySuccess(successNotificationText);
         } else {
             notification.displayWarning(failureNotificationText);
+            if (deletionException != null) {
+                throw deletionException;
+            }
         }
     }
 
