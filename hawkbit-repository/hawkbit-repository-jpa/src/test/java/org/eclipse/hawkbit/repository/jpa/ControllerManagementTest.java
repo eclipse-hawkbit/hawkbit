@@ -35,6 +35,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
+import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -69,7 +70,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -831,7 +832,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 
-        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             addAttributeAndVerify(controllerId);
             addSecondAttributeAndVerify(controllerId);
             updateAttributeAndVerify(controllerId);
@@ -986,7 +987,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
                     return null;
@@ -997,7 +998,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // Write allowed number of attributes twice with same key should result
         // in update but work
-        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             writeAttributes(controllerId, allowedAttributes, "key", "value1");
             writeAttributes(controllerId, allowedAttributes, "key", "value2");
             return null;
@@ -1005,7 +1006,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
         // Now rite one more
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
@@ -1067,7 +1068,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> securityRule
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
                 .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeStatus(actionId, allowStatusEntries);
                     return null;
@@ -1258,7 +1259,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.activeActionExistsForControllerId(DEFAULT_CONTROLLER_ID)).isEqualTo(false);
     }
 
-    @Test(expected = AssignmentQuotaExceededException.class)
+    @Test
     @Description("Verifies that quota is asserted when a controller reports too many DOWNLOADED events for a "
             + "DOWNLOAD_ONLY action.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
@@ -1274,8 +1275,9 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createAndAssignDsAsDownloadOnly("downloadOnlyDs", DEFAULT_CONTROLLER_ID);
         assertThat(actionId).isNotNull();
 
-        IntStream.range(0, maxMessages).forEach(i -> controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED)));
+        Assertions.assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() ->
+                IntStream.range(0, maxMessages).forEach(i -> controllerManagement
+                        .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Status.DOWNLOADED))));
     }
 
     @Test

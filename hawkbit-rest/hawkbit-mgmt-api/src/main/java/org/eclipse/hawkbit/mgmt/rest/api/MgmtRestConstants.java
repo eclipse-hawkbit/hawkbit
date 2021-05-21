@@ -84,6 +84,10 @@ public final class MgmtRestConstants {
      * The target URL mapping, href link for canceled actions.
      */
     public static final String TARGET_V1_ACTION_STATUS = "status";
+    /**
+     * The target URL mapping, href link for a rollout.
+     */
+    public static final String TARGET_V1_ROLLOUT = "rollout";
 
     /**
      * The target URL mapping rest resource.

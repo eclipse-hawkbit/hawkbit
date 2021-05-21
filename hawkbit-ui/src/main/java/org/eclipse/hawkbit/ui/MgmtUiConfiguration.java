@@ -8,7 +8,13 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import java.util.List;
+
 import org.eclipse.hawkbit.im.authentication.PermissionService;
+import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
+import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -19,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.vaadin.spring.servlet.Vaadin4SpringServlet;
 
+import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
 
@@ -74,6 +81,28 @@ public class MgmtUiConfiguration {
     @ConditionalOnMissingBean
     SystemMessagesProvider systemMessagesProvider(final UiProperties uiProperties, final VaadinMessageSource i18n) {
         return new LocalizedSystemMessagesProvider(uiProperties, i18n);
+    }
+
+    /**
+     * UI Error handler bean.
+     * 
+     * @return UI Error handler
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    ErrorHandler uiErrorHandler(final VaadinMessageSource i18n,
+            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractor) {
+        return new HawkbitUIErrorHandler(i18n, uiErrorDetailsExtractor);
+    }
+
+    @Bean
+    UiErrorDetailsExtractor uploadErrorExtractor() {
+        return new UploadErrorExtractor();
+    }
+
+    @Bean
+    UiErrorDetailsExtractor constraintViolationErrorExtractor(final VaadinMessageSource i18n) {
+        return new ConstraintViolationErrorExtractor(i18n);
     }
 
     /**

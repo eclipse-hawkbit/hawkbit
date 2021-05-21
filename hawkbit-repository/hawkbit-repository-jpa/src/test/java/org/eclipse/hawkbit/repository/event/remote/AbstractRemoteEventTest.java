@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Map;
 
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
@@ -44,7 +44,7 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
 
     private AbstractMessageConverter jacksonMessageConverter;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         final BusJacksonAutoConfiguration autoConfiguration = new BusJacksonAutoConfiguration();
         this.jacksonMessageConverter = autoConfiguration.busJsonConverter(null);

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ddi.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,8 +37,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,7 +66,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
-    @Before
+    @BeforeEach
     public void setup() {
         dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
@@ -190,8 +190,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(header().string("Content-Disposition", "attachment;filename=" + artifact.getFilename()))
                 .andReturn();
 
-        assertTrue("The same file that was uploaded is expected when downloaded",
-                Arrays.equals(result.getResponse().getContentAsByteArray(), random));
+        assertTrue(
+                Arrays.equals(result.getResponse().getContentAsByteArray(), random), "The same file that was uploaded is expected when downloaded");
 
         // download complete
         assertThat(downLoadProgress).isEqualTo(10);

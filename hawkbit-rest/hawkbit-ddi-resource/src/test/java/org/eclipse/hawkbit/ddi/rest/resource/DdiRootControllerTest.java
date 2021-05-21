@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -58,7 +59,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -146,7 +147,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         // make a poll, audit information should not be changed, run as
         // controller principal!
-        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/" + knownTargetControllerId, tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
             return null;
@@ -199,15 +200,16 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that tenant specific polling time, which is saved in the db, is delivered to the controller.")
     @WithUser(principal = "knownpricipal", allSpPermissions = false)
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = TargetPollEvent.class, count = 1) })
-    public void pollWithModifiedGloablPollingTime() throws Exception {
-        securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    public void pollWithModifiedGlobalPollingTime() throws Exception {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                     "00:02:00");
             return null;
         });
 
-        securityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant()))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                     .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -322,7 +324,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final long create = System.currentTimeMillis();
 
         // make a poll, audit information should be set on plug and play
-        securityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             mvc.perform(
                     get("/{tenant}/controller/v1/{controllerId}", tenantAware.getCurrentTenant(), knownControllerId1))
                     .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -568,7 +570,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     public void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        securityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
+        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                     "00:05:00");
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MIN_POLLING_TIME_INTERVAL,

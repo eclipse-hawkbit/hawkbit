@@ -14,18 +14,18 @@ import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadId;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @Feature("Unit Tests - Management UI")
 @Story("Upload UI state")
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ArtifactUploadStateTest {
 
     @Mock
@@ -43,7 +43,7 @@ public class ArtifactUploadStateTest {
 
     private ArtifactUploadState stateUnderTest;
 
-    @Before
+    @BeforeEach
     public void setupTest() {
         stateUnderTest = new ArtifactUploadState();
     }

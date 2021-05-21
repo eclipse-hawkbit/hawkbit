@@ -20,10 +20,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Utility additions for the REST API tests.
- *
- *
- *
- *
  */
 public final class ResourceUtility {
     private static final ObjectMapper mapper = new ObjectMapper();
@@ -43,5 +39,4 @@ public final class ResourceUtility {
             throws JsonParseException, JsonMappingException, IOException {
         return mapper.readValue(responseBody, PagedList.class);
     }
-
 }

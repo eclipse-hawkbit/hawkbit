@@ -17,7 +17,7 @@ import java.sql.SQLException;
 import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.UncategorizedDataAccessException;
 

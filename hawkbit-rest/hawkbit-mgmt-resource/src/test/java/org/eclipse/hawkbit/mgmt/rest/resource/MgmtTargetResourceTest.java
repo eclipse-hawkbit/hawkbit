@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -63,7 +65,7 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.data.domain.PageRequest;
@@ -2038,6 +2040,39 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                     .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
         }
 
+    }
+    
+    @Test
+    @Description("An action provides information of the rollout it was created for (if any).")
+    public void getActionWithRolloutInfo() throws Exception {
+
+        // setup
+        final int amountTargets = 10;
+        final List<Target> targets = testdataFactory.createTargets(amountTargets, "trg", "trg");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+
+        final Rollout rollout = testdataFactory.createRolloutByVariables("My Rollout", "My Rollout Description", 1,
+                "name==trg*", ds, "50", "5");
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        // get all actions for the first target
+        final Target target = targets.get(0);
+        mvc.perform(get("/rest/v1/targets/{targetId}/actions", target.getControllerId())).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(jsonPath("content.[0].rollout", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("content.[0].rolloutName", equalTo(rollout.getName())));
+
+        // get the first action for the first target;
+        // verify that also the rollout link is present
+        final Slice<Action> action = deploymentManagement.findActionsByTarget(target.getControllerId(),
+                PageRequest.of(0, 100));
+        assertThat(action.getContent()).hasSize(1);
+        mvc.perform(get("/rest/v1/targets/{targetId}/actions/{actionId}", target.getControllerId(),
+                action.getContent().get(0).getId())).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                .andExpect(jsonPath("$.rollout", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("$.rolloutName", equalTo(rollout.getName()))).andExpect(jsonPath(
+                        "$._links.rollout.href", containsString("/rest/v1/rollouts/" + rollout.getId().intValue())));
     }
 
 }

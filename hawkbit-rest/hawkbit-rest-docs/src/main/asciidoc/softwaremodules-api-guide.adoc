@@ -483,6 +483,9 @@ include::../errors/403.adoc[]
 | See <<error-body>>
 include::../errors/405.adoc[]
 include::../errors/406.adoc[]
+| `410 Gone`
+| The resource does not exist anymore. The software module might be soft deleted.
+|
 include::../errors/429.adoc[]
 |===
 

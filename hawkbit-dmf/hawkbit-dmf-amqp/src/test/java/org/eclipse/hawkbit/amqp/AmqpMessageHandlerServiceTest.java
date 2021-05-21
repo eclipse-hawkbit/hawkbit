@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,13 +60,14 @@ import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -79,7 +81,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Handler Service Test")
 public class AmqpMessageHandlerServiceTest {
@@ -132,6 +134,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private TenantAware tenantAwareMock;
 
+    @Mock
+    private UserAuthoritiesResolver authoritiesResolver;
+
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
 
@@ -144,18 +149,17 @@ public class AmqpMessageHandlerServiceTest {
     @Captor
     private ArgumentCaptor<UpdateMode> modeCaptor;
 
-    @Before
+    @BeforeEach
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void before() throws Exception {
         messageConverter = new Jackson2JsonMessageConverter();
-        when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
-        when(artifactManagementMock.findFirstBySHA1(SHA1)).thenReturn(Optional.empty());
+        lenient().when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
         final TenantConfigurationValue multiAssignmentConfig = TenantConfigurationValue.builder().value(Boolean.FALSE)
                 .global(Boolean.FALSE).build();
-        when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
+        lenient().when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
                 .thenReturn(multiAssignmentConfig);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware();
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,

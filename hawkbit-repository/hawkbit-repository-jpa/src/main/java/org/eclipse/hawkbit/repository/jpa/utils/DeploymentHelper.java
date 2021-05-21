@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
@@ -21,6 +22,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -29,6 +32,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.StringUtils;
 
 /**
  * Utility class for deployment related topics.
@@ -36,7 +40,7 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 public final class DeploymentHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DeploymentHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DeploymentHelper.class);
 
     private DeploymentHelper() {
         // utility class
@@ -126,4 +130,37 @@ public final class DeploymentHelper {
             throw new TransactionExecutionException("Caught exception during transaction execution!", e);
         }
     }
+
+    /**
+     * Runs the given handler in a non-system user context. Switches to the user
+     * which is provided by the given callback.
+     *
+     * @param handler
+     *            The handler to be invoked in the right user context.
+     * @param username
+     *            Callback to obtain the real user the user context should be
+     *            established for.
+     * @param tenantAware
+     *            The {@link TenantAware} bean to determine the current tenant
+     *            context.
+     */
+    public static void runInNonSystemContext(@NotNull final Runnable handler, @NotNull final Supplier<String> username,
+            @NotNull final TenantAware tenantAware) {
+        final String currentUser = tenantAware.getCurrentUsername();
+        if (isNonSystemUser(currentUser)) {
+            handler.run();
+            return;
+        }
+        final String user = username.get();
+        LOG.debug("Switching user context from '{}' to '{}'", currentUser, user);
+        tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), user, () -> {
+            handler.run();
+            return null;
+        });
+    }
+
+    private static boolean isNonSystemUser(final String user) {
+        return (!(StringUtils.isEmpty(user) || SecurityContextTenantAware.SYSTEM_USER.equals(user)));
+    }
+
 }

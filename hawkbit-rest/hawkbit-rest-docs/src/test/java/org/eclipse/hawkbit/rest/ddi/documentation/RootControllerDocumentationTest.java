@@ -37,8 +37,8 @@ import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 
@@ -56,11 +56,13 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     private static final String CONTROLLER_ID = "CONTROLLER_ID";
 
     @Override
-    @Before
+    public String getResourceName() {
+        return "rootcontroller";
+    }
+
+    @BeforeEach
     public void setUp() {
         host = "ddi-api.host";
-        resourceName = "rootcontroller";
-        super.setUp();
     }
 
     @Test

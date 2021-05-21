@@ -37,8 +37,7 @@ import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
@@ -55,10 +54,8 @@ import io.qameta.allure.Story;
 public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocumentation {
 
     @Override
-    @Before
-    public void setUp() {
-        this.resourceName = "distributionsettypes";
-        super.setUp();
+    public String getResourceName() {
+        return "distributionsettypes";
     }
 
     @Test

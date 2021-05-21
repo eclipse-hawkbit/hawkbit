@@ -39,8 +39,7 @@ import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -53,17 +52,14 @@ import io.qameta.allure.Story;
 
 /**
  * Documentation generation for Management API for {@link DistributionSet}.
- *
  */
 @Feature("Spring Rest Docs Tests - DistributionSet")
 @Story("DistributionSet Resource")
 public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentation {
 
     @Override
-    @Before
-    public void setUp() {
-        resourceName = "distributionsets";
-        super.setUp();
+    public String getResourceName() {
+        return "distributionsets";
     }
 
     @Test
@@ -455,7 +451,6 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("distributionSetId").description(ApiModelPropertiesGeneric.ITEM_ID),
                         parameterWithName("softwareModuleId").description(ApiModelPropertiesGeneric.ITEM_ID))));
-        ;
     }
 
     @Test
@@ -594,7 +589,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
     }
 
     @Test
-    @Description("Update a single meta data value for speficic key." + " Required Permission: "
+    @Description("Update a single meta data value for specific key." + " Required Permission: "
             + SpPermission.UPDATE_REPOSITORY)
     public void updateMetadata() throws Exception {
         // prepare and create metadata for update

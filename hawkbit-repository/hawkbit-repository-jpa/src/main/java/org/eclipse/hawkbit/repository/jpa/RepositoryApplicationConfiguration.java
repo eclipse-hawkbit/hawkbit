@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -522,8 +523,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *
      * @param targetFilterQueryRepository
      *            holding {@link TargetFilterQuery} entities
-     * @param targetRepository
-     *            holding {@link Target} entities
+     * @param targetManagement
+     *            managing {@link Target} entities
      * @param virtualPropertyReplacer
      *            for RSQL handling
      * @param distributionSetManagement
@@ -540,12 +541,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     TargetFilterQueryManagement targetFilterQueryManagement(
-            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetRepository targetRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository, final TargetManagement targetManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
-        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetRepository,
+        return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
                 tenantConfigurationManagement, systemSecurityContext, tenantAware);
     }
@@ -619,6 +620,23 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
+    RolloutExecutor rolloutExecutor(
+            final RolloutTargetGroupRepository rolloutTargetGroupRepository, final EntityManager entityManager,
+            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
+            final RolloutGroupRepository rolloutGroupRepository, final AfterTransactionCommitExecutor afterCommit,
+            final TenantAware tenantAware, final RolloutGroupManagement rolloutGroupManagement,
+            final QuotaManagement quotaManagement, final DeploymentManagement deploymentManagement,
+            final TargetManagement targetManagement, final EventPublisherHolder eventPublisherHolder,
+            final PlatformTransactionManager txManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final ApplicationContext context) {
+        return new JpaRolloutExecutor(rolloutTargetGroupRepository, entityManager, rolloutRepository, actionRepository,
+                rolloutGroupRepository, afterCommit, tenantAware, rolloutGroupManagement, quotaManagement,
+                deploymentManagement, targetManagement, eventPublisherHolder, txManager, rolloutApprovalStrategy,
+                context);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
@@ -626,17 +644,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
             final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final RolloutRepository rolloutRepository,
-            final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutTargetGroupRepository rolloutTargetGroupRepository, final ActionRepository actionRepository,
-            final AfterTransactionCommitExecutor afterCommit, final EntityManager entityManager,
-            final QuotaManagement quotaManagement, final RolloutStatusCache rolloutStatusCache) {
-
-        return new JpaRolloutManagement(rolloutRepository, rolloutGroupRepository, rolloutTargetGroupRepository,
-                actionRepository, afterCommit, entityManager, quotaManagement, rolloutStatusCache, targetManagement,
-                deploymentManagement, rolloutGroupManagement, distributionSetManagement, context, eventPublisherHolder,
-                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
-                rolloutApprovalStrategy, tenantConfigurationManagement, systemSecurityContext);
+            final SystemSecurityContext systemSecurityContext, final RolloutExecutor rolloutExecutor) {
+        return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
+                distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
+                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
     }
 
     /**
@@ -766,9 +778,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager) {
+            final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager);
+                transactionManager, tenantAware);
     }
 
     /**
