@@ -145,9 +145,7 @@
       <rabbitmq.http-client.version>3.5.0.RELEASE</rabbitmq.http-client.version>
       <!-- Newer version contains new rule that we violate. Needs to be fixed first -->
       <hibernate-validator.version>6.0.20.Final</hibernate-validator.version>
-      <!-- Newer community version does not support MySQL 5.6 anymore -->
-      <flyway.version>5.2.4</flyway.version>
-      <!-- Spring boot version overrides - END -->
+       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.version>8.12.3</vaadin.version>
