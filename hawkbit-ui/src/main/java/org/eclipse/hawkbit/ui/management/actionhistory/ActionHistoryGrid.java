@@ -15,8 +15,8 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
@@ -84,7 +84,7 @@ public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
 
     private final transient MasterEntitySupport<ProxyTarget> masterEntitySupport;
 
-    ActionHistoryGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
+    public ActionHistoryGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
@@ -93,7 +93,7 @@ public class ActionHistoryGrid extends AbstractGrid<ProxyAction, String> {
         this.actionToProxyActionMapper = new ActionToProxyActionMapper();
 
         // currently we do not restore action history selection
-        setSelectionSupport(new SelectionSupport<ProxyAction>(this, eventBus, EventLayout.ACTION_HISTORY_LIST,
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.ACTION_HISTORY_LIST,
                 EventView.DEPLOYMENT, this::mapIdToProxyEntity, null, null));
         if (actionHistoryGridLayoutUiState.isMaximized()) {
             getSelectionSupport().enableSingleSelection();

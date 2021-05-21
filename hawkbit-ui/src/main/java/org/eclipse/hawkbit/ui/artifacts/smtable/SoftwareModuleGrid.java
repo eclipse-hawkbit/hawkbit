@@ -84,9 +84,9 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
      * @param view
      *            EventView
      */
-    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
-            final GridLayoutUiState smGridLayoutUiState, final SoftwareModuleManagement softwareModuleManagement,
-            final EventView view) {
+    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies,
+            final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState,
+            final SoftwareModuleManagement softwareModuleManagement, final EventView view) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
@@ -95,8 +95,8 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleToProxyMapper = new SoftwareModuleToProxyMapper();
 
-        setSelectionSupport(new SelectionSupport<ProxySoftwareModule>(this, eventBus, EventLayout.SM_LIST, view,
-                this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.SM_LIST, view, this::mapIdToProxyEntity,
+                this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         if (smGridLayoutUiState.isMaximized()) {
             getSelectionSupport().disableSelection();
         } else {

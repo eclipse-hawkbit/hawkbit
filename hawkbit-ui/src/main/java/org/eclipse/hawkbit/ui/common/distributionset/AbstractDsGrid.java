@@ -61,8 +61,8 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
         this.dsManagement = dsManagement;
         this.dsToProxyDistributionMapper = new DistributionSetToProxyDistributionMapper();
 
-        setSelectionSupport(new SelectionSupport<ProxyDistributionSet>(this, eventBus, EventLayout.DS_LIST, view,
-                this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.DS_LIST, view, this::mapIdToProxyEntity,
+                this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         if (distributionSetGridLayoutUiState.isMaximized()) {
             getSelectionSupport().disableSelection();
         } else {
