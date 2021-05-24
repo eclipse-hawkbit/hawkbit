@@ -233,6 +233,11 @@ public final class MgmtRestConstants {
 
     public static final String DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULE_TYPES = "mandatorymoduletypes";
 
+    /**
+     * The basic authentication validation mapping
+     */
+    public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userauth";
+
     // constant class, private constructor.
     private MgmtRestConstants() {
 
