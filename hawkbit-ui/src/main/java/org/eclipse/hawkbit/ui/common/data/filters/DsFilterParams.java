@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.data.filters;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
 import org.springframework.util.StringUtils;
@@ -39,6 +40,16 @@ public class DsFilterParams implements Serializable {
     }
 
     /**
+     * Copy Constructor.
+     *
+     * @param filter
+     *            A filter to be copied
+     */
+    public DsFilterParams(final DsFilterParams filter) {
+        this.searchText = filter.getSearchText();
+    }
+
+    /**
      * @return SearchText
      */
     public String getSearchText() {
@@ -55,4 +66,20 @@ public class DsFilterParams implements Serializable {
         this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
     }
 
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DsFilterParams other = (DsFilterParams) obj;
+        return Objects.equals(this.getSearchText(), other.getSearchText());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSearchText());
+    }
 }

@@ -167,7 +167,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             getDragAndDropSupportSupport().addDragAndDrop();
         }
 
-        setFilterSupport(new FilterSupport<>(targetManagementFilterDataProvider, getSelectionSupport()::deselectAll));
+        setFilterSupport(new FilterSupport<>(targetManagementFilterDataProvider, TargetManagementFilterParams::new,
+                getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new TargetManagementFilterParams());
 

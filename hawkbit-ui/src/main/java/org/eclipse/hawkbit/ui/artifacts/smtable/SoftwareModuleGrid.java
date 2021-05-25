@@ -110,7 +110,7 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
         setFilterSupport(new FilterSupport<>(
                 new SoftwareModuleDataProvider(softwareModuleManagement,
                         new AssignedSoftwareModuleToProxyMapper(softwareModuleToProxyMapper)),
-                getSelectionSupport()::deselectAll));
+                SwFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new SwFilterParams());
 

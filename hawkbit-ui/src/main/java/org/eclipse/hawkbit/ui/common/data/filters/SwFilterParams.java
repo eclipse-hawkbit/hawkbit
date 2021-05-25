@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.data.filters;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleDataProvider;
 import org.springframework.util.StringUtils;
@@ -34,17 +35,29 @@ public class SwFilterParams implements Serializable {
      * Constructor.
      * 
      * @param searchText
-     *          String as search text
+     *            String as search text
      * @param softwareModuleTypeId
-     *          Long as software module Id
+     *            Long as software module Id
      * @param lastSelectedDistributionId
-     *          Long as Last selected Distribution Id
+     *            Long as Last selected Distribution Id
      */
     public SwFilterParams(final String searchText, final Long softwareModuleTypeId,
             final Long lastSelectedDistributionId) {
         this.searchText = searchText;
         this.softwareModuleTypeId = softwareModuleTypeId;
         this.lastSelectedDistributionId = lastSelectedDistributionId;
+    }
+
+    /**
+     * Copy Constructor.
+     *
+     * @param filter
+     *            A filter to be copied
+     */
+    public SwFilterParams(final SwFilterParams filter) {
+        this.searchText = filter.getSearchText();
+        this.softwareModuleTypeId = filter.getSoftwareModuleTypeId();
+        this.lastSelectedDistributionId = filter.getLastSelectedDistributionId();
     }
 
     /**
@@ -60,7 +73,7 @@ public class SwFilterParams implements Serializable {
      * Setter for searchText
      *
      * @param searchText
-     *          String
+     *            String
      */
     public void setSearchText(final String searchText) {
         this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
@@ -79,7 +92,7 @@ public class SwFilterParams implements Serializable {
      * Setter for softwareModuleTypeId
      *
      * @param softwareModuleTypeId
-     *          Long
+     *            Long
      */
     public void setSoftwareModuleTypeId(final Long softwareModuleTypeId) {
         this.softwareModuleTypeId = softwareModuleTypeId;
@@ -98,9 +111,28 @@ public class SwFilterParams implements Serializable {
      * Setter for lastSelectedDistributionId
      *
      * @param lastSelectedDistributionId
-     *          Long
+     *            Long
      */
     public void setLastSelectedDistributionId(final Long lastSelectedDistributionId) {
         this.lastSelectedDistributionId = lastSelectedDistributionId;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SwFilterParams other = (SwFilterParams) obj;
+        return Objects.equals(this.getSearchText(), other.getSearchText())
+                && Objects.equals(this.getSoftwareModuleTypeId(), other.getSoftwareModuleTypeId())
+                && Objects.equals(this.getLastSelectedDistributionId(), other.getLastSelectedDistributionId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSearchText(), getSoftwareModuleTypeId(), getLastSelectedDistributionId());
     }
 }

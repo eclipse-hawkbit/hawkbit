@@ -81,8 +81,10 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
             getDragAndDropSupportSupport().addDropTarget();
         }
 
-        setFilterSupport(new FilterSupport<>(new DistributionSetDistributionsStateDataProvider(dsManagement,
-                dsTypeManagement, dsToProxyDistributionMapper), getSelectionSupport()::deselectAll));
+        setFilterSupport(new FilterSupport<>(
+                new DistributionSetDistributionsStateDataProvider(dsManagement, dsTypeManagement,
+                        dsToProxyDistributionMapper),
+                DsDistributionsFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsDistributionsFilterParams());
 

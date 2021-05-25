@@ -126,7 +126,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
         setFilterSupport(new FilterSupport<>(
                 new DistributionSetManagementStateDataProvider(distributionSetManagement, dsToProxyDistributionMapper),
-                getSelectionSupport()::deselectAll));
+                DsManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsManagementFilterParams());
 

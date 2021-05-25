@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.ui.common.data.filters;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
 
@@ -44,11 +44,26 @@ public class DsManagementFilterParams extends DsFilterParams {
      *            String as pinned target controller Id
      */
     public DsManagementFilterParams(final String searchText, final boolean noTagClicked,
-            final List<String> distributionSetTags, final String pinnedTargetControllerId) {
+            final Collection<String> distributionSetTags, final String pinnedTargetControllerId) {
         super(searchText);
         this.noTagClicked = noTagClicked;
         this.distributionSetTags = distributionSetTags;
         this.pinnedTargetControllerId = pinnedTargetControllerId;
+    }
+
+    /**
+     * Copy Constructor.
+     *
+     * @param filter
+     *            A filter to be copied
+     */
+    public DsManagementFilterParams(final DsManagementFilterParams filter) {
+        super(filter);
+        this.noTagClicked = filter.isNoTagClicked();
+        this.distributionSetTags = filter.getDistributionSetTags() != null
+                ? new ArrayList<>(filter.getDistributionSetTags())
+                : null;
+        this.pinnedTargetControllerId = filter.getPinnedTargetControllerId();
     }
 
     /**
@@ -100,5 +115,25 @@ public class DsManagementFilterParams extends DsFilterParams {
      */
     public void setNoTagClicked(final boolean noTagClicked) {
         this.noTagClicked = noTagClicked;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DsManagementFilterParams other = (DsManagementFilterParams) obj;
+        return Objects.equals(this.getSearchText(), other.getSearchText())
+                && Objects.equals(this.isNoTagClicked(), other.isNoTagClicked())
+                && Objects.equals(this.getDistributionSetTags(), other.getDistributionSetTags())
+                && Objects.equals(this.getPinnedTargetControllerId(), other.getPinnedTargetControllerId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSearchText(), isNoTagClicked(), getDistributionSetTags(), getPinnedTargetControllerId());
     }
 }
