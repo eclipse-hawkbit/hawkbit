@@ -64,6 +64,7 @@ import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+
 /**
  * A utility class which is able to parse RSQL strings into an spring data
  * {@link Specification} which then can be enhanced sql queries to filter
@@ -137,43 +138,21 @@ public final class RSQLUtility {
             final Database database) {
         return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer, database);
     }
-    
+
     /**
      * Validates the RSQL string
-     * 
-     * @deprecated Use {@link RSQLUtility#validateRsqlFor} instead.
      * 
      * @param rsql
      *            RSQL string to validate
      * @param fieldNameProvider
      * 
-     * @return true if valid, false otherwise.
-     * 
+     * @throws RSQLParserException
+     *             if RSQL syntax is invalid
      * @throws RSQLParameterUnsupportedFieldException
      *             if RSQL key is not allowed
      */
-    @Deprecated
-    public static <A extends Enum<A> & FieldNameProvider> boolean isValid(final String rsql,
-            Class<A> fieldNameProvider) {
-        try {
-            validateRsqlFor(rsql, fieldNameProvider);
-            return true;
-        } catch (final IllegalArgumentException | RSQLParserException e) {
-            LOGGER.debug("Validation of RSQL expression '" + rsql + "' failed.", e);
-            return false;
-        }
-    }
-
-    /**
-     * Validates the RSQL string
-     * 
-     * @param rsql RSQL string to validate
-     * @param fieldNameProvider
-     * 
-     * @throws RSQLParserException if RSQL syntax is invalid
-     * @throws RSQLParameterUnsupportedFieldException if RSQL key is not allowed
-     */
-    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(final String rsql, Class<A> fieldNameProvider){
+    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(final String rsql,
+            final Class<A> fieldNameProvider) {
         final RSQLVisitor<Void, String> visitor = new ValidationRSQLVisitor<>(fieldNameProvider);
         final Node rootNode = parseRsql(rsql);
         rootNode.accept(visitor);
@@ -181,7 +160,7 @@ public final class RSQLUtility {
 
     private static Node parseRsql(final String rsql) {
         try {
-            LOGGER.debug("parsing rsql string {}", rsql);
+            LOGGER.debug("Parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
             return new RSQLParser(operators).parse(rsql);
         } catch (final IllegalArgumentException e) {
@@ -191,27 +170,25 @@ public final class RSQLUtility {
         }
     }
 
-
     private static final class ValidationRSQLVisitor<A extends Enum<A> & FieldNameProvider>
             extends AbstractFieldNameRSQLVisitor<A> implements RSQLVisitor<Void, String> {
-
 
         public ValidationRSQLVisitor(final Class<A> fieldNameProvider) {
             super(fieldNameProvider);
         }
 
         @Override
-        public Void visit(AndNode node, String param) {
+        public Void visit(final AndNode node, final String param) {
             return visitNode(node, param);
         }
 
         @Override
-        public Void visit(OrNode node, String param) {
+        public Void visit(final OrNode node, final String param) {
             return visitNode(node, param);
         }
 
         @Override
-        public Void visit(ComparisonNode node, String param) {
+        public Void visit(final ComparisonNode node, final String param) {
             final A fieldName = getFieldEnumByName(node);
             getAndValidatePropertyFieldName(fieldName, node);
             return null;
@@ -258,8 +235,8 @@ public final class RSQLUtility {
     }
 
     /**
-     * An implementation of the {@link RSQLVisitor} to visit the parsed tokens and
-     * build JPA where clauses.
+     * An implementation of the {@link RSQLVisitor} to visit the parsed tokens
+     * and build JPA where clauses.
      *
      * @param <A>
      *            the enum for providing the field name of the entity field to
@@ -267,8 +244,8 @@ public final class RSQLUtility {
      * @param <T>
      *            the entity type referenced by the root
      */
-    private static final class JpaQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
-            implements RSQLVisitor<List<Predicate>, String> {
+    private static final class JpaQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
+            extends AbstractFieldNameRSQLVisitor<A> implements RSQLVisitor<List<Predicate>, String> {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(JpaQueryRSQLVisitor.class);
 
@@ -359,19 +336,19 @@ public final class RSQLUtility {
 
         /**
          * Resolves the Path for a field in the persistence layer and joins the
-         * required models. This operation is part of a tree traversal through an
-         * RSQL expression. It creates for every field that is not part of the root
-         * model a join to the foreign model. This behavior is optimized when
-         * several joins happen directly under an OR node in the traversed tree. The
-         * same foreign model is only joined once.
+         * required models. This operation is part of a tree traversal through
+         * an RSQL expression. It creates for every field that is not part of
+         * the root model a join to the foreign model. This behavior is
+         * optimized when several joins happen directly under an OR node in the
+         * traversed tree. The same foreign model is only joined once.
          *
          * Example: tags.name==M;(tags.name==A,tags.name==B,tags.name==C) This
          * example joins the tags model only twice, because for the OR node in
          * brackets only one join is used.
          *
          * @param enumField
-         *            field from a FieldNameProvider to resolve on the persistence
-         *            layer
+         *            field from a FieldNameProvider to resolve on the
+         *            persistence layer
          * @param finalProperty
          *            dot notated field path
          * @return the Path for a field
@@ -402,8 +379,8 @@ public final class RSQLUtility {
             return fieldPath;
         }
 
-        private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split, final boolean isMapKeyField,
-                final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
+        private static Optional<Path<?>> getFieldPath(final Root<?> root, final String[] split,
+                final boolean isMapKeyField, final BiFunction<Path<?>, String, Path<?>> joinFieldPathProvider) {
             Path<?> fieldPath = null;
             for (int i = 0; i < split.length; i++) {
                 if (!(isMapKeyField && i == (split.length - 1))) {
@@ -490,7 +467,8 @@ public final class RSQLUtility {
         // Exception squid:S2095 - see
         // https://jira.sonarsource.com/browse/SONARJAVA-1478
         @SuppressWarnings({ "rawtypes", "unchecked", "squid:S2095" })
-        private static Object transformEnumValue(final ComparisonNode node, final String value, final Class<?> javaType) {
+        private static Object transformEnumValue(final ComparisonNode node, final String value,
+                final Class<?> javaType) {
             final Class<? extends Enum> tmpEnumType = (Class<? extends Enum>) javaType;
             try {
                 return Enum.valueOf(tmpEnumType, value.toUpperCase());
@@ -527,7 +505,8 @@ public final class RSQLUtility {
         }
 
         private Predicate addOperatorPredicate(final ComparisonNode node, final Path<Object> fieldPath,
-                final List<Object> transformedValues, final String value, final String finalProperty, final A enumField) {
+                final List<Object> transformedValues, final String value, final String finalProperty,
+                final A enumField) {
 
             // only 'equal' and 'notEqual' can handle transformed value like
             // enums. The JPA API cannot handle object types for greaterThan etc
@@ -601,14 +580,15 @@ public final class RSQLUtility {
 
         private Predicate toOutWithSubQueryPredicate(final String[] fieldNames, final List<Object> transformedValues,
                 final A enumField, final List<String> outParams) {
-            final Function<Expression<String>, Predicate> inPredicateProvider = expressionToCompare -> outParams.isEmpty()
-                    ? cb.upper(expressionToCompare).in(transformedValues)
-                    : cb.upper(expressionToCompare).in(outParams);
+            final Function<Expression<String>, Predicate> inPredicateProvider = expressionToCompare -> outParams
+                    .isEmpty() ? cb.upper(expressionToCompare).in(transformedValues)
+                            : cb.upper(expressionToCompare).in(outParams);
             return toNotExistsSubQueryPredicate(fieldNames, enumField, inPredicateProvider);
         }
 
         private Path<Object> getMapValueFieldPath(final A enumField, final Path<Object> fieldPath) {
-            final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue).orElse(null);
+            final String valueFieldNameFromSubEntity = enumField.getSubEntityMapTuple().map(Entry::getValue)
+                    .orElse(null);
 
             if (!enumField.isMap() || valueFieldNameFromSubEntity == null) {
                 return fieldPath;
@@ -617,7 +597,8 @@ public final class RSQLUtility {
         }
 
         @SuppressWarnings("unchecked")
-        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath, final A enumField) {
+        private Predicate mapToMapPredicate(final ComparisonNode node, final Path<Object> fieldPath,
+                final A enumField) {
             if (!enumField.isMap()) {
                 return null;
             }
@@ -749,8 +730,8 @@ public final class RSQLUtility {
                 final boolean isMapKeyField) {
             return getFieldPath(subqueryRoot, split, isMapKeyField,
                     (fieldPath, fieldNameSplit) -> getInnerJoinFieldPath(subqueryRoot, fieldPath, fieldNameSplit))
-                            .orElseThrow(() -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty",
-                                    null));
+                            .orElseThrow(() -> new RSQLParameterUnsupportedFieldException(
+                                    "RSQL field path cannot be empty", null));
         }
 
         private static Path<?> getInnerJoinFieldPath(final Root<?> subqueryRoot, final Path<?> fieldPath,
