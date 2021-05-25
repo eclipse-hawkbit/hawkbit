@@ -141,12 +141,14 @@ public final class RSQLUtility {
     /**
      * Validates the RSQL string
      * 
+     * @deprecated Use {@link RSQLUtility#validateRsqlFor} instead.
+     * 
      * @param rsql
      *            RSQL string to validate
      * @param fieldNameProvider
-     * @return true if valid
-     * @throws RSQLParserException
-     *             if RSQL syntax is invalid
+     * 
+     * @return true if valid, false otherwise.
+     * 
      * @throws RSQLParameterUnsupportedFieldException
      *             if RSQL key is not allowed
      */
@@ -156,9 +158,8 @@ public final class RSQLUtility {
         try {
             validateRsqlFor(rsql, fieldNameProvider);
             return true;
-        } catch (final IllegalArgumentException e) {
-            return false;
-        } catch (final RSQLParserException e) {
+        } catch (final IllegalArgumentException | RSQLParserException e) {
+            LOGGER.debug("Validation of RSQL expression '" + rsql + "' failed.", e);
             return false;
         }
     }
@@ -266,7 +267,7 @@ public final class RSQLUtility {
      * @param <T>
      *            the entity type referenced by the root
      */
-    private static class JpaQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
+    private static final class JpaQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
             implements RSQLVisitor<List<Predicate>, String> {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(JpaQueryRSQLVisitor.class);
