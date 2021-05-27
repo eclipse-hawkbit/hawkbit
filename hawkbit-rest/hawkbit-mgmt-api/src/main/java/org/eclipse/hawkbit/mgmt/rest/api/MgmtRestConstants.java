@@ -236,7 +236,7 @@ public final class MgmtRestConstants {
     /**
      * The basic authentication validation mapping
      */
-    public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userauth";
+    public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
 
     // constant class, private constructor.
     private MgmtRestConstants() {
