@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridR
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedPinAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedTagTokenAwareSupport;
-import org.eclipse.hawkbit.ui.management.CountMessageLabel;
 import org.eclipse.hawkbit.ui.management.bulkupload.BulkUploadWindowBuilder;
 import org.eclipse.hawkbit.ui.management.bulkupload.TargetBulkUploadUiState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
@@ -63,7 +62,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
     private final TargetGrid targetGrid;
     private final TargetDetailsHeader targetDetailsHeader;
     private final TargetDetails targetDetails;
-    private final transient CountMessageLabel countMessageLabel;
+    private final transient TargetCountMessageLabel countMessageLabel;
 
     private final transient GenericEventListener<TargetFilterTabChangedEventPayload> filterTabChangedListener;
     private final transient FilterChangedListener<ProxyTarget> targetFilterListener;
@@ -136,7 +135,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
                 deploymentManagement, targetMetaDataWindowBuilder);
 
-        this.countMessageLabel = new CountMessageLabel(targetManagement, uiDependencies.getI18n());
+        this.countMessageLabel = new TargetCountMessageLabel(targetManagement, uiDependencies.getI18n());
 
         initGridDataUpdatedListener();
 
@@ -258,7 +257,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *
      * @return Count message label
      */
-    public CountMessageLabel getCountMessageLabel() {
+    public TargetCountMessageLabel getCountMessageLabel() {
         return countMessageLabel;
     }
 }

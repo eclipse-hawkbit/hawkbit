@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.ui.management;
+package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Collection;
 
@@ -28,7 +28,7 @@ import com.vaadin.ui.Label;
  * Count message label which display current filter details and details on
  * pinning.
  */
-public class CountMessageLabel extends AbstractFooterSupport {
+public class TargetCountMessageLabel extends AbstractFooterSupport {
     private final VaadinMessageSource i18n;
 
     private final TargetManagement targetManagement;
@@ -43,7 +43,7 @@ public class CountMessageLabel extends AbstractFooterSupport {
      * @param i18n
      *            I18N
      */
-    public CountMessageLabel(final TargetManagement targetManagement, final VaadinMessageSource i18n) {
+    public TargetCountMessageLabel(final TargetManagement targetManagement, final VaadinMessageSource i18n) {
         this.targetManagement = targetManagement;
         this.i18n = i18n;
         this.targetCountLabel = new Label();

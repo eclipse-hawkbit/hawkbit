@@ -21,6 +21,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataProviderListener;
+import com.vaadin.data.provider.Query;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.components.grid.GridSelectionModel;
 
@@ -156,7 +157,7 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Get total number of items.
      */
     public int getDataSize() {
-        return getDataCommunicator().getDataProviderSize();
+        return getDataProvider().size(new Query<>());
     }
 
     /**
