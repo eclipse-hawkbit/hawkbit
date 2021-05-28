@@ -122,7 +122,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetGridHeader = new TargetGridHeader(uiDependencies, targetWindowBuilder, bulkUploadWindowBuilder,
                 targetTagFilterLayoutUiState, targetGridLayoutUiState, targetBulkUploadUiState);
         this.targetGridHeader.buildHeader();
-        this.targetGridHeader.addDsDroArea();
+        this.targetGridHeader.addDsDropArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
                 systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
                 targetTagFilterLayoutUiState, targetManagementStateDataSupplier);

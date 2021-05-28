@@ -79,7 +79,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     /**
      * Add distribution set filter drop area
      */
-    public void addDsDroArea() {
+    public void addDsDropArea() {
         final Component distributionSetFilterDropArea = distributionSetFilterDropAreaSupport.getHeaderComponent();
         addComponent(distributionSetFilterDropArea);
         setComponentAlignment(distributionSetFilterDropArea, Alignment.TOP_CENTER);
