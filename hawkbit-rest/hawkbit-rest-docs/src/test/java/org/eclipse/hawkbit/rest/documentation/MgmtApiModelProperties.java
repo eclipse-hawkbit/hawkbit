@@ -31,6 +31,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_METADATA = "The link to the metadata.";
     public static final String LINK_TO_MANDATORY_SMT = "Link to mandatory software modules types in this distribution set type.";
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
+    public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
@@ -142,6 +143,10 @@ public final class MgmtApiModelProperties {
     public static final String ACTION_LIST = "List of actions.";
 
     public static final String ACTION_WEIGHT = "Weight of the action showing the importance of the update.";
+
+    public static final String ACTION_ROLLOUT = "The ID of the rollout this action was created for.";
+
+    public static final String ACTION_ROLLOUT_NAME = "The name of the rollout this action was created for.";
 
     public static final String IP_ADDRESS = "Last known IP address of the target. Only presented if IP address of the target itself is known (connected directly through DDI API).";
 

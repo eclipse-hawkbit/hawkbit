@@ -83,6 +83,7 @@ public final class StatusIconBuilder {
             addMapping(Status.DOWNLOAD, VaadinIcons.CLOUD_DOWNLOAD, SPUIStyleDefinitions.STATUS_ICON_PENDING);
             addMapping(Status.DOWNLOADED, VaadinIcons.CLOUD_DOWNLOAD, SPUIStyleDefinitions.STATUS_ICON_GREEN);
             addMapping(Status.CANCELING, VaadinIcons.CLOSE_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_PENDING);
+            addMapping(Status.CANCEL_REJECTED, VaadinIcons.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_ORANGE);
             addMapping(Status.CANCELED, VaadinIcons.CLOSE_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN);
             addMapping(Status.ERROR, VaadinIcons.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED);
         }
