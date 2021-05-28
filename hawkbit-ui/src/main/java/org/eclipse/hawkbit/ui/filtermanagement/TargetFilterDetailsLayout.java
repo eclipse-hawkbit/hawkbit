@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -46,20 +46,20 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      *            properties
      * @param rsqlValidationOracle
      *            to get RSQL validation and suggestions
-     * @param targetManagement
-     *            management to get targets matching the filters
      * @param targetFilterManagement
      *            management to CRUD target filters
      * @param uiState
      *            to persist the user interaction
      */
     public TargetFilterDetailsLayout(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
-            final RsqlValidationOracle rsqlValidationOracle, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterManagement, final TargetFilterDetailsLayoutUiState uiState) {
+            final RsqlValidationOracle rsqlValidationOracle, final TargetFilterQueryManagement targetFilterManagement,
+            final TargetFilterStateDataSupplier targetFilterStateDataSupplier,
+            final TargetFilterDetailsLayoutUiState uiState) {
 
         this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(uiDependencies, targetFilterManagement,
                 uiProperties, rsqlValidationOracle, uiState);
-        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetManagement, uiState);
+        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetFilterStateDataSupplier,
+                uiState);
         this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
 
         initGridDataUpdatedListener();

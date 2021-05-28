@@ -28,8 +28,7 @@ import org.springframework.data.domain.Sort.Direction;
  * {@link ProxyTarget} entities.
  */
 public class TargetManagementStateDataProvider
-        extends AbstractProxyDataProvider<ProxyTarget, Target, TargetManagementFilterParams>
-        implements TargetManagementFilterDataProvider {
+        extends AbstractProxyDataProvider<ProxyTarget, Target, TargetManagementFilterParams> {
 
     private static final long serialVersionUID = 1L;
 

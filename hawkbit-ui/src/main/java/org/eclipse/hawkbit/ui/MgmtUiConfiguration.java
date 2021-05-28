@@ -13,9 +13,10 @@ import java.util.List;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementStateDataProvider;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplierImpl;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplierImpl;
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
@@ -30,7 +31,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.vaadin.spring.servlet.Vaadin4SpringServlet;
 
-import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
@@ -130,15 +130,16 @@ public class MgmtUiConfiguration {
     @Bean
     @ConditionalOnMissingBean
     @UIScope
-    public TargetManagementFilterDataProvider targetManagementFilterDataProvider(
-            final TargetManagement targetManagement, final TargetToProxyTargetMapper targetToProxyTargetMapper) {
-        return new TargetManagementStateDataProvider(targetManagement, targetToProxyTargetMapper);
+    public TargetManagementStateDataSupplier targetManagementStateDataSupplier(final TargetManagement targetManagement,
+            final TargetToProxyTargetMapper targetToProxyTargetMapper) {
+        return new TargetManagementStateDataSupplierImpl(targetManagement, targetToProxyTargetMapper);
     }
 
     @Bean
     @ConditionalOnMissingBean
     @UIScope
-    public DataCommunicator<ProxyTarget> targetDataCommunicator() {
-        return new DataCommunicator<>();
+    public TargetFilterStateDataSupplier targetFilterStateDataSupplier(final TargetManagement targetManagement,
+            final TargetToProxyTargetMapper targetToProxyTargetMapper) {
+        return new TargetFilterStateDataSupplierImpl(targetManagement, targetToProxyTargetMapper);
     }
 }

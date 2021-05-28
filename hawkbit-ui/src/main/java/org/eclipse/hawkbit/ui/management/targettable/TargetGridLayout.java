@@ -21,10 +21,10 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -49,8 +49,6 @@ import org.eclipse.hawkbit.ui.management.bulkupload.BulkUploadWindowBuilder;
 import org.eclipse.hawkbit.ui.management.bulkupload.TargetBulkUploadUiState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutUiState;
-
-import com.vaadin.data.provider.DataCommunicator;
 
 /**
  * Target table layout.
@@ -112,8 +110,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
-            final TargetManagementFilterDataProvider targetManagementFilterDataProvider,
-            final DataCommunicator<ProxyTarget> targetDataCommunicator) {
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
@@ -128,7 +125,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetGridHeader.addDsDroArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
                 systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
-                targetTagFilterLayoutUiState, targetManagementFilterDataProvider, targetDataCommunicator);
+                targetTagFilterLayoutUiState, targetManagementStateDataSupplier);
 
         this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder,
                 targetMetaDataWindowBuilder);

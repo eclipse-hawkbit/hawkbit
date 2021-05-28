@@ -29,9 +29,9 @@ import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetPollingStat
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.filters.TargetManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementFilterDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -61,7 +61,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import com.vaadin.data.ValueProvider;
-import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
@@ -122,10 +121,9 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetManagementFilterDataProvider targetManagementFilterDataProvider,
-            final DataCommunicator<ProxyTarget> targetDataCommunicator) {
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker(),
-                targetDataCommunicator);
+                targetManagementStateDataSupplier.dataCommunicator());
 
         this.targetManagement = targetManagement;
         this.targetGridLayoutUiState = targetGridLayoutUiState;
@@ -167,8 +165,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             getDragAndDropSupportSupport().addDragAndDrop();
         }
 
-        setFilterSupport(new FilterSupport<>(targetManagementFilterDataProvider, TargetManagementFilterParams::new,
-                getSelectionSupport()::deselectAll));
+        setFilterSupport(new FilterSupport<>(targetManagementStateDataSupplier.dataProvider(),
+                TargetManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new TargetManagementFilterParams());
 
