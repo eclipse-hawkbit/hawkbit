@@ -38,7 +38,7 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
     private final transient FilterChangedListener<ProxyTarget> targetFilterListener;
 
     /**
-     * TargetFilterDetailsLayout constructor
+     * TargetFilterDetailsLayout constructor.
      *
      * @param uiDependencies
      *            {@link CommonUiDependencies}
@@ -48,6 +48,8 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      *            to get RSQL validation and suggestions
      * @param targetFilterManagement
      *            management to CRUD target filters
+     * @param targetFilterStateDataSupplier
+     *            target grid data supplier
      * @param uiState
      *            to persist the user interaction
      */

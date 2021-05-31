@@ -11,10 +11,28 @@ package org.eclipse.hawkbit.ui.common.data.suppliers;
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataProvider;
 
+/**
+ * Interface for backend data retrieval provider.
+ *
+ * @param <T>
+ *            UI Proxy entity type
+ * @param <F>
+ *            Filter type
+ */
 public interface DataSupplier<T, F> {
 
+    /**
+     * Provides back end data.
+     *
+     * @return back end data provider
+     */
     DataProvider<T, F> dataProvider();
 
+    /**
+     * Provides client/server data communicator component.
+     *
+     * @return data communicator
+     */
     DataCommunicator<T> dataCommunicator();
 
 }

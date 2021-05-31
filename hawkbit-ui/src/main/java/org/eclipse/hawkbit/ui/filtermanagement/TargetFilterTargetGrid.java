@@ -34,7 +34,17 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
     private final TargetFilterDetailsLayoutUiState uiState;
 
-    TargetFilterTargetGrid(final CommonUiDependencies uiDependencies,
+    /**
+     * TargetFilterTargetGrid constructor.
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
+     * @param targetFilterStateDataSupplier
+     *            data supplier
+     * @param uiState
+     *            layout state
+     */
+    public TargetFilterTargetGrid(final CommonUiDependencies uiDependencies,
             final TargetFilterStateDataSupplier targetFilterStateDataSupplier,
             final TargetFilterDetailsLayoutUiState uiState) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), null,

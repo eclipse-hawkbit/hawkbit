@@ -104,6 +104,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      *            DeploymentManagement
      * @param configManagement
      *            TenantConfigurationManagement
+     * @param targetManagementStateDataSupplier
+     *            data supplier
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param uiProperties
@@ -117,11 +119,11 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      */
     public TargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
-            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetManagementStateDataSupplier targetManagementStateDataSupplier) {
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker(),
                 targetManagementStateDataSupplier.dataCommunicator());
 

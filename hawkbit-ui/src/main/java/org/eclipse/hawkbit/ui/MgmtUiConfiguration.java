@@ -102,11 +102,21 @@ public class MgmtUiConfiguration {
         return new HawkbitUIErrorHandler(i18n, uiErrorDetailsExtractor);
     }
 
+    /**
+     * UI Upload Error details extractor bean.
+     * 
+     * @return UI Upload Error details extractor
+     */
     @Bean
     UiErrorDetailsExtractor uploadErrorExtractor() {
         return new UploadErrorExtractor();
     }
 
+    /**
+     * UI ConstraintViolation Error details extractor bean.
+     * 
+     * @return UI ConstraintViolation Error details extractor
+     */
     @Bean
     UiErrorDetailsExtractor constraintViolationErrorExtractor(final VaadinMessageSource i18n) {
         return new ConstraintViolationErrorExtractor(i18n);
@@ -122,11 +132,21 @@ public class MgmtUiConfiguration {
         return new Vaadin4SpringServlet();
     }
 
+    /**
+     * UI target entity mapper bean.
+     * 
+     * @return UI target entity mapper
+     */
     @Bean
     public TargetToProxyTargetMapper targetToProxyTargetMapper(final VaadinMessageSource i18n) {
         return new TargetToProxyTargetMapper(i18n);
     }
 
+    /**
+     * UI Management target data supplier bean.
+     * 
+     * @return UI target data supplier for Management view
+     */
     @Bean
     @ConditionalOnMissingBean
     @UIScope
@@ -135,6 +155,11 @@ public class MgmtUiConfiguration {
         return new TargetManagementStateDataSupplierImpl(targetManagement, targetToProxyTargetMapper);
     }
 
+    /**
+     * UI Filter target data supplier bean.
+     * 
+     * @return UI target data supplier for Filter view
+     */
     @Bean
     @ConditionalOnMissingBean
     @UIScope

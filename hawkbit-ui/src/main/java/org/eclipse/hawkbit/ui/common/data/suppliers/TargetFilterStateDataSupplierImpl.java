@@ -16,10 +16,23 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataProvider;
 
+/**
+ * Target backend data retrieval provider for Filter View default
+ * implementation.
+ *
+ */
 public class TargetFilterStateDataSupplierImpl implements TargetFilterStateDataSupplier {
     private final TargetFilterStateDataProvider dataProvider;
     private final DataCommunicator<ProxyTarget> dataCommunicator;
 
+    /**
+     * Constructor.
+     *
+     * @param targetManagement
+     *            Target Management
+     * @param targetToProxyTargetMapper
+     *            Backend to UI Proxy target entity mapper
+     */
     public TargetFilterStateDataSupplierImpl(final TargetManagement targetManagement,
             final TargetToProxyTargetMapper targetToProxyTargetMapper) {
         this.dataProvider = new TargetFilterStateDataProvider(targetManagement, targetToProxyTargetMapper);

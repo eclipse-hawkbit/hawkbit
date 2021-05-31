@@ -96,9 +96,9 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
-            @Qualifier("uiExecutor") final Executor uiExecutor,
-            final TargetManagementStateDataSupplier targetManagementStateDataSupplier) {
+            final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+            final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -112,9 +112,10 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
 
             this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
-                    systemSecurityContext, managementUIState.getTargetTagFilterLayoutUiState(),
-                    managementUIState.getTargetGridLayoutUiState(), managementUIState.getTargetBulkUploadUiState(),
-                    managementUIState.getDistributionGridLayoutUiState(), targetManagementStateDataSupplier);
+                    targetManagementStateDataSupplier, systemSecurityContext,
+                    managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
+                    managementUIState.getTargetBulkUploadUiState(),
+                    managementUIState.getDistributionGridLayoutUiState());
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,

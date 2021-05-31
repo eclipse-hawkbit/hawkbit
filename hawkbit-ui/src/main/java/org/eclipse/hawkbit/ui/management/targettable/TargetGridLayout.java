@@ -90,6 +90,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            Executor
      * @param configManagement
      *            TenantConfigurationManagement
+     * @param targetManagementStateDataSupplier
+     *            target grid data supplier
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param targetTagFilterLayoutUiState
@@ -105,12 +107,12 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
             final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
             final Executor uiExecutor, final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState,
-            final TargetManagementStateDataSupplier targetManagementStateDataSupplier) {
+            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
@@ -124,8 +126,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetGridHeader.buildHeader();
         this.targetGridHeader.addDsDropArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
-                systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
-                targetTagFilterLayoutUiState, targetManagementStateDataSupplier);
+                targetManagementStateDataSupplier, systemSecurityContext, uiProperties, targetGridLayoutUiState,
+                distributionGridLayoutUiState, targetTagFilterLayoutUiState);
 
         this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder,
                 targetMetaDataWindowBuilder);

@@ -276,6 +276,8 @@ public class TargetManagementFilterParams implements Serializable {
         this.noTagClicked = noTagClicked;
     }
 
+    // equals requires all fields in condition
+    @SuppressWarnings("squid:S1067")
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) {

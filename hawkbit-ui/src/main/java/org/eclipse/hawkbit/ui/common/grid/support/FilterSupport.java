@@ -264,6 +264,12 @@ public class FilterSupport<T, F> {
 
         private transient F customFilter;
 
+        /**
+         * Constructor.
+         *
+         * @param dataProvider
+         *            the wrapped data provider
+         */
         public CustomFilterDataProviderWrapper(final DataProvider<T, F> dataProvider) {
             super(dataProvider);
         }
@@ -274,6 +280,11 @@ public class FilterSupport<T, F> {
             return getFilter();
         }
 
+        /**
+         * Gets the custom filter.
+         *
+         * @return custom filter
+         */
         public F getFilter() {
             return customFilter;
         }
