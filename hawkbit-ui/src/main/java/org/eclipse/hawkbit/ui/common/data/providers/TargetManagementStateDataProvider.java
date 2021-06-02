@@ -38,13 +38,13 @@ public class TargetManagementStateDataProvider
      * Constructor for TargetManagementStateDataProvider
      *
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      * @param entityMapper
-     *          TargetToProxyTargetMapper
+     *            TargetToProxyTargetMapper
      */
     public TargetManagementStateDataProvider(final TargetManagement targetManagement,
             final TargetToProxyTargetMapper entityMapper) {
-        super(entityMapper, Sort.by(Direction.DESC, "lastModifiedAt"));
+        super(entityMapper, Sort.by(Direction.DESC, "lastModifiedAt", "id"));
 
         this.targetManagement = targetManagement;
     }

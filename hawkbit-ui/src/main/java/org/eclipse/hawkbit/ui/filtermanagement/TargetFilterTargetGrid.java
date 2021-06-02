@@ -8,13 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
-import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterStateDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
@@ -36,14 +34,25 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
     private final TargetFilterDetailsLayoutUiState uiState;
 
-    TargetFilterTargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
+    /**
+     * TargetFilterTargetGrid constructor.
+     *
+     * @param uiDependencies
+     *            {@link CommonUiDependencies}
+     * @param targetFilterStateDataSupplier
+     *            data supplier
+     * @param uiState
+     *            layout state
+     */
+    public TargetFilterTargetGrid(final CommonUiDependencies uiDependencies,
+            final TargetFilterStateDataSupplier targetFilterStateDataSupplier,
             final TargetFilterDetailsLayoutUiState uiState) {
-        super(uiDependencies.getI18n(), uiDependencies.getEventBus());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), null,
+                targetFilterStateDataSupplier.dataCommunicator());
 
         this.uiState = uiState;
 
-        setFilterSupport(new FilterSupport<>(
-                new TargetFilterStateDataProvider(targetManagement, new TargetToProxyTargetMapper(i18n))));
+        setFilterSupport(new FilterSupport<>(targetFilterStateDataSupplier.dataProvider()));
         initFilterMappings();
 
         targetStatusIconSupplier = new TargetStatusIconSupplier<>(i18n, ProxyTarget::getUpdateStatus, TARGET_STATUS_ID);

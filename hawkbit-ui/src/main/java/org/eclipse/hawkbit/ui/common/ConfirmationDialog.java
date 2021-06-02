@@ -26,7 +26,6 @@ import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
@@ -138,9 +137,6 @@ public class ConfirmationDialog implements Serializable {
         return new SaveDialogCloseListener() {
             @Override
             public void saveOrUpdate() {
-                if (window.getParent() != null) {
-                    UI.getCurrent().removeWindow(window);
-                }
                 callback.accept(true);
             }
 

@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -63,17 +64,19 @@ public class FilterManagementView extends VerticalLayout implements View {
             final FilterManagementUIState filterManagementUIState, final RsqlValidationOracle rsqlValidationOracle,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
-            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement) {
+            final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetFilterStateDataSupplier targetFilterStateDataSupplier) {
         this.filterManagementUIState = filterManagementUIState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, notification,
-                permissionChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                notification, permissionChecker);
 
         this.targetFilterGridLayout = new TargetFilterGridLayout(uiDependencies, targetFilterQueryManagement,
                 targetManagement, distributionSetManagement, filterManagementUIState);
 
-        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiDependencies, uiProperties, rsqlValidationOracle,
-                targetManagement, targetFilterQueryManagement, filterManagementUIState.getDetailsLayoutUiState());
+        this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiDependencies, uiProperties,
+                rsqlValidationOracle, targetFilterQueryManagement, targetFilterStateDataSupplier,
+                filterManagementUIState.getDetailsLayoutUiState());
 
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
         layoutVisibilityHandlers.put(EventLayout.TARGET_FILTER_QUERY_LIST,

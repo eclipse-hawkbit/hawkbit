@@ -36,11 +36,11 @@ public class DistributionSetDistributionsStateDataProvider
      * Constructor for DistributionSetDistributionsStateDataProvider
      *
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param distributionSetTypeManagement
-     *          DistributionSetTypeManagement
+     *            DistributionSetTypeManagement
      * @param entityMapper
-     *          DistributionSetToProxyDistributionMapper
+     *            DistributionSetToProxyDistributionMapper
      */
     public DistributionSetDistributionsStateDataProvider(final DistributionSetManagement distributionSetManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
@@ -68,6 +68,6 @@ public class DistributionSetDistributionsStateDataProvider
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final DsDistributionsFilterParams filter) {
-        return loadBackendEntities(pageRequest, filter).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
     }
 }

@@ -58,6 +58,10 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     @Override
     public void error(final ErrorEvent event) {
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Ui error received. Trying to extract details...", event.getThrowable());
+        }
+
         final Page currentPage = getPageFrom(event);
         final List<UiErrorDetails> errorDetails = extractErrorDetails(event);
 

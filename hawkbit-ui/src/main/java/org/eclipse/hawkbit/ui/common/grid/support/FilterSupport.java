@@ -11,23 +11,27 @@ package org.eclipse.hawkbit.ui.common.grid.support;
 
 import java.util.EnumMap;
 import java.util.function.BiConsumer;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.hawkbit.ui.common.event.FilterType;
 
 import com.vaadin.data.provider.ConfigurableFilterDataProvider;
 import com.vaadin.data.provider.DataProvider;
+import com.vaadin.data.provider.DataProviderWrapper;
+import com.vaadin.data.provider.Query;
 
 /**
  * Support for Filter in Grid
  *
  * @param <T>
- *            Generic type
+ *            Data provider Proxy entity type
  * @param <F>
- *            Generic type
+ *            Custom filter type
  */
 public class FilterSupport<T, F> {
-    private final ConfigurableFilterDataProvider<T, Void, F> filterDataProvider;
+    private final CustomFilterDataProviderWrapper<T, F> filterDataProvider;
     private final EnumMap<FilterType, FilterTypeSetter<?>> filterTypeToSetterMapping;
+    private final UnaryOperator<F> filterCloner;
     private final Runnable afterRefreshFilterCallback;
 
     private F entityFilter;
@@ -36,23 +40,51 @@ public class FilterSupport<T, F> {
      * Constructor for FilterSupport
      *
      * @param dataProvider
-     *            Data provider for filter
+     *            Data provider that should be enhanced with a custom filter
      */
     public FilterSupport(final DataProvider<T, F> dataProvider) {
-        this(dataProvider, null);
+        this(dataProvider, null, null);
     }
 
     /**
      * Constructor for FilterSupport
      *
      * @param dataProvider
-     *            Data provider for filter
+     *            Data provider that should be enhanced with a custom filter
+     * @param filterCloner
+     *            Creates a clone for a filter
+     */
+    public FilterSupport(final DataProvider<T, F> dataProvider, final UnaryOperator<F> filterCloner) {
+        this(dataProvider, filterCloner, null);
+    }
+
+    /**
+     * Constructor for FilterSupport
+     *
+     * @param dataProvider
+     *            Data provider that should be enhanced with a custom filter
      * @param afterRefreshFilterCallback
-     *            Runnable
+     *            Callback to be called after filter/data refresh
      */
     public FilterSupport(final DataProvider<T, F> dataProvider, final Runnable afterRefreshFilterCallback) {
-        this.filterDataProvider = dataProvider.withConfigurableFilter();
+        this(dataProvider, null, afterRefreshFilterCallback);
+    }
+
+    /**
+     * Constructor for FilterSupport
+     *
+     * @param dataProvider
+     *            Data provider that should be enhanced with a custom filter
+     * @param filterCloner
+     *            Creates a clone for a filter
+     * @param afterRefreshFilterCallback
+     *            Callback to be called after filter/data refresh
+     */
+    public FilterSupport(final DataProvider<T, F> dataProvider, final UnaryOperator<F> filterCloner,
+            final Runnable afterRefreshFilterCallback) {
+        this.filterDataProvider = new CustomFilterDataProviderWrapper<>(dataProvider);
         this.filterTypeToSetterMapping = new EnumMap<>(FilterType.class);
+        this.filterCloner = filterCloner;
         this.afterRefreshFilterCallback = afterRefreshFilterCallback;
     }
 
@@ -121,7 +153,9 @@ public class FilterSupport<T, F> {
      * Refresh filter data
      */
     public void refreshFilter() {
-        filterDataProvider.setFilter(entityFilter);
+        // data provider receives a fresh copy of current entity filter
+        // to make it effectively immutable
+        filterDataProvider.setFilter(filterCloner != null ? filterCloner.apply(entityFilter) : entityFilter);
 
         if (afterRefreshFilterCallback != null) {
             afterRefreshFilterCallback.run();
@@ -131,7 +165,7 @@ public class FilterSupport<T, F> {
     /**
      * @return Filter data provider
      */
-    public ConfigurableFilterDataProvider<T, Void, F> getFilterDataProvider() {
+    public CustomFilterDataProviderWrapper<T, F> getFilterDataProvider() {
         return filterDataProvider;
     }
 
@@ -213,6 +247,52 @@ public class FilterSupport<T, F> {
             if (defaultValue != null) {
                 setter.accept(entityFilter, defaultValue);
             }
+        }
+    }
+
+    /**
+     * Data provider with custom filter that can be set programmatically.
+     *
+     * @param <T>
+     *            Data provider Proxy entity type
+     * @param <F>
+     *            Custom filter type
+     */
+    public static class CustomFilterDataProviderWrapper<T, F> extends DataProviderWrapper<T, Void, F>
+            implements ConfigurableFilterDataProvider<T, Void, F> {
+        private static final long serialVersionUID = 1L;
+
+        private transient F customFilter;
+
+        /**
+         * Constructor.
+         *
+         * @param dataProvider
+         *            the wrapped data provider
+         */
+        public CustomFilterDataProviderWrapper(final DataProvider<T, F> dataProvider) {
+            super(dataProvider);
+        }
+
+        @Override
+        protected F getFilter(final Query<T, Void> query) {
+            // Filter of Void query is always null, so can be ignored
+            return getFilter();
+        }
+
+        /**
+         * Gets the custom filter.
+         *
+         * @return custom filter
+         */
+        public F getFilter() {
+            return customFilter;
+        }
+
+        @Override
+        public void setFilter(final F filter) {
+            this.customFilter = filter;
+            refreshAll();
         }
     }
 }

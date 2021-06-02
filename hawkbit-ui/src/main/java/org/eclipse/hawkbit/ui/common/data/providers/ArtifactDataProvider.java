@@ -33,9 +33,9 @@ public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifac
      * Constructor for ArtifactDataProvider
      *
      * @param artifactManagement
-     *          ArtifactManagement
+     *            ArtifactManagement
      * @param entityMapper
-     *          ArtifactToProxyArtifactMapper
+     *            ArtifactToProxyArtifactMapper
      */
     public ArtifactDataProvider(final ArtifactManagement artifactManagement,
             final ArtifactToProxyArtifactMapper entityMapper) {
@@ -59,6 +59,6 @@ public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifac
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, smId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), smId).getTotalElements();
     }
 }

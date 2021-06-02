@@ -48,11 +48,12 @@ public class ActionStatusGrid extends AbstractGrid<ProxyActionStatus, Long> {
      * @param deploymentManagement
      *            deploymentManagement
      */
-    protected ActionStatusGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+    public ActionStatusGrid(final CommonUiDependencies uiDependencies,
+            final DeploymentManagement deploymentManagement) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        setSelectionSupport(new SelectionSupport<ProxyActionStatus>(this, eventBus,
-                EventLayout.ACTION_HISTORY_STATUS_LIST, EventView.DEPLOYMENT, null, null, null));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.ACTION_HISTORY_STATUS_LIST,
+                EventView.DEPLOYMENT, null, null, null));
         getSelectionSupport().enableSingleSelection();
 
         setFilterSupport(new FilterSupport<>(

@@ -11,6 +11,12 @@ package org.eclipse.hawkbit.ui;
 import java.util.List;
 
 import org.eclipse.hawkbit.im.authentication.PermissionService;
+import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplierImpl;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplierImpl;
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
@@ -28,6 +34,7 @@ import org.vaadin.spring.servlet.Vaadin4SpringServlet;
 import com.vaadin.server.ErrorHandler;
 import com.vaadin.server.SystemMessagesProvider;
 import com.vaadin.server.VaadinServlet;
+import com.vaadin.spring.annotation.UIScope;
 
 /**
  * Enables UI components for the Management UI.
@@ -95,11 +102,21 @@ public class MgmtUiConfiguration {
         return new HawkbitUIErrorHandler(i18n, uiErrorDetailsExtractor);
     }
 
+    /**
+     * UI Upload Error details extractor bean.
+     * 
+     * @return UI Upload Error details extractor
+     */
     @Bean
     UiErrorDetailsExtractor uploadErrorExtractor() {
         return new UploadErrorExtractor();
     }
 
+    /**
+     * UI ConstraintViolation Error details extractor bean.
+     * 
+     * @return UI ConstraintViolation Error details extractor
+     */
     @Bean
     UiErrorDetailsExtractor constraintViolationErrorExtractor(final VaadinMessageSource i18n) {
         return new ConstraintViolationErrorExtractor(i18n);
@@ -113,5 +130,41 @@ public class MgmtUiConfiguration {
     @Bean
     public VaadinServlet vaadinServlet() {
         return new Vaadin4SpringServlet();
+    }
+
+    /**
+     * UI target entity mapper bean.
+     * 
+     * @return UI target entity mapper
+     */
+    @Bean
+    public TargetToProxyTargetMapper targetToProxyTargetMapper(final VaadinMessageSource i18n) {
+        return new TargetToProxyTargetMapper(i18n);
+    }
+
+    /**
+     * UI Management target data supplier bean.
+     * 
+     * @return UI target data supplier for Management view
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @UIScope
+    public TargetManagementStateDataSupplier targetManagementStateDataSupplier(final TargetManagement targetManagement,
+            final TargetToProxyTargetMapper targetToProxyTargetMapper) {
+        return new TargetManagementStateDataSupplierImpl(targetManagement, targetToProxyTargetMapper);
+    }
+
+    /**
+     * UI Filter target data supplier bean.
+     * 
+     * @return UI target data supplier for Filter view
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    @UIScope
+    public TargetFilterStateDataSupplier targetFilterStateDataSupplier(final TargetManagement targetManagement,
+            final TargetToProxyTargetMapper targetToProxyTargetMapper) {
+        return new TargetFilterStateDataSupplierImpl(targetManagement, targetToProxyTargetMapper);
     }
 }
