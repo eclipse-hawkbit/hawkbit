@@ -35,6 +35,6 @@ public class DisposableSqlTestDatabase extends SharedSqlTestDatabase implements 
     @Override
     public void afterAll(final ExtensionContext context) {
         matchingDatabase(datasourceContext).dropRandomSchema();
-        System.setProperty(SPRING_DATASOURCE_URL_KEY, CONTEXT.get().getDatasourceUrl());
+        System.setProperty(SPRING_DATASOURCE_URL_KEY, matchingDatabase(CONTEXT.get()).getRandomSchemaUri());
     }
 }

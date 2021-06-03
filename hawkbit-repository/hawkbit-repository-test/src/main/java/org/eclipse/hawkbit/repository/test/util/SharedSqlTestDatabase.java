@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.eclipse.hawkbit.repository.test.util.DatasourceContext.SPRING_DATASOURCE_URL_KEY;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.junit.jupiter.api.extension.BeforeAllCallback;
@@ -39,8 +41,11 @@ public class SharedSqlTestDatabase implements BeforeAllCallback {
         final AbstractSqlTestDatabase database = matchingDatabase(testDatasourceContext);
         final String randomSchemaUri = database.createRandomSchema().getRandomSchemaUri();
         LOGGER.info("\033[0;33m Random Schema URI is {} \033[0m", randomSchemaUri);
-        System.setProperty("spring.datasource.url", randomSchemaUri);
-        Runtime.getRuntime().addShutdownHook(new Thread(database::dropRandomSchema));
+        System.setProperty(SPRING_DATASOURCE_URL_KEY, randomSchemaUri);
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            LOGGER.warn("Dropping schema at url {}", randomSchemaUri);
+            database.dropRandomSchema();
+        }));
     }
 
     protected static AbstractSqlTestDatabase matchingDatabase(final DatasourceContext context) {
