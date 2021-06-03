@@ -65,7 +65,7 @@ public class SharedSqlTestDatabase implements BeforeAllCallback {
                 database = new PostgreSqlTestDatabase(context);
                 break;
             default:
-                throw new IllegalStateException("No supported database found for uri " + context.getDatasourceUrl());
+                throw new IllegalStateException("No supported database found for type " + context.getDatabase());
         }
 
         return database;

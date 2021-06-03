@@ -1363,9 +1363,7 @@ public class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Action> foundAction = controllerManagement.getActiveActionsByExternalRef(allExternalRef);
         assertThat(foundAction).isNotNull();
-        for (int i = 0; i < numberOfActions; i++) {
-            assertThat(foundAction.get(i).getId()).isEqualTo(allActionId.get(i));
-        }
+        assertThat(foundAction.stream().map(Action::getId)).containsExactlyInAnyOrderElementsOf(allActionId);
     }
 
     @Test

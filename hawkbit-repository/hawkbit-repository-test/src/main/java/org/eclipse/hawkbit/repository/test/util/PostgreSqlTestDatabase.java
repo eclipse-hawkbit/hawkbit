@@ -50,10 +50,11 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
     protected String getRandomSchemaUri() {
         final String uri = context.getDatasourceUrl();
         final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri);
+        final String schemaName = getSchemaName(uri);
 
         return POSTGRESQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
                 .replace("{port}", databaseProperties.get("port"))
-                .replace("{db}*", context.getRandomSchemaName()) + "?currentSchema=" + context.getRandomSchemaName();
+                .replace("{db}*", schemaName.split("\\?")[0]) + "?currentSchema=" + context.getRandomSchemaName();
     }
 
     private static String getSchemaName(final String uri) {
