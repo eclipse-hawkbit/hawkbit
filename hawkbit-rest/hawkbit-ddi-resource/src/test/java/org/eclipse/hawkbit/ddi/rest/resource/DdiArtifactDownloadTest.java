@@ -47,8 +47,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.ContextHierarchy;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.google.common.base.Charsets;
@@ -69,7 +67,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     @Autowired
-    private Listener listener;
+    private DownloadProgressListener downloadProgressListener;
 
     @BeforeEach
     public void setup() {
@@ -163,8 +161,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     @WithUser(principal = "4712", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     @Description("Tests valid downloads through the artifact resource by identifying the artifact not by ID but file name.")
     public void downloadArtifactThroughFileName() throws Exception {
-        listener.getDownLoadProgress().set(1);
-        listener.getShippedBytes().set(0);
+        downloadProgressListener.getDownLoadProgress().set(1);
+        downloadProgressListener.getShippedBytes().set(0);
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
 
         // create target
@@ -199,8 +197,8 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 Arrays.equals(result.getResponse().getContentAsByteArray(), random), "The same file that was uploaded is expected when downloaded");
 
         // download complete
-        assertThat(listener.getDownLoadProgress()).hasValue(10);
-        assertThat(listener.getShippedBytes()).hasValue(artifactSize);
+        assertThat(downloadProgressListener.getDownLoadProgress()).hasValue(10);
+        assertThat(downloadProgressListener.getShippedBytes()).hasValue(artifactSize);
     }
 
     @Test
@@ -355,13 +353,13 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
     public static class DownloadTestConfiguration {
 
         @Bean
-        public Listener cancelEventHandlerStubBean() {
-            return new Listener();
+        public DownloadProgressListener cancelEventHandlerStubBean() {
+            return new DownloadProgressListener();
         }
 
     }
 
-    private static class Listener {
+    private static class DownloadProgressListener {
 
         private final AtomicInteger downLoadProgress = new AtomicInteger(0);
         private final AtomicLong shippedBytes = new AtomicLong(0);
