@@ -8,44 +8,33 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static org.eclipse.hawkbit.repository.test.util.DatasourceContext.*;
+
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 /**
  * Provides a convenient way to generate a test database that can be used, and disposed of after the test is executed.
  */
 public class DisposableSqlTestDatabase extends SharedSqlTestDatabase implements AfterAllCallback {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DisposableSqlTestDatabase.class);
-    private static final String DEFAULT_SCHEMA_URI = System.getProperty(SPRING_DATASOURCE_KEY);
+    private DatasourceContext datasourceContext = null;
 
     @Override
-    public void beforeAll(final ExtensionContext extensionContext) {
-        if (StringUtils.isEmpty(System.getProperty("spring.jpa.database")) ||
-                StringUtils.isEmpty(System.getProperty(SPRING_DATASOURCE_KEY))) {
-            LOGGER.info("No database uri configured. Skipping...");
-            return;
-        }
-        System.setProperty(SPRING_DATASOURCE_KEY, getRandomSchemaName());
-        super.beforeAll(extensionContext);
+    public void beforeAll(final ExtensionContext context) {
+        super.beforeAll(context);
+        final DatasourceContext sharedContext = CONTEXT.get();
+        datasourceContext = new DatasourceContext(sharedContext.getDatabase(), sharedContext.getDatasourceUrl(),
+                sharedContext.getUsername(), sharedContext.getPassword());
+        final AbstractSqlTestDatabase database = matchingDatabase(datasourceContext);
+        final String randomSchemaUri = database.createRandomSchema().getRandomSchemaUri();
+        LOGGER.info("\033[0;33m Random Schema URI is {} \033[0m", randomSchemaUri);
+        System.setProperty(SPRING_DATASOURCE_URL_KEY, randomSchemaUri);
     }
 
     @Override
     public void afterAll(final ExtensionContext context) {
-        for (final AbstractSqlTestDatabase database : DATABASES) {
-            if (database.isApplicable()) {
-                LOGGER.info("Dropping Schema at url {} using {}", System.getProperty(SPRING_DATASOURCE_KEY),
-                        database.getClass().getSimpleName());
-                database.dropSchema();
-                break;
-            }
-        }
-
-        if (!StringUtils.isEmpty(DEFAULT_SCHEMA_URI)) {
-            System.setProperty(SPRING_DATASOURCE_KEY, DEFAULT_SCHEMA_URI);
-        }
+        matchingDatabase(datasourceContext).dropRandomSchema();
+        System.setProperty(SPRING_DATASOURCE_URL_KEY, CONTEXT.get().getDatasourceUrl());
     }
 }

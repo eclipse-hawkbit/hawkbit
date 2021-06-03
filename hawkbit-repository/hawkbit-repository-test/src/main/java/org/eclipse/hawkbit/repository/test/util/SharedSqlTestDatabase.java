@@ -8,72 +8,62 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
+/**
+ * Represents a test database configuration for a "shared" database instance across all tests annotated with this extension
+ */
 public class SharedSqlTestDatabase implements BeforeAllCallback {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SharedSqlTestDatabase.class);
-    protected static final String SPRING_DATASOURCE_KEY = "spring.datasource.url";
-
-    protected static final AbstractSqlTestDatabase[] DATABASES = new AbstractSqlTestDatabase[] { new H2TestDatabase(),
-            new MsSqlTestDatabase(), new MySqlTestDatabase(), new PostgreSqlTestDatabase() };
-
-    static {
-        if (!StringUtils.isEmpty(System.getProperty("spring.jpa.database")) && !StringUtils.isEmpty(
-                System.getProperty(SPRING_DATASOURCE_KEY))) {
-            System.setProperty(SPRING_DATASOURCE_KEY, getRandomSchemaName());
-            registerDropSchemaShutdownHook();
-        }
-    }
+    protected static final Logger LOGGER = LoggerFactory.getLogger(SharedSqlTestDatabase.class);
+    protected static final AtomicReference<DatasourceContext> CONTEXT = new AtomicReference<>();
 
     @Override
-    public void beforeAll(final ExtensionContext extensionContext) {
-        if (StringUtils.isEmpty(System.getProperty("spring.jpa.database")) ||
-                StringUtils.isEmpty(System.getProperty(SPRING_DATASOURCE_KEY))) {
-            LOGGER.info("No database uri configured. Skipping...");
+    public void beforeAll(final ExtensionContext context) {
+        if (CONTEXT.get() != null) {
             return;
         }
-        createSchema();
-    }
 
-    protected static void createSchema() {
-        for (final AbstractSqlTestDatabase database : DATABASES) {
-            if (database.isApplicable()) {
-                database.createSchema();
-                return;
-            }
+        final DatasourceContext testDatasourceContext = new DatasourceContext(context.getRequiredTestClass());
+
+        // update CONTEXT only if the current value is null => initialize only
+        if (!CONTEXT.compareAndSet(null, testDatasourceContext)) {
+            return;
         }
 
-        throw noSupportedDbFoundException();
+        final AbstractSqlTestDatabase database = matchingDatabase(testDatasourceContext);
+        final String randomSchemaUri = database.createRandomSchema().getRandomSchemaUri();
+        LOGGER.info("\033[0;33m Random Schema URI is {} \033[0m", randomSchemaUri);
+        System.setProperty("spring.datasource.url", randomSchemaUri);
+        Runtime.getRuntime().addShutdownHook(new Thread(database::dropRandomSchema));
     }
 
-    private static void registerDropSchemaShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            for (final AbstractSqlTestDatabase database : DATABASES) {
-                if (database.isApplicable()) {
-                    database.dropSchema();
-                    return;
-                }
-            }
-        }));
-    }
+    protected static AbstractSqlTestDatabase matchingDatabase(final DatasourceContext context) {
+        AbstractSqlTestDatabase database;
 
-    protected static String getRandomSchemaName() {
-        for (final AbstractSqlTestDatabase database : DATABASES) {
-            if (database.isApplicable()) {
-                return database.getRandomSchemaUri();
-            }
+        switch (context.getDatabase()) {
+            case "H2":
+                database = new H2TestDatabase(context);
+                break;
+            case "SQL_SERVER":
+                database = new MsSqlTestDatabase(context);
+                break;
+            case "MYSQL":
+                database = new MySqlTestDatabase(context);
+                break;
+            case "POSTGRESQL":
+                database = new PostgreSqlTestDatabase(context);
+                break;
+            default:
+                throw new IllegalStateException("No supported database found for uri " + context.getDatasourceUrl());
         }
-        throw noSupportedDbFoundException();
-    }
 
-    private static IllegalStateException noSupportedDbFoundException() {
-        return new IllegalStateException(
-                "Found no supported database matching uri " + System.getProperty(SPRING_DATASOURCE_KEY));
+        return database;
     }
 
 }

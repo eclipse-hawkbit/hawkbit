@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping MySql schemas if
@@ -23,38 +23,40 @@ public class MySqlTestDatabase extends AbstractSqlTestDatabase {
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlTestDatabase.class);
     protected static final String MYSQL_URI_PATTERN = "jdbc:mysql://{host}:{port}/{db}*";
 
-    @Override 
-    protected boolean isApplicable() {
-        return "MYSQL".equals(System.getProperty("spring.jpa.database")) //
-                && MATCHER.match(MYSQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))  //
-                && !StringUtils.isEmpty(getSchemaName());
+    public MySqlTestDatabase(final DatasourceContext context) {
+        super(context);
     }
 
     @Override
-    public void createSchema() {
-        final String schemaName = getSchemaName();
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        LOGGER.info("\033[0;33m Creating mysql schema {} if not existing \033[0m", schemaName);
+    public MySqlTestDatabase createRandomSchema() {
+        final String uri = context.getDatasourceUrl();
+        final String schemaName = getSchemaName(uri);
+        LOGGER.info("\033[0;33m Creating mysql schema {} if not existing \033[0m", context.getRandomSchemaName());
 
-        executeStatement(uri.split("/" + schemaName)[0], "CREATE SCHEMA IF NOT EXISTS " + schemaName + ";");
+        executeStatement(uri.split("/" + schemaName)[0],
+                "CREATE SCHEMA IF NOT EXISTS " + context.getRandomSchemaName() + ";");
+        return this;
     }
 
     @Override
-    protected void dropSchema() {
-        final String schemaName = getSchemaName();
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        executeStatement(uri.split("/" + schemaName)[0], "DROP SCHEMA " + schemaName + ";");
+    protected void dropRandomSchema() {
+        final String uri = context.getDatasourceUrl();
+        final String schemaName = getSchemaName(uri);
+        LOGGER.info("\033[0;33m Dropping mysql schema {} if not existing \033[0m", context.getRandomSchemaName());
+        executeStatement(uri.split("/" + schemaName)[0], "DROP SCHEMA " + context.getRandomSchemaName() + ";");
     }
 
     @Override
     protected String getRandomSchemaUri() {
-       final String schemaName = "HAWKBIT_TEST_" + RandomStringUtils.randomAlphanumeric(10);
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        return uri.substring(0, uri.lastIndexOf('/') + 1) + schemaName;
+        final String uri = context.getDatasourceUrl();
+        final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(MYSQL_URI_PATTERN, uri);
+
+        return MYSQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
+                .replace("{port}", databaseProperties.get("port"))
+                .replace("{db}*", context.getRandomSchemaName());
     }
 
-    private static String getSchemaName() {
-        return MATCHER.extractUriTemplateVariables(MYSQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))
-                .get("db");
+    private static String getSchemaName(final String datasourceUrl) {
+        return MATCHER.extractUriTemplateVariables(MYSQL_URI_PATTERN, datasourceUrl).get("db");
     }
 }

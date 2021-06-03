@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping H2 schemas if
@@ -18,32 +16,23 @@ import org.springframework.util.StringUtils;
  */
 public class H2TestDatabase extends AbstractSqlTestDatabase {
 
-    protected static final String H2_URI_PATTERN = "jdbc:h2:mem:{db};MODE=MySQL;";
-
-    @Override 
-    protected boolean isApplicable() {
-        return "H2".equals(System.getProperty("spring.jpa.database")) //
-                && MATCHER.match(H2_URI_PATTERN, System.getProperty("spring.datasource.url")) //
-                && !StringUtils.isEmpty(getSchemaName());
+    public H2TestDatabase(final DatasourceContext context) {
+        super(context);
     }
 
     @Override
-    public void createSchema() {
+    public H2TestDatabase createRandomSchema() {
         // do nothing, since H2 is in memory
+        return this;
     }
 
     @Override
-    protected void dropSchema() {
+    protected void dropRandomSchema() {
         // do nothing, since H2 is in memory
     }
 
     @Override
     protected String getRandomSchemaUri() {
-        return "jdbc:h2:mem:" + RandomStringUtils.randomAlphanumeric(16) +";MODE=MySQL;";
-    }
-
-    private static String getSchemaName() {
-        return MATCHER.extractUriTemplateVariables(H2_URI_PATTERN, System.getProperty("spring.datasource.url"))
-                .get("db");
+        return "jdbc:h2:mem:" + context.getRandomSchemaName() +";MODE=MySQL;";
     }
 }

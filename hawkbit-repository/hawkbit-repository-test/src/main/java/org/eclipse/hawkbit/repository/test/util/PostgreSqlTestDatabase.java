@@ -8,11 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import org.apache.commons.lang3.RandomStringUtils;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping MySql schemas if
@@ -21,42 +21,42 @@ import org.springframework.util.StringUtils;
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSqlTestDatabase.class);
-    protected static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{path}?currentSchema={db}*";
+    private static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{db}*";
 
-    @Override
-    protected boolean isApplicable() {
-        return "POSTGRESQL".equals(System.getProperty("spring.jpa.database")) //
-                && MATCHER.match(POSTGRESQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))  //
-                && !StringUtils.isEmpty(getSchemaName());
+    public PostgreSqlTestDatabase(final DatasourceContext context) {
+        super(context);
     }
 
     @Override
-    protected void createSchema() {
-        final String schemaName = getSchemaName();
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        LOGGER.info("\033[0;33m Creating postgreSql schema {} if not existing \033[0m", schemaName);
+    protected PostgreSqlTestDatabase createRandomSchema() {
+        final String uri = context.getDatasourceUrl();
+        final String schemaName = getSchemaName(uri);
+        LOGGER.info("\033[0;33m Creating postgreSql schema {} if not existing \033[0m", context.getRandomSchemaName());
 
-        executeStatement(uri.split("\\?currentSchema=")[0], "CREATE SCHEMA IF NOT EXISTS " + schemaName + ";");
+        executeStatement(uri.split("/" + schemaName)[0],
+                "CREATE SCHEMA IF NOT EXISTS " + context.getRandomSchemaName() + ";");
+        return this;
     }
 
     @Override
-    protected void dropSchema() {
-        final String schemaName = getSchemaName();
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-
-        executeStatement(uri.split("\\?currentSchema=")[0], "DROP schema " + schemaName + " CASCADE;");
+    protected void dropRandomSchema() {
+        final String uri = context.getDatasourceUrl();
+        final String schemaName = getSchemaName(uri);
+        LOGGER.info("\033[0;33m Dropping postgreSql schema {} if not existing \033[0m", context.getRandomSchemaName());
+        executeStatement(uri.split("/" + schemaName)[0], "DROP SCHEMA " + context.getRandomSchemaName() + " CASCADE;");
     }
 
     @Override
     protected String getRandomSchemaUri() {
-        final String schemaName = "HAWKBIT_TEST" + RandomStringUtils.randomAlphanumeric(10).toLowerCase();
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
+        final String uri = context.getDatasourceUrl();
+        final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri);
 
-        return uri.substring(0, uri.indexOf('?')) + "?currentSchema=" + schemaName;
+        return POSTGRESQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
+                .replace("{port}", databaseProperties.get("port"))
+                .replace("{db}*", context.getRandomSchemaName()) + "?currentSchema=" + context.getRandomSchemaName();
     }
 
-    private static String getSchemaName() {
-        return MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))
-                .get("db");
+    private static String getSchemaName(final String uri) {
+        return MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri).get("db");
     }
 }

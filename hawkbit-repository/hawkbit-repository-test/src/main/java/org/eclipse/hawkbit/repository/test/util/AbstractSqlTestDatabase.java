@@ -8,8 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import static java.sql.DriverManager.getConnection;
+
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -28,24 +29,24 @@ public abstract class AbstractSqlTestDatabase extends AbstractTestExecutionListe
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractSqlTestDatabase.class);
     protected static final AntPathMatcher MATCHER = new AntPathMatcher();
 
-    protected static final String SPRING_DATASOURCE_URL_KEY = "spring.datasource.url";
-    protected static final String USERNAME = System.getProperty("spring.datasource.username");
-    protected static final String PASSWORD = System.getProperty("spring.datasource.password");
+    protected final DatasourceContext context;
 
-    protected abstract boolean isApplicable();
+    public AbstractSqlTestDatabase(final DatasourceContext context) {
+        this.context = context;
+    }
 
-    protected abstract void createSchema();
+    protected abstract AbstractSqlTestDatabase createRandomSchema();
 
-    protected abstract void dropSchema();
+    protected abstract void dropRandomSchema();
 
     protected abstract String getRandomSchemaUri();
 
-    protected static void executeStatement(final String uri, final String statement) {
-        try (final Connection connection = DriverManager.getConnection(uri, AbstractSqlTestDatabase.USERNAME,
-                AbstractSqlTestDatabase.PASSWORD)) {
-            try (final PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
-                preparedStatement.execute();
-            }
+    protected void executeStatement(final String uri, final String statement) {
+        LOGGER.trace("\033[0;33m Executing statement {} on uri {} \033[0m", statement, uri);
+
+        try (final Connection connection = getConnection(uri, context.getUsername(), context.getPassword());
+             final PreparedStatement preparedStatement = connection.prepareStatement(statement)) {
+            preparedStatement.execute();
         } catch (final SQLException e) {
             LOGGER.error("Execution of statement '{}' on uri {} failed!", statement, uri, e);
         }

@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.test.context.TestExecutionListener;
-import org.springframework.util.StringUtils;
 
 /**
  * A {@link TestExecutionListener} for creating and dropping MS SQL Server
@@ -21,44 +19,33 @@ import org.springframework.util.StringUtils;
 public class MsSqlTestDatabase extends AbstractSqlTestDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MsSqlTestDatabase.class);
-    private static final String MSSQL_URI_PATTERN = "jdbc:sqlserver://{host}:{port};database={db}*";
 
-    @Override
-    protected boolean isApplicable() {
-        return "SQL_SERVER".equals(System.getProperty("spring.jpa.database")) //
-                && MATCHER.match(MSSQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY)) //
-                && !StringUtils.isEmpty(getSchemaName());
+    public MsSqlTestDatabase(final DatasourceContext context) {
+        super(context);
     }
 
     @Override
-    public void createSchema() {
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        final String schemaName = getSchemaName();
-        LOGGER.info("\033[0;33m Creating mssql schema {} if not existing \033[0m", schemaName);
+    public MsSqlTestDatabase createRandomSchema() {
+        final String uri = context.getDatasourceUrl();
+        LOGGER.info("\033[0;33m Creating mssql schema {} if not existing \033[0m", context.getRandomSchemaName());
 
-        executeStatement(uri.split(";database=")[0], "CREATE DATABASE IF NOT EXISTS " + schemaName + ";");
+        executeStatement(uri.split(";database=")[0], "CREATE DATABASE " + context.getRandomSchemaName() + ";");
+        return this;
     }
 
     @Override
-    protected void dropSchema() {
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        final String schemaName = getSchemaName();
+    protected void dropRandomSchema() {
+        final String uri = context.getDatasourceUrl();
         final String dbServerUri = uri.split(";database=")[0];
 
         // Needed to avoid the DROP is rejected with "database still in use"
-        executeStatement(dbServerUri, "ALTER DATABASE " + schemaName + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE;");
-        executeStatement(dbServerUri, "DROP DATABASE " + schemaName + ";");
+        executeStatement(dbServerUri, "ALTER DATABASE " + context.getRandomSchemaName() + " SET SINGLE_USER WITH ROLLBACK IMMEDIATE;");
+        executeStatement(dbServerUri, "DROP DATABASE " + context.getRandomSchemaName() + ";");
     }
 
     @Override
     protected String getRandomSchemaUri() {
-        final String schemaName = "HAWKBIT_TEST_" + RandomStringUtils.randomAlphanumeric(10);
-        final String uri = System.getProperty(SPRING_DATASOURCE_URL_KEY);
-        return uri.substring(0, uri.indexOf(';')) + ";database=" + schemaName;
-    }
-
-    private static String getSchemaName() {
-        return MATCHER.extractUriTemplateVariables(MSSQL_URI_PATTERN, System.getProperty(SPRING_DATASOURCE_URL_KEY))
-                .get("db");
+        final String uri = context.getDatasourceUrl();
+        return uri.substring(0, uri.indexOf(';')) + ";database=" + context.getRandomSchemaName();
     }
 }
