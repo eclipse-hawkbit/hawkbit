@@ -22,6 +22,7 @@ import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.test.util.TenantEventCounter;
+import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
@@ -54,9 +55,17 @@ public class EventVerifier extends AbstractTestExecutionListener {
         if (methodAnnotation == null) {
             return Collections.emptyMap();
         }
-        return methodAnnotation.inheritExpects() ?
+        return isAutoCreateTenant(testContext) ?
                 asMap(methodAnnotation.value(), getBeforeMethodExpects(testContext)) :
                 asMap(methodAnnotation.value());
+    }
+
+    private static boolean isAutoCreateTenant(final TestContext testContext) {
+        final WithUser withUser = testContext.getTestMethod().isAnnotationPresent(WithUser.class) ?
+                testContext.getTestMethod().getAnnotation(WithUser.class) :
+                testContext.getTestClass().getAnnotation(WithUser.class);
+
+        return withUser == null || withUser.autoCreateTenant();
     }
 
     private static Map<Class<?>, Integer> asMap(final Expect[]... expectsArray) {

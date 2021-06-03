@@ -111,7 +111,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @ExpectEvents(value = { @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
-            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) }, inheritExpects = false)
+            @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
     public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())

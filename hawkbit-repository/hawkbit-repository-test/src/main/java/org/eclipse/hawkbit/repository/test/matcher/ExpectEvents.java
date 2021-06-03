@@ -26,9 +26,4 @@ public @interface ExpectEvents {
      */
     Expect[] value() default {};
 
-    /**
-     * @return whether to include expects from pre test procedures (methods annotated with @{@link org.junit.Before}, for example)
-     */
-    boolean inheritExpects() default true;
-
 }
