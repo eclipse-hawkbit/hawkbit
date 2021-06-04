@@ -12,7 +12,7 @@
 
 # Run SonarQube only for master branch
 if [ $CIRCLE_BRANCH = master ] ; then
-  mvn verify license:check javadoc:javadoc sonar:sonar -Dsonar.login=$SONAR_ACCESS_TOKEN --batch-mode
+  mvn verify license:check javadoc:javadoc sonar:sonar -Dsonar.login=$SONAR_ACCESS_TOKEN --batch-mode -Dsurefire.forkCount=4
 else
-  mvn verify license:check javadoc:javadoc --batch-mode
+  mvn verify license:check javadoc:javadoc --batch-mode -Dsurefire.forkCount=4
 fi
