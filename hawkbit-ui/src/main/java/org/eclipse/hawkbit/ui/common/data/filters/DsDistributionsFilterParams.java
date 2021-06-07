@@ -12,6 +12,8 @@ import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetDistributionsStateDataProvider;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Filter params for {@link DistributionSetDistributionsStateDataProvider}.
  */
@@ -84,5 +86,11 @@ public class DsDistributionsFilterParams extends DsFilterParams {
     @Override
     public int hashCode() {
         return Objects.hash(getSearchText(), getDsTypeId());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("searchText", getSearchText()).add("dsTypeId", getDsTypeId())
+                .toString();
     }
 }
