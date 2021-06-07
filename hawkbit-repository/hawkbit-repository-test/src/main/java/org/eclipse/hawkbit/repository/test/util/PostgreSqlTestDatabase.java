@@ -29,35 +29,36 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected PostgreSqlTestDatabase createRandomSchema() {
-        final String uri = context.getDatasourceUrl();
-        final String schemaName = getSchemaName(uri);
         LOGGER.info("\033[0;33m Creating postgreSql schema {} if not existing \033[0m", context.getRandomSchemaName());
-
-        executeStatement(uri.split("/" + schemaName)[0],
-                "CREATE SCHEMA IF NOT EXISTS " + context.getRandomSchemaName() + ";");
+        final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
+        executeStatement(uri, "CREATE SCHEMA IF NOT EXISTS " + context.getRandomSchemaName() + ";");
         return this;
     }
 
     @Override
     protected void dropRandomSchema() {
-        final String uri = context.getDatasourceUrl();
-        final String schemaName = getSchemaName(uri);
         LOGGER.info("\033[0;33m Dropping postgreSql schema {} if not existing \033[0m", context.getRandomSchemaName());
-        executeStatement(uri.split("/" + schemaName)[0], "DROP SCHEMA " + context.getRandomSchemaName() + " CASCADE;");
+        final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
+        executeStatement(uri, "DROP SCHEMA " + context.getRandomSchemaName() + " CASCADE;");
     }
 
     @Override
     protected String getRandomSchemaUri() {
+        return getBaseUri() + "?currentSchema=" + context.getRandomSchemaName();
+    }
+
+    private String getBaseUri() {
         final String uri = context.getDatasourceUrl();
         final Map<String, String> databaseProperties = MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri);
-        final String schemaName = getSchemaName(uri);
 
         return POSTGRESQL_URI_PATTERN.replace("{host}", databaseProperties.get("host"))
                 .replace("{port}", databaseProperties.get("port"))
-                .replace("{db}*", schemaName.split("\\?")[0]) + "?currentSchema=" + context.getRandomSchemaName();
+                .replace("{db}*", getSchemaName());
     }
 
-    private static String getSchemaName(final String uri) {
-        return MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, uri).get("db");
+    private String getSchemaName() {
+        return MATCHER.extractUriTemplateVariables(POSTGRESQL_URI_PATTERN, context.getDatasourceUrl())
+                .get("db")
+                .split("\\?")[0];
     }
 }
