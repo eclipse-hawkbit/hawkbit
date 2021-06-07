@@ -35,6 +35,7 @@ import org.springframework.test.context.TestExecutionListeners;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import net.jcip.annotations.NotThreadSafe;
 
 /**
  * Multi-Tenancy tests which testing the CRUD operations of entities that all
@@ -45,6 +46,7 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Repository")
 @Story("Multi Tenancy")
 @ExtendWith(DisposableSqlTestDatabase.class)
+@NotThreadSafe // test methods should not run in parallel, since they use the same tenant
 @TestExecutionListeners(listeners = CleanupTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
 @WithUser(tenantId = "DEFAULT", principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {

@@ -34,9 +34,11 @@ import org.springframework.test.context.TestExecutionListeners;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import net.jcip.annotations.NotThreadSafe;
 
 @Feature("Component Tests - Repository")
 @Story("System Management")
+@NotThreadSafe // test methods should not run in parallel, since they use the same tenant
 @ExtendWith(DisposableSqlTestDatabase.class)
 @WithUser(tenantId = "DEFAULT", principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @TestExecutionListeners(listeners = CleanupTestExecutionListener.class, mergeMode = MERGE_WITH_DEFAULTS)
