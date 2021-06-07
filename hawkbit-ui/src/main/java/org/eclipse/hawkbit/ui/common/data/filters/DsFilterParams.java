@@ -14,6 +14,8 @@ import java.util.Objects;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Filter params for {@link DistributionSetManagementStateDataProvider}.
  */
@@ -81,5 +83,10 @@ public class DsFilterParams implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(getSearchText());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("searchText", getSearchText()).toString();
     }
 }

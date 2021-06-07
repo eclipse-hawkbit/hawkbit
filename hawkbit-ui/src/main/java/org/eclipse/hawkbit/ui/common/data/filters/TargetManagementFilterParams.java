@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementStateDataPro
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.MoreObjects;
+
 /**
  * Filter params for {@link TargetManagementStateDataProvider}.
  */
@@ -301,5 +303,14 @@ public class TargetManagementFilterParams implements Serializable {
     public int hashCode() {
         return Objects.hash(getPinnedDistId(), getSearchText(), getTargetUpdateStatusList(), isOverdueState(),
                 getDistributionId(), isNoTagClicked(), getTargetTags(), getTargetFilterQueryId());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("pinnedDistId", getPinnedDistId())
+                .add("searchText", getSearchText()).add("targetUpdateStatusList", getTargetUpdateStatusList())
+                .add("overdueState", isOverdueState()).add("distributionId", getDistributionId())
+                .add("noTagClicked", isNoTagClicked()).add("targetTags", getTargetTags())
+                .add("targetFilterQueryId", getTargetFilterQueryId()).toString();
     }
 }
