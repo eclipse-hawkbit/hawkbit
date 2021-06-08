@@ -9,7 +9,7 @@
 
 package org.eclipse.hawkbit.repository.test.matcher;
 
-import static org.hamcrest.Matchers.equalTo;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
@@ -99,9 +99,10 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
         for (Map.Entry<Class<?>, Integer> expected : expectedEvents.entrySet()) {
             try {
-                Awaitility.await().atMost(5, TimeUnit.SECONDS).pollInterval(100, TimeUnit.MILLISECONDS)
-                        .until(() -> eventCounter.getEventsCount(tenant).getOrDefault(expected.getKey(), 0),
-                                equalTo(expected.getValue()));
+                Awaitility.await()
+                        .atMost(5, TimeUnit.SECONDS).pollInterval(100, TimeUnit.MILLISECONDS)
+                        .untilAsserted(() -> assertThat(expected.getValue())
+                                .isEqualTo(eventCounter.getEventsCount(tenant).getOrDefault(expected.getKey(), 0)));
             } catch (final ConditionTimeoutException e) {
                 LOGGER.trace("", e);
                 failMessage.append(expected.getKey().getSimpleName())

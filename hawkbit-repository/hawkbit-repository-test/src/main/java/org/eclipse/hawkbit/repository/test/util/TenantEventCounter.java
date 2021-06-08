@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.test.util;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,20 +33,30 @@ public class TenantEventCounter implements ApplicationListener<ApplicationEvent>
     @Override
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof TenantAwareEvent) {
-            assertThat(((TenantAwareEvent) event).getTenant()).isNotBlank();
-
-            synchronized (TENANT_EVENTS_COUNT) {
-                final Set<TenantAwareEvent> eventsCount = TENANT_EVENTS_COUNT.getOrDefault(((TenantAwareEvent) event).getTenant(), new HashSet<>());
-                eventsCount.add((TenantAwareEvent) event);
-                TENANT_EVENTS_COUNT.put(((TenantAwareEvent) event).getTenant(), eventsCount);
-            }
+            final String tenant = ((TenantAwareEvent) event).getTenant();
+            assertThat(tenant).isNotBlank();
+            TENANT_EVENTS_COUNT.merge(tenant, toSet((TenantAwareEvent) event), TenantEventCounter::mergeEvents);
         }
+    }
+
+    private static Set<TenantAwareEvent> toSet(final TenantAwareEvent event) {
+        final Set<TenantAwareEvent> events = Collections.newSetFromMap(new ConcurrentHashMap<>());
+        events.add(event);
+        return events;
+    }
+
+    private static Set<TenantAwareEvent> mergeEvents(final Set<TenantAwareEvent> events1,
+            final Set<TenantAwareEvent> events2) {
+        if (events1.size() > events2.size()) {
+            events1.addAll(events2);
+            return events1;
+        }
+        events2.addAll(events1);
+        return events2;
     }
 
     public Map<Class<? extends TenantAwareEvent>, Integer> getEventsCount(final String tenant) {
         final Set<? extends TenantAwareEvent> events = TENANT_EVENTS_COUNT.getOrDefault(tenant, Collections.emptySet());
-        synchronized (TENANT_EVENTS_COUNT) {
-            return events.stream().collect(Collectors.toMap(e -> e.getClass(), e -> 1, Integer::sum));
-        }
+        return events.stream().collect(Collectors.toMap(e -> e.getClass(), e -> 1, Integer::sum));
     }
 }
