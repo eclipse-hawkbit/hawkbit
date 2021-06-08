@@ -16,9 +16,9 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.eclipse.hawkbit.repository.test.util.TenantEventCounter;
@@ -100,7 +100,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
         for (Map.Entry<Class<?>, Integer> expected : expectedEvents.entrySet()) {
             try {
                 Awaitility.await()
-                        .atMost(5, TimeUnit.SECONDS).pollInterval(100, TimeUnit.MILLISECONDS)
+                        .atMost(Duration.TEN_SECONDS).pollInterval(Duration.ONE_SECOND)
                         .untilAsserted(() -> assertThat(expected.getValue())
                                 .isEqualTo(eventCounter.getEventsCount(tenant).getOrDefault(expected.getKey(), 0)));
             } catch (final ConditionTimeoutException e) {
@@ -115,7 +115,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
         }
 
         if (!failMessage.toString().isEmpty()) {
-            fail("Did not receive the expected amount of events.\n" + failMessage.toString());
+            fail("Did not receive the expected amount of events.\n" + failMessage);
         }
     }
 
