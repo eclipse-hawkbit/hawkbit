@@ -207,7 +207,7 @@
       <!-- Maven Surefire settings -->
       <!-- ************************ -->
       <surefire.forkcount>1.0C</surefire.forkcount>
-      <surefire.threadCount>2</surefire.threadCount>
+      <surefire.threadCount>1</surefire.threadCount>
    </properties>
 
    <build>
