@@ -14,5 +14,5 @@
 if [ $CIRCLE_BRANCH = master ] ; then
   mvn verify license:check javadoc:javadoc sonar:sonar -Dsonar.login=$SONAR_ACCESS_TOKEN --batch-mode
 else
-  mvn verify license:check javadoc:javadoc --batch-mode -e
+  mvn verify license:check javadoc:javadoc --batch-mode
 fi
