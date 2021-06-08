@@ -6,11 +6,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-/*
- * Licenses The source code is released under Apache 2.0. The application uses the Vaadin Charts 2
- * add-on, which is released under the Commercial Vaadin Addon License:
- * https://vaadin.com/license/cval-3
- */
 package org.eclipse.hawkbit.ui.menu;
 
 /*
@@ -39,15 +34,14 @@ public final class DashboardEvent {
      */
     public static PostViewChangeEvent createPostViewChangeEvent(final DashboardMenuItem view) {
         /*
-         * ( Added this method to resolve sonar issue ). Please remove this
-         * method in future.
+         * ( Added this method to resolve sonar issue ). Please remove this method in
+         * future.
          */
         return new PostViewChangeEvent(view);
     }
 
     /**
-     * TenantAwareEvent to indicate that the current shown view has been
-     * changed.
+     * TenantAwareEvent to indicate that the current shown view has been changed.
      * 
      *
      *
