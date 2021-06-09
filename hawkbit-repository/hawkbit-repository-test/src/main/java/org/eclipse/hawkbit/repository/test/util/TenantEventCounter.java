@@ -28,14 +28,14 @@ public class TenantEventCounter implements ApplicationListener<ApplicationEvent>
 
     // Using static field to mitigate the spring context refresh, any changes written in this collection
     // will be persisted even between multiple beans construction/destruction
-    private static final Map<String, Set<TenantAwareEvent>> TENANT_EVENTS_COUNT = new ConcurrentHashMap<>();
+    private final Map<String, Set<TenantAwareEvent>> tenantEventsCount = new ConcurrentHashMap<>();
 
     @Override
     public void onApplicationEvent(final ApplicationEvent event) {
         if (event instanceof TenantAwareEvent) {
             final String tenant = ((TenantAwareEvent) event).getTenant();
             assertThat(tenant).isNotBlank();
-            TENANT_EVENTS_COUNT.merge(tenant, toSet((TenantAwareEvent) event), TenantEventCounter::mergeEvents);
+            tenantEventsCount.merge(tenant, toSet((TenantAwareEvent) event), TenantEventCounter::mergeEvents);
         }
     }
 
@@ -56,7 +56,7 @@ public class TenantEventCounter implements ApplicationListener<ApplicationEvent>
     }
 
     public Map<Class<? extends TenantAwareEvent>, Integer> getEventsCount(final String tenant) {
-        final Set<? extends TenantAwareEvent> events = TENANT_EVENTS_COUNT.getOrDefault(tenant, Collections.emptySet());
+        final Set<? extends TenantAwareEvent> events = tenantEventsCount.getOrDefault(tenant, Collections.emptySet());
         return events.stream().collect(Collectors.toMap(e -> e.getClass(), e -> 1, Integer::sum));
     }
 }
