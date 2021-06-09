@@ -100,7 +100,8 @@ public class EventVerifier extends AbstractTestExecutionListener {
         for (Map.Entry<Class<?>, Integer> expected : expectedEvents.entrySet()) {
             try {
                 Awaitility.await()
-                        .atMost(Duration.TEN_SECONDS).pollInterval(Duration.ONE_SECOND)
+                        .atMost(Duration.FIVE_SECONDS).pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+                        .pollInSameThread()
                         .untilAsserted(() -> assertThat(expected.getValue())
                                 .isEqualTo(eventCounter.getEventsCount(tenant).getOrDefault(expected.getKey(), 0)));
             } catch (final ConditionTimeoutException e) {
