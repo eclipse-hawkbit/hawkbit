@@ -10,7 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtAuthRestApi;
-import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,23 +20,23 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class MgmtAuthResource implements MgmtAuthRestApi {
 
-    private final SecurityContextTenantAware securityContextTenantAware;
+    private final TenantAware tenantAware;
 
     /**
      * Default constructor
      *
-     * @param securityContextTenantAware
-     *          securityContextTenantAware
+     * @param tenantAware
+     *          tenantAware
      */
-    public MgmtAuthResource(SecurityContextTenantAware securityContextTenantAware) {
-        this.securityContextTenantAware = securityContextTenantAware;
+    public MgmtAuthResource(TenantAware tenantAware) {
+        this.tenantAware = tenantAware;
     }
 
     @Override
     public ResponseEntity<MgmtUserInfo> validateBasicAuth() {
         MgmtUserInfo userInfo = new MgmtUserInfo();
-        userInfo.setUsername(securityContextTenantAware.getCurrentUsername());
-        userInfo.setTenant(securityContextTenantAware.getCurrentTenant());
+        userInfo.setUsername(tenantAware.getCurrentUsername());
+        userInfo.setTenant(tenantAware.getCurrentTenant());
         return ResponseEntity.ok(userInfo);
     }
 }
