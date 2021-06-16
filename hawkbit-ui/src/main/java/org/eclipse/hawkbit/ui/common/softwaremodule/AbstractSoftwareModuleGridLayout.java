@@ -45,7 +45,7 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
      * @param eventView
      *            EventView
      */
-    public AbstractSoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
+    protected AbstractSoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EventView eventView) {
 

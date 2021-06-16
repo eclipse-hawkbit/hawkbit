@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.GenericEventListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.PinningChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectGridEntityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectionChangedListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedCountAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedPinAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
@@ -134,16 +135,16 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
                 deploymentManagement, targetMetaDataWindowBuilder);
 
-        this.countMessageLabel = new TargetCountMessageLabel(targetManagement, uiDependencies.getI18n());
-
-        initGridDataUpdatedListener();
+        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(), targetManagement,
+                targetGrid.getFilterSupport());
 
         this.filterTabChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);
         this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
-                new EventViewAware(EventView.DEPLOYMENT), targetGrid.getFilterSupport());
+                new EventViewAware(EventView.DEPLOYMENT), targetGrid.getFilterSupport(),
+                countMessageLabel::updateFilteredCount);
         this.pinningChangedListener = new PinningChangedListener<>(uiDependencies.getEventBus(),
-                ProxyDistributionSet.class, targetGrid.getPinSupport());
+                ProxyDistributionSet.class, targetGrid.getPinSupport(), countMessageLabel::updatePinningDetails);
         this.targetChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(),
                 new EventLayoutViewAware(EventLayout.TARGET_LIST, EventView.DEPLOYMENT),
                 getMasterTargetAwareComponents());
@@ -160,11 +161,6 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         buildLayout(targetGridHeader, targetGrid, targetDetailsHeader, targetDetails);
     }
 
-    private void initGridDataUpdatedListener() {
-        targetGrid.addDataChangedListener(event -> countMessageLabel.displayTargetCountStatus(targetGrid.getDataSize(),
-                targetGrid.getFilter().orElse(null)));
-    }
-
     private List<MasterEntityAwareComponent<ProxyTarget>> getMasterTargetAwareComponents() {
         return Arrays.asList(targetDetailsHeader, targetDetails);
     }
@@ -174,7 +170,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
                 EntityModifiedSelectionAwareSupport.of(targetGrid.getSelectionSupport(),
                         targetGrid::mapIdToProxyEntity),
                 EntityModifiedPinAwareSupport.of(targetGrid.getPinSupport(), true, true),
-                EntityModifiedGridRefreshAwareSupport.of(targetGrid::refreshAll));
+                EntityModifiedGridRefreshAwareSupport.of(targetGrid::refreshAll),
+                EntityModifiedCountAwareSupport.of(countMessageLabel));
     }
 
     private List<EntityModifiedAwareSupport> getTagModifiedAwareSupports() {
@@ -211,6 +208,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             targetGridHeader.enableSearchIcon();
             targetGrid.onSimpleTabSelected();
         }
+
+        countMessageLabel.updateFilteredCount();
     }
 
     /**

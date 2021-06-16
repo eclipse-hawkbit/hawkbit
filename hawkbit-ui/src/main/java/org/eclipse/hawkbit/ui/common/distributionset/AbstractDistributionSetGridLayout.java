@@ -51,7 +51,7 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
      * @param eventView
      *            EventView
      */
-    public AbstractDistributionSetGridLayout(final CommonUiDependencies uiDependencies,
+    protected AbstractDistributionSetGridLayout(final CommonUiDependencies uiDependencies,
             final SystemManagement systemManagement, final SystemSecurityContext systemSecurityContext,
             final TenantConfigurationManagement configManagement,
             final DistributionSetManagement distributionSetManagement,
