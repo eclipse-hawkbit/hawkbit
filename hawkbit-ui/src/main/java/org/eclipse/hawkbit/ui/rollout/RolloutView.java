@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -51,7 +52,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @UIScope
 @SpringView(name = RolloutView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class RolloutView extends VerticalLayout implements View {
+public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "rollout";
@@ -74,8 +75,8 @@ public class RolloutView extends VerticalLayout implements View {
             final SystemSecurityContext systemSecurityContext) {
         this.rolloutManagementUIState = rolloutManagementUIState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permissionChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permissionChecker);
 
         this.rolloutsLayout = new RolloutGridLayout(uiDependencies, rolloutManagementUIState, rolloutManagement,
                 targetManagement, uiProperties, targetFilterQueryManagement, rolloutGroupManagement, quotaManagement,
@@ -171,6 +172,11 @@ public class RolloutView extends VerticalLayout implements View {
         rolloutsLayout.restoreState();
         rolloutGroupsLayout.restoreState();
         rolloutGroupTargetsLayout.restoreState();
+    }
+
+    @Override
+    public String getViewName() {
+        return RolloutView.VIEW_NAME;
     }
 
     @PreDestroy

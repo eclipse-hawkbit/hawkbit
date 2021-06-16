@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -62,7 +63,7 @@ import com.vaadin.ui.VerticalLayout;
 @UIScope
 @SpringView(name = DistributionsView.VIEW_NAME, ui = AbstractHawkbitUI.class)
 @JavaScript("vaadin://js/dynamicStylesheet.js")
-public class DistributionsView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DistributionsView extends VerticalLayout implements View, ViewNameAware, BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "distributions";
@@ -94,8 +95,8 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
         this.permChecker = permChecker;
         this.manageDistUIState = manageDistUIState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permChecker);
 
         if (permChecker.hasReadRepositoryPermission()) {
             this.dsTypeFilterLayout = new DSTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
@@ -298,6 +299,11 @@ public class DistributionsView extends VerticalLayout implements View, BrowserWi
                 showSmTypeLayout();
             }
         }
+    }
+
+    @Override
+    public String getViewName() {
+        return DistributionsView.VIEW_NAME;
     }
 
     @PreDestroy

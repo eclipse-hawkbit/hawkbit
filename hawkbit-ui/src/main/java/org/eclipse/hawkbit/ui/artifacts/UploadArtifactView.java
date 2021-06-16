@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -52,7 +53,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @UIScope
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class UploadArtifactView extends VerticalLayout implements View, ViewNameAware, BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "spUpload";
@@ -78,8 +79,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permChecker);
 
         if (permChecker.hasReadRepositoryPermission()) {
             this.smTypeFilterLayout = new SMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
@@ -247,6 +248,11 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
                 showSmTypeLayout();
             }
         }
+    }
+
+    @Override
+    public String getViewName() {
+        return UploadArtifactView.VIEW_NAME;
     }
 
     @PreDestroy

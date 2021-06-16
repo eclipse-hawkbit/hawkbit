@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -47,7 +48,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @UIScope
 @SpringView(name = FilterManagementView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class FilterManagementView extends VerticalLayout implements View {
+public class FilterManagementView extends VerticalLayout implements View, ViewNameAware {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "targetFilters";
@@ -128,6 +129,11 @@ public class FilterManagementView extends VerticalLayout implements View {
         }
         targetFilterDetailsLayout.restoreState();
         targetFilterGridLayout.restoreState();
+    }
+
+    @Override
+    public String getViewName() {
+        return FilterManagementView.VIEW_NAME;
     }
 
     @PreDestroy

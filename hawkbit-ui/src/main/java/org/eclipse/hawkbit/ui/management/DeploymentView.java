@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -66,7 +67,7 @@ import com.vaadin.ui.VerticalLayout;
  */
 @UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DeploymentView extends VerticalLayout implements View, ViewNameAware, BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "deployment";
@@ -457,6 +458,11 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
                 showDsTagLayout();
             }
         }
+    }
+
+    @Override
+    public String getViewName() {
+        return DeploymentView.VIEW_NAME;
     }
 
     @PreDestroy
