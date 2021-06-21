@@ -68,6 +68,14 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
 
     public void updateTotalCount() {
         totalCount = fetchTotalCount();
+        updateCountLabel();
+    }
+
+    private int fetchTotalCount() {
+        return gridFilterSupport.getOriginalDataProvider().size(new Query<>());
+    }
+
+    public void updateFilteredCount() {
         if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
             filteredCount = fetchFilteredCount();
         }
@@ -75,8 +83,17 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         updateCountLabel();
     }
 
-    private int fetchTotalCount() {
-        return gridFilterSupport.getOriginalDataProvider().size(new Query<>());
+    private int fetchFilteredCount() {
+        return gridFilterSupport.getFilterDataProvider().size(new Query<>());
+    }
+
+    public void updateTotalAndFilteredCount() {
+        totalCount = fetchTotalCount();
+        if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
+            filteredCount = fetchFilteredCount();
+        }
+
+        updateCountLabel();
     }
 
     private void updateCountLabel() {
@@ -194,19 +211,6 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         targetCountLabel.setValue(message.toString());
     }
 
-    public void updateFilteredCount() {
-        if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
-            filteredCount = fetchFilteredCount();
-        }
-
-        updateCountLabel();
-        updatePinningDetails();
-    }
-
-    private int fetchFilteredCount() {
-        return gridFilterSupport.getFilterDataProvider().size(new Query<>());
-    }
-
     @Override
     protected Label getFooterMessageLabel() {
         return targetCountLabel;
@@ -214,17 +218,18 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
 
     @Override
     public void updateCountOnEntitiesAdded(final int count) {
-        updateCountLabel();
+        updateTotalAndFilteredCount();
     }
 
     @Override
     public void updateCountOnEntitiesUpdated() {
         updateFilteredCount();
+        updatePinningDetails();
     }
 
     @Override
     public void updateCountOnEntitiesDeleted(final int count) {
-        updateCountLabel();
+        updateTotalAndFilteredCount();
         updatePinningDetails();
     }
 }

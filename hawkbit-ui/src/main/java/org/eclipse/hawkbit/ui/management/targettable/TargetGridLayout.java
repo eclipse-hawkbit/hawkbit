@@ -234,6 +234,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
     public void restoreState() {
         targetGridHeader.restoreState();
         targetGrid.restoreState();
+        countMessageLabel.updateTotalAndFilteredCount();
+        countMessageLabel.updatePinningDetails();
     }
 
     /**
@@ -241,6 +243,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      */
     public void onViewEnter() {
         targetGrid.getSelectionSupport().reselectCurrentEntity();
+        countMessageLabel.updateTotalAndFilteredCount();
+        countMessageLabel.updatePinningDetails();
     }
 
     /**
