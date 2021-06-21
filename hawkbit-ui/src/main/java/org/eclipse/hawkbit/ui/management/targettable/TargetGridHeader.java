@@ -186,7 +186,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
         bulkUploadTargetWindow.setVisible(true);
     }
 
-    private Boolean isBulkUploadInProgress() {
+    private boolean isBulkUploadInProgress() {
         return targetBulkUploadUiState.isInProgress();
     }
 

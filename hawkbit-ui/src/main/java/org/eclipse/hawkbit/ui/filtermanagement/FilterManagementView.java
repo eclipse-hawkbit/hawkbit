@@ -38,6 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
@@ -59,6 +61,8 @@ public class FilterManagementView extends VerticalLayout implements View, ViewNa
     private final TargetFilterDetailsLayout targetFilterDetailsLayout;
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
+
+    private boolean initial;
 
     @Autowired
     FilterManagementView(final VaadinMessageSource i18n, final UIEventBus eventBus,
@@ -91,7 +95,7 @@ public class FilterManagementView extends VerticalLayout implements View, ViewNa
     @PostConstruct
     void init() {
         buildLayout();
-        restoreState();
+        initial = true;
     }
 
     private void buildLayout() {
@@ -136,11 +140,47 @@ public class FilterManagementView extends VerticalLayout implements View, ViewNa
         return FilterManagementView.VIEW_NAME;
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        subscribeListeners();
+
+        if (initial) {
+            restoreState();
+            initial = false;
+            return;
+        }
+
+        updateLayoutsOnViewEnter();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        unsubscribeListeners();
+        event.navigate();
+    }
+
+    private void subscribeListeners() {
+        layoutVisibilityListener.subscribe();
+
+        targetFilterGridLayout.subscribeListeners();
+        targetFilterDetailsLayout.subscribeListeners();
+    }
+
+    private void unsubscribeListeners() {
         layoutVisibilityListener.unsubscribe();
 
-        targetFilterGridLayout.unsubscribeListener();
-        targetFilterDetailsLayout.unsubscribeListener();
+        targetFilterGridLayout.unsubscribeListeners();
+        targetFilterDetailsLayout.unsubscribeListeners();
+    }
+
+    private void updateLayoutsOnViewEnter() {
+        // TODO: think if needed
+        // targetFilterGridLayout.onViewEnter();
+        // targetFilterDetailsLayout.onViewEnter();
+    }
+
+    @PreDestroy
+    void destroy() {
+        unsubscribeListeners();
     }
 }

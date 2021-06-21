@@ -94,9 +94,11 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
     /**
      * Returns the {@link AbstractDsGrid}
      *
+     * @param <F>
+     *            Generic filter type
      * @return the distributionGrid
      */
-    public abstract <T extends DsFilterParams> AbstractDsGrid<T> getDistributionGrid();
+    public abstract <F extends DsFilterParams> AbstractDsGrid<F> getDistributionGrid();
 
     /**
      * Returns the {@link DistributionSetGridHeader}
@@ -148,9 +150,23 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
     }
 
     /**
-     * Unsubscribe the event listeners.
+     * Update components on view enter
      */
-    public void unsubscribeListener() {
+    public void onViewEnter() {
+        getDistributionGrid().getSelectionSupport().reselectCurrentEntity();
+    }
+
+    /**
+     * Subscribe event listeners.
+     */
+    public void subscribeListeners() {
+        listeners.forEach(TopicEventListener::subscribe);
+    }
+
+    /**
+     * Unsubscribe event listeners.
+     */
+    public void unsubscribeListeners() {
         listeners.forEach(TopicEventListener::unsubscribe);
     }
 }

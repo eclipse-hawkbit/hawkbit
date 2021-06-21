@@ -42,6 +42,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
@@ -63,6 +65,8 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     private final RolloutManagementUIState rolloutManagementUIState;
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
+
+    private boolean initial;
 
     @Autowired
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutManagementUIState rolloutManagementUIState,
@@ -100,7 +104,7 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     @PostConstruct
     void init() {
         buildLayout();
-        restoreState();
+        initial = true;
     }
 
     private void buildLayout() {
@@ -179,12 +183,50 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
         return RolloutView.VIEW_NAME;
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        subscribeListeners();
+
+        if (initial) {
+            restoreState();
+            initial = false;
+            return;
+        }
+
+        updateLayoutsOnViewEnter();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        unsubscribeListeners();
+        event.navigate();
+    }
+
+    private void subscribeListeners() {
+        layoutVisibilityListener.subscribe();
+
+        rolloutsLayout.subscribeListeners();
+        rolloutGroupsLayout.subscribeListeners();
+        rolloutGroupTargetsLayout.subscribeListeners();
+    }
+
+    private void unsubscribeListeners() {
         layoutVisibilityListener.unsubscribe();
 
-        rolloutsLayout.unsubscribeListener();
-        rolloutGroupsLayout.unsubscribeListener();
-        rolloutGroupTargetsLayout.unsubscribeListener();
+        rolloutsLayout.unsubscribeListeners();
+        rolloutGroupsLayout.unsubscribeListeners();
+        rolloutGroupTargetsLayout.unsubscribeListeners();
+    }
+
+    private void updateLayoutsOnViewEnter() {
+        // TODO: think if needed
+        // rolloutsLayout.onViewEnter();
+        // rolloutGroupsLayout.onViewEnter();
+        // rolloutGroupTargetsLayout.onViewEnter();
+    }
+
+    @PreDestroy
+    void destroy() {
+        unsubscribeListeners();
     }
 }

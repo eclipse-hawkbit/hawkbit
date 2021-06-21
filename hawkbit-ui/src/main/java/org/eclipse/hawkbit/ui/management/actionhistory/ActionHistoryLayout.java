@@ -33,7 +33,8 @@ public class ActionHistoryLayout extends HorizontalLayout {
      * @param actionHistoryGridLayoutUiState
      *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryLayout(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
+    public ActionHistoryLayout(final CommonUiDependencies uiDependencies,
+            final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
 
         this.actionHistoryGridLayout = new ActionHistoryGridLayout(uiDependencies, deploymentManagement,
@@ -99,11 +100,20 @@ public class ActionHistoryLayout extends HorizontalLayout {
     }
 
     /**
-     * Unsubscribe the changed listener
+     * Subscribe event listeners
      */
-    public void unsubscribeListener() {
-        actionHistoryGridLayout.unsubscribeListener();
-        actionStatusLayout.unsubscribeListener();
-        actionStatusMsgLayout.unsubscribeListener();
+    public void subscribeListeners() {
+        actionHistoryGridLayout.subscribeListeners();
+        actionStatusLayout.subscribeListeners();
+        actionStatusMsgLayout.subscribeListeners();
+    }
+
+    /**
+     * Unsubscribe event listeners
+     */
+    public void unsubscribeListeners() {
+        actionHistoryGridLayout.unsubscribeListeners();
+        actionStatusLayout.unsubscribeListeners();
+        actionStatusMsgLayout.unsubscribeListeners();
     }
 }

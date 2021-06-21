@@ -62,20 +62,22 @@ public class DistributionTagLayout extends AbstractFilterLayout {
             final DistributionSetTagManagement distributionSetTagManagement,
             final DistributionSetManagement distributionSetManagement,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
-        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(uiDependencies, distributionSetTagManagement);
+        final DsTagWindowBuilder dsTagWindowBuilder = new DsTagWindowBuilder(uiDependencies,
+                distributionSetTagManagement);
 
         this.distributionTagFilterHeader = new DistributionTagFilterHeader(uiDependencies, dsTagWindowBuilder,
                 distributionTagLayoutUiState);
         this.distributionTagButtons = new DistributionTagButtons(uiDependencies, distributionSetTagManagement,
                 distributionSetManagement, dsTagWindowBuilder, distributionTagLayoutUiState);
 
+        final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.DS_TAG_FILTER,
+                EventView.DEPLOYMENT);
         this.gridActionsVisibilityListener = new GridActionsVisibilityListener(uiDependencies.getEventBus(),
-                new EventLayoutViewAware(EventLayout.DS_TAG_FILTER, EventView.DEPLOYMENT),
-                distributionTagButtons::hideActionColumns, distributionTagButtons::showEditColumn,
+                layoutViewAware, distributionTagButtons::hideActionColumns, distributionTagButtons::showEditColumn,
                 distributionTagButtons::showDeleteColumn);
         this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
-                .entityModifiedAwareSupports(getEntityModifiedAwareSupports())
-                .parentEntityType(ProxyDistributionSet.class).build();
+                .parentEntityType(ProxyDistributionSet.class).viewAware(layoutViewAware)
+                .entityModifiedAwareSupports(getEntityModifiedAwareSupports()).build();
 
         buildLayout();
     }
@@ -110,9 +112,17 @@ public class DistributionTagLayout extends AbstractFilterLayout {
     }
 
     /**
-     * Unsubscribe the changed listener
+     * Subscribe event listeners
      */
-    public void unsubscribeListener() {
+    public void subscribeListeners() {
+        gridActionsVisibilityListener.subscribe();
+        entityModifiedListener.subscribe();
+    }
+
+    /**
+     * Unsubscribe event listeners
+     */
+    public void unsubscribeListeners() {
         gridActionsVisibilityListener.unsubscribe();
         entityModifiedListener.unsubscribe();
     }

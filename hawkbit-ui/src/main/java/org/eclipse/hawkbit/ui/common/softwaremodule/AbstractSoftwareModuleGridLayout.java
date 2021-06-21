@@ -130,9 +130,23 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
     }
 
     /**
-     * Unsubscribe the event listeners.
+     * Update components on view enter
      */
-    public void unsubscribeListener() {
+    public void onViewEnter() {
+        getSoftwareModuleGrid().getSelectionSupport().reselectCurrentEntity();
+    }
+
+    /**
+     * Subscribe event listeners.
+     */
+    public void subscribeListeners() {
+        listeners.forEach(TopicEventListener::subscribe);
+    }
+
+    /**
+     * Unsubscribe event listeners.
+     */
+    public void unsubscribeListeners() {
         listeners.forEach(TopicEventListener::unsubscribe);
     }
 

@@ -49,19 +49,21 @@ public class ActionHistoryGridLayout extends AbstractGridComponentLayout {
      * @param actionHistoryGridLayoutUiState
      *            ActionHistoryGridLayoutUiState
      */
-    public ActionHistoryGridLayout(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement,
+    public ActionHistoryGridLayout(final CommonUiDependencies uiDependencies,
+            final DeploymentManagement deploymentManagement,
             final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState) {
         this.actionHistoryHeader = new ActionHistoryGridHeader(uiDependencies, actionHistoryGridLayoutUiState);
-        this.actionHistoryGrid = new ActionHistoryGrid(uiDependencies, deploymentManagement, actionHistoryGridLayoutUiState);
+        this.actionHistoryGrid = new ActionHistoryGrid(uiDependencies, deploymentManagement,
+                actionHistoryGridLayoutUiState);
 
         final EventLayoutViewAware masterLayoutView = new EventLayoutViewAware(EventLayout.TARGET_LIST,
                 EventView.DEPLOYMENT);
-
-        this.masterEntityChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), masterLayoutView,
-                getMasterEntityAwareComponents());
-        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyAction.class)
-                .entityModifiedAwareSupports(getEntityModifiedAwareSupports()).parentEntityType(ProxyTarget.class)
-                .parentEntityIdProvider(this::getMasterEntityId).build();
+        this.masterEntityChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(),
+                masterLayoutView, getMasterEntityAwareComponents());
+        this.entityModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
+                ProxyAction.class).parentEntityType(ProxyTarget.class).parentEntityIdProvider(this::getMasterEntityId)
+                        .viewAware(masterLayoutView).entityModifiedAwareSupports(getEntityModifiedAwareSupports())
+                        .build();
 
         buildLayout(actionHistoryHeader, actionHistoryGrid);
     }
@@ -103,9 +105,17 @@ public class ActionHistoryGridLayout extends AbstractGridComponentLayout {
     }
 
     /**
-     * Unsubscribe the changed listener
+     * Subscribe event listeners
      */
-    public void unsubscribeListener() {
+    public void subscribeListeners() {
+        entityModifiedListener.subscribe();
+        masterEntityChangedListener.subscribe();
+    }
+
+    /**
+     * Unsubscribe event listeners
+     */
+    public void unsubscribeListeners() {
         entityModifiedListener.unsubscribe();
         masterEntityChangedListener.unsubscribe();
     }

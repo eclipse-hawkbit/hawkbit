@@ -89,9 +89,17 @@ public class RolloutGroupTargetGridLayout extends AbstractGridComponentLayout {
     }
 
     /**
-     * unsubscribe all listener
+     * Subscribe event listeners
      */
-    public void unsubscribeListener() {
+    public void subscribeListeners() {
+        rolloutChangedListener.subscribe();
+        rolloutGroupChangedListener.subscribe();
+    }
+
+    /**
+     * Unsubscribe event listeners
+     */
+    public void unsubscribeListeners() {
         rolloutChangedListener.unsubscribe();
         rolloutGroupChangedListener.unsubscribe();
     }

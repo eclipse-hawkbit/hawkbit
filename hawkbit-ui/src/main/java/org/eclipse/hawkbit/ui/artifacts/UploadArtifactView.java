@@ -40,6 +40,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -69,6 +71,8 @@ public class UploadArtifactView extends VerticalLayout implements View, ViewName
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
     private final transient LayoutResizeListener layoutResizeListener;
+
+    private boolean initial;
 
     @Autowired
     UploadArtifactView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
@@ -118,8 +122,8 @@ public class UploadArtifactView extends VerticalLayout implements View, ViewName
     void init() {
         if (permChecker.hasReadRepositoryPermission()) {
             buildLayout();
-            restoreState();
             Page.getCurrent().addBrowserWindowResizeListener(this);
+            initial = true;
         }
     }
 
@@ -255,15 +259,56 @@ public class UploadArtifactView extends VerticalLayout implements View, ViewName
         return UploadArtifactView.VIEW_NAME;
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        subscribeListeners();
+
+        if (initial) {
+            restoreState();
+            initial = false;
+            return;
+        }
+
+        updateLayoutsOnViewEnter();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        unsubscribeListeners();
+        event.navigate();
+    }
+
+    private void subscribeListeners() {
+        if (permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.subscribe();
+            layoutResizeListener.subscribe();
+
+            smTypeFilterLayout.subscribeListeners();
+            smGridLayout.subscribeListeners();
+            artifactDetailsGridLayout.subscribeListeners();
+        }
+    }
+
+    private void unsubscribeListeners() {
         if (permChecker.hasReadRepositoryPermission()) {
             layoutVisibilityListener.unsubscribe();
             layoutResizeListener.unsubscribe();
 
-            smTypeFilterLayout.unsubscribeListener();
-            smGridLayout.unsubscribeListener();
-            artifactDetailsGridLayout.unsubscribeListener();
+            smTypeFilterLayout.unsubscribeListeners();
+            smGridLayout.unsubscribeListeners();
+            artifactDetailsGridLayout.unsubscribeListeners();
         }
+    }
+
+    private void updateLayoutsOnViewEnter() {
+        // TODO: think if enough
+        if (permChecker.hasReadRepositoryPermission()) {
+            smGridLayout.onViewEnter();
+        }
+    }
+
+    @PreDestroy
+    void destroy() {
+        unsubscribeListeners();
     }
 }

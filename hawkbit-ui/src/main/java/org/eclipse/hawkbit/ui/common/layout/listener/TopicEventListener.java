@@ -28,14 +28,16 @@ public abstract class TopicEventListener {
     protected TopicEventListener(final UIEventBus eventBus, final Collection<String> topics) {
         this.eventBus = eventBus;
         this.topics = topics;
-
-        subscribe();
     }
 
     /**
      * Subscribe the event
      */
     public void subscribe() {
+        if (subscribed) {
+            return;
+        }
+
         topics.forEach(topic -> eventBus.subscribe(this, topic));
         subscribed = true;
     }
@@ -44,6 +46,10 @@ public abstract class TopicEventListener {
      * Unsubscribe the event
      */
     public void unsubscribe() {
+        if (!subscribed) {
+            return;
+        }
+
         eventBus.unsubscribe(this);
         subscribed = false;
     }

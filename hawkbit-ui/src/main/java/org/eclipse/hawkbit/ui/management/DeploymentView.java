@@ -53,6 +53,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -86,6 +88,8 @@ public class DeploymentView extends VerticalLayout implements View, ViewNameAwar
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
     private final transient LayoutResizeListener layoutResizeListener;
+
+    private boolean initial;
 
     @Autowired
     DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
@@ -170,8 +174,8 @@ public class DeploymentView extends VerticalLayout implements View, ViewNameAwar
     void init() {
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             buildLayout();
-            restoreState();
             Page.getCurrent().addBrowserWindowResizeListener(this);
+            initial = true;
         }
     }
 
@@ -465,22 +469,74 @@ public class DeploymentView extends VerticalLayout implements View, ViewNameAwar
         return DeploymentView.VIEW_NAME;
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        subscribeListeners();
+
+        if (initial) {
+            restoreState();
+            initial = false;
+            return;
+        }
+
+        updateLayoutsOnViewEnter();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        unsubscribeListeners();
+        event.navigate();
+    }
+
+    private void subscribeListeners() {
+        if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.subscribe();
+            layoutResizeListener.subscribe();
+        }
+
+        if (permChecker.hasTargetReadPermission()) {
+            targetTagFilterLayout.subscribeListeners();
+            targetGridLayout.subscribeListeners();
+            actionHistoryLayout.subscribeListeners();
+        }
+
+        if (permChecker.hasReadRepositoryPermission()) {
+            distributionTagLayout.subscribeListeners();
+            distributionGridLayout.subscribeListeners();
+        }
+    }
+
+    private void unsubscribeListeners() {
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             layoutVisibilityListener.unsubscribe();
             layoutResizeListener.unsubscribe();
         }
 
         if (permChecker.hasTargetReadPermission()) {
-            targetTagFilterLayout.unsubscribeListener();
-            targetGridLayout.unsubscribeListener();
-            actionHistoryLayout.unsubscribeListener();
+            targetTagFilterLayout.unsubscribeListeners();
+            targetGridLayout.unsubscribeListeners();
+            actionHistoryLayout.unsubscribeListeners();
         }
 
         if (permChecker.hasReadRepositoryPermission()) {
-            distributionTagLayout.unsubscribeListener();
-            distributionGridLayout.unsubscribeListener();
+            distributionTagLayout.unsubscribeListeners();
+            distributionGridLayout.unsubscribeListeners();
         }
+    }
+
+    private void updateLayoutsOnViewEnter() {
+        // TODO: think if enough
+        if (permChecker.hasTargetReadPermission()) {
+            targetGridLayout.onViewEnter();
+        }
+
+        if (permChecker.hasReadRepositoryPermission()) {
+            distributionGridLayout.onViewEnter();
+        }
+    }
+
+    @PreDestroy
+    void destroy() {
+        unsubscribeListeners();
     }
 }

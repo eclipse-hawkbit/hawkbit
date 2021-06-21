@@ -64,12 +64,12 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
         this.targetFilterGrid = new TargetFilterGrid(uiDependencies, filterManagementUIState.getGridLayoutUiState(),
                 targetFilterQueryManagement, autoAssignmentWindowBuilder);
 
+        final EventViewAware viewAware = new EventViewAware(EventView.TARGET_FILTER);
         this.targetQueryFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(),
-                ProxyTargetFilterQuery.class, new EventViewAware(EventView.TARGET_FILTER),
-                targetFilterGrid.getFilterSupport());
+                ProxyTargetFilterQuery.class, viewAware, targetFilterGrid.getFilterSupport());
         this.filterQueryModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
-                ProxyTargetFilterQuery.class).entityModifiedAwareSupports(getFilterQueryModifiedAwareSupports())
-                        .build();
+                ProxyTargetFilterQuery.class).viewAware(viewAware)
+                        .entityModifiedAwareSupports(getFilterQueryModifiedAwareSupports()).build();
 
         buildLayout(targetFilterGridHeader, targetFilterGrid);
     }
@@ -87,9 +87,17 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
     }
 
     /**
-     * unsubscribe all listener
+     * Subscribe event listeners
      */
-    public void unsubscribeListener() {
+    public void subscribeListeners() {
+        targetQueryFilterListener.subscribe();
+        filterQueryModifiedListener.subscribe();
+    }
+
+    /**
+     * Unsubscribe event listeners
+     */
+    public void unsubscribeListeners() {
         targetQueryFilterListener.unsubscribe();
         filterQueryModifiedListener.unsubscribe();
     }

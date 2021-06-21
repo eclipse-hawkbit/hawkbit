@@ -49,6 +49,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.annotations.JavaScript;
 import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
+import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
@@ -80,6 +82,8 @@ public class DistributionsView extends VerticalLayout implements View, ViewNameA
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
     private final transient LayoutResizeListener layoutResizeListener;
+
+    private boolean initial;
 
     @Autowired
     DistributionsView(final SpPermissionChecker permChecker, final UIEventBus eventBus, final VaadinMessageSource i18n,
@@ -143,8 +147,8 @@ public class DistributionsView extends VerticalLayout implements View, ViewNameA
     void init() {
         if (permChecker.hasReadRepositoryPermission()) {
             buildLayout();
-            restoreState();
             Page.getCurrent().addBrowserWindowResizeListener(this);
+            initial = true;
         }
     }
 
@@ -306,16 +310,59 @@ public class DistributionsView extends VerticalLayout implements View, ViewNameA
         return DistributionsView.VIEW_NAME;
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public void enter(final ViewChangeEvent event) {
+        subscribeListeners();
+
+        if (initial) {
+            restoreState();
+            initial = false;
+            return;
+        }
+
+        updateLayoutsOnViewEnter();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        unsubscribeListeners();
+        event.navigate();
+    }
+
+    private void subscribeListeners() {
+        if (permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.subscribe();
+            layoutResizeListener.subscribe();
+
+            dsTypeFilterLayout.subscribeListeners();
+            distributionSetGridLayout.subscribeListeners();
+            swModuleGridLayout.subscribeListeners();
+            distSMTypeFilterLayout.subscribeListeners();
+        }
+    }
+
+    private void unsubscribeListeners() {
         if (permChecker.hasReadRepositoryPermission()) {
             layoutVisibilityListener.unsubscribe();
             layoutResizeListener.unsubscribe();
 
-            dsTypeFilterLayout.unsubscribeListener();
-            distributionSetGridLayout.unsubscribeListener();
-            swModuleGridLayout.unsubscribeListener();
-            distSMTypeFilterLayout.unsubscribeListener();
+            dsTypeFilterLayout.unsubscribeListeners();
+            distributionSetGridLayout.unsubscribeListeners();
+            swModuleGridLayout.unsubscribeListeners();
+            distSMTypeFilterLayout.unsubscribeListeners();
         }
+    }
+
+    private void updateLayoutsOnViewEnter() {
+        // TODO: think if enough
+        if (permChecker.hasReadRepositoryPermission()) {
+            distributionSetGridLayout.onViewEnter();
+            swModuleGridLayout.onViewEnter();
+        }
+    }
+
+    @PreDestroy
+    void destroy() {
+        unsubscribeListeners();
     }
 }
