@@ -80,6 +80,9 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Column(name = "auto_assign_initiated_by", nullable = true, length = USERNAME_FIELD_LENGTH)
     private String autoAssignInitiatedBy;
 
+    @Column(name = "auto_assign_paused")
+    private boolean autoAssignPaused;
+
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
     }
@@ -97,14 +100,17 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
      *            of the {@link TargetFilterQuery}.
      * @param autoAssignWeight
      *            of the {@link TargetFilterQuery}.
+     * @param autoAssignPaused
+     *            of the {@link TargetFilterQuery}
      */
     public JpaTargetFilterQuery(final String name, final String query, final DistributionSet autoAssignDistributionSet,
-            final ActionType autoAssignActionType, final Integer autoAssignWeight) {
+            final ActionType autoAssignActionType, final Integer autoAssignWeight, final boolean autoAssignPaused) {
         this.name = name;
         this.query = query;
         this.autoAssignDistributionSet = (JpaDistributionSet) autoAssignDistributionSet;
         this.autoAssignActionType = autoAssignActionType;
         this.autoAssignWeight = autoAssignWeight;
+        this.autoAssignPaused = autoAssignPaused;
     }
 
     @Override
@@ -152,12 +158,22 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
         this.autoAssignWeight = weight;
     }
 
+    @Override
     public String getAutoAssignInitiatedBy() {
         return autoAssignInitiatedBy;
     }
 
     public void setAutoAssignInitiatedBy(final String autoAssignInitiatedBy) {
         this.autoAssignInitiatedBy = autoAssignInitiatedBy;
+    }
+
+    @Override
+    public boolean isAutoAssignPaused() {
+        return autoAssignPaused;
+    }
+
+    public void setAutoAssignPaused(final boolean paused) {
+        this.autoAssignPaused = paused;
     }
 
     @Override

@@ -84,6 +84,15 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate autoAssignWeight(Integer weight);
 
     /**
+     * Set paused status of auto assignment
+     *
+     * @param paused
+     *            paused status of auto assignment
+     * @return updated builder instance
+     */
+    TargetFilterQueryCreate autoAssignPaused(boolean paused);
+
+    /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder
      */
     TargetFilterQuery build();

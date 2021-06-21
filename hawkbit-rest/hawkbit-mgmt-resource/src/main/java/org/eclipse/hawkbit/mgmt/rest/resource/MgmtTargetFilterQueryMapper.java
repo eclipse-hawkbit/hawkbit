@@ -62,6 +62,7 @@ public final class MgmtTargetFilterQueryMapper {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
             targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(filter.getAutoAssignActionType()));
             filter.getAutoAssignWeight().ifPresent(targetRest::setAutoAssignWeight);
+            targetRest.setAutoAssignPaused(filter.isAutoAssignPaused());
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
@@ -85,7 +86,7 @@ public final class MgmtTargetFilterQueryMapper {
         final ActionType type = MgmtRestModelMapper.convertActionType(assignRest.getType());
 
         return entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(assignRest.getId()).actionType(type)
-                .weight(assignRest.getWeight());
+                .weight(assignRest.getWeight()).paused(assignRest.isPaused());
     }
 
 }

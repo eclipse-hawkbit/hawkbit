@@ -72,8 +72,7 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     ActionType getAutoAssignActionType();
 
     /**
-     * @return the weight of the {@link Action}s created during an auto
-     *         assignment.
+     * @return the weight of the {@link Action}s created during an auto assignment.
      */
     Optional<Integer> getAutoAssignWeight();
 
@@ -81,4 +80,10 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      * @return the user that triggered the auto assignment
      */
     String getAutoAssignInitiatedBy();
+
+    /**
+     * @return the paused status of the auto assignment
+     */
+    boolean isAutoAssignPaused();
+
 }

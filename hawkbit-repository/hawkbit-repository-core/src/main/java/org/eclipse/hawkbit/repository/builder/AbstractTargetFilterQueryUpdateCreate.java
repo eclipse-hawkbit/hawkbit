@@ -40,6 +40,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
 
+    protected boolean autoAssignPaused;
+
     /**
      * Set DS ID of the {@link Action} created during auto assignment
      * 
@@ -57,8 +59,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     }
 
     /**
-     * Set {@link ActionType} of the {@link Action} created during auto
-     * assignment
+     * Set {@link ActionType} of the {@link Action} created during auto assignment
      * 
      * @param actionType
      *            of the {@link TargetFilterQuery}
@@ -78,6 +79,18 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
      */
     public T autoAssignWeight(final Integer weight) {
         this.weight = weight;
+        return (T) this;
+    }
+
+    /**
+     * Set paused status of the auto assignment
+     *
+     * @param paused
+     *            paused status of the {@link TargetFilterQuery} auto assignment
+     * @return this builder
+     */
+    public T autoAssignPaused(final boolean paused) {
+        this.autoAssignPaused = paused;
         return (T) this;
     }
 

@@ -25,6 +25,9 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
     @JsonProperty(required = false)
     private Integer weight;
 
+    @JsonProperty(required = false)
+    private boolean paused = false;
+
     public MgmtActionType getType() {
         return type;
     }
@@ -39,5 +42,13 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    public boolean isPaused() {
+        return paused;
+    }
+
+    public void setPaused(final boolean paused) {
+        this.paused = paused;
     }
 }

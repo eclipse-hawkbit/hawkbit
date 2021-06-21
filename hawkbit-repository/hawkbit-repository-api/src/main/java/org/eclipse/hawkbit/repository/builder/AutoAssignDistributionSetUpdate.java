@@ -29,6 +29,8 @@ public class AutoAssignDistributionSetUpdate {
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
+    private boolean paused;
+
     /**
      * Constructor
      * 
@@ -75,6 +77,11 @@ public class AutoAssignDistributionSetUpdate {
         return this;
     }
 
+    public AutoAssignDistributionSetUpdate paused(final boolean paused) {
+        this.paused = paused;
+        return this;
+    }
+
     public Long getDsId() {
         return dsId;
     }
@@ -91,4 +98,7 @@ public class AutoAssignDistributionSetUpdate {
         return targetFilterId;
     }
 
+    public boolean isPaused() {
+        return paused;
+    }
 }
