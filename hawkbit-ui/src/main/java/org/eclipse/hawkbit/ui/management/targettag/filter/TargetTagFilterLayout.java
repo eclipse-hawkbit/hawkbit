@@ -93,6 +93,13 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        multipleTargetFilter.onViewEnter();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

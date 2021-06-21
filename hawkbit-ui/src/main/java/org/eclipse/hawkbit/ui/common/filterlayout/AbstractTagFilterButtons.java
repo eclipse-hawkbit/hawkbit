@@ -58,7 +58,8 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
      */
     public AbstractTagFilterButtons(final CommonUiDependencies uiDependencies,
             final TagFilterLayoutUiState tagFilterLayoutUiState) {
-        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(), uiDependencies.getPermChecker());
+        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(),
+                uiDependencies.getPermChecker());
 
         this.uiNotification = uiDependencies.getUiNotification();
         this.tagFilterLayoutUiState = tagFilterLayoutUiState;
@@ -212,11 +213,32 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         final Map<Long, String> tagsToRestore = tagFilterLayoutUiState.getClickedTagIdsWithName();
 
         if (!CollectionUtils.isEmpty(tagsToRestore)) {
+            removeNonExistingTags(tagsToRestore);
             getFilterButtonClickBehaviour().setPreviouslyClickedFilterIdsWithName(tagsToRestore);
         }
 
         if (tagFilterLayoutUiState.isNoTagClicked()) {
             getNoTagButton().addStyleName(SPUIStyleDefinitions.SP_NO_TAG_BTN_CLICKED_STYLE);
+        }
+    }
+
+    private boolean removeNonExistingTags(final Map<Long, String> tagIdsWithName) {
+        final Collection<Long> tagIds = tagIdsWithName.keySet();
+        final Collection<Long> existingTagIds = filterExistingTagIds(tagIds);
+        if (tagIds.size() != existingTagIds.size()) {
+            return tagIds.retainAll(existingTagIds);
+        }
+
+        return false;
+    }
+
+    protected abstract Collection<Long> filterExistingTagIds(final Collection<Long> tagIds);
+
+    public void reevaluateFilter() {
+        final Map<Long, String> clickedTags = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIdsWithName();
+
+        if (!CollectionUtils.isEmpty(clickedTags) && removeNonExistingTags(clickedTags)) {
+            publishFilterChangedEvent(clickedTags);
         }
     }
 }

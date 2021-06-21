@@ -112,6 +112,13 @@ public class DistributionTagLayout extends AbstractFilterLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        distributionTagButtons.reevaluateFilter();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

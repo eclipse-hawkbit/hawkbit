@@ -179,6 +179,14 @@ public class MultipleTargetFilter extends Accordion {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        filterByButtons.reevaluateFilter();
+        customFilterTab.reevaluateFilter();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {
