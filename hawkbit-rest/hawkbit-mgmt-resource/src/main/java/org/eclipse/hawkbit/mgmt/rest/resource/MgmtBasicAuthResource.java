@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtAuthRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtBasicAuthRestApi;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
  * REST Resource handling basic auth validation.
  */
 @RestController
-public class MgmtAuthResource implements MgmtAuthRestApi {
+public class MgmtBasicAuthResource implements MgmtBasicAuthRestApi {
 
     private final TenantAware tenantAware;
 
@@ -28,7 +28,7 @@ public class MgmtAuthResource implements MgmtAuthRestApi {
      * @param tenantAware
      *          tenantAware
      */
-    public MgmtAuthResource(TenantAware tenantAware) {
+    public MgmtBasicAuthResource(TenantAware tenantAware) {
         this.tenantAware = tenantAware;
     }
 
