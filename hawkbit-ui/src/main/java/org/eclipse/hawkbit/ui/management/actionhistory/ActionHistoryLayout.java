@@ -100,6 +100,13 @@ public class ActionHistoryLayout extends HorizontalLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        actionHistoryGridLayout.onViewEnter();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

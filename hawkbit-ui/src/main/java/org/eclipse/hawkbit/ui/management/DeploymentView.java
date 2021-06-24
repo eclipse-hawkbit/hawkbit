@@ -525,10 +525,10 @@ public class DeploymentView extends VerticalLayout implements View, ViewNameAwar
     }
 
     private void updateLayoutsOnViewEnter() {
-        // TODO: think if enough
         if (permChecker.hasTargetReadPermission()) {
             targetTagFilterLayout.onViewEnter();
             targetGridLayout.onViewEnter();
+            actionHistoryLayout.onViewEnter();
         }
 
         if (permChecker.hasReadRepositoryPermission()) {

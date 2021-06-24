@@ -116,6 +116,13 @@ public class RolloutGridLayout extends AbstractGridComponentLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        rolloutListGrid.reselectCurrentRollout();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

@@ -103,6 +103,13 @@ public class SMTypeFilterLayout extends AbstractFilterLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        smTypeFilterButtons.reevaluateFilter();
+    }
+
+    /**
      * Subscribe events listeners
      */
     public void subscribeListeners() {

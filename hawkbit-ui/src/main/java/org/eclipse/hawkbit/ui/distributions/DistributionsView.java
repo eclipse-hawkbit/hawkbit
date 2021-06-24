@@ -354,10 +354,11 @@ public class DistributionsView extends VerticalLayout implements View, ViewNameA
     }
 
     private void updateLayoutsOnViewEnter() {
-        // TODO: think if enough
         if (permChecker.hasReadRepositoryPermission()) {
+            dsTypeFilterLayout.onViewEnter();
             distributionSetGridLayout.onViewEnter();
             swModuleGridLayout.onViewEnter();
+            distSMTypeFilterLayout.onViewEnter();
         }
     }
 

@@ -174,9 +174,7 @@ public class FilterManagementView extends VerticalLayout implements View, ViewNa
     }
 
     private void updateLayoutsOnViewEnter() {
-        // TODO: think if needed
-        // targetFilterGridLayout.onViewEnter();
-        // targetFilterDetailsLayout.onViewEnter();
+        // nothing to do
     }
 
     @PreDestroy

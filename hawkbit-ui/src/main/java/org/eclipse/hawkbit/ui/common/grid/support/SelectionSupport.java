@@ -351,7 +351,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
     }
 
     /**
-     * Re-selects currently selected entity
+     * Re-fetches and re-selects currently selected entity
      */
     public void reselectCurrentEntity() {
         getSelectedEntityId().ifPresent(selectedEntityId -> {

@@ -105,6 +105,13 @@ public class ActionHistoryGridLayout extends AbstractGridComponentLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        actionHistoryGrid.getSelectionSupport().reselectCurrentEntity();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

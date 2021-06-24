@@ -108,6 +108,13 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
     }
 
     /**
+     * Update components on view enter
+     */
+    public void onViewEnter() {
+        dSTypeFilterButtons.reevaluateFilter();
+    }
+
+    /**
      * Subscribe event listeners
      */
     public void subscribeListeners() {

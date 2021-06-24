@@ -301,8 +301,8 @@ public class UploadArtifactView extends VerticalLayout implements View, ViewName
     }
 
     private void updateLayoutsOnViewEnter() {
-        // TODO: think if enough
         if (permChecker.hasReadRepositoryPermission()) {
+            smTypeFilterLayout.onViewEnter();
             smGridLayout.onViewEnter();
         }
     }

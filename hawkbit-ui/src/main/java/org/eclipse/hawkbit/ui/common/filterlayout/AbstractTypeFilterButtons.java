@@ -47,7 +47,8 @@ public abstract class AbstractTypeFilterButtons extends AbstractFilterButtons<Pr
      */
     public AbstractTypeFilterButtons(final CommonUiDependencies uiDependencies,
             final TypeFilterLayoutUiState typeFilterLayoutUiState) {
-        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(), uiDependencies.getPermChecker());
+        super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(),
+                uiDependencies.getPermChecker());
 
         this.uiNotification = uiDependencies.getUiNotification();
         this.typeFilterLayoutUiState = typeFilterLayoutUiState;
@@ -152,6 +153,17 @@ public abstract class AbstractTypeFilterButtons extends AbstractFilterButtons<Pr
 
         if (lastClickedTypeId != null) {
             getFilterButtonClickBehaviour().setPreviouslyClickedFilterId(lastClickedTypeId);
+        }
+    }
+
+    protected abstract boolean typeExists(final Long typeId);
+
+    public void reevaluateFilter() {
+        final Long clickedTypeId = getFilterButtonClickBehaviour().getPreviouslyClickedFilterId();
+
+        if (clickedTypeId != null && !typeExists(clickedTypeId)) {
+            getFilterButtonClickBehaviour().setPreviouslyClickedFilterId(null);
+            publishFilterChangedEvent(null);
         }
     }
 }

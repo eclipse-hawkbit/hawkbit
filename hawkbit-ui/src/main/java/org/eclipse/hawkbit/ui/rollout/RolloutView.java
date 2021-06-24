@@ -219,10 +219,7 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     }
 
     private void updateLayoutsOnViewEnter() {
-        // TODO: think if needed
-        // rolloutsLayout.onViewEnter();
-        // rolloutGroupsLayout.onViewEnter();
-        // rolloutGroupTargetsLayout.onViewEnter();
+        rolloutsLayout.onViewEnter();
     }
 
     @PreDestroy
