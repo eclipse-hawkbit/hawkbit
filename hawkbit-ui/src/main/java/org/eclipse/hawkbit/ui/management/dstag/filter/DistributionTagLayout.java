@@ -103,32 +103,24 @@ public class DistributionTagLayout extends AbstractFilterLayout {
         return filterButtonsLayout;
     }
 
-    /**
-     * Restore the distribution tag state
-     */
+    @Override
     public void restoreState() {
         distributionTagFilterHeader.restoreState();
         distributionTagButtons.restoreState();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         distributionTagButtons.reevaluateFilter();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         gridActionsVisibilityListener.subscribe();
         entityModifiedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         gridActionsVisibilityListener.unsubscribe();
         entityModifiedListener.unsubscribe();

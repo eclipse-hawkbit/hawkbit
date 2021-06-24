@@ -97,31 +97,23 @@ public class ActionHistoryGridLayout extends AbstractGridComponentLayout {
         actionHistoryGrid.createMinimizedContent();
     }
 
-    /**
-     * restore action histors header
-     */
+    @Override
     public void restoreState() {
         actionHistoryHeader.restoreState();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         actionHistoryGrid.getSelectionSupport().reselectCurrentEntity();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         entityModifiedListener.subscribe();
         masterEntityChangedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         entityModifiedListener.unsubscribe();
         masterEntityChangedListener.unsubscribe();

@@ -80,25 +80,19 @@ public class RolloutGroupTargetGridLayout extends AbstractGridComponentLayout {
         return Arrays.asList(rolloutGroupTargetsListHeader, rolloutGroupTargetsListGrid.getMasterEntitySupport());
     }
 
-    /**
-     * Restore the rollout group target list state
-     */
+    @Override
     public void restoreState() {
         rolloutGroupTargetsListHeader.restoreState();
         rolloutGroupTargetsListGrid.restoreState();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         rolloutChangedListener.subscribe();
         rolloutGroupChangedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         rolloutChangedListener.unsubscribe();
         rolloutGroupChangedListener.unsubscribe();

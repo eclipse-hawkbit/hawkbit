@@ -117,35 +117,27 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
         showDetailsLayout();
     }
 
-    /**
-     * Is called when view is shown to the user
-     */
+    protected void addEventListener(final TopicEventListener listener) {
+        listeners.add(listener);
+    }
+
+    @Override
     public void restoreState() {
         getSoftwareModuleGridHeader().restoreState();
         getSoftwareModuleGrid().restoreState();
     }
 
-    protected void addEventListener(final TopicEventListener listener) {
-        listeners.add(listener);
-    }
-
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         getSoftwareModuleGrid().getSelectionSupport().reselectCurrentEntity();
     }
 
-    /**
-     * Subscribe event listeners.
-     */
+    @Override
     public void subscribeListeners() {
         listeners.forEach(TopicEventListener::subscribe);
     }
 
-    /**
-     * Unsubscribe event listeners.
-     */
+    @Override
     public void unsubscribeListeners() {
         listeners.forEach(TopicEventListener::unsubscribe);
     }

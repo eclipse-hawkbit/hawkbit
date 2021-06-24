@@ -78,25 +78,19 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
         return Collections.singletonList(EntityModifiedGridRefreshAwareSupport.of(targetFilterGrid::refreshAll));
     }
 
-    /**
-     * restore the saved state
-     */
+    @Override
     public void restoreState() {
         targetFilterGridHeader.restoreState();
         targetFilterGrid.restoreState();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         targetQueryFilterListener.subscribe();
         filterQueryModifiedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         targetQueryFilterListener.unsubscribe();
         filterQueryModifiedListener.unsubscribe();

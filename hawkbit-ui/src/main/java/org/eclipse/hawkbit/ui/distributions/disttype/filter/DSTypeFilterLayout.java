@@ -100,31 +100,23 @@ public class DSTypeFilterLayout extends AbstractFilterLayout {
         return wrapFilterContent(dSTypeFilterButtons);
     }
 
-    /**
-     * Restore state of distribution set filter button
-     */
+    @Override
     public void restoreState() {
         dSTypeFilterButtons.restoreState();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         dSTypeFilterButtons.reevaluateFilter();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         gridActionsVisibilityListener.subscribe();
         entityModifiedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         gridActionsVisibilityListener.unsubscribe();
         entityModifiedListener.unsubscribe();

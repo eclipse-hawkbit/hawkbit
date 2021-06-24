@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.rollout;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -26,8 +24,8 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.AbstractEventListenersAwareView;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
-import org.eclipse.hawkbit.ui.common.ViewNameAware;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -41,20 +39,16 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.navigator.View;
-import com.vaadin.navigator.ViewBeforeLeaveEvent;
-import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Alignment;
-import com.vaadin.ui.VerticalLayout;
 
 /**
  * Rollout management view.
  */
 @UIScope
 @SpringView(name = RolloutView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class RolloutView extends VerticalLayout implements View, ViewNameAware {
+public class RolloutView extends AbstractEventListenersAwareView {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "rollout";
@@ -65,8 +59,6 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     private final RolloutManagementUIState rolloutManagementUIState;
 
     private final transient LayoutVisibilityListener layoutVisibilityListener;
-
-    private boolean initial;
 
     @Autowired
     RolloutView(final SpPermissionChecker permissionChecker, final RolloutManagementUIState rolloutManagementUIState,
@@ -90,6 +82,8 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
         this.rolloutGroupTargetsLayout = new RolloutGroupTargetGridLayout(uiDependencies, rolloutGroupManagement,
                 rolloutManagementUIState);
 
+        addEventAwareLayouts(Arrays.asList(rolloutsLayout, rolloutGroupsLayout, rolloutGroupTargetsLayout));
+
         final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
         layoutVisibilityHandlers.put(EventLayout.ROLLOUT_LIST,
                 new VisibilityHandler(this::showRolloutListLayout, this::showRolloutGroupListLayout));
@@ -101,13 +95,8 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
                 layoutVisibilityHandlers);
     }
 
-    @PostConstruct
-    void init() {
-        buildLayout();
-        initial = true;
-    }
-
-    private void buildLayout() {
+    @Override
+    protected void buildLayout() {
         setSpacing(false);
         setMargin(false);
         setSizeFull();
@@ -157,7 +146,8 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
         rolloutGroupTargetsLayout.setVisible(true);
     }
 
-    private void restoreState() {
+    @Override
+    protected void restoreState() {
         final EventLayout layout = rolloutManagementUIState.getCurrentLayout().orElse(EventLayout.ROLLOUT_LIST);
         switch (layout) {
         case ROLLOUT_LIST:
@@ -173,9 +163,7 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
             break;
         }
 
-        rolloutsLayout.restoreState();
-        rolloutGroupsLayout.restoreState();
-        rolloutGroupTargetsLayout.restoreState();
+        super.restoreState();
     }
 
     @Override
@@ -184,46 +172,16 @@ public class RolloutView extends VerticalLayout implements View, ViewNameAware {
     }
 
     @Override
-    public void enter(final ViewChangeEvent event) {
-        subscribeListeners();
+    protected void subscribeListeners() {
+        layoutVisibilityListener.subscribe();
 
-        if (initial) {
-            restoreState();
-            initial = false;
-            return;
-        }
-
-        updateLayoutsOnViewEnter();
+        super.subscribeListeners();
     }
 
     @Override
-    public void beforeLeave(final ViewBeforeLeaveEvent event) {
-        unsubscribeListeners();
-        event.navigate();
-    }
-
-    private void subscribeListeners() {
-        layoutVisibilityListener.subscribe();
-
-        rolloutsLayout.subscribeListeners();
-        rolloutGroupsLayout.subscribeListeners();
-        rolloutGroupTargetsLayout.subscribeListeners();
-    }
-
-    private void unsubscribeListeners() {
+    protected void unsubscribeListeners() {
         layoutVisibilityListener.unsubscribe();
 
-        rolloutsLayout.unsubscribeListeners();
-        rolloutGroupsLayout.unsubscribeListeners();
-        rolloutGroupTargetsLayout.unsubscribeListeners();
-    }
-
-    private void updateLayoutsOnViewEnter() {
-        rolloutsLayout.onViewEnter();
-    }
-
-    @PreDestroy
-    void destroy() {
-        unsubscribeListeners();
+        super.unsubscribeListeners();
     }
 }

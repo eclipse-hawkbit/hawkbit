@@ -228,9 +228,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         showDetailsLayout();
     }
 
-    /**
-     * Restore the target grid state
-     */
+    @Override
     public void restoreState() {
         targetGridHeader.restoreState();
         targetGrid.restoreState();
@@ -238,18 +236,14 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         countMessageLabel.updatePinningDetails();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         targetGrid.getSelectionSupport().reselectCurrentEntity();
         countMessageLabel.updateTotalAndFilteredCount();
         countMessageLabel.updatePinningDetails();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         filterTabChangedListener.subscribe();
         targetFilterListener.subscribe();
@@ -261,9 +255,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         bulkUploadListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         filterTabChangedListener.unsubscribe();
         targetFilterListener.unsubscribe();

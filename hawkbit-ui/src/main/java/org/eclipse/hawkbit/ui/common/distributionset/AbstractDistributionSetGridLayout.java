@@ -137,9 +137,7 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
         showDetailsLayout();
     }
 
-    /**
-     * Restore the distribution grid state
-     */
+    @Override
     public void restoreState() {
         getDistributionSetGridHeader().restoreState();
         getDistributionGrid().restoreState();
@@ -149,23 +147,17 @@ public abstract class AbstractDistributionSetGridLayout extends AbstractGridComp
         listeners.add(listener);
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         getDistributionGrid().getSelectionSupport().reselectCurrentEntity();
     }
 
-    /**
-     * Subscribe event listeners.
-     */
+    @Override
     public void subscribeListeners() {
         listeners.forEach(TopicEventListener::subscribe);
     }
 
-    /**
-     * Unsubscribe event listeners.
-     */
+    @Override
     public void unsubscribeListeners() {
         listeners.forEach(TopicEventListener::unsubscribe);
     }

@@ -107,32 +107,24 @@ public class RolloutGridLayout extends AbstractGridComponentLayout {
                         rolloutListGrid::mapIdToProxyEntity, rolloutListGrid::onSelectedRolloutDeleted));
     }
 
-    /**
-     * Restore the rollout grid state
-     */
+    @Override
     public void restoreState() {
         rolloutListHeader.restoreState();
         rolloutListGrid.restoreState();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         rolloutListGrid.reselectCurrentRollout();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         rolloutFilterListener.subscribe();
         rolloutModifiedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         rolloutFilterListener.unsubscribe();
         rolloutModifiedListener.unsubscribe();

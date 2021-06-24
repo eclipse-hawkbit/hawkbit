@@ -116,9 +116,7 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
         showDetailsLayout();
     }
 
-    /**
-     * Is called when view is shown to the user
-     */
+    @Override
     public void restoreState() {
         artifactDetailsHeader.restoreState();
 
@@ -127,17 +125,13 @@ public class ArtifactDetailsGridLayout extends AbstractGridComponentLayout {
         }
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         selectionChangedListener.subscribe();
         fileUploadChangedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         selectionChangedListener.unsubscribe();
         fileUploadChangedListener.unsubscribe();

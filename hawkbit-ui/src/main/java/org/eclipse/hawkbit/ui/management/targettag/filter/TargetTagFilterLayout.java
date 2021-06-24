@@ -84,32 +84,24 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
         return multipleTargetFilter;
     }
 
-    /**
-     * Restore the target filter state
-     */
+    @Override
     public void restoreState() {
         targetTagFilterHeader.restoreState();
         multipleTargetFilter.restoreState();
     }
 
-    /**
-     * Update components on view enter
-     */
+    @Override
     public void onViewEnter() {
         multipleTargetFilter.onViewEnter();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         filterTabChangedListener.subscribe();
         multipleTargetFilter.subscribeListeners();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         filterTabChangedListener.unsubscribe();
         multipleTargetFilter.unsubscribeListeners();

@@ -80,16 +80,12 @@ public class ActionStatusMsgGridLayout extends AbstractGridComponentLayout {
         actionStatusMsgGrid.getSelectionSupport().disableSelection();
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         selectionChangedListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         selectionChangedListener.unsubscribe();
     }

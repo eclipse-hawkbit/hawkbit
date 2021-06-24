@@ -84,9 +84,7 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
                 .updateTotalFilteredTargetsCount(targetFilterTargetGrid.getDataSize()));
     }
 
-    /**
-     * restore the saved state
-     */
+    @Override
     public void restoreState() {
         targetFilterDetailsGridHeader.restoreState();
         if (targetFilterDetailsGridHeader.isFilterQueryValid()) {
@@ -94,17 +92,13 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
         }
     }
 
-    /**
-     * Subscribe event listeners
-     */
+    @Override
     public void subscribeListeners() {
         showFilterQueryFormListener.subscribe();
         targetFilterListener.subscribe();
     }
 
-    /**
-     * Unsubscribe event listeners
-     */
+    @Override
     public void unsubscribeListeners() {
         showFilterQueryFormListener.unsubscribe();
         targetFilterListener.unsubscribe();
