@@ -227,6 +227,8 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ARTIFACT_FILENAME = "artifact.filename.caption";
 
+    public static final String CAPTION_CLEAR_FILE_UPLOAD_QUEUE = "caption.clear.file.upload.queue";
+
     public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
@@ -234,6 +236,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
+
+    public static final String MESSAGE_CLEAR_FILE_UPLOAD_QUEUE = "message.clear.file.upload.queue.confirm";
 
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
 

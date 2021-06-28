@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.artifacts;
 
+import static org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus.UPLOAD_STARTED;
+
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
@@ -23,8 +25,10 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
 import org.eclipse.hawkbit.ui.common.AbstractEventListenersAwareView;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -32,18 +36,25 @@ import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener.ResizeHandler;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener.VisibilityHandler;
+import org.eclipse.hawkbit.ui.menu.DashboardEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenu;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.UI;
 
 /**
  * Display artifacts upload view.
@@ -61,6 +72,8 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
     private final SMTypeFilterLayout smTypeFilterLayout;
     private final SoftwareModuleGridLayout smGridLayout;
     private final ArtifactDetailsGridLayout artifactDetailsGridLayout;
+    private final VaadinMessageSource i18n;
+    private final DashboardMenu dashboardMenu;
 
     private HorizontalLayout mainLayout;
 
@@ -72,9 +85,12 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
+            final DashboardMenu dashboardMenu) {
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
+        this.i18n = i18n;
+        this.dashboardMenu = dashboardMenu;
 
         final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
                 uiNotification, permChecker);
@@ -282,4 +298,37 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
 
         super.unsubscribeListeners();
     }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        if (isAnyUploadInUploadQueue()) {
+            final ConfirmationDialog confirmDeleteDialog = new ConfirmationDialog(i18n,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_CLEAR_FILE_UPLOAD_QUEUE),
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_CLEAR_FILE_UPLOAD_QUEUE), ok -> {
+                        if (Boolean.TRUE.equals(ok)) {
+                            // Clear all queued file uploads
+                            artifactUploadState.clearFileStates();
+                            super.beforeLeave(event);
+                        } else {
+                            // Send a PostViewChangeEvent to the DashboardMenu
+                            // as if the navigation actually
+                            // happened to prevent the DashboardMenu navigation
+                            // from getting stuck
+                            final DashboardMenuItem dashboardMenuItem = dashboardMenu.getByViewName(VIEW_NAME);
+                            dashboardMenu.postViewChange(DashboardEvent.createPostViewChangeEvent(dashboardMenuItem));
+                        }
+                    }, UIComponentIdProvider.UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG);
+            UI.getCurrent().addWindow(confirmDeleteDialog.getWindow());
+            confirmDeleteDialog.getWindow().bringToFront();
+        } else {
+            super.beforeLeave(event);
+        }
+    }
+
+    private boolean isAnyUploadInUploadQueue() {
+        return artifactUploadState.getAllFileUploadProgressValuesFromOverallUploadProcessList().stream()
+                .map(FileUploadProgress::getFileUploadStatus)
+                .anyMatch(fileUploadStatus -> fileUploadStatus == UPLOAD_STARTED);
+    }
+
 }

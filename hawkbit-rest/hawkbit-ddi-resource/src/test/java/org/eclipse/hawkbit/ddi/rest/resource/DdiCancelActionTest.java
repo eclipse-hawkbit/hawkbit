@@ -523,18 +523,6 @@ public class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
                         .content(JsonBuilder.cancelActionFeedback("sdfsdfsdfs", "closed"))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
-        mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
-                + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.cancelActionFeedback("1234", "closed"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
-
-        // right action but for wrong target
-        mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"
-                + cancelAction.getId() + "/feedback", tenantAware.getCurrentTenant())
-                        .content(JsonBuilder.cancelActionFeedback(cancelAction2.getId().toString(), "closed"))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
 
         // finally get it right :)
         mvc.perform(post("/{tenant}/controller/v1/" + TestdataFactory.DEFAULT_CONTROLLER_ID + "/cancelAction/"

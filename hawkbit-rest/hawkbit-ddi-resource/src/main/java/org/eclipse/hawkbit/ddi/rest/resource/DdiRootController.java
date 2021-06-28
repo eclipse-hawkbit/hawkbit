@@ -351,13 +351,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        if (!actionId.equals(feedback.getId())) {
-            LOG.warn(
-                    "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
-                    feedback.getId(), actionId);
-            return ResponseEntity.notFound().build();
-        }
-
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
@@ -370,7 +363,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId()));
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, actionId));
 
         return ResponseEntity.ok().build();
 
@@ -501,13 +494,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        if (!actionId.equals(feedback.getId())) {
-            LOG.warn(
-                    "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
-                    feedback.getId(), actionId);
-            return ResponseEntity.notFound().build();
-        }
-
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
@@ -515,7 +501,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, actionId, entityFactory));
         return ResponseEntity.ok().build();
     }
 

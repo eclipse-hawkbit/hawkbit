@@ -60,7 +60,7 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
     }
 
     /**
-     * Checks for duplication and invalid file name during feil upload process
+     * Checks for duplication and invalid file name during file upload process
      * 
      * @param event
      *            StreamingStartEvent
