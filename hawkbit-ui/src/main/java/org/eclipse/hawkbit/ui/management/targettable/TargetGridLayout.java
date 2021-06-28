@@ -238,6 +238,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
 
     @Override
     public void onViewEnter() {
+        targetGridHeader.checkBulkUpload();
         targetGrid.getSelectionSupport().reselectCurrentEntity();
         countMessageLabel.updateTotalAndFilteredCount();
         countMessageLabel.updatePinningDetails();

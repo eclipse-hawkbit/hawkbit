@@ -11,21 +11,21 @@ package org.eclipse.hawkbit.ui.common.layout.listener;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.vaadin.spring.events.EventBus.UIEventBus;
+import org.vaadin.spring.events.EventBus;
 
 /**
  * Abstract class for event listener
  */
 public abstract class TopicEventListener {
-    private final UIEventBus eventBus;
+    private final EventBus eventBus;
     private final Collection<String> topics;
     private boolean subscribed;
 
-    protected TopicEventListener(final UIEventBus eventBus, final String topic) {
+    protected TopicEventListener(final EventBus eventBus, final String topic) {
         this(eventBus, Collections.singleton(topic));
     }
 
-    protected TopicEventListener(final UIEventBus eventBus, final Collection<String> topics) {
+    protected TopicEventListener(final EventBus eventBus, final Collection<String> topics) {
         this.eventBus = eventBus;
         this.topics = topics;
     }
@@ -61,7 +61,7 @@ public abstract class TopicEventListener {
         return subscribed;
     }
 
-    protected UIEventBus getEventBus() {
+    protected EventBus getEventBus() {
         return eventBus;
     }
 }
