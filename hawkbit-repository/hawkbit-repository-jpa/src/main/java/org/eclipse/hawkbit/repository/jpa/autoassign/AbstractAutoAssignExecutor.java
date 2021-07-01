@@ -42,7 +42,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      * assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
-    
+
     /**
      * Maximum for target filter queries with auto assign DS activated.
      */
@@ -98,7 +98,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         Pageable query = PageRequest.of(0, PAGE_SIZE);
 
         do {
-            filterQueries = targetFilterQueryManagement.findWithAutoAssignDS(query);
+            filterQueries = targetFilterQueryManagement.findWithAutoAssignDSAndNotPaused(query);
 
             filterQueries.forEach(filterQuery -> {
                 try {
