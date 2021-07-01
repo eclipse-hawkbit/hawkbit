@@ -26,6 +26,8 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
 
     private ActionType autoAssignActionType;
 
+    private boolean autoAssignPaused;
+
     /**
      * Constructor
      */
@@ -99,6 +101,26 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      */
     public void setAutoAssignmentEnabled(final boolean isAutoAssignmentEnabled) {
         this.isAutoAssignmentEnabled = isAutoAssignmentEnabled;
+    }
+
+    /**
+     * Paused status of the auto assignment
+     * 
+     * @return <code>true</code> if the autoAssignment is paused, otherwise
+     *         <code>false</code>
+     */
+    public boolean isAutoAssignPaused() {
+        return autoAssignPaused;
+    }
+
+    /**
+     * Sets the paused status of the autoAssignment
+     * 
+     * @param autoAssignPaused
+     *            paused status to set
+     */
+    public void setAutoAssignPaused(final boolean autoAssignPaused) {
+        this.autoAssignPaused = autoAssignPaused;
     }
 
     /**

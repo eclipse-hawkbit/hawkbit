@@ -9,10 +9,14 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
@@ -32,12 +36,14 @@ import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterGridLayoutUiState;
+import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.ValueProvider;
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
@@ -59,6 +65,7 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     private final UINotification notification;
     private final TargetFilterGridLayoutUiState uiState;
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final TargetFilterQueryBuilder targetFilterQueryBuilder;
 
     private final transient AutoAssignmentWindowBuilder autoAssignmentWindowBuilder;
 
@@ -75,17 +82,21 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
      *            TargetFilterGridLayoutUiState
      * @param targetFilterQueryManagement
      *            TargetFilterQueryManagement
+     * @param targetFilterQueryBuilder
+     *            TargetFilterQueryBuilder
      * @param autoAssignmentWindowBuilder
      *            AutoAssignmentWindowBuilder
      */
     public TargetFilterGrid(final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState,
             final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.notification = uiDependencies.getUiNotification();
         this.uiState = uiState;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.targetFilterQueryBuilder = targetFilterQueryBuilder;
         this.autoAssignmentWindowBuilder = autoAssignmentWindowBuilder;
 
         this.targetFilterDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.filter.custom",
@@ -147,8 +158,11 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
             horizontalLayout.setWidthUndefined();
             horizontalLayout.setDefaultComponentAlignment(Alignment.MIDDLE_LEFT);
 
-            final Label icon = actionTypeIconSupplier.getLabel(filter);
-            horizontalLayout.addComponent(icon);
+            final Button togglePausedButton = buildAutoAssignPauseButton(filter);
+            horizontalLayout.addComponent(togglePausedButton);
+
+            final Label actionIcon = actionTypeIconSupplier.getLabel(filter);
+            horizontalLayout.addComponent(actionIcon);
 
             final Button link = buildAutoAssignmentLink(filter);
             horizontalLayout.addComponent(link);
@@ -157,6 +171,53 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
         };
         GridComponentBuilder.addComponentColumn(this, autoAssignmentProvider)
                 .setCaption(i18n.getMessage("header.auto.assignment.ds")).setWidthUndefined();
+    }
+
+    private Button buildAutoAssignPauseButton(final ProxyTargetFilterQuery filter) {
+        if (filter.getDistributionSetInfo() == null) {
+            return GridComponentBuilder.buildActionButton(i18n, event -> this.togglePausedState(filter),
+                    VaadinIcons.PLAY, UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_PLAY,
+                    SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, "auto.assign.toggle.button", false);
+
+        }
+        return GridComponentBuilder.buildActionButton(i18n, event -> this.togglePausedState(filter),
+                getAutoAssignStatusIcon(filter), getAutoAssignStatusTooltip(filter),
+                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, "auto.assign.toggle.button", true);
+
+    }
+
+    private String getAutoAssignStatusTooltip(final ProxyTargetFilterQuery filter) {
+        if (filter.isAutoAssignPaused()) {
+            return UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_PLAY;
+        }
+        return UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_PAUSE;
+    }
+
+    private VaadinIcons getAutoAssignStatusIcon(final ProxyTargetFilterQuery filter) {
+        if (filter.isAutoAssignPaused()) {
+            return VaadinIcons.PLAY;
+        }
+        return VaadinIcons.PAUSE;
+    }
+
+    private void togglePausedState(final ProxyTargetFilterQuery proxyFilter) {
+        final Optional<TargetFilterQuery> targetFilterQuery = targetFilterQueryManagement.get(proxyFilter.getId());
+        targetFilterQuery.filter(filter -> filter.getAutoAssignDistributionSet() != null).ifPresent(filter -> {
+            final AutoAssignDistributionSetUpdate autoAssignDsUpdate = targetFilterQueryBuilder
+                    .updateAutoAssign(filter.getId()).ds(filter.getAutoAssignDistributionSet().getId())
+                    .actionType(filter.getAutoAssignActionType()).paused(!filter.isAutoAssignPaused());
+            filter.getAutoAssignWeight().ifPresent(autoAssignDsUpdate::weight);
+            final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement
+                    .updateAutoAssignDS(autoAssignDsUpdate);
+            this.refreshAll();
+            displayToggleNotification(updatedFilterQuery.isAutoAssignPaused());
+        });
+    }
+
+    private void displayToggleNotification(final boolean paused) {
+        final String messageId = paused ? UIMessageIdProvider.MESSAGE_AUTOASSIGN_PAUSED
+                : UIMessageIdProvider.MESSAGE_AUTOASSIGN_STARTED;
+        notification.displaySuccess(i18n.getMessage(messageId));
     }
 
     private Button buildFilterLink(final ProxyTargetFilterQuery targetFilter) {

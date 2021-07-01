@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -65,6 +66,7 @@ public class FilterManagementView extends VerticalLayout implements View {
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
+            final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final TargetFilterStateDataSupplier targetFilterStateDataSupplier) {
         this.filterManagementUIState = filterManagementUIState;
 
@@ -72,7 +74,7 @@ public class FilterManagementView extends VerticalLayout implements View {
                 notification, permissionChecker);
 
         this.targetFilterGridLayout = new TargetFilterGridLayout(uiDependencies, targetFilterQueryManagement,
-                targetManagement, distributionSetManagement, filterManagementUIState);
+                targetManagement, distributionSetManagement, targetFilterQueryBuilder, filterManagementUIState);
 
         this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiDependencies, uiProperties,
                 rsqlValidationOracle, targetFilterQueryManagement, targetFilterStateDataSupplier,

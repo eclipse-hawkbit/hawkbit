@@ -429,7 +429,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     @Step
     private void verifyFindForAllWithAutoAssignDs(final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
-                .findWithAutoAssignDS(PageRequest.of(0, 500));
+                .findWithAutoAssignDSAndNotPaused(PageRequest.of(0, 500));
 
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
     }

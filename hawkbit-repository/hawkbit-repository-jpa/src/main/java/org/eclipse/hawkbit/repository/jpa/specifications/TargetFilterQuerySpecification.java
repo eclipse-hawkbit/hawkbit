@@ -25,8 +25,8 @@ public final class TargetFilterQuerySpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getQuery()}.
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based on
+     * is {@link JpaTargetFilterQuery#getQuery()}.
      *
      * @param queryValue
      *            the query of the filter
@@ -38,8 +38,8 @@ public final class TargetFilterQuerySpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getName()}.
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based on
+     * is {@link JpaTargetFilterQuery#getName()}.
      * 
      * @param searchText
      *            of the filter
@@ -53,8 +53,8 @@ public final class TargetFilterQuerySpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getName()}.
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based on
+     * is {@link JpaTargetFilterQuery#getName()}.
      *
      * @param distributionSet
      *            of the filter
@@ -66,13 +66,14 @@ public final class TargetFilterQuerySpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based
-     * on is {@link JpaTargetFilterQuery#getName()}.
+     * {@link Specification} for retrieving {@link JpaTargetFilterQuery}s based on
+     * is {@link JpaTargetFilterQuery#getName()}.
      *
      * @return the {@link JpaTargetFilterQuery} {@link Specification}
      */
-    public static Specification<JpaTargetFilterQuery> withAutoAssignDS() {
-        return (targetFilterQueryRoot, query, cb) -> cb
-                .isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet));
+    public static Specification<JpaTargetFilterQuery> withAutoAssignDSAndNotPaused() {
+        return (targetFilterQueryRoot, query, cb) -> cb.and(
+                cb.isNotNull(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignDistributionSet)),
+                cb.isFalse(targetFilterQueryRoot.get(JpaTargetFilterQuery_.autoAssignPaused)));
     }
 }

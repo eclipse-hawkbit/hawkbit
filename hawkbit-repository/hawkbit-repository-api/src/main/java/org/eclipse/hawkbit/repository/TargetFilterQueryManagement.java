@@ -18,10 +18,10 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -50,8 +50,8 @@ public interface TargetFilterQueryManagement {
      *             {@link TargetFilterQueryCreate} for field constraints.
      * 
      * @throws AssignmentQuotaExceededException
-     *             if the maximum number of targets that is addressed by the
-     *             given query is exceeded (auto-assignments only)
+     *             if the maximum number of targets that is addressed by the given
+     *             query is exceeded (auto-assignments only)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     TargetFilterQuery create(@NotNull @Valid TargetFilterQueryCreate create);
@@ -106,8 +106,7 @@ public interface TargetFilterQueryManagement {
     long count();
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s which match the given name
-     * filter.
+     * Retrieves all {@link TargetFilterQuery}s which match the given name filter.
      *
      * @param pageable
      *            pagination parameter
@@ -119,8 +118,7 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findByName(@NotNull Pageable pageable, @NotNull String name);
 
     /**
-     * Retrieves all {@link TargetFilterQuery} which match the given RSQL
-     * filter.
+     * Retrieves all {@link TargetFilterQuery} which match the given RSQL filter.
      *
      * @param pageable
      *            pagination parameter
@@ -144,8 +142,8 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findByQuery(@NotNull Pageable pageable, @NotNull String query);
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s which match the given
-     * auto-assign distribution set and RSQL filter.
+     * Retrieves all {@link TargetFilterQuery}s which match the given auto-assign
+     * distribution set and RSQL filter.
      *
      * @param pageable
      *            pagination parameter
@@ -162,14 +160,14 @@ public interface TargetFilterQueryManagement {
     Page<TargetFilterQuery> findByAutoAssignDSAndRsql(@NotNull Pageable pageable, long setId, String rsqlParam);
 
     /**
-     * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution
-     * set.
+     * Retrieves all {@link TargetFilterQuery}s with an auto-assign distribution set
+     * and are not paused.
      *
      * @return the page with the found {@link TargetFilterQuery}s
      * @param pageable
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
+    Page<TargetFilterQuery> findWithAutoAssignDSAndNotPaused(@NotNull Pageable pageable);
 
     /**
      * Finds the {@link TargetFilterQuery} by id.
@@ -229,16 +227,16 @@ public interface TargetFilterQueryManagement {
      *             provided but not found
      * 
      * @throws AssignmentQuotaExceededException
-     *             if the query that is already associated with this filter
-     *             query addresses too many targets (auto-assignments only)
+     *             if the query that is already associated with this filter query
+     *             addresses too many targets (auto-assignments only)
      * 
      * @throws InvalidAutoAssignActionTypeException
      *             if the provided auto-assign {@link ActionType} is not valid
      *             (neither FORCED, nor SOFT)
      * 
      * @throws InvalidAutoAssignDistributionSetException
-     *             if the provided auto-assign {@link DistributionSet} is not
-     *             valid (incomplete or soft deleted)
+     *             if the provided auto-assign {@link DistributionSet} is not valid
+     *             (incomplete or soft deleted)
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDS(

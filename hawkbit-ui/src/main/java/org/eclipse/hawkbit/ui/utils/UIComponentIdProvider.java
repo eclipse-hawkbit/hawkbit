@@ -21,8 +21,7 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TABLE_ID = "target.tableId";
 
     /**
-     * ID of the confirmation window when assigning a distribution set to a
-     * target
+     * ID of the confirmation window when assigning a distribution set to a target
      */
     public static final String DIST_SET_TO_TARGET_ASSIGNMENT_CONFIRM_ID = "dist.to.target.assign.confirm.id";
 
@@ -99,8 +98,8 @@ public final class UIComponentIdProvider {
     public static final String TARGET_MENU_BAR_ID = "target.menu.bar.id";
 
     /**
-     * ID for the cancel button in the tag header, when updating or deleting a
-     * tag is selected
+     * ID for the cancel button in the tag header, when updating or deleting a tag
+     * is selected
      */
     public static final String CANCEL_UPDATE_TAG_ID = "cancel.update.tag.id";
 
@@ -1504,7 +1503,7 @@ public final class UIComponentIdProvider {
     public static final String UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG = "upload.queue.clear.confirmation.window";
 
     /**
-     * /* Private Constructor.
+     * Private Constructor.
      */
     private UIComponentIdProvider() {
 

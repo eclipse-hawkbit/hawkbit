@@ -184,9 +184,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
+    public Page<TargetFilterQuery> findWithAutoAssignDSAndNotPaused(final Pageable pageable) {
         final List<Specification<JpaTargetFilterQuery>> specList = Collections
-                .singletonList(TargetFilterQuerySpecification.withAutoAssignDS());
+                .singletonList(TargetFilterQuerySpecification.withAutoAssignDSAndNotPaused());
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
 
@@ -257,6 +257,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
+            targetFilterQuery.setAutoAssignPaused(update.isPaused());
         }
         return targetFilterQueryRepository.save(targetFilterQuery);
     }

@@ -29,6 +29,10 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
 
+    public static final String BUTTON_AUTO_ASSIGNMENT_PLAY = "button.auto.assignment.play";
+
+    public static final String BUTTON_AUTO_ASSIGNMENT_PAUSE = "button.auto.assignment.pause";
+
     public static final String METADATA_LINK_DESCRIPTION = "metadata.link.desc";
 
     public static final String HEADER_DISTRIBUTION_SET = "header.distributionset";
@@ -110,6 +114,10 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_CONFIRM_DELETE_ENTITY = "message.confirm.delete.entity";
 
     public static final String MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS = "message.autoassign.create.error.missingElements";
+
+    public static final String MESSAGE_AUTOASSIGN_STARTED = "message.autoassign.started";
+
+    public static final String MESSAGE_AUTOASSIGN_PAUSED = "message.autoassign.paused";
 
     public static final String MESSAGE_ERROR_NAMEREQUIRED = "message.error.nameRequired";
 

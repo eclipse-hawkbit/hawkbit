@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -54,6 +55,7 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
     public TargetFilterGridLayout(final CommonUiDependencies uiDependencies,
             final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement,
+            final TargetFilterQueryBuilder targetFilterQueryBuilder,
             final FilterManagementUIState filterManagementUIState) {
         this.targetFilterGridHeader = new TargetFilterGridHeader(uiDependencies,
                 filterManagementUIState.getGridLayoutUiState());
@@ -62,7 +64,7 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
                 targetManagement, targetFilterQueryManagement, distributionSetManagement);
 
         this.targetFilterGrid = new TargetFilterGrid(uiDependencies, filterManagementUIState.getGridLayoutUiState(),
-                targetFilterQueryManagement, autoAssignmentWindowBuilder);
+                targetFilterQueryManagement, targetFilterQueryBuilder, autoAssignmentWindowBuilder);
 
         this.targetQueryFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(),
                 ProxyTargetFilterQuery.class, new EventViewAware(EventView.TARGET_FILTER),
