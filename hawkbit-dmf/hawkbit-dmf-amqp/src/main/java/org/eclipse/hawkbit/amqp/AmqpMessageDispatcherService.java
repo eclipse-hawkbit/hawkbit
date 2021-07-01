@@ -143,9 +143,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
-            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
-                    target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
-                            target, softwareModules));
+            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(target -> {
+                if (!hasPendingCancellations(target.getControllerId())) {
+                    sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()), target,
+                            softwareModules);
+                }
+            });
         });
     }
 
@@ -359,6 +362,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private boolean isFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher == null || serviceMatcher.isFromSelf(event);
+    }
+
+    private boolean hasPendingCancellations(final String controllerId) {
+        return deploymentManagement.hasPendingCancellations(controllerId);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
