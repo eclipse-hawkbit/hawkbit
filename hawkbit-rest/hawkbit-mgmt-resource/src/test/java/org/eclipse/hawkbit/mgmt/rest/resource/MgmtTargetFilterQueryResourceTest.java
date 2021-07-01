@@ -85,7 +85,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Description("Ensures that deletion is executed if permitted.")
     public void deleteTargetFilterQueryReturnsOK() throws Exception {
         final String filterName = "filter_01";
-        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name=test_01");
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
 
         mvc.perform(delete(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
                 .andExpect(status().isOk());
@@ -114,8 +114,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Description("Ensures that update request is reflected by repository.")
     public void updateTargetFilterQueryQuery() throws Exception {
         final String filterName = "filter_02";
-        final String filterQuery = "name=test_02";
-        final String filterQuery2 = "name=test_02_changed";
+        final String filterQuery = "name==test_02";
+        final String filterQuery2 = "name==test_02_changed";
         final String body = new JSONObject().put("query", filterQuery2).toString();
 
         // prepare
@@ -137,7 +137,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     public void updateTargetFilterQueryName() throws Exception {
         final String filterName = "filter_03";
         final String filterName2 = "filter_03_changed";
-        final String filterQuery = "name=test_03";
+        final String filterQuery = "name==test_03";
         final String body = new JSONObject().put("name", filterName2).toString();
 
         // prepare
@@ -162,7 +162,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String idA = "a";
         final String idB = "b";
         final String idC = "c";
-        final String testQuery = "name=test";
+        final String testQuery = "name==test";
 
         createSingleTargetFilterQuery(idA, testQuery);
         createSingleTargetFilterQuery(idB, testQuery);
@@ -191,7 +191,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String idA = "a";
         final String idB = "b";
         final String idC = "c";
-        final String testQuery = "name=test";
+        final String testQuery = "name==test";
 
         createSingleTargetFilterQuery(idA, testQuery);
         createSingleTargetFilterQuery(idB, testQuery);
@@ -217,7 +217,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final String idC = "c";
         final String idD = "d";
         final String idE = "e";
-        final String testQuery = "name=test";
+        final String testQuery = "name==test";
 
         createSingleTargetFilterQuery("a", testQuery);
         createSingleTargetFilterQuery("b", testQuery);
@@ -247,7 +247,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @Description("Ensures that a single target filter query can be retrieved via its id.")
     public void getSingleTarget() throws Exception {
         // create first a target which can be retrieved by rest interface
-        final String knownQuery = "name=test01";
+        final String knownQuery = "name==test01";
         final String knownName = "someName";
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
         final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
