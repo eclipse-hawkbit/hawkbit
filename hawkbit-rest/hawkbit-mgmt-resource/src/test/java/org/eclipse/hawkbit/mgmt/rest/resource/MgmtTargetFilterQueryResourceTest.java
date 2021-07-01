@@ -294,6 +294,18 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(exceptionInfo.getExceptionClass()).isEqualTo(MessageNotReadableException.class.getName());
         assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REST_BODY_NOT_READABLE.getKey());
     }
+    
+    @Test
+    @Description("Ensures that the creation of a target filter query based on an invalid RSQL query results in a HTTP Bad Request error (400).")
+    public void createTargetFilterWithInvalidQuery() throws Exception {
+        final String invalidQuery = "name=abc";
+        final String body = new JSONObject().put("query", invalidQuery).put("name", "invalidFilter").toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isBadRequest()).andReturn();
+
+        assertThat(targetFilterQueryManagement.count()).isEqualTo(0);
+    }
 
     @Test
     @Description("Ensures that the assignment of an auto-assign distribution set results in a HTTP Forbidden error (403) "
