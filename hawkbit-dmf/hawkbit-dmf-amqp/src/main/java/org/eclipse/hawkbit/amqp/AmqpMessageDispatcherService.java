@@ -147,6 +147,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 if (!hasPendingCancellations(target.getControllerId())) {
                     sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()), target,
                             softwareModules);
+                } else {
+                    LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                            target.getControllerId());
                 }
             });
         });

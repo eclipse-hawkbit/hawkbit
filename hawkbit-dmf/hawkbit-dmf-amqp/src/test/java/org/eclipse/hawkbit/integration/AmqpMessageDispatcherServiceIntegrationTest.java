@@ -153,9 +153,15 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
+
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
+
+        // first assignment will be canceled -> Open cancellations -> No message through the DMF
         assignDistributionSet(distributionSet2.getId(), controllerId);
-        assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
+
+        // should not get the message of the second assignment
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);
