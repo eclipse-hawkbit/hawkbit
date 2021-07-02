@@ -216,7 +216,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         return message;
     }
 
-    protected void sendActionUpdateStatus(final DmfActionUpdateStatus actionStatus) {
+    protected void createAndSendActionStatusUpdateMessage(final DmfActionUpdateStatus actionStatus) {
         final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
         getDmfClient().send(eventMessage);
     }

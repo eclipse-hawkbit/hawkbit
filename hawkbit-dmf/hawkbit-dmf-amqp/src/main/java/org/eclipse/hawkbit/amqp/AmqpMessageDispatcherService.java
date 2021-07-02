@@ -61,6 +61,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -139,20 +140,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(assignedEvent)) {
             return;
         }
+
+        final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(
+                assignedEvent.getActions().keySet());
+
         LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
-                    ds);
-            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(target -> {
-                if (!hasPendingCancellations(target.getControllerId())) {
-                    sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()), target,
-                            softwareModules);
-                } else {
-                    LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
-                            target.getControllerId());
-                }
-            });
-        });
+        sendUpdateMessageToTarget(assignedEvent, filteredTargetList);
     }
 
     /**
@@ -168,6 +161,30 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
         LOG.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
+    }
+
+    private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
+        return targetManagement.getByControllerID(controllerIds).stream().filter(target -> {
+            if (hasPendingCancellations(target.getControllerId())) {
+                LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                        target.getControllerId());
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+    }
+
+    private void sendUpdateMessageToTarget(final TargetAssignDistributionSetEvent assignedEvent,
+            final List<Target> targets) {
+        if (targets.isEmpty()) {
+            return;
+        }
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
+                    ds);
+            targets.forEach(target -> sendUpdateMessageToTarget(
+                    assignedEvent.getActions().get(target.getControllerId()), target, softwareModules));
+        });
     }
 
     private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {

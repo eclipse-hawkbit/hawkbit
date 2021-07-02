@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
-import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
@@ -63,7 +62,6 @@ import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -615,7 +613,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final Long actionId = registerTargetAndCancelActionId(controllerId);
         final Long actionNotExist = actionId + 1;
 
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionNotExist, DmfActionStatus.CANCELED));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionNotExist, DmfActionStatus.CANCELED));
         verifyOneDeadLetterMessage();
     }
 
@@ -649,7 +647,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         final Long actionId = registerTargetAndCancelActionId(controllerId);
 
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
         assertAction(actionId, 1, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
     }
 
@@ -846,7 +844,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
@@ -878,14 +876,14 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message, should result in the action being closed
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
 
         // Send FINISHED message
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.FINISHED));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionId, DmfActionStatus.FINISHED));
         assertAction(actionId, 2, Status.RUNNING, Status.DOWNLOADED, Status.FINISHED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
@@ -948,7 +946,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final Long actionId = getFirstAssignedActionId(assignmentResult);
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
+        createAndSendActionStatusUpdateMessage(new DmfActionUpdateStatus(actionId, sendActionStatus));
         return actionId;
     }
 

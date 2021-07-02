@@ -170,7 +170,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         // confirm the cancel of the first action should lead to expose the latest action
-        sendActionUpdateStatus(
+        createAndSendActionStatusUpdateMessage(
                 new DmfActionUpdateStatus(getFirstAssignedActionId(assignmentResult), DmfActionStatus.CANCELED));
         // verify latest action is exposed
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
