@@ -144,8 +144,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(
                 assignedEvent.getActions().keySet());
 
-        LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-        sendUpdateMessageToTarget(assignedEvent, filteredTargetList);
+        if (!filteredTargetList.isEmpty()) {
+            LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
+            sendUpdateMessageToTarget(assignedEvent, filteredTargetList);
+        }
     }
 
     /**
@@ -176,9 +178,6 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private void sendUpdateMessageToTarget(final TargetAssignDistributionSetEvent assignedEvent,
             final List<Target> targets) {
-        if (targets.isEmpty()) {
-            return;
-        }
         distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
