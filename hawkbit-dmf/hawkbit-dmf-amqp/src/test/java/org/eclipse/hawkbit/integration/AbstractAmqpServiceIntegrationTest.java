@@ -216,20 +216,6 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         return message;
     }
 
-    protected void createAndSendActionStatusUpdateMessage(final DmfActionUpdateStatus actionStatus) {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
-        getDmfClient().send(eventMessage);
-    }
-
-    protected Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
-        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
-        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
-        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
-        messageProperties.setCorrelationId(CORRELATION_ID);
-
-        return createMessage(payload, messageProperties);
-    }
-
     protected void verifyReplyToListener() {
         createConditionFactory()
                 .untilAsserted(() -> Mockito.verify(replyToListener, Mockito.atLeast(1)).handleMessage(Mockito.any()));
@@ -332,15 +318,23 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         return createMessage(null, messageProperties);
     }
 
-    protected void createAndSendActionStatusUpdateMessage(final String target, final String tenant, final long actionId,
+    protected void createAndSendActionStatusUpdateMessage(final String target, final long actionId,
             final DmfActionStatus status) {
+        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
+
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, dmfActionUpdateStatus);
+        eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.THING_ID, target);
+
+        getDmfClient().send(eventMessage);
+    }
+
+    protected Message createUpdateActionEventMessage(final String tenant, final Object payload) {
         final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
-        messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.toString());
+        messageProperties.setCorrelationId(CORRELATION_ID);
 
-        final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
-        getDmfClient().send(createMessage(dmfActionUpdateStatus, messageProperties));
+        return createMessage(payload, messageProperties);
     }
 
     protected MessageProperties createMessagePropertiesWithTenant(final String tenant) {

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
-import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
@@ -170,11 +169,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         // confirm the cancel of the first action should lead to expose the latest action
-        createAndSendActionStatusUpdateMessage(
-                new DmfActionUpdateStatus(getFirstAssignedActionId(assignmentResult), DmfActionStatus.CANCELED));
+        createAndSendActionStatusUpdateMessage(controllerId, getFirstAssignedActionId(assignmentResult),
+                DmfActionStatus.CANCELED);
+
         // verify latest action is exposed
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
-
     }
 
     @Test
@@ -351,7 +350,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private void updateActionViaDmfClient(final String controllerId, final long actionId,
             final DmfActionStatus status) {
-        createAndSendActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId, status);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, status);
     }
 
     private Long assignNewDsToTarget(final String controllerId) {
