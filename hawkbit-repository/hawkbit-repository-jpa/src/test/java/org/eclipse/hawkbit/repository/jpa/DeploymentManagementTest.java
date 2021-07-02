@@ -945,8 +945,8 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = CancelTargetAssignmentEvent.class, count = 4 * 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
-            @Expect(type = TargetAssignDistributionSetEvent.class, count = 2) })
-    public void mutipleDeployments() throws InterruptedException {
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 3) })
+    public void multipleDeployments() throws InterruptedException {
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 5;
 

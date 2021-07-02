@@ -143,7 +143,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
@@ -153,14 +153,27 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
+
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
+
+        // first assignment will be canceled -> Open cancellations -> No message through the DMF
         assignDistributionSet(distributionSet2.getId(), controllerId);
-        assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
+
+        // should not get the message of the second assignment
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
+
+        // confirm the cancel of the first action should lead to expose the latest action
+        createAndSendActionStatusUpdateMessage(controllerId, getFirstAssignedActionId(assignmentResult),
+                DmfActionStatus.CANCELED);
+
+        // verify latest action is exposed
+        assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
     }
 
     @Test
@@ -337,7 +350,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private void updateActionViaDmfClient(final String controllerId, final long actionId,
             final DmfActionStatus status) {
-        createAndSendActionStatusUpdateMessage(controllerId, TENANT_EXIST, actionId, status);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, status);
     }
 
     private Long assignNewDsToTarget(final String controllerId) {

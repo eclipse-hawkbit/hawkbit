@@ -505,4 +505,15 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     int deleteActionsByStatusAndLastModifiedBefore(@NotNull Set<Action.Status> status, long lastModified);
 
+    /**
+     * Checks if there is an action for the device with the given controller ID that
+     * is in the {@link Action.Status#CANCELING} state.
+     *
+     * @param controllerId
+     *            of target
+     * @return if actions in CANCELING state are present
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    boolean hasPendingCancellations(@NotEmpty String controllerId);
+
 }

@@ -167,7 +167,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
         final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity())
-                .filter(action -> !hasPendingCancellations(action.getTarget())).collect(Collectors.toList());
+                .collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
         return assignmentResult;
@@ -182,11 +182,6 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions,
                         eventPublisherHolder.getApplicationId(), actions.get(0).isMaintenanceWindowAvailable())));
-    }
-
-    private boolean hasPendingCancellations(final Target target) {
-        return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(target.getControllerId(),
-                Status.CANCELING);
     }
 
     /**

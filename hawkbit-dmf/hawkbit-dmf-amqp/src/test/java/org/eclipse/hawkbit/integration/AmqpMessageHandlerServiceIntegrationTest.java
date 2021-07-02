@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.amqp.AmqpMessageHandlerService;
 import org.eclipse.hawkbit.amqp.AmqpProperties;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
-import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
@@ -63,7 +62,6 @@ import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -78,7 +76,6 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
-    private static final String CORRELATION_ID = UUID.randomUUID().toString();
     private static final String TARGET_PREFIX = "Dmf_hand_";
 
     @Autowired
@@ -299,7 +296,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests null topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nullTopicHeader() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "");
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, null);
         getDmfClient().send(eventMessage);
 
@@ -310,7 +307,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests null topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void emptyTopicHeader() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "");
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, "");
         getDmfClient().send(eventMessage);
 
@@ -321,7 +318,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests null topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void invalidTopicHeader() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "");
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.TOPIC, "NotExist");
         getDmfClient().send(eventMessage);
 
@@ -332,7 +329,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests missing topic message header. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void missingTopicHeader() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "");
         eventMessage.getMessageProperties().getHeaders().remove(MessageHeaderKey.TOPIC);
         getDmfClient().send(eventMessage);
 
@@ -343,7 +340,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests invalid null message content. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithNullContent() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, null);
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, null);
         getDmfClient().send(eventMessage);
         verifyOneDeadLetterMessage();
     }
@@ -352,7 +349,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests invalid empty message content. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithEmptyContent() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, "");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "");
         getDmfClient().send(eventMessage);
         verifyOneDeadLetterMessage();
     }
@@ -361,8 +358,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @Description("Tests invalid json message content. This message should forwarded to the deadletter queue")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidJsonContent() {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
-                "Invalid Content");
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, "Invalid Content");
         getDmfClient().send(eventMessage);
         verifyOneDeadLetterMessage();
     }
@@ -372,8 +368,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void updateActionStatusWithInvalidActionId() {
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS,
-                actionUpdateStatus);
+        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, actionUpdateStatus);
         getDmfClient().send(eventMessage);
         verifyOneDeadLetterMessage();
     }
@@ -423,7 +418,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     @Test
     @Description("Register a target and send a update action status (download). Verify if the updated action status is correct.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -437,7 +432,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     @Test
     @Description("Register a target and send a update action status (error). Verify if the updated action status is correct.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 1), @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -520,7 +515,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
     @Test
     @Description("Verify receiving a download message if a deployment is done with window configured but before maintenance window start time.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -616,7 +611,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final Long actionId = registerTargetAndCancelActionId(controllerId);
         final Long actionNotExist = actionId + 1;
 
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionNotExist, DmfActionStatus.CANCELED));
+        createAndSendActionStatusUpdateMessage(controllerId, actionNotExist, DmfActionStatus.CANCELED);
         verifyOneDeadLetterMessage();
     }
 
@@ -650,7 +645,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         final Long actionId = registerTargetAndCancelActionId(controllerId);
 
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.CANCEL_REJECTED));
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CANCEL_REJECTED);
         assertAction(actionId, 1, Status.RUNNING, Status.CANCELING, Status.CANCEL_REJECTED);
     }
 
@@ -847,7 +842,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DOWNLOADED);
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
@@ -879,14 +874,14 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message, should result in the action being closed
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.DOWNLOADED));
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DOWNLOADED);
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
 
         // Send FINISHED message
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, DmfActionStatus.FINISHED));
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.FINISHED);
         assertAction(actionId, 2, Status.RUNNING, Status.DOWNLOADED, Status.FINISHED);
         Mockito.verifyZeroInteractions(getDeadletterListener());
 
@@ -949,13 +944,8 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     private Long registerTargetAndSendActionStatus(final DmfActionStatus sendActionStatus, final String controllerId) {
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
         final Long actionId = getFirstAssignedActionId(assignmentResult);
-        sendActionUpdateStatus(new DmfActionUpdateStatus(actionId, sendActionStatus));
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, sendActionStatus);
         return actionId;
-    }
-
-    private void sendActionUpdateStatus(final DmfActionUpdateStatus actionStatus) {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
-        getDmfClient().send(eventMessage);
     }
 
     private void registerTargetAndSendAndAssertUpdateActionStatus(final DmfActionStatus sendActionStatus,
@@ -993,15 +983,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
-        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
-        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
-        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
-        messageProperties.setCorrelationId(CORRELATION_ID);
-
-        return createMessage(payload, messageProperties);
     }
 
     private void sendUpdateAttributeMessage(final String target, final String tenant,
