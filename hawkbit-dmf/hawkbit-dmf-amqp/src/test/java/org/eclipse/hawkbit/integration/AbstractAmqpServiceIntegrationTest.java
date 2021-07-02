@@ -70,6 +70,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected static final String TENANT_EXIST = "DEFAULT";
     protected static final String CREATED_BY = "CONTROLLER_PLUG_AND_PLAY";
+    protected static final String CORRELATION_ID = UUID.randomUUID().toString();
 
     protected ReplyToListener replyToListener;
     private DeadletterListener deadletterListener;
@@ -214,6 +215,20 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final Message message = createPingMessage(correlationId, tenant);
         getDmfClient().send(message);
         return message;
+    }
+
+    protected void sendActionUpdateStatus(final DmfActionUpdateStatus actionStatus) {
+        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
+        getDmfClient().send(eventMessage);
+    }
+
+    protected Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
+        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
+        messageProperties.setCorrelationId(CORRELATION_ID);
+
+        return createMessage(payload, messageProperties);
     }
 
     protected void verifyReplyToListener() {

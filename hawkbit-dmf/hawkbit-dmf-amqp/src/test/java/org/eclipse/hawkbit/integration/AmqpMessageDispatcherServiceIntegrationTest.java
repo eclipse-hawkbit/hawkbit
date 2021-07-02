@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
@@ -143,7 +144,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
@@ -167,6 +168,13 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         createAndSendThingCreated(controllerId, TENANT_EXIST);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
+
+        // confirm the cancel of the first action should lead to expose the latest action
+        sendActionUpdateStatus(
+                new DmfActionUpdateStatus(getFirstAssignedActionId(assignmentResult), DmfActionStatus.CANCELED));
+        // verify latest action is exposed
+        assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
+
     }
 
     @Test

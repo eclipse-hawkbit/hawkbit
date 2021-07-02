@@ -78,7 +78,6 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Device Management Federation API")
 @Story("Amqp Message Handler Service")
 public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
-    private static final String CORRELATION_ID = UUID.randomUUID().toString();
     private static final String TARGET_PREFIX = "Dmf_hand_";
 
     @Autowired
@@ -953,11 +952,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         return actionId;
     }
 
-    private void sendActionUpdateStatus(final DmfActionUpdateStatus actionStatus) {
-        final Message eventMessage = createEventMessage(TENANT_EXIST, EventTopic.UPDATE_ACTION_STATUS, actionStatus);
-        getDmfClient().send(eventMessage);
-    }
-
     private void registerTargetAndSendAndAssertUpdateActionStatus(final DmfActionStatus sendActionStatus,
             final Status expectedActionStatus, final String controllerId) {
         final Long actionId = registerTargetAndSendActionStatus(sendActionStatus, controllerId);
@@ -993,15 +987,6 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private Message createEventMessage(final String tenant, final EventTopic eventTopic, final Object payload) {
-        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
-        messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
-        messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, eventTopic.toString());
-        messageProperties.setCorrelationId(CORRELATION_ID);
-
-        return createMessage(payload, messageProperties);
     }
 
     private void sendUpdateAttributeMessage(final String target, final String tenant,
