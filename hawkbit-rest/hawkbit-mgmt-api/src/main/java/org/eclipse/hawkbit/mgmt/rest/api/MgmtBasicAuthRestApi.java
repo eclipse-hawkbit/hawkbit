@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * Api for handling basic auth user validation
  */
 @RequestMapping(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
+@SuppressWarnings("squid:S1609")
 public interface MgmtBasicAuthRestApi {
     /**
      * Handles the GET request of basic auth.
