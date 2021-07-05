@@ -136,7 +136,7 @@ public final class RSQLUtility {
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer, database);
+        return new RSQLSpecification<>(rsql, fieldNameProvider, virtualPropertyReplacer, database);
     }
 
     /**
@@ -162,7 +162,7 @@ public final class RSQLUtility {
         try {
             LOGGER.debug("Parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(rsql);
+            return new RSQLParser(operators).parse(rsql.toLowerCase());
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
         } catch (final RSQLParserException e) {
