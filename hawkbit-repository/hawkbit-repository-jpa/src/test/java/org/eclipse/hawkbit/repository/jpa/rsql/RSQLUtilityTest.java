@@ -142,6 +142,13 @@ public class RSQLUtilityTest {
         RSQLUtility.validateRsqlFor(rsql2, TestFieldEnum.class);
         RSQLUtility.validateRsqlFor(rsql3, TestFieldEnum.class);
     }
+    
+    @Test
+    @Description("Verify that RSQL expressions are validated case insensitive")
+    public void mixedCaseRsqlFieldValidation() {
+        final String rsqlWithMixedCase = "name==b And name==c aND Name==d OR NAME=iN=y oR nAme=IN=z";
+        RSQLUtility.validateRsqlFor(rsqlWithMixedCase, TargetFields.class);
+    }
 
     @Test
     public void wrongRsqlSyntaxThrowSyntaxException() {
