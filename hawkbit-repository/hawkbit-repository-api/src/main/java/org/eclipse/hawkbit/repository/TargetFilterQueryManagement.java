@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
@@ -241,4 +242,38 @@ public interface TargetFilterQueryManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDS(
             @NotNull @Valid AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate);
+
+    /**
+     * Starts the auto-assignment for a {@link TargetFilterQuery}.
+     *
+     * @param filterId
+     *            id of the filter for which to start the auto assignment
+     *
+     * @throws EntityNotFoundException
+     *             if {@link TargetFilterQuery} with given ID does not exist
+     * 
+     * @throws AutoAssignmentIllegalStateException
+     *             if {@link TargetFilterQuery} is not in the appropriated state to
+     *             perform the action
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void startAutoAssignment(Long filterId);
+
+    /**
+     * Pauses the auto-assignment for a {@link TargetFilterQuery}.
+     *
+     * @param filterId
+     *            id of the filter for which to start the auto assignment
+     *
+     * @throws EntityNotFoundException
+     *             if {@link TargetFilterQuery} with given ID does not exist
+     *
+     * @throws AutoAssignmentIllegalStateException
+     *             if {@link TargetFilterQuery} is not in the appropriated state to
+     *             perform the action
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void pauseAutoAssignment(Long filterId);
 }

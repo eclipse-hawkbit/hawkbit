@@ -108,9 +108,8 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
         LOG.debug("updating target filter query {}", filterId);
 
-        final TargetFilterQuery updateFilter = filterManagement
-                .update(entityFactory.targetFilterQuery().update(filterId).name(targetFilterRest.getName())
-                        .query(targetFilterRest.getQuery()));
+        final TargetFilterQuery updateFilter = filterManagement.update(entityFactory.targetFilterQuery()
+                .update(filterId).name(targetFilterRest.getName()).query(targetFilterRest.getQuery()));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter);
         MgmtTargetFilterQueryMapper.addLinks(response);
@@ -160,6 +159,18 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         filterManagement.updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(null));
 
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<MgmtTargetFilterQuery> startAutoAssignment(final Long filterId) {
+        filterManagement.startAutoAssignment(filterId);
+        return null;
+    }
+
+    @Override
+    public ResponseEntity<MgmtTargetFilterQuery> pauseAutoAssignment(final Long filterId) {
+        filterManagement.pauseAutoAssignment(filterId);
+        return null;
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {

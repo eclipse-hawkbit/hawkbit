@@ -161,15 +161,15 @@ public enum SpServerError {
             "Storage quota will be exceeded if file is uploaded."),
 
     /**
-     * error message, which describes that the action can not be canceled cause
-     * the action is inactive.
+     * error message, which describes that the action can not be canceled cause the
+     * action is inactive.
      */
     SP_ACTION_NOT_CANCELABLE("hawkbit.server.error.action.notcancelable",
             "Only active actions which are in status pending are cancelable."),
 
     /**
-     * error message, which describes that the action can not be force quit
-     * cause the action is inactive.
+     * error message, which describes that the action can not be force quit cause
+     * the action is inactive.
      */
     SP_ACTION_NOT_FORCE_QUITABLE("hawkbit.server.error.action.notforcequitable",
             "Only active actions which are in status pending can be force quit."),
@@ -245,8 +245,7 @@ public enum SpServerError {
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
 
     /**
-     * Error message informing that the action type for auto-assignment is
-     * invalid.
+     * Error message informing that the action type for auto-assignment is invalid.
      */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
             "The given action type for auto-assignment is invalid: allowed values are ['forced', 'soft', 'downloadonly']"),
@@ -275,7 +274,13 @@ public enum SpServerError {
     *
     */
     SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE("hawkbit.server.error.noWeightProvidedInMultiAssignmentMode",
-            "The requested operation requires a weight to be specified when multi assignments is enabled.");
+            "The requested operation requires a weight to be specified when multi assignments is enabled."),
+
+    /**
+     * 
+     */
+    SP_AUTO_ASSIGN_ILLEGAL_STATE("hawkbit.server.error.autoassign.illegalstate",
+            "The auto assignment is in the wrong state for the requested operation");
 
     private final String key;
     private final String message;

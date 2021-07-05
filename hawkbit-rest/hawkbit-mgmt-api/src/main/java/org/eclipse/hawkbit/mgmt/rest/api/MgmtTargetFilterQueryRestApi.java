@@ -46,11 +46,11 @@ public interface MgmtTargetFilterQueryRestApi {
      * Handles the GET request of retrieving all filters.
      *
      * @param pagingOffsetParam
-     *            the offset of list of targets for pagination, might not be
-     *            present in the rest request then default value will be applied
+     *            the offset of list of targets for pagination, might not be present
+     *            in the rest request then default value will be applied
      * @param pagingLimitParam
-     *            the limit of the paged request, might not be present in the
-     *            rest request then default value will be applied
+     *            the limit of the paged request, might not be present in the rest
+     *            request then default value will be applied
      * @param sortParam
      *            the sorting parameter in the request URL, syntax
      *            {@code field:direction, field:direction}
@@ -75,26 +75,25 @@ public interface MgmtTargetFilterQueryRestApi {
      *
      * @param filter
      *            the filters to be created.
-     * @return In case all filters were successfully created the ResponseEntity
-     *         with status code 201 with a list of successfully created entities
-     *         is returned. In any failure the JsonResponseExceptionHandler is
-     *         handling the response.
+     * @return In case all filters were successfully created the ResponseEntity with
+     *         status code 201 with a list of successfully created entities is
+     *         returned. In any failure the JsonResponseExceptionHandler is handling
+     *         the response.
      */
     @PostMapping(consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetFilterQuery> createFilter(@RequestBody MgmtTargetFilterQueryRequestBody filter);
 
     /**
-     * Handles the PUT request of updating a target filter. The ID is within the
-     * URL path of the request. A given ID in the request body is ignored. It's
-     * not possible to set fields to {@code null} values.
+     * Handles the PUT request of updating a target filter. The ID is within the URL
+     * path of the request. A given ID in the request body is ignored. It's not
+     * possible to set fields to {@code null} values.
      *
      * @param filterId
      *            the path parameter which contains the ID of the target filter
      * @param targetFilterRest
      *            the request body which contains the fields which should be
-     *            updated, fields which are not given are ignored for the
-     *            update.
+     *            updated, fields which are not given are ignored for the update.
      * @return the updated target filter response which contains all fields
      *         including fields which have not been updated
      */
@@ -109,9 +108,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *
      * @param filterId
      *            the ID of the target filter to be deleted
-     * @return If the given controllerId could exists and could be deleted Http
-     *         OK. In any failure the JsonResponseExceptionHandler is handling
-     *         the response.
+     * @return If the given controllerId could exists and could be deleted Http OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
      */
     @DeleteMapping(value = "/{filterId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteFilter(@PathVariable("filterId") Long filterId);
@@ -130,14 +129,13 @@ public interface MgmtTargetFilterQueryRestApi {
     ResponseEntity<MgmtDistributionSet> getAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
     /**
-     * Handles the POST request for changing distribution set for auto
-     * assignment of a target filter.
+     * Handles the POST request for changing distribution set for auto assignment of
+     * a target filter.
      *
      * @param filterId
      *            of the target to change
      * @param dsIdWithActionType
-     *            id of the distribution set and the action type for auto
-     *            assignment
+     *            id of the distribution set and the action type for auto assignment
      * @return http status
      */
     @PostMapping(value = "/{filterId}/autoAssignDS", consumes = { MediaTypes.HAL_JSON_VALUE,
@@ -157,4 +155,27 @@ public interface MgmtTargetFilterQueryRestApi {
     @DeleteMapping(value = "/{filterId}/autoAssignDS")
     ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") Long filterId);
 
+    /**
+     * Handles the POST request in order to start/unpause an auto assignment of a
+     * target filter.
+     *
+     * @param filterId
+     *            of the target to change
+     * @return http status
+     */
+    @PostMapping(value = "/{filterId}/autoAssign/start", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetFilterQuery> startAutoAssignment(@PathVariable("filterId") Long filterId);
+
+    /**
+     * Handles the POST request in order to pause an auto assignment of a target
+     * filter.
+     *
+     * @param filterId
+     *            of the target to change
+     * @return http status
+     */
+    @PostMapping(value = "/{filterId}/autoAssign/pause", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetFilterQuery> pauseAutoAssignment(@PathVariable("filterId") Long filterId);
 }

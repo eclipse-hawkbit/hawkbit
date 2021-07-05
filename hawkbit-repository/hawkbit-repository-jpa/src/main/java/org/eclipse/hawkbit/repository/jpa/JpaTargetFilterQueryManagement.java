@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
@@ -260,6 +261,40 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignPaused(update.isPaused());
         }
         return targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Transactional
+    public void startAutoAssignment(final Long filterId) {
+        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(filterId);
+        checkTargetFilterForDistSetOrThrowException(targetFilterQuery);
+
+        if (!targetFilterQuery.isAutoAssignPaused()) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment is already started.");
+        }
+
+        targetFilterQuery.setAutoAssignPaused(false);
+        targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    @Override
+    @Transactional
+    public void pauseAutoAssignment(final Long filterId) {
+        final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(filterId);
+        checkTargetFilterForDistSetOrThrowException(targetFilterQuery);
+
+        if (targetFilterQuery.isAutoAssignPaused()) {
+            throw new AutoAssignmentIllegalStateException("Auto assignment is already paused.");
+        }
+
+        targetFilterQuery.setAutoAssignPaused(true);
+        targetFilterQueryRepository.save(targetFilterQuery);
+    }
+
+    private void checkTargetFilterForDistSetOrThrowException(final JpaTargetFilterQuery targetFilterQuery) {
+        if (targetFilterQuery.getAutoAssignDistributionSet() == null) {
+            throw new AutoAssignmentIllegalStateException("No distribution-set assigned to target-filter");
+        }
     }
 
     private static void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
