@@ -128,8 +128,7 @@ public final class StatusIconBuilder {
     }
 
     /**
-     * Generate labels with icons according to entities'
-     * {@link RolloutGroupStatus}
+     * Generate labels with icons according to entities' {@link RolloutGroupStatus}
      *
      * @param <E>
      *            entity type
@@ -204,7 +203,7 @@ public final class StatusIconBuilder {
                     .get(rolloutManagementUIState.getSelectedRolloutGroupId());
             final Optional<ProxyFontIcon> optionalIcon = getIcon(entity);
 
-            ProxyFontIcon icon;
+            final ProxyFontIcon icon;
             if (optionalIcon.isPresent()) {
                 icon = getFontIconFromStatusMap(optionalIcon.get(), getEntityStatus.apply(entity), group.orElse(null));
             } else {
@@ -252,8 +251,7 @@ public final class StatusIconBuilder {
     }
 
     /**
-     * Generate labels with icons according to entities'
-     * {@link IsActiveDecoration}
+     * Generate labels with icons according to entities' {@link IsActiveDecoration}
      *
      * @param <E>
      *            entity type
@@ -313,7 +311,7 @@ public final class StatusIconBuilder {
                     UIMessageIdProvider.CAPTION_ACTION_FORCED);
             addMapping(ActionType.TIMEFORCED, VaadinIcons.BOLT, SPUIStyleDefinitions.STATUS_ICON_FORCED,
                     UIMessageIdProvider.CAPTION_ACTION_FORCED);
-            addMapping(ActionType.SOFT, VaadinIcons.STEP_FORWARD, SPUIStyleDefinitions.STATUS_ICON_SOFT,
+            addMapping(ActionType.SOFT, VaadinIcons.USER_CHECK, SPUIStyleDefinitions.STATUS_ICON_SOFT,
                     UIMessageIdProvider.CAPTION_ACTION_SOFT);
             addMapping(ActionType.DOWNLOAD_ONLY, VaadinIcons.DOWNLOAD, SPUIStyleDefinitions.STATUS_ICON_DOWNLOAD_ONLY,
                     UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY);
@@ -321,8 +319,7 @@ public final class StatusIconBuilder {
     }
 
     /**
-     * Generate labels with icons according to entities'
-     * {@link TargetUpdateStatus}
+     * Generate labels with icons according to entities' {@link TargetUpdateStatus}
      *
      * @param <E>
      *            entity type
@@ -441,8 +438,8 @@ public final class StatusIconBuilder {
             }
 
             final long currentTimeMillis = System.currentTimeMillis();
-            String style;
-            String description;
+            final String style;
+            final String description;
             if (action.isHitAutoForceTime(currentTimeMillis)) {
                 style = SPUIStyleDefinitions.STATUS_ICON_GREEN;
                 final String duration = SPDateTimeUtil.getDurationFormattedString(action.getForcedTime(),

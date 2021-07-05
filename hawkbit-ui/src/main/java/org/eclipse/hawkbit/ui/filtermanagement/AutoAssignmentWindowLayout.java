@@ -33,15 +33,16 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
     private final Label descriptionLabel;
     private final CheckBox enableCheckBox;
     private final ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
+    private final StartTypeOptionGroupAutoAssignmentLayout startTypeOptionGroupLayout;
     private final BoundComponent<ComboBox<ProxyDistributionSet>> autoAssignDsComboBox;
 
     /**
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      */
     public AutoAssignmentWindowLayout(final VaadinMessageSource i18n, final DistributionSetManagement dsManagement) {
         super();
@@ -51,6 +52,7 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
         this.descriptionLabel = autoAssignComponentBuilder.createDescriptionLabel();
         this.enableCheckBox = autoAssignComponentBuilder.createEnableCheckbox(binder);
         this.actionTypeOptionGroupLayout = autoAssignComponentBuilder.createActionTypeOptionGroupLayout(binder);
+        this.startTypeOptionGroupLayout = autoAssignComponentBuilder.createStartTypeOptionGroupLayout(binder);
         this.autoAssignDsComboBox = autoAssignComponentBuilder.createDistributionSetCombo(binder,
                 new DistributionSetStatelessDataProvider(dsManagement, new DistributionSetToProxyDistributionMapper()));
 
@@ -66,6 +68,7 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
         autoAssignmentLayout.addComponent(descriptionLabel);
         autoAssignmentLayout.addComponent(enableCheckBox);
         autoAssignmentLayout.addComponent(actionTypeOptionGroupLayout);
+        autoAssignmentLayout.addComponent(startTypeOptionGroupLayout);
         autoAssignmentLayout.addComponent(autoAssignDsComboBox.getComponent());
 
         return autoAssignmentLayout;
@@ -79,10 +82,11 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
      * Toggle auto assign input option
      *
      * @param autoAssignmentEnabled
-     *          boolean
+     *            boolean
      */
     public void switchAutoAssignmentInputsVisibility(final boolean autoAssignmentEnabled) {
         actionTypeOptionGroupLayout.setVisible(autoAssignmentEnabled);
+        startTypeOptionGroupLayout.setVisible(autoAssignmentEnabled);
         autoAssignDsComboBox.getComponent().setVisible(autoAssignmentEnabled);
         autoAssignDsComboBox.setRequired(autoAssignmentEnabled);
     }

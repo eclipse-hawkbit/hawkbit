@@ -66,6 +66,7 @@ public class AutoAssignmentWindowController extends
         if (proxyEntity.getDistributionSetInfo() != null) {
             autoAssignmentFilter.setAutoAssignmentEnabled(true);
             autoAssignmentFilter.setAutoAssignActionType(proxyEntity.getAutoAssignActionType());
+            autoAssignmentFilter.setAutoAssignPaused(proxyEntity.isAutoAssignPaused());
             autoAssignmentFilter.setDistributionSetInfo(proxyEntity.getDistributionSetInfo());
         } else {
             autoAssignmentFilter.setAutoAssignmentEnabled(false);
@@ -102,8 +103,7 @@ public class AutoAssignmentWindowController extends
                     : getI18n().getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT,
                             targetsForAutoAssignmentCount);
 
-            showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
-                    entity.getAutoAssignActionType());
+            showConsequencesDialog(confirmationCaption, confirmationQuestion, entity, autoAssignDsId);
         } else {
             final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
                     getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
@@ -112,13 +112,14 @@ public class AutoAssignmentWindowController extends
     }
 
     private void showConsequencesDialog(final String confirmationCaption, final String confirmationQuestion,
-            final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType) {
+            final ProxyTargetFilterQuery targetFilter, final Long autoAssignDsId) {
         final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption,
                 confirmationQuestion, ok -> {
                     if (ok) {
                         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                                getEntityFactory().targetFilterQuery().updateAutoAssign(targetFilterId)
-                                        .ds(autoAssignDsId).actionType(autoAssignActionType));
+                                getEntityFactory().targetFilterQuery().updateAutoAssign(targetFilter.getId())
+                                        .ds(autoAssignDsId).actionType(targetFilter.getAutoAssignActionType())
+                                        .paused(targetFilter.isAutoAssignPaused()));
                         publishModifiedEvent(createModifiedEventPayload(targetFilterQuery));
                     }
                 }, UIComponentIdProvider.DIST_SET_SELECT_CONS_WINDOW_ID);

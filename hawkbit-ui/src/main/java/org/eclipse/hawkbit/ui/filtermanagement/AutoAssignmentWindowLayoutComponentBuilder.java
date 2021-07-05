@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.filtermanagement.StartTypeOptionGroupAutoAssignmentLayout.AutoAssignmentStartOption;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAutoAssignmentLayout;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -36,7 +37,7 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
      * Constructor for AutoAssignmentWindowLayoutComponentBuilder
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
     public AutoAssignmentWindowLayoutComponentBuilder(final VaadinMessageSource i18n) {
         this.i18n = i18n;
@@ -59,7 +60,7 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
      * Create checkbox for auto enable
      *
      * @param binder
-     *          Target filter query binder
+     *            Target filter query binder
      *
      * @return Auto assignment checkbox
      */
@@ -73,7 +74,7 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
      * Create layout for action type option group
      *
      * @param binder
-     *          Target filter query binder
+     *            Target filter query binder
      *
      * @return Action type option group layout
      */
@@ -86,6 +87,26 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
                 .bind(ProxyTargetFilterQuery::getAutoAssignActionType, ProxyTargetFilterQuery::setAutoAssignActionType);
 
         return actionTypeOptionGroupLayout;
+    }
+
+    /**
+     * Create layout for start type option group
+     *
+     * @param binder
+     *            Target filter query binder
+     *
+     * @return Start type option group layout
+     */
+    public StartTypeOptionGroupAutoAssignmentLayout createStartTypeOptionGroupLayout(
+            final Binder<ProxyTargetFilterQuery> binder) {
+        final StartTypeOptionGroupAutoAssignmentLayout startTypeOptionGroupLayout = new StartTypeOptionGroupAutoAssignmentLayout(
+                i18n, UIComponentIdProvider.AUTO_ASSIGNMENT_START_TYPE_OPTIONS_ID);
+
+        binder.forField(startTypeOptionGroupLayout.getStartTypeOptionGroup()).bind(this::getAutoAssignmentStartType,
+                this::setAutoAssignmentStartType);
+
+        return startTypeOptionGroupLayout;
+
     }
 
     /**
@@ -105,5 +126,15 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
         boundComboBox.getComponent().setSizeFull();
 
         return boundComboBox;
+    }
+
+    private AutoAssignmentStartOption getAutoAssignmentStartType(final ProxyTargetFilterQuery targetFilterQuery) {
+        return targetFilterQuery.isAutoAssignPaused() ? AutoAssignmentStartOption.MANUAL
+                : AutoAssignmentStartOption.AUTO_START;
+    }
+
+    private void setAutoAssignmentStartType(final ProxyTargetFilterQuery targetFilterQuery,
+            final AutoAssignmentStartOption autoAssignmentStartOption) {
+        targetFilterQuery.setAutoAssignPaused(autoAssignmentStartOption == AutoAssignmentStartOption.MANUAL);
     }
 }

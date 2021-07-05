@@ -1472,6 +1472,8 @@ public final class UIComponentIdProvider {
 
     public static final String AUTO_ASSIGNMENT_ACTION_TYPE_OPTIONS_ID = "auto.assignment.action.type.options.id";
 
+    public static final String AUTO_ASSIGNMENT_START_TYPE_OPTIONS_ID = "auto.assignment.start.type.options.id";
+
     public static final String ROLLOUT_ACTION_TYPE_OPTIONS_ID = "rollout.action.type.options.id";
 
     public static final String ROLLOUT_START_OPTIONS_ID = "rollout.start.options.id";
