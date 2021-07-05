@@ -232,6 +232,9 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "autoAssignWeight")
                         .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                         .type(JsonFieldType.NUMBER.toString()),
+                fieldWithPath(arrayPrefix + "autoAssignPaused")
+                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_AUTO_ASSIGN_PAUSED_STATUS)
+                        .type(JsonFieldType.BOOLEAN.toString()),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
@@ -240,8 +243,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                         .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS));
     }
 
-    private String createTargetFilterQueryJson(final String name, final String query)
-            throws JsonProcessingException {
+    private String createTargetFilterQueryJson(final String name, final String query) throws JsonProcessingException {
         final Map<String, Object> target = new HashMap<>();
         target.put("name", name);
         target.put("query", query);

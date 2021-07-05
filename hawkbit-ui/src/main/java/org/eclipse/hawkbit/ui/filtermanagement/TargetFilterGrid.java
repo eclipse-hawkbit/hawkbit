@@ -65,7 +65,7 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     private final UINotification notification;
     private final TargetFilterGridLayoutUiState uiState;
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
-    private final TargetFilterQueryBuilder targetFilterQueryBuilder;
+    private final transient TargetFilterQueryBuilder targetFilterQueryBuilder;
 
     private final transient AutoAssignmentWindowBuilder autoAssignmentWindowBuilder;
 

@@ -48,7 +48,6 @@ public class StartTypeOptionGroupAutoAssignmentLayout extends HorizontalLayout {
                 ? i18n.getMessage("caption.auto.assignment.start.manual.desc")
                 : i18n.getMessage("caption.auto.assignment.start.auto.desc"));
 
-        // startTypeOptionGroup.setItems(true, false);
         startTypeOptionGroup.setItems(AutoAssignmentStartOption.values());
         addComponent(startTypeOptionGroup);
     }

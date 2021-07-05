@@ -223,4 +223,5 @@ public final class MgmtApiModelProperties {
     public static final String CONFIG_PARAM = "The name of the configuration parameter.";
 
     public static final String DS_NEW_ASSIGNED_ACTIONS = "The newly created actions as a result of this assignment";
+    public static final String TARGET_FILTER_QUERY_AUTO_ASSIGN_PAUSED_STATUS = "Paused status of the target filter's auto assignment";
 }
