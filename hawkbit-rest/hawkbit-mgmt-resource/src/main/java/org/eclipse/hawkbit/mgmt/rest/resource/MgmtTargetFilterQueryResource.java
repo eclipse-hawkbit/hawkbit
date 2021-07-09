@@ -162,15 +162,15 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> startAutoAssignment(final Long filterId) {
+    public ResponseEntity<Void> startAutoAssignment(final Long filterId) {
         filterManagement.startAutoAssignment(filterId);
-        return null;
+        return ResponseEntity.ok().build();
     }
 
     @Override
-    public ResponseEntity<MgmtTargetFilterQuery> pauseAutoAssignment(final Long filterId) {
+    public ResponseEntity<Void> pauseAutoAssignment(final Long filterId) {
         filterManagement.pauseAutoAssignment(filterId);
-        return null;
+        return ResponseEntity.ok().build();
     }
 
     private TargetFilterQuery findFilterWithExceptionIfNotFound(final Long filterId) {

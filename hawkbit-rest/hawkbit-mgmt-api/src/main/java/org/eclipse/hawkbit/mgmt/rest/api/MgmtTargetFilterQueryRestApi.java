@@ -165,7 +165,7 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @PostMapping(value = "/{filterId}/autoAssign/start", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> startAutoAssignment(@PathVariable("filterId") Long filterId);
+    ResponseEntity<Void> startAutoAssignment(@PathVariable("filterId") Long filterId);
 
     /**
      * Handles the POST request in order to pause an auto assignment of a target
@@ -177,5 +177,5 @@ public interface MgmtTargetFilterQueryRestApi {
      */
     @PostMapping(value = "/{filterId}/autoAssign/pause", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<MgmtTargetFilterQuery> pauseAutoAssignment(@PathVariable("filterId") Long filterId);
+    ResponseEntity<Void> pauseAutoAssignment(@PathVariable("filterId") Long filterId);
 }

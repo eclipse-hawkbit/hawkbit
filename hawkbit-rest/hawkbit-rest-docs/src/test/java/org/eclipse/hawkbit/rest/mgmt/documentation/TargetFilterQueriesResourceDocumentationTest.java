@@ -62,7 +62,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Description("Handles the GET request of retrieving all target filter queries within SP. Required Permission: READ_TARGET.")
     public void getTargetFilterQueries() throws Exception {
 
-        createTargetFilterQueryWithDS(createDistributionSet());
+        createTargetFilterQueryWithDS();
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
@@ -136,7 +136,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the GET request of retrieving a single target filter query within SP. Required Permission: READ_TARGET.")
     public void getTargetFilterQuery() throws Exception {
-        final TargetFilterQuery tfq = createTargetFilterQueryWithDS(createDistributionSet());
+        final TargetFilterQuery tfq = createTargetFilterQueryWithDS();
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}", tfq.getId()))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
@@ -168,7 +168,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the GET request of retrieving a the auto assign distribution set of a target filter query within SP. Required Permission: READ_TARGET.")
     public void getAssignDS() throws Exception {
-        final TargetFilterQuery tfq = createTargetFilterQueryWithDS(createDistributionSet());
+        final TargetFilterQuery tfq = createTargetFilterQueryWithDS();
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
                 tfq.getId())).andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
@@ -208,12 +208,39 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the DELETE request of deleting the auto assign distribution set from a target filter query within SP. Required Permission: DELETE_TARGET.")
     public void deleteAutoAssignDS() throws Exception {
-        final TargetFilterQuery tfq = createTargetFilterQueryWithDS(createDistributionSet());
+        final TargetFilterQuery tfq = createTargetFilterQueryWithDS();
         this.mockMvc
                 .perform(delete(
                         MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
                         tfq.getId()))
                 .andExpect(status().isNoContent()).andDo(MockMvcResultPrinter.print())
+                .andDo(this.document.document(pathParameters(
+                        parameterWithName("targetFilterQueryId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
+    @Description("Handles the POST request of pausing the auto assignment. Required Permission: UPDATE_TARGET.")
+    public void postAutoAssignPause() throws Exception {
+        final TargetFilterQuery filterQuery = createTargetFilterQueryWithDS();
+
+        mockMvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssign/pause",
+                        filterQuery.getId()))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+                .andDo(this.document.document(pathParameters(
+                        parameterWithName("targetFilterQueryId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
+    @Description("Handles the POST request of starting the auto assignment. Required Permission: UPDATE_TARGET.")
+    public void postAutoAssignStart() throws Exception {
+        final TargetFilterQuery filterQuery = createTargetFilterQueryWithDS();
+        targetFilterQueryManagement.pauseAutoAssignment(filterQuery.getId());
+
+        mockMvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssign/start",
+                        filterQuery.getId()))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("targetFilterQueryId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
@@ -260,4 +287,9 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
         return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
     }
+
+    private TargetFilterQuery createTargetFilterQueryWithDS() {
+        return createTargetFilterQueryWithDS(createDistributionSet());
+    }
+
 }
