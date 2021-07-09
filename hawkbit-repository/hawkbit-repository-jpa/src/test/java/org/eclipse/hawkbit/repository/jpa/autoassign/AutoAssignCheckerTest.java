@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
@@ -105,11 +106,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery()
-                        .updateAutoAssign(targetFilterQueryManagement.create(
-                                entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
-                        .ds(setA.getId()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
@@ -221,10 +222,10 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId())
-                .stream().filter(a -> targetIds.contains(a.getTarget().getControllerId()))
-                .forEach(a -> assertThat(a.getInitiatedBy()).as(
-                        "Action should be initiated by the user who initiated the auto assignment")
+        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId()).stream()
+                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy())
+                        .as("Action should be initiated by the user who initiated the auto assignment")
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
@@ -312,5 +313,36 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
         assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
+    }
+
+    @Test
+    @Description("Paused auto assignments are not executed and only assign DS after they have been started again")
+    public void checkPausedAndResumedAutoAssignment() {
+
+        final DistributionSet distSetA = testdataFactory.createDistributionSet("dsA");
+        final DistributionSet distSetB = testdataFactory.createDistributionSet("dsB");
+        final TargetFilterQueryCreate filterEntity = entityFactory.targetFilterQuery().create().name("test")
+                .query("name==*").autoAssignDistributionSet(distSetB.getId()).autoAssignActionType(ActionType.FORCED)
+                .autoAssignPaused(true);
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(filterEntity);
+
+        final List<Target> targets = testdataFactory.createTargets(100, "TestTarget",
+                "Paused auto assignment test-target");
+        final int targetsCount = targets.size();
+
+        assignDistributionSet(distSetA, targets);
+        verifyThatTargetsHaveDistributionSetAssignment(distSetA, targets, targetsCount);
+
+        // run checker
+        autoAssignChecker.check();
+        // Verify paused auto assignment was not executed
+        verifyThatTargetsHaveDistributionSetAssignment(distSetA, targets, targetsCount);
+
+        targetFilterQueryManagement.startAutoAssignment(targetFilterQuery.getId());
+
+        // run checker
+        autoAssignChecker.check();
+        // Verify started auto assignment was executed
+        verifyThatTargetsHaveDistributionSetAssignment(distSetB, targets, targetsCount);
     }
 }

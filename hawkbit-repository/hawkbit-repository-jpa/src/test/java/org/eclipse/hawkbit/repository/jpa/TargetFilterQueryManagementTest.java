@@ -28,7 +28,9 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.AutoAssignmentIllegalStateException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
@@ -43,6 +45,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -58,7 +61,7 @@ import io.qameta.allure.Story;
 public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
-    @Description("Verifies that management get access reacts as specfied on calls for non existing entities by means "
+    @Description("Verifies that management get access reacts as specified on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void nonExistingEntityAccessReturnsNotPresent() {
@@ -67,7 +70,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     }
 
     @Test
-    @Description("Verifies that management queries react as specfied on calls for non existing entities "
+    @Description("Verifies that management queries react as specified on calls for non existing entities "
             + " by means of throwing EntityNotFoundException.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
@@ -405,7 +408,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         // check if find works with name filter
         verifyFindByDistributionSetAndRsql(distributionSet, "name==" + filterName, tfq2);
 
-        verifyFindForAllWithAutoAssignDs(tfq, tfq2);
+        verifyFindForAllWithAutoAssignDsAndNotPaused(tfq, tfq2);
     }
 
     @Step
@@ -427,7 +430,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
     }
 
     @Step
-    private void verifyFindForAllWithAutoAssignDs(final TargetFilterQuery... expectedFilterQueries) {
+    private void verifyFindForAllWithAutoAssignDsAndNotPaused(final TargetFilterQuery... expectedFilterQueries) {
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
                 .findWithAutoAssignDSAndNotPaused(PageRequest.of(0, 500));
 
@@ -501,5 +504,102 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(Action.WEIGHT_MIN));
         assertThat(targetFilterQueryManagement.get(filterId).get().getAutoAssignWeight().get())
                 .isEqualTo(Action.WEIGHT_MIN);
+    }
+
+    @Test
+    @Description("Initial state of an auto assignment is not paused")
+    void initialStateOfAutoAssignment() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*")
+                        .autoAssignDistributionSet(ds).autoAssignActionType(ActionType.FORCED));
+
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isFalse();
+    }
+
+    @Test
+    @Description("Auto assignment of target filter is getting paused and started again")
+    void pauseAutoAssignment() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*")
+                        .autoAssignDistributionSet(ds).autoAssignActionType(ActionType.FORCED));
+        final Long filterId = targetFilterQuery.getId();
+
+        // Verify initial state
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isFalse();
+
+        targetFilterQueryManagement.pauseAutoAssignment(filterId);
+        final TargetFilterQuery pausedFilter = targetFilterQueryManagement.get(filterId).get();
+        assertThat(pausedFilter.isAutoAssignPaused()).isTrue();
+
+        targetFilterQueryManagement.startAutoAssignment(filterId);
+        final TargetFilterQuery activeFilter = targetFilterQueryManagement.get(filterId).get();
+        assertThat(activeFilter.isAutoAssignPaused()).isFalse();
+    }
+
+    @Test
+    @Description("Paused Auto assignment are not returned by the auto assignment query")
+    void pausedAutoAssignmentIsNotQueried() {
+        final Pageable query = PageRequest.of(0, 200);
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*")
+                        .autoAssignDistributionSet(ds).autoAssignActionType(ActionType.FORCED));
+
+        final Page<TargetFilterQuery> pageWithFilter = targetFilterQueryManagement
+                .findWithAutoAssignDSAndNotPaused(query);
+
+        targetFilterQueryManagement.pauseAutoAssignment(targetFilterQuery.getId());
+
+        final Page<TargetFilterQuery> pageWithoutFilter = targetFilterQueryManagement
+                .findWithAutoAssignDSAndNotPaused(query);
+
+        assertThat(pageWithFilter.getContent()).contains(targetFilterQuery);
+        assertThat(pageWithoutFilter.getContent()).doesNotContainSequence(targetFilterQuery);
+    }
+
+    @Test
+    @Description("Already paused Auto assignment cannot be paused")
+    void pausedAutoAssignmentCannotBePaused() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*")
+                        .autoAssignDistributionSet(ds).autoAssignActionType(ActionType.FORCED).autoAssignPaused(true));
+
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isTrue();
+        assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.pauseAutoAssignment(targetFilterQuery.getId()))
+                .withMessageContaining("Auto assignment is already paused");
+    }
+
+    @Test
+    @Description("Already started Auto assignment cannot be started")
+    void runningAutoAssignmentCannotBeStarted() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test").query("id==*")
+                        .autoAssignDistributionSet(ds).autoAssignActionType(ActionType.FORCED));
+
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isFalse();
+        assertThatExceptionOfType(AutoAssignmentIllegalStateException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.startAutoAssignment(targetFilterQuery.getId()))
+                .withMessageContaining("Auto assignment is already started");
+    }
+
+    @Test
+    @Description("Pausing a nonexistent targetfilter failes with exception")
+    void pauseNonexistentAutoAssignment() {
+        final long invalidId = -1L;
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.pauseAutoAssignment(invalidId));
+    }
+
+    @Test
+    @Description("Starting a nonexistent targetfilter failes with exception")
+    void startNonexistentAutoAssignment() {
+        final long invalidId = -1L;
+        assertThatExceptionOfType(EntityNotFoundException.class)
+                .isThrownBy(() -> targetFilterQueryManagement.startAutoAssignment(invalidId));
     }
 }
