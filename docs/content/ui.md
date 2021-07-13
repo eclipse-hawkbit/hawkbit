@@ -146,6 +146,7 @@ It is possible to assign some distribution set with different action types (_for
 
 In order to activate the auto-assignment, one should first click on _Auto assignment_ cell in Custom Filters table, and then check the corresponding checkbox. After that, the action type and distribution set for auto-assignment should be selected and confirmed.
 
-As long as the auto-assignment stays active, the scheduler will try to assign selected distribution set to corresponding custom filter targets, that have never seen it before. 
+As long as the auto-assignment stays active, the scheduler will try to assign selected distribution set to corresponding
+custom filter targets, that have never seen it before. Paused auto assignments will not be handled up by the scheduler.
 
 ![Auto assignment](../images/ui/target_filter_auto_assignment.png)
