@@ -1,0 +1,1 @@
+ALTER TABLE sp_target_filter_query ADD auto_assign_paused BIT NOT NULL default 0;
