@@ -26,9 +26,6 @@ public class MgmtTargetType extends MgmtNamedEntity {
     private Long moduleId;
 
     @JsonProperty
-    private String name;
-
-    @JsonProperty
     private boolean deleted;
 
     public boolean isDeleted() {
@@ -45,14 +42,6 @@ public class MgmtTargetType extends MgmtNamedEntity {
 
     public void setModuleId(final Long moduleId) {
         this.moduleId = moduleId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
     }
 
 }
