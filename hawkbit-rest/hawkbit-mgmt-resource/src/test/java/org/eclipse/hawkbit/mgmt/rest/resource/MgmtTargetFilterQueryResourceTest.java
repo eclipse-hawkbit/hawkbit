@@ -25,9 +25,9 @@ import java.util.List;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -312,7 +312,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(
+                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
@@ -344,7 +345,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
                 .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(
+                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
@@ -538,6 +540,64 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         final List<TargetFilterQuery> filters = targetFilterQueryManagement.findAll(PAGE).getContent();
         assertThat(filters).hasSize(1);
         assertThat(filters.get(0).getAutoAssignWeight().get()).isEqualTo(45);
+    }
+
+    @Test
+    @Description("Ensures that state validation for auto-assignment works as intended")
+    public void validateAutoAssignmentState() throws Exception {
+
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final Long filterId = createFilterQueryWithAutoAssign("Test", "id==*", set.getId()).getId();
+
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.get(filterId).get();
+
+        assertThat(targetFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
+        assertThat(targetFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isFalse();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterId + "/autoAssign/start"))
+                .andExpect(status().isBadRequest()).andExpect(
+                        jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_AUTO_ASSIGN_ILLEGAL_STATE.getKey())));
+
+        targetFilterQueryManagement.pauseAutoAssignment(filterId);
+        final TargetFilterQuery pausedFilter = targetFilterQueryManagement.get(filterId).get();
+        assertThat(pausedFilter.isAutoAssignPaused()).isTrue();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterId + "/autoAssign/pause"))
+                .andExpect(status().isBadRequest()).andExpect(
+                        jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_AUTO_ASSIGN_ILLEGAL_STATE.getKey())));
+    }
+
+    @Test
+    @Description("Ensures that pausing and (re)starting of an auto-assignment works as intended")
+    public void pauseAndStartAutoAssignment() throws Exception {
+
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final Long filterId = createFilterQueryWithAutoAssign("MyFilter", "id==*", set.getId()).getId();
+
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.get(filterId).get();
+
+        assertThat(targetFilterQuery.getAutoAssignDistributionSet()).isEqualTo(set);
+        assertThat(targetFilterQuery.getAutoAssignActionType()).isEqualTo(ActionType.FORCED);
+        assertThat(targetFilterQuery.isAutoAssignPaused()).isFalse();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterId + "/autoAssign/pause"))
+                .andExpect(status().isOk());
+
+        final TargetFilterQuery pausedFilter = targetFilterQueryManagement.get(filterId).get();
+        assertThat(pausedFilter.isAutoAssignPaused()).isTrue();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterId + "/autoAssign/start"))
+                .andExpect(status().isOk());
+
+        final TargetFilterQuery startedFilter = targetFilterQueryManagement.get(filterId).get();
+        assertThat(startedFilter.isAutoAssignPaused()).isFalse();
+    }
+
+    private TargetFilterQuery createFilterQueryWithAutoAssign(final String name, final String filterQuery,
+            final Long dsId) {
+        return targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(name)
+                .query(filterQuery).autoAssignDistributionSet(dsId).autoAssignActionType(ActionType.FORCED));
     }
 
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {

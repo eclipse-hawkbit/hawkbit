@@ -87,6 +87,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_AUTO_ASSIGN_ILLEGAL_STATE, HttpStatus.BAD_REQUEST);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {
@@ -94,16 +95,16 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * method for handling exception of type AbstractServerRtException. Called
-     * by the Spring-Framework for exception handling.
+     * method for handling exception of type AbstractServerRtException. Called by
+     * the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
      * @param ex
      *            the exception which occurred
      *
-     * @return the entity to be responded containing the exception information
-     *         as entity.
+     * @return the entity to be responded containing the exception information as
+     *         entity.
      */
     @ExceptionHandler(AbstractServerRtException.class)
     public ResponseEntity<ExceptionInfo> handleSpServerRtExceptions(final HttpServletRequest request,
@@ -120,12 +121,11 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type
-     * {@link FileStreamingFailedException} which is thrown in case the
-     * streaming of a file failed due to an internal server error. As the
-     * streaming of the file has already begun, no JSON response but only the
-     * ResponseStatus 500 is returned. Called by the Spring-Framework for
-     * exception handling.
+     * Method for handling exception of type {@link FileStreamingFailedException}
+     * which is thrown in case the streaming of a file failed due to an internal
+     * server error. As the streaming of the file has already begun, no JSON
+     * response but only the ResponseStatus 500 is returned. Called by the
+     * Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
@@ -143,17 +143,16 @@ public class ResponseExceptionHandler {
 
     /**
      * Method for handling exception of type HttpMessageNotReadableException and
-     * MethodArgumentNotValidException which are thrown in case the request body
-     * is not well formed (e.g. syntax failures, missing/invalid parameters) and
-     * cannot be deserialized. Called by the Spring-Framework for exception
-     * handling.
+     * MethodArgumentNotValidException which are thrown in case the request body is
+     * not well formed (e.g. syntax failures, missing/invalid parameters) and cannot
+     * be deserialized. Called by the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
      * @param ex
      *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
+     * @return the entity to be responded containing the exception information as
+     *         entity.
      */
     @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class })
     public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
@@ -164,16 +163,16 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type ConstraintViolationException which
-     * is thrown in case the request is rejected due to a constraint violation.
-     * Called by the Spring-Framework for exception handling.
+     * Method for handling exception of type ConstraintViolationException which is
+     * thrown in case the request is rejected due to a constraint violation. Called
+     * by the Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
      * @param ex
      *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
+     * @return the entity to be responded containing the exception information as
+     *         entity.
      */
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ExceptionInfo> handleConstraintViolationException(final HttpServletRequest request,
@@ -191,16 +190,16 @@ public class ResponseExceptionHandler {
     }
 
     /**
-     * Method for handling exception of type ValidationException which is thrown
-     * in case the request is rejected due to invalid requests. Called by the
+     * Method for handling exception of type ValidationException which is thrown in
+     * case the request is rejected due to invalid requests. Called by the
      * Spring-Framework for exception handling.
      *
      * @param request
      *            the Http request
      * @param ex
      *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
+     * @return the entity to be responded containing the exception information as
+     *         entity.
      */
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ExceptionInfo> handleValidationException(final HttpServletRequest request,
@@ -224,8 +223,8 @@ public class ResponseExceptionHandler {
      *            the Http request
      * @param ex
      *            the exception which occurred
-     * @return the entity to be responded containing the exception information
-     *         as entity.
+     * @return the entity to be responded containing the exception information as
+     *         entity.
      */
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ExceptionInfo> handleMultipartException(final HttpServletRequest request,
