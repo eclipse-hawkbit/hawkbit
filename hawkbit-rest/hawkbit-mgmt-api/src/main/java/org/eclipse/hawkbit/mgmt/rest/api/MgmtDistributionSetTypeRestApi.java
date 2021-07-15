@@ -28,8 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * REST Resource handling for SoftwareModule and related Artifact CRUD
- * operations.
+ * REST Resource handling for DistributionSet CRUD operations.
  *
  */
 @RequestMapping(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
@@ -68,9 +67,9 @@ public interface MgmtDistributionSetTypeRestApi {
      * within.
      *
      * @param distributionSetTypeId
-     *            the ID of the module type to retrieve
+     *            the ID of the DS type to retrieve
      *
-     * @return a single softwareModule with status OK.
+     * @return a single distributionSet with status OK.
      */
     @GetMapping(value = "/{distributionSetTypeId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
@@ -92,9 +91,9 @@ public interface MgmtDistributionSetTypeRestApi {
      * Handles the PUT request of updating a Distribution Set Type.
      *
      * @param distributionSetTypeId
-     *            the ID of the software module in the URL
+     *            the ID of the DS type in the URL
      * @param restDistributionSetType
-     *            the module type to be updated.
+     *            the DS type to be updated.
      * @return status OK if update is successful
      */
     @PutMapping(value = "/{distributionSetTypeId}", consumes = { MediaTypes.HAL_JSON_VALUE,
