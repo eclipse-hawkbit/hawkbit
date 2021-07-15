@@ -11,12 +11,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface TargetTypeCreate {
-    /**
-     * @param key
-     *            for {@link TargetType#getKey()}
-     * @return updated builder instance
-     */
-    TargetTypeCreate key(@Size(min = 1, max = TargetType.KEY_MAX_SIZE) @NotNull String key);
 
     /**
      * @param name
@@ -40,40 +34,15 @@ public interface TargetTypeCreate {
     TargetTypeCreate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param mandatory
-     *            for {@link TargetType#getMandatoryModuleTypes()}
-     * @return updated builder instance
-     */
-    TargetTypeCreate mandatory(Collection<Long> mandatory);
-
-    /**
-     * @param mandatory
-     *            for {@link TargetType#getMandatoryModuleTypes()}
-     * @return updated builder instance
-     */
-    default TargetTypeCreate mandatory(final Long mandatory) {
-        return mandatory(Arrays.asList(mandatory));
-    }
-
-    /**
-     * @param mandatory
-     *            for {@link TargetType#getOptionalModuleTypes()}
-     * @return updated builder instance
-     */
-    default TargetTypeCreate mandatory(final DistributionSetType mandatory) {
-        return mandatory(Optional.ofNullable(mandatory).map(DistributionSetType::getId).orElse(null));
-    }
-
-    /**
      * @param optional
-     *            for {@link TargetType#getOptionalModuleTypes()}
+     *            for {@link TargetType#getOptionalSetTypes()}
      * @return updated builder instance
      */
     TargetTypeCreate optional(Collection<Long> optional);
 
     /**
      * @param optional
-     *            for {@link TargetType#getOptionalModuleTypes()}
+     *            for {@link TargetType#getOptionalSetTypes()}
      * @return updated builder instance
      */
     default TargetTypeCreate optional(final Long optional) {
@@ -82,7 +51,7 @@ public interface TargetTypeCreate {
 
     /**
      * @param optional
-     *            for {@link TargetType#getOptionalModuleTypes()}
+     *            for {@link TargetType#getOptionalSetTypes()}
      * @return updated builder instance
      */
     default TargetTypeCreate optional(final DistributionSetType optional) {

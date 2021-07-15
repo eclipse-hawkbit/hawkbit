@@ -16,86 +16,35 @@ import java.util.Set;
  *
  */
 public interface TargetType extends Type{
-    /**
-     * @return immutable set of {@link DistributionSetType}s
-     */
-    Set<DistributionSetType> getMandatoryModuleTypes();
 
     /**
      * @return immutable set of optional {@link DistributionSetType}s
      */
-    Set<DistributionSetType> getOptionalModuleTypes();
+    Set<DistributionSetType> getOptionalSetTypes();
+
 
     /**
-     * Checks if the given {@link DistributionSetType} is in this
-     * {@link DistributionSetType}.
+     * Checks if the given {@link DistributionSetType} is in
+     * {@link #getOptionalSetTypes()}.
      *
      * @param distributionSetType
      *            search for
      * @return <code>true</code> if found
      */
-    default boolean containsModuleType(final DistributionSetType distributionSetType) {
-        return containsMandatoryModuleType(distributionSetType) || containsOptionalModuleType(distributionSetType);
-    }
-
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in this
-     * {@link DistributionSetType}.
-     *
-     * @param distributionSetTypeId
-     *            search for by {@link DistributionSetType#getId()}
-     * @return <code>true</code> if found
-     */
-    default boolean containsModuleType(final Long distributionSetTypeId) {
-        return containsMandatoryModuleType(distributionSetTypeId) || containsOptionalModuleType(distributionSetTypeId);
+    default boolean containsOptionalSetType(final DistributionSetType distributionSetType) {
+        return containsOptionalSetType(distributionSetType.getId());
     }
 
     /**
      * Checks if the given {@link DistributionSetType} is in
-     * {@link #getMandatoryModuleTypes()}.
-     *
-     * @param distributionSetType
-     *            search for
-     * @return <code>true</code> if found
-     */
-    default boolean containsMandatoryModuleType(final DistributionSetType distributionSetType) {
-        return containsMandatoryModuleType(distributionSetType.getId());
-    }
-
-    /**
-     * Checks if the given {@link DistributionSetType} is in
-     * {@link #getMandatoryModuleTypes()}.
-     *
-     * @param distributionSetTypeId
-     *            search for by {@link DistributionSetType#getId()}
-     * @return <code>true</code> if found
-     */
-    default boolean containsMandatoryModuleType(final Long distributionSetTypeId) {
-        return getMandatoryModuleTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
-    }
-
-    /**
-     * Checks if the given {@link DistributionSetType} is in
-     * {@link #getOptionalModuleTypes()}.
-     *
-     * @param distributionSetType
-     *            search for
-     * @return <code>true</code> if found
-     */
-    default boolean containsOptionalModuleType(final DistributionSetType distributionSetType) {
-        return containsOptionalModuleType(distributionSetType.getId());
-    }
-
-    /**
-     * Checks if the given {@link SoftwareModuleType} is in
-     * {@link #getOptionalModuleTypes()}.
+     * {@link #getOptionalSetTypes()}.
      *
      * @param distributionSetTypeId
      *            search by {@link DistributionSetType#getId()}
      * @return <code>true</code> if found
      */
-    default boolean containsOptionalModuleType(final Long distributionSetTypeId) {
-        return getOptionalModuleTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
+    default boolean containsOptionalSetType(final Long distributionSetTypeId) {
+        return getOptionalSetTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
     }
 
     /**
@@ -106,7 +55,7 @@ public interface TargetType extends Type{
      *            to compare with
      * @return <code>true</code> if the lists are identical.
      */
-    boolean areModuleEntriesIdentical(DistributionSetType dsType);
+    boolean areSetEntriesIdentical(DistributionSetType dsType);
 
     /**
      * @param target

@@ -22,15 +22,8 @@ public interface TargetTypeUpdate {
     TargetTypeUpdate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param mandatory
-     *            for {@link TargetType#getMandatoryModuleTypes()}
-     * @return updated builder instance
-     */
-    TargetTypeUpdate mandatory(Collection<Long> mandatory);
-
-    /**
      * @param optional
-     *            for {@link TargetType#getOptionalModuleTypes()}
+     *            for {@link TargetType#getOptionalSetTypes()}
      * @return updated builder instance
      */
     TargetTypeUpdate optional(Collection<Long> optional);

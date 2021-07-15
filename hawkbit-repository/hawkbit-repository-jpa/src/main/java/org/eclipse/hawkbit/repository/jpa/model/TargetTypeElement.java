@@ -38,9 +38,6 @@ public class TargetTypeElement implements Serializable {
     @EmbeddedId
     private TargetTypeElementCompositeKey key;
 
-    @Column(name = "mandatory")
-    private boolean mandatory;
-
     @CascadeOnDelete
     @MapsId("targetType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
@@ -64,25 +61,11 @@ public class TargetTypeElement implements Serializable {
      *            of the element
      * @param targetType
      *            of the element
-     * @param mandatory
-     *            to <code>true</code> if the {@link DistributionSetType} if
-     *            mandatory element in the {@link DistributionSet}.
      */
-    TargetTypeElement(final JpaDistributionSetType dsType, final JpaTargetType targetType,
-                      final boolean mandatory) {
+    TargetTypeElement(final JpaTargetType targetType, final JpaDistributionSetType dsType) {
         key = new TargetTypeElementCompositeKey(targetType, dsType);
         this.dsType = dsType;
         this.targetType = targetType;
-        this.mandatory = mandatory;
-    }
-
-    TargetTypeElement setMandatory(final boolean mandatory) {
-        this.mandatory = mandatory;
-        return this;
-    }
-
-    public boolean isMandatory() {
-        return mandatory;
     }
 
     public DistributionSetType getDsType() {
@@ -99,7 +82,7 @@ public class TargetTypeElement implements Serializable {
 
     @Override
     public String toString() {
-        return "DistributionSetTypeElement [mandatory=" + mandatory + ", dsType=" + dsType + ", targetType=" + targetType + "]";
+        return "DistributionSetTypeElement [dsType=" + dsType + ", targetType=" + targetType + "]";
     }
 
     @Override
