@@ -830,6 +830,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return deleteQuery.executeUpdate();
     }
 
+    @Override
+    public boolean hasPendingCancellations(String controllerId) {
+        return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(controllerId,
+                Action.Status.CANCELING);
+    }
+
     private static String getQueryForDeleteActionsByStatusAndLastModifiedBeforeString(final Database database) {
         return QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED.getOrDefault(database,
                 QUERY_DELETE_ACTIONS_BY_STATE_AND_LAST_MODIFIED_DEFAULT);

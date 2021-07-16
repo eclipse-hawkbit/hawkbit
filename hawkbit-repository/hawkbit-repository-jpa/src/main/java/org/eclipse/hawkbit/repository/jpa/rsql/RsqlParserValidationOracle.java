@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetFields;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.rsql.ParseExceptionWrapper.TokenWrapper;
@@ -33,8 +32,6 @@ import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
 import org.eclipse.persistence.exceptions.ConversionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
 
@@ -61,9 +58,6 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RsqlParserValidationOracle.class);
 
-    @Autowired
-    private TargetManagement targetManagement;
-
     @Override
     public ValidationOracleContext suggest(final String rsqlQuery, final int cursorPosition) {
 
@@ -76,7 +70,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         context.setSyntaxErrorContext(errorContext);
 
         try {
-            targetManagement.findByRsql(PageRequest.of(0, 1), rsqlQuery);
+            RSQLUtility.validateRsqlFor(rsqlQuery, TargetFields.class);
             context.setSyntaxError(false);
             suggestionContext.getSuggestions().addAll(getLogicalOperatorSuggestion(rsqlQuery));
         } catch (final RSQLParameterSyntaxException | RSQLParserException ex) {

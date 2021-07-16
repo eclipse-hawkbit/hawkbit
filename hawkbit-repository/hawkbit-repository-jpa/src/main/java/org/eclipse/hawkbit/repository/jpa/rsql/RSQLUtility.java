@@ -136,29 +136,67 @@ public final class RSQLUtility {
     public static <A extends Enum<A> & FieldNameProvider, T> Specification<T> parse(final String rsql,
             final Class<A> fieldNameProvider, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
-        return new RSQLSpecification<>(rsql.toLowerCase(), fieldNameProvider, virtualPropertyReplacer, database);
+        return new RSQLSpecification<>(rsql, fieldNameProvider, virtualPropertyReplacer, database);
     }
 
     /**
-     * Validate the given rsql string regarding existence and correct syntax.
-     *
+     * Validates the RSQL string
+     * 
      * @param rsql
-     *            the rsql string to get validated
-     *
+     *            RSQL string to validate
+     * @param fieldNameProvider
+     * 
+     * @throws RSQLParserException
+     *             if RSQL syntax is invalid
+     * @throws RSQLParameterUnsupportedFieldException
+     *             if RSQL key is not allowed
      */
-    public static void isValid(final String rsql) {
-        parseRsql(rsql);
+    public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(final String rsql,
+            final Class<A> fieldNameProvider) {
+        final RSQLVisitor<Void, String> visitor = new ValidationRSQLVisitor<>(fieldNameProvider);
+        final Node rootNode = parseRsql(rsql);
+        rootNode.accept(visitor);
     }
 
     private static Node parseRsql(final String rsql) {
         try {
-            LOGGER.debug("parsing rsql string {}", rsql);
+            LOGGER.debug("Parsing rsql string {}", rsql);
             final Set<ComparisonOperator> operators = RSQLOperators.defaultOperators();
-            return new RSQLParser(operators).parse(rsql);
+            return new RSQLParser(operators).parse(rsql.toLowerCase());
         } catch (final IllegalArgumentException e) {
             throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
         } catch (final RSQLParserException e) {
             throw new RSQLParameterSyntaxException(e);
+        }
+    }
+
+    private static final class ValidationRSQLVisitor<A extends Enum<A> & FieldNameProvider>
+            extends AbstractFieldNameRSQLVisitor<A> implements RSQLVisitor<Void, String> {
+
+        public ValidationRSQLVisitor(final Class<A> fieldNameProvider) {
+            super(fieldNameProvider);
+        }
+
+        @Override
+        public Void visit(final AndNode node, final String param) {
+            return visitNode(node, param);
+        }
+
+        @Override
+        public Void visit(final OrNode node, final String param) {
+            return visitNode(node, param);
+        }
+
+        @Override
+        public Void visit(final ComparisonNode node, final String param) {
+            final A fieldName = getFieldEnumByName(node);
+            getAndValidatePropertyFieldName(fieldName, node);
+            return null;
+        }
+
+        private Void visitNode(final LogicalNode node, final String param) {
+            node.getChildren().forEach(child -> child.accept(this, param));
+            return null;
         }
     }
 
@@ -184,7 +222,7 @@ public final class RSQLUtility {
             final Node rootNode = parseRsql(rsql);
             query.distinct(true);
 
-            final JpqQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpqQueryRSQLVisitor<>(root, cb, enumType,
+            final JpaQueryRSQLVisitor<A, T> jpqQueryRSQLVisitor = new JpaQueryRSQLVisitor<>(root, cb, enumType,
                     virtualPropertyReplacer, database, query);
             final List<Predicate> accept = rootNode.<List<Predicate>, String> accept(jpqQueryRSQLVisitor);
 
@@ -198,9 +236,7 @@ public final class RSQLUtility {
 
     /**
      * An implementation of the {@link RSQLVisitor} to visit the parsed tokens
-     * and build jpa where clauses.
-     *
-     *
+     * and build JPA where clauses.
      *
      * @param <A>
      *            the enum for providing the field name of the entity field to
@@ -208,34 +244,35 @@ public final class RSQLUtility {
      * @param <T>
      *            the entity type referenced by the root
      */
-    private static final class JpqQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
-            implements RSQLVisitor<List<Predicate>, String> {
+    private static final class JpaQueryRSQLVisitor<A extends Enum<A> & FieldNameProvider, T>
+            extends AbstractFieldNameRSQLVisitor<A> implements RSQLVisitor<List<Predicate>, String> {
+
+        private static final Logger LOGGER = LoggerFactory.getLogger(JpaQueryRSQLVisitor.class);
+
+        public static final Character LIKE_WILDCARD = '*';
         private static final char ESCAPE_CHAR = '\\';
         private static final List<String> NO_JOINS_OPERATOR = Lists.newArrayList("!=", "=out=");
 
-        public static final Character LIKE_WILDCARD = '*';
+        private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
 
-        private final Root<T> root;
         private final CriteriaBuilder cb;
         private final CriteriaQuery<?> query;
-        private final Class<A> enumType;
+        private final Database database;
+        private final Root<T> root;
+        private final SimpleTypeConverter simpleTypeConverter;
         private final VirtualPropertyReplacer virtualPropertyReplacer;
+
         private int level;
         private boolean isOrLevel;
-        private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
         private boolean joinsNeeded;
 
-        private final SimpleTypeConverter simpleTypeConverter;
-
-        private final Database database;
-
-        private JpqQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
+        private JpaQueryRSQLVisitor(final Root<T> root, final CriteriaBuilder cb, final Class<A> enumType,
                 final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
                 final CriteriaQuery<?> query) {
+            super(enumType);
             this.root = root;
             this.cb = cb;
             this.query = query;
-            this.enumType = enumType;
             this.virtualPropertyReplacer = virtualPropertyReplacer;
             this.simpleTypeConverter = new SimpleTypeConverter();
             this.database = database;
@@ -297,64 +334,6 @@ public final class RSQLUtility {
             return Collections.singletonList(predicate);
         }
 
-        private String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
-
-            final String[] graph = getSubAttributesFrom(node.getSelector());
-
-            validateMapParameter(propertyEnum, node, graph);
-
-            // sub entity need minium 1 dot
-            if (!propertyEnum.getSubEntityAttributes().isEmpty() && graph.length < 2) {
-                throw createRSQLParameterUnsupportedException(node);
-            }
-
-            final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
-
-            for (int i = 1; i < graph.length; i++) {
-
-                final String propertyField = graph[i];
-                fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR).append(propertyField);
-
-                // the key of map is not in the graph
-                if (propertyEnum.isMap() && graph.length == (i + 1)) {
-                    continue;
-                }
-
-                if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
-                    throw createRSQLParameterUnsupportedException(node);
-                }
-            }
-
-            return fieldNameBuilder.toString();
-        }
-
-        private void validateMapParameter(final A propertyEnum, final ComparisonNode node, final String[] graph) {
-            if (!propertyEnum.isMap()) {
-                return;
-
-            }
-
-            if (!propertyEnum.getSubEntityAttributes().isEmpty()) {
-                throw new UnsupportedOperationException(
-                        "Currently subentity attributes for maps are not supported, alternatively you could use the key/value tuple, defined by SimpleImmutableEntry class");
-            }
-
-            // enum.key
-            final int minAttributeForMap = 2;
-            if (graph.length != minAttributeForMap) {
-                throw new RSQLParameterUnsupportedFieldException("The syntax of the given map search parameter field {"
-                        + node.getSelector() + "} is wrong. Syntax is: fieldname.keyname", new Exception());
-            }
-        }
-
-        private RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
-                final ComparisonNode node) {
-            return new RSQLParameterUnsupportedFieldException(
-                    "The given search parameter field {" + node.getSelector()
-                            + "} does not exist, must be one of the following fields {" + getExpectedFieldList() + "}",
-                    new Exception());
-        }
-
         /**
          * Resolves the Path for a field in the persistence layer and joins the
          * required models. This operation is part of a tree traversal through
@@ -374,12 +353,14 @@ public final class RSQLUtility {
          *            dot notated field path
          * @return the Path for a field
          */
+        @SuppressWarnings("unchecked")
         private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
             return (Path<Object>) getFieldPath(root, getSubAttributesFrom(finalProperty), enumField.isMap(),
                     this::getJoinFieldPath).orElseThrow(
-                            () -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
+                            () -> createRSQLParameterUnsupportedException("RSQL field path cannot be empty", null));
         }
 
+        @SuppressWarnings("unchecked")
         private Path<?> getJoinFieldPath(final Path<?> fieldPath, final String fieldNameSplit) {
             if (fieldPath instanceof PluralJoin) {
                 final Join<Object, ?> join = (Join<Object, ?>) fieldPath;
@@ -416,17 +397,7 @@ public final class RSQLUtility {
         // https://jira.sonarsource.com/browse/SONARJAVA-1478
         @SuppressWarnings({ "squid:S2095" })
         public List<Predicate> visit(final ComparisonNode node, final String param) {
-            A fieldName = null;
-            try {
-                fieldName = getFieldEnumByName(node);
-            } catch (final IllegalArgumentException e) {
-                throw new RSQLParameterUnsupportedFieldException("The given search parameter field {"
-                        + node.getSelector() + "} does not exist, must be one of the following fields {"
-                        + Arrays.stream(enumType.getEnumConstants()).map(v -> v.name().toLowerCase())
-                                .collect(Collectors.toList())
-                        + "}", e);
-
-            }
+            final A fieldName = getFieldEnumByName(node);
             final String finalProperty = getAndValidatePropertyFieldName(fieldName, node);
 
             final List<String> values = node.getArguments();
@@ -444,44 +415,6 @@ public final class RSQLUtility {
 
         private static boolean areJoinsNeeded(final ComparisonNode node) {
             return !NO_JOINS_OPERATOR.contains(node.getOperator().getSymbol());
-        }
-
-        // Exception squid:S2095 - see
-        // https://jira.sonarsource.com/browse/SONARJAVA-1478
-        @SuppressWarnings({ "squid:S2095" })
-        private List<String> getExpectedFieldList() {
-            final List<String> expectedFieldList = Arrays.stream(enumType.getEnumConstants())
-                    .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {
-                        final String enumFieldName = enumField.name().toLowerCase();
-
-                        if (enumField.isMap()) {
-                            return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + "keyName";
-                        }
-
-                        return enumFieldName;
-                    }).collect(Collectors.toList());
-
-            final List<String> expectedSubFieldList = Arrays.stream(enumType.getEnumConstants())
-                    .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
-                        final List<String> subEntity = enumField.getSubEntityAttributes().stream()
-                                .map(fieldName -> enumField.name().toLowerCase()
-                                        + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
-                                .collect(Collectors.toList());
-
-                        return subEntity.stream();
-                    }).collect(Collectors.toList());
-            expectedFieldList.addAll(expectedSubFieldList);
-            return expectedFieldList;
-        }
-
-        private A getFieldEnumByName(final ComparisonNode node) {
-            String enumName = node.getSelector();
-            final String[] graph = getSubAttributesFrom(enumName);
-            if (graph.length != 0) {
-                enumName = graph[0];
-            }
-            LOGGER.debug("get fieldidentifier by name {} of enum type {}", enumName, enumType);
-            return Enum.valueOf(enumType, enumName.toUpperCase());
         }
 
         private Object convertValueIfNecessary(final ComparisonNode node, final A fieldName, final String value,
@@ -522,7 +455,7 @@ public final class RSQLUtility {
         private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
             final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
             if (convertedValue == null) {
-                throw new RSQLParameterUnsupportedFieldException(
+                throw createRSQLParameterUnsupportedException(
                         "field {" + node.getSelector() + "} must be one of the following values {"
                                 + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
                         null);
@@ -775,10 +708,6 @@ public final class RSQLUtility {
             return cb.not(cb.exists(subquery));
         }
 
-        private static String[] getSubAttributesFrom(final String property) {
-            return property.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-        }
-
         private static boolean isSimpleField(final String[] split, final boolean isMapKeyField) {
             return split.length == 1 || (split.length == 2 && isMapKeyField);
         }
@@ -788,8 +717,7 @@ public final class RSQLUtility {
                 return pathOfString(innerFieldPath);
             }
             if (innerFieldPath instanceof MapJoin) {
-                // Currently we support only string key .So below cast
-                // is safe.
+                // Currently we support only string key. So below cast is safe.
                 return (Expression<String>) (((MapJoin<?, ?, ?>) pathOfString(innerFieldPath)).value());
             }
             final String valueFieldName = enumField.getSubEntityMapTuple().map(Entry::getValue)
