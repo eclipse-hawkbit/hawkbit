@@ -30,12 +30,24 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
     private final transient Set<EventListenersAwareLayout> eventAwareLayouts = new HashSet<>();
     private boolean initial;
 
+    /**
+     * Adds event aware layout.
+     * 
+     * @param eventAwareLayout
+     *            event aware layout to add
+     */
     protected void addEventAwareLayout(final EventListenersAwareLayout eventAwareLayout) {
         if (eventAwareLayout != null) {
             eventAwareLayouts.add(eventAwareLayout);
         }
     }
 
+    /**
+     * Adds a list of event aware layouts.
+     * 
+     * @param eventAwareLayouts
+     *            event aware layouts to add
+     */
     protected void addEventAwareLayouts(final Collection<EventListenersAwareLayout> eventAwareLayouts) {
         eventAwareLayouts.forEach(this::addEventAwareLayout);
     }
@@ -46,6 +58,10 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
         initial = true;
     }
 
+    /**
+     * Builds view layout.
+     * 
+     */
     protected abstract void buildLayout();
 
     @Override
@@ -61,14 +77,27 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
         updateLayoutsOnViewEnter();
     }
 
+    /**
+     * Subscribes all listeners of added event aware layouts to event bus.
+     * 
+     */
     protected void subscribeListeners() {
         eventAwareLayouts.forEach(EventListenersAwareLayout::subscribeListeners);
     }
 
+    /**
+     * Restores session state of added event aware layouts.
+     * 
+     */
     protected void restoreState() {
         eventAwareLayouts.forEach(EventListenersAwareLayout::restoreState);
     }
 
+    /**
+     * Called on on view enter for added event aware layouts to update their
+     * state.
+     * 
+     */
     protected void updateLayoutsOnViewEnter() {
         eventAwareLayouts.forEach(EventListenersAwareLayout::onViewEnter);
     }
@@ -79,6 +108,10 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
         event.navigate();
     }
 
+    /**
+     * Unsubscribes all listeners of added event aware layouts to event bus.
+     * 
+     */
     protected void unsubscribeListeners() {
         eventAwareLayouts.forEach(EventListenersAwareLayout::unsubscribeListeners);
     }

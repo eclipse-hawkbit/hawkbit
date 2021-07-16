@@ -56,7 +56,7 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
      * @param tagFilterLayoutUiState
      *            TagFilterLayoutUiState
      */
-    public AbstractTagFilterButtons(final CommonUiDependencies uiDependencies,
+    protected AbstractTagFilterButtons(final CommonUiDependencies uiDependencies,
             final TagFilterLayoutUiState tagFilterLayoutUiState) {
         super(uiDependencies.getEventBus(), uiDependencies.getI18n(), uiDependencies.getUiNotification(),
                 uiDependencies.getPermChecker());
@@ -100,8 +100,18 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         tagFilterLayoutUiState.setClickedTagIdsWithName(activeTagIdsWithName);
     }
 
+    /**
+     * Provides type of the master entity.
+     * 
+     * @return type of the master entity
+     */
     protected abstract Class<? extends ProxyIdentifiableEntity> getFilterMasterEntityType();
 
+    /**
+     * Provides event view filter.
+     * 
+     * @return event view filter.
+     */
     protected abstract EventView getView();
 
     private void onNoTagChangedEvent(final ClickBehaviourType clickType) {
@@ -147,6 +157,12 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         }
     }
 
+    /**
+     * Tag deletion operation.
+     * 
+     * @param tagToDelete
+     *            tag to delete
+     */
     protected abstract void deleteTag(final ProxyTag tagToDelete);
 
     /**
@@ -184,6 +200,13 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         updateWindow.setVisible(Boolean.TRUE);
     }
 
+    /**
+     * Provides the window for updating tag
+     *
+     * @param clickedFilter
+     *            tag to update
+     * @return update window
+     */
     protected abstract Window getUpdateWindow(final ProxyTag clickedFilter);
 
     /**
@@ -232,8 +255,19 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         return false;
     }
 
+    /**
+     * Filters out non-existant tags by ids.
+     *
+     * @param tagIds
+     *            provided tag ids
+     * @return filtered list of existing tag ids
+     */
     protected abstract Collection<Long> filterExistingTagIds(final Collection<Long> tagIds);
 
+    /**
+     * Re-evaluates a filter (usually after view enter).
+     *
+     */
     public void reevaluateFilter() {
         final Map<Long, String> clickedTags = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIdsWithName();
 

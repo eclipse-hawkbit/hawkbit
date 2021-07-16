@@ -233,6 +233,9 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
         }
     }
 
+    /**
+     * Hides progress indicator in case no bulk upload is running.
+     */
     public void checkBulkUpload() {
         if (bulkUploadHeaderSupport != null && !isBulkUploadInProgress()) {
             bulkUploadHeaderSupport.hideProgressIndicator();

@@ -188,6 +188,10 @@ public class TargetFilterQueryButtons extends AbstractGrid<ProxyTargetFilterQuer
         return targetFilterQueryManagement.get(targetFilterQueryId).isPresent();
     }
 
+    /**
+     * Re-evaluates a filter (usually after view enter).
+     *
+     */
     public void reevaluateFilter() {
         final Long clickedTargetFilterQueryId = customTargetTagFilterButtonClick.getPreviouslyClickedFilterId();
 

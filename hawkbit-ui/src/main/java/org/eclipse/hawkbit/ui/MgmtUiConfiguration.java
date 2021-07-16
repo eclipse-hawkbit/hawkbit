@@ -94,13 +94,18 @@ public class MgmtUiConfiguration {
     /**
      * UI Error handler bean.
      * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @param uiErrorDetailsExtractor
+     *            ui error details extractors
+     * 
      * @return UI Error handler
      */
     @Bean
     @ConditionalOnMissingBean
     ErrorHandler uiErrorHandler(final VaadinMessageSource i18n,
-            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractor) {
-        return new HawkbitUIErrorHandler(i18n, uiErrorDetailsExtractor);
+            final List<UiErrorDetailsExtractor> uiErrorDetailsExtractors) {
+        return new HawkbitUIErrorHandler(i18n, uiErrorDetailsExtractors);
     }
 
     /**
@@ -116,6 +121,8 @@ public class MgmtUiConfiguration {
     /**
      * UI ConstraintViolation Error details extractor bean.
      * 
+     * @param i18n
+     *            VaadinMessageSource
      * @return UI ConstraintViolation Error details extractor
      */
     @Bean
@@ -126,6 +133,8 @@ public class MgmtUiConfiguration {
     /**
      * UI Entity not found Error details extractor bean.
      * 
+     * @param i18n
+     *            VaadinMessageSource
      * @return UI EntityNotFound Error details extractor
      */
     @Bean
@@ -146,6 +155,8 @@ public class MgmtUiConfiguration {
     /**
      * UI target entity mapper bean.
      * 
+     * @param i18n
+     *            VaadinMessageSource
      * @return UI target entity mapper
      */
     @Bean
@@ -156,6 +167,10 @@ public class MgmtUiConfiguration {
     /**
      * UI Management target data supplier bean.
      * 
+     * @param targetManagement
+     *            TargetManagement
+     * @param targetToProxyTargetMapper
+     *            UI target entity mapper
      * @return UI target data supplier for Management view
      */
     @Bean
@@ -169,6 +184,10 @@ public class MgmtUiConfiguration {
     /**
      * UI Filter target data supplier bean.
      * 
+     * @param targetManagement
+     *            TargetManagement
+     * @param targetToProxyTargetMapper
+     *            UI target entity mapper
      * @return UI target data supplier for Filter view
      */
     @Bean

@@ -443,6 +443,11 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 new LayoutVisibilityEventPayload(VisibilityType.SHOW, EventLayout.ROLLOUT_LIST, EventView.ROLLOUT));
     }
 
+    /**
+     * Re-fetches and re-selects currently selected rollout in order to update
+     * details layouts.
+     *
+     */
     public void reselectCurrentRollout() {
         final Long selectedRolloutId = rolloutManagementUIState.getSelectedRolloutId();
         if (selectedRolloutId == null) {
