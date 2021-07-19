@@ -8,11 +8,12 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ErrorHandler;
 
@@ -29,10 +30,10 @@ public class DelegatingAmqpErrorHandlerTest {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
-                        .handleError(new Throwable(new IllegalArgumentException())),
-                "Expected handled exception to be of type IllegalArgumentException");
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .as("Expected handled exception to be of type IllegalArgumentException")
+                .isThrownBy(() -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
+                                .handleError(new Throwable(new IllegalArgumentException())));
     }
 
     @Test
@@ -41,10 +42,10 @@ public class DelegatingAmqpErrorHandlerTest {
         List<AmqpErrorHandler> handlers = new ArrayList<>();
         handlers.add(new IllegalArgumentExceptionHandler());
         handlers.add(new IndexOutOfBoundsExceptionHandler());
-        Assertions.assertThrows(RuntimeException.class,
-                () -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
-                        .handleError(new Throwable(new NullPointerException())),
-                "Expected handled exception to be of type RuntimeException");
+        assertThatExceptionOfType(RuntimeException.class)
+                .as("Expected handled exception to be of type RuntimeException")
+                .isThrownBy(() -> new DelegatingConditionalErrorHandler(handlers, new DefaultErrorHandler())
+                        .handleError(new Throwable(new NullPointerException())));
     }
 
     // Test class
