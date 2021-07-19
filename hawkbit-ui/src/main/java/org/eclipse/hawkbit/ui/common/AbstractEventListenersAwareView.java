@@ -8,9 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -27,7 +27,7 @@ import com.vaadin.ui.VerticalLayout;
 public abstract class AbstractEventListenersAwareView extends VerticalLayout implements View, ViewNameAware {
     private static final long serialVersionUID = 1L;
 
-    private final transient Set<EventListenersAwareLayout> eventAwareLayouts = new HashSet<>();
+    private final transient List<EventListenersAwareLayout> eventAwareLayouts = new ArrayList<>();
     private boolean initial;
 
     /**
