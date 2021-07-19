@@ -18,7 +18,7 @@ import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 /**
  * Class that composes a meaningful error message and enhances it with properties from failed message
  */
-public class AmqpErrorMessageComposer {
+public final class AmqpErrorMessageComposer {
 
     private AmqpErrorMessageComposer() {
     }
