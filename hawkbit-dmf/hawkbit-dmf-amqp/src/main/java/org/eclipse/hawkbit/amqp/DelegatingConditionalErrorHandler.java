@@ -39,9 +39,8 @@ public class DelegatingConditionalErrorHandler implements ErrorHandler {
 
     @Override
     public void handleError(final Throwable t) {
-        final Throwable error = t.getCause();
-        if (error == null || includesAmqpRejectException(error)){
-            LOG.error("Received an AmqpRejectAndDontRequeueException due to {}", error.getMessage());
+        if (t.getCause() == null || includesAmqpRejectException(t.getCause())){
+            LOG.error("Received an AmqpRejectAndDontRequeueException due to {}", t.getCause().getMessage());
             return;
         }
         AmqpErrorHandlerChain.getHandlerChain(handlers, defaultHandler).handle(t);
