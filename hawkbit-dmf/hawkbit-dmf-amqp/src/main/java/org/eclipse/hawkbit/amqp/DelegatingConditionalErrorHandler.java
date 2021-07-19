@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.amqp;
 import java.util.List;
 import javax.validation.constraints.NotNull;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.util.ErrorHandler;
 
@@ -18,6 +20,7 @@ import org.springframework.util.ErrorHandler;
  * An error handler delegates error handling to the matching {@link AmqpErrorHandler} based on the type of exception
  */
 public class DelegatingConditionalErrorHandler implements ErrorHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(DelegatingConditionalErrorHandler.class);
     private final List<AmqpErrorHandler> handlers;
     private final ErrorHandler defaultHandler;
 
@@ -36,7 +39,9 @@ public class DelegatingConditionalErrorHandler implements ErrorHandler {
 
     @Override
     public void handleError(final Throwable t) {
-        if (t.getCause() == null || includesAmqpRejectException(t)){
+        final Throwable error = t.getCause();
+        if (error == null || includesAmqpRejectException(error)){
+            LOG.error("Received an AmqpRejectAndDontRequeueException due to {}", error.getMessage());
             return;
         }
         AmqpErrorHandlerChain.getHandlerChain(handlers, defaultHandler).handle(t);
