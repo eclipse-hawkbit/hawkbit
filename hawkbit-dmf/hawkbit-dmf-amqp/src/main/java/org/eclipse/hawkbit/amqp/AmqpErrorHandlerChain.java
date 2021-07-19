@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * An error handler chain that delegates the error to the matching error handler based on the type of exception
  */
-public class AmqpErrorHandlerChain {
+public final class AmqpErrorHandlerChain {
     private final Iterator<AmqpErrorHandler> iterator;
     private final ErrorHandler defaultHandler;
 
