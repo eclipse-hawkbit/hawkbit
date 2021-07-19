@@ -21,7 +21,7 @@ public final class AmqpErrorHandlerChain {
     private final ErrorHandler defaultHandler;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param iterator
      *                  the {@link AmqpErrorHandler} iterator
