@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
 import org.slf4j.Logger;
@@ -153,9 +154,14 @@ public final class RSQLUtility {
      */
     public static <A extends Enum<A> & FieldNameProvider> void validateRsqlFor(final String rsql,
             final Class<A> fieldNameProvider) {
-        final RSQLVisitor<Void, String> visitor = new ValidationRSQLVisitor<>(fieldNameProvider);
+        final RSQLVisitor<Void, String> visitor = getRSQLVisitor(fieldNameProvider);
         final Node rootNode = parseRsql(rsql);
         rootNode.accept(visitor);
+    }
+
+    private static <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> getRSQLVisitor(
+            Class<A> fieldNameProvider) {
+        return RsqlVisitorFactoryHolder.getInstance().getRsqlVisitorFactory().rsqlVisitor(fieldNameProvider);
     }
 
     private static Node parseRsql(final String rsql) {
@@ -167,36 +173,6 @@ public final class RSQLUtility {
             throw new RSQLParameterSyntaxException("rsql filter must not be null", e);
         } catch (final RSQLParserException e) {
             throw new RSQLParameterSyntaxException(e);
-        }
-    }
-
-    private static final class ValidationRSQLVisitor<A extends Enum<A> & FieldNameProvider>
-            extends AbstractFieldNameRSQLVisitor<A> implements RSQLVisitor<Void, String> {
-
-        public ValidationRSQLVisitor(final Class<A> fieldNameProvider) {
-            super(fieldNameProvider);
-        }
-
-        @Override
-        public Void visit(final AndNode node, final String param) {
-            return visitNode(node, param);
-        }
-
-        @Override
-        public Void visit(final OrNode node, final String param) {
-            return visitNode(node, param);
-        }
-
-        @Override
-        public Void visit(final ComparisonNode node, final String param) {
-            final A fieldName = getFieldEnumByName(node);
-            getAndValidatePropertyFieldName(fieldName, node);
-            return null;
-        }
-
-        private Void visitNode(final LogicalNode node, final String param) {
-            node.getChildren().forEach(child -> child.accept(this, param));
-            return null;
         }
     }
 

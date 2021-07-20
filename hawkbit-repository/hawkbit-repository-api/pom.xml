@@ -67,6 +67,10 @@
          <groupId>com.cronutils</groupId>
          <artifactId>cron-utils</artifactId>
       </dependency>
+      <dependency>
+         <groupId>cz.jirutka.rsql</groupId>
+         <artifactId>rsql-parser</artifactId>
+      </dependency>
 
       <!-- TEST -->
       <dependency>
