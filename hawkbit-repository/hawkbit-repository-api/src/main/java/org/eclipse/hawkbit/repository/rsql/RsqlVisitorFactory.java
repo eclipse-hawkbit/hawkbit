@@ -17,6 +17,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * Factory to obtain {@link RSQLVisitor} instances that can be used to process
  * the {@link Node}s representing an RSQL query.
  */
+@FunctionalInterface
 public interface RsqlVisitorFactory {
 
     /**
