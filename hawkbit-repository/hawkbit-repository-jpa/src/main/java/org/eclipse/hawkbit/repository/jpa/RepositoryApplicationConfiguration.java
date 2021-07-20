@@ -15,8 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-import com.google.common.collect.Maps;
-
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -30,8 +28,8 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -92,6 +90,7 @@ import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -128,6 +127,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+import com.google.common.collect.Maps;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -887,6 +888,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     RsqlVisitorFactory rsqlVisitorFactory() {
         return new ValidationRsqlVisitorFactory();
+    }
+
+    /**
+     * Obtains the {@link RsqlVisitorFactoryHolder} bean.
+     * 
+     * @return The {@link RsqlVisitorFactoryHolder} singleton.
+     */
+    @Bean
+    RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
+        return RsqlVisitorFactoryHolder.getInstance();
     }
 
 }
