@@ -128,7 +128,7 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
 
     private boolean masterFilterHasNotChanged() {
         final Long filterDsId = getFilter().map(SwFilterParams::getLastSelectedDistributionId).orElse(null);
-        final Long masterDsId = getMasterEntitySupport().getMasterId();
+        final Long masterDsId = getMasterEntitySupport() != null ? getMasterEntitySupport().getMasterId() : null;
 
         return Objects.equals(filterDsId, masterDsId);
     }
