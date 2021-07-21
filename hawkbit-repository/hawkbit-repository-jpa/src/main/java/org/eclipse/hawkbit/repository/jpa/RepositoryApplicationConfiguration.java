@@ -131,7 +131,7 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories("org.eclipse.hawkbit.repository.jpa")
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryFactoryBeanClass = HawkbitRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
@@ -189,12 +189,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     AfterTransactionCommitDefaultServiceExecutor afterTransactionCommitDefaultServiceExecutor() {
         return new AfterTransactionCommitDefaultServiceExecutor();
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    NoCountPagingRepository noCountPagingRepository() {
-        return new NoCountPagingRepository();
     }
 
     @Bean
@@ -443,14 +437,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final EventPublisherHolder eventPublisherHolder,
-            final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
-                targetFilterQueryRepository, actionRepository, criteriaNoCountDao, eventPublisherHolder, tenantAware,
+                targetFilterQueryRepository, actionRepository, eventPublisherHolder, tenantAware,
                 virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
                 properties.getDatabase());
 
@@ -467,11 +461,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final JpaProperties properties, final QuotaManagement quotaManagement) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final QuotaManagement quotaManagement) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase(),
-                quotaManagement);
+                distributionSetRepository, virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
     }
 
     /**
@@ -508,14 +501,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
+            final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
                 rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
-                criteriaNoCountDao, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
-                properties.getDatabase());
+                eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -575,10 +566,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetTagManagement distributionSetTagManagement(
             final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final JpaProperties properties) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaDistributionSetTagManagement(distributionSetTagRepository, distributionSetRepository,
-                virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase());
+                virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -592,13 +582,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
-            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
-                softwareModuleMetadataRepository, softwareModuleTypeRepository, criteriaNoCountDao, auditorProvider,
-                artifactManagement, quotaManagement, virtualPropertyReplacer, properties.getDatabase());
+                softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
+                quotaManagement, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -612,10 +601,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,
-            final JpaProperties properties) {
+            final SoftwareModuleRepository softwareModuleRepository, final JpaProperties properties) {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                virtualPropertyReplacer, softwareModuleRepository, criteriaNoCountDao, properties.getDatabase());
+                virtualPropertyReplacer, softwareModuleRepository, properties.getDatabase());
     }
 
     @Bean

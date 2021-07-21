@@ -55,18 +55,14 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final Database database;
 
     JpaDistributionSetTagManagement(final DistributionSetTagRepository distributionSetTagRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final Database database) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.database = database;
     }
 
@@ -129,7 +125,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Slice<DistributionSetTag> findAll(final Pageable pageable) {
-        return convertDsPage(criteriaNoCountDao.findAll(pageable, JpaDistributionSetTag.class), pageable);
+        return convertDsPage(distributionSetTagRepository.findAllWithoutCount(pageable), pageable);
     }
 
     @Override
