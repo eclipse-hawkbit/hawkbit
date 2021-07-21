@@ -78,7 +78,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
-import org.eclipse.hawkbit.repository.jpa.rsql.ValidationRsqlVisitorFactory;
+import org.eclipse.hawkbit.repository.jpa.rsql.DefaultRsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -887,7 +887,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RsqlVisitorFactory rsqlVisitorFactory() {
-        return new ValidationRsqlVisitorFactory();
+        return new DefaultRsqlVisitorFactory();
     }
 
     /**

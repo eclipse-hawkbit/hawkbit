@@ -23,7 +23,7 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * @param <A>
  *            The type the {@link FieldNameProvider} refers to.
  */
-public class ValidationRSQLVisitor<A extends Enum<A> & FieldNameProvider> extends AbstractFieldNameRSQLVisitor<A>
+public class FieldValidationRsqlVisitor<A extends Enum<A> & FieldNameProvider> extends AbstractFieldNameRSQLVisitor<A>
         implements RSQLVisitor<Void, String> {
 
     /**
@@ -32,7 +32,7 @@ public class ValidationRSQLVisitor<A extends Enum<A> & FieldNameProvider> extend
      * @param fieldNameProvider
      *            The {@link FieldNameProvider} to use for validation.
      */
-    public ValidationRSQLVisitor(final Class<A> fieldNameProvider) {
+    public FieldValidationRsqlVisitor(final Class<A> fieldNameProvider) {
         super(fieldNameProvider);
     }
 

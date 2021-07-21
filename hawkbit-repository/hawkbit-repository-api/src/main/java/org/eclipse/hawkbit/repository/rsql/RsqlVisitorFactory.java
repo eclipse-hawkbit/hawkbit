@@ -21,16 +21,17 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 public interface RsqlVisitorFactory {
 
     /**
-     * Provides a {@link RSQLVisitor} instance for the given
-     * {@link FieldNameProvider}.
+     * Provides a {@link RSQLVisitor} instance for validating RSQL queries based
+     * on the given {@link FieldNameProvider}.
      * 
-     * @param <A> The type of the {@link FieldNameProvider}.
+     * @param <A>
+     *            The type of the {@link FieldNameProvider}.
      * @param fieldNameProvider
      *            providing accessing to the relevant field names.
      * 
-     * @return An {@link RSQLVisitor} to process the {@link Node}s of an RSQL
+     * @return An {@link RSQLVisitor} to validate the {@link Node}s of an RSQL
      *         query.
      */
-    <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> rsqlVisitor(Class<A> fieldNameProvider);
+    <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> validationRsqlVisitor(Class<A> fieldNameProvider);
 
 }

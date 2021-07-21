@@ -17,12 +17,12 @@ import cz.jirutka.rsql.parser.ast.RSQLVisitor;
  * Factory providing {@link RSQLVisitor} instances which validate the nodes
  * based on a given {@link FieldNameProvider}.
  */
-public class ValidationRsqlVisitorFactory implements RsqlVisitorFactory {
+public class DefaultRsqlVisitorFactory implements RsqlVisitorFactory {
 
     @Override
-    public <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> rsqlVisitor(
+    public <A extends Enum<A> & FieldNameProvider> RSQLVisitor<Void, String> validationRsqlVisitor(
             final Class<A> fieldNameProvider) {
-        return new ValidationRSQLVisitor<>(fieldNameProvider);
+        return new FieldValidationRsqlVisitor<>(fieldNameProvider);
     }
 
 }
