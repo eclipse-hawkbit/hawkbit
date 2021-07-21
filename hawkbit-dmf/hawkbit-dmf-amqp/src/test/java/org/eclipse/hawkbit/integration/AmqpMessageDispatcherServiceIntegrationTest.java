@@ -153,25 +153,31 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final String controllerId = TARGET_PREFIX + "assignDistributionSetMultipleTimes";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
-        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
 
         final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(distributionSet2);
         // first assignment will be canceled -> Open cancellations
         assignDistributionSet(distributionSet2.getId(), controllerId);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CANCEL_DOWNLOAD);
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
+        // cancelation message is returned upon polling
         createAndSendThingCreated(controllerId, TENANT_EXIST);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CANCEL_DOWNLOAD);
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         // confirm the cancel of the first action should lead to expose the
         // latest action
         createAndSendActionStatusUpdateMessage(controllerId, getFirstAssignedActionId(assignmentResult),
                 DmfActionStatus.CANCELED);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
         // verify latest action is exposed
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
 
+        // latest action is returned upon polling
         createAndSendThingCreated(controllerId, TENANT_EXIST);
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
     }
 
