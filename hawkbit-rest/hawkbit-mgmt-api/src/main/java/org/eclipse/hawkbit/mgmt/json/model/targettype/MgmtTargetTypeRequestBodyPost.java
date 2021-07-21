@@ -16,11 +16,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut{
 
-    @JsonProperty(required = true)
-    private String name;
-
-    @JsonProperty
-    private String key;
+    public MgmtTargetTypeRequestBodyPost setName(final String name) {
+        super.setName(name);
+        return this;
+    }
 
     @Override
     public MgmtTargetTypeRequestBodyPost setDescription(final String description) {
@@ -34,38 +33,4 @@ public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut{
         return this;
     }
 
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtTargetTypeRequestBodyPost setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return the key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * @param key
-     *            the key to set
-     * @return updated body
-     */
-    public MgmtTargetTypeRequestBodyPost setKey(final String key) {
-        this.key = key;
-        return this;
-    }
 }

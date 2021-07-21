@@ -49,7 +49,7 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
         this.colour = colour;
     }
 
-    public JpaTargetType addOptionalDistributionSetType(final DistributionSetType dsSetType) {
+    public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
         return setDistributionSetType(dsSetType);
     }
 
@@ -84,13 +84,8 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     }
 
     @Override
-    public Set<DistributionSetType> getOptionalSetTypes() {
+    public Set<DistributionSetType> getCompatibleDistributionSetTypes() {
         return null;
-    }
-
-    @Override
-    public boolean areSetEntriesIdentical(DistributionSetType dsType) {
-        return false;
     }
 
     @Override

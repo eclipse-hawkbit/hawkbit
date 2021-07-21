@@ -24,15 +24,15 @@ public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractNamedEnt
     @ValidString
     protected String colour;
 
-    protected Collection<Long> optional;
+    protected Collection<Long> compatible;
 
-    public T optional(final Collection<Long> optional) {
-        this.optional = optional;
+    public T compatible(final Collection<Long> compatible) {
+        this.compatible = compatible;
         return (T) this;
     }
 
-    public Optional<Collection<Long>> getOptional() {
-        return Optional.ofNullable(optional);
+    public Optional<Collection<Long>> getCompatible() {
+        return Optional.ofNullable(compatible);
     }
 
     public T colour(final String colour) {

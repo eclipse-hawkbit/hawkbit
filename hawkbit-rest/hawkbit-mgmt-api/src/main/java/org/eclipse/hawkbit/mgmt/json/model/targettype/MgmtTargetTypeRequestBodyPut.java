@@ -16,11 +16,32 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MgmtTargetTypeRequestBodyPut {
 
+    @JsonProperty(required = true)
+    private String name;
+
     @JsonProperty
     private String description;
 
     @JsonProperty
     private String colour;
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param name
+     *            the name to set
+     *
+     * @return updated body
+     */
+    public MgmtTargetTypeRequestBodyPut setName(final String name) {
+        this.name = name;
+        return this;
+    }
 
     public String getDescription() {
         return description;

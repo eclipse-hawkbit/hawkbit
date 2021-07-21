@@ -9,17 +9,12 @@
 package org.eclipse.hawkbit.repository.jpa.builder;
 
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.builder.AbstractDistributionSetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetTypeUpdateCreate;
-import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.util.CollectionUtils;
 
 import java.util.Collection;
@@ -42,7 +37,7 @@ public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTy
     public JpaTargetType build() {
         final JpaTargetType result = new JpaTargetType(name, description, colour);
 
-        findDistributionSetTypeWithExceptionIfNotFound(optional).forEach(result::addOptionalDistributionSetType);
+        findDistributionSetTypeWithExceptionIfNotFound(compatible).forEach(result::addCompatibleDistributionSetType);
 
         return result;
     }

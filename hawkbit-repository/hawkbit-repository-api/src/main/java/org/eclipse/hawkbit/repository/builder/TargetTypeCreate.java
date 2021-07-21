@@ -34,28 +34,28 @@ public interface TargetTypeCreate {
     TargetTypeCreate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param optional
-     *            for {@link TargetType#getOptionalSetTypes()}
+     * @param compatible
+     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    TargetTypeCreate optional(Collection<Long> optional);
+    TargetTypeCreate compatible(Collection<Long> compatible);
 
     /**
-     * @param optional
-     *            for {@link TargetType#getOptionalSetTypes()}
+     * @param compatible
+     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    default TargetTypeCreate optional(final Long optional) {
-        return optional(Arrays.asList(optional));
+    default TargetTypeCreate compatible(final Long compatible) {
+        return compatible(Arrays.asList(compatible));
     }
 
     /**
-     * @param optional
-     *            for {@link TargetType#getOptionalSetTypes()}
+     * @param compatible
+     *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    default TargetTypeCreate optional(final DistributionSetType optional) {
-        return optional(Optional.ofNullable(optional).map(DistributionSetType::getId).orElse(null));
+    default TargetTypeCreate compatible(final DistributionSetType compatible) {
+        return compatible(Optional.ofNullable(compatible).map(DistributionSetType::getId).orElse(null));
     }
 
     /**

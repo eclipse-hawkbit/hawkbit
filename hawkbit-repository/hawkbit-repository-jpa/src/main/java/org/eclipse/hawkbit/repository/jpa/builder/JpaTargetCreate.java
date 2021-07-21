@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -20,8 +21,17 @@ import org.springframework.util.StringUtils;
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
+    @ValidString
+    private long typeId;
+
     JpaTargetCreate() {
         super(null);
+    }
+
+    @Override
+    public TargetCreate type(long targetTypeId) {
+        this.typeId = targetTypeId;
+        return this;
     }
 
     @Override

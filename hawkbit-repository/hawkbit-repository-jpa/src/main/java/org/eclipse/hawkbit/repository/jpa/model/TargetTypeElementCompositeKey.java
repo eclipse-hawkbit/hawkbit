@@ -28,7 +28,7 @@ public class TargetTypeElementCompositeKey implements Serializable {
     /**
      * Default constructor.
      */
-    TargetTypeElementCompositeKey() {
+    public TargetTypeElementCompositeKey() {
     }
 
     /**

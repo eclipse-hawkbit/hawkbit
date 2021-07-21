@@ -22,9 +22,9 @@ public interface TargetTypeUpdate {
     TargetTypeUpdate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
 
     /**
-     * @param optional
-     *            for {@link TargetType#getOptionalSetTypes()}
+     * @param name
+     *            Name
      * @return updated builder instance
      */
-    TargetTypeUpdate optional(Collection<Long> optional);
+    TargetTypeUpdate name(@Size(max = TargetType.NAME_MAX_SIZE) String name);
 }

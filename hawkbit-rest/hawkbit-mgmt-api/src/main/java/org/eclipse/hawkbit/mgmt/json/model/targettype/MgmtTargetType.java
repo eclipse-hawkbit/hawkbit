@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 public class MgmtTargetType extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
-    private Long moduleId;
+    private Long typeId;
 
     @JsonProperty
     private boolean deleted;
@@ -36,12 +36,12 @@ public class MgmtTargetType extends MgmtNamedEntity {
         this.deleted = deleted;
     }
 
-    public Long getModuleId() {
-        return moduleId;
+    public Long getTypeId() {
+        return typeId;
     }
 
-    public void setModuleId(final Long moduleId) {
-        this.moduleId = moduleId;
+    public void setTypeId(final Long typeId) {
+        this.typeId = typeId;
     }
 
 }

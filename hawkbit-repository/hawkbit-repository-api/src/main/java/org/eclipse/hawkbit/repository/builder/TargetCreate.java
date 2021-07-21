@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -45,6 +46,8 @@ public interface TargetCreate {
      * @return updated builder instance
      */
     TargetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
+
+    TargetCreate type(long targetTypeId);
 
     /**
      * @param securityToken

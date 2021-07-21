@@ -20,42 +20,32 @@ public interface TargetType extends Type{
     /**
      * @return immutable set of optional {@link DistributionSetType}s
      */
-    Set<DistributionSetType> getOptionalSetTypes();
+    Set<DistributionSetType> getCompatibleDistributionSetTypes();
 
 
     /**
      * Checks if the given {@link DistributionSetType} is in
-     * {@link #getOptionalSetTypes()}.
+     * {@link #getCompatibleDistributionSetTypes()}.
      *
      * @param distributionSetType
      *            search for
      * @return <code>true</code> if found
      */
-    default boolean containsOptionalSetType(final DistributionSetType distributionSetType) {
-        return containsOptionalSetType(distributionSetType.getId());
+    default boolean containsCompatibleDistributionSetType(final DistributionSetType distributionSetType) {
+        return containsCompatibleDistributionSetType(distributionSetType.getId());
     }
 
     /**
      * Checks if the given {@link DistributionSetType} is in
-     * {@link #getOptionalSetTypes()}.
+     * {@link #getCompatibleDistributionSetTypes()}.
      *
      * @param distributionSetTypeId
      *            search by {@link DistributionSetType#getId()}
      * @return <code>true</code> if found
      */
-    default boolean containsOptionalSetType(final Long distributionSetTypeId) {
-        return getOptionalSetTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
+    default boolean containsCompatibleDistributionSetType(final Long distributionSetTypeId) {
+        return getCompatibleDistributionSetTypes().stream().anyMatch(element -> element.getId().equals(distributionSetTypeId));
     }
-
-    /**
-     * Compares the modules of this {@link DistributionSetType} and the given
-     * one.
-     *
-     * @param dsType
-     *            to compare with
-     * @return <code>true</code> if the lists are identical.
-     */
-    boolean areSetEntriesIdentical(DistributionSetType dsType);
 
     /**
      * @param target

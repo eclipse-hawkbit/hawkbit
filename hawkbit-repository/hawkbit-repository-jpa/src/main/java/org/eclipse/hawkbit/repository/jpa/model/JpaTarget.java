@@ -51,10 +51,12 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
@@ -162,6 +164,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private Map<String, String> controllerAttributes;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaTargetType.class)
+    @JoinColumn(name = "target_id", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_targettype_target"))
+    @NotNull
+    private TargetType type;
+
     // set default request controller attributes to true, because we want to
     // request them the first
     // time
@@ -201,7 +208,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                 : controllerId;
     }
 
-    JpaTarget() {
+    public JpaTarget() {
         // empty constructor for JPA.
     }
 
@@ -346,6 +353,15 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Override
     public TargetUpdateStatus getUpdateStatus() {
         return updateStatus;
+    }
+
+    @Override
+    public TargetType getType() {
+        return type;
+    }
+
+    public void setType(final TargetType type) {
+        this.type = type;
     }
 
     public JpaDistributionSet getInstalledDistributionSet() {
