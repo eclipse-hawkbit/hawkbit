@@ -55,6 +55,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.TenantConfigHelper;
@@ -289,8 +290,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .distinct().collect(Collectors.toList());
 
         final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
-                .stream().map(targetRepository::filterNonExistingControllerIds).flatMap(List::stream)
-                .collect(Collectors.toList());
+                .stream().map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)))
+                .flatMap(List::stream).map(JpaTarget::getControllerId).collect(Collectors.toList());
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());
@@ -701,7 +702,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
-        if (!targetRepository.existsByControllerId(controllerId)) {
+        if (!targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent()) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
     }

@@ -66,6 +66,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -310,7 +311,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
-        if (!targetRepository.existsByControllerId(controllerId)) {
+        if (!targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent()) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
     }
@@ -367,9 +368,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public void deleteExistingTarget(@NotEmpty final String controllerId) {
-        final Target target = targetRepository.findByControllerId(controllerId)
+        final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-         targetRepository.deleteById(target.getId());
+        targetRepository.deleteById(target.getId());
     }
 
     @Override
@@ -738,7 +739,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             throw new InvalidTargetAttributeException();
         }
 
-        final JpaTarget target = (JpaTarget) targetRepository.findByControllerId(controllerId)
+        final JpaTarget target = (JpaTarget) targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         // get the modifiable attribute map
@@ -884,7 +885,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Target> getByControllerId(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId);
+        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).map(Target.class::cast);
     }
 
     @Override

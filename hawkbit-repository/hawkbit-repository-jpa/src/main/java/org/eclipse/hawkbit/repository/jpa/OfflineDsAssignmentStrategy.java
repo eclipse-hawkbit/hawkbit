@@ -62,7 +62,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     public List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
         final Function<List<String>, List<JpaTarget>> mapper;
         if (isMultiAssignmentsEnabled()) {
-            mapper = targetRepository::findAllByControllerId;
+            mapper = ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids));
         } else {
             mapper = ids -> targetRepository.findAll(SpecificationsBuilder.combineWithAnd(
                     Arrays.asList(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),

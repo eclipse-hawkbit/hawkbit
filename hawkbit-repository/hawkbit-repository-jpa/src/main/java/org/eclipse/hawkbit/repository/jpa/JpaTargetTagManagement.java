@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -154,7 +155,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     public Page<TargetTag> findByTarget(final Pageable pageable, final String controllerId) {
-        if (!targetRepository.existsByControllerId(controllerId)) {
+        if (!targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent()) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
 

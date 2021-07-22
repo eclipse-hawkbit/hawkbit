@@ -10,25 +10,29 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
+
+import reactor.util.annotation.NonNull;
 
 /**
  * {@link Target} repository.
@@ -81,28 +85,6 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
             @Param("lastModifiedBy") String modifiedBy, @Param("targets") Collection<Long> targets);
 
     /**
-     * Loads {@link Target} by given ID.
-     *
-     * @param controllerID
-     *            to search for
-     * @return found {@link Target} or <code>null</code> if not found.
-     */
-    Optional<Target> findByControllerId(String controllerID);
-
-    @Query("SELECT t.controllerAttributes FROM JpaTarget t WHERE t.controllerId=:controllerId")
-    Map<String, String> getControllerAttributes(@Param("controllerId") String controllerId);
-
-    /**
-     * Checks if target with given id exists.
-     * 
-     * @param controllerId
-     *            to check
-     * @return <code>true</code> if target with given id exists
-     */
-    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.controllerId=:controllerId")
-    boolean existsByControllerId(@Param("controllerId") String controllerId);
-
-    /**
      * Deletes the {@link Target}s with the given target IDs.
      *
      * @param targetIDs
@@ -115,164 +97,105 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     void deleteByIdIn(Collection<Long> targetIDs);
 
     /**
-     * Finds {@link Target}s by assigned {@link Tag}.
-     * 
-     * @param page
-     *            pages query and sorting information
-     *
-     * @param tagId
-     *            to be found
-     * @return page of found targets
-     */
-    @Query(value = "SELECT DISTINCT t FROM JpaTarget t JOIN t.tags tt WHERE tt.id = :tag")
-    Page<JpaTarget> findByTag(Pageable page, @Param("tag") Long tagId);
-
-    /**
-     * Finds all {@link Target}s based on given {@link Target#getControllerId()}
-     * list and assigned {@link Tag#getName()}.
-     *
-     * @param tag
-     *            to search for
-     * @param controllerIds
-     *            to search for
-     * @return {@link List} of found {@link Target}s.
-     */
-    @Query(value = "SELECT DISTINCT t from JpaTarget t JOIN t.tags tt WHERE tt.name = :tagname AND t.controllerId IN :targets")
-    List<JpaTarget> findByTagNameAndControllerIdIn(@Param("tagname") String tag,
-            @Param("targets") Collection<String> controllerIds);
-
-    /**
-     * Used by UI to filter based on selected status.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param status
-     *            to filter for
-     *
-     * @return found targets
-     */
-    Page<Target> findByUpdateStatus(Pageable pageable, TargetUpdateStatus status);
-
-    /**
-     * retrieves the {@link Target}s which has the {@link DistributionSet}
-     * installed with the given ID.
-     * 
-     * @param pageable
-     *            parameter
-     * @param setID
-     *            the ID of the {@link DistributionSet}
-     * @return the found {@link Target}s
-     */
-    Page<Target> findByInstalledDistributionSetId(Pageable pageable, Long setID);
-
-    /**
-     * Finds all targets that have defined {@link DistributionSet} assigned.
-     * 
-     * @param pageable
-     *            for page configuration
-     * @param setID
-     *            is the ID of the {@link DistributionSet} to filter for.
-     *
-     * @return page of found targets
-     */
-    Page<Target> findByAssignedDistributionSetId(Pageable pageable, Long setID);
-
-    /**
-     * retrieves {@link Target}s where
-     * {@link JpaTarget#isRequestControllerAttributes()}.
-     * 
-     * @param pageReq
-     *            page parameter
-     *
-     * @return the found {@link Target}s
-     * 
-     */
-    Page<Target> findByRequestControllerAttributesIsTrue(Pageable pageable);
-
-    /**
-     * Counts number of targets with given distribution set Id.
-     *
-     * @param distId
-     *            to search for
-     *
-     * @return number of found {@link Target}s.
-     */
-    Long countByAssignedDistributionSetId(Long distId);
-
-    /**
-     * Counts number of targets with given distribution set Id.
-     *
-     * @param distId
-     *            to search for
-     * @return number of found {@link Target}s.
-     */
-    Long countByInstalledDistributionSetId(Long distId);
-
-    /**
-     * Checks if there is already a {@link Target} that has the given distribution set Id assigned or installed.
-     *
-     * @param distId
-     *            to check
-     * @return <code>true</code> if a {@link Target} exists.
-     */
-    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTarget t WHERE t.installedDistributionSet.id=:distId OR t.assignedDistributionSet.id=:distId")
-    boolean existsByInstalledOrAssignedDistributionSet(@Param("distId") Long distId);
-
-    /**
      * Finds all {@link Target}s in the repository.
      *
-     * @return {@link List} of {@link Target}s
+     * Calls version with (empty) spec to allow injecting further specs
      *
-     * @see org.springframework.data.repository.CrudRepository#findAll()
+     * @return {@link List} of {@link Target}s
      */
     @Override
-    List<JpaTarget> findAll();
+    @NonNull
+    default List<JpaTarget> findAll() {
+        return this.findAll(Specification.where(null));
+    }
 
+    /**
+     * Finds all {@link Target}s in the repository sorted.
+     *
+     * Calls version with (empty) spec to allow injecting further specs
+     *
+     * @param sort instructions to sort result by
+     * @return {@link List} of {@link Target}s
+     */
     @Override
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT t FROM JpaTarget t WHERE t.id IN ?1")
-    List<JpaTarget> findAllById(Iterable<Long> ids);
+    @NonNull
+    default Iterable<JpaTarget> findAll(@NonNull Sort sort) {
+        return this.findAll(Specification.where(null), sort);
+    }
 
     /**
-     * Finds all targets for the given list of controller IDs.
-     * 
-     * @param controllerIds
-     *            The controller IDs to look for.
-     * 
-     * @return The list of matching targets.
+     * Finds a page of {@link Target}s in the repository.
+     *
+     * Calls version with (empty) spec to allow injecting further specs
+     *
+     * @param pageable paging context
+     * @return {@link List} of {@link Target}s
      */
-    @Query("SELECT t FROM JpaTarget t WHERE t.controllerId IN ?1")
-    List<JpaTarget> findAllByControllerId(Iterable<String> controllerIds);
+    @Override
+    @NonNull
+    default Page<JpaTarget> findAll(@NonNull Pageable pageable) {
+        return this.findAll(Specification.where(null), pageable);
+    }
 
     /**
-     * 
-     * Finds all targets of a rollout group.
-     * 
-     * @param rolloutGroupId
-     *            the ID of the rollout group
-     * @param page
-     *            the page request parameter
-     * @return a page of all targets related to a rollout group
+     * Finds {@link Target}s in the repository matching a list of ids.
+     *
+     * Calls version based on spec to allow injecting further specs
+     *
+     * @param ids ids to filter for
+     * @return {@link List} of {@link Target}s
      */
-    Page<Target> findByRolloutTargetGroupRolloutGroupId(Long rolloutGroupId, Pageable page);
+    @Override
+    @NonNull
+    default List<JpaTarget> findAllById(Iterable<Long> ids) {
+        final List<Long> collectedIds = StreamSupport.stream(ids.spliterator(), true).collect(Collectors.toList());
+        return this.findAll(Specification.where(TargetSpecifications.hasIdIn(collectedIds)));
+    }
 
     /**
-     * Finds all targets related to a target rollout group stored for a specific
-     * rollout.
-     * 
-     * @param rolloutGroupId
-     *            the rollout group the targets should belong to
-     * @param page
-     *            the page request parameter
-     * @return a page of all targets related to a rollout group
+     * Finds {@link Target} in the repository matching an id.
+     *
+     * Calls version based on spec to allow injecting further specs
+     *
+     * @param id id to filter for
+     * @return {@link Optional} of {@link Target}
      */
-    Page<Target> findByActionsRolloutGroupId(Long rolloutGroupId, Pageable page);
+    @Override
+    @NonNull
+    default Optional<JpaTarget> findById(@NonNull Long id) {
+        return this.findOne(Specification.where(TargetSpecifications.hasId(id)));
+    }
+
+    /**
+     * Checks whether {@link Target} in the repository matching an id exists or not.
+     *
+     * Calls version based on spec to allow injecting further specs
+     *
+     * @param id id to check for
+     * @return true if target with id exists
+     */
+    @Override
+    default boolean existsById(@NonNull Long id) {
+        return this.findOne(Specification.where(TargetSpecifications.hasId(id))).isPresent();
+    }
+
+    /**
+     * Count number of {@link Target}s in the repository.
+     *
+     * Calls version with an empty spec to allow injecting further specs
+     *
+     * @return number of targets in the repository
+     */
+    @Override
+    default long count() {
+        return this.count(Specification.where(null));
+    }
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
-     * manually to query even if this will by done by {@link EntityManager}
-     * anyhow. The DB should take care of optimizing this away.
+     * manually to query even if this will by done by {@link EntityManager} anyhow.
+     * The DB should take care of optimizing this away.
      *
      * @param tenant
      *            to delete data from
@@ -281,14 +204,4 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     @Transactional
     @Query("DELETE FROM JpaTarget t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
-    /**
-     * Filters a given list of controllerIds and returns only the existing IDs.
-     * 
-     * @param controllerIds
-     *            The IDs to be filtered
-     * @return only the existing controllerIds
-     */
-    @Query("SELECT t.controllerId FROM JpaTarget t WHERE t.controllerId IN ?1")
-    List<String> filterNonExistingControllerIds(Iterable<String> controllerIds);
 }
