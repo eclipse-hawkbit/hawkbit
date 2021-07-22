@@ -232,9 +232,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
-        return convertPage(
-                distributionSetTypeRepository.findAll(DistributionSetTypeSpecification.isDeleted(false), pageable),
-                pageable);
+        return convertPage(distributionSetTypeRepository
+                .findAllWithoutCount(DistributionSetTypeSpecification.isDeleted(false), pageable), pageable);
     }
 
     @Override
