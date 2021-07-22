@@ -134,7 +134,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class,
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TagFields.class,
                 virtualPropertyReplacer, database);
 
         return convertDsPage(distributionSetTagRepository.findAll(spec, pageable), pageable);

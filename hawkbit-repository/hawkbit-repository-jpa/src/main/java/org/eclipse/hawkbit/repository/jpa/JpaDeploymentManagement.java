@@ -655,7 +655,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.parse(rsqlParam, ActionFields.class, virtualPropertyReplacer,
+        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer,
                 database);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));

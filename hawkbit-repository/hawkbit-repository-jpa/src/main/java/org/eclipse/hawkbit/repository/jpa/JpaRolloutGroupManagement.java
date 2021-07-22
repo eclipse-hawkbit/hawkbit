@@ -119,7 +119,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             final String rsqlParam) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
-        final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class,
+        final Specification<JpaRolloutGroup> specification = RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutGroupFields.class,
                 virtualPropertyReplacer, database);
 
         return convertPage(rolloutGroupRepository.findAll((root, query, criteriaBuilder) -> criteriaBuilder.and(
@@ -211,7 +211,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
-        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
+        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertTPage(targetRepository.findAll((root, query, criteriaBuilder) -> {

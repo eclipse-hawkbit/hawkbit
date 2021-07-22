@@ -166,7 +166,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(rsqlFilter)) {
             specList = Collections.singletonList(
-                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
+                    RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -191,7 +191,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         if (!StringUtils.isEmpty(rsqlFilter)) {
             specList.add(
-                    RSQLUtility.parse(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
+                    RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
