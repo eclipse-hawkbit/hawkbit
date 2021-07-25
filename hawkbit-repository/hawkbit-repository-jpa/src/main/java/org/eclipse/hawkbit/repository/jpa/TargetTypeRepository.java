@@ -38,7 +38,7 @@ public interface TargetTypeRepository
 
     long countByDeleted(boolean isDeleted);
 
-    long countByElementsDsSetType(JpaDistributionSetType distributionSetType);
+    long countByElementsDsType(JpaDistributionSetType distributionSetType);
 
     @Modifying
     @Transactional

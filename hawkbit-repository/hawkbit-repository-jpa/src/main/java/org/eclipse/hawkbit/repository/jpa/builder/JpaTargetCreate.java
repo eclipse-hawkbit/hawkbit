@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import org.eclipse.hawkbit.repository.ValidString;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.util.StringUtils;
 
@@ -21,17 +22,23 @@ import org.springframework.util.StringUtils;
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
-    @ValidString
     private long typeId;
 
-    JpaTargetCreate() {
+    final private TargetTypeManagement targetTypeManagement;
+
+    JpaTargetCreate(TargetTypeManagement targetTypeManagement) {
         super(null);
+        this.targetTypeManagement = targetTypeManagement;
     }
 
     @Override
     public TargetCreate type(long targetTypeId) {
         this.typeId = targetTypeId;
         return this;
+    }
+
+    public long getTypeId() {
+        return typeId;
     }
 
     @Override
@@ -47,7 +54,9 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         if (!StringUtils.isEmpty(name)) {
             target.setName(name);
         }
-
+        //TODO: Add Handler for default target type
+        TargetType targetType = targetTypeManagement.get(typeId).get();
+        target.setType(targetType);
         target.setDescription(description);
         target.setAddress(address);
         target.setUpdateStatus(getStatus().orElse(TargetUpdateStatus.UNKNOWN));

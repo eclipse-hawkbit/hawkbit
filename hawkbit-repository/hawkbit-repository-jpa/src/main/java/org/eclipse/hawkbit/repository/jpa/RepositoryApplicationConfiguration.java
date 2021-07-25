@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
@@ -48,6 +49,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
@@ -64,6 +66,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
@@ -117,6 +120,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
+import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
@@ -232,6 +236,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetBuilder distributionSetBuilder(final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleManagement softwareManagement) {
         return new JpaDistributionSetBuilder(distributionSetTypeManagement, softwareManagement);
+    }
+
+    @Bean
+    TargetBuilder targetBuilder(final TargetTypeManagement targetTypeManagement){
+        return new JpaTargetBuilder(targetTypeManagement);
     }
 
     @Bean
@@ -472,6 +481,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
                 distributionSetRepository, virtualPropertyReplacer, criteriaNoCountDao, properties.getDatabase(),
                 quotaManagement);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
+                                              final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+                                              final JpaProperties properties){
+        return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**

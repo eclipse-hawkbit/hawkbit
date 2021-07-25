@@ -45,7 +45,7 @@ public class TargetTypeElement implements Serializable {
     private JpaTargetType targetType;
 
     @CascadeOnDelete
-    @MapsId("targetType")
+    @MapsId("dsType")
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_element_dstype"))
     private JpaDistributionSetType dsType;

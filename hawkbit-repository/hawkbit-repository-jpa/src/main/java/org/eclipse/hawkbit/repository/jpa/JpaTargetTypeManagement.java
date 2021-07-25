@@ -110,7 +110,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Optional<TargetType> get(long id) {
-        return Optional.empty();
+        // TODO: Add error handler
+        Optional<TargetType> type = targetTypeRepository.findById(id).map(targetType -> targetType);
+        return type;
     }
 
     @Override

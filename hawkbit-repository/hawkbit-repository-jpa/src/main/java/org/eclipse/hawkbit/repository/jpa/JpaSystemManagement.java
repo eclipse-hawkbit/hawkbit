@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -92,6 +93,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Autowired
     private TargetTagRepository targetTagRepository;
+
+    @Autowired
+    private TargetTypeRepository targetTypeRepository;
 
     @Autowired
     private DistributionSetTagRepository distributionSetTagRepository;
@@ -311,6 +315,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
         // make sure the module types get their IDs
         entityManager.flush();
+
+        //TODO: adding default tenant, values may change after the final discussion
+        targetTypeRepository.save(new JpaTargetType("default", "default tenant", "red"));
 
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_KEY,

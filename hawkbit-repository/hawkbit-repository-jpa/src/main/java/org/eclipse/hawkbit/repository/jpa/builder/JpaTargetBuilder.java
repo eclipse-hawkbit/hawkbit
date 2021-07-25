@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
@@ -17,6 +18,11 @@ import org.eclipse.hawkbit.repository.builder.TargetUpdate;
  *
  */
 public class JpaTargetBuilder implements TargetBuilder {
+    final private TargetTypeManagement targetTypeManagement;
+
+    public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
+        this.targetTypeManagement = targetTypeManagement;
+    }
 
     @Override
     public TargetUpdate update(final String controllerId) {
@@ -25,7 +31,7 @@ public class JpaTargetBuilder implements TargetBuilder {
 
     @Override
     public TargetCreate create() {
-        return new JpaTargetCreate();
+        return new JpaTargetCreate(targetTypeManagement);
     }
 
 }

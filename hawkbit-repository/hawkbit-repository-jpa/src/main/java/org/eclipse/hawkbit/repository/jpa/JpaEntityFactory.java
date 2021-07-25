@@ -43,6 +43,9 @@ public class JpaEntityFactory implements EntityFactory {
     private DistributionSetBuilder distributionSetBuilder;
 
     @Autowired
+    private TargetBuilder targetBuilder;
+
+    @Autowired
     private DistributionSetTypeBuilder distributionSetTypeBuilder;
 
     @Autowired
@@ -79,7 +82,7 @@ public class JpaEntityFactory implements EntityFactory {
 
     @Override
     public TargetBuilder target() {
-        return new JpaTargetBuilder();
+        return targetBuilder;
     }
 
     @Override

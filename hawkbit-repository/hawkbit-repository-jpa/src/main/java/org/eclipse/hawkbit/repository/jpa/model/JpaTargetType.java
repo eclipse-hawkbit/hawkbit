@@ -23,7 +23,7 @@ import java.util.Set;
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_01", columnList = "tenant,deleted"),
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_name")})
+        @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_type_name")})
 public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType, EventAwareEntity{
 
     private static final long serialVersionUID = 1L;
