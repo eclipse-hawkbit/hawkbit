@@ -153,6 +153,7 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
+        targetRest.setTargetTypeId(target.getType().getId());
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 

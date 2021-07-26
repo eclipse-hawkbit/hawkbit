@@ -27,6 +27,17 @@ public class MgmtTargetRequestBody {
     @JsonProperty
     private Boolean requestAttributes;
 
+    @JsonProperty
+    private long targetTypeId;
+
+    public long getTargetTypeId() {
+        return targetTypeId;
+    }
+
+    public void setTargetTypeId(long targetTypeId) {
+        this.targetTypeId = targetTypeId;
+    }
+
     public String getSecurityToken() {
         return securityToken;
     }

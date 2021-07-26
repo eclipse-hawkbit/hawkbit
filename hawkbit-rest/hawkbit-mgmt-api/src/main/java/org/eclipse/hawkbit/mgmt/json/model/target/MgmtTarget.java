@@ -49,6 +49,17 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonProperty
     private boolean requestAttributes;
 
+    @JsonProperty
+    private long targetTypeId;
+
+    public long getTargetTypeId() {
+        return targetTypeId;
+    }
+
+    public void setTargetTypeId(long targetTypeId) {
+        this.targetTypeId = targetTypeId;
+    }
+
     /**
      * @return the controllerId
      */
