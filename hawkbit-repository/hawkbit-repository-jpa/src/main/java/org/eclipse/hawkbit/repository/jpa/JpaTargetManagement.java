@@ -655,7 +655,7 @@ public class JpaTargetManagement implements TargetManagement {
     public boolean existsByInstalledOrAssignedDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.findOne(TargetSpecifications.hasInstalledOrAssignedDistributionSet(distId)).isPresent();
+        return targetRepository.exists(TargetSpecifications.hasInstalledOrAssignedDistributionSet(distId));
     }
 
     @Override
@@ -832,7 +832,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public boolean existsByControllerId(final String controllerId) {
-        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent();
+        return targetRepository.exists(TargetSpecifications.hasControllerId(controllerId));
     }
 
     @Override

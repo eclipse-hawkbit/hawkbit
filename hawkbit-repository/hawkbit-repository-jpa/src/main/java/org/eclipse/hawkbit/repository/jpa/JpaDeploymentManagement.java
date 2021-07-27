@@ -702,7 +702,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
-        if (!targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent()) {
+        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
     }

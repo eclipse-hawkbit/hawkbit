@@ -175,7 +175,17 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
      */
     @Override
     default boolean existsById(@NonNull Long id) {
-        return this.findOne(Specification.where(TargetSpecifications.hasId(id))).isPresent();
+        return this.exists(TargetSpecifications.hasId(id));
+    }
+
+    /**
+     * Checks whether {@link Target} in the repository matching a spec exists or not.
+     *
+     * @param spec to check for existence
+     * @return true if target with id exists
+     */
+    default boolean exists(@NonNull Specification<JpaTarget> spec) {
+        return this.count(spec) > 0;
     }
 
     /**

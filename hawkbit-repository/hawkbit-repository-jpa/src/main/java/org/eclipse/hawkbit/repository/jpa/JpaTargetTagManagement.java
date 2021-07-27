@@ -155,7 +155,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
 
     @Override
     public Page<TargetTag> findByTarget(final Pageable pageable, final String controllerId) {
-        if (!targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).isPresent()) {
+        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
 
