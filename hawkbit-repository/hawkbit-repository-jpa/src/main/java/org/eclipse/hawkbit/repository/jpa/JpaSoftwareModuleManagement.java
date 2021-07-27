@@ -295,7 +295,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class,
+        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class,
                 virtualPropertyReplacer, database);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
@@ -603,7 +603,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.parse(rsqlParam,
+        final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 SoftwareModuleMetadataFields.class, virtualPropertyReplacer, database);
         return convertSmMdPage(
                 softwareModuleMetadataRepository

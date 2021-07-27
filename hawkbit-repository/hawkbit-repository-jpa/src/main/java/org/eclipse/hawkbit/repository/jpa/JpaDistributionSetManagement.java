@@ -552,7 +552,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
-        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
+        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 DistributionSetMetadataFields.class, virtualPropertyReplacer, database);
 
         return convertMdPage(
@@ -781,7 +781,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
@@ -797,7 +797,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertDsPage(

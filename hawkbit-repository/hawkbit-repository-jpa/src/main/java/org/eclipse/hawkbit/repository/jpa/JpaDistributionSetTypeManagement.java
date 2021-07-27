@@ -225,7 +225,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
         return convertPage(
                 findByCriteriaAPI(pageable,
-                        Arrays.asList(RSQLUtility.parse(rsqlParam, DistributionSetTypeFields.class,
+                        Arrays.asList(RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class,
                                 virtualPropertyReplacer, database), DistributionSetTypeSpecification.isDeleted(false))),
                 pageable);
     }

@@ -279,7 +279,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
-        final Specification<JpaTargetMetadata> spec = RSQLUtility.parse(rsqlParam, TargetMetadataFields.class,
+        final Specification<JpaTargetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetMetadataFields.class,
                 virtualPropertyReplacer, database);
 
         return convertMdPage(targetMetadataRepository.findAll((Specification<JpaTargetMetadata>) (root, query, cb) -> cb
@@ -306,14 +306,14 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
         return findTargetsBySpec(
-                RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database),
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database),
                 pageable);
     }
 
     @Override
     public Page<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
         return findTargetsBySpec(
-                RSQLUtility.parse(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database), pageable);
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database), pageable);
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
@@ -381,7 +381,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
                 database);
 
         return convertPage(
@@ -418,7 +418,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
                 database);
 
         return convertPage(
@@ -655,7 +655,7 @@ public class JpaTargetManagement implements TargetManagement {
             final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
 
         return findTargetsBySpec(
@@ -670,7 +670,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(final Pageable pageRequest,
             final Collection<Long> groups, final String targetFilterQuery) {
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
 
         return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
@@ -691,7 +691,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByRsqlAndNotInRolloutGroups(final Collection<Long> groups, final String targetFilterQuery) {
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
                 TargetSpecifications.isNotInRolloutGroups(groups));
@@ -703,7 +703,7 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByRsqlAndNonDS(final long distributionSetId, final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(spec);
@@ -747,7 +747,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.parse(rsqlParam, TargetFields.class, virtualPropertyReplacer,
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
                 database);
 
         return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
@@ -760,14 +760,14 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery.getQuery(), TargetFields.class,
+        final Specification<JpaTarget> specs = RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class,
                 virtualPropertyReplacer, database);
         return targetRepository.count(specs);
     }
 
     @Override
     public long countByRsql(final String targetFilterQuery) {
-        final Specification<JpaTarget> specs = RSQLUtility.parse(targetFilterQuery, TargetFields.class,
+        final Specification<JpaTarget> specs = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         return targetRepository.count((root, query, cb) -> {
             query.distinct(true);

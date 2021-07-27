@@ -151,7 +151,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
-        specList.add(RSQLUtility.parse(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
+        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
         return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
