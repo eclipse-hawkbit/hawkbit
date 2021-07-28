@@ -352,6 +352,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return installedDistributionSet;
     }
 
+    @Override
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
     }
