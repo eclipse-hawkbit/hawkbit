@@ -42,11 +42,13 @@ public class SimpleJpaWithNoCountRepository<T, I extends Serializable> extends S
         super(entityInformation, entityManager);
     }
 
+    @Override
     public Slice<T> findAllWithoutCount(@Nullable Specification<T> spec, Pageable pageable) {
         TypedQuery<T> query = getQuery(spec, pageable);
         return pageable.isUnpaged() ? new PageImpl<>(query.getResultList()) : readPageWithoutCount(query, pageable);
     }
 
+    @Override
     public Slice<T> findAllWithoutCount(final Pageable pageable) {
         return findAllWithoutCount(null, pageable);
     }
