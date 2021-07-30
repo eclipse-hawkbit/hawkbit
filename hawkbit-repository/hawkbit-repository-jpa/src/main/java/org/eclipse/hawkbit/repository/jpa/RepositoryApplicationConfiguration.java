@@ -15,8 +15,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-import com.google.common.collect.Maps;
-
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -30,8 +28,8 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryDefaultConfiguration;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
+import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -83,6 +81,7 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRollou
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
+import org.eclipse.hawkbit.repository.jpa.rsql.DefaultRsqlVisitorFactory;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -93,6 +92,8 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
+import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactoryHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
@@ -130,6 +131,8 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.jta.JtaTransactionManager;
 import org.springframework.validation.beanvalidation.MethodValidationPostProcessor;
+
+import com.google.common.collect.Maps;
 
 /**
  * General configuration for hawkBit's Repository.
@@ -424,7 +427,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Override
     @Bean
-    public PlatformTransactionManager transactionManager(ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+    public PlatformTransactionManager transactionManager(
+            ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         return new MultiTenantJpaTransactionManager();
     }
 
@@ -637,15 +641,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    RolloutExecutor rolloutExecutor(
-            final RolloutTargetGroupRepository rolloutTargetGroupRepository, final EntityManager entityManager,
-            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-            final RolloutGroupRepository rolloutGroupRepository, final AfterTransactionCommitExecutor afterCommit,
-            final TenantAware tenantAware, final RolloutGroupManagement rolloutGroupManagement,
-            final QuotaManagement quotaManagement, final DeploymentManagement deploymentManagement,
-            final TargetManagement targetManagement, final EventPublisherHolder eventPublisherHolder,
-            final PlatformTransactionManager txManager, final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final ApplicationContext context) {
+    RolloutExecutor rolloutExecutor(final RolloutTargetGroupRepository rolloutTargetGroupRepository,
+            final EntityManager entityManager, final RolloutRepository rolloutRepository,
+            final ActionRepository actionRepository, final RolloutGroupRepository rolloutGroupRepository,
+            final AfterTransactionCommitExecutor afterCommit, final TenantAware tenantAware,
+            final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
+            final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
+            final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
+            final RolloutApprovalStrategy rolloutApprovalStrategy, final ApplicationContext context) {
         return new JpaRolloutExecutor(rolloutTargetGroupRepository, entityManager, rolloutRepository, actionRepository,
                 rolloutGroupRepository, afterCommit, tenantAware, rolloutGroupManagement, quotaManagement,
                 deploymentManagement, targetManagement, eventPublisherHolder, txManager, rolloutApprovalStrategy,
@@ -892,4 +895,26 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
         return new RolloutScheduler(systemManagement, rolloutManagement, systemSecurityContext);
     }
+
+    /**
+     * Creates the {@link RsqlVisitorFactory} bean.
+     * 
+     * @return A new {@link RsqlVisitorFactory} bean.
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    RsqlVisitorFactory rsqlVisitorFactory() {
+        return new DefaultRsqlVisitorFactory();
+    }
+
+    /**
+     * Obtains the {@link RsqlVisitorFactoryHolder} bean.
+     * 
+     * @return The {@link RsqlVisitorFactoryHolder} singleton.
+     */
+    @Bean
+    RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
+        return RsqlVisitorFactoryHolder.getInstance();
+    }
+
 }

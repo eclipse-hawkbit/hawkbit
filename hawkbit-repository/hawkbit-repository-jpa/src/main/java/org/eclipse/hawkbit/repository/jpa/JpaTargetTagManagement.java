@@ -106,7 +106,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
 
-        final Specification<JpaTargetTag> spec = RSQLUtility.parse(rsqlParam, TagFields.class, virtualPropertyReplacer,
+        final Specification<JpaTargetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TagFields.class, virtualPropertyReplacer,
                 database);
         return convertTPage(targetTagRepository.findAll(spec, pageable), pageable);
     }
