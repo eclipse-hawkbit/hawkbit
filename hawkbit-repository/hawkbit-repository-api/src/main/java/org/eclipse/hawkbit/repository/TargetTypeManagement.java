@@ -3,7 +3,6 @@ package org.eclipse.hawkbit.repository;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,10 +28,10 @@ public interface TargetTypeManagement {
     
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     List<TargetType> create(@NotNull @Valid Collection<TargetTypeCreate> creates);
-    
+
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void delete(@NotEmpty String targetTypeName);
-    
+    void delete(@NotNull Long id);
+
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<TargetType> findAll(@NotNull Pageable pageable);
 
@@ -57,11 +56,11 @@ public interface TargetTypeManagement {
     TargetType update(@NotNull @Valid TargetTypeUpdate update);
 
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetType assignOptionalDistributionSetTypes(long targetTypeId,
+    TargetType assignDistributionSetTypes(long targetTypeId,
                                                            @NotEmpty Collection<Long> distributionSetTypeIds);
 
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    DistributionSetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds);
+    TargetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds);
 
 
 }

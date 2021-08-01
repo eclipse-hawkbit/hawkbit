@@ -33,7 +33,7 @@ create index sp_idx_target_type_01 on sp_target_type (tenant, deleted);
 create index sp_idx_target_type_prim on sp_target_type (tenant, id);
 
 alter table sp_target
-    add column target_type_id bigint not null default 0;
+    add column target_type_id bigint;
 
 alter table sp_target
     add constraint fk_target_target_type_target

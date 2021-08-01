@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
@@ -153,7 +154,9 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
-        targetRest.setTargetTypeId(target.getType().getId());
+        if (Objects.nonNull(target.getType())){
+            targetRest.setTargetTypeId(target.getType().getId());
+        }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 
@@ -171,10 +174,9 @@ public final class MgmtTargetMapper {
     }
 
     private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
-        //TODO: check target type, add default type if not provided
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress()).type(1);
+                .address(targetRest.getAddress()).type(targetRest.getTargetTypeId());
     }
 
     static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,

@@ -28,13 +28,13 @@ public class MgmtTargetRequestBody {
     private Boolean requestAttributes;
 
     @JsonProperty
-    private long targetTypeId;
+    private Long targetTypeId;
 
-    public long getTargetTypeId() {
+    public Long getTargetTypeId() {
         return targetTypeId;
     }
 
-    public void setTargetTypeId(long targetTypeId) {
+    public void setTargetTypeId(Long targetTypeId) {
         this.targetTypeId = targetTypeId;
     }
 

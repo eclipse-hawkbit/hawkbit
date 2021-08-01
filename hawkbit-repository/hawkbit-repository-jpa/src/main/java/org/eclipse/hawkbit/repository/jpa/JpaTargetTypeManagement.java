@@ -8,41 +8,20 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import org.eclipse.hawkbit.repository.TagFields;
-import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
-import org.eclipse.hawkbit.repository.builder.TagCreate;
-import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
-import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
-import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * JPA implementation of {@link TargetTypeManagement}.
@@ -89,7 +68,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public void delete(String targetTypeName) {
+    public void delete(Long id) {
 
     }
 
@@ -126,12 +105,13 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public DistributionSetType assignOptionalDistributionSetTypes(long targetTypeId, Collection<Long> distributionSetTypeIds) {
+    public TargetType assignDistributionSetTypes(long targetTypeId, Collection<Long> distributionSetTypeIds) {
         return null;
     }
 
     @Override
-    public DistributionSetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds) {
+    public TargetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds) {
         return null;
     }
+
 }

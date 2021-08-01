@@ -50,13 +50,13 @@ public class MgmtTarget extends MgmtNamedEntity {
     private boolean requestAttributes;
 
     @JsonProperty
-    private long targetTypeId;
+    private Long targetTypeId;
 
-    public long getTargetTypeId() {
+    public Long getTargetTypeId() {
         return targetTypeId;
     }
 
-    public void setTargetTypeId(long targetTypeId) {
+    public void setTargetTypeId(Long targetTypeId) {
         this.targetTypeId = targetTypeId;
     }
 
@@ -190,4 +190,5 @@ public class MgmtTarget extends MgmtNamedEntity {
     public void setRequestAttributes(final boolean requestAttributes) {
         this.requestAttributes = requestAttributes;
     }
+
 }
