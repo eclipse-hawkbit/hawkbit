@@ -23,6 +23,9 @@ public class DmfCreateThing {
     @JsonProperty
     private String name;
 
+    @JsonProperty
+    private DmfAttributeUpdate attributeUpdate;
+
     public String getName() {
         return name;
     }
@@ -31,4 +34,11 @@ public class DmfCreateThing {
         this.name = name;
     }
 
+    public DmfAttributeUpdate getAttributeUpdate() {
+        return attributeUpdate;
+    }
+
+    public void setAttributeUpdate(final DmfAttributeUpdate attributeUpdate) {
+        this.attributeUpdate = attributeUpdate;
+    }
 }

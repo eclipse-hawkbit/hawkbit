@@ -92,7 +92,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         assertPingReplyMessage(CORRELATION_ID);
 
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -107,7 +107,63 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         registerAndAssertTargetWithExistingTenant(target2, 2);
 
         registerSameTargetAndAssertBasedOnVersion(target2, 2, TargetUpdateStatus.REGISTERED);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Tests register target with name")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void registerTargetWithName() {
+        final String controllerId = TARGET_PREFIX + "registerTargetWithName";
+        final String name = "NonDefaultTargetName";
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY,
+                null);
+
+        registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED,
+                null);
+
+        Mockito.verifyNoInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Tests register target with attributes")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void registerTargetWithAttributes() {
+        final String controllerId = TARGET_PREFIX + "registerTargetWithAttributes";
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put("testKey1", "testValue1");
+        attributes.put("testKey2", "testValue2");
+
+        registerAndAssertTargetWithExistingTenant(controllerId, null, 1, TargetUpdateStatus.REGISTERED, CREATED_BY,
+                attributes);
+
+        attributes.put("testKey3", "testValue3");
+        registerSameTargetAndAssertBasedOnVersion(controllerId, null, 1, TargetUpdateStatus.REGISTERED, attributes);
+
+        Mockito.verifyNoInteractions(getDeadletterListener());
+    }
+
+    @Test
+    @Description("Tests register target with name and attributes")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 2) })
+    public void registerTargetWithNameAndAttributes() {
+        final String controllerId = TARGET_PREFIX + "registerTargetWithAttributes";
+        final String name = "NonDefaultTargetName";
+        final Map<String, String> attributes = new HashMap<>();
+        attributes.put("testKey1", "testValue1");
+        attributes.put("testKey2", "testValue2");
+
+        registerAndAssertTargetWithExistingTenant(controllerId, name, 1, TargetUpdateStatus.REGISTERED, CREATED_BY,
+                attributes);
+
+        attributes.put("testKey3", "testValue3");
+        registerSameTargetAndAssertBasedOnVersion(controllerId, name + "_updated", 1, TargetUpdateStatus.REGISTERED,
+                attributes);
+
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -510,7 +566,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -537,7 +593,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         assertDownloadMessage(distributionSet.getModules(), controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -564,7 +620,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         assertDownloadAndInstallMessage(distributionSet.getModules(), controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -592,7 +648,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         assertCancelActionMessage(getFirstAssignedActionId(distributionSetAssignmentResult), controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
     }
 
     @Test
@@ -836,15 +892,15 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         // get actionId from Message
-        Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
+        final Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message
         createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DOWNLOADED);
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
     }
@@ -868,22 +924,22 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
 
         // verify
         final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         // get actionId from Message
-        Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
+        final Long actionId = Long.parseLong(getJsonFieldFromBody(message.getBody(), "actionId"));
 
         // Send DOWNLOADED message, should result in the action being closed
         createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DOWNLOADED);
         assertAction(actionId, 1, Status.RUNNING, Status.DOWNLOADED);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), null);
 
         // Send FINISHED message
         createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.FINISHED);
         assertAction(actionId, 2, Status.RUNNING, Status.DOWNLOADED, Status.FINISHED);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         verifyAssignedDsAndInstalledDs(controllerId, distributionSet.getId(), distributionSet.getId());
     }
@@ -899,7 +955,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
         final String controllerId = "dummy_target";
 
         try {
-            for (Class<? extends RuntimeException> exceptionClass : exceptionsThatShouldNotBeRequeued) {
+            for (final Class<? extends RuntimeException> exceptionClass : exceptionsThatShouldNotBeRequeued) {
                 doThrow(exceptionClass).when(mockedControllerManagement)
                         .findOrRegisterTargetIfItDoesNotExist(eq(controllerId), any());
 
@@ -998,7 +1054,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     }
 
     private void assertEmptyReceiverQueueCount() {
-        assertThat(getAuthenticationMessageCount()).isEqualTo(0);
+        assertThat(getAuthenticationMessageCount()).isZero();
     }
 
     private void verifyOneDeadLetterMessage() {
@@ -1013,7 +1069,7 @@ public class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServic
     }
 
     private static String getJsonFieldFromBody(final byte[] body, final String fieldName) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
+        final ObjectMapper objectMapper = new ObjectMapper();
         final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
         assertThat(node.has(fieldName)).isTrue();
         return node.get(fieldName).asText();

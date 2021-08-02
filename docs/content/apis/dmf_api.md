@@ -63,11 +63,19 @@ Payload Template (optional):
 
 ```json
 {
-    "name": "String"
+    "name": "String",
+    "attributeUpdate": {
+        "attributes": {
+            "exampleKey1" : "exampleValue1",
+            "exampleKey2" : "exampleValue2"
+        },
+        "mode": "String"
+    }
 }
 ```
 
-The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.
+The "name" property specifies the name of the thing, which by default is the thing ID. This property is optional.<br />
+The "attributeUpdate" property provides the attributes of the thing, for details see UPDATE_ATTRIBUTES message. This property is optional.
 
 
 ### THING_REMOVED
@@ -93,7 +101,7 @@ type=THING\_REMOVED <br /> tenant=default <br /> thingId=abc | content\_type=app
 
 ### UPDATE_ATTRIBUTES
 
-Message to update target attributes. This message can be send in response to a _REQUEST_ATTRIBUTES_UPDATE_ event, sent by hawkBit.
+Message to update target attributes. This message can be send in response to a REQUEST_ATTRIBUTES_UPDATE event, sent by hawkBit.
 
 | Header | Description | Type | Mandatory
 |-----------------------------|----------------------------------|-------------------------------------|----------------

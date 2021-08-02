@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
-import static org.springframework.util.StringUtils.hasText;
 
 import java.io.Serializable;
 import java.net.URI;
@@ -53,7 +52,6 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.MessageConversionException;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -201,12 +199,12 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     /**
-     * Method to create a new target or to find the target if it already exists and
-     * update its poll time, status and optionally its name.
+     * Method to create a new target or to find the target if it already exists
+     * and update its poll time, status and optionally its name and attributes.
      *
      * @param message
-     *            the message that contains replyTo property and optionally the name
-     *            in body
+     *            the message that contains replyTo property and optionally the
+     *            name and attributes in body
      * @param virtualHost
      *            the virtual host
      */
@@ -225,14 +223,22 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             } else {
                 checkContentTypeJson(message);
+                final DmfCreateThing thingCreateBody = convertMessage(message, DmfCreateThing.class);
+                final DmfAttributeUpdate thingAttributeUpdateBody = thingCreateBody.getAttributeUpdate();
 
-                    target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri, convertMessage(message, DmfCreateThing.class).getName());
+                target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
+                        thingCreateBody.getName());
 
+                if (thingAttributeUpdateBody != null) {
+                    controllerManagement.updateControllerAttributes(thingId, thingAttributeUpdateBody.getAttributes(),
+                            getUpdateMode(thingAttributeUpdateBody));
+                }
             }
             LOG.debug("Target {} reported online state.", thingId);
             sendUpdateCommandToTarget(target);
         } catch (final EntityAlreadyExistsException e) {
-            throw new AmqpRejectAndDontRequeueException("Tried to register previously registered target, message will be ignored!", e);
+            throw new AmqpRejectAndDontRequeueException(
+                    "Tried to register previously registered target, message will be ignored!", e);
         }
     }
 
@@ -251,8 +257,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     }
 
     private void sendCurrentActionsAsMultiActionToTarget(final Target target) {
-        final List<Action> actions = controllerManagement
-                .findActiveActionsWithHighestWeight(target.getControllerId(), MAX_ACTION_COUNT);
+        final List<Action> actions = controllerManagement.findActiveActionsWithHighestWeight(target.getControllerId(),
+                MAX_ACTION_COUNT);
 
         final Set<DistributionSet> distributionSets = actions.stream().map(Action::getDistributionSet)
                 .collect(Collectors.toSet());
