@@ -330,7 +330,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         assertThat(target.getUpdateStatus()).isEqualTo(updateStatus);
         assertThat(target.getAddress())
                 .isEqualTo(IpUtil.createAmqpUri(getVirtualHost(), DmfTestConfiguration.REPLY_TO_EXCHANGE));
-        assertThat(target.getControllerAttributes()).isEqualTo(attributes);
+        assertThat(targetManagement.getControllerAttributes(target.getControllerId())).isEqualTo(attributes);
     }
 
     protected Message createTargetMessage(final String controllerId, final String tenant) {
