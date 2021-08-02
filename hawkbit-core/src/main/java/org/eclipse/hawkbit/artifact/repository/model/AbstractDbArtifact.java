@@ -19,9 +19,10 @@ import org.springframework.util.Assert;
 public abstract class AbstractDbArtifact {
 
     private final String artifactId;
-    private final DbArtifactHash hashes;
     private final long size;
     private final String contentType;
+
+    private DbArtifactHash hashes;
 
     protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final long size,
             final String contentType) {
@@ -48,6 +49,13 @@ public abstract class AbstractDbArtifact {
     }
 
     /**
+     * Set hashes of the artifact
+     */
+    public void setHashes(final DbArtifactHash hashes) {
+        this.hashes = hashes;
+    }
+
+    /**
      * @return site of the artifact in bytes
      */
     public long getSize() {
@@ -62,8 +70,8 @@ public abstract class AbstractDbArtifact {
     }
 
     /**
-     * Creates an {@link InputStream} on this artifact. Caller has to take care
-     * of closing the stream. Repeatable calls open a new {@link InputStream}.
+     * Creates an {@link InputStream} on this artifact. Caller has to take care of
+     * closing the stream. Repeatable calls open a new {@link InputStream}.
      * 
      * @return {@link InputStream} to read from artifact.
      */
