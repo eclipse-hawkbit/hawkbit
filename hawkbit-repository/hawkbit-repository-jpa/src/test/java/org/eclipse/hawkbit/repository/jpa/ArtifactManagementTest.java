@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -25,6 +27,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
@@ -32,6 +35,9 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
+import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -46,6 +52,7 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
+import com.google.common.io.BaseEncoding;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -259,7 +266,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     /**
      * Test method for
      * {@link org.eclipse.hawkbit.repository.ArtifactManagement#delete(long)} .
-     * 
+     *
      * @throws IOException
      */
     @Test
@@ -482,6 +489,103 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             createArtifactForSoftwareModule("file2", sm.getId(), artifactSize, inputStream2);
             assertThat(artifactManagement.getByFilenameAndSoftwareModule("file1", sm.getId())).isPresent();
         }
+    }
+
+    @Test
+    @Description("Verifies that creation of an artifact with none matching hashes fails.")
+    public void createArtifactWithNoneMatchingHashes() throws IOException, NoSuchAlgorithmException {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final DbArtifactHash artifactHashes = calcHashes(testData);
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload artifactUploadWithInvalidSha1 = new ArtifactUpload(inputStream, sm.getId(),
+                    "test-file", artifactHashes.getMd5(), "sha1", artifactHashes.getSha256(), false, null,
+                    testData.length);
+            assertThatExceptionOfType(InvalidSHA1HashException.class)
+                    .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha1));
+        }
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload artifactUploadWithInvalidMd5 = new ArtifactUpload(inputStream, sm.getId(), "test-file",
+                    "md5", artifactHashes.getSha1(), artifactHashes.getSha256(), false, null, testData.length);
+            assertThatExceptionOfType(InvalidMD5HashException.class)
+                    .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidMd5));
+        }
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload artifactUploadWithInvalidSha256 = new ArtifactUpload(inputStream, sm.getId(),
+                    "test-file", artifactHashes.getMd5(), artifactHashes.getSha1(), "sha256", false, null,
+                    testData.length);
+            assertThatExceptionOfType(InvalidSHA256HashException.class)
+                    .isThrownBy(() -> artifactManagement.create(artifactUploadWithInvalidSha256));
+        }
+    }
+
+    @Test
+    @Description("Verifies that creation of an artifact with matching hashes works.")
+    public void createArtifactWithMatchingHashes() throws IOException, NoSuchAlgorithmException {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final DbArtifactHash artifactHashes = calcHashes(testData);
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload artifactUpload = new ArtifactUpload(inputStream, sm.getId(), "test-file",
+                    artifactHashes.getMd5(), artifactHashes.getSha1(), artifactHashes.getSha256(), false, null,
+                    testData.length);
+            final Artifact createdArtifact = artifactManagement.create(artifactUpload);
+            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.getSha1());
+            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.getMd5());
+            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.getSha256());
+        }
+
+        final Optional<AbstractDbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1());
+        assertThat(dbArtifact).isPresent();
+    }
+
+    @Test
+    @Description("Verifies that creation of an existing artifact returns a full hash list.")
+    public void createExistingArtifactReturnsFullHashList() throws IOException, NoSuchAlgorithmException {
+        final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
+        final SoftwareModule smApp = testdataFactory.createSoftwareModuleApp();
+
+        final byte[] testData = RandomStringUtils.randomAlphanumeric(100).getBytes();
+        final DbArtifactHash artifactHashes = calcHashes(testData);
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload artifactUpload = new ArtifactUpload(inputStream, smOs.getId(), "test-file",
+                    artifactHashes.getMd5(), artifactHashes.getSha1(), artifactHashes.getSha256(), false, null,
+                    testData.length);
+            final Artifact artifact = artifactManagement.create(artifactUpload);
+            assertThat(artifact).isNotNull();
+        }
+        final Optional<AbstractDbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1());
+        assertThat(dbArtifact).isPresent();
+
+        try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
+            final ArtifactUpload existingArtifactUpload = new ArtifactUpload(inputStream, smApp.getId(), "test-file",
+                    false, testData.length);
+            final Artifact createdArtifact = artifactManagement.create(existingArtifactUpload);
+            assertThat(createdArtifact.getSha1Hash()).isEqualTo(artifactHashes.getSha1());
+            assertThat(createdArtifact.getMd5Hash()).isEqualTo(artifactHashes.getMd5());
+            assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.getSha256());
+        }
+    }
+
+    private DbArtifactHash calcHashes(final byte[] input) throws NoSuchAlgorithmException {
+        final String sha1Hash = toBase16Hash("SHA1", input);
+        final String md5Hash = toBase16Hash("MD5", input);
+        final String sha256Hash = toBase16Hash("SHA-256", input);
+
+        return new DbArtifactHash(sha1Hash, md5Hash, sha256Hash);
+    }
+
+    private String toBase16Hash(final String algorithm, final byte[] input) throws NoSuchAlgorithmException {
+        final MessageDigest messageDigest = MessageDigest.getInstance(algorithm);
+        messageDigest.update(input);
+        return BaseEncoding.base16().lowerCase().encode(messageDigest.digest());
     }
 
     private Artifact createArtifactForSoftwareModule(final String filename, final long moduleId, final int artifactSize)
