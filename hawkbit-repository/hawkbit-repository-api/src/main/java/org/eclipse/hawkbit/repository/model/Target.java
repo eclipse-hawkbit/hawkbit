@@ -98,5 +98,4 @@ public interface Target extends NamedEntity {
      *         {@link #getControllerAttributes()}.
      */
     boolean isRequestControllerAttributes();
-
 }
