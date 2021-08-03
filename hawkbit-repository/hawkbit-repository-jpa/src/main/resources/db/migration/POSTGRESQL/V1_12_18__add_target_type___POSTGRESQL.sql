@@ -16,7 +16,7 @@ CREATE TABLE sp_target_type(
     optlock_revision BIGINT,
     tenant           VARCHAR(40) NOT NULL,
     description      VARCHAR(512),
-    name             VARCHAR(128),
+    name             VARCHAR(64),
     colour           VARCHAR(16)
 )
         WITH (
