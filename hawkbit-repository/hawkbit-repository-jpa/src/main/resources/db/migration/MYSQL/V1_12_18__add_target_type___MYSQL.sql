@@ -13,7 +13,7 @@ create table sp_target_type
     primary key (id)
 );
 
-create table sp_target_type_element
+create table sp_target_type_ds_type_relation
 (
     target_type           bigint not null,
     distribution_set_type bigint not null,
@@ -23,25 +23,22 @@ create table sp_target_type_element
 alter table sp_target_type
     add constraint uk_target_type_name unique (name, tenant);
 
-alter table sp_target_type
-    add constraint uk_target_type_id unique (id, tenant);
-
 create index sp_idx_target_type_prim on sp_target_type (tenant, id);
 
 alter table sp_target
     add column target_type bigint;
 
 alter table sp_target
-    add constraint fk_target_target_type_target
+    add constraint fk_target_relation_target_type
         foreign key (target_type)
             references sp_target_type (id);
 
-alter table sp_target_type_element
-    add constraint fk_target_type_element_element
+alter table sp_target_type_ds_type_relation
+    add constraint fk_target_type_relation_target_type
         foreign key (target_type)
             references sp_target_type (id);
 
-alter table sp_target_type_element
-    add constraint fk_target_type_element_dstype
+alter table sp_target_type_ds_type_relation
+    add constraint fk_target_type_relation_ds_type
         foreign key (distribution_set_type)
             references sp_distribution_set_type (id);

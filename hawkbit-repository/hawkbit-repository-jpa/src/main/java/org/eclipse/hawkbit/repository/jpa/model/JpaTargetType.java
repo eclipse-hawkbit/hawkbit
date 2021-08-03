@@ -6,36 +6,39 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.ForeignKey;
 import javax.persistence.Index;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Entity
 @Table(name = "sp_target_type", indexes = {
-        @Index(name = "sp_idx_target_type_01", columnList = "tenant,deleted"),
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_type_name")})
 public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType, EventAwareEntity{
 
     private static final long serialVersionUID = 1L;
 
-    @CascadeOnDelete
-    @OneToMany(mappedBy = "targetType", targetEntity = TargetTypeElement.class, cascade = {
-            CascadeType.PERSIST }, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<TargetTypeElement> elements;
-
     @Column(name = "colour", nullable = true, length = TargetType.COLOUR_MAX_SIZE)
     @Size(max = TargetType.COLOUR_MAX_SIZE)
     private String colour;
+
+    @CascadeOnDelete
+    @ManyToMany(targetEntity = JpaDistributionSetType.class)
+    @JoinTable(name = "sp_target_type_ds_type_relation", joinColumns = {
+            @JoinColumn(name = "target_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type"))}, inverseJoinColumns = {
+            @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type"))})
+    private Set<DistributionSetType> distributionSetTypes;
 
     public JpaTargetType() {
         // default public constructor for JPA
@@ -47,42 +50,30 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     }
 
     public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
-        return setDistributionSetType(dsSetType);
-    }
-
-    private JpaTargetType setDistributionSetType(final DistributionSetType distributionSetType) {
-        if (elements == null) {
-            elements = new HashSet<>();
-            elements.add(new TargetTypeElement(this, (JpaDistributionSetType) distributionSetType));
-            return this;
+        if (distributionSetTypes == null) {
+            distributionSetTypes = new HashSet<>();
         }
 
-        // check if this was in the list before before
-        final Optional<TargetTypeElement> existing = elements.stream()
-                .filter(element -> element.getDsType().getKey().equals(distributionSetType.getKey())).findAny();
-
-
-        elements.add(new TargetTypeElement(this, (JpaDistributionSetType) distributionSetType));
-
-
+        distributionSetTypes.add(dsSetType);
         return this;
     }
 
     public JpaTargetType removeDistributionSetType(final Long dsTypeId) {
-        if (elements == null) {
+        if (distributionSetTypes == null) {
             return this;
         }
-
-        // we search by id (standard equals compares also revision)
-        elements.stream().filter(element -> element.getDsType().getId().equals(dsTypeId)).findAny()
-                .ifPresent(elements::remove);
-
+        distributionSetTypes.remove(dsTypeId);
         return this;
     }
 
     @Override
     public Set<DistributionSetType> getCompatibleDistributionSetTypes() {
-        return null;
+
+        if (distributionSetTypes == null) {
+            return Collections.emptySet();
+        }
+
+        return Collections.unmodifiableSet(distributionSetTypes);
     }
 
     @Override
