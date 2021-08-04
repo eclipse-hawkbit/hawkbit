@@ -25,21 +25,17 @@ public class MgmtTargetType extends MgmtNamedEntity {
     @JsonProperty(value = "id", required = true)
     private Long typeId;
 
-    @JsonProperty
-    private boolean deleted;
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
-
+    /**
+     * @return target type ID
+     */
     public Long getTypeId() {
         return typeId;
     }
 
+    /**
+     * @param typeId
+     *          Target type ID
+     */
     public void setTypeId(final Long typeId) {
         this.typeId = typeId;
     }

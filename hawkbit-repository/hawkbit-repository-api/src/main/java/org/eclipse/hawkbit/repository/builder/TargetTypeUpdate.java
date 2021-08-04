@@ -1,11 +1,23 @@
+/**
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.repository.builder;
 
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.TargetType;
 
 import javax.validation.constraints.Size;
-import java.util.Collection;
 
+/**
+ * Builder to update an existing {@link TargetType} entry. Defines all
+ * fields that can be updated.
+ *
+ */
 public interface TargetTypeUpdate {
     /**
      * @param description

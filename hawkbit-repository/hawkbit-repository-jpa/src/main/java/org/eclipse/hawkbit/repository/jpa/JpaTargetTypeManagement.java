@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -38,6 +38,18 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
 
+    /**
+     * Constructor
+     *
+     * @param targetTypeRepository
+     *          Target type repository
+     * @param targetRepository
+     *          Target repository
+     * @param virtualPropertyReplacer
+     *          replacer
+     * @param database
+     *          database
+     */
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
                                    final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
                                    final Database database) {

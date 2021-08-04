@@ -43,19 +43,35 @@ public class MgmtTargetTypeRequestBodyPut {
         return this;
     }
 
+    /**
+     * @return description
+     */
     public String getDescription() {
         return description;
     }
 
+    /**
+     * @param description
+     *          Description
+     * @return Updated body
+     */
     public MgmtTargetTypeRequestBodyPut setDescription(final String description) {
         this.description = description;
         return this;
     }
 
+    /**
+     * @return Colour
+     */
     public String getColour() {
         return colour;
     }
 
+    /**
+     * @param colour
+     *          Colour
+     * @return Updated body
+     */
     public MgmtTargetTypeRequestBodyPut setColour(final String colour) {
         this.colour = colour;
         return this;

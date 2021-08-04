@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -26,11 +26,20 @@ import java.util.List;
 public interface TargetTypeRepository
         extends BaseEntityRepository<JpaTargetType, Long>, JpaSpecificationExecutor<JpaTargetType> {
 
+    /**
+     * @param tenant
+     *          Tenant
+     */
     @Modifying
     @Transactional
     @Query("DELETE FROM JpaTargetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
 
+    /**
+     * @param ids
+     *          List of ID
+     * @return Taget type list
+     */
     @Override
     @Query("SELECT d FROM JpaTargetType d WHERE d.id IN ?1")
     List<JpaTargetType> findAllById(Iterable<Long> ids);

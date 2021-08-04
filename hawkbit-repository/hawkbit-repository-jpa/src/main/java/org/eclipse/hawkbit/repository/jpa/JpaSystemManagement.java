@@ -315,6 +315,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
         // make sure the module types get their IDs
         entityManager.flush();
+
         distributionSetTypeRepository
                 .save(new JpaDistributionSetType(org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_KEY,
                         org.eclipse.hawkbit.repository.Constants.DST_DEFAULT_OS_ONLY_NAME,

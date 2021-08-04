@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.repository.jpa.model;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -21,6 +29,11 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * A target type defines which distribution set types can or have to be
+ * {@link Target}.
+ *
+ */
 @Entity
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
@@ -40,15 +53,33 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
             @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type"))})
     private Set<DistributionSetType> distributionSetTypes;
 
+    /**
+     * Constructor
+     */
     public JpaTargetType() {
         // default public constructor for JPA
     }
 
+    /**
+     * Constructor
+     *
+     * @param name
+     *          Type name
+     * @param description
+     *          Description
+     * @param colour
+     *          Colour
+     */
     public JpaTargetType(String name, String description, String colour) {
         super(name,description);
         this.colour = colour;
     }
 
+    /**
+     * @param dsSetType
+     *          Distribution set type
+     * @return Target type
+     */
     public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
         if (distributionSetTypes == null) {
             distributionSetTypes = new HashSet<>();
@@ -58,6 +89,11 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
         return this;
     }
 
+    /**
+     * @param dsTypeId
+     *          Distribution set type ID
+     * @return Target type
+     */
     public JpaTargetType removeDistributionSetType(final Long dsTypeId) {
         if (distributionSetTypes == null) {
             return this;

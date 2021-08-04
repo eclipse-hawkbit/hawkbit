@@ -29,6 +29,12 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     final private TargetTypeManagement targetTypeManagement;
 
+    /**
+     * Constructor
+     *
+     * @param targetTypeManagement
+     *          Target type management
+     */
     JpaTargetCreate(TargetTypeManagement targetTypeManagement) {
         super(null);
         this.targetTypeManagement = targetTypeManagement;
@@ -40,6 +46,9 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         return this;
     }
 
+    /**
+     * @return Target type ID
+     */
     public Long getTargetTypeId() {
         return targetTypeId;
     }

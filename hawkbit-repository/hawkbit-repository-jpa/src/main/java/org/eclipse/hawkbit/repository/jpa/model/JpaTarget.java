@@ -51,7 +51,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -207,10 +206,16 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                 : controllerId;
     }
 
+    /**
+     * Constructor
+     */
     public JpaTarget() {
         // empty constructor for JPA.
     }
 
+    /**
+     * @return assigned distribution set
+     */
     public DistributionSet getAssignedDistributionSet() {
         return assignedDistributionSet;
     }
@@ -220,6 +225,9 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return controllerId;
     }
 
+    /**
+     * @return tags
+     */
     public Set<TargetTag> getTags() {
         if (tags == null) {
             return Collections.emptySet();
@@ -228,6 +236,9 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return Collections.unmodifiableSet(tags);
     }
 
+    /**
+     * @return rollouts target group
+     */
     public List<RolloutTargetGroup> getRolloutTargetGroup() {
         if (rolloutTargetGroup == null) {
             return Collections.emptyList();
@@ -236,6 +247,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
+    /**
+     * @param tag
+     *          tag
+     * @return boolean true or false
+     */
     public boolean addTag(final TargetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
@@ -244,6 +260,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return tags.add(tag);
     }
 
+    /**
+     * @param tag
+     *          tag
+     * @return boolean true or false
+     */
     public boolean removeTag(final TargetTag tag) {
         if (tags == null) {
             return false;
@@ -252,14 +273,25 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return tags.remove(tag);
     }
 
+    /**
+     * @param assignedDistributionSet
+     *          Distribution set
+     */
     public void setAssignedDistributionSet(final DistributionSet assignedDistributionSet) {
         this.assignedDistributionSet = (JpaDistributionSet) assignedDistributionSet;
     }
 
+    /**
+     * @param controllerId
+     *          Controller ID
+     */
     public void setControllerId(final String controllerId) {
         this.controllerId = controllerId;
     }
 
+    /**
+     * @return list of action
+     */
     public List<Action> getActions() {
         if (actions == null) {
             return Collections.emptyList();
@@ -268,6 +300,11 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return Collections.unmodifiableList(actions);
     }
 
+    /**
+     * @param action
+     *          Action
+     * @return boolean true or false
+     */
     public boolean addAction(final Action action) {
         if (actions == null) {
             actions = new ArrayList<>();
@@ -291,6 +328,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return null;
     }
 
+    /**
+     * @param securityToken
+     *          token value
+     */
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
     }
@@ -359,14 +400,24 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return type;
     }
 
+    /**
+     * @param type
+     *          Target type
+     */
     public void setType(final TargetType type) {
         this.type = type;
     }
 
+    /**
+     * @return Distribution set
+     */
     public JpaDistributionSet getInstalledDistributionSet() {
         return installedDistributionSet;
     }
 
+    /**
+     * @return controller attributes
+     */
     public Map<String, String> getControllerAttributes() {
         return controllerAttributes;
     }
@@ -376,6 +427,9 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         return requestControllerAttributes;
     }
 
+    /**
+     * @return target metadata
+     */
     public List<TargetMetadata> getMetadata() {
         if (metadata == null) {
             return Collections.emptyList();
@@ -390,26 +444,50 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
                 + "]";
     }
 
+    /**
+     * @param address
+     *          Address
+     */
     public void setAddress(final String address) {
         this.address = address;
     }
 
+    /**
+     * @param lastTargetQuery
+     *          last query ID
+     */
     public void setLastTargetQuery(final Long lastTargetQuery) {
         this.lastTargetQuery = lastTargetQuery;
     }
 
+    /**
+     * @param installationDate
+     *          installation date
+     */
     public void setInstallationDate(final Long installationDate) {
         this.installationDate = installationDate;
     }
 
+    /**
+     * @param installedDistributionSet
+     *          Distribution set
+     */
     public void setInstalledDistributionSet(final JpaDistributionSet installedDistributionSet) {
         this.installedDistributionSet = installedDistributionSet;
     }
 
+    /**
+     * @param updateStatus
+     *          Status
+     */
     public void setUpdateStatus(final TargetUpdateStatus updateStatus) {
         this.updateStatus = updateStatus;
     }
 
+    /**
+     * @param requestControllerAttributes
+     *          Attributes
+     */
     public void setRequestControllerAttributes(final boolean requestControllerAttributes) {
         this.requestControllerAttributes = requestControllerAttributes;
     }

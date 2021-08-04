@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Builder implementation for {@link Target}.
@@ -20,6 +21,10 @@ import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 public class JpaTargetBuilder implements TargetBuilder {
     final private TargetTypeManagement targetTypeManagement;
 
+    /**
+     * @param targetTypeManagement
+     *          Target type management
+     */
     public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
         this.targetTypeManagement = targetTypeManagement;
     }

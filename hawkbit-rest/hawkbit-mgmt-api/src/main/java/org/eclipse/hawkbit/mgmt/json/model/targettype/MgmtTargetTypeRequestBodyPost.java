@@ -8,14 +8,17 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targettype;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Request Body for TargetType POST.
  *
  */
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut{
 
+    /**
+     * @param name
+     *          the name to set
+     * @return  post request body
+     */
     public MgmtTargetTypeRequestBodyPost setName(final String name) {
         super.setName(name);
         return this;
