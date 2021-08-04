@@ -9,14 +9,25 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
+import org.eclipse.hawkbit.repository.model.TargetType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * {@link PagingAndSortingRepository} for {@link JpaTargetType}.
@@ -27,6 +38,119 @@ public interface TargetTypeRepository
         extends BaseEntityRepository<JpaTargetType, Long>, JpaSpecificationExecutor<JpaTargetType> {
 
     /**
+     * Finds {@link TargetType} in the repository matching an id.
+     *
+     * Calls version based on spec to allow injecting further specs
+     *
+     * @param id id to filter for
+     * @return {@link Optional} of {@link TargetType}
+     */
+    @Override
+    @NonNull
+    default Optional<JpaTargetType> findById(@NonNull Long id) {
+        return this.findOne(Specification.where(TargetTypeSpecification.hasId(id)));
+    }
+
+    /**
+     * @param ids
+     *          List of ID
+     * @return Target type list
+     */
+    @Override
+    @NonNull
+    default List<JpaTargetType> findAllById(Iterable<Long> ids) {
+        final List<Long> collectedIds = StreamSupport.stream(ids.spliterator(), true).collect(Collectors.toList());
+        return this.findAll(Specification.where(TargetTypeSpecification.hasIdIn(collectedIds)));
+    }
+
+    /**
+     * Deletes the {@link TargetType}s with the given target IDs.
+     *
+     * @param targetTypeIDs
+     *            to be deleted
+     */
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM JpaTargetType t WHERE t.id IN ?1")
+    void deleteByIdIn(Collection<Long> targetTypeIDs);
+
+    /**
+     * Finds all {@link TargetType}s in the repository.
+     *
+     * Calls version with (empty) spec to allow injecting further specs
+     *
+     * @return {@link List} of {@link TargetType}s
+     */
+    @Override
+    @NonNull
+    default List<JpaTargetType> findAll() {
+        return this.findAll(Specification.where(null));
+    }
+
+    /**
+     * Finds all {@link TargetType}s in the repository sorted.
+     *
+     * Calls version with (empty) spec to allow injecting further specs
+     *
+     * @param sort instructions to sort result by
+     * @return {@link List} of {@link TargetType}s
+     */
+    @Override
+    @NonNull
+    default Iterable<JpaTargetType> findAll(@NonNull Sort sort) {
+        return this.findAll(Specification.where(null), sort);
+    }
+
+    /**
+     * Finds a page of {@link TargetType}s in the repository.
+     *
+     * Calls version with (empty) spec to allow injecting further specs
+     *
+     * @param pageable paging context
+     * @return {@link List} of {@link TargetType}s
+     */
+    @Override
+    @NonNull
+    default Page<JpaTargetType> findAll(@NonNull Pageable pageable) {
+        return this.findAll(Specification.where(null), pageable);
+    }
+
+    /**
+     * Checks whether {@link TargetType} in the repository matching an id exists or not.
+     *
+     * Calls version based on spec to allow injecting further specs
+     *
+     * @param id id to check for
+     * @return true if TargetType with id exists
+     */
+    @Override
+    default boolean existsById(@NonNull Long id) {
+        return this.exists(TargetTypeSpecification.hasId(id));
+    }
+
+    /**
+     * Checks whether {@link TargetType} in the repository matching a spec exists or not.
+     *
+     * @param spec to check for existence
+     * @return true if target with id exists
+     */
+    default boolean exists(@NonNull Specification<JpaTargetType> spec) {
+        return this.count(spec) > 0;
+    }
+
+    /**
+     * Count number of {@link TargetType}s in the repository.
+     *
+     * Calls version with an empty spec to allow injecting further specs
+     *
+     * @return number of targetTypes in the repository
+     */
+    @Override
+    default long count() {
+        return this.count(Specification.where(null));
+    }
+
+    /**
      * @param tenant
      *          Tenant
      */
@@ -34,14 +158,5 @@ public interface TargetTypeRepository
     @Transactional
     @Query("DELETE FROM JpaTargetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
-    /**
-     * @param ids
-     *          List of ID
-     * @return Taget type list
-     */
-    @Override
-    @Query("SELECT d FROM JpaTargetType d WHERE d.id IN ?1")
-    List<JpaTargetType> findAllById(Iterable<Long> ids);
 
 }
