@@ -69,6 +69,64 @@ public final class TargetSpecifications {
     }
 
     /**
+     * {@link Specification} for retrieving {@link Target}s by controllerId
+     *
+     * @param controllerID
+     *            to search for
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasControllerId(final String controllerID) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerID);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by controllerId
+     *
+     * @param controllerIDs
+     *            to search for
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasControllerIdIn(final Collection<String> controllerIDs) {
+        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.controllerId).in(controllerIDs);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by controllerId
+     *
+     * @param id
+     *            to search for
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasId(final Long id) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.id), id);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by controllerId
+     *
+     * @param ids
+     *            to search for
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasIdIn(final Collection<Long> ids) {
+        return (targetRoot, query, cb) -> targetRoot.get(JpaTarget_.id).in(ids);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that have the request
+     * controller attributes flag set
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasRequestControllerAttributesTrue() {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.requestControllerAttributes), true);
+    }
+
+    /**
      * {@link Specification} for retrieving {@link JpaTarget}s including
      * {@link JpaTarget#getAssignedDistributionSet()}.
      *
@@ -87,7 +145,7 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "equal to given
+     * {@link Specification} for retrieving {@link Target}s by "equal to any given
      * {@link TargetUpdateStatus}".
      *
      * @param updateStatus
@@ -100,8 +158,21 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "not equal to
-     * given {@link TargetUpdateStatus}".
+     * {@link Specification} for retrieving {@link Target}s by "equal to given
+     * {@link TargetUpdateStatus}".
+     *
+     * @param updateStatus
+     *            to be filtered on
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.updateStatus), updateStatus);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by "not equal to given
+     * {@link TargetUpdateStatus}".
      *
      * @param updateStatus
      *            to be filtered on
@@ -189,11 +260,7 @@ public final class TargetSpecifications {
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasInstalledOrAssignedDistributionSet(@NotNull final Long distributionId) {
-        return (targetRoot, query, cb) -> cb.or(
-                cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
-                        distributionId),
-                cb.equal(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
-                        .get(JpaDistributionSet_.id), distributionId));
+        return hasInstalledDistributionSet(distributionId).or(hasAssignedDistributionSet(distributionId));
     }
 
     /**
@@ -212,6 +279,22 @@ public final class TargetSpecifications {
                 cb.or(cb.notEqual(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet)
                         .get(JpaDistributionSet_.id), distributionId),
                         cb.isNull(targetRoot.<JpaDistributionSet> get(JpaTarget_.assignedDistributionSet))));
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s based on a
+     * {@link TargetTag} name.
+     *
+     * @param tagName
+     *            to search for
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTagName(final String tagName) {
+        return (targetRoot, query, cb) -> {
+            final SetJoin<JpaTarget, JpaTargetTag> join = targetRoot.join(JpaTarget_.tags);
+            return cb.equal(join.get(JpaTargetTag_.name), tagName);
+        };
     }
 
     /**
@@ -290,6 +373,37 @@ public final class TargetSpecifications {
     }
 
     /**
+     * {@link Specification} for retrieving {@link Target}s that are in a given
+     * {@link RolloutGroup}
+     *
+     * @param group
+     *            the {@link RolloutGroup}
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isInRolloutGroup(final Long group) {
+        return (targetRoot, query, cb) -> {
+            final ListJoin<JpaTarget, RolloutTargetGroup> targetGroupJoin = targetRoot
+                    .join(JpaTarget_.rolloutTargetGroup);
+            return cb.equal(targetGroupJoin.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), group);
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are in an action
+     * for a given {@link RolloutGroup}
+     *
+     * @param group
+     *            the {@link RolloutGroup}
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isInActionRolloutGroup(final Long group) {
+        return (targetRoot, query, cb) -> {
+            final ListJoin<JpaTarget, JpaAction> targetActionJoin = targetRoot.join(JpaTarget_.actions);
+            return cb.equal(targetActionJoin.get(JpaAction_.rolloutGroup).get(JpaRolloutGroup_.id), group);
+        };
+    }
+
+    /**
      * {@link Specification} for retrieving {@link Target}s that are not in the
      * given {@link RolloutGroup}s
      *
@@ -347,7 +461,7 @@ public final class TargetSpecifications {
      * {@link Specification} for retrieving {@link Target}s by tag.
      *
      * @param tagId
-     *            the ID of the distribution set which must be assigned
+     *            the ID of the tag that should be to be assigned to target
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTag(final Long tagId) {

@@ -108,8 +108,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TargetTagRepository targetTagRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
@@ -125,7 +123,7 @@ public class JpaTargetManagement implements TargetManagement {
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final TargetTagRepository targetTagRepository,
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
@@ -137,7 +135,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.distributionSetRepository = distributionSetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.afterCommit = afterCommit;
@@ -147,11 +144,11 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Optional<Target> getByControllerID(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId);
+        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId)).map(Target.class::cast);
     }
 
     private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
-        return targetRepository.findByControllerId(controllerId).map(JpaTarget.class::cast)
+        return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
@@ -300,7 +297,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findAll(final Pageable pageable) {
-        return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
+        return convertPage(targetRepository.findAllWithoutCount(pageable), pageable);
     }
 
     @Override
@@ -345,7 +342,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> targetIDs) {
-        final List<JpaTarget> targets = targetRepository.findAllById(targetIDs);
+        final List<JpaTarget> targets = targetRepository.findAll(TargetSpecifications.hasIdIn(targetIDs));
 
         if (targets.size() < targetIDs.size()) {
             throw new EntityNotFoundException(Target.class, targetIDs,
@@ -376,7 +373,9 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
-        return targetRepository.findByAssignedDistributionSetId(pageReq, distributionSetID);
+        return convertPage(
+                targetRepository.findAll(TargetSpecifications.hasAssignedDistributionSet(distributionSetID), pageReq),
+                pageReq);
     }
 
     @Override
@@ -402,7 +401,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
     }
 
-    private static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
+    public static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
 
@@ -413,7 +412,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetID) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
-        return targetRepository.findByInstalledDistributionSetId(pageReq, distributionSetID);
+        return convertPage(
+                targetRepository.findAll(TargetSpecifications.hasInstalledDistributionSet(distributionSetID), pageReq),
+                pageReq);
     }
 
     @Override
@@ -435,7 +436,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
-        return targetRepository.findByUpdateStatus(pageable, status);
+        return convertPage(targetRepository.findAll(TargetSpecifications.hasTargetUpdateStatus(status), pageable),
+                pageable);
     }
 
     @Override
@@ -488,10 +490,10 @@ public class JpaTargetManagement implements TargetManagement {
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
         if (CollectionUtils.isEmpty(specList)) {
-            return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
+            return convertPage(targetRepository.findAllWithoutCount(pageable), pageable);
         }
         return convertPage(
-                criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, JpaTarget.class),
+                targetRepository.findAllWithoutCount(SpecificationsBuilder.combineWithAnd(specList), pageable),
                 pageable);
     }
 
@@ -518,8 +520,8 @@ public class JpaTargetManagement implements TargetManagement {
                     allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
         }
 
-        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findByTagNameAndControllerIdIn(tagName,
-                controllerIds);
+        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
+                TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
@@ -636,21 +638,21 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByAssignedDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.countByAssignedDistributionSetId(distId);
+        return targetRepository.count(TargetSpecifications.hasAssignedDistributionSet(distId));
     }
 
     @Override
     public long countByInstalledDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.countByInstalledDistributionSetId(distId);
+        return targetRepository.count(TargetSpecifications.hasInstalledDistributionSet(distId));
     }
 
     @Override
     public boolean existsByInstalledOrAssignedDistributionSet(final long distId) {
         throwEntityNotFoundIfDsDoesNotExist(distId);
 
-        return targetRepository.existsByInstalledOrAssignedDistributionSet(distId);
+        return targetRepository.exists(TargetSpecifications.hasInstalledOrAssignedDistributionSet(distId));
     }
 
     @Override
@@ -736,7 +738,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByTag(final Pageable pageable, final long tagId) {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        return convertPage(targetRepository.findByTag(pageable, tagId), pageable);
+        return convertPage(targetRepository.findAll(TargetSpecifications.hasTag(tagId), pageable), pageable);
     }
 
     private void throwEntityNotFoundExceptionIfTagDoesNotExist(final Long tagId) {
@@ -785,7 +787,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<Target> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(targetRepository.findAllById(ids));
+        return Collections.unmodifiableList(targetRepository.findAll(TargetSpecifications.hasIdIn(ids)));
     }
 
     @Override
@@ -827,12 +829,13 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public boolean existsByControllerId(final String controllerId) {
-        return targetRepository.existsByControllerId(controllerId);
+        return targetRepository.exists(TargetSpecifications.hasControllerId(controllerId));
     }
 
     @Override
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
-        return targetRepository.findByRequestControllerAttributesIsTrue(pageReq);
+        return convertPage(targetRepository.findAll(TargetSpecifications.hasRequestControllerAttributesTrue(), pageReq),
+                pageReq);
     }
 
 }
