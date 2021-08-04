@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
-        extends PagingAndSortingRepository<T, I> {
+        extends PagingAndSortingRepository<T, I>, NoCountSliceRepository<T> {
 
     /**
      * Retrieves an {@link BaseEntity} by its id.

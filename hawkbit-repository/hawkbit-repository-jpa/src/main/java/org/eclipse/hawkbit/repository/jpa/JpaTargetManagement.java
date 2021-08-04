@@ -108,8 +108,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TargetTagRepository targetTagRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
@@ -125,7 +123,7 @@ public class JpaTargetManagement implements TargetManagement {
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final TargetTagRepository targetTagRepository,
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
@@ -137,7 +135,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.distributionSetRepository = distributionSetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.afterCommit = afterCommit;
@@ -300,7 +297,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Slice<Target> findAll(final Pageable pageable) {
-        return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
+        return convertPage(targetRepository.findAllWithoutCount(pageable), pageable);
     }
 
     @Override
@@ -488,10 +485,10 @@ public class JpaTargetManagement implements TargetManagement {
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
         if (CollectionUtils.isEmpty(specList)) {
-            return convertPage(criteriaNoCountDao.findAll(pageable, JpaTarget.class), pageable);
+            return convertPage(targetRepository.findAllWithoutCount(pageable), pageable);
         }
         return convertPage(
-                criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable, JpaTarget.class),
+                targetRepository.findAllWithoutCount(SpecificationsBuilder.combineWithAnd(specList), pageable),
                 pageable);
     }
 

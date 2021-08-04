@@ -68,7 +68,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
     private final Database database;
 
     private final QuotaManagement quotaManagement;
@@ -76,13 +75,12 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final NoCountPagingRepository criteriaNoCountDao,
-            final Database database, final QuotaManagement quotaManagement) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
+            final QuotaManagement quotaManagement) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.database = database;
         this.quotaManagement = quotaManagement;
     }
@@ -234,8 +232,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
-        return convertPage(criteriaNoCountDao.findAll(DistributionSetTypeSpecification.isDeleted(false), pageable,
-                JpaDistributionSetType.class), pageable);
+        return convertPage(distributionSetTypeRepository
+                .findAllWithoutCount(DistributionSetTypeSpecification.isDeleted(false), pageable), pageable);
     }
 
     @Override
