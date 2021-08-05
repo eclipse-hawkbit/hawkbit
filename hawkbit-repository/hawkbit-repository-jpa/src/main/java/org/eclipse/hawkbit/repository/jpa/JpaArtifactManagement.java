@@ -43,7 +43,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -105,20 +104,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         assertArtifactQuota(moduleId, 1);
 
-        return getOrCreateArtifact(artifactUpload)
-                .map(artifact -> storeArtifactMetadata(softwareModule, filename, artifact, existing)).orElse(null);
-    }
-
-    private Optional<AbstractDbArtifact> getOrCreateArtifact(final ArtifactUpload artifactUpload) {
-        final String providedSha1Sum = artifactUpload.getProvidedSha1Sum();
-
-        if (!StringUtils.isEmpty(providedSha1Sum)
-                && artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(), providedSha1Sum)) {
-            return Optional
-                    .ofNullable(artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), providedSha1Sum));
-        }
-
-        return Optional.of(storeArtifact(artifactUpload));
+        final AbstractDbArtifact artifact = storeArtifact(artifactUpload);
+        return storeArtifactMetadata(softwareModule, filename, artifact, existing);
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
