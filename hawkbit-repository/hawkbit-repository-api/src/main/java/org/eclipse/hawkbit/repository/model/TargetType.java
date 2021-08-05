@@ -15,7 +15,11 @@ import java.util.Set;
  * {@link Target}
  *
  */
-public interface TargetType extends Type{
+public interface TargetType extends NamedEntity {
+    /**
+     * Maximum length of color in Management UI.
+     */
+    int COLOUR_MAX_SIZE = 16;
 
     /**
      * @return immutable set of optional {@link DistributionSetType}s
@@ -48,10 +52,14 @@ public interface TargetType extends Type{
     }
 
     /**
-     * @param target
-     *            to check for completeness
-     * @return <code>true</code> if the all mandatory target types are
-     *         in the system.
+     * Unassigns a distribution set type from target types
+     * @param dsTypeId
+     * @return the resulting target type
      */
-    boolean checkComplete(Target target);
+    TargetType removeDistributionSetType(final Long dsTypeId);
+
+    /**
+     * @return get color code to be used in management UI views.
+     */
+    String getColour();
 }

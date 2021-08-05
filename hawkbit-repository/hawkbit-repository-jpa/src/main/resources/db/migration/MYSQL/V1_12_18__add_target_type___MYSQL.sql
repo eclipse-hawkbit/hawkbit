@@ -32,7 +32,7 @@ alter table sp_target
     add constraint fk_target_relation_target_type
         foreign key (target_type)
             references sp_target_type (id)
-            on delete cascade;
+            on delete set null;
 
 alter table sp_target_type_ds_type_relation
     add constraint fk_target_type_relation_target_type

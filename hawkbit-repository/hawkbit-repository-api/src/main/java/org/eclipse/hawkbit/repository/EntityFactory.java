@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.MetaData;
 
@@ -108,6 +109,11 @@ public interface EntityFactory {
      * @return {@link TargetBuilder} object
      */
     TargetBuilder target();
+
+    /**
+     * @return {@link TargetTypeBuilder} object
+     */
+    TargetTypeBuilder targetType();
 
     /**
      * @return {@link TargetFilterQueryBuilder} object

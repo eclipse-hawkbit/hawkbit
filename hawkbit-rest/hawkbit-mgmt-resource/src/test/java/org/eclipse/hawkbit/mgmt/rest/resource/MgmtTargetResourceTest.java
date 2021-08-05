@@ -56,6 +56,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -105,6 +106,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
     private static final String JSON_PATH_FIELD_LAST_REQUEST_AT = ".lastControllerRequestAt";
+    private static final String JSON_PATH_FIELD_TYPE = ".targetTypeId";
 
     // target
     // $.field
@@ -117,6 +119,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
+    private static final String JSON_PATH_TYPE = JSON_PATH_ROOT + JSON_PATH_FIELD_TYPE;
 
     @Autowired
     private JpaProperties jpaProperties;
@@ -2073,6 +2076,75 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.rollout", equalTo(rollout.getId().intValue())))
                 .andExpect(jsonPath("$.rolloutName", equalTo(rollout.getName()))).andExpect(jsonPath(
                         "$._links.rollout.href", containsString("/rest/v1/rollouts/" + rollout.getId().intValue())));
+    }
+
+    @Test
+    @Description("Ensures that a post request for creating targets with target type works.")
+    public void createTargetsWithTargetType() throws Exception {
+        final TargetType type1 = testdataFactory.createTargetType("typeWithDs", Collections.singletonList(standardDsType));
+        final TargetType type2 = testdataFactory.createTargetType("typeWithOutDs", Collections.singletonList(standardDsType));
+
+        final Target test1 = entityFactory.target().create().controllerId("id1").name("targetWithoutType")
+                .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
+        final Target test2 = entityFactory.target().create().controllerId("id2").name("targetOfType1")
+                .type(type1.getId()).description("testid2").build();
+        final Target test3 = entityFactory.target().create().controllerId("id3").name("targetOfType2")
+                .type(type2.getId()).description("testid3").build();
+        final String hrefType1 = "http://localhost/rest/v1/targettypes/" + type1.getId();
+
+        final List<Target> targets = Arrays.asList(test1, test2, test3);
+
+        final MvcResult mvcPostResult = mvc
+                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("[0].name", equalTo("targetWithoutType")))
+                .andExpect(jsonPath("[0].controllerId", equalTo("id1")))
+                .andExpect(jsonPath("[0].description", equalTo("testid1")))
+                .andExpect(jsonPath("[0].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[0].securityToken", equalTo("token")))
+                .andExpect(jsonPath("[0].address", equalTo("amqp://test123/foobar")))
+                .andExpect(jsonPath("[0].targetTypeId").doesNotExist())
+                .andExpect(jsonPath("[1].name", equalTo("targetOfType1")))
+                .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[1].controllerId", equalTo("id2")))
+                .andExpect(jsonPath("[1].description", equalTo("testid2")))
+                .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[1].targetTypeId", equalTo(type1.getId().intValue())))
+                .andExpect(jsonPath("[2].name", equalTo("targetOfType2")))
+                .andExpect(jsonPath("[2].controllerId", equalTo("id3")))
+                .andExpect(jsonPath("[2].description", equalTo("testid3")))
+                .andExpect(jsonPath("[2].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[2].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[2].targetTypeId", equalTo(type2.getId().intValue())))
+                .andReturn();
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + test2.getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath(JSON_PATH_NAME, equalTo("targetOfType1")))
+                .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo("id2")))
+                .andExpect(jsonPath(JSON_PATH_TYPE, equalTo(type1.getId().intValue())))
+                .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo("testid2")))
+                .andExpect(jsonPath("$._links.type.href", equalTo(hrefType1))).andReturn();
+
+        assertThat(targetManagement.getByControllerID("id1")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id1").get().getName()).isEqualTo("targetWithoutType");
+        assertThat(targetManagement.getByControllerID("id1").get().getDescription()).isEqualTo("testid1");
+        assertThat(targetManagement.getByControllerID("id1").get().getType()).isNull();
+        assertThat(targetManagement.getByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
+        assertThat(targetManagement.getByControllerID("id1").get().getAddress().toString())
+                .isEqualTo("amqp://test123/foobar");
+        assertThat(targetManagement.getByControllerID("id2")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id2").get().getName()).isEqualTo("targetOfType1");
+        assertThat(targetManagement.getByControllerID("id2").get().getDescription()).isEqualTo("testid2");
+        assertThat(targetManagement.getByControllerID("id2").get().getType().getName()).isEqualTo("typeWithDs");
+        assertThat(targetManagement.getByControllerID("id3")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id3").get().getName()).isEqualTo("targetOfType2");
+        assertThat(targetManagement.getByControllerID("id3").get().getDescription()).isEqualTo("testid3");
+        assertThat(targetManagement.getByControllerID("id3").get().getType().getName()).isEqualTo("typeWithOutDs");
     }
 
 }

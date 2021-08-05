@@ -106,4 +106,9 @@ public interface QuotaManagement {
      */
     long getMaxArtifactStorage();
 
+    /**
+     * @return the maximum number of distribution set types per target type
+     */
+    int getMaxDistributionSetTypesPerTargetType();
+
 }

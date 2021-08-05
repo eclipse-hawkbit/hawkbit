@@ -25,6 +25,9 @@ public class MgmtTargetType extends MgmtNamedEntity {
     @JsonProperty(value = "id", required = true)
     private Long typeId;
 
+    @JsonProperty
+    private String colour;
+
     /**
      * @return target type ID
      */
@@ -40,4 +43,19 @@ public class MgmtTargetType extends MgmtNamedEntity {
         this.typeId = typeId;
     }
 
+    /**
+     * 
+     * @return the color in format #000000
+     */
+    public String getColour() {
+        return colour;
+    }
+
+    /**
+     * @param colour
+     *            in format #000000
+     */
+    public void setColour(String colour) {
+        this.colour = colour;
+    }
 }

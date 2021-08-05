@@ -27,7 +27,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     private Long targetTypeId;
 
-    final private TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement targetTypeManagement;
 
     /**
      * Constructor

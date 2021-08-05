@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -66,6 +67,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private final DistributionSetRepository distributionSetRepository;
 
+    private final TargetTypeRepository targetTypeRepository;
+
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final Database database;
@@ -74,12 +77,13 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
-            final DistributionSetRepository distributionSetRepository,
+            final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final QuotaManagement quotaManagement) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
+        this.targetTypeRepository = targetTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
         this.quotaManagement = quotaManagement;
@@ -190,7 +194,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     /**
-     * Enforces the quota specifiying the maximum number of
+     * Enforces the quota specifying the maximum number of
      * {@link SoftwareModuleType}s per {@link DistributionSetType}.
      * 
      * @param id
@@ -268,16 +272,26 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long typeId) {
-
         final JpaDistributionSetType toDelete = distributionSetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
+
+        unassignDsTypeFromTargetTypes(typeId);
 
         if (distributionSetRepository.countByTypeId(typeId) > 0) {
             toDelete.setDeleted(true);
             distributionSetTypeRepository.save(toDelete);
-        } else {
+        }
+        else {
             distributionSetTypeRepository.deleteById(typeId);
         }
+    }
+
+    private void unassignDsTypeFromTargetTypes(long typeId) {
+        List<JpaTargetType> targetTypesByDsType = targetTypeRepository.findByDsType(typeId);
+        targetTypesByDsType.forEach(targetType -> {
+            targetType.removeDistributionSetType(typeId);
+            targetTypeRepository.save(targetType);
+        });
     }
 
     @Override

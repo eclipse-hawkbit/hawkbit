@@ -159,4 +159,26 @@ public interface TargetTypeRepository
     @Query("DELETE FROM JpaTargetType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
 
+    @Query(value = "SELECT COUNT (t.id) FROM JpaDistributionSetType t JOIN t.compatibleToTargetTypes tt WHERE tt.id = :id")
+    long countDsSetTypesById(@Param("id") Long id);
+
+    /**
+     *
+     * @param dsTypeId
+     *            to search for
+     * @return all {@link TargetType}s in the repository with given
+     *         {@link TargetType#getName()}
+     */
+    default List<JpaTargetType> findByDsType(@Param("id") Long dsTypeId) {
+        return this.findAll(Specification.where(TargetTypeSpecification.hasDsSetType(dsTypeId)));
+    }
+
+    /**
+     *
+     * @param name
+     *            to search for
+     * @return all {@link TargetType}s in the repository with given
+     *         {@link TargetType#getName()}
+     */
+    Optional<TargetType> findByName(String name);
 }

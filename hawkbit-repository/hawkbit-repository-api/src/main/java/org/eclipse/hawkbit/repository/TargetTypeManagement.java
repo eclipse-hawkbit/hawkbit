@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.validation.Valid;
@@ -71,7 +72,7 @@ public interface TargetTypeManagement {
      * @return TargetType page
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findAll(@NotNull Pageable pageable);
+    Slice<TargetType> findAll(@NotNull Pageable pageable);
 
 
     /**
@@ -130,8 +131,8 @@ public interface TargetTypeManagement {
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    TargetType assignDistributionSetTypes(long targetTypeId,
-                                                           @NotEmpty Collection<Long> distributionSetTypeIds);
+    TargetType assignCompatibleDistributionSetTypes(long targetTypeId,
+                                                    @NotEmpty Collection<Long> distributionSetTypeIds);
 
     /**
      * @param targetTypeId

@@ -21,19 +21,15 @@ import org.eclipse.hawkbit.repository.model.TargetType;
  *
  */
 public class JpaTargetTypeBuilder implements TargetTypeBuilder {
-    private final TargetTypeManagement targetTypeManagement;
     private final DistributionSetTypeManagement distributionSetTypeManagement;
 
     /**
      * Constructor
      *
-     * @param targetTypeManagement
-     *          Target type management
      * @param distributionSetTypeManagement
      *          Distribution set type management
      */
-    public JpaTargetTypeBuilder(TargetTypeManagement targetTypeManagement, DistributionSetTypeManagement distributionSetTypeManagement) {
-        this.targetTypeManagement = targetTypeManagement;
+    public JpaTargetTypeBuilder(DistributionSetTypeManagement distributionSetTypeManagement) {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
     }
 

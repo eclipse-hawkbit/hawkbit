@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -66,6 +67,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
@@ -88,6 +90,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
@@ -121,7 +124,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
 import org.springframework.orm.jpa.vendor.EclipseLinkJpaVendorAdapter;
 import org.springframework.retry.annotation.EnableRetry;
@@ -238,6 +240,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     TargetBuilder targetBuilder(final TargetTypeManagement targetTypeManagement){
         return new JpaTargetBuilder(targetTypeManagement);
+    }
+
+    /**
+     * @param dsTypeManagement
+     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @return TargetTypeBuilder bean
+     */
+    @Bean
+    TargetTypeBuilder targetTypeBuilder(final DistributionSetTypeManagement dsTypeManagement) {
+        return new JpaTargetTypeBuilder(dsTypeManagement);
     }
 
     @Bean
@@ -474,18 +486,26 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
+            final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
             final QuotaManagement quotaManagement) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
+                distributionSetRepository, targetTypeRepository, virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
     }
 
+    /**
+     * {@link JpaTargetTypeManagement} bean.
+     *
+     * @return a new {@link TargetTypeManagement}
+     */
     @Bean
     @ConditionalOnMissingBean
     TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
-                                              final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
-                                              final JpaProperties properties){
-        return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, virtualPropertyReplacer, properties.getDatabase());
+            final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final QuotaManagement quotaManagement) {
+        return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository,
+                virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
     }
 
     /**

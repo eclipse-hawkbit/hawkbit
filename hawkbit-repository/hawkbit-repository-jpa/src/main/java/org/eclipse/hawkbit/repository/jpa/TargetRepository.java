@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
@@ -199,6 +200,15 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     default long count() {
         return this.count(Specification.where(null));
     }
+
+    /**
+     * Counts {@link TargetType} instances of given type in the repository.
+     *
+     * @param typeId
+     *            to search for
+     * @return number of found {@link Target}s
+     */
+    long countByTypeId(Long typeId);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

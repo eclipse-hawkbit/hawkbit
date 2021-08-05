@@ -100,6 +100,13 @@ public final class MgmtRestConstants {
     public static final String TARGET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettags";
 
     /**
+     * The target type URL mapping rest resource.
+     */
+    public static final String TARGETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettypes";
+
+    public static final String TARGETTYPE_V1_DS_TYPES = "compatibledistributionsettypes";
+
+    /**
      * The tag URL mapping rest resource.
      * 
      * @deprecated {@link #TARGET_TAG_TARGETS_REQUEST_MAPPING} is preferred as

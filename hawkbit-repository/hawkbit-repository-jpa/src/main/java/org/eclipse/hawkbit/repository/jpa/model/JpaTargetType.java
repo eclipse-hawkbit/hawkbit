@@ -98,7 +98,8 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
         if (distributionSetTypes == null) {
             return this;
         }
-        distributionSetTypes.remove(dsTypeId);
+        distributionSetTypes.stream().filter(element -> element.getId().equals(dsTypeId)).findAny()
+                .ifPresent(distributionSetTypes::remove);
         return this;
     }
 
@@ -113,23 +114,12 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     }
 
     @Override
-    public boolean checkComplete(Target target) {
-        return false;
-    }
-
-    @Override
-    public String getKey() {
-        return null;
-    }
-
-    @Override
-    public boolean isDeleted() {
-        return false;
-    }
-
-    @Override
     public String getColour() {
-        return null;
+        return colour;
+    }
+
+    public void setColour(final String colour) {
+        this.colour = colour;
     }
 
     @Override
