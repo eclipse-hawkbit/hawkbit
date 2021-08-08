@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @Feature("Spring Rest Docs Tests - TargetType")
 @Story("TargetTypes Resource")
-class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
+public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Override
     public String getResourceName() {
         return "targettypes";
@@ -55,7 +55,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the GET request of retrieving all target types within Hawkbit. Required Permission: "
             + SpPermission.READ_TARGET)
-    void getTargetTypes() throws Exception {
+    public void getTargetTypes() throws Exception {
         testdataFactory.findOrCreateTargetType("targetType1");
         testdataFactory.createTargetType("targetType2", Collections.singletonList(standardDsType));
 
@@ -82,7 +82,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Description("Handles the GET request of retrieving all target types within Hawkbit with a defined page size and "
             + "offset, sorted by name in descending order and filtered down to all targets which name starts with 'a'. "
             + "Required Permission: " + SpPermission.READ_TARGET)
-    void getTargetTypesWithParameters() throws Exception {
+    public void getTargetTypesWithParameters() throws Exception {
         testdataFactory.findOrCreateTargetType("targetType1");
         testdataFactory.createTargetType("targetType2", Collections.singletonList(standardDsType));
 
@@ -96,7 +96,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the GET request for a single target type within Hawkbit. Required Permission: "
             + SpPermission.READ_TARGET)
-    void getTargetType() throws Exception {
+    public void getTargetType() throws Exception {
         TargetType testType = testdataFactory.createTargetType("TargetType", Collections.singletonList(standardDsType));
 
         mockMvc.perform(get(MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}", testType.getId())
@@ -122,7 +122,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the POST request for creating new target types within Hawkbit. The request body "
             + "must always be a list of types. Required Permission: " + SpPermission.CREATE_TARGET)
-    void postTargetTypes() throws Exception {
+    public void postTargetTypes() throws Exception {
         final List<TargetType> types = new ArrayList<>();
         types.add(entityFactory.targetType().create().name("targetType1").description("targetType1 description")
                 .colour("#ffffff").build());
@@ -155,7 +155,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the GET request of retrieving a single target type within Hawkbit. Required Permission: "
             + SpPermission.DELETE_TARGET)
-    void deleteTargetType() throws Exception {
+    public void deleteTargetType() throws Exception {
         TargetType testType = testdataFactory.createTargetType("TargetType", Collections.singletonList(standardDsType));
 
         mockMvc.perform(delete(MgmtRestConstants.TARGETTYPE_V1_REQUEST_MAPPING + "/{targetTypeId}", testType.getId()))
@@ -167,7 +167,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the PUT request for a single target type within Hawkbit. " + "Required Permission: "
             + SpPermission.UPDATE_TARGET)
-    void putTargetType() throws Exception {
+    public void putTargetType() throws Exception {
         TargetType testType = testdataFactory.createTargetType("targetType", Collections.singletonList(standardDsType));
         final String body = new JSONObject().put("description", "an updated description").put("name", "updatedTypeName")
                 .put("colour", "#aaafff").toString();
@@ -202,7 +202,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the GET request of retrieving the list of compatible distribution set types in that target type. "
             + "Required Permission: " + SpPermission.READ_TARGET + " and " + SpPermission.READ_REPOSITORY)
-    void getCompatibleDistributionSetTypes() throws Exception {
+    public void getCompatibleDistributionSetTypes() throws Exception {
         TargetType testType = testdataFactory.createTargetType("targetType", Collections.singletonList(standardDsType));
 
         mockMvc.perform(
@@ -232,7 +232,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the POST request for adding a compatible distribution set type to a target type."
             + " Required Permission: " + SpPermission.UPDATE_TARGET + " and " + SpPermission.READ_REPOSITORY)
-    void postCompatibleDistributionSetTypes() throws Exception {
+    public void postCompatibleDistributionSetTypes() throws Exception {
         final DistributionSetType dsType1 = distributionSetTypeManagement.create(
                 entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1"));
         final DistributionSetType dsType2 = distributionSetTypeManagement.create(
@@ -255,7 +255,7 @@ class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     @Test
     @Description("Handles the GET request of retrieving the list of compatible distribution set types in that target type. "
             + SpPermission.UPDATE_TARGET + " and " + SpPermission.READ_REPOSITORY)
-    void deleteCompatibleDistributionSetType() throws Exception {
+    public void deleteCompatibleDistributionSetType() throws Exception {
         final DistributionSetType dsType = distributionSetTypeManagement.create(
                 entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1"));
         final TargetType targetType = testdataFactory.createTargetType("targetType", Collections.singletonList(dsType));

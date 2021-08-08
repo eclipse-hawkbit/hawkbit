@@ -24,7 +24,7 @@ import java.util.Collection;
  * Specifications.
  *
  */
-public class TargetTypeSpecification {
+public final class TargetTypeSpecification {
 
     private TargetTypeSpecification() {
         // utility class

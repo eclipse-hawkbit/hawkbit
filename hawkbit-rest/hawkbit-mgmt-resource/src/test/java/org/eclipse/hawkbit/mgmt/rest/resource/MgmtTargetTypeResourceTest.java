@@ -363,7 +363,6 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} DELETE requests.")
     void deletingDsTypeRemovesAssignmentFromTargetType() throws Exception {
         String typeName = "TestTypeRemoveDs";
-        //DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("dsTypeDeleteKey", "dsTypeDeleteName");
         TargetType testType = createTestTargetTypeInDB(typeName, Collections.singletonList(standardDsType));
         assertThat(testType.getCompatibleDistributionSetTypes()).hasSize(1);
         assertThat(distributionSetTypeManagement.getByKey(standardDsType.getKey())).isNotEmpty();

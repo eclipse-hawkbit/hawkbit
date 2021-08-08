@@ -168,7 +168,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
                 .findAllById(distributionSetTypeIds);
 
         if (dsTypes.size() < distributionSetTypeIds.size()) {
-            throw new EntityNotFoundException(DistributionSetType.class, dsTypes,
+            throw new EntityNotFoundException(DistributionSetType.class, distributionSetTypeIds,
                     dsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList()));
         }
 
