@@ -31,8 +31,6 @@ services:
 
   # ---------------------
   # hawkBit simulator
-  # username: admin
-  # password: admin
   # ---------------------
   simulator:
     image: "hawkbit/hawkbit-device-simulator:latest"
