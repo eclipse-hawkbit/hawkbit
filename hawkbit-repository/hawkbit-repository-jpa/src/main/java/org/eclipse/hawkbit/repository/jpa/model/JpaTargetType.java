@@ -8,9 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
@@ -124,16 +128,19 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
 
     @Override
     public void fireCreateEvent(DescriptorEvent descriptorEvent) {
-
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireUpdateEvent(DescriptorEvent descriptorEvent) {
-
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
+                new TargetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
     public void fireDeleteEvent(DescriptorEvent descriptorEvent) {
-
+        EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(
+                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

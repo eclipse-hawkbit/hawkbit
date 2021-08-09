@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -88,7 +87,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Optional<TargetType> getByName(String name) {
-        return targetTypeRepository.findByName(name);
+        return targetTypeRepository.findByName(name).map(TargetType.class::cast);
     }
 
     @Override
@@ -124,11 +123,6 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     @Override
     public Slice<TargetType> findAll(Pageable pageable) {
         return convertPage(targetTypeRepository.findAllWithoutCount(pageable), pageable);
-    }
-
-    @Override
-    public Page<TargetType> findByTarget(Pageable pageable, String controllerId) {
-        return null;
     }
 
     @Override

@@ -180,5 +180,7 @@ public interface TargetTypeRepository
      * @return all {@link TargetType}s in the repository with given
      *         {@link TargetType#getName()}
      */
-    Optional<TargetType> findByName(String name);
+    default Optional<JpaTargetType> findByName(String name){
+        return this.findOne(Specification.where(TargetTypeSpecification.byName(name)));
+    };
 }

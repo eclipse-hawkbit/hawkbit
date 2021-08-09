@@ -74,18 +74,6 @@ public interface TargetTypeManagement {
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<TargetType> findAll(@NotNull Pageable pageable);
 
-
-    /**
-     * @param pageable
-     *          page
-     * @param controllerId
-     *          Target ID
-     * @return Target type
-     */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
-
-
     /**
      * @param pageable
      *          Page
