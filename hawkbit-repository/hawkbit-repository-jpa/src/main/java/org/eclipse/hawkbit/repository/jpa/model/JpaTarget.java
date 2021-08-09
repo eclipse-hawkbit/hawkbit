@@ -163,8 +163,8 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             @JoinColumn(name = "target_id", nullable = false, updatable = false) }, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_targ_attrib_target"))
     private Map<String, String> controllerAttributes;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = JpaTargetType.class)
-    @JoinColumn(name = "target_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
+    @ManyToOne(fetch = FetchType.LAZY, optional = true, targetEntity = JpaTargetType.class)
+    @JoinColumn(name = "target_type", nullable = true, updatable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
     private TargetType type;
 
     // set default request controller attributes to true, because we want to

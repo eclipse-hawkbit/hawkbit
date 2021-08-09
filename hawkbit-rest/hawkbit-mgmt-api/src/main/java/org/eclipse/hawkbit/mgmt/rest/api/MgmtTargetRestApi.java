@@ -124,6 +124,18 @@ public interface MgmtTargetRestApi {
     ResponseEntity<Void> deleteTarget(@PathVariable("targetId") String targetId);
 
     /**
+     * Handles the DELETE (unassign) request of a target type.
+     *
+     * @param targetId
+     *            the ID of the target
+     * @return If the given targetId could exists and could be unassign Http OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @DeleteMapping(value = "/{targetId}/targettype")
+    ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") String targetId);
+
+    /**
      * Handles the GET request of retrieving the attributes of a specific
      * target.
      *

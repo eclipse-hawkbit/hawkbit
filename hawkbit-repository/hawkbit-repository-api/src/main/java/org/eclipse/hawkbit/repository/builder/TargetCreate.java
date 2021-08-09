@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import java.util.Optional;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 

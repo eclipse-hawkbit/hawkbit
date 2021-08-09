@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -333,6 +334,9 @@ public class JpaTargetManagement implements TargetManagement {
         update.getDescription().ifPresent(target::setDescription);
         update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
+        if (Objects.nonNull(update.getTargetTypeId())){
+            target.setType(update.findTargetTypeWithExceptionIfNotFound(update.getTargetTypeId()));
+        }
 
         return targetRepository.save(target);
     }
@@ -587,6 +591,16 @@ public class JpaTargetManagement implements TargetManagement {
         // No reason to save the tag
         entityManager.detach(tag);
         return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target unAssignType(final String controllerID) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
+        target.setType(null);
+        return targetRepository.save(target);
     }
 
     @Override

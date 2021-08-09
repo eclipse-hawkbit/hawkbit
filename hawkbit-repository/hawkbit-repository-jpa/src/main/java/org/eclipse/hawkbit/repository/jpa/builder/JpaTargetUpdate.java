@@ -8,13 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 
 public class JpaTargetUpdate extends AbstractTargetUpdateCreate<TargetUpdate> implements TargetUpdate {
 
-    JpaTargetUpdate(final String controllerId) {
-        super(controllerId);
+    JpaTargetUpdate(final String controllerId, TargetTypeManagement targetTypeManagement) {
+        super(controllerId, targetTypeManagement);
     }
 
 }

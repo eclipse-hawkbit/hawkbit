@@ -27,8 +27,6 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
     private Long targetTypeId;
 
-    private final TargetTypeManagement targetTypeManagement;
-
     /**
      * Constructor
      *
@@ -36,8 +34,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
      *          Target type management
      */
     JpaTargetCreate(TargetTypeManagement targetTypeManagement) {
-        super(null);
-        this.targetTypeManagement = targetTypeManagement;
+        super(null, targetTypeManagement);
     }
 
     @Override
@@ -77,11 +74,6 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         getLastTargetQuery().ifPresent(target::setLastTargetQuery);
 
         return target;
-    }
-
-    private TargetType findTargetTypeWithExceptionIfNotFound(final Long targetTypeId) {
-        return targetTypeManagement.get(targetTypeId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
     }
 
 }

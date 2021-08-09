@@ -140,7 +140,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Target updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+                .type(targetRest.getTargetTypeId()).securityToken(targetRest.getSecurityToken())
+                .requestAttributes(targetRest.isRequestAttributes()));
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
@@ -153,6 +154,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
         this.targetManagement.deleteByControllerID(targetId);
         LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTargetType(String targetId) {
+        this.targetManagement.unAssignType(targetId);
         return ResponseEntity.ok().build();
     }
 
