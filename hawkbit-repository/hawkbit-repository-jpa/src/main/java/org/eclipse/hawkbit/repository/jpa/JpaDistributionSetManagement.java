@@ -100,8 +100,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final ActionRepository actionRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
@@ -122,8 +120,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final EventPublisherHolder eventPublisherHolder,
-            final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final Database database) {
@@ -136,7 +134,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetMetadataRepository = distributionSetMetadataRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -555,7 +552,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
-        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
+        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 DistributionSetMetadataFields.class, virtualPropertyReplacer, database);
 
         return convertMdPage(
@@ -784,7 +781,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
@@ -793,13 +790,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Slice<DistributionSet> findAll(final Pageable pageable) {
-        return convertDsPage(criteriaNoCountDao.findAll(DistributionSetSpecification.isDeleted(false), pageable,
-                JpaDistributionSet.class), pageable);
+        return convertDsPage(
+                distributionSetRepository.findAllWithoutCount(DistributionSetSpecification.isDeleted(false), pageable),
+                pageable);
     }
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertDsPage(

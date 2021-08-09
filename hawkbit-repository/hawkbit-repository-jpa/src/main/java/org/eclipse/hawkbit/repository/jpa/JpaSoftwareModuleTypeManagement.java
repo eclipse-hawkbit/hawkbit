@@ -55,19 +55,17 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     private final SoftwareModuleRepository softwareModuleRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
     private final Database database;
 
     public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final NoCountPagingRepository criteriaNoCountDao,
+            final SoftwareModuleRepository softwareModuleRepository,
             final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.database = database;
     }
 
@@ -90,7 +88,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Override
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
 
-        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleTypeFields.class,
+        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
                 virtualPropertyReplacer, database);
 
         return convertPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
@@ -98,9 +96,9 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     @Override
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
-        return convertPage(criteriaNoCountDao.findAll(
+        return convertPage(softwareModuleTypeRepository.findAllWithoutCount(
                 (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaSoftwareModuleType_.deleted), false),
-                pageable, JpaSoftwareModuleType.class), pageable);
+                pageable), pageable);
     }
 
     @Override
