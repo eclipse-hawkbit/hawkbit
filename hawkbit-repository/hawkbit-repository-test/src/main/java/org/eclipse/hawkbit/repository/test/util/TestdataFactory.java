@@ -646,6 +646,22 @@ public class TestdataFactory {
         return target;
     }
 
+    /**
+     * @param controllerId
+     *            of the target
+     * @param targetName
+     *            name of the target
+     * @param targetTypeId
+     *          target type id
+     * @return persisted {@link Target}
+     */
+    public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
+        final Target target = targetManagement
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).type(targetTypeId));
+        assertTargetProperlyCreated(target);
+        return target;
+    }
+
     private void assertTargetProperlyCreated(final Target target) {
         assertThat(target.getCreatedBy()).isNotNull();
         assertThat(target.getCreatedAt()).isNotNull();

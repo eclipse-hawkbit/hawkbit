@@ -444,6 +444,31 @@ public abstract class JsonBuilder {
 
         return builder.toString();
     }
+
+    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final Target target : targets) {
+            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
+            final String type = target.getType() != null ? target.getType().getId().toString() : null;
+            final String token = withToken ? target.getSecurityToken() : null;
+
+            builder.append(new JSONObject().put("controllerId", target.getControllerId())
+                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("address", address).put("securityToken", token).put("targetTypeId", targetTypeId).toString());
+
+            if (++i < targets.size()) {
+                builder.append(",");
+            }
+        }
+
+        builder.append("]");
+
+        return builder.toString();
+    }
     
     public static String targetTypes(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
