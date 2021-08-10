@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToDistributi
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -131,6 +132,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         getFilterSupport().setFilter(new DsManagementFilterParams());
 
         initTargetPinningStyleGenerator();
+        initInvalidationStyleGenerator();
         init();
     }
 
@@ -183,6 +185,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         setStyleGenerator(ds -> pinSupport.getAssignedOrInstalledRowStyle(ds.getId()));
     }
 
+    private void initInvalidationStyleGenerator() {
+        setStyleGenerator(ds -> ds.getIsValid() ? null : SPUIDefinitions.INVALID_DISTRIBUTION);
+    }
+
     @Override
     public String getGridId() {
         return UIComponentIdProvider.DIST_TABLE_ID;
@@ -194,7 +200,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         addVersionColumn();
 
         GridComponentBuilder.joinToActionColumn(i18n, getDefaultHeaderRow(),
-                Arrays.asList(addPinColumn(), addDeleteColumn()));
+                Arrays.asList(addPinColumn(), addDeleteColumn(), addInvalidateColumn()));
     }
 
     private Column<ProxyDistributionSet, Button> addPinColumn() {
@@ -203,6 +209,15 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 UIMessageIdProvider.TOOLTIP_DISTRIBUTION_SET_PIN, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 UIComponentIdProvider.DIST_PIN_ICON + "." + ds.getId(), true);
         return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_PIN_BUTTON_ID, null,
+                pinSupport::getPinningStyle);
+    }
+
+    private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
+        final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
+                i18n, clickEvent -> dsManagement.invalidate(ds.getId()), VaadinIcons.BAN,
+                "tooltip.distribution.set.invalidate", SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                "dist.invalidate.icon" + "." + ds.getId(), ds.getIsValid());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, "dsInvalidateButton", null,
                 pinSupport::getPinningStyle);
     }
 

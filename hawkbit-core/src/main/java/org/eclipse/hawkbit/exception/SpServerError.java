@@ -32,7 +32,7 @@ public enum SpServerError {
             "The given entity cannot be saved due to Constraint Violation"),
 
     /**
-     * 
+     *
      */
     SP_REPO_INVALID_TARGET_ADDRESS("hawkbit.server.error.repo.invalidTargetAddress",
             "The target address is not well formed"),
@@ -181,6 +181,11 @@ public enum SpServerError {
             "Distribution set is assigned to a target that is incomplete (i.e. mandatory modules are missing)"),
 
     /**
+    *
+    */
+    SP_DS_INVALID("hawkbit.server.error.distributionset.invalid", "Invalid distribution set is assigned to a target"),
+
+    /**
      *
      */
     SP_DS_TYPE_UNDEFINED("hawkbit.server.error.distributionset.type.undefined",
@@ -210,18 +215,18 @@ public enum SpServerError {
             "The given entity is read only and the change cannot be completed."),
 
     /**
-     * 
+     *
      */
     SP_CONFIGURATION_VALUE_INVALID("hawkbit.server.error.configValueInvalid",
             "The given configuration value is invalid."),
 
     /**
-     * 
+     *
      */
     SP_CONFIGURATION_KEY_INVALID("hawkbit.server.error.configKeyInvalid", "The given configuration key is invalid."),
 
     /**
-     * 
+     *
      */
     SP_ROLLOUT_ILLEGAL_STATE("hawkbit.server.error.rollout.illegalstate",
             "The rollout is in the wrong state for the requested operation"),
@@ -256,7 +261,7 @@ public enum SpServerError {
      * invalid.
      */
     SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
-            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted"),
+            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing), invalidated or soft deleted"),
 
     /**
      * Error message informing the user that the requested tenant configuration
@@ -290,7 +295,7 @@ public enum SpServerError {
 
     /**
      * Gets the key of the error
-     * 
+     *
      * @return the key of the error
      */
     public String getKey() {
@@ -299,7 +304,7 @@ public enum SpServerError {
 
     /**
      * Gets the message of the error
-     * 
+     *
      * @return message of the error
      */
     public String getMessage() {

@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -254,8 +255,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
-     * 
-     * 
+     *
+     *
      * In case the update was executed offline (i.e. not managed by hawkBit) the
      * handling differs my means that:<br/>
      * A. it ignores targets completely that are in
@@ -366,6 +367,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private JpaDistributionSet getAndValidateDsById(final Long dsID) {
         final JpaDistributionSet distributionSet = distributionSetRepository.findById(dsID)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
+
+        if (!distributionSet.isValid()) {
+            throw new InvalidDistributionSetException("Distribution set of type " + distributionSet.getType().getKey()
+                    + " is invalid: " + distributionSet.getId());
+        }
 
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type "
@@ -656,8 +662,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer,
-                database);
+        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class,
+                virtualPropertyReplacer, database);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
     }
@@ -832,7 +838,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public boolean hasPendingCancellations(String controllerId) {
+    public boolean hasPendingCancellations(final String controllerId) {
         return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(controllerId,
                 Action.Status.CANCELING);
     }

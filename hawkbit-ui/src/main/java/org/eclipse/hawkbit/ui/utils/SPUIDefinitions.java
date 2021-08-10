@@ -205,6 +205,8 @@ public final class SPUIDefinitions {
     /* Action History */
     public static final String DISABLE_DISTRIBUTION = "incomplete-distribution";
 
+    public static final String INVALID_DISTRIBUTION = "invalid-distribution";
+
     /**
      * Filter by type layout width.
      */

@@ -72,7 +72,7 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaTargetFilterQueryManagement.class);
-    
+
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
 
@@ -165,8 +165,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public Page<TargetFilterQuery> findByRsql(final Pageable pageable, final String rsqlFilter) {
         List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
         if (!StringUtils.isEmpty(rsqlFilter)) {
-            specList = Collections.singletonList(
-                    RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
+            specList = Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
+                    TargetFilterQueryFields.class, virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -190,8 +190,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
 
         if (!StringUtils.isEmpty(rsqlFilter)) {
-            specList.add(
-                    RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class, virtualPropertyReplacer, database));
+            specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,
+                    virtualPropertyReplacer, database));
         }
         return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
     }
@@ -275,7 +275,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private static void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
-        if (!distributionSet.isComplete() || distributionSet.isDeleted()) {
+        if (!distributionSet.isComplete() || distributionSet.isDeleted() || !distributionSet.isValid()) {
             throw new InvalidAutoAssignDistributionSetException();
         }
     }

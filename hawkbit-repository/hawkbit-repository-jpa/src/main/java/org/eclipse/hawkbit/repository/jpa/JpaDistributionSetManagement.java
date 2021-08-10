@@ -595,7 +595,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(8);
+        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(9);
 
         Specification<JpaDistributionSet> spec;
 
@@ -606,6 +606,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (distributionSetFilter.getIsDeleted() != null) {
             spec = DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted());
+            specList.add(spec);
+        }
+
+        if (distributionSetFilter.getIsValid() != null) {
+            spec = DistributionSetSpecification.isValid(distributionSetFilter.getIsValid());
             specList.add(spec);
         }
 
@@ -781,8 +786,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
-        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                DistributionSetFields.class, virtualPropertyReplacer, database);
 
         return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
                 DistributionSetSpecification.isDeleted(false))), pageable);
@@ -797,8 +802,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                DistributionSetFields.class, virtualPropertyReplacer, database);
 
         return convertDsPage(
                 findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.isDeleted(false))),
@@ -813,6 +818,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public boolean exists(final long id) {
         return distributionSetRepository.existsById(id);
+    }
+
+    @Override
+    public void invalidate(final long setId) {
+        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        set.invalidate();
+        distributionSetRepository.save(set);
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
     }
 
 }
