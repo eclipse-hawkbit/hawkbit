@@ -8,6 +8,10 @@
  */
 package org.eclipse.hawkbit.repository;
 
+/**
+ * Describing the fields of the TargetType model which can be used in
+ * the REST API
+ */
 public enum TargetTypeFields implements FieldNameProvider {
     /**
      * The name field.
