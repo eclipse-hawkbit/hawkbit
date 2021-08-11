@@ -88,7 +88,7 @@ public interface Target extends NamedEntity {
     /**
      * @return Target type {@link TargetType}.
      */
-    TargetType getType();
+    TargetType getTargetType();
 
     /**
      * @return the poll time which holds the last poll time of the target, the

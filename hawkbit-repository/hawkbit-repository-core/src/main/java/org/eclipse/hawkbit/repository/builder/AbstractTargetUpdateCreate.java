@@ -87,7 +87,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
         return (TargetCreate) this;
     }
 
-    public T type(final Long targetTypeId) {
+    public T targetType(final Long targetTypeId) {
         this.targetTypeId = targetTypeId;
         return (T) this;
     }

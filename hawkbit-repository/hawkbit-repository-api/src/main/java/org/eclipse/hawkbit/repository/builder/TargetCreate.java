@@ -48,10 +48,10 @@ public interface TargetCreate {
 
     /**
      * @param targetTypeId
-     *            for {@link Target#getType()}
+     *            for {@link Target#getTargetType()}
      * @return updated builder instance
      */
-    TargetCreate type(Long targetTypeId);
+    TargetCreate targetType(Long targetTypeId);
 
     /**
      * @param securityToken

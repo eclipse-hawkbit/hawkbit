@@ -204,11 +204,11 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     /**
      * Counts {@link TargetType} instances of given type in the repository.
      *
-     * @param typeId
+     * @param targetTypeId
      *            to search for
      * @return number of found {@link Target}s
      */
-    long countByTypeId(Long typeId);
+    long countByTargetTypeId(Long targetTypeId);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

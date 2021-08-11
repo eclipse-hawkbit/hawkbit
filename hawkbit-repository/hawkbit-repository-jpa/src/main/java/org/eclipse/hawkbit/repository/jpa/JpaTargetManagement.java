@@ -335,7 +335,7 @@ public class JpaTargetManagement implements TargetManagement {
         update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
         if (Objects.nonNull(update.getTargetTypeId())){
-            target.setType(update.findTargetTypeWithExceptionIfNotFound(update.getTargetTypeId()));
+            target.setTargetType(update.findTargetTypeWithExceptionIfNotFound(update.getTargetTypeId()));
         }
 
         return targetRepository.save(target);
@@ -599,7 +599,7 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unAssignType(final String controllerID) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
-        target.setType(null);
+        target.setTargetType(null);
         return targetRepository.save(target);
     }
 

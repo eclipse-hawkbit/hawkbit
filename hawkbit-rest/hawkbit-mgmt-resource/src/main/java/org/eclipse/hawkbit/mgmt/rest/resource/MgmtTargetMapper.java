@@ -81,9 +81,9 @@ public final class MgmtTargetMapper {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
-        if (response.getTargetTypeId() != null) {
+        if (response.getTargetType() != null) {
             response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class)
-                    .getTargetType(response.getTargetTypeId())).withRel("type"));
+                    .getTargetType(response.getTargetType())).withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
         }
     }
 
@@ -159,8 +159,8 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
-        if (Objects.nonNull(target.getType())){
-            targetRest.setTargetTypeId(target.getType().getId());
+        if (Objects.nonNull(target.getTargetType())){
+            targetRest.setTargetType(target.getTargetType().getId());
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
@@ -181,7 +181,7 @@ public final class MgmtTargetMapper {
     private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress()).type(targetRest.getTargetTypeId());
+                .address(targetRest.getAddress()).targetType(targetRest.getTargetType());
     }
 
     static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,

@@ -400,7 +400,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
         final TargetType testType = createTestTargetTypeInDB(typeName);
 
         targetManagement.create(entityFactory.target().create().controllerId("target").name("TargetOfTestType")
-                .description("target description").type(testType.getId()));
+                .description("target description").targetType(testType.getId()));
 
         assertThat(targetTypeManagement.count()).isEqualTo(1);
         assertThat(targetManagement.count()).isEqualTo(1);

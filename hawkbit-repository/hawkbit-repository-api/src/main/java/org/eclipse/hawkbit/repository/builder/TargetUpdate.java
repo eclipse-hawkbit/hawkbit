@@ -45,10 +45,10 @@ public interface TargetUpdate {
 
     /**
      * @param targetTypeId
-     *            for {@link Target#getType()}
+     *            for {@link Target#getTargetType()}
      * @return updated builder instance
      */
-    TargetUpdate type(Long targetTypeId);
+    TargetUpdate targetType(Long targetTypeId);
 
     /**
      * @param address

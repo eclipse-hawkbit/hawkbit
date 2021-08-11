@@ -1053,16 +1053,16 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
         assertThat(targetFound).isPresent();
         assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
-        assertThat(targetFound.get().getType().getId()).isEqualTo(targetTypes.get(0).getId());
+        assertThat(targetFound.get().getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
 
         // update the target type
-        targetManagement.update(entityFactory.target().update(target.getControllerId()).type(targetTypes.get(1).getId()));
+        targetManagement.update(entityFactory.target().update(target.getControllerId()).targetType(targetTypes.get(1).getId()));
 
         // opt lock revision must be changed
         Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
         assertThat(targetFound1).isPresent();
         assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
-        assertThat(targetFound1.get().getType().getId()).isEqualTo(targetTypes.get(1).getId());
+        assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetTypes.get(1).getId());
 
         // unassign the target type
         targetManagement.unAssignType(target.getControllerId());
@@ -1071,7 +1071,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         Optional<JpaTarget> targetFound2 = targetRepository.findById(target.getId());
         assertThat(targetFound2).isPresent();
         assertThat(targetFound2.get().getOptLockRevision()).isEqualTo(3);
-        assertThat(targetFound2.get().getType()).isNull();
+        assertThat(targetFound2.get().getTargetType()).isNull();
     }
 
     @Test

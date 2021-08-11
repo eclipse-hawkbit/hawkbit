@@ -61,6 +61,11 @@ public final class MgmtRestConstants {
     public static final String SYSTEM_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + BASE_SYSTEM_MAPPING;
 
     /**
+     * The target URL mapping, href link for assigned target type.
+     */
+    public static final String TARGET_V1_ASSIGNED_TARGET_TYPE= "targetType";
+
+    /**
      * The target URL mapping, href link for assigned distribution set.
      */
     public static final String TARGET_V1_ASSIGNED_DISTRIBUTION_SET = "assignedDS";

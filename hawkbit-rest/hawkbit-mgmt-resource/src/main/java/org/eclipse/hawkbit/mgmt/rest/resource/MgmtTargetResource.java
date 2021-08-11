@@ -140,7 +140,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Target updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .type(targetRest.getTargetTypeId()).securityToken(targetRest.getSecurityToken())
+                .targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
                 .requestAttributes(targetRest.isRequestAttributes()));
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);

@@ -657,7 +657,7 @@ public class TestdataFactory {
      */
     public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
         final Target target = targetManagement
-                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).type(targetTypeId));
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
         assertTargetProperlyCreated(target);
         return target;
     }

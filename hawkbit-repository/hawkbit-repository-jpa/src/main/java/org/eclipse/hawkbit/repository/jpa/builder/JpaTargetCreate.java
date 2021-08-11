@@ -48,7 +48,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         }
 
         if (Objects.nonNull(targetTypeId)){
-            target.setType(findTargetTypeWithExceptionIfNotFound(targetTypeId));
+            target.setTargetType(findTargetTypeWithExceptionIfNotFound(targetTypeId));
         }
 
         target.setDescription(description);

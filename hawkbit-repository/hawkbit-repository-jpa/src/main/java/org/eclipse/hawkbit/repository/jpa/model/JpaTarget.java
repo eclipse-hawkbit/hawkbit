@@ -165,7 +165,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
 
     @ManyToOne(fetch = FetchType.LAZY, optional = true, targetEntity = JpaTargetType.class)
     @JoinColumn(name = "target_type", nullable = true, updatable = true, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_relation_target_type"))
-    private TargetType type;
+    private TargetType targetType;
 
     // set default request controller attributes to true, because we want to
     // request them the first
@@ -396,16 +396,16 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     }
 
     @Override
-    public TargetType getType() {
-        return type;
+    public TargetType getTargetType() {
+        return targetType;
     }
 
     /**
      * @param type
      *          Target type
      */
-    public void setType(final TargetType type) {
-        this.type = type;
+    public void setTargetType(final TargetType type) {
+        this.targetType = type;
     }
 
     /**

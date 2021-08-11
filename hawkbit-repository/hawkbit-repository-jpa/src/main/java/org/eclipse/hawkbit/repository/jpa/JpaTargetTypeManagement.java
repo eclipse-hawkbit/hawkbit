@@ -113,7 +113,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     public void delete(final Long targetTypeId) {
         throwExceptionIfTargetTypeDoesNotExist(targetTypeId);
 
-        if (targetRepository.countByTypeId(targetTypeId) > 0) {
+        if (targetRepository.countByTargetTypeId(targetTypeId) > 0) {
             throw new TargetTypeInUseException("Cannot delete target type that is in use");
         }
 
