@@ -56,6 +56,10 @@ public final class UIComponentIdProvider {
      */
     public static final String DIST_PIN_ICON = "dist.pin.icon";
     /**
+     * ID-DistributionSet invalidate icon.
+     */
+    public static final String DIST_INVALIDATE_ICON = "dist.invalidate.icon";
+    /**
      * ID-Targ.DELETE.
      */
     public static final String TARGET_DELET_ICON = "target.delete.icon";

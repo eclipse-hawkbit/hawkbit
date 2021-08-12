@@ -58,6 +58,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     private static final long serialVersionUID = 1L;
 
     private static final String DS_PIN_BUTTON_ID = "dsPinnButton";
+    private static final String DS_INVALIDATE_BUTTON_ID = "dsInvalidateButton";
 
     private final TargetGridLayoutUiState targetGridLayoutUiState;
     private final DistributionGridLayoutUiState distributionGridLayoutUiState;
@@ -131,6 +132,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         getFilterSupport().setFilter(new DsManagementFilterParams());
 
         initTargetPinningStyleGenerator();
+        initDistributionSetInvalidStyleGenerator();       
         init();
     }
 
@@ -183,6 +185,11 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         setStyleGenerator(ds -> pinSupport.getAssignedOrInstalledRowStyle(ds.getId()));
     }
 
+
+    private void initDistributionSetInvalidStyleGenerator() {
+        setStyleGenerator(ds -> ds.getIsValid() ? null : SPUIDefinitions.INVALID_DISTRIBUTION);
+    }
+
     @Override
     public String getGridId() {
         return UIComponentIdProvider.DIST_TABLE_ID;
@@ -206,6 +213,15 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 pinSupport::getPinningStyle);
     }
 
+
+    private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
+        final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
+                i18n, clickEvent -> onClickinvalidateDistributionSet(ds), VaadinIcons.BAN,
+                UIMessageIdProvider.TOOLTIP_DISTRIBUTION_SET_INVALIDATE, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(), ds.getIsValid());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_INVALIDATE_BUTTON_ID, null);
+    }
+
     @Override
     public void restoreState() {
         final Long pinnedDsId = distributionGridLayoutUiState.getPinnedDsId();
@@ -222,6 +238,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         }
 
         super.restoreState();
+    }
+
+    private void onClickinvalidateDistributionSet(final ProxyDistributionSet distributionSet) {
+        dsManagement.invalidate(distributionSet.getId());
     }
 
     /**

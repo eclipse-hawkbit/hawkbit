@@ -171,6 +171,8 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_DISTRIBUTION_SET_PIN = "tooltip.distribution.set.pin";
 
+    public static final String TOOLTIP_DISTRIBUTION_SET_INVALIDATE = "tooltip.distribution.set.invalidate";
+
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
     public static final String TOOLTIP_TIMEFORCED_FORCED_IN = "tooltip.timeforced.forced.in";
