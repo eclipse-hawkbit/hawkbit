@@ -35,6 +35,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -43,8 +44,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -131,6 +130,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private final EntityManager entityManager;
+    private final DistributionSetManagement distributionSetManagement;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -147,6 +147,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
+            final DistributionSetManagement distributionSetManagement,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
@@ -157,6 +158,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
+        this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.auditorProvider = auditorProvider;
@@ -286,7 +288,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
-        final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
+        final JpaDistributionSet distributionSetEntity = (JpaDistributionSet) distributionSetManagement
+                .getValidAndComplete(dsID);
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().collect(Collectors.toList());
 
@@ -362,23 +365,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
 
         return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
-    }
-
-    private JpaDistributionSet getAndValidateDsById(final Long dsID) {
-        final JpaDistributionSet distributionSet = distributionSetRepository.findById(dsID)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
-
-        if (!distributionSet.isValid()) {
-            throw new InvalidDistributionSetException("Distribution set of type " + distributionSet.getType().getKey()
-                    + " is invalid: " + distributionSet.getId());
-        }
-
-        if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
-        }
-
-        return distributionSet;
     }
 
     private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {

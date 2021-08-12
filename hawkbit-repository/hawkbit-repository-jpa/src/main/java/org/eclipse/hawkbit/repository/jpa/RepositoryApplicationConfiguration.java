@@ -77,8 +77,8 @@ import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAct
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
-import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
 import org.eclipse.hawkbit.repository.jpa.rsql.DefaultRsqlVisitorFactory;
+import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -413,7 +413,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Override
     @Bean
     public PlatformTransactionManager transactionManager(
-            ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
+            final ObjectProvider<TransactionManagerCustomizers> transactionManagerCustomizers) {
         return new MultiTenantJpaTransactionManager();
     }
 
@@ -681,17 +681,17 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     DeploymentManagement deploymentManagement(final EntityManager entityManager,
             final ActionRepository actionRepository, final DistributionSetRepository distributionSetRepository,
-            final TargetRepository targetRepository, final ActionStatusRepository actionStatusRepository,
-            final AuditorAware<String> auditorProvider, final EventPublisherHolder eventPublisherHolder,
-            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager,
+            final DistributionSetManagement distributionSetManagement, final TargetRepository targetRepository,
+            final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
+            final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final JpaProperties properties, final RepositoryProperties repositoryProperties) {
-        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetRepository, targetRepository,
-                actionStatusRepository, auditorProvider, eventPublisherHolder, afterCommit, virtualPropertyReplacer,
-                txManager, tenantConfigurationManagement, quotaManagement, systemSecurityContext, tenantAware,
-                properties.getDatabase(), repositoryProperties);
+        return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
+                distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
+                eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
+                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
     }
 
     /**
@@ -776,7 +776,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoAssignScheduler} bean.
-     * 
+     *
      * Note: does not activate in test profile, otherwise it is hard to test the
      * auto assign functionality.
      *
@@ -806,12 +806,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoActionCleanup} bean.
-     * 
+     *
      * @param deploymentManagement
      *            Deployment management service
      * @param configManagement
      *            Tenant configuration service
-     * 
+     *
      * @return a new {@link AutoActionCleanup} bean
      */
     @Bean
@@ -822,7 +822,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoCleanupScheduler} bean.
-     * 
+     *
      * @param systemManagement
      *            to find all tenants
      * @param systemSecurityContext
@@ -831,7 +831,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *            to lock the tenant for auto assignment
      * @param cleanupTasks
      *            a list of cleanup tasks
-     * 
+     *
      * @return a new {@link AutoCleanupScheduler} bean
      */
     @Bean
@@ -846,10 +846,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link RolloutScheduler} bean.
-     * 
+     *
      * Note: does not activate in test profile, otherwise it is hard to test the
      * rollout handling functionality.
-     * 
+     *
      * @param systemManagement
      *            to find all tenants
      * @param rolloutManagement
@@ -869,7 +869,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * Creates the {@link RsqlVisitorFactory} bean.
-     * 
+     *
      * @return A new {@link RsqlVisitorFactory} bean.
      */
     @Bean
@@ -880,7 +880,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * Obtains the {@link RsqlVisitorFactoryHolder} bean.
-     * 
+     *
      * @return The {@link RsqlVisitorFactoryHolder} singleton.
      */
     @Bean

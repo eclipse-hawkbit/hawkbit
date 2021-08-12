@@ -48,7 +48,7 @@ public class JpaDistributionSetCreate extends AbstractDistributionSetUpdateCreat
         return new JpaDistributionSet(name, version, description,
                 Optional.ofNullable(type).map(this::findDistributionSetTypeWithExceptionIfNotFound).orElse(null),
                 findSoftwareModuleWithExceptionIfNotFound(modules),
-                Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE));
+                Optional.ofNullable(requiredMigrationStep).orElse(Boolean.FALSE), true);
     }
 
     @Override

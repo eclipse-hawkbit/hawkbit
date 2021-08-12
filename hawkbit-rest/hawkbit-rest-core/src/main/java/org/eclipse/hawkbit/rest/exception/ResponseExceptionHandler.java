@@ -88,6 +88,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INVALID, HttpStatus.BAD_REQUEST);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INCOMPLETE, HttpStatus.BAD_REQUEST);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {

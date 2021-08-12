@@ -174,6 +174,42 @@ public interface DistributionSetManagement
     Optional<DistributionSet> getByNameAndVersion(@NotEmpty String distributionName, @NotEmpty String version);
 
     /**
+     * Find distribution set by id and throw an exception if it is deleted,
+     * incomplete or invalidated.
+     *
+     * @param id
+     *            id of {@link DistributionSet}
+     *
+     * @return the found valid {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    DistributionSet getValidAndComplete(long id);
+
+    /**
+     * Find distribution set by id and throw an exception if it is deleted or
+     * invalidated.
+     *
+     * @param id
+     *            id of {@link DistributionSet}
+     *
+     * @return the found valid {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    DistributionSet getValid(long id);
+
+    /**
+     * Find distribution set by id and throw an exception if it is (soft)
+     * deleted.
+     *
+     * @param id
+     *            id of {@link DistributionSet}
+     *
+     * @return the found valid {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    DistributionSet getOrElseThrowException(long id);
+
+    /**
      * Finds all meta data by the given distribution set id.
      *
      * @param pageable

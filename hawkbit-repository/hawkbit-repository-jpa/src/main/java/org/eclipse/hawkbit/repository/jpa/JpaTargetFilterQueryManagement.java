@@ -264,7 +264,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // specify an
             // auto-assign distribution set when creating a target filter query
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
-            final JpaDistributionSet ds = findDistributionSetAndThrowExceptionIfNotFound(update.getDsId());
+            final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
+                    .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfNotValid(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());

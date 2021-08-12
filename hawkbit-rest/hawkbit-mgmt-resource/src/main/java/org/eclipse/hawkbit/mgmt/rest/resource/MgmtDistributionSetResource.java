@@ -125,7 +125,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<MgmtDistributionSet> getDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId) {
-        final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        final DistributionSet foundDs = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
         MgmtDistributionSetMapper.addLinks(foundDs, response);
@@ -206,7 +206,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -254,11 +254,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final List<Entry<String, Long>> offlineAssignments = assignments.stream()
                     .map(assignment -> new SimpleEntry<String, Long>(assignment.getId(), distributionSetId))
                     .collect(Collectors.toList());
-            return ResponseEntity
-                    .ok(MgmtDistributionSetMapper
-                            .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));
+            return ResponseEntity.ok(MgmtDistributionSetMapper
+                    .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));
         }
-        
+
         final List<DeploymentRequest> deploymentRequests = assignments.stream()
                 .map(assignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(assignment, distributionSetId))
                 .collect(Collectors.toList());
@@ -372,10 +371,5 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 distributionSetId);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()));
-    }
-
-    private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {
-        return distributionSetManagement.get(distributionSetId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
     }
 }

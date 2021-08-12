@@ -144,10 +144,11 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
      */
     public JpaDistributionSet(final String name, final String version, final String description,
             final DistributionSetType type, final Collection<SoftwareModule> moduleList,
-            final boolean requiredMigrationStep) {
+            final boolean requiredMigrationStep, final boolean valid) {
         super(name, version, description);
 
         this.requiredMigrationStep = requiredMigrationStep;
+        this.valid = valid;
         this.type = type;
         if (moduleList != null) {
             moduleList.forEach(this::addModule);
@@ -173,7 +174,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
      */
     public JpaDistributionSet(final String name, final String version, final String description,
             final DistributionSetType type, final Collection<SoftwareModule> moduleList) {
-        this(name, version, description, type, moduleList, false);
+        this(name, version, description, type, moduleList, false, true);
     }
 
     public Set<DistributionSetTag> getTags() {
