@@ -68,6 +68,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
     private final transient PinSupport<ProxyDistributionSet, String> pinSupport;
 
+    private final transient InvalidateDistributionSetSupport invalidateDistributionSetSupport;
+
     /**
      * Constructor for DistributionGrid
      *
@@ -130,6 +132,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 DsManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsManagementFilterParams());
+        this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, notification,
+                dsManagement);
 
         initTargetPinningStyleGenerator();
         initDistributionSetInvalidStyleGenerator();       
@@ -187,7 +191,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
 
     private void initDistributionSetInvalidStyleGenerator() {
-        setStyleGenerator(ds -> ds.getIsValid() ? null : SPUIDefinitions.INVALID_DISTRIBUTION);
+        setStyleGenerator(InvalidateDistributionSetSupport::getInvalidDistributionSetRowStyle);
     }
 
     @Override
@@ -216,9 +220,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
     private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
         final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
-                i18n, clickEvent -> onClickinvalidateDistributionSet(ds), VaadinIcons.BAN,
-                UIMessageIdProvider.TOOLTIP_DISTRIBUTION_SET_INVALIDATE, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
-                UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(), ds.getIsValid());
+                i18n, clickEvent -> invalidateDistributionSetSupport.openConsequencesWindowOnInvalidateAction(ds),
+                VaadinIcons.BAN, UIMessageIdProvider.TOOLTIP_INVALIDATE_DISTRIBUTIONSET,
+                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(),
+                ds.getIsValid());
         return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_INVALIDATE_BUTTON_ID, null);
     }
 
@@ -238,10 +243,6 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         }
 
         super.restoreState();
-    }
-
-    private void onClickinvalidateDistributionSet(final ProxyDistributionSet distributionSet) {
-        dsManagement.invalidate(distributionSet.getId());
     }
 
     /**

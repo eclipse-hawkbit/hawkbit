@@ -1364,6 +1364,20 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
+
+    /**
+     * Distribution set invalidate consequences window id
+     */
+    public static final String INVALIDATE_DS_CONSEQUENCES = "invalidate.distributionset.consequences.window";
+    /**
+     * Distribution set invalidate affected entities window id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
+    /**
+     * Distribution set invalidate consequences window, stop rollouts checkbox
+     */
+    public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
+
     /**
      * Id of the unread notification button
      */
