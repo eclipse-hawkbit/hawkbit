@@ -90,7 +90,7 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
 
-    private static List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
+    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
             RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
             RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
 
@@ -872,8 +872,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public void invalidate(final DistributionSetInvalidation distributionSetInvalidation) {
-        System.out.println(
-                "Affected AAs " + countAutoAssignmentsForInvalidation(distributionSetInvalidation.getSetIds()));
         distributionSetInvalidation.getSetIds().forEach(setId -> {
             final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
             set.invalidate();
@@ -919,9 +917,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 .sum();
     }
 
+    @Override
     public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(setId -> targetFilterQueryRepository.countByAutoAssignDistributionSetId(setId))
-                .sum();
+        return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
     }
 
 }
