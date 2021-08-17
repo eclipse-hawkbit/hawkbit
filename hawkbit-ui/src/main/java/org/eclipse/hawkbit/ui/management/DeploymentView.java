@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -93,7 +94,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final TargetTagManagement targetTagManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final TenantConfigurationManagement configManagement,
+            final TenantConfigurationManagement configManagement, final RolloutManagement rolloutManagement,
             final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
         this.permChecker = permChecker;
@@ -132,7 +133,8 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             this.distributionGridLayout = new DistributionGridLayout(uiDependencies, targetManagement,
                     distributionSetManagement, smManagement, distributionSetTypeManagement,
                     distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
-                    systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),
+                    rolloutManagement, targetFilterQueryManagement, systemSecurityContext, uiProperties,
+                    managementUIState.getDistributionGridLayoutUiState(),
                     managementUIState.getDistributionTagLayoutUiState(),
                     managementUIState.getTargetGridLayoutUiState());
 

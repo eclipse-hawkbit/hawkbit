@@ -47,6 +47,7 @@ public class InvalidateDsAffectedEntitiesDialog {
         final Label consequencesLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO,
                 HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion())));
+        consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
 
         final Label stoppedRolloutsLabel = new Label(i18n.getMessage(
@@ -58,7 +59,7 @@ public class InvalidateDsAffectedEntitiesDialog {
                 stoppedAutoAssignments));
         content.addComponent(stoppedAutoAssignmentsLabel);
 
-        final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CONFIRMATION_WINDOW)
+        final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .id(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES)
                 .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES))
                 .content(content).cancelButtonClickListener(e -> callback.accept(false))
@@ -67,9 +68,9 @@ public class InvalidateDsAffectedEntitiesDialog {
 
         this.window = windowBuilder.buildCommonDialogWindow();
         window.setSaveButtonEnabled(true);
+        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
         this.callback = callback;
 
-        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
     }
 
     private SaveDialogCloseListener getSaveDialogCloseListener() {

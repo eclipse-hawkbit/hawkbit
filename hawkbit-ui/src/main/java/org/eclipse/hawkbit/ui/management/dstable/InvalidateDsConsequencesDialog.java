@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
@@ -49,7 +48,7 @@ public class InvalidateDsConsequencesDialog {
 
         final Label consequencesLabel = new Label(
                 i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES));
-        consequencesLabel.setWidth(500, Unit.POINTS);
+        consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
 
         stopRolloutsCheckBox = new CheckBox();
@@ -57,7 +56,7 @@ public class InvalidateDsConsequencesDialog {
         stopRolloutsCheckBox.setCaption(i18n.getMessage(UIMessageIdProvider.LABEL_INVALIDATE_DS_STOP_ROLLOUTS));
         content.addComponent(stopRolloutsCheckBox);
 
-        final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CONFIRMATION_WINDOW)
+        final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .id(UIComponentIdProvider.INVALIDATE_DS_CONSEQUENCES)
                 .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES,
                         HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(),
@@ -68,9 +67,9 @@ public class InvalidateDsConsequencesDialog {
 
         this.window = windowBuilder.buildCommonDialogWindow();
         window.setSaveButtonEnabled(true);
+        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
         this.callback = callback;
 
-        window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
     }
 
     private SaveDialogCloseListener getSaveDialogCloseListener() {

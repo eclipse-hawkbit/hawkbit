@@ -17,6 +17,8 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.RolloutManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -81,6 +83,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      *            DistributionSetManagement
      * @param deploymentManagement
      *            DeploymentManagement
+     * @param rolloutManagement
+     *            {@link RolloutManagement}
+     * @param targetFilterQueryManagement
+     *            {@link TargetFilterQueryManagement}
      * @param uiProperties
      *            UiProperties
      * @param distributionGridLayoutUiState
@@ -92,6 +98,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      */
     public DistributionGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
+            final RolloutManagement rolloutManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
@@ -133,7 +140,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         initFilterMappings();
         getFilterSupport().setFilter(new DsManagementFilterParams());
         this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, notification,
-                dsManagement);
+                dsManagement, rolloutManagement, targetFilterQueryManagement);
 
         initTargetPinningStyleGenerator();
         initDistributionSetInvalidStyleGenerator();       
