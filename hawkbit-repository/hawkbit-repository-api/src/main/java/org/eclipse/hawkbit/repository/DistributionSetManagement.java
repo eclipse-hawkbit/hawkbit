@@ -463,4 +463,10 @@ public interface DistributionSetManagement
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void invalidate(DistributionSetInvalidation distributionSetInvalidation);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countRolloutsForInvalidation(final Collection<Long> setIds);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countAutoAssignmentsForInvalidation(final Collection<Long> setIds);
+
 }

@@ -90,6 +90,10 @@ import com.google.common.collect.Lists;
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
 
+    private static List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
+            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
+            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
+
     private final EntityManager entityManager;
 
     private final DistributionSetRepository distributionSetRepository;
@@ -868,40 +872,56 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public void invalidate(final DistributionSetInvalidation distributionSetInvalidation) {
-        final JpaDistributionSet set = (JpaDistributionSet) getValid(distributionSetInvalidation.getSetId());
-        set.invalidate();
-        distributionSetRepository.save(set);
+        System.out.println(
+                "Affected AAs " + countAutoAssignmentsForInvalidation(distributionSetInvalidation.getSetIds()));
+        distributionSetInvalidation.getSetIds().forEach(setId -> {
+            final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
+            set.invalidate();
+            distributionSetRepository.save(set);
 
-        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                || distributionSetInvalidation.isCancelRollouts()) {
-            // stop all rollouts for this distribution set
-            rolloutRepository.findByDistributionSet(set).forEach(rollout -> {
-                final JpaRollout jpaRollout = (JpaRollout) rollout;
-                jpaRollout.setStatus(RolloutStatus.STOPPING);
-                rolloutRepository.save(jpaRollout);
-            });
-        }
+            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                    || distributionSetInvalidation.isCancelRollouts()) {
+                // stop all rollouts for this distribution set
+                rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+                    final JpaRollout jpaRollout = (JpaRollout) rollout;
+                    jpaRollout.setStatus(RolloutStatus.STOPPING);
+                    rolloutRepository.save(jpaRollout);
+                });
+            }
 
-        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                || distributionSetInvalidation.isCancelAutoAssignments()) {
-            // remove distribution set from all auto assignments
-            targetFilterQueryRepository
-                    .unsetAutoAssignDistributionSetAndActionType(distributionSetInvalidation.getSetId());
-        }
+            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                    || distributionSetInvalidation.isCancelAutoAssignments()) {
+                // remove distribution set from all auto assignments
+                targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
+            }
 
-        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
-            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
-                final JpaAction jpaAction = (JpaAction) action;
-                deploymentManagement.cancelAction(jpaAction.getId());
-            });
-        }
+            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
+                actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                    final JpaAction jpaAction = (JpaAction) action;
+                    deploymentManagement.cancelAction(jpaAction.getId());
+                });
+            }
 
-        if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
-            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
-                final JpaAction jpaAction = (JpaAction) action;
-                deploymentManagement.forceQuitAction(jpaAction.getId());
-            });
-        }
+            if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
+                actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                    final JpaAction jpaAction = (JpaAction) action;
+                    deploymentManagement.forceQuitAction(jpaAction.getId());
+                });
+            }
+        });
+    }
+
+    @Override
+    public long countRolloutsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream()
+                .mapToLong(
+                        setId -> rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE))
+                .sum();
+    }
+
+    public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(setId -> targetFilterQueryRepository.countByAutoAssignDistributionSetId(setId))
+                .sum();
     }
 
 }

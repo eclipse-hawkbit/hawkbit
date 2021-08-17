@@ -8,27 +8,29 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Collection;
+
 public class DistributionSetInvalidation {
 
-    private long setId;
+    private Collection<Long> setIds;
     private CancelationType cancelationType;
     private boolean cancelRollouts;
     private boolean cancelAutoAssignments;
 
-    public DistributionSetInvalidation(final long setId, final CancelationType cancelationType,
+    public DistributionSetInvalidation(final Collection<Long> setIds, final CancelationType cancelationType,
             final boolean cancelRollouts, final boolean cancelAutoAssignments) {
-        this.setId = setId;
+        this.setIds = setIds;
         this.cancelationType = cancelationType;
         this.cancelRollouts = cancelRollouts;
         this.cancelAutoAssignments = cancelAutoAssignments;
     }
 
-    public long getSetId() {
-        return setId;
+    public Collection<Long> getSetIds() {
+        return setIds;
     }
 
-    public void setSetId(final long setId) {
-        this.setId = setId;
+    public void setSetIds(final Collection<Long> setIds) {
+        this.setIds = setIds;
     }
 
     public CancelationType getCancelationType() {

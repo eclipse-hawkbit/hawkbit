@@ -73,5 +73,7 @@ public interface RolloutRepository
      *            the distribution set
      * @return {@link Rollout} for specific distribution set
      */
-    List<Rollout> findByDistributionSet(DistributionSet set);
+    List<Rollout> findByDistributionSetAndStatusIn(DistributionSet set, Collection<RolloutStatus> status);
+
+    long countByDistributionSetIdAndStatusIn(long distributionSetId, Collection<RolloutStatus> status);
 }

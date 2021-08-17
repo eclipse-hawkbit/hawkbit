@@ -32,7 +32,7 @@ public interface TargetFilterQueryRepository
 
     /**
      * Find customer target filter by name
-     * 
+     *
      * @param name
      * @return custom target filter
      */
@@ -55,6 +55,8 @@ public interface TargetFilterQueryRepository
     @Transactional
     @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL where d.autoAssignDistributionSet in :ids")
     void unsetAutoAssignDistributionSetAndActionType(@Param("ids") Long... dsIds);
+
+    long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
