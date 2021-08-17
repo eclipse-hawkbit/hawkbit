@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
@@ -214,8 +216,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
     private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
         final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
-                i18n, clickEvent -> dsManagement.invalidate(ds.getId()), VaadinIcons.BAN,
-                "tooltip.distribution.set.invalidate", SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                i18n,
+                clickEvent -> dsManagement
+                        .invalidate(new DistributionSetInvalidation(ds.getId(), CancelationType.FORCE, true, true)),
+                VaadinIcons.BAN, "tooltip.distribution.set.invalidate", SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 "dist.invalidate.icon" + "." + ds.getId(), ds.getIsValid());
         return GridComponentBuilder.addIconColumn(this, buttonProvider, "dsInvalidateButton", null,
                 pinSupport::getPinningStyle);

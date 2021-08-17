@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -38,10 +39,12 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
@@ -51,11 +54,14 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -116,6 +122,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final Database database;
 
+    private final RolloutRepository rolloutRepository;
+
+    private final DeploymentManagement deploymentManagement;
+
     JpaDistributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
@@ -126,7 +136,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit, final Database database) {
+            final AfterTransactionCommitExecutor afterCommit, final Database database,
+            final RolloutRepository rolloutRepository, final DeploymentManagement deploymentManagement) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.distributionSetTagManagement = distributionSetTagManagement;
@@ -143,6 +154,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
         this.database = database;
+        this.rolloutRepository = rolloutRepository;
+        this.deploymentManagement = deploymentManagement;
     }
 
     @Override
@@ -854,11 +867,41 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public void invalidate(final long setId) {
-        final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
+    public void invalidate(final DistributionSetInvalidation distributionSetInvalidation) {
+        final JpaDistributionSet set = (JpaDistributionSet) getValid(distributionSetInvalidation.getSetId());
         set.invalidate();
         distributionSetRepository.save(set);
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
+
+        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                || distributionSetInvalidation.isCancelRollouts()) {
+            // stop all rollouts for this distribution set
+            rolloutRepository.findByDistributionSet(set).forEach(rollout -> {
+                final JpaRollout jpaRollout = (JpaRollout) rollout;
+                jpaRollout.setStatus(RolloutStatus.STOPPING);
+                rolloutRepository.save(jpaRollout);
+            });
+        }
+
+        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                || distributionSetInvalidation.isCancelAutoAssignments()) {
+            // remove distribution set from all auto assignments
+            targetFilterQueryRepository
+                    .unsetAutoAssignDistributionSetAndActionType(distributionSetInvalidation.getSetId());
+        }
+
+        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
+            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                final JpaAction jpaAction = (JpaAction) action;
+                deploymentManagement.cancelAction(jpaAction.getId());
+            });
+        }
+
+        if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
+            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                final JpaAction jpaAction = (JpaAction) action;
+                deploymentManagement.forceQuitAction(jpaAction.getId());
+            });
+        }
     }
 
 }

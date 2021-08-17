@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThis
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -460,6 +461,6 @@ public interface DistributionSetManagement
     long countByTypeId(long typeId);
 
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void invalidate(long setId);
+    void invalidate(DistributionSetInvalidation distributionSetInvalidation);
 
 }

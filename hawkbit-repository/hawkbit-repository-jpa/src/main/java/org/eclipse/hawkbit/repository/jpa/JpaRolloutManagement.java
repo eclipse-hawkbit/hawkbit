@@ -100,7 +100,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
-            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING);
+            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
+            RolloutStatus.STOPPING);
 
     @Autowired
     private RolloutRepository rolloutRepository;

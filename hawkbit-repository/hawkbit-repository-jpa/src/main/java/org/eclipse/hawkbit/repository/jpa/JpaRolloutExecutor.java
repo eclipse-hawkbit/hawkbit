@@ -155,6 +155,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         case RUNNING:
             handleRunningRollout((JpaRollout) rollout);
             break;
+        case STOPPING:
+            handleStopRollout((JpaRollout) rollout);
+            break;
         default:
             LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
             break;
@@ -242,6 +245,27 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         rolloutRepository.save(rollout);
 
         sendRolloutGroupDeletedEvents(rollout);
+    }
+
+    private void handleStopRollout(final JpaRollout rollout) {
+        LOGGER.debug("handleStopRollout called for {}", rollout.getId());
+        // clean up all scheduled actions
+        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
+        deleteScheduledActions(rollout, scheduledActions);
+
+        // avoid another scheduler round and re-check if all scheduled actions
+        // has been cleaned up. we flush first to ensure that the we include the
+        // deletion above
+        entityManager.flush();
+        final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
+                Status.SCHEDULED) > 0;
+
+        if (hasScheduledActionsLeft) {
+            return;
+        }
+
+        rollout.setStatus(RolloutStatus.FINISHED);
+        rolloutRepository.save(rollout);
     }
 
     private void handleReadyRollout(final Rollout rollout) {
