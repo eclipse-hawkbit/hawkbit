@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
+import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.ConfirmStyle;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
@@ -36,17 +38,34 @@ public class InvalidateDsAffectedEntitiesDialog {
 
     private final CommonDialogWindow window;
 
-    public InvalidateDsAffectedEntitiesDialog(final ProxyDistributionSet distributionSet,
+    private final VaadinMessageSource i18n;
+
+    /**
+     * Constructor for {@link InvalidateDsAffectedEntitiesDialog}
+     *
+     * @param allDistributionSetsForInvalidation
+     *            {@link List} of {@link ProxyDistributionSet} that are selected
+     *            for invalidation
+     * @param i18n
+     *            {@link VaadinMessageSource}
+     * @param callback
+     *            callback for dialog result
+     * @param affectedRollouts
+     *            number of affected {@link Rollout}s
+     * @param affectedAutoAssignments
+     *            number of affected auto assignments
+     */
+    public InvalidateDsAffectedEntitiesDialog(final List<ProxyDistributionSet> allDistributionSetsForInvalidation,
             final VaadinMessageSource i18n, final Consumer<Boolean> callback, final long affectedRollouts,
             final long affectedAutoAssignments) {
+
+        this.i18n = i18n;
 
         final VerticalLayout content = new VerticalLayout();
         content.setSpacing(true);
         content.setMargin(true);
 
-        final Label consequencesLabel = new Label(i18n.getMessage(
-                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO,
-                HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion())));
+        final Label consequencesLabel = new Label(createConsequencesText(allDistributionSetsForInvalidation));
         consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
 
@@ -71,6 +90,22 @@ public class InvalidateDsAffectedEntitiesDialog {
         window.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_WINDOW_STYLE);
         this.callback = callback;
 
+    }
+
+    private String createConsequencesText(final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
+        String consequencesText = "";
+        if (allDistributionSetsForInvalidation.size() == 1) {
+            final ProxyDistributionSet distributionSet = allDistributionSetsForInvalidation.get(0);
+            consequencesText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_SINGULAR,
+                    HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
+        } else {
+            consequencesText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_PLURAL,
+                    allDistributionSetsForInvalidation.size());
+        }
+
+        return consequencesText;
     }
 
     private SaveDialogCloseListener getSaveDialogCloseListener() {

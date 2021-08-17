@@ -75,7 +75,9 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX = "caption.entity.assign.action.confirmbox";
 
-    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES = "caption.invalidate.distributionset.consequences";
+    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_SINGULAR = "caption.invalidate.distributionset.consequences.singular";
+
+    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_PLURAL = "caption.invalidate.distributionset.consequences.plural";
 
     public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES = "caption.invalidate.distributionset.affected.entities";
 
@@ -251,17 +253,25 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_CLEAR_FILE_UPLOAD_QUEUE = "message.clear.file.upload.queue.confirm";
 
-    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES = "message.invalidate.distributionset.consequences";
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_SINGULAR = "message.invalidate.distributionset.consequences.singular";
 
-    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO = "message.invalidate.distributionset.affected.entities.intro";
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_PLURAL = "message.invalidate.distributionset.consequences.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_SINGULAR = "message.invalidate.distributionset.affected.entities.intro.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_PLURAL = "message.invalidate.distributionset.affected.entities.intro.plural";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS = "message.invalidate.distributionset.affected.entities.rollouts";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "message.invalidate.distributionset.affected.entities.autoassignments";
 
-    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS = "message.invalidate.distributionset.success";
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_SINGULAR = "message.invalidate.distributionset.success.singular";
 
-    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL = "message.invalidate.distributionset.fail";
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_PLURAL = "message.invalidate.distributionset.success.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_SINGULAR = "message.invalidate.distributionset.fail.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_PLURAL = "message.invalidate.distributionset.fail.plural";
 
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
 

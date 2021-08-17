@@ -18,10 +18,8 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-<<<<<<< Upstream, based on origin/master
-=======
+
 import com.google.common.collect.Lists;
->>>>>>> 1998fd4 retrieving affected entities from repository
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.UI;
 
@@ -108,13 +106,10 @@ public class InvalidateDistributionSetSupport {
         try {
             // TODO use boolean flag in repo call
             final boolean stopRollouts = consequencesDialog.getStopRollouts();
-<<<<<<< Upstream, based on origin/master
             dsManagement.invalidate(distributionSet.getId());
-=======
             final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
                     Lists.newArrayList(distributionSet.getId()), CancelationType.NONE, stopRollouts, true);
             dsManagement.invalidate(distributionSetInvalidation);
->>>>>>> 1998fd4 retrieving affected entities from repository
             notification.displaySuccess(successNotificationText);
             grid.refreshItem(distributionSet);
         } catch (final RuntimeException ex) {
