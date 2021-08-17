@@ -37,8 +37,8 @@ public class InvalidateDsAffectedEntitiesDialog {
     private final CommonDialogWindow window;
 
     public InvalidateDsAffectedEntitiesDialog(final ProxyDistributionSet distributionSet,
-            final VaadinMessageSource i18n, final Consumer<Boolean> callback, final int stoppedRollouts,
-            final int stoppedAutoAssignments) {
+            final VaadinMessageSource i18n, final Consumer<Boolean> callback, final long affectedRollouts,
+            final long affectedAutoAssignments) {
 
         final VerticalLayout content = new VerticalLayout();
         content.setSpacing(true);
@@ -51,12 +51,12 @@ public class InvalidateDsAffectedEntitiesDialog {
         content.addComponent(consequencesLabel);
 
         final Label stoppedRolloutsLabel = new Label(i18n.getMessage(
-                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS, stoppedRollouts));
+                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS, affectedRollouts));
         content.addComponent(stoppedRolloutsLabel);
 
         final Label stoppedAutoAssignmentsLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS,
-                stoppedAutoAssignments));
+                affectedAutoAssignments));
         content.addComponent(stoppedAutoAssignmentsLabel);
 
         final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)

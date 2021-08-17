@@ -16,10 +16,8 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -80,10 +78,6 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
      *            DeploymentManagement
      * @param configManagement
      *            TenantConfigurationManagement
-     * @param rolloutManagement
-     *            {@link RolloutManagement}
-     * @param targetFilterQueryManagement
-     *            {@link TargetFilterQueryManagement}
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param uiProperties
@@ -100,7 +94,6 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
-            final RolloutManagement rolloutManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState,
@@ -113,8 +106,8 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
         this.distributionGridHeader.buildHeader();
 
         this.distributionGrid = new DistributionGrid(uiDependencies, targetManagement, distributionSetManagement,
-                deploymentManagement, rolloutManagement, targetFilterQueryManagement, uiProperties,
-                distributionGridLayoutUiState, targetGridLayoutUiState, distributionTagLayoutUiState);
+                deploymentManagement, uiProperties, distributionGridLayoutUiState, targetGridLayoutUiState,
+                distributionTagLayoutUiState);
 
         this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(uiDependencies, getDsWindowBuilder(),
                 getDsMetaDataWindowBuilder());

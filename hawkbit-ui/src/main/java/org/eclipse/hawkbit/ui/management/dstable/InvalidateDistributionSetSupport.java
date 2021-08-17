@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.RolloutManagement;
-import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
@@ -20,6 +18,10 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+<<<<<<< Upstream, based on origin/master
+=======
+import com.google.common.collect.Lists;
+>>>>>>> 1998fd4 retrieving affected entities from repository
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.UI;
 
@@ -34,8 +36,6 @@ public class InvalidateDistributionSetSupport {
     private final DistributionGrid grid;
 
     private final DistributionSetManagement dsManagement;
-    private final RolloutManagement rolloutManagement;
-    private final TargetFilterQueryManagement targetFilterQueryManagement;
 
     private InvalidateDsConsequencesDialog consequencesDialog;
     private InvalidateDsAffectedEntitiesDialog affectedEntitiesDialog;
@@ -51,20 +51,13 @@ public class InvalidateDistributionSetSupport {
      *            UINotification
      * @param dsManagement
      *            {@link DistributionSetManagement}
-     * @param rolloutManagement
-     *            {@link RolloutManagement}
-     * @param targetFilterQueryManagement
-     *            {@link TargetFilterQueryManagement}
      */
     public InvalidateDistributionSetSupport(final DistributionGrid grid, final VaadinMessageSource i18n,
-            final UINotification notification, final DistributionSetManagement dsManagement,
-            final RolloutManagement rolloutManagement, final TargetFilterQueryManagement targetFilterQueryManagement) {
+            final UINotification notification, final DistributionSetManagement dsManagement) {
         this.grid = grid;
         this.i18n = i18n;
         this.notification = notification;
         this.dsManagement = dsManagement;
-        this.rolloutManagement = rolloutManagement;
-        this.targetFilterQueryManagement = targetFilterQueryManagement;
     }
 
     /**
@@ -87,8 +80,12 @@ public class InvalidateDistributionSetSupport {
     }
 
     private void openAffectedEntitiesWindowOnInvalidateAction(final ProxyDistributionSet distributionSet) {
-        final int affectedRolloutsByDSInvalidation = getAffectedRolloutsByDSInvalidation(distributionSet);
-        final int affectedAutoAssignmentsByDSInvalidation = getAffectedAutoAssignmentsByDSInvalidation(distributionSet);
+        long affectedRolloutsByDSInvalidation = 0;
+        if (consequencesDialog.getStopRollouts()) {
+            affectedRolloutsByDSInvalidation = getAffectedRolloutsByDSInvalidation(distributionSet);
+        }
+        final long affectedAutoAssignmentsByDSInvalidation = getAffectedAutoAssignmentsByDSInvalidation(
+                distributionSet);
 
         affectedEntitiesDialog = new InvalidateDsAffectedEntitiesDialog(distributionSet, i18n, ok -> {
             if (ok) {
@@ -111,7 +108,13 @@ public class InvalidateDistributionSetSupport {
         try {
             // TODO use boolean flag in repo call
             final boolean stopRollouts = consequencesDialog.getStopRollouts();
+<<<<<<< Upstream, based on origin/master
             dsManagement.invalidate(distributionSet.getId());
+=======
+            final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
+                    Lists.newArrayList(distributionSet.getId()), CancelationType.NONE, stopRollouts, true);
+            dsManagement.invalidate(distributionSetInvalidation);
+>>>>>>> 1998fd4 retrieving affected entities from repository
             notification.displaySuccess(successNotificationText);
             grid.refreshItem(distributionSet);
         } catch (final RuntimeException ex) {
@@ -121,14 +124,12 @@ public class InvalidateDistributionSetSupport {
         }
     }
 
-    private int getAffectedRolloutsByDSInvalidation(final ProxyDistributionSet distributionSet) {
-        // TODO adapt
-        return 0;
+    private long getAffectedRolloutsByDSInvalidation(final ProxyDistributionSet distributionSet) {
+        return dsManagement.countRolloutsForInvalidation(Lists.newArrayList(distributionSet.getId()));
     }
 
-    private int getAffectedAutoAssignmentsByDSInvalidation(final ProxyDistributionSet distributionSet) {
-        // TODO adapt
-        return 0;
+    private long getAffectedAutoAssignmentsByDSInvalidation(final ProxyDistributionSet distributionSet) {
+        return dsManagement.countAutoAssignmentsForInvalidation(Lists.newArrayList(distributionSet.getId()));
     }
 
     /**
