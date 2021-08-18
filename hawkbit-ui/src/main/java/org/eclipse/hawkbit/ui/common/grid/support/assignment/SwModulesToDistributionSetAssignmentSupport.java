@@ -117,8 +117,8 @@ public class SwModulesToDistributionSetAssignmentSupport
 
         if (!ds.getIsValid()) {
             /* Distribution is invalidated */
-            notification
-                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID));
+            notification.displayValidationError(
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID, ds.getNameVersion()));
             return false;
         }
 

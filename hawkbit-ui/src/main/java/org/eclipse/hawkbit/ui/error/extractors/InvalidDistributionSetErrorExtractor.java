@@ -36,6 +36,6 @@ public class InvalidDistributionSetErrorExtractor extends AbstractSingleUiErrorD
     protected Optional<UiErrorDetails> findDetails(final Throwable error) {
         return findExceptionOf(error, InvalidDistributionSetException.class)
                 .map(ex -> UiErrorDetails.create(i18n.getMessage(UIMessageIdProvider.CAPTION_ERROR),
-                        i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID)));
+                        i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID, "")));
     }
 }
