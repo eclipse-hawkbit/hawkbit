@@ -15,14 +15,12 @@ public class DistributionSetInvalidation {
     private Collection<Long> setIds;
     private CancelationType cancelationType;
     private boolean cancelRollouts;
-    private boolean cancelAutoAssignments;
 
     public DistributionSetInvalidation(final Collection<Long> setIds, final CancelationType cancelationType,
-            final boolean cancelRollouts, final boolean cancelAutoAssignments) {
+            final boolean cancelRollouts) {
         this.setIds = setIds;
         this.cancelationType = cancelationType;
         this.cancelRollouts = cancelRollouts;
-        this.cancelAutoAssignments = cancelAutoAssignments;
     }
 
     public Collection<Long> getSetIds() {
@@ -47,14 +45,6 @@ public class DistributionSetInvalidation {
 
     public void setCancelRollouts(final boolean cancelRollouts) {
         this.cancelRollouts = cancelRollouts;
-    }
-
-    public boolean isCancelAutoAssignments() {
-        return cancelAutoAssignments;
-    }
-
-    public void setCancelAutoAssignments(final boolean cancelAutoAssignments) {
-        this.cancelAutoAssignments = cancelAutoAssignments;
     }
 
     public enum CancelationType {

@@ -9,10 +9,13 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -20,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtInvalidateDistributionSetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -40,6 +44,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -371,5 +376,15 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 distributionSetId);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()));
+    }
+
+    @Override
+    public ResponseEntity<Void> invalidateDistributionSet(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @Valid @RequestBody final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
+        distributionSetManagement.invalidate(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
+                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
+                invalidateRequestBody.isCancelRollouts()));
+        return ResponseEntity.ok().build();
     }
 }

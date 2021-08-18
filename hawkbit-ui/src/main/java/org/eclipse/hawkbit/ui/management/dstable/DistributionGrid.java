@@ -218,7 +218,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
                 i18n,
                 clickEvent -> dsManagement.invalidate(
-                        new DistributionSetInvalidation(Arrays.asList(ds.getId()), CancelationType.FORCE, true, true)),
+                        new DistributionSetInvalidation(Arrays.asList(ds.getId()), CancelationType.FORCE, true)),
                 VaadinIcons.BAN, "tooltip.distribution.set.invalidate", SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 "dist.invalidate.icon" + "." + ds.getId(), ds.getIsValid());
         return GridComponentBuilder.addIconColumn(this, buttonProvider, "dsInvalidateButton", null,

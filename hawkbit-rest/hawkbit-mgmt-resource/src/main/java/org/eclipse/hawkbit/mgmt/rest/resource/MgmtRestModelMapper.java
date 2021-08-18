@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtCancelationType;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
@@ -48,10 +50,10 @@ public final class MgmtRestModelMapper {
     /**
      * Convert the given {@link MgmtActionType} into a corresponding repository
      * {@link ActionType}.
-     * 
+     *
      * @param actionTypeRest
      *            the REST representation of the action type
-     * 
+     *
      * @return <null> or the repository action type
      */
     public static ActionType convertActionType(final MgmtActionType actionTypeRest) {
@@ -76,10 +78,10 @@ public final class MgmtRestModelMapper {
     /**
      * Converts the given repository {@link ActionType} into a corresponding
      * {@link MgmtActionType}.
-     * 
+     *
      * @param actionType
      *            the repository representation of the action type
-     * 
+     *
      * @return <null> or the REST action type
      */
     public static MgmtActionType convertActionType(final ActionType actionType) {
@@ -98,6 +100,23 @@ public final class MgmtRestModelMapper {
             return MgmtActionType.DOWNLOAD_ONLY;
         default:
             throw new IllegalStateException("Action Type is not supported");
+        }
+    }
+
+    public static CancelationType convertCancelationType(final MgmtCancelationType cancelationType) {
+        if (cancelationType == null) {
+            return null;
+        }
+
+        switch (cancelationType) {
+        case SOFT:
+            return CancelationType.SOFT;
+        case FORCE:
+            return CancelationType.FORCE;
+        case NONE:
+            return CancelationType.NONE;
+        default:
+            throw new IllegalStateException("Action Cancelation Type is not supported");
         }
     }
 }

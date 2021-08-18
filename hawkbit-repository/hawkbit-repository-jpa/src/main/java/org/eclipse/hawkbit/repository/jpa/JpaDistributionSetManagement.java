@@ -873,7 +873,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public void invalidate(final DistributionSetInvalidation distributionSetInvalidation) {
         distributionSetInvalidation.getSetIds().forEach(setId -> {
-            final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
+            final JpaDistributionSet set = (JpaDistributionSet) getValidAndComplete(setId);
             set.invalidate();
             distributionSetRepository.save(set);
 
@@ -887,11 +887,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 });
             }
 
-            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                    || distributionSetInvalidation.isCancelAutoAssignments()) {
-                // remove distribution set from all auto assignments
-                targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
-            }
+            // remove distribution set from all auto assignments
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
 
             if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
                 actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
