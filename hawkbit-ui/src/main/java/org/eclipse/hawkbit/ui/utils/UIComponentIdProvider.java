@@ -1374,6 +1374,14 @@ public final class UIComponentIdProvider {
      */
     public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
     /**
+     * Distribution set invalidate affected rollouts label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS = "invalidate.distributionset.affectedentities.rollouts";
+    /**
+     * Distribution set invalidate affected autoassignments label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "invalidate.distributionset.affectedentities.autoassignments";
+    /**
      * Distribution set invalidate consequences window, stop rollouts checkbox
      */
     public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";

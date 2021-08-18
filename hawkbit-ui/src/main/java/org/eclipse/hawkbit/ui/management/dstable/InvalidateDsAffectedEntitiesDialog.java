@@ -71,11 +71,13 @@ public class InvalidateDsAffectedEntitiesDialog {
 
         final Label stoppedRolloutsLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS, affectedRollouts));
+        stoppedRolloutsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS);
         content.addComponent(stoppedRolloutsLabel);
 
         final Label stoppedAutoAssignmentsLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS,
                 affectedAutoAssignments));
+        stoppedAutoAssignmentsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_AUTOASSIGNMENTS);
         content.addComponent(stoppedAutoAssignmentsLabel);
 
         final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
