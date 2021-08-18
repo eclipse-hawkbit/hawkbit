@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModi
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
@@ -38,7 +39,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Support for assigning software modules to distribution set.
- * 
+ *
  */
 public class SwModulesToDistributionSetAssignmentSupport
         extends DeploymentAssignmentSupport<ProxySoftwareModule, ProxyDistributionSet> {
@@ -111,6 +112,13 @@ public class SwModulesToDistributionSetAssignmentSupport
     private boolean isTargetDsValid(final ProxyDistributionSet ds, final DistributionSetType dsType) {
         if (dsType == null) {
             notification.displayValidationError(i18n.getMessage("message.dist.type.notfound", ds.getNameVersion()));
+            return false;
+        }
+
+        if (!ds.getIsValid()) {
+            /* Distribution is invalidated */
+            notification
+                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID));
             return false;
         }
 

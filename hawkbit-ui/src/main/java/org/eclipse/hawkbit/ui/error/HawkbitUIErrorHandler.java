@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.ui.common.notification.ParallelNotification;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
@@ -76,7 +77,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to find the {@link Page} to show notification on.
-     * 
+     *
      * @param event
      *            error event
      * @return current {@link Page} for error notification
@@ -117,8 +118,8 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
     private void showGenericErrorNotification(final Page page, final ErrorEvent event) {
         LOG.error("Unexpected Ui error occured", event.getThrowable());
 
-        final Notification notification = buildErrorNotification(i18n.getMessage("caption.error"),
-                i18n.getMessage("message.error"));
+        final Notification notification = buildErrorNotification(i18n.getMessage(UIMessageIdProvider.CAPTION_ERROR),
+                i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR));
         showErrorNotification(page, notification);
     }
 
@@ -129,7 +130,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to build an error notification based on caption and description.
-     * 
+     *
      * @param caption
      *            notification caption
      * @param description
@@ -143,7 +144,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to show notification on the given page.
-     * 
+     *
      * @param page
      *            page to show notification on
      * @param notification

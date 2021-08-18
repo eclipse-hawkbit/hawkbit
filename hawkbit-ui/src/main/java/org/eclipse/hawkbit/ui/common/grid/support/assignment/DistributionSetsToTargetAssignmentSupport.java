@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
 /**
  * Support for assigning the distribution sets to target.
@@ -64,7 +65,25 @@ public class DistributionSetsToTargetAssignmentSupport
     @Override
     protected List<ProxyDistributionSet> getFilteredSourceItems(final List<ProxyDistributionSet> sourceItemsToAssign,
             final ProxyTarget targetItem) {
+
+        if (!areSourceDsValid(sourceItemsToAssign)) {
+            return Collections.emptyList();
+        }
+
         return isMultiAssignmentEnabled() ? sourceItemsToAssign : Collections.singletonList(sourceItemsToAssign.get(0));
+    }
+
+    private boolean areSourceDsValid(final List<ProxyDistributionSet> sourceItemsToAssign) {
+        return sourceItemsToAssign.stream().allMatch(this::isSourceDsValid);
+    }
+
+    private boolean isSourceDsValid(final ProxyDistributionSet distributionSet) {
+        if (!distributionSet.getIsValid()) {
+            notification
+                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID));
+            return false;
+        }
+        return true;
     }
 
     private boolean isMultiAssignmentEnabled() {

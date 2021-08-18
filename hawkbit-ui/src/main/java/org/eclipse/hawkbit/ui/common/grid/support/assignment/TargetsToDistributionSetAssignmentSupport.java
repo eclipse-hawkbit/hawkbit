@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
-import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
 /**
  * Support for assigning targets to distribution set.
@@ -51,6 +52,25 @@ public class TargetsToDistributionSetAssignmentSupport
     public List<String> getMissingPermissionsForDrop() {
         return permChecker.hasUpdateTargetPermission() ? Collections.emptyList()
                 : Collections.singletonList(SpPermission.UPDATE_TARGET);
+    }
+
+    @Override
+    protected List<ProxyTarget> getFilteredSourceItems(final List<ProxyTarget> sourceItemsToAssign,
+            final ProxyDistributionSet targetItem) {
+        if (!isTargetDsValid(targetItem)) {
+            return Collections.emptyList();
+        }
+
+        return sourceItemsToAssign;
+    }
+
+    private boolean isTargetDsValid(final ProxyDistributionSet distributionSet) {
+        if (!distributionSet.getIsValid()) {
+            notification
+                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID));
+            return false;
+        }
+        return true;
     }
 
     @Override
