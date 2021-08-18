@@ -9,9 +9,7 @@
 package org.eclipse.hawkbit.ui.management.dstable;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -127,19 +125,19 @@ public class InvalidateDistributionSetSupport {
         return dsManagement.countAutoAssignmentsForInvalidation(Lists.newArrayList(distributionSet.getId()));
     }
 
-    /**
-     * Gets the style of an invalid {@link DistributionSet}
-     *
-     * @param itemId
-     *            Id of item
-     *
-     * @return row style
-     */
-    public static String getInvalidDistributionSetRowStyle(final ProxyDistributionSet distributionSet) {
-        if (distributionSet == null || distributionSet.getIsValid()) {
-            return null;
-        }
 
-        return SPUIDefinitions.INVALID_DISTRIBUTION;
+    private List<ProxyDistributionSet> getDistributionSetsForInvalidation(final ProxyDistributionSet clickedItem) {
+        final List<ProxyDistributionSet> selectedItems = Lists.newArrayList(grid.getSelectedItems());
+
+        // only clicked item should be deleted if it is not part of the
+        // selection
+        if (selectedItems.contains(clickedItem)) {
+            return selectedItems;
+        } else {
+            grid.deselectAll();
+            grid.select(clickedItem);
+
+            return Collections.singletonList(clickedItem);
+        }
     }
 }

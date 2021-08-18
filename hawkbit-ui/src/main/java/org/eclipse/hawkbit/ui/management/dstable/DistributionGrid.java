@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToDistributi
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -134,9 +135,11 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         getFilterSupport().setFilter(new DsManagementFilterParams());
         this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, notification,
                 dsManagement);
+   
+        initStyleGenerator();
 
         initTargetPinningStyleGenerator();
-        initDistributionSetInvalidStyleGenerator();       
+        initDistributionSetInvalidStyleGenerator();
         init();
     }
 
@@ -185,13 +188,13 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         return installedDsId != null ? Collections.singletonList(installedDsId) : Collections.emptyList();
     }
 
-    private void initTargetPinningStyleGenerator() {
-        setStyleGenerator(ds -> pinSupport.getAssignedOrInstalledRowStyle(ds.getId()));
+    private void initStyleGenerator() {
+        setStyleGenerator(this::getRowStyle);
     }
 
 
     private void initDistributionSetInvalidStyleGenerator() {
-        setStyleGenerator(InvalidateDistributionSetSupport::getInvalidDistributionSetRowStyle);
+        setStyleGenerator(ds -> ds.getIsValid() ? null : SPUIDefinitions.INVALID_DISTRIBUTION);
     }
 
     @Override
@@ -220,10 +223,9 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
 
     private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
         final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
-                i18n, clickEvent -> invalidateDistributionSetSupport.openConsequencesWindowOnInvalidateAction(ds),
-                VaadinIcons.BAN, UIMessageIdProvider.TOOLTIP_INVALIDATE_DISTRIBUTIONSET,
-                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(),
-                ds.getIsValid());
+                i18n, clickEvent -> onClickinvalidateDistributionSet(ds), VaadinIcons.BAN,
+                UIMessageIdProvider.TOOLTIP_DISTRIBUTION_SET_INVALIDATE, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(), ds.getIsValid());
         return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_INVALIDATE_BUTTON_ID, null);
     }
 
@@ -243,6 +245,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         }
 
         super.restoreState();
+    }
+
+    private void onClickinvalidateDistributionSet(final ProxyDistributionSet distributionSet) {
+        dsManagement.invalidate(distributionSet.getId());
     }
 
     /**

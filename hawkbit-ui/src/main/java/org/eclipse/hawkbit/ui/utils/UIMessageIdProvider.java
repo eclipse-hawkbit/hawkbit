@@ -129,6 +129,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR_DISTRIBUTIONSET_REQUIRED = "message.error.distributionSetRequired";
 
+    public static final String MESSAGE_ERROR_DISTRIBUTIONSET_INVALID = "message.error.distributionset.invalid";
+
     public static final String MESSAGE_ERROR_TFQ_REQUIRED = "message.error.tfqRequired";
 
     public static final String MESSAGE_FILTER_QUERY_ERROR_NOTVALIDE = "message.filter.query.error.notValide";
@@ -184,6 +186,10 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_DISTRIBUTION_SET_PIN = "tooltip.distribution.set.pin";
 
     public static final String TOOLTIP_INVALIDATE_DISTRIBUTIONSET = "tooltip.invalidate.distributionset";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALID = "tooltip.distributionset.invalid";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INCOMPLETE = "tooltip.distributionset.incomplete";
 
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
@@ -246,6 +252,10 @@ public final class UIMessageIdProvider {
     public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
+
+    public static final String CAPTION_ERROR = "caption.error";
+
+    public static final String MESSAGE_ERROR = "message.error";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
