@@ -164,6 +164,12 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
+    public ResponseEntity<Void> assignTargetType(String targetId, long targetTypeId) {
+        this.targetManagement.assignType(targetId, targetTypeId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     public ResponseEntity<MgmtTargetAttributes> getAttributes(@PathVariable("targetId") final String targetId) {
         final Map<String, String> controllerAttributes = targetManagement.getControllerAttributes(targetId);
         if (controllerAttributes.isEmpty()) {

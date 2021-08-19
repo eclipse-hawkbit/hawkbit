@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.util.StringUtils;
 
@@ -23,14 +25,17 @@ import java.util.Objects;
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
+    private final TargetTypeManagement targetTypeManagement;
+
     /**
      * Constructor
      *
      * @param targetTypeManagement
      *          Target type management
      */
-    JpaTargetCreate(TargetTypeManagement targetTypeManagement) {
-        super(null, targetTypeManagement);
+    JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
+        super(null);
+        this.targetTypeManagement = targetTypeManagement;
     }
 
     @Override
@@ -48,7 +53,9 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
         }
 
         if (Objects.nonNull(targetTypeId)){
-            target.setTargetType(findTargetTypeWithExceptionIfNotFound(targetTypeId));
+            TargetType targetType = targetTypeManagement.get(targetTypeId)
+                    .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
+            target.setTargetType(targetType);
         }
 
         target.setDescription(description);

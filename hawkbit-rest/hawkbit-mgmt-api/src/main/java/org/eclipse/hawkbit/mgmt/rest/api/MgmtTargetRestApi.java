@@ -136,6 +136,18 @@ public interface MgmtTargetRestApi {
     ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") String targetId);
 
     /**
+     * Handles the POST (assign) request of a target type.
+     *
+     * @param targetId
+     *            the ID of the target
+     * @return If the given targetId could exists and could be assign Http OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @PostMapping(value = "/{targetId}/targettype/{targetTypeId}")
+    ResponseEntity<Void> assignTargetType(@PathVariable("targetId") String targetId, @PathVariable("targetTypeId") long targetTypeId);
+
+    /**
      * Handles the GET request of retrieving the attributes of a specific
      * target.
      *

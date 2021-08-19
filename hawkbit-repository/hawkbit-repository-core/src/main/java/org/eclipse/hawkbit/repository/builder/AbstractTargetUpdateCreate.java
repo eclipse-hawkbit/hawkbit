@@ -41,11 +41,8 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     protected Long targetTypeId;
 
-    private final TargetTypeManagement targetTypeManagement;
-
-    protected AbstractTargetUpdateCreate(final String controllerId, final TargetTypeManagement targetTypeManagement) {
+    protected AbstractTargetUpdateCreate(final String controllerId) {
         this.controllerId = StringUtils.trimWhitespace(controllerId);
-        this.targetTypeManagement = targetTypeManagement;
     }
 
     public T status(final TargetUpdateStatus status) {
@@ -114,11 +111,6 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     public Long getTargetTypeId() {
         return targetTypeId;
-    }
-
-    public TargetType findTargetTypeWithExceptionIfNotFound(final Long targetTypeId) {
-        return targetTypeManagement.get(targetTypeId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
     }
 
 }

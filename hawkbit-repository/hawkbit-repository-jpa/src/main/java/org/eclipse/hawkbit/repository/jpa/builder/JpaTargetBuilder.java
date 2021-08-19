@@ -31,7 +31,7 @@ public class JpaTargetBuilder implements TargetBuilder {
 
     @Override
     public TargetUpdate update(final String controllerId) {
-        return new JpaTargetUpdate(controllerId, targetTypeManagement);
+        return new JpaTargetUpdate(controllerId);
     }
 
     @Override
