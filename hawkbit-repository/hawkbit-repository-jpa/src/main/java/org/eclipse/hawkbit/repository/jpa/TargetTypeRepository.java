@@ -181,6 +181,6 @@ public interface TargetTypeRepository
      *         {@link TargetType#getName()}
      */
     default Optional<JpaTargetType> findByName(String name){
-        return this.findOne(Specification.where(TargetTypeSpecification.byName(name)));
+        return this.findOne(Specification.where(TargetTypeSpecification.hasName(name)));
     };
 }

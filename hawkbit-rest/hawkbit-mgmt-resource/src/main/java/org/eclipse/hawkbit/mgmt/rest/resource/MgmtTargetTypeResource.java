@@ -65,15 +65,14 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetTypeSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
-        final Slice<TargetType> findTargetTypesAll;
+        final Page<TargetType> findTargetTypesAll;
         long countTargetTypesAll;
         if (rsqlParam != null) {
-            findTargetTypesAll = targetTypeManagement.findByRsql(pageable, rsqlParam);
-            countTargetTypesAll = ((Page<TargetType>) findTargetTypesAll).getTotalElements();
+            findTargetTypesAll= targetTypeManagement.findByRsql(pageable, rsqlParam);
         } else {
             findTargetTypesAll = targetTypeManagement.findAll(pageable);
-            countTargetTypesAll = targetTypeManagement.count();
         }
+        countTargetTypesAll = findTargetTypesAll.getTotalElements();
 
         final List<MgmtTargetType> rest = MgmtTargetTypeMapper.toListResponse(findTargetTypesAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countTargetTypesAll));

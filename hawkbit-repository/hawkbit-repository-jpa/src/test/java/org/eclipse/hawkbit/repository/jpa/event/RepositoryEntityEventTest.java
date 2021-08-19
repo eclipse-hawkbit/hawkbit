@@ -96,33 +96,33 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the target type created event is published when a target type has been created")
     public void targetTypeCreatedEventIsPublished() throws InterruptedException {
-        List<TargetType> createdTargetTypes = testdataFactory.createTargetTypes("targettype", 1);
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
 
         TargetTypeCreatedEvent targetTypeCreatedEvent = eventListener.waitForEvent(TargetTypeCreatedEvent.class);
         assertThat(targetTypeCreatedEvent).isNotNull();
-        assertThat(targetTypeCreatedEvent.getEntity().getId()).isEqualTo(createdTargetTypes.get(0).getId());
+        assertThat(targetTypeCreatedEvent.getEntity().getId()).isEqualTo(createdTargetType.getId());
     }
 
     @Test
     @Description("Verifies that the target type updated event is published when a target type has been updated")
     public void targetTypeUpdatedEventIsPublished() throws InterruptedException {
-        List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
-        targetTypeManagement.update(entityFactory.targetType().update(targetTypes.get(0).getId()).name("updatedtargettype"));
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement.update(entityFactory.targetType().update(createdTargetType.getId()).name("updatedtargettype"));
 
         TargetTypeUpdatedEvent targetTypeUpdatedEvent = eventListener.waitForEvent(TargetTypeUpdatedEvent.class);
         assertThat(targetTypeUpdatedEvent).isNotNull();
-        assertThat(targetTypeUpdatedEvent.getEntity().getId()).isEqualTo(targetTypes.get(0).getId());
+        assertThat(targetTypeUpdatedEvent.getEntity().getId()).isEqualTo(createdTargetType.getId());
     }
 
     @Test
     @Description("Verifies that the target type deleted event is published when a target type has been deleted")
     public void targetTypeDeletedEventIsPublished() throws InterruptedException {
-        List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype", 1);
-        targetTypeManagement.delete(targetTypes.get(0).getId());
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement.delete(createdTargetType.getId());
 
         TargetTypeDeletedEvent targetTypeDeletedEvent = eventListener.waitForEvent(TargetTypeDeletedEvent.class);
         assertThat(targetTypeDeletedEvent).isNotNull();
-        assertThat(targetTypeDeletedEvent.getEntityId()).isEqualTo(targetTypes.get(0).getId());
+        assertThat(targetTypeDeletedEvent.getEntityId()).isEqualTo(createdTargetType.getId());
     }
 
     @Test

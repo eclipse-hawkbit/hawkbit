@@ -9,11 +9,10 @@
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
 import org.eclipse.hawkbit.repository.event.entity.EntityUpdatedEvent;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
 /**
- * Defines the remote event for updating a {@link SoftwareModuleType}.
+ * Defines the remote event for updating a {@link TargetType}.
  *
  */
 public class TargetTypeUpdatedEvent extends RemoteEntityEvent<TargetType>

@@ -159,7 +159,7 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
-        if (Objects.nonNull(target.getTargetType())){
+        if (target.getTargetType() != null){
             targetRest.setTargetType(target.getTargetType().getId());
         }
 

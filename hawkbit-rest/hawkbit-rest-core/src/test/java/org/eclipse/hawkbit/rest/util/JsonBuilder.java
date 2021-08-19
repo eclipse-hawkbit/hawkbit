@@ -432,7 +432,7 @@ public abstract class JsonBuilder {
 
             builder.append(new JSONObject().put("controllerId", target.getControllerId())
                     .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
-                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("updatedAt", "0").put("createdBy", "systemtest").put("updatedBy", "systemtest")
                     .put("address", address).put("securityToken", token).put("targetType", targetType).toString());
 
             if (++i < targets.size()) {

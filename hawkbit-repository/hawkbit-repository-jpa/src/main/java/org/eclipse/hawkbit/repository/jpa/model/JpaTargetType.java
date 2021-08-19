@@ -21,11 +21,13 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.ForeignKey;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Size;
@@ -56,6 +58,9 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
             @JoinColumn(name = "target_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_target_type"))}, inverseJoinColumns = {
             @JoinColumn(name = "distribution_set_type", nullable = false, updatable = false, foreignKey = @ForeignKey(value = ConstraintMode.CONSTRAINT, name = "fk_target_type_relation_ds_type"))})
     private Set<DistributionSetType> distributionSetTypes;
+
+    @OneToMany(targetEntity = JpaTarget.class, mappedBy = "targetType", fetch = FetchType.LAZY)
+    private Set<Target> targets;
 
     /**
      * Constructor
@@ -115,6 +120,11 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
         }
 
         return Collections.unmodifiableSet(distributionSetTypes);
+    }
+
+    @Override
+    public Set<Target> getTargets() {
+        return targets;
     }
 
     @Override

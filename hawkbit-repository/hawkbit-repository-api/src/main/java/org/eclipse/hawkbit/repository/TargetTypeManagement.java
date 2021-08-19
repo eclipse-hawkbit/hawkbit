@@ -58,7 +58,7 @@ public interface TargetTypeManagement {
      * @return List of targetType
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
-    List<TargetType> create(@NotNull @Valid Collection<TargetTypeCreate> creates);
+    List<TargetType> create(@NotEmpty @Valid Collection<TargetTypeCreate> creates);
 
     /**
      * @param id targetTypeId
@@ -72,7 +72,7 @@ public interface TargetTypeManagement {
      * @return TargetType page
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<TargetType> findAll(@NotNull Pageable pageable);
+    Page<TargetType> findAll(@NotNull Pageable pageable);
 
     /**
      * @param pageable
@@ -82,8 +82,7 @@ public interface TargetTypeManagement {
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
-
+    Page<TargetType> findByRsql(@NotNull Pageable pageable, @NotEmpty String rsqlParam);
 
     /**
      * @param id
@@ -92,6 +91,38 @@ public interface TargetTypeManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<TargetType> get(long id);
+
+    /**
+     * @param targetId
+     *          Target ID
+     * @return Target Type
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Optional<TargetType> findByTargetId(long targetId);
+
+    /**
+     * @param targetIds
+     *          List of Target ID
+     * @return Target Type
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<TargetType> findByTargetIds(Collection<Long> targetIds);
+
+    /**
+     * @param controllerId
+     *          Target controller ID
+     * @return Target Type
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Optional<TargetType> findByTargetControllerId(String controllerId);
+
+    /**
+     * @param controllerIds
+     *          List of Target controller ID
+     * @return Target Type
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    List<TargetType> findByTargetControllerIds(Collection<String> controllerIds);
 
 
     /**
@@ -131,6 +162,5 @@ public interface TargetTypeManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     TargetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds);
-
 
 }

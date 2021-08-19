@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -121,8 +122,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Slice<TargetType> findAll(Pageable pageable) {
-        return convertPage(targetTypeRepository.findAllWithoutCount(pageable), pageable);
+    public Page<TargetType> findAll(Pageable pageable) {
+        return convertPage(targetTypeRepository.findAll(pageable), pageable);
     }
 
     @Override
@@ -136,6 +137,30 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     @Override
     public Optional<TargetType> get(long id) {
         return targetTypeRepository.findById(id).map(targetType -> targetType);
+    }
+
+    @Override
+    public Optional<TargetType> findByTargetId(long targetId) {
+        return targetTypeRepository
+                .findOne(TargetTypeSpecification.hasTarget(targetId)).map(TargetType.class::cast);
+    }
+
+    @Override
+    public List<TargetType> findByTargetIds(Collection<Long> targetIds) {
+        return targetTypeRepository.findAll(TargetTypeSpecification.hasTarget(targetIds))
+                .stream().map(TargetType.class::cast).collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<TargetType> findByTargetControllerId(String controllerId) {
+        return targetTypeRepository
+                .findOne(TargetTypeSpecification.hasTargetControllerId(controllerId)).map(TargetType.class::cast);
+    }
+
+    @Override
+    public List<TargetType> findByTargetControllerIds(Collection<String> controllerIds) {
+        return targetTypeRepository.findAll(TargetTypeSpecification.hasTargetControllerIdIn(controllerIds))
+                .stream().map(TargetType.class::cast).collect(Collectors.toList());
     }
 
     @Override
@@ -187,12 +212,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         return (JpaTargetType) get(typeId).orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
     }
 
-    private JpaDistributionSetType findDsTypeAndThrowExceptionIfNotFound(final Long typeId) {
-        List<JpaDistributionSetType> dsTypes = distributionSetTypeRepository.findAllById(Collections.singleton(typeId));
-        if (dsTypes.isEmpty()) {
-            throw new EntityNotFoundException(DistributionSetType.class, typeId);
-        }
-        return dsTypes.get(0);
+    private void findDsTypeAndThrowExceptionIfNotFound(final Long typeId) {
+        distributionSetTypeRepository.findById(typeId).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
     }
 
     private void throwExceptionIfTargetTypeDoesNotExist(final Long typeId) {

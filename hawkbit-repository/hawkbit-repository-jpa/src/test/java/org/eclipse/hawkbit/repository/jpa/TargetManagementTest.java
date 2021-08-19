@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -1056,7 +1057,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound.get().getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
 
         // update the target type
-        targetManagement.update(entityFactory.target().update(target.getControllerId()).targetType(targetTypes.get(1).getId()));
+        TargetUpdate targetUpdate = entityFactory.target().update(target.getControllerId()).targetType(targetTypes.get(1).getId());
+        targetManagement.update(targetUpdate);
 
         // opt lock revision must be changed
         Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
