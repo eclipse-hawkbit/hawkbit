@@ -17,8 +17,6 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.util.StringUtils;
 
-import java.util.Objects;
-
 /**
  * Create/build implementation.
  *
@@ -52,7 +50,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
             target.setName(name);
         }
 
-        if (Objects.nonNull(targetTypeId)){
+        if (targetTypeId != null){
             TargetType targetType = targetTypeManagement.get(targetTypeId)
                     .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
             target.setTargetType(targetType);
