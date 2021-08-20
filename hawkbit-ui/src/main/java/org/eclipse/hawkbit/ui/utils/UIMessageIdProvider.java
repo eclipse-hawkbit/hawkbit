@@ -123,6 +123,10 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS = "message.autoassign.create.error.missingElements";
 
+    public static final String MESSAGE_DISTRIBUTION_ASSIGNED = "message.dist.already.assigned";
+
+    public static final String MESSAGE_DISTRIBUTION_NOT_ASSIGNED = "message.dist.not.assigned";
+
     public static final String MESSAGE_ERROR_NAMEREQUIRED = "message.error.nameRequired";
 
     public static final String MESSAGE_ERROR_VERSIONREQUIRED = "message.error.versionRequired";

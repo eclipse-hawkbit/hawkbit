@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -42,7 +42,7 @@ import com.vaadin.server.FontIcon;
 import com.vaadin.ui.Label;
 
 /**
- * 
+ *
  * Generate labels with icons according to entities' states
  *
  */
@@ -63,7 +63,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -101,7 +101,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -140,7 +140,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -177,7 +177,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -241,9 +241,15 @@ public final class StatusIconBuilder {
             } else if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.FINISHED) {
                 final DistributionSet dist = rolloutGroup.getRollout().getDistributionSet();
                 final String ds = HawkbitCommonUtil.getFormattedNameVersion(dist.getName(), dist.getVersion());
-
-                return new ProxyFontIcon(VaadinIcons.MINUS_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE,
-                        i18n.getMessage("message.dist.already.assigned", ds));
+                if (dist.isValid()) {
+                    return new ProxyFontIcon(VaadinIcons.MINUS_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE,
+                            i18n.getMessage(UIMessageIdProvider.MESSAGE_DISTRIBUTION_ASSIGNED, ds));
+                } else {
+                    // invalidated ds, finished rollout but ds wasn't assigned
+                    // to target
+                    return new ProxyFontIcon(VaadinIcons.MINUS_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE,
+                            i18n.getMessage(UIMessageIdProvider.MESSAGE_DISTRIBUTION_NOT_ASSIGNED, ds));
+                }
             } else {
                 return generateUnknwonStateIcon();
             }
@@ -264,7 +270,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -298,7 +304,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -333,7 +339,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -366,7 +372,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param getEntityStatus
@@ -393,7 +399,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param labelIdPrefix
@@ -424,7 +430,7 @@ public final class StatusIconBuilder {
 
         /**
          * constructor
-         * 
+         *
          * @param i18n
          *            message source for internationalization
          * @param labelIdPrefix
@@ -541,7 +547,7 @@ public final class StatusIconBuilder {
 
         /**
          * Generate a label from the entity according to its state
-         * 
+         *
          * @param entity
          *            to read the state from
          * @return the label
