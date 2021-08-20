@@ -2212,6 +2212,43 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     }
 
     @Test
+    @Description("Ensures that a post request for assign target type to target works.")
+    public void assignTargetTypeToTarget() throws Exception {
+        // create target type
+        TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
+        assertThat(targetType).isNotNull();
+
+        // create target
+        String targetControllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(targetControllerId, "testtarget");
+        assertThat(target).isNotNull();
+
+        // assign target type over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                .content("{\"id\":" + targetType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType().getId()).isEqualTo(targetType.getId());
+    }
+
+    @Test
+    @Description("Ensures that a post request for assign a invalid target type to target fails.")
+    public void assignInvalidTargetTypeToTargetFails() throws Exception {
+        // Invalid target type ID
+        long invalidTargetTypeId = 999;
+
+        // create target
+        String targetControllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(targetControllerId, "testtarget");
+        assertThat(target).isNotNull();
+
+        // assign invalid target type over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                .content("{\"id\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+    }
+
+    @Test
     @Description("Ensures that a delete request for unassign target type from target works.")
     public void unassignTargetTypeFromTarget() throws Exception {
         // create target type

@@ -105,10 +105,18 @@ public final class MgmtRestConstants {
     public static final String TARGET_TAG_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettags";
 
     /**
+     * The target URL mapping rest resource.
+     */
+    public static final String TARGET_TARGET_TYPE_V1_REQUEST_MAPPING = "/{targetId}/targettype";
+
+    /**
      * The target type URL mapping rest resource.
      */
     public static final String TARGETTYPE_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targettypes";
 
+    /**
+     * The target type URL mapping rest resource.
+     */
     public static final String TARGETTYPE_V1_DS_TYPES = "compatibledistributionsettypes";
 
     /**

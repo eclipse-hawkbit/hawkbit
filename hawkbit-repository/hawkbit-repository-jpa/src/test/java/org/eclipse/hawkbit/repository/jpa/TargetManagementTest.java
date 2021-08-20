@@ -1077,6 +1077,32 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @WithUser(allSpPermissions = true)
+    @Description("Checks that target type to a target can be assigned.")
+    public void assignTargetTypeInTarget() {
+        // create a target
+        final Target target = testdataFactory.createTarget("target1", "testtarget");
+        // initial opt lock revision must be one
+        Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
+        assertThat(targetFound).isPresent();
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
+        assertThat(targetFound.get().getTargetType()).isNull();
+
+        // create a target type
+        TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
+        assertThat(targetType).isNotNull();
+
+        // assign target type to target
+        targetManagement.assignType(targetFound.get().getControllerId(), targetType.getId());
+
+        // opt lock revision must be changed
+        Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
+        assertThat(targetFound1).isPresent();
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
+        assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetType.getId());
+    }
+
+    @Test
     @Description("Queries and loads the metadata related to a given target.")
     public void findAllTargetMetadataByControllerId() {
         // create targets
