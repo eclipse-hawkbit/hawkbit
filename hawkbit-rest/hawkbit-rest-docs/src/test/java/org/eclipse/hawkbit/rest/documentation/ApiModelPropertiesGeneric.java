@@ -19,12 +19,12 @@ public final class ApiModelPropertiesGeneric {
     public static final String ITEM_ID = "The technical identifier " + ENDING;
     public static final String NAME = "The name" + ENDING;
     public static final String DESCRPTION = "The description" + ENDING;
-    public static final String COLOUR = "The colour" + ENDING;
+    public static final String COLOUR = "The colour" + ENDING + ". In HEX format, e.g. #800080";
     public static final String DELETED = "Deleted flag, used for soft deleted entities";
 
-    public static final String CREATED_BY = "Entity was originally created by User, AMQP-Controller, anonymous etc.)";
+    public static final String CREATED_BY = "Entity was originally created by (User, AMQP-Controller, anonymous etc.)";
     public static final String CREATED_AT = "Entity was originally created at (timestamp UTC in milliseconds)";
-    public static final String LAST_MODIFIED_BY = "Entity was last modified by User, AMQP-Controller, anonymous etc.)";
+    public static final String LAST_MODIFIED_BY = "Entity was last modified by (User, AMQP-Controller, anonymous etc.)";
     public static final String LAST_MODIFIED_AT = "Entity was last modified at (timestamp UTC in milliseconds)";
 
     // Paging elements

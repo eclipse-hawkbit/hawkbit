@@ -49,6 +49,24 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonProperty
     private boolean requestAttributes;
 
+    @JsonProperty
+    private Long targetType;
+
+    /**
+     * @return Target type ID
+     */
+    public Long getTargetType() {
+        return targetType;
+    }
+
+    /**
+     * @param targetType
+     *          Target type ID
+     */
+    public void setTargetType(Long targetType) {
+        this.targetType = targetType;
+    }
+
     /**
      * @return the controllerId
      */
@@ -150,6 +168,9 @@ public class MgmtTarget extends MgmtNamedEntity {
         return securityToken;
     }
 
+    /**
+     * @return Address
+     */
     public String getAddress() {
         return address;
     }
@@ -171,6 +192,9 @@ public class MgmtTarget extends MgmtNamedEntity {
         this.securityToken = securityToken;
     }
 
+    /**
+     * @return boolean true or false
+     */
     public boolean isRequestAttributes() {
         return requestAttributes;
     }

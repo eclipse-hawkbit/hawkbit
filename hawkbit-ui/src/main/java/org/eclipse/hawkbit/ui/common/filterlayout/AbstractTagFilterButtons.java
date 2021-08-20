@@ -46,6 +46,8 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
 
     protected final UINotification uiNotification;
     private final Button noTagButton;
+    private final Button noTargetTypeButton;
+
     private final transient TagFilterButtonClick tagFilterButtonClick;
 
     /**
@@ -64,6 +66,7 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         this.uiNotification = uiDependencies.getUiNotification();
         this.tagFilterLayoutUiState = tagFilterLayoutUiState;
         this.noTagButton = buildNoTagButton();
+        this.noTargetTypeButton = buildNoTargetTypeButton();
         this.tagFilterButtonClick = new TagFilterButtonClick(this::onFilterChangedEvent, this::onNoTagChangedEvent);
     }
 
@@ -80,6 +83,21 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
         noTag.addClickListener(event -> getFilterButtonClickBehaviour().processFilterClick(dummyNoTag));
 
         return noTag;
+    }
+
+    private Button buildNoTargetTypeButton() {
+        final Button noTargetType = SPUIComponentProvider.getButton(
+                getFilterButtonIdPrefix() + "." + SPUIDefinitions.NO_TARGET_TYPE_BUTTON_ID,
+                i18n.getMessage(UIMessageIdProvider.LABEL_NO_TARGET_TYPE),
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_FILTER), "button-no-target-type", false, null,
+                SPUITagButtonStyle.class);
+
+        final ProxyTag dummyNoTag = new ProxyTag();
+        dummyNoTag.setNoTag(true);
+
+        noTargetType.addClickListener(event -> getFilterButtonClickBehaviour().processFilterClick(dummyNoTag));
+
+        return noTargetType;
     }
 
     @Override
@@ -214,6 +232,13 @@ public abstract class AbstractTagFilterButtons extends AbstractFilterButtons<Pro
      */
     public Button getNoTagButton() {
         return noTagButton;
+    }
+
+    /**
+     * @return Button component of no tag
+     */
+    public Button getNoTargetTypeButton() {
+        return noTargetTypeButton;
     }
 
     /**

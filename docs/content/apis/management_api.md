@@ -29,6 +29,7 @@ Supported HTTP-methods are:
 Available Management APIs resources are:
 
 - [Targets](/hawkbit/apis/mgmt/targets/)
+- [Target types](/hawkbit/apis/mgmt/targettypess/)
 - [Distribution sets](/hawkbit/apis/mgmt/distributionsets/)
 - [Distribution set types](/hawkbit/apis/mgmt/distributionsettypes/)
 - [Software modules](/hawkbit/apis/mgmt/softwaremodules/)

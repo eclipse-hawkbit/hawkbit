@@ -77,6 +77,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     protected TargetTagRepository targetTagRepository;
 
     @Autowired
+    protected TargetTypeRepository targetTypeRepository;
+
+    @Autowired
     protected DistributionSetTagRepository distributionSetTagRepository;
 
     @Autowired

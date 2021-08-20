@@ -19,10 +19,12 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -85,17 +87,18 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
 
     @Autowired
     DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
-            final UINotification uiNotification, final ManagementUIState managementUIState,
-            final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement smManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement,
+                   final UINotification uiNotification, final ManagementUIState managementUIState,
+                   final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
+                   final SoftwareModuleManagement smManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+                   final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
+                   final EntityFactory entityFactory, final UiProperties uiProperties,
+                   final TargetTagManagement targetTagManagement,
+                   final TargetTypeManagement targetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final TenantConfigurationManagement configManagement,
-            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
-            final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
+                   final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
+                   final TenantConfigurationManagement configManagement,
+                   final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+                   final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -104,8 +107,8 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
 
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
-                    targetFilterQueryManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState());
+                    targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement, distributionSetManagement, softwareModuleTypeManagement);
 
             this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,

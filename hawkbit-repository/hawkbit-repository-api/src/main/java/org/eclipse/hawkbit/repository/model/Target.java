@@ -86,6 +86,11 @@ public interface Target extends NamedEntity {
     TargetUpdateStatus getUpdateStatus();
 
     /**
+     * @return Target type {@link TargetType}.
+     */
+    TargetType getTargetType();
+
+    /**
      * @return the poll time which holds the last poll time of the target, the
      *         next poll time and the overdue time. In case the
      *         {@link #lastTargetQuery} is not set e.g. the target never polled

@@ -83,6 +83,8 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_NO_TAG = "label.no.tag";
 
+    public static final String LABEL_NO_TARGET_TYPE = "label.no.target.type";
+
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
 
     public static final String LABEL_EDIT_FILTER = "label.edit.filter";

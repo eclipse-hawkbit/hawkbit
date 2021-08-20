@@ -8,24 +8,35 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Builder implementation for {@link Target}.
  *
  */
 public class JpaTargetBuilder implements TargetBuilder {
+    final private TargetTypeManagement targetTypeManagement;
+
+    /**
+     * @param targetTypeManagement
+     *          Target type management
+     */
+    public JpaTargetBuilder(TargetTypeManagement targetTypeManagement) {
+        this.targetTypeManagement = targetTypeManagement;
+    }
 
     @Override
     public TargetUpdate update(final String controllerId) {
-        return new JpaTargetUpdate(controllerId);
+        return new JpaTargetUpdate(controllerId, targetTypeManagement);
     }
 
     @Override
     public TargetCreate create() {
-        return new JpaTargetCreate();
+        return new JpaTargetCreate(targetTypeManagement);
     }
 
 }

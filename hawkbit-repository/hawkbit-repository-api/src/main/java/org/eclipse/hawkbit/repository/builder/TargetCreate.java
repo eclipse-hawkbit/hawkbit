@@ -47,6 +47,13 @@ public interface TargetCreate {
     TargetCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
+     * @param targetTypeId
+     *            for {@link Target#getTargetType()}
+     * @return updated builder instance
+     */
+    TargetCreate targetType(Long targetTypeId);
+
+    /**
      * @param securityToken
      *            for {@link Target#getSecurityToken()} is generated with a
      *            random sequence as default if not set explicitly

@@ -8,11 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.util.StringUtils;
+
+import java.util.Objects;
 
 /**
  * Create/build implementation.
@@ -20,8 +23,14 @@ import org.springframework.util.StringUtils;
  */
 public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> implements TargetCreate {
 
-    JpaTargetCreate() {
-        super(null);
+    /**
+     * Constructor
+     *
+     * @param targetTypeManagement
+     *          Target type management
+     */
+    JpaTargetCreate(TargetTypeManagement targetTypeManagement) {
+        super(null, targetTypeManagement);
     }
 
     @Override
@@ -36,6 +45,10 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
 
         if (!StringUtils.isEmpty(name)) {
             target.setName(name);
+        }
+
+        if (Objects.nonNull(targetTypeId)){
+            target.setTargetType(findTargetTypeWithExceptionIfNotFound(targetTypeId));
         }
 
         target.setDescription(description);

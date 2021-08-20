@@ -67,7 +67,7 @@ final class MgmtDistributionSetTypeMapper {
                 .orElse(Collections.emptyList());
     }
 
-    static List<MgmtDistributionSetType> toListResponse(final List<DistributionSetType> types) {
+    static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }

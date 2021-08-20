@@ -44,6 +44,13 @@ public interface TargetUpdate {
     TargetUpdate securityToken(@Size(min = 1, max = Target.SECURITY_TOKEN_MAX_SIZE) @NotNull String securityToken);
 
     /**
+     * @param targetTypeId
+     *            for {@link Target#getTargetType()}
+     * @return updated builder instance
+     */
+    TargetUpdate targetType(Long targetTypeId);
+
+    /**
      * @param address
      *            for {@link Target#getAddress()}
      *

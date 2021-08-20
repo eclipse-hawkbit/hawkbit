@@ -38,6 +38,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.TenantStatsManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
@@ -46,7 +47,9 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetBuilder;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.builder.TargetTypeBuilder;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
@@ -62,7 +65,9 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetBuilder;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryBuilder;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeBuilder;
 import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactionManager;
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
@@ -85,6 +90,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
@@ -229,6 +235,21 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     DistributionSetBuilder distributionSetBuilder(final DistributionSetTypeManagement distributionSetTypeManagement,
             final SoftwareModuleManagement softwareManagement) {
         return new JpaDistributionSetBuilder(distributionSetTypeManagement, softwareManagement);
+    }
+
+    @Bean
+    TargetBuilder targetBuilder(final TargetTypeManagement targetTypeManagement){
+        return new JpaTargetBuilder(targetTypeManagement);
+    }
+
+    /**
+     * @param dsTypeManagement
+     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
+     * @return TargetTypeBuilder bean
+     */
+    @Bean
+    TargetTypeBuilder targetTypeBuilder(final DistributionSetTypeManagement dsTypeManagement) {
+        return new JpaTargetTypeBuilder(dsTypeManagement);
     }
 
     @Bean
@@ -465,10 +486,26 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository,
+            final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
             final QuotaManagement quotaManagement) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                distributionSetRepository, virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
+                distributionSetRepository, targetTypeRepository, virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
+    }
+
+    /**
+     * {@link JpaTargetTypeManagement} bean.
+     *
+     * @return a new {@link TargetTypeManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
+            final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final QuotaManagement quotaManagement) {
+        return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository,
+                virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
     }
 
     /**
