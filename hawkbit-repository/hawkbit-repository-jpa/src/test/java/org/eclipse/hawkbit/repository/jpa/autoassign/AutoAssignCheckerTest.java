@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -105,11 +105,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery()
-                        .updateAutoAssign(targetFilterQueryManagement.create(
-                                entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
-                        .ds(setA.getId()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
@@ -159,7 +159,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        assertThatExceptionOfType(InvalidAutoAssignDistributionSetException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(() -> {
             final Long filterId = targetFilterQueryManagement.create(
                     entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
                     .getId();
@@ -221,10 +221,10 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId())
-                .stream().filter(a -> targetIds.contains(a.getTarget().getControllerId()))
-                .forEach(a -> assertThat(a.getInitiatedBy()).as(
-                        "Action should be initiated by the user who initiated the auto assignment")
+        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId()).stream()
+                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy())
+                        .as("Action should be initiated by the user who initiated the auto assignment")
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 

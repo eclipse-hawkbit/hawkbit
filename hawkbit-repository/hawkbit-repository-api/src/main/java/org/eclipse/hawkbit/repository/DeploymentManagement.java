@@ -20,11 +20,11 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -56,7 +57,7 @@ public interface DeploymentManagement {
      *
      * @param deploymentRequests
      *            information about all target-ds-assignments that shall be made
-     * 
+     *
      * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
@@ -66,17 +67,18 @@ public interface DeploymentManagement {
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    List<DistributionSetAssignmentResult> assignDistributionSets(@Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
+    List<DistributionSetAssignmentResult> assignDistributionSets(
+            @Valid @NotEmpty List<DeploymentRequest> deploymentRequests);
 
     /**
      * Assigns {@link DistributionSet}s to {@link Target}s according to the
@@ -88,7 +90,7 @@ public interface DeploymentManagement {
      *            information about all target-ds-assignments that shall be made
      * @param actionMessage
      *            an optional message for the action status
-     * 
+     *
      * @return the list of assignment results
      *
      * @throws IncompleteDistributionSetException
@@ -98,23 +100,23 @@ public interface DeploymentManagement {
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
      * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<DistributionSetAssignmentResult> assignDistributionSets(String initiatedBy,
             @Valid @NotEmpty List<DeploymentRequest> deploymentRequests, String actionMessage);
-            
-                /**
+
+    /**
      * build a {@link DeploymentRequest} for a target distribution set
      * assignment
-     * 
+     *
      * @param controllerId
      *            ID of target
      * @param distributionSetId
@@ -128,9 +130,9 @@ public interface DeploymentManagement {
     /**
      * Registers "offline" assignments. "offline" assignment means adding a
      * completed action for a {@link DistributionSet} to a {@link Target}.
-     * 
+     *
      * The handling differs to hawkBit-managed updates by means that:<br/>
-     * 
+     *
      * <ol type="A">
      * <li>it ignores targets completely that are in
      * {@link TargetUpdateStatus#PENDING}.</li>
@@ -139,12 +141,12 @@ public interface DeploymentManagement {
      * status to {@link TargetUpdateStatus#IN_SYNC}.</li>
      * <li>does not send a {@link TargetAssignDistributionSetEvent}.</li>
      * </ol>
-     * 
+     *
      * @param assignments
      *            target IDs with the respective distribution set ID which they
      *            are supposed to be assigned to
      * @return the assignment results
-     * 
+     *
      * @throws IncompleteDistributionSetException
      *             if mandatory {@link SoftwareModuleType} are not assigned as
      *             defined by the {@link DistributionSetType}.
@@ -152,11 +154,11 @@ public interface DeploymentManagement {
      * @throws EntityNotFoundException
      *             if either provided {@link DistributionSet} or {@link Target}s
      *             do not exist
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of targets the distribution set can be
      *             assigned to at once is exceeded
-     * 
+     *
      * @throws MultiAssignmentIsNotEnabledException
      *             if the request results in multiple assignments to the same
      *             target and multiassignment is disabled
@@ -173,7 +175,7 @@ public interface DeploymentManagement {
      *            to be canceled
      *
      * @return canceled {@link Action}
-     * 
+     *
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active or is already a cancel
      *             action
@@ -221,7 +223,7 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated to the actions to count
      * @return the count value of found actions associated to the target
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -234,7 +236,7 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be id of the action
      * @return the corresponding {@link Action}
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<Action> findAction(long actionId);
@@ -252,7 +254,7 @@ public interface DeploymentManagement {
     /**
      * Retrieves all {@link Action} which assigned to a specific
      * {@link DistributionSet}.
-     * 
+     *
      * @param pageable
      *            the page request parameter for paging and sorting the result
      * @param distributionSetId
@@ -260,7 +262,7 @@ public interface DeploymentManagement {
      *            in the result
      * @return a list of {@link Action} which are assigned to a specific
      *         {@link DistributionSet}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -279,7 +281,7 @@ public interface DeploymentManagement {
      *            the page request
      * @return a slice of actions assigned to the specific target and the
      *         specification
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -299,7 +301,7 @@ public interface DeploymentManagement {
      * @param pageable
      *            the pageable request to limit, sort the actions
      * @return a slice of actions found for a specific target
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsByTarget(@NotEmpty String controllerId, @NotNull Pageable pageable);
@@ -313,7 +315,7 @@ public interface DeploymentManagement {
      * @param actionId
      *            to be filtered on
      * @return the corresponding {@link Page} of {@link ActionStatus}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -346,13 +348,13 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all active {@link Action}s of a specific target.
-     * 
+     *
      * @param pageable
      *            the page request parameter for paging and sorting the result
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -367,7 +369,7 @@ public interface DeploymentManagement {
      * @param controllerId
      *            the target associated with the actions
      * @return a list of actions associated with the given target
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -377,13 +379,13 @@ public interface DeploymentManagement {
     /**
      * Retrieves active {@link Action}s with highest weight that are assigned to
      * a {@link Target}.
-     * 
+     *
      * @param controllerId
      *            identifies the target to retrieve the action from
      * @param maxActionCount
      *            max size of returned list
      * @return the action
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActiveActionsWithHighestWeight(@NotEmpty String controllerId, int maxActionCount);
@@ -391,7 +393,7 @@ public interface DeploymentManagement {
     /**
      * Get weight of an Action. Returns the default value if the weight is null
      * according to the properties.
-     * 
+     *
      * @param action
      *            to extract the weight from
      * @return weight of the action
@@ -408,10 +410,10 @@ public interface DeploymentManagement {
      *            to be canceled
      *
      * @return quite {@link Action}
-     * 
+     *
      * @throws CancelActionNotAllowedException
      *             in case the given action is not active
-     * 
+     *
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -425,7 +427,7 @@ public interface DeploymentManagement {
      * @param actionId
      *            the ID of the action
      * @return the updated or the found {@link Action}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if action with given ID does not exist
      */
@@ -438,7 +440,7 @@ public interface DeploymentManagement {
      *
      * @param targetIds
      *            ids of the {@link Target}s the actions belong to
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     void cancelInactiveScheduledActionsForTargets(List<Long> targetIds);
@@ -468,11 +470,11 @@ public interface DeploymentManagement {
 
     /**
      * Returns {@link DistributionSet} that is assigned to given {@link Target}.
-     * 
+     *
      * @param controllerId
      *            of target
      * @return assigned {@link DistributionSet}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -481,11 +483,11 @@ public interface DeploymentManagement {
     /**
      * Returns {@link DistributionSet} that is installed on given
      * {@link Target}.
-     * 
+     *
      * @param controllerId
      *            of target
      * @return installed {@link DistributionSet}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -494,20 +496,20 @@ public interface DeploymentManagement {
     /**
      * Deletes actions which match one of the given action status and which have
      * not been modified since the given (absolute) time-stamp.
-     * 
+     *
      * @param status
      *            Set of action status.
      * @param lastModified
      *            A time-stamp in milliseconds.
-     * 
+     *
      * @return The number of action entries that were deleted.
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     int deleteActionsByStatusAndLastModifiedBefore(@NotNull Set<Action.Status> status, long lastModified);
 
     /**
-     * Checks if there is an action for the device with the given controller ID that
-     * is in the {@link Action.Status#CANCELING} state.
+     * Checks if there is an action for the device with the given controller ID
+     * that is in the {@link Action.Status#CANCELING} state.
      *
      * @param controllerId
      *            of target
@@ -515,5 +517,14 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     boolean hasPendingCancellations(@NotEmpty String controllerId);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void invalidateDistributionSet(DistributionSetInvalidation distributionSetInvalidation);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countRolloutsForInvalidation(Collection<Long> setIds);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countAutoAssignmentsForInvalidation(Collection<Long> setIds);
 
 }

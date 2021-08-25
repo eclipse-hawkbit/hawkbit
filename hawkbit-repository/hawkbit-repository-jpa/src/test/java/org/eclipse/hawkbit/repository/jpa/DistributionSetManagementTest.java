@@ -31,16 +31,20 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -174,6 +178,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> distributionSetManagement.updateMetaData(set.getId(),
                 entityFactory.generateDsMetadata(NOT_EXIST_ID, "xxx")), "DistributionSetMetadata");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.getOrElseThrowException(NOT_EXIST_IDL),
+                "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.getValidAndComplete(NOT_EXIST_IDL), "DistributionSet");
+
+        verifyThrownExceptionBy(() -> distributionSetManagement.getValid(NOT_EXIST_IDL), "DistributionSet");
     }
 
     @Test
@@ -494,6 +505,16 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that an exception is thrown when trying to update an invalid distribution set")
+    public void updateInvalidDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement
+                        .update(entityFactory.distributionSet().update(distributionSet.getId()).name("new_name")));
+    }
+
+    @Test
     @Description("Verifies the enforcement of the software module quota per distribution set.")
     public void assignSoftwareModulesUntilQuotaIsExceeded() {
 
@@ -531,6 +552,33 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> distributionSetManagement
                 .assignSoftwareModules(ds3.getId(), modules.subList(firstHalf, modules.size())));
 
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to assign software modules to an invalidated distribution set.")
+    public void verifyAssignSoftwareModulesToInvalidDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleOs();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(distributionSet.getId(),
+                        Collections.singletonList(softwareModule.getId())));
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to unassign a software module from an invalidated distribution set.")
+    public void verifyUnassignSoftwareModulesToInvalidDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleOs();
+        distributionSetManagement.assignSoftwareModules(distributionSet.getId(),
+                Collections.singletonList(softwareModule.getId()));
+        deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
+                Collections.singletonList(distributionSet.getId()), CancelationType.NONE, false));
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement
+                        .unassignSoftwareModule(distributionSet.getId(), softwareModule.getId()));
     }
 
     @Test
@@ -1011,6 +1059,29 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         final List<Long> collect = foundDs.stream().map(DistributionSet::getId).collect(Collectors.toList());
         assertThat(collect).containsAll(searchIds);
+    }
+
+    @Test
+    @Description("Verify that an exception is thrown when trying to get an invalid distribution set")
+    public void verifyGetValid() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.getValid(distributionSet.getId()));
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.getValidAndComplete(distributionSet.getId()));
+    }
+
+    @Test
+    @Description("Verify that an exception is thrown when trying to get an incomplete distribution set")
+    public void verifyGetValidAndComplete() {
+        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
+
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Incomplete distributionSet should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.getValidAndComplete(distributionSet.getId()));
     }
 
 }

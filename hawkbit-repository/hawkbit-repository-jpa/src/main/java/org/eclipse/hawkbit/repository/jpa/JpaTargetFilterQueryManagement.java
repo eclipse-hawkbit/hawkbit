@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -266,7 +265,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             assertMaxTargetsQuota(targetFilterQuery.getQuery());
             final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
-            verifyDistributionSetAndThrowExceptionIfNotValid(ds);
+            verifyDistributionSetAndThrowExceptionIfDeleted(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
@@ -275,9 +274,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
 
-    private static void verifyDistributionSetAndThrowExceptionIfNotValid(final DistributionSet distributionSet) {
-        if (!distributionSet.isComplete() || distributionSet.isDeleted() || !distributionSet.isValid()) {
-            throw new InvalidAutoAssignDistributionSetException();
+    private static void verifyDistributionSetAndThrowExceptionIfDeleted(final DistributionSet distributionSet) {
+        if (distributionSet.isDeleted()) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSet.getId());
         }
     }
 

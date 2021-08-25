@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
@@ -39,12 +38,10 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
@@ -54,14 +51,11 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -89,10 +83,6 @@ import com.google.common.collect.Lists;
 @Transactional(readOnly = true)
 @Validated
 public class JpaDistributionSetManagement implements DistributionSetManagement {
-
-    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
-            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
-            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
 
     private final EntityManager entityManager;
 
@@ -126,10 +116,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final Database database;
 
-    private final RolloutRepository rolloutRepository;
-
-    private final DeploymentManagement deploymentManagement;
-
     JpaDistributionSetManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
@@ -140,8 +126,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit, final Database database,
-            final RolloutRepository rolloutRepository, final DeploymentManagement deploymentManagement) {
+            final AfterTransactionCommitExecutor afterCommit, final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.distributionSetTagManagement = distributionSetTagManagement;
@@ -158,8 +143,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
         this.database = database;
-        this.rolloutRepository = rolloutRepository;
-        this.deploymentManagement = deploymentManagement;
     }
 
     @Override
@@ -836,14 +819,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public DistributionSet getOrElseThrowException(final long id) {
-        final DistributionSet distributionSet = get(id)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-
-        if (distributionSet.isDeleted()) {
-            throw new EntityNotFoundException(DistributionSet.class, id);
-        }
-
-        return distributionSet;
+        return get(id).orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
     }
 
     @Override
@@ -868,55 +844,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         return distributionSet;
-    }
-
-    @Override
-    public void invalidate(final DistributionSetInvalidation distributionSetInvalidation) {
-        distributionSetInvalidation.getSetIds().forEach(setId -> {
-            final JpaDistributionSet set = (JpaDistributionSet) getValidAndComplete(setId);
-            set.invalidate();
-            distributionSetRepository.save(set);
-
-            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                    || distributionSetInvalidation.isCancelRollouts()) {
-                // stop all rollouts for this distribution set
-                rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-                    final JpaRollout jpaRollout = (JpaRollout) rollout;
-                    jpaRollout.setStatus(RolloutStatus.STOPPING);
-                    rolloutRepository.save(jpaRollout);
-                });
-            }
-
-            // remove distribution set from all auto assignments
-            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
-
-            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
-                actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
-                    final JpaAction jpaAction = (JpaAction) action;
-                    deploymentManagement.cancelAction(jpaAction.getId());
-                });
-            }
-
-            if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
-                actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
-                    final JpaAction jpaAction = (JpaAction) action;
-                    deploymentManagement.forceQuitAction(jpaAction.getId());
-                });
-            }
-        });
-    }
-
-    @Override
-    public long countRolloutsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream()
-                .mapToLong(
-                        setId -> rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE))
-                .sum();
-    }
-
-    @Override
-    public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
     }
 
 }

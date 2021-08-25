@@ -12,6 +12,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -52,6 +53,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -67,7 +69,10 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -129,6 +134,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         + ACTION_PAGE_LIMIT + ")");
     }
 
+    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
+            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
+            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
+
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
     private final DistributionSetRepository distributionSetRepository;
@@ -145,6 +154,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantAware tenantAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
+    private final RolloutRepository rolloutRepository;
+    private final TargetFilterQueryRepository targetFilterQueryRepository;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement,
@@ -154,7 +165,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties, final RolloutRepository rolloutRepository,
+            final TargetFilterQueryRepository targetFilterQueryRepository) {
         super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -175,6 +187,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.tenantAware = tenantAware;
         this.database = database;
         retryTemplate = createRetryTemplate();
+        this.rolloutRepository = rolloutRepository;
+        this.targetFilterQueryRepository = targetFilterQueryRepository;
     }
 
     @Override
@@ -872,5 +886,71 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         template.setRetryPolicy(retryPolicy);
 
         return template;
+    }
+
+    @Override
+    public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
+        distributionSetInvalidation.getSetIds().forEach(setId -> {
+            final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(setId);
+            invalidateDistributionSet(set);
+
+            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                    || distributionSetInvalidation.isCancelRollouts()) {
+                cancelRollouts(set);
+            }
+
+            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
+                cancelActions(distributionSetInvalidation, set);
+            }
+        });
+
+        cancelAutoAssignments(distributionSetInvalidation);
+    }
+
+    private void invalidateDistributionSet(final JpaDistributionSet set) {
+        set.invalidate();
+        distributionSetRepository.save(set);
+    }
+
+    private void cancelRollouts(final DistributionSet set) {
+        // stop all rollouts for this distribution set
+        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+            final JpaRollout jpaRollout = (JpaRollout) rollout;
+            jpaRollout.setStatus(RolloutStatus.STOPPING);
+            rolloutRepository.save(jpaRollout);
+        });
+    }
+
+    private void cancelActions(final DistributionSetInvalidation distributionSetInvalidation,
+            final DistributionSet set) {
+        actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+            final JpaAction jpaAction = (JpaAction) action;
+            cancelAction(jpaAction.getId());
+        });
+        if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
+            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                final JpaAction jpaAction = (JpaAction) action;
+                forceQuitAction(jpaAction.getId());
+            });
+        }
+    }
+
+    private void cancelAutoAssignments(final DistributionSetInvalidation distributionSetInvalidation) {
+        // remove distribution set from all auto assignments
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(distributionSetInvalidation.getSetIds()
+                .toArray(new Long[distributionSetInvalidation.getSetIds().size()]));
+    }
+
+    @Override
+    public long countRolloutsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream()
+                .mapToLong(
+                        setId -> rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE))
+                .sum();
+    }
+
+    @Override
+    public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
     }
 }

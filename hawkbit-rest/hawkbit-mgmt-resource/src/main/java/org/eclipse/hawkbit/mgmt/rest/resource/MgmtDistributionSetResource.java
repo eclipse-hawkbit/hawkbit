@@ -382,7 +382,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<Void> invalidateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @Valid @RequestBody final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
-        distributionSetManagement.invalidate(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
+        deployManagament.invalidateDistributionSet(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
                 MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
                 invalidateRequestBody.isCancelRollouts()));
         return ResponseEntity.ok().build();
