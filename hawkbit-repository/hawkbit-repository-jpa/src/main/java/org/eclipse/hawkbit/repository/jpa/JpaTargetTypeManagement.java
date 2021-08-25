@@ -8,6 +8,12 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -31,19 +37,12 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * JPA implementation of {@link TargetTypeManagement}.
@@ -87,7 +86,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Optional<TargetType> getByName(String name) {
+    public Optional<TargetType> getByName(final String name) {
         return targetTypeRepository.findByName(name).map(TargetType.class::cast);
     }
 
@@ -97,13 +96,19 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public TargetType create(TargetTypeCreate create) {
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetType create(final TargetTypeCreate create) {
         final JpaTargetTypeCreate typeCreate = (JpaTargetTypeCreate) create;
         return targetTypeRepository.save(typeCreate.build());
     }
 
     @Override
-    public List<TargetType> create(Collection<TargetTypeCreate> creates) {
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public List<TargetType> create(final Collection<TargetTypeCreate> creates) {
         return creates.stream().map(this::create).collect(Collectors.toList());
     }
 
@@ -122,12 +127,12 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Page<TargetType> findAll(Pageable pageable) {
+    public Page<TargetType> findAll(final Pageable pageable) {
         return convertPage(targetTypeRepository.findAll(pageable), pageable);
     }
 
     @Override
-    public Page<TargetType> findByRsql(Pageable pageable, String rsqlParam) {
+    public Page<TargetType> findByRsql(final Pageable pageable, final String rsqlParam) {
         final Specification<JpaTargetType> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTypeFields.class,
                 virtualPropertyReplacer, database);
 
@@ -135,41 +140,40 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Optional<TargetType> get(long id) {
+    public Optional<TargetType> get(final long id) {
         return targetTypeRepository.findById(id).map(targetType -> targetType);
     }
 
     @Override
-    public Optional<TargetType> findByTargetId(long targetId) {
-        return targetTypeRepository
-                .findOne(TargetTypeSpecification.hasTarget(targetId)).map(TargetType.class::cast);
+    public Optional<TargetType> findByTargetId(final long targetId) {
+        return targetTypeRepository.findOne(TargetTypeSpecification.hasTarget(targetId)).map(TargetType.class::cast);
     }
 
     @Override
-    public List<TargetType> findByTargetIds(Collection<Long> targetIds) {
-        return targetTypeRepository.findAll(TargetTypeSpecification.hasTarget(targetIds))
-                .stream().map(TargetType.class::cast).collect(Collectors.toList());
+    public List<TargetType> findByTargetIds(final Collection<Long> targetIds) {
+        return targetTypeRepository.findAll(TargetTypeSpecification.hasTarget(targetIds)).stream()
+                .map(TargetType.class::cast).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<TargetType> findByTargetControllerId(String controllerId) {
-        return targetTypeRepository
-                .findOne(TargetTypeSpecification.hasTargetControllerId(controllerId)).map(TargetType.class::cast);
+    public Optional<TargetType> findByTargetControllerId(final String controllerId) {
+        return targetTypeRepository.findOne(TargetTypeSpecification.hasTargetControllerId(controllerId))
+                .map(TargetType.class::cast);
     }
 
     @Override
-    public List<TargetType> findByTargetControllerIds(Collection<String> controllerIds) {
-        return targetTypeRepository.findAll(TargetTypeSpecification.hasTargetControllerIdIn(controllerIds))
-                .stream().map(TargetType.class::cast).collect(Collectors.toList());
+    public List<TargetType> findByTargetControllerIds(final Collection<String> controllerIds) {
+        return targetTypeRepository.findAll(TargetTypeSpecification.hasTargetControllerIdIn(controllerIds)).stream()
+                .map(TargetType.class::cast).collect(Collectors.toList());
     }
 
     @Override
-    public List<TargetType> get(Collection<Long> ids) {
+    public List<TargetType> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(targetTypeRepository.findAllById(ids));
     }
 
     @Override
-    public TargetType update(TargetTypeUpdate update) {
+    public TargetType update(final TargetTypeUpdate update) {
         final GenericTargetTypeUpdate typeUpdate = (GenericTargetTypeUpdate) update;
 
         final JpaTargetType type = findTargetTypeAndThrowExceptionIfNotFound(typeUpdate.getId());
@@ -182,7 +186,11 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public TargetType assignCompatibleDistributionSetTypes(long targetTypeId, Collection<Long> distributionSetTypeIds) {
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetType assignCompatibleDistributionSetTypes(final long targetTypeId,
+            final Collection<Long> distributionSetTypeIds) {
         final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository
                 .findAllById(distributionSetTypeIds);
 
@@ -200,7 +208,10 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public TargetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeId) {
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetType unassignDistributionSetType(final long targetTypeId, final long distributionSetTypeId) {
         final JpaTargetType type = findTargetTypeAndThrowExceptionIfNotFound(targetTypeId);
         findDsTypeAndThrowExceptionIfNotFound(distributionSetTypeId);
         type.removeDistributionSetType(distributionSetTypeId);
@@ -212,8 +223,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         return (JpaTargetType) get(typeId).orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
     }
 
-    private void findDsTypeAndThrowExceptionIfNotFound(final Long typeId) {
-        distributionSetTypeRepository.findById(typeId).orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
+    private JpaDistributionSetType findDsTypeAndThrowExceptionIfNotFound(final Long typeId) {
+        return distributionSetTypeRepository.findById(typeId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
     }
 
     private void throwExceptionIfTargetTypeDoesNotExist(final Long typeId) {
@@ -242,9 +254,4 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     private static Page<TargetType> convertPage(final Page<JpaTargetType> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
-
-    private static Slice<TargetType> convertPage(final Slice<JpaTargetType> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
-    }
-
 }
