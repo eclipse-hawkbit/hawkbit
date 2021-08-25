@@ -173,6 +173,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType update(final TargetTypeUpdate update) {
         final GenericTargetTypeUpdate typeUpdate = (GenericTargetTypeUpdate) update;
 
