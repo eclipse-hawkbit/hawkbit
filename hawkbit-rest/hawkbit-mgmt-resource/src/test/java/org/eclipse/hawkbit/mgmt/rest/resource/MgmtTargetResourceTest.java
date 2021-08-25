@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolationException;
@@ -56,6 +57,7 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
@@ -63,6 +65,7 @@ import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.hamcrest.Matchers;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -105,6 +108,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
     private static final String JSON_PATH_FIELD_LAST_REQUEST_AT = ".lastControllerRequestAt";
+    private static final String JSON_PATH_FIELD_TARGET_TYPE = ".targetType";
 
     // target
     // $.field
@@ -117,6 +121,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
     private static final String JSON_PATH_CONTROLLERID = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTROLLERID;
     private static final String JSON_PATH_DESCRIPTION = JSON_PATH_ROOT + JSON_PATH_FIELD_DESCRIPTION;
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
+    private static final String JSON_PATH_TYPE = JSON_PATH_ROOT + JSON_PATH_FIELD_TARGET_TYPE;
 
     @Autowired
     private JpaProperties jpaProperties;
@@ -2073,6 +2078,194 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .andExpect(jsonPath("$.rollout", equalTo(rollout.getId().intValue())))
                 .andExpect(jsonPath("$.rolloutName", equalTo(rollout.getName()))).andExpect(jsonPath(
                         "$._links.rollout.href", containsString("/rest/v1/rollouts/" + rollout.getId().intValue())));
+    }
+
+    @Test
+    @Description("Ensures that a post request for creating targets with target type works.")
+    public void createTargetsWithTargetType() throws Exception {
+        final TargetType type1 = testdataFactory.createTargetType("typeWithDs", Collections.singletonList(standardDsType));
+        final TargetType type2 = testdataFactory.createTargetType("typeWithOutDs", Collections.singletonList(standardDsType));
+
+        final Target test1 = entityFactory.target().create().controllerId("id1").name("targetWithoutType")
+                .securityToken("token").address("amqp://test123/foobar").description("testid1").build();
+        final Target test2 = entityFactory.target().create().controllerId("id2").name("targetOfType1")
+                .targetType(type1.getId()).description("testid2").build();
+        final Target test3 = entityFactory.target().create().controllerId("id3").name("targetOfType2")
+                .targetType(type2.getId()).description("testid3").build();
+        final String hrefType1 = "http://localhost/rest/v1/targettypes/" + type1.getId();
+
+        final List<Target> targets = Arrays.asList(test1, test2, test3);
+
+        final MvcResult mvcPostResult = mvc
+                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("[0].name", equalTo("targetWithoutType")))
+                .andExpect(jsonPath("[0].controllerId", equalTo("id1")))
+                .andExpect(jsonPath("[0].description", equalTo("testid1")))
+                .andExpect(jsonPath("[0].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[0].securityToken", equalTo("token")))
+                .andExpect(jsonPath("[0].address", equalTo("amqp://test123/foobar")))
+                .andExpect(jsonPath("[0].targetType").doesNotExist())
+                .andExpect(jsonPath("[1].name", equalTo("targetOfType1")))
+                .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[1].controllerId", equalTo("id2")))
+                .andExpect(jsonPath("[1].description", equalTo("testid2")))
+                .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[1].targetType", equalTo(type1.getId().intValue())))
+                .andExpect(jsonPath("[2].name", equalTo("targetOfType2")))
+                .andExpect(jsonPath("[2].controllerId", equalTo("id3")))
+                .andExpect(jsonPath("[2].description", equalTo("testid3")))
+                .andExpect(jsonPath("[2].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("[2].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("[2].targetType", equalTo(type2.getId().intValue())))
+                .andReturn();
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + test2.getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath(JSON_PATH_NAME, equalTo("targetOfType1")))
+                .andExpect(jsonPath(JSON_PATH_CONTROLLERID, equalTo("id2")))
+                .andExpect(jsonPath(JSON_PATH_TYPE, equalTo(type1.getId().intValue())))
+                .andExpect(jsonPath(JSON_PATH_DESCRIPTION, equalTo("testid2")))
+                .andExpect(jsonPath("$._links.targetType.href", equalTo(hrefType1))).andReturn();
+
+        assertThat(targetManagement.getByControllerID("id1")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id1").get().getName()).isEqualTo("targetWithoutType");
+        assertThat(targetManagement.getByControllerID("id1").get().getDescription()).isEqualTo("testid1");
+        assertThat(targetManagement.getByControllerID("id1").get().getTargetType()).isNull();
+        assertThat(targetManagement.getByControllerID("id1").get().getSecurityToken()).isEqualTo("token");
+        assertThat(targetManagement.getByControllerID("id1").get().getAddress().toString())
+                .isEqualTo("amqp://test123/foobar");
+        assertThat(targetManagement.getByControllerID("id2")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id2").get().getName()).isEqualTo("targetOfType1");
+        assertThat(targetManagement.getByControllerID("id2").get().getDescription()).isEqualTo("testid2");
+        assertThat(targetManagement.getByControllerID("id2").get().getTargetType().getName()).isEqualTo("typeWithDs");
+        assertThat(targetManagement.getByControllerID("id3")).isNotNull();
+        assertThat(targetManagement.getByControllerID("id3").get().getName()).isEqualTo("targetOfType2");
+        assertThat(targetManagement.getByControllerID("id3").get().getDescription()).isEqualTo("testid3");
+        assertThat(targetManagement.getByControllerID("id3").get().getTargetType().getName()).isEqualTo("typeWithOutDs");
+    }
+
+    @Test
+    @Description("Ensures that a post request for creating target with target type works.")
+    public void createTargetWithExistingTargetType() throws Exception {
+        // create target type
+        List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype",1);
+        assertThat(targetTypes).hasSize(1);
+
+        final Target target = entityFactory.target().create().controllerId("targetcontroller").name("testtarget").targetType(targetTypes.get(0).getId()).build();
+
+        final String targetList = JsonBuilder.targets(Collections.singletonList(target), false);
+
+        // test query target over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isCreated())
+                .andExpect(jsonPath("[0].controllerId", equalTo("targetcontroller")))
+                .andExpect(jsonPath("[0].targetType", equalTo(targetTypes.get(0).getId().intValue())));
+
+        assertThat(targetManagement.getByControllerID("targetcontroller").get().getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
+    }
+
+    @Test
+    @Description("Ensures that a put request for updating targets with target type works.")
+    public void updateTargetTypeInTarget() throws Exception {
+        // create target type
+        List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype",2);
+        assertThat(targetTypes).hasSize(2);
+
+        String controllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(controllerId, "testtarget", targetTypes.get(0).getId());
+
+        assertThat(target).isNotNull();
+        assertThat(target.getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
+
+        // update target over rest resource
+        final String body = new JSONObject().put("targetType", targetTypes.get(1).getId().intValue()).toString();
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + controllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+                .andExpect(jsonPath("controllerId", equalTo(controllerId)))
+                .andExpect(jsonPath("targetType", equalTo(targetTypes.get(1).getId().intValue())));
+    }
+
+    @Test
+    @Description("Ensures that a post request for creating targets with unknown target type fails.")
+    public void addingNonExistingTargetTypeInTargetShouldFail() throws Exception {
+        long unknownTargetTypeId = 999;
+        String errorMsg = String.format("TargetType with given identifier {%s} does not exist.", unknownTargetTypeId);
+
+        Optional<TargetType> targetType = targetTypeManagement.get(unknownTargetTypeId);
+        assertThat(targetType).isNotPresent();
+
+        String controllerId = "targetcontroller";
+        final Target target = entityFactory.target().create().controllerId(controllerId).name("testtarget").build();
+
+        final String targetList = JsonBuilder.targets(Collections.singletonList(target), false, unknownTargetTypeId);
+
+        // post target over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING).content(targetList)
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isNotFound())
+                .andExpect(jsonPath("message", Matchers.containsString(errorMsg)));
+    }
+
+    @Test
+    @Description("Ensures that a post request for assign target type to target works.")
+    public void assignTargetTypeToTarget() throws Exception {
+        // create target type
+        TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
+        assertThat(targetType).isNotNull();
+
+        // create target
+        String targetControllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(targetControllerId, "testtarget");
+        assertThat(target).isNotNull();
+
+        // assign target type over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                .content("{\"id\":" + targetType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType().getId()).isEqualTo(targetType.getId());
+    }
+
+    @Test
+    @Description("Ensures that a post request for assign a invalid target type to target fails.")
+    public void assignInvalidTargetTypeToTargetFails() throws Exception {
+        // Invalid target type ID
+        long invalidTargetTypeId = 999;
+
+        // create target
+        String targetControllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(targetControllerId, "testtarget");
+        assertThat(target).isNotNull();
+
+        // assign invalid target type over rest resource
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                .content("{\"id\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Description("Ensures that a delete request for unassign target type from target works.")
+    public void unassignTargetTypeFromTarget() throws Exception {
+        // create target type
+        List<TargetType> targetTypes = testdataFactory.createTargetTypes("targettype",1);
+        assertThat(targetTypes).hasSize(1);
+
+        String targetControllerId = "targetcontroller";
+        Target target = testdataFactory.createTarget(targetControllerId, "testtarget", targetTypes.get(0).getId());
+
+        assertThat(target).isNotNull();
+        assertThat(target.getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
+
+        // unassign target type over rest resource
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+
+        assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType()).isNull();
     }
 
 }

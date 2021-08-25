@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -63,6 +64,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -98,6 +100,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TargetRepository targetRepository;
 
+    private final TargetTypeRepository targetTypeRepository;
+
     private final TargetMetadataRepository targetMetadataRepository;
 
     private final RolloutGroupRepository rolloutGroupRepository;
@@ -119,7 +123,7 @@ public class JpaTargetManagement implements TargetManagement {
     private final Database database;
 
     public JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
+            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
@@ -130,6 +134,7 @@ public class JpaTargetManagement implements TargetManagement {
         this.entityManager = entityManager;
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
+        this.targetTypeRepository = targetTypeRepository;
         this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -150,6 +155,10 @@ public class JpaTargetManagement implements TargetManagement {
     private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
         return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
+    private JpaTargetType getTargetTypeByIdAndThrowIfNotFound(final long id) {
+        return targetTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(TargetType.class, id));
     }
 
     @Override
@@ -333,6 +342,10 @@ public class JpaTargetManagement implements TargetManagement {
         update.getDescription().ifPresent(target::setDescription);
         update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
+        if (update.getTargetTypeId() != null){
+            TargetType targetType = getTargetTypeByIdAndThrowIfNotFound(update.getTargetTypeId());
+            target.setTargetType(targetType);
+        }
 
         return targetRepository.save(target);
     }
@@ -587,6 +600,24 @@ public class JpaTargetManagement implements TargetManagement {
         // No reason to save the tag
         entityManager.detach(tag);
         return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target unAssignType(final String controllerID) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
+        target.setTargetType(null);
+        return targetRepository.save(target);
+    }
+
+    @Override
+    public Target assignType(String controllerID, long targetTypeId) {
+        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
+        final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
+        target.setTargetType(targetType);
+        return targetRepository.save(target);
     }
 
     @Override

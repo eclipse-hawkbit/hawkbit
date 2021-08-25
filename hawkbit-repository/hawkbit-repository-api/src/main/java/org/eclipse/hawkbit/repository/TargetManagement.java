@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
@@ -597,6 +598,30 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Target unAssignTag(@NotEmpty String controllerID, long targetTagId);
+
+    /**
+     * Un-assign a {@link TargetType} assignment to given {@link Target}.
+     *
+     * @param controllerID
+     *            to un-assign for
+     * @return the unassigned target
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Target unAssignType(@NotEmpty String controllerID);
+
+    /**
+     * Assign a {@link TargetType} assignment to given {@link Target}.
+     *
+     * @param controllerID
+     *            to un-assign for
+     * @return the unassigned target
+     *
+     * @throws EntityNotFoundException
+     *             if TargetType with given target ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Target assignType(@NotEmpty String controllerID, @NotNull long targetTypeId);
 
     /**
      * updates the {@link Target}.

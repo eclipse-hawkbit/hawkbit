@@ -63,7 +63,7 @@ public class JpaTestRepositoryManagement {
                     return null;
                 });
             } catch (final Exception e) {
-                LOGGER.error("Error hile delete tenant", e);
+                LOGGER.error("Error while delete tenant", e);
             }
         });
     }

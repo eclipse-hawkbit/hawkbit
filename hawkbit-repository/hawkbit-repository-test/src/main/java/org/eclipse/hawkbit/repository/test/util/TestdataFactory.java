@@ -37,8 +37,10 @@ import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
+import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -61,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -123,6 +126,8 @@ public class TestdataFactory {
      */
     public static final String SM_TYPE_APP = "application";
 
+    public static final String DEFAULT_COLOUR = "#000000";
+
     @Autowired
     private ControllerManagement controllerManagament;
 
@@ -140,6 +145,9 @@ public class TestdataFactory {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private TargetTypeManagement targetTypeManagement;
 
     @Autowired
     private DeploymentManagement deploymentManagement;
@@ -634,6 +642,22 @@ public class TestdataFactory {
     public Target createTarget(final String controllerId, final String targetName) {
         final Target target = targetManagement
                 .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+        assertTargetProperlyCreated(target);
+        return target;
+    }
+
+    /**
+     * @param controllerId
+     *            of the target
+     * @param targetName
+     *            name of the target
+     * @param targetTypeId
+     *          target type id
+     * @return persisted {@link Target}
+     */
+    public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
+        final Target target = targetManagement
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
         assertTargetProperlyCreated(target);
         return target;
     }
@@ -1160,4 +1184,54 @@ public class TestdataFactory {
         rolloutManagement.handleRollouts();
         return newRollout;
     }
+
+    /**
+     * Finds {@link TargetType} in repository with given
+     * {@link TargetType#getName()} or creates if it does not exist yet.
+     * No ds types are assigned on creation.
+     *
+     * @param targetTypeName
+     *            {@link TargetType#getName()}
+     *
+     * @return persisted {@link TargetType}
+     */
+    public TargetType findOrCreateTargetType(final String targetTypeName) {
+        return targetTypeManagement.getByName(targetTypeName)
+                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
+                        .name(targetTypeName).description(targetTypeName + " description").colour(DEFAULT_COLOUR)));
+    }
+    
+    /**
+     * Creates {@link TargetType} in repository with given
+     * {@link TargetType#getName()}. Compatible distribution set types are assigned on creation 
+     *
+     * @param targetTypeName
+     *            {@link TargetType#getName()}
+     *
+     * @return persisted {@link TargetType}
+     */
+    public TargetType createTargetType(final String targetTypeName, List<DistributionSetType> compatibleDsTypes) {
+        return targetTypeManagement.create(entityFactory.targetType().create()
+                        .name(targetTypeName).description(targetTypeName + " description").colour(DEFAULT_COLOUR)
+                        .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
+    }
+        
+    /**
+     * Creates {@link TargetType} in repository with given
+     * {@link TargetType#getName()}. No ds types are assigned on creation.
+     *
+     * @param targetTypePrefix
+     *            {@link TargetType#getName()}
+     *
+     * @return persisted {@link TargetType}
+     */
+    public List<TargetType> createTargetTypes(final String targetTypePrefix, int count) {
+        final List<TargetTypeCreate> result = Lists.newArrayListWithExpectedSize(count);
+        for (int i = 0; i < count; i++) {
+            result.add(entityFactory.targetType().create().name(targetTypePrefix + i).description(targetTypePrefix + " description")
+                    .colour(DEFAULT_COLOUR));
+        }
+        return targetTypeManagement.create(result);
+    }
+
 }

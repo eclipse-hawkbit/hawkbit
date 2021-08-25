@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa.event;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -20,10 +21,13 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
@@ -31,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,6 +91,38 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class);
         assertThat(targetDeletedEvent).isNotNull();
         assertThat(targetDeletedEvent.getEntityId()).isEqualTo(createdTarget.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type created event is published when a target type has been created")
+    public void targetTypeCreatedEventIsPublished() throws InterruptedException {
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+
+        TargetTypeCreatedEvent targetTypeCreatedEvent = eventListener.waitForEvent(TargetTypeCreatedEvent.class);
+        assertThat(targetTypeCreatedEvent).isNotNull();
+        assertThat(targetTypeCreatedEvent.getEntity().getId()).isEqualTo(createdTargetType.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type updated event is published when a target type has been updated")
+    public void targetTypeUpdatedEventIsPublished() throws InterruptedException {
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement.update(entityFactory.targetType().update(createdTargetType.getId()).name("updatedtargettype"));
+
+        TargetTypeUpdatedEvent targetTypeUpdatedEvent = eventListener.waitForEvent(TargetTypeUpdatedEvent.class);
+        assertThat(targetTypeUpdatedEvent).isNotNull();
+        assertThat(targetTypeUpdatedEvent.getEntity().getId()).isEqualTo(createdTargetType.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type deleted event is published when a target type has been deleted")
+    public void targetTypeDeletedEventIsPublished() throws InterruptedException {
+        TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement.delete(createdTargetType.getId());
+
+        TargetTypeDeletedEvent targetTypeDeletedEvent = eventListener.waitForEvent(TargetTypeDeletedEvent.class);
+        assertThat(targetTypeDeletedEvent).isNotNull();
+        assertThat(targetTypeDeletedEvent.getEntityId()).isEqualTo(createdTargetType.getId());
     }
 
     @Test

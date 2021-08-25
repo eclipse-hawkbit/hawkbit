@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -426,13 +427,13 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final Target target : targets) {
             final String address = target.getAddress() != null ? target.getAddress().toString() : null;
-
+            final String targetType = target.getTargetType() != null ? target.getTargetType().getId().toString() : null;
             final String token = withToken ? target.getSecurityToken() : null;
 
             builder.append(new JSONObject().put("controllerId", target.getControllerId())
                     .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
-                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
-                    .put("address", address).put("securityToken", token).toString());
+                    .put("updatedAt", "0").put("createdBy", "systemtest").put("updatedBy", "systemtest")
+                    .put("address", address).put("securityToken", token).put("targetType", targetType).toString());
 
             if (++i < targets.size()) {
                 builder.append(",");
@@ -442,6 +443,83 @@ public abstract class JsonBuilder {
         builder.append("]");
 
         return builder.toString();
+    }
+
+    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
+        final StringBuilder builder = new StringBuilder();
+
+        builder.append("[");
+        int i = 0;
+        for (final Target target : targets) {
+            final String address = target.getAddress() != null ? target.getAddress().toString() : null;
+            final String type = target.getTargetType() != null ? target.getTargetType().getId().toString() : null;
+            final String token = withToken ? target.getSecurityToken() : null;
+
+            builder.append(new JSONObject().put("controllerId", target.getControllerId())
+                    .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
+                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("address", address).put("securityToken", token).put("targetType", targetTypeId).toString());
+
+            if (++i < targets.size()) {
+                builder.append(",");
+            }
+        }
+
+        builder.append("]");
+
+        return builder.toString();
+    }
+    
+    public static String targetTypes(final List<TargetType> types) throws JSONException {
+        final JSONArray result = new JSONArray();
+
+        for (final TargetType type : types) {
+
+            final JSONArray dsTypes = new JSONArray();
+            type.getCompatibleDistributionSetTypes().forEach(dsType -> {
+                try {
+                    dsTypes.put(new JSONObject().put("id", dsType.getId()));
+                } catch (final JSONException e1) {
+                    e1.printStackTrace();
+                }
+            });
+
+            result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
+                    .put("id", Long.MAX_VALUE).put("colour", type.getColour()).put("createdAt", "0").put("updatedAt", "0")
+                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("distributionsets", dsTypes));
+
+        }
+
+        return result.toString();
+    }  
+    
+    public static String targetTypesCreatableFieldsOnly(final List<TargetType> types) throws JSONException {
+        final JSONArray result = new JSONArray();
+
+        for (final TargetType type : types) {
+
+            final JSONArray dsTypes = new JSONArray();
+            type.getCompatibleDistributionSetTypes().forEach(dsType -> {
+                try {
+                    dsTypes.put(new JSONObject().put("id", dsType.getId()));
+                } catch (final JSONException e1) {
+                    e1.printStackTrace();
+                }
+            });
+
+            JSONObject json = new JSONObject().put("name", type.getName()).put("description", type.getDescription())
+                    .put("colour", type.getColour());
+
+            if(dsTypes.length() != 0)
+            {
+                json.put("compatibledistributionsettypes", dsTypes);
+            }
+
+            result.put(json);
+        }
+
+        return result.toString();
     }
 
     public static String rollout(final String name, final String description, final int groupSize,
