@@ -123,14 +123,14 @@ public class JpaTargetManagement implements TargetManagement {
     private final Database database;
 
     public JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
-            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository, final TargetMetadataRepository targetMetadataRepository,
+            final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
+            final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository,
-            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-            final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final Database database) {
+            final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
+            final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
@@ -288,8 +288,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Long targetId = getByControllerIdAndThrowIfNotFound(controllerId).getId();
 
-        final Specification<JpaTargetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetMetadataFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaTargetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                TargetMetadataFields.class, virtualPropertyReplacer, database);
 
         return convertMdPage(targetMetadataRepository.findAll((Specification<JpaTargetMetadata>) (root, query, cb) -> cb
                 .and(cb.equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId),
@@ -314,15 +314,14 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
-        return findTargetsBySpec(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class, virtualPropertyReplacer, database),
-                pageable);
+        return findTargetsBySpec(RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class,
+                virtualPropertyReplacer, database), pageable);
     }
 
     @Override
     public Page<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
-        return findTargetsBySpec(
-                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database), pageable);
+        return findTargetsBySpec(RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
+                virtualPropertyReplacer, database), pageable);
     }
 
     private Page<Target> findTargetsBySpec(final Specification<JpaTarget> spec, final Pageable pageable) {
@@ -342,8 +341,8 @@ public class JpaTargetManagement implements TargetManagement {
         update.getDescription().ifPresent(target::setDescription);
         update.getAddress().ifPresent(target::setAddress);
         update.getSecurityToken().ifPresent(target::setSecurityToken);
-        if (update.getTargetTypeId() != null){
-            TargetType targetType = getTargetTypeByIdAndThrowIfNotFound(update.getTargetTypeId());
+        if (update.getTargetTypeId() != null) {
+            final TargetType targetType = getTargetTypeByIdAndThrowIfNotFound(update.getTargetTypeId());
             target.setTargetType(targetType);
         }
 
@@ -396,8 +395,8 @@ public class JpaTargetManagement implements TargetManagement {
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
 
-        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
-                database);
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer, database);
 
         return convertPage(
                 targetRepository
@@ -435,8 +434,8 @@ public class JpaTargetManagement implements TargetManagement {
             final String rsqlParam) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
-                database);
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer, database);
 
         return convertPage(
                 targetRepository
@@ -613,7 +612,10 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Target assignType(String controllerID, long targetTypeId) {
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Target assignType(final String controllerID, final long targetTypeId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);
@@ -783,8 +785,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
-        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer,
-                database);
+        final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
+                virtualPropertyReplacer, database);
 
         return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
                 TargetSpecifications.hasTag(tagId).toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
@@ -796,8 +798,8 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
-        final Specification<JpaTarget> specs = RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaTarget> specs = RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(),
+                TargetFields.class, virtualPropertyReplacer, database);
         return targetRepository.count(specs);
     }
 
