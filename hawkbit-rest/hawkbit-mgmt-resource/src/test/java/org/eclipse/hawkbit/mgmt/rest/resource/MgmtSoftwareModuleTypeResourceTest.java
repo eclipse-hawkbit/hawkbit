@@ -63,6 +63,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].name", contains(osType.getName())))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].description",
                         contains(osType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].colour").doesNotExist())
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].maxAssignments", contains(1)))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + osType.getKey() + "')].key", contains("os")))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + runtimeType.getKey() + "')].name",
@@ -75,12 +76,14 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                         jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].name", contains(appType.getName())))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].description",
                         contains(appType.getDescription())))
+                .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].colour").doesNotExist())
                 .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].maxAssignments",
                         contains(Integer.MAX_VALUE)))
                 .andExpect(jsonPath("$.content.[?(@.key=='" + appType.getKey() + "')].key", contains("application")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].id", contains(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].name", contains("TestName123")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].colour", contains("colour")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdAt", contains(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedBy", contains("uploadTester")))
@@ -93,7 +96,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
     private SoftwareModuleType createTestType() {
         SoftwareModuleType testType = softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
-                .key("test123").name("TestName123").description("Desc123").maxAssignments(5));
+                .key("test123").name("TestName123").description("Desc123").colour("colour").maxAssignments(5));
         testType = softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
         return testType;
@@ -113,6 +116,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.content.[1].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[1].name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.content.[1].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[1].colour", equalTo("colour")))
                 .andExpect(jsonPath("$.content.[1].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.content.[1].createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[1].lastModifiedBy", equalTo("uploadTester")))
@@ -219,6 +223,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.colour", equalTo("colour")))
                 .andExpect(jsonPath("$.maxAssignments", equalTo(5)))
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
@@ -272,16 +277,17 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/softwaremoduletypes/{ID} PUT requests.")
-    public void updateSoftwareModuleTypeOnlyDescriptionAndNameUntouched() throws Exception {
+    public void updateSoftwareModuleTypeColourDescriptionAndNameUntouched() throws Exception {
         final SoftwareModuleType testType = createTestType();
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
-                .put("name", "nameShouldNotBeChanged").toString();
+                .put("colour", "updatedColour").put("name", "nameShouldNotBeChanged").toString();
 
         mvc.perform(put("/rest/v1/softwaremoduletypes/{smId}", testType.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
+                .andExpect(jsonPath("$.colour", equalTo("updatedColour")))
                 .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
 
     }

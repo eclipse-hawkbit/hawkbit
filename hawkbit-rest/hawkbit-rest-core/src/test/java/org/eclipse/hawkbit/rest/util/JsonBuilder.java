@@ -148,7 +148,7 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final SoftwareModuleType module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("id", Long.MAX_VALUE).put("key", module.getKey())
+                    .put("colour", module.getColour()).put("id", Long.MAX_VALUE).put("key", module.getKey())
                     .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")
                     .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
 
@@ -298,9 +298,10 @@ public abstract class JsonBuilder {
             });
 
             result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
-                    .put("id", Long.MAX_VALUE).put("key", type.getKey()).put("createdAt", "0").put("updatedAt", "0")
-                    .put("createdBy", "fghdfkjghdfkjh").put("optionalmodules", osmTypes)
-                    .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh"));
+                    .put("colour", type.getColour()).put("id", Long.MAX_VALUE).put("key", type.getKey())
+                    .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
+                    .put("optionalmodules", osmTypes).put("mandatorymodules", msmTypes)
+                    .put("updatedBy", "fghdfkjghdfkjh"));
 
         }
 
