@@ -953,4 +953,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
         return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
     }
+
+    @Override
+    public long countActionsForInvalidation(final Collection<Long> setIds) {
+        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndStatusIn).sum();
+    }
 }

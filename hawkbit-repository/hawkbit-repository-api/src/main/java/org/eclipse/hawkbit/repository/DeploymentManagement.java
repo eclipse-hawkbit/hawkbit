@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -518,13 +519,54 @@ public interface DeploymentManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     boolean hasPendingCancellations(@NotEmpty String controllerId);
 
+    /**
+     * Invalidates a given {@link DistributionSet}. The invalidation always
+     * cancels all auto assignments referring this {@link DistributionSet} and
+     * can not be undone. Optionally, all rollouts and actions referring this
+     * {@link DistributionSet} can be canceled.
+     *
+     * @param distributionSetInvalidation
+     *            defines the {@link DistributionSet} and options what should be
+     *            canceled
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     void invalidateDistributionSet(DistributionSetInvalidation distributionSetInvalidation);
 
+    /**
+     * Counts all rollouts for a list of {@link DistributionSet}s that will be
+     * canceled when invalidation is called for those {@link DistributionSet}s
+     * with the option to cancel rollouts enabled.
+     *
+     * @param setIds
+     *            the {@link DistributionSet}s that should be invalidated
+     * @return the amount of rollouts that will be canceled
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countRolloutsForInvalidation(Collection<Long> setIds);
 
+    /**
+     * Counts all autp assignments for a list of {@link DistributionSet}s that
+     * will be canceled when invalidation is called for those
+     * {@link DistributionSet}s.
+     *
+     * @param setIds
+     *            the {@link DistributionSet}s that should be invalidated
+     * @return the amount of auto assignments that will be canceled
+     */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countAutoAssignmentsForInvalidation(Collection<Long> setIds);
+
+    /**
+     * Counts all actions for a list of {@link DistributionSet}s that will be
+     * canceled when invalidation is called for those {@link DistributionSet}s
+     * with the option to cancel actions enabled (i.e. {@link CancelationType}
+     * != NONE).
+     *
+     * @param setIds
+     *            the {@link DistributionSet}s that should be invalidated
+     * @return the amount of actions that will be canceled
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countActionsForInvalidation(final Collection<Long> setIds);
 
 }

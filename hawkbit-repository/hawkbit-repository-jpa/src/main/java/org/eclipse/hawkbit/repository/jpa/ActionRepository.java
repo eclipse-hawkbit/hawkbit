@@ -64,6 +64,14 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      */
     Page<Action> findByDistributionSetId(Pageable pageable, Long dsId);
 
+    /**
+     * Retrieves all active {@link Action}s which are referring the given
+     * {@link DistributionSet}.
+     *
+     * @param set
+     *            the {@link DistributionSet} on which will be filtered
+     * @return the found {@link Action}s
+     */
     List<Action> findByDistributionSetAndActiveIsTrue(DistributionSet set);
 
     /**
@@ -351,6 +359,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSetId(Long distributionSet);
+
+    /**
+     * Counts all active {@link Action}s referring to the given DistributionSet.
+     *
+     * @param distributionSet
+     *            DistributionSet to count the {@link Action}s from
+     * @return the count of actions referring to the given distributionSet
+     */
+    Long countByDistributionSetIdAndStatusIn(Long distributionSet);
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup which
