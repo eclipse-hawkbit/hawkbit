@@ -367,7 +367,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            DistributionSet to count the {@link Action}s from
      * @return the count of actions referring to the given distributionSet
      */
-    Long countByDistributionSetIdAndStatusIn(Long distributionSet);
+    Long countByDistributionSetIdAndActiveIsTrue(Long distributionSet);
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup which

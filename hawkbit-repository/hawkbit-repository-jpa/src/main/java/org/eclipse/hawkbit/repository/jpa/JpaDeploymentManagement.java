@@ -956,6 +956,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public long countActionsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndStatusIn).sum();
+        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
     }
 }
