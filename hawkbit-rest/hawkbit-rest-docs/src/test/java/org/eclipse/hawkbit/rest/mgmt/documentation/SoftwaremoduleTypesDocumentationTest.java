@@ -169,6 +169,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                                 fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -201,6 +202,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                                 fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)

@@ -171,6 +171,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -220,6 +221,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -350,6 +352,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         responseFields(fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("[]createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("[]colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("[]key").description(MgmtApiModelProperties.SM_TYPE_KEY),
                                 fieldWithPath("[]maxAssignments")
                                         .description(MgmtApiModelProperties.SMT_MAX_ASSIGNMENTS),

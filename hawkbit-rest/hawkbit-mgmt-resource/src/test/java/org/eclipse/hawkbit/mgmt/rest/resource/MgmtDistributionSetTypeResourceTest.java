@@ -557,10 +557,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnDistributionSetTypesResource() throws Exception {
-        // final DistributionSetType testDsType = distributionSetManagement
-        // .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
-        // .name("TestName123").description("Desc123").colour("col"));
-
         final SoftwareModuleType testSmType = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 
