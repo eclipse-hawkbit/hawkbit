@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Random;
 
 import org.apache.commons.io.FileUtils;
@@ -24,8 +25,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.Files;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -43,9 +42,9 @@ public class ArtifactFilesystemRepositoryTest {
     private static ArtifactFilesystemRepository artifactFilesystemRepository;
 
     @BeforeAll
-    public static void setup() {
+    public static void setup() throws IOException {
         artifactResourceProperties = new ArtifactFilesystemProperties();
-        artifactResourceProperties.setPath(Files.createTempDir().getAbsolutePath());
+        artifactResourceProperties.setPath(Files.createTempDirectory(null).toString());
 
         artifactFilesystemRepository = new ArtifactFilesystemRepository(artifactResourceProperties);
     }
