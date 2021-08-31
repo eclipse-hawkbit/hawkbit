@@ -84,6 +84,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         fieldWithPath("content[].lastModifiedBy")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                         fieldWithPath("content[].name").description(ApiModelPropertiesGeneric.NAME),
+                        fieldWithPath("content[].deleted").description(ApiModelPropertiesGeneric.DELETED),
                         fieldWithPath("content[]._links.self").ignored())));
     }
 
@@ -91,8 +92,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     @Description("Handles the GET request of retrieving all distribution set types within SP with a defined page size and offset, sortet by name in descending order and filtered down to all targets which name starts with 'a'. Required Permission: READ_REPOSITORY.")
     public void getDistributionSetTypesWithParameters() throws Exception {
 
-        distributionSetTypeManagement.update(entityFactory.distributionSetType()
-                .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
+        distributionSetTypeManagement.update(
+                entityFactory.distributionSetType().update(testdataFactory.createDistributionSet().getType().getId())
+                        .description("Desc1234").colour("rgb(86,37,99)"));
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON)
                 .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==a*"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -110,7 +112,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
 
         final List<DistributionSetType> types = new ArrayList<>();
         types.add(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
-                .mandatory(osType).optional(runtimeType).build());
+                .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType).build());
 
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING)
                 .content(JsonBuilder.distributionSetTypesCreateValidFieldsOnly(types))
@@ -122,15 +124,16 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                                         requestFieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
                                         optionalRequestFieldWithPath("[]description")
                                                 .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                        optionalRequestFieldWithPath("[]colour")
+                                                .description(ApiModelPropertiesGeneric.COLOUR),
                                         optionalRequestFieldWithPath("[]mandatorymodules")
                                                 .description(MgmtApiModelProperties.DS_TYPE_MANDATORY_MODULES),
                                         optionalRequestFieldWithPath("[]optionalmodules")
                                                 .description(MgmtApiModelProperties.DS_TYPE_OPTIONAL_MODULES)),
                                 responseFields(
-
                                         fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                         fieldWithPath("[]createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
-                                        fieldWithPath("[].description")
+                                        fieldWithPath("[]description")
                                                 .description(ApiModelPropertiesGeneric.DESCRPTION),
                                         fieldWithPath("[]key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                         fieldWithPath("[]id").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -140,14 +143,17 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                                         fieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
                                         fieldWithPath("[]deleted").description(ApiModelPropertiesGeneric.DELETED),
+                                        fieldWithPath("[]colour")
+                                                .description(ApiModelPropertiesGeneric.COLOUR),
                                         fieldWithPath("[]_links.self").ignored())));
     }
 
     @Test
     @Description("Handles the GET request of retrieving a single distribution set type within SP. Required Permission: READ_REPOSITORY")
     public void deleteDistributionSetType() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
-                .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
+        final DistributionSetType testType = distributionSetTypeManagement.update(
+                entityFactory.distributionSetType().update(testdataFactory.createDistributionSet().getType().getId())
+                        .description("Desc1234").colour("rgb(86,37,99)"));
 
         mockMvc.perform(delete(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
                 testType.getId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -160,7 +166,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     public void getDistributionSetType() throws Exception {
 
         final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
-                .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
+                .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234").colour("rgb(86,37,99)"));
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
                 testType.getId()).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -171,7 +177,6 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -180,6 +185,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                                         .type("String"),
                                 fieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.mandatorymodules")
                                         .description(MgmtApiModelProperties.LINK_TO_MANDATORY_SMT),
@@ -207,7 +213,8 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     public void putDistributionSetType() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
                 .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
-        final String body = new JSONObject().put("description", "an updated desription").toString();
+        final String body = new JSONObject().put("description", "an updated description")
+                .put("colour", "rgb(106,178,83)").toString();
 
         this.mockMvc
                 .perform(put(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
@@ -217,11 +224,11 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                         pathParameters(parameterWithName("distributionSetTypeId")
                                 .description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(
-                                requestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION)),
+                                optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR)),
                         responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
-                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -230,6 +237,7 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
                                         .type("String"),
                                 fieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.mandatorymodules")
                                         .description(MgmtApiModelProperties.LINK_TO_MANDATORY_SMT),
@@ -242,8 +250,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Handles the GET request of retrieving the list of mandatory software module types in that distribution set type. Required Permission: READ_REPOSITORY.")
     public void getMandatoryModules() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(runtimeType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType));
 
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/mandatorymoduletypes", testType.getId()).accept(MediaType.APPLICATION_JSON))
@@ -275,8 +284,8 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
             + "Note that a DS type cannot be changed after it has been used by a DS. Required Permission: "
             + SpPermission.UPDATE_REPOSITORY + " and " + SpPermission.READ_REPOSITORY)
     public void postMandatoryModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(
-                entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1"));
+        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
+                .create().key("test1").name("TestName1").description("Desc1").colour("rgb(86,37,99)"));
 
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/mandatorymoduletypes", testType.getId())
@@ -293,8 +302,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
             + "Note that a DS type cannot be changed after it has been used by a DS. Required permissions: "
             + SpPermission.UPDATE_REPOSITORY + " and " + SpPermission.READ_REPOSITORY)
     public void deleteMandatoryModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(runtimeType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType));
         mockMvc.perform(delete(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/mandatorymoduletypes/{softwareModuleTypeId}",
@@ -310,8 +320,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     @Description("Handles the GET request of retrieving the single mandatory software module type in that distribution set type. Required Permission: "
             + SpPermission.READ_REPOSITORY)
     public void getMandatoryModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(runtimeType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType));
 
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
@@ -340,8 +351,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     @Description("Handles the GET request of retrieving the list of optional software module types in that distribution set type. Required Permission: "
             + SpPermission.READ_REPOSITORY)
     public void getOptionalModules() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(runtimeType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType));
         mockMvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/optionalmoduletypes", testType.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -371,8 +383,8 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
             + "Note that a DS type cannot be changed after it has been used by a DS. Required Permission: "
             + SpPermission.UPDATE_REPOSITORY + " and " + SpPermission.READ_REPOSITORY)
     public void postOptionalModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(
-                entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1"));
+        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
+                .create().key("test1").name("TestName1").description("Desc1").colour("rgb(86,37,99)"));
         mockMvc.perform(post(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                 + "/{distributionSetTypeId}/optionalmoduletypes", testType.getId())
                         .content("{\"id\":" + appType.getId() + "}").contentType(MediaType.APPLICATION_JSON))
@@ -389,8 +401,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
             + "Note that a DS type cannot be changed after it has been used by a DS. Required Permission: "
             + SpPermission.UPDATE_REPOSITORY + " and " + SpPermission.READ_REPOSITORY)
     public void deleteOptionalModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(runtimeType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(runtimeType));
         mockMvc.perform(delete(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
                         + "/{distributionSetTypeId}/optionalmoduletypes/{softwareModuleTypeId}",
@@ -405,8 +418,9 @@ public class DistributionSetTypesDocumentationTest extends AbstractApiRestDocume
     @Description("Handles the GET request of retrieving the single optional software module type in that distribution set type. Required Permission: "
             + SpPermission.READ_REPOSITORY)
     public void getOptionalModule() throws Exception {
-        final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
-                .create().key("test1").name("TestName1").description("Desc1").mandatory(osType).optional(appType));
+        final DistributionSetType testType = distributionSetTypeManagement
+                .create(entityFactory.distributionSetType().create().key("test1").name("TestName1").description("Desc1")
+                        .colour("rgb(86,37,99)").mandatory(osType).optional(appType));
 
         mockMvc.perform(get(
                 MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING

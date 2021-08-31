@@ -171,7 +171,8 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final SoftwareModuleType module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("key", module.getKey()).put("maxAssignments", module.getMaxAssignments()).toString());
+                    .put("colour", module.getColour()).put("key", module.getKey())
+                    .put("maxAssignments", module.getMaxAssignments()).toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -331,7 +332,7 @@ public abstract class JsonBuilder {
                 });
 
                 result.put(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                        .put("key", module.getKey()).put("optionalmodules", osmTypes)
+                        .put("colour", module.getColour()).put("key", module.getKey()).put("optionalmodules", osmTypes)
                         .put("mandatorymodules", msmTypes));
             } catch (final JSONException e) {
                 e.printStackTrace();
