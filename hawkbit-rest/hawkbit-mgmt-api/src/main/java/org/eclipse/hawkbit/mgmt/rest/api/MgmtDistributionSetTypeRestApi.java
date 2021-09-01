@@ -69,7 +69,7 @@ public interface MgmtDistributionSetTypeRestApi {
      * @param distributionSetTypeId
      *            the ID of the DS type to retrieve
      *
-     * @return a single distributionSet with status OK.
+     * @return a single DS type with status OK.
      */
     @GetMapping(value = "/{distributionSetTypeId}", produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
