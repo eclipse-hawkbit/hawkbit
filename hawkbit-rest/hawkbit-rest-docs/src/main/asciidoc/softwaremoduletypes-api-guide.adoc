@@ -15,7 +15,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all software module types within SP. Required Permission: READ_REPOSITORY
+Handles the GET request of retrieving all software module types within Hawkbit. Required Permission: READ_REPOSITORY
 
 === Get software module types
 
@@ -63,7 +63,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the POST request of creating new software module types within SP. The request body must always be a list of module types. Required Permission: CREATE_REPOSITORY
+Handles the POST request of creating new software module types within Hawkbit. The request body must always be a list of module types. Required Permission: CREATE_REPOSITORY
 
 === Creating software module types
 
@@ -112,7 +112,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request for a single software module type within SP. Required Permission: DELETE_REPOSITORY
+Handles the DELETE request for a single software module type within Hawkbit. Required Permission: DELETE_REPOSITORY
 
 === Delete software module type
 
@@ -153,7 +153,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the GET request of retrieving a single software module type within SP. Required Permission: READ_REPOSITORY
+Handles the GET request of retrieving a single software module type within Hawkbit. Required Permission: READ_REPOSITORY
 
 === Accessing a software module type
 
@@ -197,7 +197,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the PUT request for a single software module type within SP. Required Permission: UPDATE_REPOSITORY
+Handles the PUT request for a single software module type within Hawkbit. Required Permission: UPDATE_REPOSITORY
 
 === Updating a software module types
 

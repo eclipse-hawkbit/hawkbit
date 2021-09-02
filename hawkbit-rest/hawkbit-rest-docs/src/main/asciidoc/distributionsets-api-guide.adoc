@@ -15,7 +15,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all distribution sets within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving all distribution sets within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get paged list of Distribution Sets
 
@@ -62,7 +62,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/distributionsets
 
 === Implementation Notes
-Handles the POST request of creating new distribution sets within SP. The request body must always be a list of sets. Required permission: CREATE_REPOSITORY
+Handles the POST request of creating new distribution sets within Hawkbit. The request body must always be a list of sets. Required permission: CREATE_REPOSITORY
 
 === Create Distribution Sets
 
@@ -111,7 +111,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request for a single Distribution Set within SP. Required permission: DELETE_REPOSITORY
+Handles the DELETE request for a single Distribution Set within Hawkbit. Required permission: DELETE_REPOSITORY
 
 === Delete Distribution Set
 
@@ -151,7 +151,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving a single distribution set within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get Distribution Set
 
@@ -196,7 +196,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the UPDATE request for a single Distribution Set within SP. Required permission: UPDATE_REPOSITORY
+Handles the UPDATE request for a single Distribution Set within Hawkbit. Required permission: UPDATE_REPOSITORY
 
 === Updating a Distribution Set
 
@@ -246,7 +246,7 @@ include::../errors/429.adoc[]
 == GET /rest/v1/distributionsets/{distributionSetId}/assignedSM
 
 ===  Implementation Notes
-Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving a single distribution set within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get assigned Software Modules
 

@@ -218,6 +218,7 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                                 fieldWithPath("[]key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("[]colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("[]createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("[]lastModifiedAt")
@@ -226,7 +227,6 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                                 fieldWithPath("[]deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("[]_links.self").ignored())));
-
     }
 
     @Test
@@ -268,6 +268,6 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("targetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID))));
-
     }
+
 }
