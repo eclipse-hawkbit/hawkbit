@@ -16,6 +16,7 @@ import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -35,6 +36,7 @@ public class InvalidateDistributionSetSupport {
     private static final Logger LOG = LoggerFactory.getLogger(InvalidateDistributionSetSupport.class);
 
     private final VaadinMessageSource i18n;
+    private final UiProperties uiProperties;
     private final UINotification notification;
     private final DistributionGrid grid;
 
@@ -54,10 +56,11 @@ public class InvalidateDistributionSetSupport {
      * @param dsInvalidationManagement
      *            {@link DistributionSetInvalidationManagement}
      */
-    public InvalidateDistributionSetSupport(final DistributionGrid grid, final VaadinMessageSource i18n,
+    public InvalidateDistributionSetSupport(final DistributionGrid grid, final VaadinMessageSource i18n, final UiProperties uiProperties,
             final UINotification notification, final DistributionSetInvalidationManagement dsInvalidationManagement) {
         this.grid = grid;
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
         this.notification = notification;
         this.dsInvalidationManagement = dsInvalidationManagement;
     }
@@ -72,7 +75,7 @@ public class InvalidateDistributionSetSupport {
         final List<ProxyDistributionSet> allDistributionSetsForInvalidation = getDistributionSetsForInvalidation(
                 clickedDistributionSet);
 
-        consequencesDialog = new InvalidateDsConsequencesDialog(allDistributionSetsForInvalidation, i18n, ok -> {
+        consequencesDialog = new InvalidateDsConsequencesDialog(allDistributionSetsForInvalidation, i18n, uiProperties, ok -> {
             if (ok) {
                 openAffectedEntitiesWindowOnInvalidateAction(allDistributionSetsForInvalidation);
             }

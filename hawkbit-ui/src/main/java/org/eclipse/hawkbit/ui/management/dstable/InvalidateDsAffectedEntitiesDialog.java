@@ -44,8 +44,8 @@ public class InvalidateDsAffectedEntitiesDialog {
      * Constructor for {@link InvalidateDsAffectedEntitiesDialog}
      *
      * @param allDistributionSetsForInvalidation
-     *            {@link List} of {@link ProxyDistributionSet} that are selected
-     *            for invalidation
+     *            {@link List} of {@link ProxyDistributionSet} that are selected for
+     *            invalidation
      * @param i18n
      *            {@link VaadinMessageSource}
      * @param callback
@@ -56,8 +56,8 @@ public class InvalidateDsAffectedEntitiesDialog {
      *            number of affected auto assignments
      */
     public InvalidateDsAffectedEntitiesDialog(final List<ProxyDistributionSet> allDistributionSetsForInvalidation,
-            final VaadinMessageSource i18n, final Consumer<Boolean> callback, final long affectedRollouts,
-            final long affectedAutoAssignments) {
+            final VaadinMessageSource i18n, final Consumer<Boolean> callback, final long affectedActions,
+            final long affectedRollouts, final long affectedAutoAssignments) {
 
         this.i18n = i18n;
 
@@ -68,6 +68,11 @@ public class InvalidateDsAffectedEntitiesDialog {
         final Label consequencesLabel = new Label(createConsequencesText(allDistributionSetsForInvalidation));
         consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
+
+        final Label stoppedSingleAssignmentsLabel = new Label(i18n.getMessage(
+                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ACTIONS, affectedActions));
+        stoppedSingleAssignmentsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_ACTIONS);
+        content.addComponent(stoppedSingleAssignmentsLabel);
 
         final Label stoppedRolloutsLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS, affectedRollouts));

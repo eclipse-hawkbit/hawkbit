@@ -1374,6 +1374,10 @@ public final class UIComponentIdProvider {
      */
     public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
     /**
+     * Distribution set invalidate affected actions label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ACTIONS = "invalidate.distributionset.affectedentities.actions";
+    /**
      * Distribution set invalidate affected rollouts label id
      */
     public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS = "invalidate.distributionset.affectedentities.rollouts";
@@ -1385,7 +1389,10 @@ public final class UIComponentIdProvider {
      * Distribution set invalidate consequences window, stop rollouts checkbox
      */
     public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
-
+    /**
+     * Distribution set invalidate consequences window, cancelation type radio button group
+     */
+    public static final String INVALIDATE_DS_CANCELATION_TYPE = "invalidate.distributionset.consequences.cancelation.type.radio";
     /**
      * Id of the unread notification button
      */

@@ -279,7 +279,15 @@ public class UiProperties implements Serializable {
              */
             private String rolloutView = "";
 
+            /**
+             * Link to documentation of state machine
+             */
             private String provisioningStateMachine = "";
+
+            /**
+             * Link to documentation of distribution set invalidation
+             */
+            private String distributionSetInvalidation = "";
 
             /**
              * @return Link to documentation of deployment view
@@ -352,6 +360,13 @@ public class UiProperties implements Serializable {
                 return provisioningStateMachine;
             }
 
+            /**
+             * @return Link to documentation of distribution set invalidation
+             */
+            public String getDistributionSetInvalidation() {
+                return distributionSetInvalidation;
+            }
+
             public void setDeploymentView(final String deploymentView) {
                 this.deploymentView = deploymentView;
             }
@@ -414,6 +429,15 @@ public class UiProperties implements Serializable {
                 this.provisioningStateMachine = provisioningStateMachine;
             }
 
+            /**
+             * Sets the link to the distribution set invalidation documentation
+             * 
+             * @param distributionSetInvalidation
+             *            Link
+             */
+            public void setDistributionSetInvalidation(String distributionSetInvalidation) {
+                this.distributionSetInvalidation = distributionSetInvalidation;
+            }
         }
 
         private final Documentation documentation = new Documentation();

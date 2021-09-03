@@ -105,6 +105,14 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "label.invalidate.distributionset.stop.rollouts";
 
+    public static final String LABEL_INVALIDATE_DS_TYPE_OF_CANCELLATION = "label.invalidate.ds.cancelation.type";
+
+    public static final String LABEL_CANCEL_ACTION_NONE = "label.cancel.action.none";
+
+    public static final String LABEL_CANCEL_ACTION_FORCE = "label.cancel.action.force";
+
+    public static final String LABEL_CANCEL_ACTION_SOFT = "label.cancel.action.soft";
+
     public static final String MESSAGE_NO_DATA = "message.no.data";
 
     public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
@@ -195,6 +203,12 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_DISTRIBUTIONSET_INCOMPLETE = "tooltip.distributionset.incomplete";
 
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_FORCED = "tooltip.distributionset.invalidate.forced";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_SOFT = "tooltip.distributionset.invalidate.soft";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_NONE = "tooltip.distributionset.invalidate.none";
+
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
     public static final String TOOLTIP_TIMEFORCED_FORCED_IN = "tooltip.timeforced.forced.in";
@@ -274,6 +288,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_SINGULAR = "message.invalidate.distributionset.affected.entities.intro.singular";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_PLURAL = "message.invalidate.distributionset.affected.entities.intro.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ACTIONS = "message.invalidate.distributionset.affected.entities.actions";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS = "message.invalidate.distributionset.affected.entities.rollouts";
 
