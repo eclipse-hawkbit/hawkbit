@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
@@ -30,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -79,6 +81,10 @@ public final class MgmtTargetMapper {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
+        if (response.getTargetType() != null) {
+            response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class)
+                    .getTargetType(response.getTargetType())).withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
+        }
     }
 
     static void addPollStatus(final Target target, final MgmtTarget targetRest) {
@@ -153,6 +159,9 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
+        if (target.getTargetType() != null){
+            targetRest.setTargetType(target.getTargetType().getId());
+        }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
 
@@ -172,7 +181,7 @@ public final class MgmtTargetMapper {
     private static TargetCreate fromRequest(final EntityFactory entityFactory, final MgmtTargetRequestBody targetRest) {
         return entityFactory.target().create().controllerId(targetRest.getControllerId()).name(targetRest.getName())
                 .description(targetRest.getDescription()).securityToken(targetRest.getSecurityToken())
-                .address(targetRest.getAddress());
+                .address(targetRest.getAddress()).targetType(targetRest.getTargetType());
     }
 
     static List<MetaData> fromRequestTargetMetadata(final List<MgmtMetadata> metadata,

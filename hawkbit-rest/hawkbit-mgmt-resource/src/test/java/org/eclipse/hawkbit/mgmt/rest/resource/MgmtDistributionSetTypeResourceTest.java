@@ -82,6 +82,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].id", contains(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].name", contains("TestName123")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].description", contains("Desc1234")))
+                .andExpect(jsonPath("$.content.[?(@.key=='test123')].colour", contains("col12")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdBy", contains("uploadTester")))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].createdAt", contains(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[?(@.key=='test123')].lastModifiedBy", contains("uploadTester")))
@@ -110,6 +111,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.content.[0].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[0].name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.content.[0].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[0].colour", equalTo("col12")))
                 .andExpect(jsonPath("$.content.[0].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.content.[0].createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo("uploadTester")))
@@ -124,6 +126,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.content.[4].id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.content.[4].name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.content.[4].description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.content.[4].colour", equalTo("col12")))
                 .andExpect(jsonPath("$.content.[4].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.content.[4].createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[4].lastModifiedBy", equalTo("uploadTester")))
@@ -178,6 +181,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("[0].name", equalTo("TestName1")))
                 .andExpect(jsonPath("[0].key", equalTo("testKey1")))
                 .andExpect(jsonPath("[0].description", equalTo("Desc1")))
+                .andExpect(jsonPath("[0].colour", equalTo("col")))
                 .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1].name", equalTo("TestName2")))
                 .andExpect(jsonPath("[1].key", equalTo("testKey2")))
@@ -411,7 +415,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     public void getDistributionSetType() throws Exception {
 
         DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
-                .key("test123").name("TestName123").description("Desc123").colour("col12"));
+                .key("test123").name("TestName123").description("Desc123"));
         testType = distributionSetTypeManagement
                 .update(entityFactory.distributionSetType().update(testType.getId()).description("Desc1234"));
 
@@ -420,6 +424,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.name", equalTo("TestName123")))
                 .andExpect(jsonPath("$.description", equalTo("Desc1234")))
+                .andExpect(jsonPath("$.colour").doesNotExist())
                 .andExpect(jsonPath("$.createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("uploadTester")))
@@ -476,17 +481,19 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
     @Test
     @Description("Checks the correct behaviour of /rest/v1/distributionsettypes/{ID} PUT requests.")
-    public void updateDistributionSetTypeOnlyDescriptionAndNameUntouched() throws Exception {
+    public void updateDistributionSetTypeColourDescriptionAndNameUntouched() throws Exception {
         final DistributionSetType testType = distributionSetTypeManagement.create(entityFactory.distributionSetType()
                 .create().key("test123").name("TestName123").description("Desc123").colour("col"));
 
         final String body = new JSONObject().put("id", testType.getId()).put("description", "foobardesc")
+                .put("colour", "updatedColour")
                 .put("name", "nameShouldNotBeChanged").toString();
 
         mvc.perform(put("/rest/v1/distributionsettypes/{smId}", testType.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
+                .andExpect(jsonPath("$.colour", equalTo("updatedColour")))
                 .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
     }
 
@@ -550,10 +557,6 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Test
     @Description("Ensures that the server is behaving as expected on invalid requests (wrong media type, wrong ID etc.).")
     public void invalidRequestsOnDistributionSetTypesResource() throws Exception {
-        // final DistributionSetType testDsType = distributionSetManagement
-        // .createDistributionSetType(entityFactory.distributionSetType().create().key("test123")
-        // .name("TestName123").description("Desc123").colour("col"));
-
         final SoftwareModuleType testSmType = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test123").name("TestName123"));
 

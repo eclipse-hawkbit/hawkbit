@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagBuilder;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
+import org.eclipse.hawkbit.repository.model.Tag;
 
 /**
  * Builder implementation for {@link Tag}.

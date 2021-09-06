@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -140,7 +141,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final Target updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+                .targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
+                .requestAttributes(targetRest.isRequestAttributes()));
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
@@ -153,6 +155,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
         this.targetManagement.deleteByControllerID(targetId);
         LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") final String targetId) {
+        this.targetManagement.unAssignType(targetId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId, @RequestBody final MgmtId targetTypeId) {
+        this.targetManagement.assignType(targetId, targetTypeId.getId());
         return ResponseEntity.ok().build();
     }
 

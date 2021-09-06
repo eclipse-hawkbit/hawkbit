@@ -67,7 +67,7 @@ final class MgmtDistributionSetTypeMapper {
                 .orElse(Collections.emptyList());
     }
 
-    static List<MgmtDistributionSetType> toListResponse(final List<DistributionSetType> types) {
+    static List<MgmtDistributionSetType> toListResponse(final Collection<DistributionSetType> types) {
         if (types == null) {
             return Collections.emptyList();
         }
@@ -83,6 +83,7 @@ final class MgmtDistributionSetTypeMapper {
         result.setKey(type.getKey());
         result.setModuleId(type.getId());
         result.setDeleted(type.isDeleted());
+        result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
                 .withSelfRel());

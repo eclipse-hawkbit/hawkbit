@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -122,6 +123,31 @@ public interface MgmtTargetRestApi {
      */
     @DeleteMapping(value = "/{targetId}")
     ResponseEntity<Void> deleteTarget(@PathVariable("targetId") String targetId);
+
+    /**
+     * Handles the DELETE (unassign) request of a target type.
+     *
+     * @param targetId
+     *            the ID of the target
+     * @return If the given targetId could exists and could be unassign Http OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @DeleteMapping(value = MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING)
+    ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") String targetId);
+
+    /**
+     * Handles the POST (assign) request of a target type.
+     *
+     * @param targetId
+     *            the ID of the target
+     * @return If the given targetId could exists and could be assign Http OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @PostMapping(value = MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> assignTargetType(@PathVariable("targetId") String targetId, MgmtId targetTypeId);
 
     /**
      * Handles the GET request of retrieving the attributes of a specific

@@ -1,0 +1,396 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[target-types]]
+= Target Types
+
+toc::[]
+
+
+== GET /rest/v1/targettypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving all target types within Hawkbit. Required Permission: READ_TARGET
+
+=== Get target types
+
+==== CURL
+
+include::{snippets}/targettypes/get-target-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/get-target-types/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/targettypes/get-target-types-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/targettypes/get-target-types-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettypes/get-target-types/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettypes/get-target-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targettypes
+
+=== Implementation notes
+
+Handles the POST request for creating new target types within Hawkbit. The request body must always be a list of types. Required Permission: CREATE_TARGET
+
+=== Create target types
+
+==== CURL
+
+include::{snippets}/targettypes/post-target-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/post-target-types/http-request.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettypes/post-target-types/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response fields
+
+include::{snippets}/targettypes/post-target-types/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettypes/post-target-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Target type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+| `409 Conflict`
+| Target type already exists
+| See <<error-body>>
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targettypes/{targetTypeId}
+
+=== Implementation Notes
+
+Handles the DELETE request for a single target type within Hawkbit. Required Permission: DELETE_TARGET
+
+=== Delete target type
+
+==== CURL
+
+include::{snippets}/targettypes/delete-target-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/delete-target-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/delete-target-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targettypes/delete-target-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Target type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targettypes/{targetTypeId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single target type within Hawkbit. Required Permission: READ_TARGET
+
+=== Get target type
+
+==== CURL
+
+include::{snippets}/targettypes/get-target-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/get-target-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/get-target-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettypes/get-target-type/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettypes/get-target-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Target type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== PUT /rest/v1/targettypes/{targetTypeId}
+
+=== Implementation notes
+
+Handles the PUT request for a single target type within Hawkbit. Required Permission: UPDATE_TARGET
+
+=== Update target type
+
+==== CURL
+
+include::{snippets}/targettypes/put-target-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/put-target-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/put-target-type/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettypes/put-target-type/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettypes/put-target-type/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettypes/put-target-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Target type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== GET /rest/v1/targettypes/{targetTypeId}/compatibledistributionsettypes
+
+=== Implementation notes
+
+Handles the GET request of retrieving the list of compatible distribution set types in that target type. Required Permission: READ_TARGET, READ_REPOSITORY
+
+=== Lists all compatible distribution set types
+
+==== CURL
+
+include::{snippets}/targettypes/get-compatible-distribution-set-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/get-compatible-distribution-set-types/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/get-compatible-distribution-set-types/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/targettypes/get-compatible-distribution-set-types/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targettypes/get-compatible-distribution-set-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targettypes/{targetTypeId}/compatibledistributionsettypes
+
+=== Implementation notes
+
+Handles the POST request for adding compatible distribution set types to a target type. Required Permission: UPDATE_TARGET and READ_REPOSITORY
+
+=== Add compatible distribution set type
+
+==== CURL
+
+include::{snippets}/targettypes/post-compatible-distribution-set-types/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/post-compatible-distribution-set-types/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/post-compatible-distribution-set-types/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targettypes/post-compatible-distribution-set-types/request-fields.adoc[]
+
+=== Response (Status 201)
+
+==== Response example
+
+include::{snippets}/targettypes/post-compatible-distribution-set-types/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+| `409 Conflict`
+| Distribution set type already exists
+| See <<error-body>>
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== DELETE /rest/v1/targettypes/{targetTypeId}/compatibledistributionsettypes/{distributionSetTypeId}
+
+=== Implementation Notes
+
+Handles the DELETE request for removing a distribution set type from a single target type. Required Permission: UPDATE_TARGET and READ_REPOSITORY
+
+=== Remove compatible distribution set type from target type
+
+==== CURL
+
+include::{snippets}/targettypes/delete-compatible-distribution-set-type/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targettypes/delete-compatible-distribution-set-type/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targettypes/delete-compatible-distribution-set-type/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/targettypes/delete-compatible-distribution-set-type/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+| `404 Not Found`
+| Distribution set type was not found.
+| See <<error-body>>
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+

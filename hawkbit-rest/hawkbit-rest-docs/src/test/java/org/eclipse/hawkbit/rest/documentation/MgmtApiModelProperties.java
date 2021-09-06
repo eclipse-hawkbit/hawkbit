@@ -80,6 +80,10 @@ public final class MgmtApiModelProperties {
     public static final String POLL_STATUS = "Poll status of the target. In many scenarios that target will poll the update server on a regular basis to look for potential updates. If that poll does not happen it might imply that the target is offline.";
     public static final String POLL_OVERDUE = "Defines if the target poll time is overdue based on the next expected poll time plus the configured overdue poll time threshold.";
 
+    // Target type
+    public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
+    public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
+
     // rollout
     public static final String ROLLOUT_FILTER_QUERY = "target filter query language expression";
     public static final String ROLLOUT_GROUP_FILTER_QUERY = "target filter query language expression that selects a subset of targets which match the target filter of the Rollout";
@@ -119,6 +123,8 @@ public final class MgmtApiModelProperties {
     public static final String TARGET_ATTRIBUTES = "Target attributes.";
 
     public static final String TARGET_LIST = "List of provisioning targets.";
+
+    public static final String TARGET_TYPE_LIST = "List of target types";
 
     public static final String SM_LIST = "List of software modules.";
 

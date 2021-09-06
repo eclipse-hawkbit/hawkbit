@@ -35,8 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST Resource handling for {@link SoftwareModule} and related
- * {@link Artifact} CRUD operations.
+ * REST Resource handling for {@link SoftwareModuleType} CRUD operations.
  *
  */
 @RestController
