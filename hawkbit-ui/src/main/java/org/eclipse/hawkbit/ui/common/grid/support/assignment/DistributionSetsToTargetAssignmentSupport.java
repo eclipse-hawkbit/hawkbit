@@ -79,8 +79,8 @@ public class DistributionSetsToTargetAssignmentSupport
 
     private boolean isSourceDsValid(final ProxyDistributionSet distributionSet) {
         if (!distributionSet.getIsValid()) {
-            notification.displayValidationError(i18n.getMessage(
-                    UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID, distributionSet.getNameVersion()));
+            addSpecificValidationErrorMessage(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID,
+                    distributionSet.getNameVersion()));
             return false;
         }
         return true;
