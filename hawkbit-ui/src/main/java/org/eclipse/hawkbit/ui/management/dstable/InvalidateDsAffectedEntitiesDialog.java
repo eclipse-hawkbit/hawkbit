@@ -34,7 +34,7 @@ import com.vaadin.ui.Window;
  */
 public class InvalidateDsAffectedEntitiesDialog {
 
-    private final transient Consumer<Boolean> callback;
+    private final Consumer<Boolean> callback;
 
     private final CommonDialogWindow window;
 
