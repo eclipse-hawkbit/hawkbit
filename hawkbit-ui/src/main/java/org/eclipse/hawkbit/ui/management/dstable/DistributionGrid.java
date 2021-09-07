@@ -193,6 +193,14 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     }
 
 
+    private String getRowStyle(final ProxyDistributionSet distributionSet) {
+        final StringBuilder style = new StringBuilder();
+
+        final String assignedInstalledStyle = pinSupport.getAssignedOrInstalledRowStyle(distributionSet.getId());
+        if (assignedInstalledStyle != null) {
+            style.append(assignedInstalledStyle);
+        }
+
     private void initDistributionSetInvalidStyleGenerator() {
         setStyleGenerator(ds -> ds.getIsValid() ? null : SPUIDefinitions.INVALID_DISTRIBUTION);
     }
