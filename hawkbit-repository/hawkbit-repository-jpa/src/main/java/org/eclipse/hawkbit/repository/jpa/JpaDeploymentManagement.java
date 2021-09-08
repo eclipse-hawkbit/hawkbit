@@ -22,6 +22,8 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,6 +48,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -91,6 +94,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.annotation.Backoff;
@@ -100,6 +104,7 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -156,6 +161,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
     private final RolloutRepository rolloutRepository;
     private final TargetFilterQueryRepository targetFilterQueryRepository;
+    private final LockRegistry lockRegistry;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement,
@@ -166,7 +172,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
             final RepositoryProperties repositoryProperties, final RolloutRepository rolloutRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository) {
+            final TargetFilterQueryRepository targetFilterQueryRepository, final LockRegistry lockRegistry) {
         super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -189,6 +195,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         retryTemplate = createRetryTemplate();
         this.rolloutRepository = rolloutRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
+        this.lockRegistry = lockRegistry;
     }
 
     @Override
@@ -889,56 +896,93 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    // No transaction, will be created per handled distribution set
+    @Transactional(propagation = Propagation.NEVER)
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
-        distributionSetInvalidation.getSetIds().forEach(setId -> {
-            final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(setId);
-            invalidateDistributionSet(set);
+        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getSetIds());
+        final String tenant = tenantAware.getCurrentTenant();
 
-            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                    || distributionSetInvalidation.isCancelRollouts()) {
-                cancelRollouts(set);
+        if (distributionSetInvalidation.isCancelRollouts()) {
+            final String handlerId = tenant + "-rollout";
+            final Lock lock = lockRegistry.obtain(handlerId);
+            try {
+                if (!lock.tryLock(repositoryProperties.getDsInvalidationLockTimeout(), TimeUnit.SECONDS)) {
+                    throw new StopRolloutException("Timeout while trying to invalidate distribution sets");
+                }
+            } catch (final InterruptedException e) {
+                LOG.error("Lock was interrupted while invalidating distribution sets {}!",
+                        distributionSetInvalidation.getSetIds(), e);
+                throw new StopRolloutException(e);
             }
-
-            if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE) {
-                cancelActions(distributionSetInvalidation, set);
+            try {
+                invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+            } finally {
+                lock.unlock();
             }
-        });
-
-        cancelAutoAssignments(distributionSetInvalidation);
+        } else {
+            // no lock is needed as no rollout will be stopped
+            invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+        }
     }
 
-    private void invalidateDistributionSet(final JpaDistributionSet set) {
+    private void invalidateDistributionSetsInTransactions(final DistributionSetInvalidation distributionSetInvalidation,
+            final String tenant) {
+        distributionSetInvalidation.getSetIds()
+                .forEach(setId -> DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS-" + setId,
+                        status -> invalidateDistributionSet(setId, distributionSetInvalidation.getCancelationType(),
+                                distributionSetInvalidation.isCancelRollouts())));
+    }
+
+    private long invalidateDistributionSet(final long setId, final CancelationType cancelationType,
+            final boolean cancelRollouts) {
+        final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(setId);
         set.invalidate();
         distributionSetRepository.save(set);
+        LOG.debug("Distribution set {} set to invalid", set.getId());
+
+        if (cancelationType != CancelationType.NONE || cancelRollouts) {
+            cancelRollouts(set);
+        }
+
+        if (cancelationType != CancelationType.NONE) {
+            cancelActions(cancelationType, set);
+        }
+
+        cancelAutoAssignments(setId);
+        return 0;
     }
 
     private void cancelRollouts(final DistributionSet set) {
+
         // stop all rollouts for this distribution set
         rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
             final JpaRollout jpaRollout = (JpaRollout) rollout;
             jpaRollout.setStatus(RolloutStatus.STOPPING);
             rolloutRepository.save(jpaRollout);
+            LOG.debug("Rollout {} stopped", jpaRollout.getId());
         });
+
     }
 
-    private void cancelActions(final DistributionSetInvalidation distributionSetInvalidation,
-            final DistributionSet set) {
+    private void cancelActions(final CancelationType cancelationType, final DistributionSet set) {
         actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
             final JpaAction jpaAction = (JpaAction) action;
             cancelAction(jpaAction.getId());
+            LOG.debug("Action {} canceled", jpaAction.getId());
         });
-        if (distributionSetInvalidation.getCancelationType() == CancelationType.FORCE) {
+        if (cancelationType == CancelationType.FORCE) {
             actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
                 final JpaAction jpaAction = (JpaAction) action;
                 forceQuitAction(jpaAction.getId());
+                LOG.debug("Action {} force canceled", jpaAction.getId());
             });
         }
     }
 
-    private void cancelAutoAssignments(final DistributionSetInvalidation distributionSetInvalidation) {
+    private void cancelAutoAssignments(final long setId) {
         // remove distribution set from all auto assignments
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(distributionSetInvalidation.getSetIds()
-                .toArray(new Long[distributionSetInvalidation.getSetIds().size()]));
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
+        LOG.debug("Auto assignments for distribution sets {} deactivated", setId);
     }
 
     @Override

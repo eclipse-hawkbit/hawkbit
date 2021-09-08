@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedExcepti
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -64,6 +65,12 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -76,6 +83,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.test.context.TestPropertySource;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -92,6 +100,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Repository")
 @Story("Deployment Management")
+@TestPropertySource(properties = "hawkbit.server.repository.dsInvalidationLockTimeout=10")
 public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private static final boolean STATE_ACTIVE = true;
@@ -1403,6 +1412,7 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), CancelationType.NONE, false));
+        rolloutManagement.handleRollouts();
 
         assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
@@ -1431,11 +1441,13 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), CancelationType.NONE, true));
+        rolloutManagement.handleRollouts();
 
         assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
-                RolloutStatus.FINISHED);
+        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.FINISHED);
+        assertNoScheduledActionsExist(rollout);
+        assertRolloutGroupsAreFinished(rollout);
         for (final Target target : targets) {
             // if status is pending, the assignment has not been canceled
             assertThat(targetRepository.findById(targets.get(0).getId()).get().getUpdateStatus())
@@ -1461,17 +1473,30 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), CancelationType.FORCE, true));
+        rolloutManagement.handleRollouts();
 
         assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
                 .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
-                RolloutStatus.FINISHED);
+        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.FINISHED);
+        assertNoScheduledActionsExist(rollout);
+        assertRolloutGroupsAreFinished(rollout);
         for (final Target target : targets) {
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.IN_SYNC);
             assertThat(actionRepository.findByTarget(target).size()).isEqualTo(1);
             assertThat(actionRepository.findByTarget(target).get(0).getStatus()).isEqualTo(Status.CANCELED);
         }
+    }
+
+    private void assertNoScheduledActionsExist(final Rollout rollout) {
+        assertThat(
+                actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Status.SCHEDULED).getTotalElements())
+                        .isZero();
+    }
+
+    private void assertRolloutGroupsAreFinished(final Rollout rollout) {
+        assertThat(rolloutGroupRepository.findByRolloutId(rollout.getId(), PAGE))
+                .allMatch(rolloutGroup -> rolloutGroup.getStatus().equals(RolloutGroupStatus.FINISHED));
     }
 
     @Test
@@ -1521,6 +1546,43 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("Invalid distributionSet should throw an exception")
                 .isThrownBy(() -> deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                         Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true)));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Test
+    @Description("Verify that a large rollout causes a timeout when trying to invalidate a distribution set")
+    public void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() throws Exception {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.createTargets(10000, "verifyInvalidateDistributionSetWithLargeRolloutThrowsException");
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50")
+                .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
+                .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
+        rolloutManagement.create(entityFactory.rollout().create()
+                .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
+                .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED), 20, conditions);
+        final String tenant = tenantAware.getCurrentTenant();
+
+        // run in new Thread so that the invalidation can be executed in
+        // parallel
+        final Thread handleRolloutsThread = new Thread(() -> {
+            tenantAware.runAsTenant(tenant, () -> systemSecurityContext.runAsSystem(() -> {
+                rolloutManagement.handleRollouts();
+                return 0;
+            }));
+        });
+        handleRolloutsThread.start();
+        // wait a moment so that the rollouts are being handled when the
+        // distribution set gets invalidated
+        Thread.sleep(500);
+
+        assertThatExceptionOfType(StopRolloutException.class)
+                .as("Invalidation of distributionSet should throw an exception")
+                .isThrownBy(() -> deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
+                        Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true)));
+        // stop the handler thread so that other tests are not influenced by the
+        // rollout executor that is running in the background
+        handleRolloutsThread.stop();
     }
 
     /**
