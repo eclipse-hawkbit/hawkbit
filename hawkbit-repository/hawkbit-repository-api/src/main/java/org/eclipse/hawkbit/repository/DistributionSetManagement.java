@@ -39,8 +39,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import jdk.nashorn.internal.runtime.regexp.joni.constants.TargetInfo;
-
 /**
  * Management service for {@link DistributionSet}s.
  *
