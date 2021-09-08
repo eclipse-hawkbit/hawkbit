@@ -909,13 +909,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 if (!lock.tryLock(repositoryProperties.getDsInvalidationLockTimeout(), TimeUnit.SECONDS)) {
                     throw new StopRolloutException("Timeout while trying to invalidate distribution sets");
                 }
-                invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+                try {
+                    invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+                } finally {
+                    lock.unlock();
+                }
             } catch (final InterruptedException e) {
                 LOG.error("InterruptedException while invalidating distribution sets {}!",
                         distributionSetInvalidation.getSetIds(), e);
                 Thread.currentThread().interrupt();
-            } finally {
-                lock.unlock();
             }
         } else {
             // no lock is needed as no rollout will be stopped
