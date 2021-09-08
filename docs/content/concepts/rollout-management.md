@@ -8,6 +8,7 @@ Software update operations in large scale IoT scenarios with hundreds of thousan
 <!--more-->
 
 That includes:
+
 - _Technical Scalability_ by means of horizontal scale of the hawkBit server cluster in the cloud.
 - _Global_ artifact _content delivery_ capacities.
 - _Functional Scalability_ by means of:
@@ -20,6 +21,7 @@ That includes:
 Eclipse hawkBit sees these capabilities under the term Rollout Management.
 
 The following capabilities are currently supported by the _Rollout Management_:
+
 - Create, update and start of rollouts.
   - Selection of targets as input for the rollout based on _target filter_ functionality.
   - Selection of a _DistributionSet_.
