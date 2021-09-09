@@ -247,7 +247,7 @@ public final class StatusIconBuilder {
                 } else {
                     // invalidated ds, finished rollout but ds wasn't assigned
                     // to target
-                    return new ProxyFontIcon(VaadinIcons.MINUS_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_BLUE,
+                    return new ProxyFontIcon(VaadinIcons.BAN, SPUIStyleDefinitions.STATUS_ICON_BLUE,
                             i18n.getMessage(UIMessageIdProvider.MESSAGE_DISTRIBUTION_NOT_ASSIGNED, ds));
                 }
             } else {
