@@ -9,10 +9,13 @@
 package org.eclipse.hawkbit.ui.rollout.window.controllers;
 
 import java.util.List;
+import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.mappers.RolloutGroupToAdvancedDefinitionMapper;
@@ -37,6 +40,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final QuotaManagement quotaManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
     /**
      * Constructor for CopyRolloutWindowController
@@ -53,6 +57,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         this.targetFilterQueryManagement = dependencies.getTargetFilterQueryManagement();
         this.rolloutGroupManagement = dependencies.getRolloutGroupManagement();
         this.quotaManagement = dependencies.getQuotaManagement();
+        this.distributionSetManagement = dependencies.getDistributionSetManagement();
     }
 
     @Override
@@ -61,6 +66,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
 
         proxyRolloutWindow.setName(getI18n().getMessage("textfield.rollout.copied.name", proxyRolloutWindow.getName()));
 
+        removeDistributionSetIfInvalid(proxyRolloutWindow);
         setTargetFilterId(proxyRolloutWindow);
 
         if (proxyRolloutWindow.getForcedTime() == null
@@ -82,6 +88,15 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         }
 
         return proxyRolloutWindow;
+    }
+
+    private void removeDistributionSetIfInvalid(final ProxyRolloutWindow proxyRolloutWindow) {
+        final Optional<DistributionSet> dsOptional = distributionSetManagement
+                .get(proxyRolloutWindow.getRolloutForm().getDistributionSetInfo().getId());
+        if (!dsOptional.isPresent() || !dsOptional.get().isValid()) {
+            proxyRolloutWindow.getRolloutForm().setDistributionSetInfo(null);
+        }
+
     }
 
     private void setTargetFilterId(final ProxyRolloutWindow proxyRolloutWindow) {
