@@ -76,7 +76,7 @@ public class AddTargetWindowController
     @Override
     protected Target persistEntityInRepository(final ProxyTarget entity) {
         return targetManagement.create(getEntityFactory().target().create().controllerId(entity.getControllerId())
-                .name(entity.getName()).description(entity.getDescription()).targetType(entity.getTypeInfo().getId()));
+                .name(entity.getName()).description(entity.getDescription()).targetType(entity.getTypeInfo()!=null?entity.getTypeInfo().getId():null));
     }
 
     @Override
