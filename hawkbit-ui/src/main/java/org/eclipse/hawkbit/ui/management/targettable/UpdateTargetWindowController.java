@@ -56,6 +56,7 @@ public class UpdateTargetWindowController
         target.setControllerId(proxyEntity.getControllerId());
         target.setName(proxyEntity.getName());
         target.setDescription(proxyEntity.getDescription());
+        target.setTypeInfo(proxyEntity.getTypeInfo());
 
         controllerIdBeforeEdit = proxyEntity.getControllerId();
 
@@ -71,12 +72,13 @@ public class UpdateTargetWindowController
     protected void adaptLayout(final ProxyTarget proxyEntity) {
         layout.setControllerIdEnabled(false);
         layout.setNameRequired(true);
+        layout.setTypeRequired(false);
     }
 
     @Override
     protected Target persistEntityInRepository(final ProxyTarget entity) {
         final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId())
-                .name(entity.getName()).description(entity.getDescription());
+                .name(entity.getName()).description(entity.getDescription()).targetType(entity.getTypeInfo()!=null?entity.getTypeInfo().getId():null);
 
         return targetManagement.update(targetUpdate);
     }

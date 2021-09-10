@@ -327,6 +327,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TABLE_POLLING_STATUS_LABEL_ID = "target.table.poll.statusId";
 
     /**
+     * ID-Target.targetType.
+     */
+    public static final String TARGET_ADD_TARGETTYPE = "target.add.targettype";
+
+    /**
      * Action history table active-state label Id.
      */
     public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";

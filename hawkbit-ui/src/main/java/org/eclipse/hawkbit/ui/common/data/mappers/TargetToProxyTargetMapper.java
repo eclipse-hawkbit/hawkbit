@@ -12,7 +12,9 @@ import java.util.TimeZone;
 
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -49,6 +51,10 @@ public class TargetToProxyTargetMapper extends AbstractNamedEntityToProxyNamedEn
         proxyTarget.setPollStatusToolTip(getPollStatusToolTip(target.getPollStatus()));
         proxyTarget.setSecurityToken(target.getSecurityToken());
         proxyTarget.setRequestAttributes(target.isRequestControllerAttributes());
+        if (target.getTargetType() != null){
+            TargetType type = target.getTargetType();
+            proxyTarget.setTypeInfo(new ProxyTypeInfo(type.getId(), type.getName(), type.getKey()));
+        }
 
         return proxyTarget;
     }

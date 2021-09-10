@@ -70,12 +70,13 @@ public class AddTargetWindowController
     protected void adaptLayout(final ProxyTarget proxyEntity) {
         layout.setControllerIdEnabled(true);
         layout.setNameRequired(false);
+        layout.setTypeRequired(false);
     }
 
     @Override
     protected Target persistEntityInRepository(final ProxyTarget entity) {
         return targetManagement.create(getEntityFactory().target().create().controllerId(entity.getControllerId())
-                .name(entity.getName()).description(entity.getDescription()));
+                .name(entity.getName()).description(entity.getDescription()).targetType(entity.getTypeInfo().getId()));
     }
 
     @Override

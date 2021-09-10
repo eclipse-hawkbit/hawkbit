@@ -128,6 +128,16 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     }
 
     @Override
+    public String getKey() {
+        return null;
+    }
+
+    @Override
+    public boolean isDeleted() {
+        return false;
+    }
+
+    @Override
     public String getColour() {
         return colour;
     }

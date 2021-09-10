@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -104,16 +105,17 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            DistributionGridLayoutUiState
      */
     public TargetGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
-            final Executor uiExecutor, final TenantConfigurationManagement configManagement,
-            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
-            final SystemSecurityContext systemSecurityContext,
-            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetGridLayoutUiState targetGridLayoutUiState,
-            final TargetBulkUploadUiState targetBulkUploadUiState,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
-        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
+                            final TargetTypeManagement targetTypeManagement,
+                            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
+                            final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
+                            final Executor uiExecutor, final TenantConfigurationManagement configManagement,
+                            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+                            final SystemSecurityContext systemSecurityContext,
+                            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+                            final TargetGridLayoutUiState targetGridLayoutUiState,
+                            final TargetBulkUploadUiState targetBulkUploadUiState,
+                            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
+        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement, targetTypeManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
