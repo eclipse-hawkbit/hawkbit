@@ -910,7 +910,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     throw new StopRolloutException("Timeout while trying to invalidate distribution sets");
                 }
                 try {
-                    invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+                    invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
                 } finally {
                     lock.unlock();
                 }
@@ -921,19 +921,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             }
         } else {
             // no lock is needed as no rollout will be stopped
-            invalidateDistributionSetsInTransactions(distributionSetInvalidation, tenant);
+            invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
         }
     }
 
-    private void invalidateDistributionSetsInTransactions(final DistributionSetInvalidation distributionSetInvalidation,
+    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
             final String tenant) {
-        distributionSetInvalidation.getSetIds()
-                .forEach(setId -> DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS-" + setId,
-                        status -> invalidateDistributionSet(setId, distributionSetInvalidation.getCancelationType(),
-                                distributionSetInvalidation.isCancelRollouts())));
+        DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
+            distributionSetInvalidation.getSetIds().forEach(setId -> invalidateDistributionSet(setId,
+                    distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
+            return 0;
+        });
     }
 
-    private long invalidateDistributionSet(final long setId, final CancelationType cancelationType,
+    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType,
             final boolean cancelRollouts) {
         final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(setId);
         set.invalidate();
@@ -949,7 +950,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
 
         cancelAutoAssignments(setId);
-        return 0;
     }
 
     private void cancelRollouts(final DistributionSet set) {
