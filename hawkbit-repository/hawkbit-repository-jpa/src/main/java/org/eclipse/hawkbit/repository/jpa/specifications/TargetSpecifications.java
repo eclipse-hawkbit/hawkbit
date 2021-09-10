@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.MapJoin;
@@ -25,11 +26,15 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
@@ -185,15 +190,14 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are overdue. A
-     * target is overdue if it did not respond during the configured
-     * intervals:<br>
+     * target is overdue if it did not respond during the configured intervals:<br>
      * <em>poll_itvl + overdue_itvl</em>
      *
      * @param overdueTimestamp
      *            the calculated timestamp to compare with the last respond of a
      *            target (lastTargetQuery).<br>
-     *            The <code>overdueTimestamp</code> has to be calculated with
-     *            the following expression:<br>
+     *            The <code>overdueTimestamp</code> has to be calculated with the
+     *            following expression:<br>
      *            <em>overdueTimestamp = nowTimestamp - poll_itvl -
      *            overdue_itvl</em>
      *
@@ -205,8 +209,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId or like name or like description".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
+     * like name or like description".
      *
      * @param searchText
      *            to be filtered on
@@ -240,8 +244,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId or like name or like description or like attribute value".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
+     * like name or like description or like attribute value".
      *
      * @param searchText
      *            to be filtered on
@@ -252,8 +256,7 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId".
      *
      * @param distributionId
      *            to be filtered on
@@ -264,8 +267,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * Finds all targets by given {@link Target#getControllerId()}s and which
-     * are not yet assigned to given {@link DistributionSet}.
+     * Finds all targets by given {@link Target#getControllerId()}s and which are
+     * not yet assigned to given {@link DistributionSet}.
      *
      * @param tIDs
      *            to search for.
@@ -298,8 +301,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "has no tag
-     * names"or "has at least on of the given tag names".
+     * {@link Specification} for retrieving {@link Target}s by "has no tag names"or
+     * "has at least on of the given tag names".
      *
      * @param tagNames
      *            to be filtered on
@@ -341,8 +344,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
+     * {@link Specification} for retrieving {@link Target}s by assigned distribution
+     * set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -369,6 +372,24 @@ public final class TargetSpecifications {
                     distributionSetId));
 
             return cb.isNull(actionsJoin.get(JpaAction_.id));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are compatible with
+     * given DistributionSetType
+     *
+     * @param distributionSetTypeId
+     *            the ID of the distribution set type which must compatible
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
+        return (targetRoot, query, cb) -> {
+            final Join<JpaTarget, JpaTargetType> targetTypeJoin = targetRoot.join(JpaTarget_.targetType);
+            final SetJoin<JpaTargetType, JpaDistributionSetType> distSetTypeJoin = targetTypeJoin
+                    .join(JpaTargetType_.distributionSetTypes);
+            return cb.or(cb.isNull(targetRoot.get(JpaTarget_.targetType)),
+                    cb.equal(distSetTypeJoin.get(JpaDistributionSetType_.id), distributionSetTypeId));
         };
     }
 
@@ -423,8 +444,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have no Action
-     * of the {@link RolloutGroup}.
+     * {@link Specification} for retrieving {@link Target}s that have no Action of
+     * the {@link RolloutGroup}.
      *
      * @param group
      *            the {@link RolloutGroup}
@@ -445,8 +466,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
+     * {@link Specification} for retrieving {@link Target}s by assigned distribution
+     * set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -470,5 +491,15 @@ public final class TargetSpecifications {
             final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
             return cb.equal(tags.get(JpaTargetTag_.id), tagId);
         };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that have a
+     * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
+     * 
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTargetType() {
+        return (targetRoot, query, cb) -> cb.isNotNull(targetRoot.get(JpaTarget_.targetType));
     }
 }

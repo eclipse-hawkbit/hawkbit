@@ -105,11 +105,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery()
-                        .updateAutoAssign(targetFilterQueryManagement.create(
-                                entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
-                        .ds(setA.getId()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
@@ -131,7 +131,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(90);
+        assertThat(targetManagement.countByRsqlAndNonDSAndCompatible(setA.getId(), targetFilterQuery.getQuery()))
+                .isEqualTo(90);
 
         // Run the check
         autoAssignChecker.check();
@@ -221,10 +222,10 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId())
-                .stream().filter(a -> targetIds.contains(a.getTarget().getControllerId()))
-                .forEach(a -> assertThat(a.getInitiatedBy()).as(
-                        "Action should be initiated by the user who initiated the auto assignment")
+        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId()).stream()
+                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy())
+                        .as("Action should be initiated by the user who initiated the auto assignment")
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 

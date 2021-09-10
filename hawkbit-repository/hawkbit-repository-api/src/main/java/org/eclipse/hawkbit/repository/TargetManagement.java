@@ -21,9 +21,9 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -34,8 +34,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -83,23 +83,21 @@ public interface TargetManagement {
      * Count {@link Target}s for all the given filter parameters.
      *
      * @param status
-     *            find targets having one of these {@link TargetUpdateStatus}s.
-     *            Set to <code>null</code> in case this is not required.
+     *            find targets having one of these {@link TargetUpdateStatus}s. Set
+     *            to <code>null</code> in case this is not required.
      * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
-     *            Set to <code>null</code> in case this is not required.
+     *            find targets that are overdue (targets that did not respond during
+     *            the configured intervals: poll_itvl + overdue_itvl). Set to
+     *            <code>null</code> in case this is not required.
      * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any one in this tag names.
+     *            to find targets having the text anywhere in name or description.
      *            Set <code>null</code> in case this is not required.
+     * @param installedOrAssignedDistributionSetId
+     *            to find targets having the {@link DistributionSet} as installed or
+     *            assigned. Set to <code>null</code> in case this is not required.
+     * @param tagNames
+     *            to find targets which are having any one in this tag names. Set
+     *            <code>null</code> in case this is not required.
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned
      *
@@ -127,7 +125,8 @@ public interface TargetManagement {
     long countByInstalledDistributionSet(long distId);
 
     /**
-     * Checks if there is already a {@link Target} that has the given distribution set Id assigned or installed.
+     * Checks if there is already a {@link Target} that has the given distribution
+     * set Id assigned or installed.
      *
      * @param distId
      *            to search for
@@ -137,7 +136,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-                          + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     boolean existsByInstalledOrAssignedDistributionSet(long distId);
 
     /**
@@ -181,8 +180,8 @@ public interface TargetManagement {
      * @throws EntityAlreadyExistsException
      *             given target already exists.
      * @throws ConstraintViolationException
-     *             if fields are not filled as specified. Check
-     *             {@link TargetCreate} for field constraints.
+     *             if fields are not filled as specified. Check {@link TargetCreate}
+     *             for field constraints.
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
@@ -190,9 +189,9 @@ public interface TargetManagement {
 
     /**
      * creates multiple {@link Target}s. If some of the given {@link Target}s
-     * already exists in the DB a {@link EntityAlreadyExistsException} is
-     * thrown. {@link Target}s contain all objects of the parameter targets,
-     * including duplicates.
+     * already exists in the DB a {@link EntityAlreadyExistsException} is thrown.
+     * {@link Target}s contain all objects of the parameter targets, including
+     * duplicates.
      *
      * @param creates
      *            to be created.
@@ -201,8 +200,8 @@ public interface TargetManagement {
      * @throws EntityAlreadyExistsException
      *             of one of the given targets already exist.
      * @throws ConstraintViolationException
-     *             if fields are not filled as specified. Check
-     *             {@link TargetCreate} for field constraints.
+     *             if fields are not filled as specified. Check {@link TargetCreate}
+     *             for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     List<Target> create(@NotNull @Valid Collection<TargetCreate> creates);
@@ -232,9 +231,8 @@ public interface TargetManagement {
     void deleteByControllerID(@NotEmpty String controllerID);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified distribution set in their action
-     * history.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
+     * that don't have the specified distribution set in their action history.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -248,13 +246,12 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
+    Page<Target> findByTargetFilterQueryAndNonDSAndCompatible(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified distribution set in their action
-     * history.
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
+     * that don't have the specified distribution set in their action history.
      *
      * @param distributionSetId
      *            id of the {@link DistributionSet}
@@ -266,11 +263,11 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDS(long distributionSetId, @NotNull String rsqlParam);
+    long countByRsqlAndNonDSAndCompatible(long distributionSetId, @NotNull String rsqlParam);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that are not assigned to one of the {@link RolloutGroup}s
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
+     * that are not assigned to one of the {@link RolloutGroup}s
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -285,8 +282,8 @@ public interface TargetManagement {
             @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that are not assigned to one of the {@link RolloutGroup}s
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
+     * that are not assigned to one of the {@link RolloutGroup}s
      *
      * @param groups
      *            the list of {@link RolloutGroup}s
@@ -298,8 +295,8 @@ public interface TargetManagement {
     long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
 
     /**
-     * Finds all targets of the provided {@link RolloutGroup} that have no
-     * Action for the RolloutGroup.
+     * Finds all targets of the provided {@link RolloutGroup} that have no Action
+     * for the RolloutGroup.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -331,8 +328,8 @@ public interface TargetManagement {
     Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
 
     /**
-     * Retrieves {@link Target}s by the assigned {@link DistributionSet}
-     * possible including additional filtering based on the given {@code spec}.
+     * Retrieves {@link Target}s by the assigned {@link DistributionSet} possible
+     * including additional filtering based on the given {@code spec}.
      * 
      * @param pageReq
      *            page parameter
@@ -375,14 +372,14 @@ public interface TargetManagement {
     Optional<Target> getByControllerID(@NotEmpty String controllerId);
 
     /**
-     * Filter {@link Target}s for all the given parameters. If all parameters
-     * except pageable are null, all available {@link Target}s are returned.
+     * Filter {@link Target}s for all the given parameters. If all parameters except
+     * pageable are null, all available {@link Target}s are returned.
      *
      * @param pageable
      *            page parameters
      * @param filterParams
-     *            the filters to apply; only filters are enabled that have
-     *            non-null value; filters are AND-gated
+     *            the filters to apply; only filters are enabled that have non-null
+     *            value; filters are AND-gated
      *
      * @return the found {@link Target}s
      * 
@@ -409,8 +406,8 @@ public interface TargetManagement {
     Page<Target> findByInstalledDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
 
     /**
-     * retrieves {@link Target}s by the installed {@link DistributionSet}
-     * including additional filtering based on the given {@code spec}.
+     * retrieves {@link Target}s by the installed {@link DistributionSet} including
+     * additional filtering based on the given {@code spec}.
      * 
      * @param pageReq
      *            page parameter
@@ -435,8 +432,7 @@ public interface TargetManagement {
             @NotNull String rsqlParam);
 
     /**
-     * Retrieves the {@link Target} which have a certain
-     * {@link TargetUpdateStatus}.
+     * Retrieves the {@link Target} which have a certain {@link TargetUpdateStatus}.
      *
      * @param pageable
      *            page parameter
@@ -499,8 +495,7 @@ public interface TargetManagement {
     Slice<Target> findByTargetFilterQuery(@NotNull Pageable pageable, long targetFilterQueryId);
 
     /**
-     * method retrieves all {@link Target}s from the repo in the following
-     * order:
+     * method retrieves all {@link Target}s from the repo in the following order:
      * <p>
      * 1) {@link Target}s which have the given {@link DistributionSet} as
      * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
@@ -516,8 +511,8 @@ public interface TargetManagement {
      * @param orderByDistributionId
      *            {@link DistributionSet#getId()} to be ordered by
      * @param filterParams
-     *            the filters to apply; only filters are enabled that have
-     *            non-null value; filters are AND-gated
+     *            the filters to apply; only filters are enabled that have non-null
+     *            value; filters are AND-gated
      * @return a paged result {@link Page} of the {@link Target}s in a defined
      *         order.
      * 
@@ -567,9 +562,9 @@ public interface TargetManagement {
     Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
-     * Toggles {@link TargetTag} assignment to given {@link Target}s by means
-     * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. Only if all of theme have the tag already assigned
+     * Toggles {@link TargetTag} assignment to given {@link Target}s by means that
+     * if some (or all) of the targets in the list have the {@link Tag} not yet
+     * assigned, they will be. Only if all of theme have the tag already assigned
      * they will be removed instead.
      *
      * @param controllerIds
@@ -634,8 +629,8 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if given target does not exist
      * @throws ConstraintViolationException
-     *             if fields are not filled as specified. Check
-     *             {@link TargetUpdate} for field constraints.
+     *             if fields are not filled as specified. Check {@link TargetUpdate}
+     *             for field constraints.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Target update(@NotNull @Valid TargetUpdate update);
@@ -724,8 +719,7 @@ public interface TargetManagement {
      * Creates a list of target meta data entries.
      *
      * @param controllerId
-     *            {@link Target} controller id the metadata has to be created
-     *            for
+     *            {@link Target} controller id the metadata has to be created for
      * @param metadata
      *            the meta data entries to create or update
      * @return the updated or created target meta data entries
@@ -738,8 +732,8 @@ public interface TargetManagement {
      *             specific key
      * 
      * @throws AssignmentQuotaExceededException
-     *             if the maximum number of {@link MetaData} entries is exceeded
-     *             for the addressed {@link Target}
+     *             if the maximum number of {@link MetaData} entries is exceeded for
+     *             the addressed {@link Target}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     List<TargetMetadata> createMetaData(@NotEmpty String controllerId, @NotEmpty Collection<MetaData> metadata);
@@ -819,15 +813,13 @@ public interface TargetManagement {
      * Updates a target meta data value if corresponding entry exists.
      *
      * @param controllerId
-     *            {@link Target} controller id of the meta data entry to be
-     *            updated
+     *            {@link Target} controller id of the meta data entry to be updated
      * @param metadata
      *            meta data entry to be updated
      * @return the updated meta data entry
      * 
      * @throws EntityNotFoundException
-     *             in case the meta data entry does not exists and cannot be
-     *             updated
+     *             in case the meta data entry does not exists and cannot be updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);

@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
@@ -413,6 +414,14 @@ public class JpaTargetManagement implements TargetManagement {
         }
     }
 
+    private JpaDistributionSet getDistributionSetOrThrowNotFoundException(final long distributionSetId) {
+        final Optional<JpaDistributionSet> distributionSet = distributionSetRepository.findById(distributionSetId);
+        if (!distributionSet.isPresent()) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
+        }
+        return distributionSet.get();
+    }
+
     public static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
@@ -689,17 +698,17 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
-            final String targetFilterQuery) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
+    public Page<Target> findByTargetFilterQueryAndNonDSAndCompatible(final Pageable pageRequest,
+            final long distributionSetId, final String targetFilterQuery) {
+        final JpaDistributionSet jpaDistributionSet = getDistributionSetOrThrowNotFoundException(distributionSetId);
+        final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
 
-        return findTargetsBySpec(
-                (root, cq,
-                        cb) -> cb.and(spec.toPredicate(root, cq, cb), TargetSpecifications
-                                .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
+        return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb), cb.and(
+                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId).toPredicate(root, cq, cb))),
                 pageRequest);
 
     }
@@ -738,7 +747,7 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNonDS(final long distributionSetId, final String targetFilterQuery) {
+    public long countByRsqlAndNonDSAndCompatible(final long distributionSetId, final String targetFilterQuery) {
         throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,

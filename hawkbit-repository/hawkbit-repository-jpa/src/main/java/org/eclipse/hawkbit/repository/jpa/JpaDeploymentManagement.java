@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -232,16 +233,27 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void checkForTargetTypeCompatibility(final List<DeploymentRequest> deploymentRequests) {
+        final Map<String, Long> targetDistSetAssignments = new HashMap<>();
         for (final DeploymentRequest deploymentRequest : deploymentRequests) {
-            final Optional<JpaTarget> one = targetRepository
-                    .findOne(TargetSpecifications.hasControllerId(deploymentRequest.getControllerId()));
-            one.ifPresent(target -> {
-                if (target.getTargetType() != null && !target.getTargetType()
-                        .containsCompatibleDistributionSetType(deploymentRequest.getDistributionSetId())) {
-                    throw new DistributionSetTypeNotInTargetTypeException(target.getTargetType().getId(),
-                            deploymentRequest.getDistributionSetId());
-                }
-            });
+            targetDistSetAssignments.put(deploymentRequest.getControllerId(), deploymentRequest.getDistributionSetId());
+        }
+
+        final List<JpaTarget> allTargets = targetRepository.findAll(TargetSpecifications
+                .hasControllerIdIn(targetDistSetAssignments.keySet()).and(TargetSpecifications.hasTargetType()));
+        final Map<Long, JpaDistributionSet> allDistSets = distributionSetRepository
+                .findAllById(targetDistSetAssignments.values()).stream()
+                .collect(Collectors.toMap(JpaDistributionSet::getId, jpaDistributionSet -> jpaDistributionSet));
+
+        for (final JpaTarget target : allTargets) {
+            final Long distId = targetDistSetAssignments.get(target.getControllerId());
+            final JpaDistributionSet jpaDistributionSet = allDistSets.get(distId);
+            if (jpaDistributionSet == null) {
+                throw new EntityNotFoundException(DistributionSet.class, distId);
+            }
+            if (!target.getTargetType().containsCompatibleDistributionSetType(jpaDistributionSet.getType().getId())) {
+                throw new DistributionSetTypeNotInTargetTypeException(target.getTargetType().getId(),
+                        jpaDistributionSet.getType().getId());
+            }
         }
     }
 
@@ -293,9 +305,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *            the assignment strategy (online /offline)
      * @return the assignment result
      *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             define by the {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsID,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
