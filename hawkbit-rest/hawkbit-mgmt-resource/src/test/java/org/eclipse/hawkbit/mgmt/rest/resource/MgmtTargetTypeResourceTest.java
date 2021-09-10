@@ -539,16 +539,15 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     @Description("Verifies quota enforcement for /rest/v1/targettypes/{ID}/compatibledistributionsettypes POST requests.")
     void assignDistributionSetTypeToTargetTypeUntilQuotaExceeded() throws Exception {
-        String typeName = "TestTypeQuota";
-        final TargetType testType = createTestTargetTypeInDB(typeName);
+        final TargetType testType = createTestTargetTypeInDB("TestTypeQuota");
 
         // create distribution set types
         final int maxDistributionSetTypes = quotaManagement.getMaxDistributionSetTypesPerTargetType();
         final List<Long> dsTypeIds = Lists.newArrayList();
         for (int i = 0; i < maxDistributionSetTypes + 1; ++i) {
-            final DistributionSetTypeCreate dsCreate = entityFactory.distributionSetType().create().name("dsType_" + i)
-                    .description("dsType_" + i).colour("#000000").key("dsType_" + i);
-            dsTypeIds.add(distributionSetTypeManagement.create(dsCreate).getId());
+            final DistributionSetType ds = testdataFactory.findOrCreateDistributionSetType("dsType_" + i,
+                    "dsType_" + i);
+            dsTypeIds.add(ds.getId());
         }
 
         // verify quota enforcement for distribution set types
