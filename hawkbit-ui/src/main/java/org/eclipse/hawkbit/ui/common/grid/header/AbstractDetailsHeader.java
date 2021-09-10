@@ -142,7 +142,7 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
     }
 
     private void enableMetaData() {
-        if (metaDataDetailsHeaderSupport != null) {
+        if (metaDataDetailsHeaderSupport != null && editSelectedEntityAllowed()) {
             metaDataDetailsHeaderSupport.enableMetaDataIcon();
         }
     }
