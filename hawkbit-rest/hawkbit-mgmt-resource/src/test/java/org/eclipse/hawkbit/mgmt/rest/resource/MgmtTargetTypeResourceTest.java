@@ -19,9 +19,13 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
+import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
+import org.eclipse.hawkbit.repository.builder.DistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -529,6 +533,35 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk()).andExpect(jsonPath("size", equalTo(2)))
                 .andExpect(jsonPath("total", equalTo(2))).andExpect(jsonPath("content[0].name", equalTo("TestName123")))
                 .andExpect(jsonPath("content[1].name", equalTo("TestName1234")));
+    }
+
+    @Test
+    @WithUser(principal = TEST_USER, allSpPermissions = true)
+    @Description("Verifies quota enforcement for /rest/v1/targettypes/{ID}/compatibledistributionsettypes POST requests.")
+    void assignDistributionSetTypeToTargetTypeUntilQuotaExceeded() throws Exception {
+        final TargetType testType = createTestTargetTypeInDB("TestTypeQuota");
+
+        // create distribution set types
+        final int maxDistributionSetTypes = quotaManagement.getMaxDistributionSetTypesPerTargetType();
+        final List<Long> dsTypeIds = Lists.newArrayList();
+        for (int i = 0; i < maxDistributionSetTypes + 1; ++i) {
+            final DistributionSetType ds = testdataFactory.findOrCreateDistributionSetType("dsType_" + i,
+                    "dsType_" + i);
+            dsTypeIds.add(ds.getId());
+        }
+
+        // verify quota enforcement for distribution set types
+        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
+                .content(JsonBuilder.ids(dsTypeIds.subList(0, dsTypeIds.size() - 1)))
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        mvc.perform(post(TARGETTYPE_DSTYPES_ENDPOINT, testType.getId())
+                .content("[{\"id\":" + dsTypeIds.get(dsTypeIds.size() - 1) + "}]")
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
     @Step
