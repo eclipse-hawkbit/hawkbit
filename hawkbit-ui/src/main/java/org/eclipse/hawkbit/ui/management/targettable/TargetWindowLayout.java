@@ -14,15 +14,10 @@ import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
-import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
-import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
@@ -44,15 +39,12 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
      */
     public TargetWindowLayout(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
         super();
-        this.targetComponentBuilder = new TargetWindowLayoutComponentBuilder(i18n);
+        this.targetComponentBuilder = new TargetWindowLayoutComponentBuilder(i18n, targetTypeManagement);
 
         this.targetControllerId = targetComponentBuilder.createControllerIdField(binder);
         this.targetName = targetComponentBuilder.createNameField(binder);
         this.targetDescription = targetComponentBuilder.createDescriptionField(binder);
-        TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
-                targetTypeManagement, new TypeToTypeInfoMapper<TargetType>());
-        this.targetTypeCombo = FormComponentBuilder
-                .createTypeCombo(binder, targetTypeInfoDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE);
+        this.targetTypeCombo = targetComponentBuilder.createTargetTypeCombo(binder);
     }
 
     @Override

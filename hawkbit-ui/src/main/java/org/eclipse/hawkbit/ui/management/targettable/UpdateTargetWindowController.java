@@ -78,7 +78,8 @@ public class UpdateTargetWindowController
     @Override
     protected Target persistEntityInRepository(final ProxyTarget entity) {
         final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId())
-                .name(entity.getName()).description(entity.getDescription()).targetType(entity.getTypeInfo()!=null?entity.getTypeInfo().getId():null);
+                .name(entity.getName()).description(entity.getDescription())
+                .targetType(entity.getTypeInfo() != null ? entity.getTypeInfo().getId() : null);
 
         return targetManagement.update(targetUpdate);
     }

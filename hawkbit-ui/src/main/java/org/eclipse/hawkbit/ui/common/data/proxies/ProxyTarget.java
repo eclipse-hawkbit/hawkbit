@@ -42,7 +42,6 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
 
     private ProxyTypeInfo typeInfo;
 
-
     /**
      * Gets the controllerId
      *

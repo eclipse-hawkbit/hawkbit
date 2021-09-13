@@ -360,7 +360,8 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
         private void addNewTarget(final String controllerId, final String name) {
             try {
                 targetManagement.create(entityFactory.target().create().controllerId(controllerId).name(name)
-                        .description(bulkUploadInputs.getDescription()));
+                        .description(bulkUploadInputs.getDescription())
+                        .targetType(bulkUploadInputs.getTypeInfo() != null ? bulkUploadInputs.getTypeInfo().getId() : null));
 
                 provisionedControllerIds.add(controllerId);
             } catch (final EntityAlreadyExistsException ex) {

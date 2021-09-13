@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
 
 /**
@@ -26,6 +27,7 @@ public class TargetBulkUploadUiState implements Serializable {
     private ProxyDistributionSetInfo dsInfo;
     private final Map<Long, String> tagIdsWithNameToAssign = new HashMap<>();
     private String description;
+    private ProxyTypeInfo proxyTypeInfo;
 
     /**
      * @return true whe upload in progress else false
@@ -94,6 +96,23 @@ public class TargetBulkUploadUiState implements Serializable {
      */
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    /**
+     * @return target type of target bulk upload
+     */
+    public ProxyTypeInfo getProxyTypeInfo() {
+        return proxyTypeInfo;
+    }
+
+    /**
+     * Sets the target type of target bulk upload
+     *
+     * @param proxyTypeInfo
+     *            ProxyTypeInfo
+     */
+    public void setProxyTypeInfo(ProxyTypeInfo proxyTypeInfo) {
+        this.proxyTypeInfo = proxyTypeInfo;
     }
 
     /**

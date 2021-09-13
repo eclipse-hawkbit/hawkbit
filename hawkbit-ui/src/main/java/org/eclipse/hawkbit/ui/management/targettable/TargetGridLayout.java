@@ -79,10 +79,14 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      * @param deploymentManagement
      *            DeploymentManagement
      * @param uiProperties
      *            UiProperties
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      * @param targetTagManagement
      *            TargetTagManagement
      * @param distributionSetManagement
@@ -120,7 +124,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
         final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,
-                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTagManagement,
+                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTypeManagement, targetTagManagement,
                 distributionSetManagement, targetBulkUploadUiState);
 
         this.targetGridHeader = new TargetGridHeader(uiDependencies, targetWindowBuilder, bulkUploadWindowBuilder,

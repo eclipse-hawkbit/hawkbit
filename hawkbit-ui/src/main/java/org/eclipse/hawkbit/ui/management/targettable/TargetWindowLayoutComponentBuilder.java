@@ -8,11 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import com.vaadin.ui.ComboBox;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -30,14 +36,19 @@ public class TargetWindowLayoutComponentBuilder {
 
     private final VaadinMessageSource i18n;
 
+    private final TargetTypeManagement targetTypeManagement;
+
     /**
      * Constructor for TargetWindowLayoutComponentBuilder
      *
      * @param i18n
      *            VaadinMessageSource
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      */
-    public TargetWindowLayoutComponentBuilder(final VaadinMessageSource i18n) {
+    public TargetWindowLayoutComponentBuilder(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
         this.i18n = i18n;
+        this.targetTypeManagement = targetTypeManagement;
     }
 
     /**
@@ -82,6 +93,20 @@ public class TargetWindowLayoutComponentBuilder {
     public TextArea createDescriptionField(final Binder<ProxyTarget> binder) {
         return FormComponentBuilder.createDescriptionInput(binder, i18n, UIComponentIdProvider.TARGET_ADD_DESC)
                 .getComponent();
+    }
+
+    /**
+     * create target type combo
+     *
+     * @param binder
+     *            binder the input will be bound to
+     * @return input component
+     */
+    public BoundComponent<ComboBox<ProxyTypeInfo>> createTargetTypeCombo(final Binder<ProxyTarget> binder) {
+        TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
+                targetTypeManagement, new TypeToTypeInfoMapper<TargetType>());
+        return FormComponentBuilder
+                .createTypeCombo(binder, targetTypeInfoDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE);
     }
 
 }

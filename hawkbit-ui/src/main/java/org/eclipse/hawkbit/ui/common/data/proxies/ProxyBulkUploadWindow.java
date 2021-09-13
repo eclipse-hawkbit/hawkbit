@@ -13,16 +13,18 @@ import java.util.Map;
 
 import org.eclipse.hawkbit.ui.common.data.aware.DescriptionAware;
 import org.eclipse.hawkbit.ui.common.data.aware.DsIdAware;
+import org.eclipse.hawkbit.ui.common.data.aware.TypeInfoAware;
 
 /**
  * Proxy entity representing rollout popup window bean.
  */
-public class ProxyBulkUploadWindow implements Serializable, DescriptionAware, DsIdAware {
+public class ProxyBulkUploadWindow implements Serializable, DescriptionAware, DsIdAware, TypeInfoAware {
     private static final long serialVersionUID = 1L;
 
     private ProxyDistributionSetInfo dsInfo;
     private Map<Long, String> tagIdsWithNameToAssign;
     private String description;
+    private ProxyTypeInfo typeInfo;
 
     /**
      * Gets the distribution set info
@@ -83,5 +85,15 @@ public class ProxyBulkUploadWindow implements Serializable, DescriptionAware, Ds
     @Override
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    @Override
+    public void setTypeInfo(ProxyTypeInfo typeInfo) {
+        this.typeInfo = typeInfo;
+    }
+
+    @Override
+    public ProxyTypeInfo getTypeInfo() {
+        return typeInfo;
     }
 }

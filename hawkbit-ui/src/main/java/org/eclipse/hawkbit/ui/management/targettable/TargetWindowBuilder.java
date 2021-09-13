@@ -36,6 +36,8 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
      *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      * @param view
      *            EventView
      */

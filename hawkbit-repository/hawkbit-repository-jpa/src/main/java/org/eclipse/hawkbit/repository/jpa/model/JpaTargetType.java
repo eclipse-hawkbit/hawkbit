@@ -129,11 +129,13 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
 
     @Override
     public String getKey() {
+        // Default override: not used in target type
         return null;
     }
 
     @Override
     public boolean isDeleted() {
+        // Default override: not used in target type
         return false;
     }
 

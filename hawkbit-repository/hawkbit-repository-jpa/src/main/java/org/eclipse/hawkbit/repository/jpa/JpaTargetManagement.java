@@ -344,7 +344,7 @@ public class JpaTargetManagement implements TargetManagement {
         if (update.getTargetTypeId() != null) {
             final TargetType targetType = getTargetTypeByIdAndThrowIfNotFound(update.getTargetTypeId());
             target.setTargetType(targetType);
-        }else{
+        } else {
             target.setTargetType(null);
         }
 
