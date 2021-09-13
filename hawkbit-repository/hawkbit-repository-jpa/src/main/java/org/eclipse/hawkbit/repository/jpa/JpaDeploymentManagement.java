@@ -902,7 +902,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getSetIds());
         final String tenant = tenantAware.getCurrentTenant();
 
-        if (distributionSetInvalidation.isCancelRollouts()) {
+        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
+                || distributionSetInvalidation.isCancelRollouts()) {
             final String handlerId = tenant + "-rollout";
             final Lock lock = lockRegistry.obtain(handlerId);
             try {
