@@ -528,7 +528,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      *            of the DS to touch
      */
     private JpaDistributionSet touch(final Long distId) {
-        return touch(getOrElseThrowException(distId));
+        return touch(getValid(distId));
     }
 
     @Override
