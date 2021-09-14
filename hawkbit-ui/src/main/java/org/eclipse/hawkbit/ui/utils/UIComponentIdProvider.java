@@ -721,6 +721,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_CONTROLLER_ID = "target.controller.id";
 
     /**
+     * Id of target type Id label in target details.
+     */
+    public static final String TARGET_TYPE_ID = "target.type.id";
+
+    /**
      * Id of created at label in details.
      */
     public static final String CREATEDAT_ID = "createdAt.id";

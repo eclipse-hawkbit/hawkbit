@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -28,10 +29,12 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeFilter;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -42,6 +45,8 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -137,6 +142,29 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
                 virtualPropertyReplacer, database);
 
         return convertPage(targetTypeRepository.findAll(spec, pageable), pageable);
+    }
+
+    @Override
+    public Page<TargetType> findByTargetTypeFilter(Pageable pageable, TargetTypeFilter targetTypeFilter) {
+
+        final List<Specification<JpaTargetType>> specList = Lists.newArrayListWithExpectedSize(2);
+
+        Specification<JpaTargetType> spec;
+
+        if (!StringUtils.isEmpty(targetTypeFilter.getSearchText())) {
+            spec = TargetTypeSpecification.likeNameOrDescription(targetTypeFilter.getSearchText());
+            specList.add(spec);
+        }
+
+         if (!StringUtils.isEmpty(targetTypeFilter.getFilterString())) {
+            spec = TargetTypeSpecification.likeNameOrDescription(targetTypeFilter.getFilterString().trim() + "%");
+            specList.add(spec);
+        }
+        if (CollectionUtils.isEmpty(specList)) {
+            return convertPage(targetTypeRepository.findAll(pageable), pageable);
+        }
+
+        return convertPage(targetTypeRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable), pageable);
     }
 
     @Override

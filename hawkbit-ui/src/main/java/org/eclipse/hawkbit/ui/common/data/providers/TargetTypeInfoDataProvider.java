@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.data.providers;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeFilter.TargetTypeFilterBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.IdentifiableEntityToProxyIdentifiableEntityMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.springframework.data.domain.Page;
@@ -39,10 +40,13 @@ public class TargetTypeInfoDataProvider<T extends ProxyIdentifiableEntity>
 
     @Override
     protected Page<TargetType> loadBackendEntities(PageRequest pageRequest, String filter) {
+        final TargetTypeFilterBuilder builder =  new TargetTypeFilterBuilder();
+
         if (!StringUtils.isEmpty(filter)) {
-            return targetTypeManagement.findByRsql(pageRequest, "name==*" + filter + "*");
+            builder.setFilterString(filter);
         }
-        return targetTypeManagement.findAll(pageRequest);
+
+        return targetTypeManagement.findByTargetTypeFilter(pageRequest, builder.build());
     }
 
     @Override

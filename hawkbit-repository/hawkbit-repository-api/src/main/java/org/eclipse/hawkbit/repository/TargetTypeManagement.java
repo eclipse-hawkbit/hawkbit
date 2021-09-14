@@ -12,9 +12,9 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.validation.Valid;
@@ -83,6 +83,18 @@ public interface TargetTypeManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<TargetType> findByRsql(@NotNull Pageable pageable, @NotEmpty String rsqlParam);
+
+    /**
+     * Retrieves {@link TargetType}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param filter
+     *            has text of filters to be applied.
+     * @return the page of found {@link TargetType}
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetType> findByTargetTypeFilter(@NotNull Pageable pageable, @NotNull TargetTypeFilter filter);
 
     /**
      * @param id
