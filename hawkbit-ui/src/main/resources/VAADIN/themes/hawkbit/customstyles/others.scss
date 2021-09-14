@@ -203,10 +203,11 @@
   }
 
   
-   // Disabled row style when distribution is invalid
+   // Disabled row/cell style when distribution is invalid
   .v-grid-row.invalid-distribution,
-  .v-grid-row.invalid-distribution>.v-grid-cell {
-    color: $disabled-row-color-grey !important;
+  .v-grid-row.invalid-distribution>.v-grid-cell,
+  td.v-grid-cell.invalid-distribution {
+    color: $disabled-row-color-grey !important;    
     text-decoration: line-through !important;
   }
 

@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowBuilder;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -137,6 +138,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
         actionTypeIconSupplier = new ActionTypeIconSupplier<>(i18n, ProxyRollout::getActionType,
                 UIComponentIdProvider.ROLLOUT_ACTION_TYPE_LABEL_ID);
+
         init();
     }
 
@@ -266,8 +268,9 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 
-        GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion).setId(DIST_NAME_VERSION_ID)
-                .setCaption(i18n.getMessage("header.distributionset")).setHidable(true).setExpandRatio(2);
+        GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion, this::getDistributionCellStyle)
+                .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset")).setHidable(true)
+                .setExpandRatio(2);
 
         GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
@@ -463,5 +466,12 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         if (!refetchedRollout.isPresent()) {
             onSelectedRolloutDeleted(selectedRolloutId);
         }
+    }
+
+    private String getDistributionCellStyle(final ProxyRollout rollout) {
+        if (!rollout.getDsInfo().isValid()) {
+            return SPUIDefinitions.INVALID_DISTRIBUTION;
+        }
+        return null;
     }
 }
