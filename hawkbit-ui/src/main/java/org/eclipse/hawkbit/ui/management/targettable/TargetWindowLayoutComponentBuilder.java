@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import com.vaadin.ui.ComboBox;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.mappers.NamedEntityToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
@@ -104,7 +103,7 @@ public class TargetWindowLayoutComponentBuilder {
      */
     public BoundComponent<ComboBox<ProxyTypeInfo>> createTargetTypeCombo(final Binder<ProxyTarget> binder) {
         TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
-                targetTypeManagement, new TypeToTypeInfoMapper<TargetType>());
+                targetTypeManagement, new NamedEntityToTypeInfoMapper<>());
         return FormComponentBuilder
                 .createTypeCombo(binder, targetTypeInfoDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE);
     }

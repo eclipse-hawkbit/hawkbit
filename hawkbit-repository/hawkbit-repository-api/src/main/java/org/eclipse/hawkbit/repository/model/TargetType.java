@@ -15,7 +15,7 @@ import java.util.Set;
  * {@link Target}
  *
  */
-public interface TargetType extends Type {
+public interface TargetType extends NamedEntity {
     /**
      * Maximum length of color in Management UI.
      */

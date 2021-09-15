@@ -53,7 +53,7 @@ public class TargetToProxyTargetMapper extends AbstractNamedEntityToProxyNamedEn
         proxyTarget.setRequestAttributes(target.isRequestControllerAttributes());
         if (target.getTargetType() != null){
             TargetType type = target.getTargetType();
-            proxyTarget.setTypeInfo(new ProxyTypeInfo(type.getId(), type.getName(), type.getKey()));
+            proxyTarget.setTypeInfo(new ProxyTypeInfo(type.getId(), type.getName()));
         }
 
         return proxyTarget;

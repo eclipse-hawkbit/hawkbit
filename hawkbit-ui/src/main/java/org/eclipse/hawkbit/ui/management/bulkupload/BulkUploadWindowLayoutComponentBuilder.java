@@ -10,11 +10,10 @@ package org.eclipse.hawkbit.ui.management.bulkupload;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
-import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.mappers.NamedEntityToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyBulkUploadWindow;
@@ -51,7 +50,7 @@ public final class BulkUploadWindowLayoutComponentBuilder {
         this.i18n = i18n;
 
         this.targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
-                targetTypeManagement, new TypeToTypeInfoMapper<TargetType>());
+                targetTypeManagement, new NamedEntityToTypeInfoMapper<>());
 
         this.distributionSetDataProvider = new DistributionSetStatelessDataProvider(distributionSetManagement,
                 new DistributionSetToProxyDistributionMapper());
