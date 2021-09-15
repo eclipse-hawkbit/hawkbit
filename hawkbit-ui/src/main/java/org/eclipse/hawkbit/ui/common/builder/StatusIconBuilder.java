@@ -208,7 +208,7 @@ public final class StatusIconBuilder {
             if (optionalIcon.isPresent()) {
                 icon = getFontIconFromStatusMap(optionalIcon.get(), getEntityStatus.apply(entity), group.orElse(null));
             } else {
-                icon = buildDefaultStatusIcon(group.orElse(null));
+                icon = buildStatusIcon(group.orElse(null));
             }
 
             return getLabel(entity, icon);
@@ -233,7 +233,7 @@ public final class StatusIconBuilder {
         // Actions are not created for targets when rollout's status is
         // READY and when duplicate assignment is done. In these cases
         // display a appropriate status with description
-        private ProxyFontIcon buildDefaultStatusIcon(final RolloutGroup rolloutGroup) {
+        private ProxyFontIcon buildStatusIcon(final RolloutGroup rolloutGroup) {
             if (rolloutGroup != null && rolloutGroup.getStatus() == RolloutGroupStatus.READY) {
                 return new ProxyFontIcon(VaadinIcons.BULLSEYE, SPUIStyleDefinitions.STATUS_ICON_LIGHT_BLUE,
                         i18n.getMessage(UIMessageIdProvider.TOOLTIP_ROLLOUT_GROUP_STATUS_PREFIX

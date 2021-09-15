@@ -103,7 +103,7 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_AUTO_ASSIGNMENT_ENABLE = "label.auto.assign.enable";
 
-    public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "Stop rollouts";
+    public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "label.invalidate.distributionset.stop.rollouts";
 
     public static final String MESSAGE_NO_DATA = "message.no.data";
 

@@ -269,8 +269,8 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 
         GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion, this::getDistributionCellStyle)
-                .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset")).setHidable(true)
-                .setExpandRatio(2);
+                .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset"))
+                .setDescriptionGenerator(this::createDSTooltipText).setHidable(true).setExpandRatio(2);
 
         GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
@@ -473,5 +473,14 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
             return SPUIDefinitions.INVALID_DISTRIBUTION;
         }
         return null;
+    }
+
+    protected String createDSTooltipText(final ProxyRollout rollout) {
+        final StringBuilder tooltipText = new StringBuilder(rollout.getDsInfo().getNameVersion());
+        if (!rollout.getDsInfo().isValid()) {
+            tooltipText.append(" - ");
+            tooltipText.append(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALID));
+        }
+        return tooltipText.toString();
     }
 }

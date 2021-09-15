@@ -85,6 +85,28 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
     }
 
     /**
+
+     * Flag that indicates if the distribution set is valid.
+     *
+     * @return <code>true</code> if the distribution set is valid, otherwise
+     *         <code>false</code>
+     */
+    public Boolean getIsValid() {
+        return isValid;
+    }
+
+    /**
+     * Sets the flag that indicates if the distribution set is valid
+     *
+     * @param isValid
+     *            <code>true</code> if the distribution set is valid, otherwise
+     *            <code>false</code>
+     */
+    public void setIsValid(final Boolean isValid) {
+        this.isValid = isValid;
+    }
+
+    /**
      * Flag that indicates if the migration step is required.
      *
      * @return <code>true</code> if the action is complete, otherwise

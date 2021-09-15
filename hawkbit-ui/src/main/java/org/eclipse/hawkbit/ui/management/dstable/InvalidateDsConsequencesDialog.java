@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 Bosch.IO GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -29,7 +29,7 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window;
 
 /**
- * Target add/update window layout.
+ * Showing the consequences for invalidating distribution set.
  */
 public class InvalidateDsConsequencesDialog {
 

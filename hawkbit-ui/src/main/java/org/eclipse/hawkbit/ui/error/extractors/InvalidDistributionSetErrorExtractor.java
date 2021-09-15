@@ -10,20 +10,19 @@ package org.eclipse.hawkbit.ui.error.extractors;
 
 import java.util.Optional;
 
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
- * UI error details extractor for {@link EntityNotFoundException}.
+ * UI error details extractor for {@link InvalidDistributionSetException}.
  */
 public class InvalidDistributionSetErrorExtractor extends AbstractSingleUiErrorDetailsExtractor {
     private final VaadinMessageSource i18n;
 
     /**
-     * Constructor for EntityNotFoundErrorExtractor.
+     * Constructor for {@link InvalidDistributionSetException}.
      *
      * @param i18n
      *            Message source used for localization

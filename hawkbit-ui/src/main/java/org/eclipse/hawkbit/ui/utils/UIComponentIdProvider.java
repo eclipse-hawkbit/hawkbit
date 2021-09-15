@@ -52,7 +52,7 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_PIN_ICON = "target.pin.icon";
     /**
-     * ID-Targ.PIN.
+     * ID-DistributionSet pin icon.
      */
     public static final String DIST_PIN_ICON = "dist.pin.icon";
     /**
