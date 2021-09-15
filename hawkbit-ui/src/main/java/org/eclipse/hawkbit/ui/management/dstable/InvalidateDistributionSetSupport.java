@@ -129,11 +129,12 @@ public class InvalidateDistributionSetSupport {
     private List<ProxyDistributionSet> getDistributionSetsForInvalidation(final ProxyDistributionSet clickedItem) {
         final List<ProxyDistributionSet> selectedItems = Lists.newArrayList(grid.getSelectedItems());
 
-        // only clicked item should be deleted if it is not part of the
-        // selection
         if (selectedItems.contains(clickedItem)) {
-            return selectedItems;
+            // consider only valid DS for invalidation
+            return selectedItems.stream().filter(ProxyDistributionSet::getIsValid).collect(Collectors.toList());
         } else {
+            // only clicked item should be invalidated if it is not part of the
+            // selection
             grid.deselectAll();
             grid.select(clickedItem);
 
