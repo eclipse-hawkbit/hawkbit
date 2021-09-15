@@ -49,7 +49,7 @@ public class DistributionSetStatelessDataProvider
     @Override
     protected Page<DistributionSet> loadBackendEntities(final PageRequest pageRequest, final String filter) {
         final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false)
-                .setIsComplete(true).setIsValid(true);
+                .setIsComplete(true);
 
         if (!StringUtils.isEmpty(filter)) {
             builder.setFilterString(filter);

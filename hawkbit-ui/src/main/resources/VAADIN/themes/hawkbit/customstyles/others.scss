@@ -201,12 +201,6 @@
   .v-grid-row.incomplete-distribution>.v-grid-cell {
     color: $disabled-row-color-grey !important;
   }
-  
-   // Disabled row style when distribution is invalid
-  .v-grid-row.invalid-distribution,
-  .v-grid-row.invalid-distribution>.v-grid-cell {
-    color: $disabled-row-color-grey !important;
-  }
 
   .v-link {
     text-decoration: none;
