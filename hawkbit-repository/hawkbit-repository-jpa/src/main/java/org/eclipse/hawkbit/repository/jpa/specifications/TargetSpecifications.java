@@ -1,6 +1,6 @@
 /**
  * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
- *
+ * <p>
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -155,7 +155,7 @@ public final class TargetSpecifications {
      *
      * @param updateStatus
      *            to be filtered on
-     * 
+     *
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus) {
@@ -181,7 +181,7 @@ public final class TargetSpecifications {
      *
      * @param updateStatus
      *            to be filtered on
-     * 
+     *
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> notEqualToTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
@@ -385,11 +385,17 @@ public final class TargetSpecifications {
      */
     public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
         return (targetRoot, query, cb) -> {
-            final Join<JpaTarget, JpaTargetType> targetTypeJoin = targetRoot.join(JpaTarget_.targetType);
-            final SetJoin<JpaTargetType, JpaDistributionSetType> distSetTypeJoin = targetTypeJoin
-                    .join(JpaTargetType_.distributionSetTypes);
-            return cb.or(cb.isNull(targetRoot.get(JpaTarget_.targetType)),
-                    cb.equal(distSetTypeJoin.get(JpaDistributionSetType_.id), distributionSetTypeId));
+            // Since the targetRoot is changed by joining we need to get the
+            // isNull predicate first
+            final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
+
+            final Join<JpaTarget, JpaTargetType> targetTypeJoin = targetRoot.join(JpaTarget_.targetType, JoinType.LEFT);
+            targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
+            final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
+                    .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
+
+            return cb.or(targetTypeIsNull,
+                    cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), distributionSetTypeId));
         };
     }
 
@@ -496,7 +502,7 @@ public final class TargetSpecifications {
     /**
      * {@link Specification} for retrieving {@link Target}s that have a
      * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
-     * 
+     *
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetType() {

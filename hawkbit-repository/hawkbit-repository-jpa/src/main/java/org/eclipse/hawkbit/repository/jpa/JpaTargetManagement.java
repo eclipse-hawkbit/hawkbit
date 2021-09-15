@@ -705,11 +705,12 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
+        final Specification<JpaTarget> dsNotInActions = TargetSpecifications
+                .hasNotDistributionSetInActions(distributionSetId);
+        final Specification<JpaTarget> isCompatible = TargetSpecifications
+                .isCompatibleWithDistributionSetType(distSetTypeId);
 
-        return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb), cb.and(
-                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb),
-                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId).toPredicate(root, cq, cb))),
-                pageRequest);
+        return findTargetsBySpec(spec.and(dsNotInActions).and(isCompatible), pageRequest);
 
     }
 
@@ -748,13 +749,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByRsqlAndNonDSAndCompatible(final long distributionSetId, final String targetFilterQuery) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
+        final JpaDistributionSet jpaDistributionSet = getDistributionSetOrThrowNotFoundException(distributionSetId);
+        final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(spec);
         specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
+        specList.add(TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId));
 
         return countByCriteriaAPI(specList);
     }
