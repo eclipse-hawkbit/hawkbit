@@ -58,6 +58,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -84,8 +85,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -707,23 +706,23 @@ public class JpaTargetManagement implements TargetManagement {
                 virtualPropertyReplacer, database);
         final Specification<JpaTarget> dsNotInActions = TargetSpecifications
                 .hasNotDistributionSetInActions(distributionSetId);
-        final Specification<JpaTarget> isCompatible = TargetSpecifications
+        final Specification<JpaTarget> isCompatibleWithDsType = TargetSpecifications
                 .isCompatibleWithDistributionSetType(distSetTypeId);
 
-        return findTargetsBySpec(spec.and(dsNotInActions).and(isCompatible), pageRequest);
-
+        return findTargetsBySpec(spec.and(dsNotInActions).and(isCompatibleWithDsType), pageRequest);
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(final Pageable pageRequest,
-            final Collection<Long> groups, final String targetFilterQuery) {
+    public Page<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(final Pageable pageRequest,
+            final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType) {
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
+        final Specification<JpaTarget> notInRolloutGroups = TargetSpecifications.isNotInRolloutGroups(groups);
+        final Specification<JpaTarget> isCompatibleWithDsType = TargetSpecifications
+                .isCompatibleWithDistributionSetType(dsType.getId());
 
-        return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
-                TargetSpecifications.isNotInRolloutGroups(groups).toPredicate(root, cq, cb)), pageRequest);
-
+        return findTargetsBySpec((spec.and(notInRolloutGroups).and(isCompatibleWithDsType)), pageRequest);
     }
 
     @Override
@@ -738,11 +737,13 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNotInRolloutGroups(final Collection<Long> groups, final String targetFilterQuery) {
+    public long countByRsqlAndNotInRolloutGroupsAndCompatible(final Collection<Long> groups,
+            final String targetFilterQuery, final DistributionSetType dsType) {
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
-                TargetSpecifications.isNotInRolloutGroups(groups));
+                TargetSpecifications.isNotInRolloutGroups(groups),
+                TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()));
 
         return countByCriteriaAPI(specList);
     }
@@ -754,10 +755,9 @@ public class JpaTargetManagement implements TargetManagement {
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
-        final List<Specification<JpaTarget>> specList = Lists.newArrayListWithExpectedSize(2);
-        specList.add(spec);
-        specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
-        specList.add(TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId));
+        final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
+                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId));
 
         return countByCriteriaAPI(specList);
     }

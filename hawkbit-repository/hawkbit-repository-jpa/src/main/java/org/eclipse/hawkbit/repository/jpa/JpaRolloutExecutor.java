@@ -493,7 +493,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
+                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatible(readyGroups, groupTargetFilter,
+                        rollout.getDistributionSet().getType()));
         final long expectedInGroup = Math
                 .round((double) (group.getTargetPercentage() / 100) * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
@@ -537,8 +538,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
-                    readyGroups, targetFilter);
+            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
+                    pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
 
             createAssignmentOfTargetsToGroup(targets, group);
 
@@ -547,8 +548,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Schedules a group of the rollout. Scheduled Actions are created to
-     * achieve this. The creation of those Actions is allowed to fail.
+     * Schedules a group of the rollout. Scheduled Actions are created to achieve
+     * this. The creation of those Actions is allowed to fail.
      */
     private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
         final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
@@ -611,8 +612,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     /**
      * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action
-     * is created in-active.
+     * scheduled actions the scheduled actions gets canceled. A scheduled action is
+     * created in-active.
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,

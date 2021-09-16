@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -275,11 +276,15 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
+     * @param distributionSetType
+     *            type of the {@link DistributionSet} the targets must be compatible
+     *            with
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    Page<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
+            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
+            @NotNull DistributionSetType distributionSetType);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery} and
@@ -289,10 +294,14 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
+     * @param distributionSetType
+     *            type of the {@link DistributionSet} the targets must be compatible
+     *            with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    long countByRsqlAndNotInRolloutGroupsAndCompatible(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
+            @NotNull DistributionSetType distributionSetType);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no Action
