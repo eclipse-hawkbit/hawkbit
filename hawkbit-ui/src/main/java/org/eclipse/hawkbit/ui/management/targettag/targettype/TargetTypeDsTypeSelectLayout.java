@@ -71,6 +71,7 @@ public class TargetTypeDsTypeSelectLayout extends CustomField<Set<ProxyType>> {
                 .map(dsTypeToProxyTypeMapper::map).getContent();
         this.selectedDsTypes = new HashSet<>();
 
+
         this.layout = new HorizontalLayout();
         this.layout.setSpacing(false);
         this.layout.setMargin(false);

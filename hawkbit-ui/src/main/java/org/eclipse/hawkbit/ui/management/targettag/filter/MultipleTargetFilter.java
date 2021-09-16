@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -30,6 +32,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.GridActionsVisibilityListen
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGenericSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
+import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -59,22 +62,25 @@ public class MultipleTargetFilter extends Accordion {
     private final FilterByStatusLayout filterByStatusFooter;
     private final TargetFilterQueryButtons customFilterTab;
 
-    private final transient GridActionsVisibilityListener gridActionsVisibilityListener;
+    private final transient GridActionsVisibilityListener targetTagGridActionsVisibilityListener;
+    private final transient GridActionsVisibilityListener targetTypeGridActionsVisibilityListener;
     private final transient EntityModifiedListener<ProxyTag> entityTagModifiedListener;
     private final transient EntityModifiedListener<ProxyTargetFilterQuery> entityFilterQueryModifiedListener;
+
+    private final transient EntityModifiedListener<ProxyTargetType> entityTargetTypeModifiedListener;
 
     MultipleTargetFilter(final CommonUiDependencies uiDependencies,
                          final TargetFilterQueryManagement targetFilterQueryManagement,
                          final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
                          final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-                         final TargetTagWindowBuilder targetTagWindowBuilder, final TargetTypeManagement targetTypeManagement) {
+                         final TargetTagWindowBuilder targetTagWindowBuilder, final TargetTypeWindowBuilder targetTypeWindowBuilder, final TargetTypeManagement targetTypeManagement) {
         this.i18n = uiDependencies.getI18n();
         this.eventBus = uiDependencies.getEventBus();
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
 
         this.filterByButtons = new TargetTagFilterButtons(uiDependencies, targetTagManagement, targetManagement,
                 targetTagFilterLayoutUiState, targetTagWindowBuilder);
-        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetTagFilterLayoutUiState);
+        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
         this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, targetTagFilterLayoutUiState);
         this.simpleFilterTab = buildSimpleFilterTab();
         this.targetTypeFilterTab = buildTargetTypeFilterTab();
@@ -83,7 +89,7 @@ public class MultipleTargetFilter extends Accordion {
 
         final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_TAG_FILTER,
                 EventView.DEPLOYMENT);
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
+        this.targetTagGridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
                 filterByButtons::hideActionColumns, filterByButtons::showEditColumn, filterByButtons::showDeleteColumn);
         this.entityTagModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
                 .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
@@ -91,6 +97,12 @@ public class MultipleTargetFilter extends Accordion {
         this.entityFilterQueryModifiedListener = new EntityModifiedListener.Builder<>(eventBus,
                 ProxyTargetFilterQuery.class).viewAware(layoutViewAware)
                         .entityModifiedAwareSupports(getFilterQueryModifiedAwareSupports()).build();
+
+        this.targetTypeGridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
+                targetTypeFilterButtons::hideActionColumns, targetTypeFilterButtons::showEditColumn, targetTypeFilterButtons::showDeleteColumn);
+        this.entityTargetTypeModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTargetType.class)
+                .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
+                .entityModifiedAwareSupports(getTargetTypeModifiedAwareSupports()).build();
 
         init();
         addTabs();
@@ -152,6 +164,11 @@ public class MultipleTargetFilter extends Accordion {
     private List<EntityModifiedAwareSupport> getTagModifiedAwareSupports() {
         return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(filterByButtons::refreshAll),
                 EntityModifiedGenericSupport.of(null, null, filterByButtons::resetFilterOnTagsDeleted));
+    }
+
+    private List<EntityModifiedAwareSupport> getTargetTypeModifiedAwareSupports() {
+        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(targetTypeFilterButtons::refreshAll),
+                EntityModifiedGenericSupport.of(null, null, targetTypeFilterButtons::resetFilterOnTagsDeleted));
     }
 
     private List<EntityModifiedAwareSupport> getFilterQueryModifiedAwareSupports() {
@@ -238,17 +255,21 @@ public class MultipleTargetFilter extends Accordion {
      * Subscribe event listeners
      */
     public void subscribeListeners() {
-        gridActionsVisibilityListener.subscribe();
+        targetTagGridActionsVisibilityListener.subscribe();
         entityTagModifiedListener.subscribe();
         entityFilterQueryModifiedListener.subscribe();
+        targetTypeGridActionsVisibilityListener.subscribe();
+        entityTargetTypeModifiedListener.subscribe();
     }
 
     /**
      * Unsubscribe event listeners
      */
     public void unsubscribeListeners() {
-        gridActionsVisibilityListener.unsubscribe();
+        targetTagGridActionsVisibilityListener.unsubscribe();
         entityTagModifiedListener.unsubscribe();
         entityFilterQueryModifiedListener.unsubscribe();
+        targetTypeGridActionsVisibilityListener.unsubscribe();
+        entityTargetTypeModifiedListener.unsubscribe();
     }
 }

@@ -14,13 +14,14 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 /**
  * Builder for distribution set type window
  */
-public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyType> {
+public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTargetType> {
 
     private final TargetTypeManagement targetTypeManagement;
     private final TargetManagement targetManagement;
@@ -56,13 +57,10 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTy
     public Window getWindowForAdd() {
         return getWindowForNewEntity(new AddTargetTypeWindowController(uiDependencies, targetTypeManagement,
                 new TargetTypeWindowLayout(uiDependencies, dsTypeManagement)));
-//        return getWindowForNewEntity(new AddDsTypeWindowController(uiDependencies, dsTypeManagement,
-//                new DsTypeWindowLayout(uiDependencies, smTypeManagement)));
-
     }
 
     @Override
-    public Window getWindowForUpdate(final ProxyType proxyType) {
+    public Window getWindowForUpdate(final ProxyTargetType proxyType) {
         return getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies, targetTypeManagement, targetManagement,
                 new TargetTypeWindowLayout(uiDependencies, dsTypeManagement)));
     }

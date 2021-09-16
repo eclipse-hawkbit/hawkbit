@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -18,6 +20,8 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
@@ -28,7 +32,7 @@ import java.util.Set;
  * Controller for update distribution set type window
  */
 public class UpdateTargetTypeWindowController
-        extends AbstractUpdateNamedEntityWindowController<ProxyType, ProxyType, TargetType> {
+        extends AbstractUpdateNamedEntityWindowController<ProxyTargetType, ProxyTargetType, TargetType> {
 
     private final TargetTypeManagement targetTypeManagement;
     private final TargetManagement targetManagement;
@@ -65,65 +69,61 @@ public class UpdateTargetTypeWindowController
     }
 
     @Override
-    public AbstractEntityWindowLayout<ProxyType> getLayout() {
+    public AbstractEntityWindowLayout<ProxyTargetType> getLayout() {
         return layout;
     }
 
     @Override
-    protected ProxyType buildEntityFromProxy(final ProxyType proxyEntity) {
-        final ProxyType dsType = new ProxyType();
-
-        dsType.setId(proxyEntity.getId());
+    protected ProxyTargetType buildEntityFromProxy(final ProxyTargetType proxyEntity) {
+        final ProxyTargetType dsType = new ProxyTargetType();
         dsType.setName(proxyEntity.getName());
         dsType.setDescription(proxyEntity.getDescription());
         dsType.setColour(proxyEntity.getColour());
-        dsType.setKey(proxyEntity.getKey());
         dsType.setSelectedSmTypes(getSmTypesByDsTypeId(proxyEntity.getId()));
 
         nameBeforeEdit = proxyEntity.getName();
-        keyBeforeEdit = proxyEntity.getKey();
 
-        isTargetTypeAssigned = targetManagement.get(proxyEntity.getId()).get().getTargetType() != null;
+        isTargetTypeAssigned = targetTypeManagement.get(proxyEntity.getId()).get() != null;
 
         return dsType;
     }
 
     private Set<ProxyType> getSmTypesByDsTypeId(final Long id) {
-        //TODO: Implement
-        return null;
+        return targetTypeManagement.get(id).get().getCompatibleDistributionSetTypes().stream()
+                .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
     }
 
     @Override
-    protected void adaptLayout(final ProxyType proxyEntity) {
-        layout.disableTagName();
+    protected void adaptLayout(final ProxyTargetType proxyEntity) {
+       /* layout.disableTagName();
 
         if (isTargetTypeAssigned) {
             getUiNotification().displayValidationError(
                     nameBeforeEdit + "  " + getI18n().getMessage("message.error.target.type.update"));
             layout.disableTargetTypeDsSelectLayout();
-        }
+        }  */
     }
 
     @Override
-    protected TargetType persistEntityInRepository(final ProxyType entity) {
+    protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
         //TODO: implement
         return null;
     }
 
     @Override
     protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
-        return ProxyType.class;
+        return ProxyTargetType.class;
     }
 
     @Override
     protected Class<? extends ProxyIdentifiableEntity> getParentEntityClass() {
-        return ProxyDistributionSet.class;
+        return ProxyTarget.class;
     }
 
     @Override
-    protected boolean isEntityValid(final ProxyType entity) {
+    protected boolean isEntityValid(final ProxyTargetType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        //final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         //TODO: add the validator, check ds type update controller
         return true;
     }

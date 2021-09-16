@@ -12,13 +12,14 @@ import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.FormLayout;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 
 /**
  * Distribution set window layout
  */
-public class TargetTypeWindowLayout extends TagWindowLayout<ProxyType> {
+public class TargetTypeWindowLayout extends TagWindowLayout<ProxyTargetType> {
     private final TargetTypeWindowLayoutComponentBuilder targetTypeWindowLayoutComponentBuilder;
 
     private final TargetTypeDsTypeSelectLayout targetTypeDsTypeSelectLayout;

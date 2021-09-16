@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
+import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
@@ -15,6 +16,7 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
@@ -23,7 +25,7 @@ import org.springframework.util.StringUtils;
  * Add distribution set type window controller
  */
 public class AddTargetTypeWindowController
-        extends AbstractAddNamedEntityWindowController<ProxyType, ProxyType, TargetType> {
+        extends AbstractAddNamedEntityWindowController<ProxyTargetType, ProxyTargetType, TargetType> {
 
     private final TargetTypeWindowLayout layout;
     private final ProxyTypeValidator validator;
@@ -49,26 +51,30 @@ public class AddTargetTypeWindowController
     }
 
     @Override
-    public EntityWindowLayout<ProxyType> getLayout() {
+    public EntityWindowLayout<ProxyTargetType> getLayout() {
         return layout;
     }
 
     @Override
-    protected ProxyType buildEntityFromProxy(final ProxyType proxyEntity) {
+    protected ProxyTargetType buildEntityFromProxy(final ProxyTargetType proxyEntity) {
         // We ignore the method parameter, because we are interested in the
         // empty object, that we can populate with defaults
-        return new ProxyType();
+        return new ProxyTargetType();
     }
 
     @Override
-    protected TargetType persistEntityInRepository(final ProxyType entity) {
-        return targetTypeManagement.create(getEntityFactory().targetType().create()
+    protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
+        TargetType targetType = targetTypeManagement.create(getEntityFactory().targetType().create()
                 .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
+
+        targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
+                entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet()));
+        return targetType;
     }
 
     @Override
     protected Class<? extends ProxyIdentifiableEntity> getEntityClass() {
-        return ProxyType.class;
+        return ProxyTargetType.class;
     }
 
     @Override
@@ -77,9 +83,9 @@ public class AddTargetTypeWindowController
     }
 
     @Override
-    protected boolean isEntityValid(final ProxyType entity) {
+    protected boolean isEntityValid(final ProxyTargetType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        //final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         //TODO: Add the validator, check in DsType
         return true;
     }

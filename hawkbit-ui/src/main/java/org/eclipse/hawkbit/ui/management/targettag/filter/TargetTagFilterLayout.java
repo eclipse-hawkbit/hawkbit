@@ -68,7 +68,7 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
         this.targetTagFilterHeader = new TargetTagFilterHeader(uiDependencies, targetTagFilterLayoutUiState,
                 targetTagWindowBuilder, targetTypeWindowBuilder);
         this.multipleTargetFilter = new MultipleTargetFilter(uiDependencies, targetFilterQueryManagement,
-                targetTagManagement, targetManagement, targetTagFilterLayoutUiState, targetTagWindowBuilder, targetTypeManagement);
+                targetTagManagement, targetManagement, targetTagFilterLayoutUiState, targetTagWindowBuilder, targetTypeWindowBuilder, targetTypeManagement);
 
         this.filterTabChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);

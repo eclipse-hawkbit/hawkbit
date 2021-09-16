@@ -16,7 +16,7 @@ import java.util.Objects;
 /**
  * Proxy for {@link Tag}.
  */
-public class ProxyTargetType extends ProxyTag {
+public class ProxyTargetType extends ProxyType {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,7 +39,10 @@ public class ProxyTargetType extends ProxyTag {
      *          Tag oolour
      */
     public ProxyTargetType(final Long id, final String name, final String colour) {
-        super(id, name, colour);
+        setId(id);
+        setName(name);
+        setColour(colour);
+       // super(id, name, colour);
     }
 
     public boolean isNoTargetType() {

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import com.vaadin.data.Binder;
 import com.vaadin.data.ValidationResult;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
@@ -45,7 +46,7 @@ public class TargetTypeWindowLayoutComponentBuilder {
      *
      * @return layout of distribution set software module selection
      */
-    public TargetTypeDsTypeSelectLayout createTargetTypeDsSelectLayout(final Binder<ProxyType> binder) {
+    public TargetTypeDsTypeSelectLayout createTargetTypeDsSelectLayout(final Binder<ProxyTargetType> binder) {
 
         final TargetTypeDsTypeSelectLayout targetTypeDsTypeSelectLayout = new TargetTypeDsTypeSelectLayout(i18n, distributionSetTypeManagement);
         targetTypeDsTypeSelectLayout.setRequiredIndicatorVisible(true);

@@ -76,7 +76,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
                 SPUITagButtonStyle.class);
 
         final ProxyTargetType proxyTargetType = new ProxyTargetType();
-        proxyTargetType.setNoTag(true);
+        proxyTargetType.setNoTargetType(true);
 
         noTargetType.addClickListener(event -> getFilterButtonClickBehaviour().processFilterClick(proxyTargetType));
 
