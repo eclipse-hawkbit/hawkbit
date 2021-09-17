@@ -10,9 +10,11 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToProxyTargetTypeMapper;
@@ -25,10 +27,12 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTargetTypeFilterButtons;
+import org.eclipse.hawkbit.ui.common.grid.support.DragAndDropSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToTagAssignmentSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToTargetTypeAssignmentSupport;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
 import java.util.Collection;
 import org.springframework.util.CollectionUtils;
@@ -43,12 +47,20 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
 
     TargetTypeFilterButtons(final CommonUiDependencies uiDependencies,
-                            final TargetTypeManagement targetTypeManagement, final TagFilterLayoutUiState tagFilterLayoutUiState,
+                            final TargetTypeManagement targetTypeManagement, final TargetManagement targetManagement, final TagFilterLayoutUiState tagFilterLayoutUiState,
                             final TargetTypeWindowBuilder targetTypeWindowBuilder) {
         super(uiDependencies, tagFilterLayoutUiState);
 
         this.targetTypeManagement = targetTypeManagement;
         this.targetTypeWindowBuilder = targetTypeWindowBuilder;
+
+        final TargetsToTargetTypeAssignmentSupport targetsToTargetTypeAssignment = new TargetsToTargetTypeAssignmentSupport(uiDependencies,
+                targetManagement);
+
+        setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiNotification,
+                Collections.singletonMap(UIComponentIdProvider.TARGET_TABLE_ID, targetsToTargetTypeAssignment), eventBus));
+        getDragAndDropSupportSupport().ignoreSelection(true);
+        getDragAndDropSupportSupport().addDragAndDrop();
 
         init();
         setDataProvider(

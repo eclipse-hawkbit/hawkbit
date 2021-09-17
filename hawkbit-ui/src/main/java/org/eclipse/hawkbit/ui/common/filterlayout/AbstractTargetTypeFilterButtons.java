@@ -72,7 +72,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
         final Button noTargetType = SPUIComponentProvider.getButton(
                 getFilterButtonIdPrefix() + "." + SPUIDefinitions.NO_TARGET_TYPE_BUTTON_ID,
                 i18n.getMessage(UIMessageIdProvider.LABEL_NO_TARGET_TYPE),
-                i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_FILTER), "button-no-target-type", false, null,
+                i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_FILTER), "button-no-tag", false, null,
                 SPUITagButtonStyle.class);
 
         final ProxyTargetType proxyTargetType = new ProxyTargetType();
@@ -96,7 +96,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
 
     private void publishFilterChangedEvent(final Map<Long, String> activeTagIdsWithName) {
         eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(getFilterMasterEntityType(),
-                FilterType.TAG, activeTagIdsWithName.values(), getView()));
+                FilterType.TYPE, activeTagIdsWithName.values(), getView()));
 
         tagFilterLayoutUiState.setClickedTagIdsWithName(activeTagIdsWithName);
     }

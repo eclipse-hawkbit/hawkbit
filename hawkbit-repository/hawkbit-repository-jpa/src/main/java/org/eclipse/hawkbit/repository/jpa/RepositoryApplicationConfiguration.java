@@ -542,11 +542,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final RolloutGroupRepository rolloutGroupRepository,
             final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
-            final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
+            final TargetTagRepository targetTagRepository, final TargetTypeRepository targetTypeRepository, final EventPublisherHolder eventPublisherHolder,
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetMetadataRepository,
-                rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository,
+                rolloutGroupRepository, distributionSetRepository, targetFilterQueryRepository, targetTagRepository, targetTypeRepository,
                 eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer, properties.getDatabase());
     }
 

@@ -80,7 +80,7 @@ public class MultipleTargetFilter extends Accordion {
 
         this.filterByButtons = new TargetTagFilterButtons(uiDependencies, targetTagManagement, targetManagement,
                 targetTagFilterLayoutUiState, targetTagWindowBuilder);
-        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
+        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
         this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, targetTagFilterLayoutUiState);
         this.simpleFilterTab = buildSimpleFilterTab();
         this.targetTypeFilterTab = buildTargetTypeFilterTab();

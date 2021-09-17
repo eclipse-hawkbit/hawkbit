@@ -31,11 +31,19 @@ public class TargetTypeFilterButtonClick extends AbstractFilterMultiButtonClick<
 
     @Override
     protected void filterUnClicked(ProxyTargetType clickedFilter) {
-
+        if (clickedFilter.isNoTargetType()) {
+            noTagChangedCallback.accept(ClickBehaviourType.UNCLICKED);
+        } else {
+            filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
+        }
     }
 
     @Override
     protected void filterClicked(ProxyTargetType clickedFilter) {
-
+        if (clickedFilter.isNoTargetType()) {
+            noTagChangedCallback.accept(ClickBehaviourType.CLICKED);
+        } else {
+            filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
+        }
     }
 }
