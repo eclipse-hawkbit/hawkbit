@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSup
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.InsufficientPermissionErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -140,6 +141,18 @@ public class MgmtUiConfiguration {
     @Bean
     UiErrorDetailsExtractor entityNotFoundErrorExtractor(final VaadinMessageSource i18n) {
         return new EntityNotFoundErrorExtractor(i18n);
+    }
+
+    /**
+     * UI Insufficient Permission Error details extractor bean.
+     * 
+     * @param i18n
+     *            VaadinMessageSource
+     * @return UI InsufficientPermission Error details extractor
+     */
+    @Bean
+    UiErrorDetailsExtractor insufficientPermissionErrorExtractor(final VaadinMessageSource i18n) {
+        return new InsufficientPermissionErrorExtractor(i18n);
     }
 
     /**

@@ -79,6 +79,10 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_TAG = "caption.tag";
 
+    public static final String CAPTION_ERROR = "caption.error";
+
+    public static final String CAPTION_INSUFFICIENT_PERMISSION = "caption.no.permission";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
@@ -124,6 +128,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_ERROR_ENTITY_DELETED = "message.entity.error.deleted";
 
     public static final String MESSAGE_ERROR_ENTITY_READONLY = "message.entity.error.readonly";
+
+    public static final String MESSAGE_ERROR = "message.error";
 
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
