@@ -68,6 +68,7 @@ public class UpdateTargetTypeWindowController
     @Override
     protected ProxyTargetType buildEntityFromProxy(final ProxyTargetType proxyEntity) {
         final ProxyTargetType dsType = new ProxyTargetType();
+        dsType.setId(proxyEntity.getId());
         dsType.setName(proxyEntity.getName());
         dsType.setDescription(proxyEntity.getDescription());
         dsType.setColour(proxyEntity.getColour());
