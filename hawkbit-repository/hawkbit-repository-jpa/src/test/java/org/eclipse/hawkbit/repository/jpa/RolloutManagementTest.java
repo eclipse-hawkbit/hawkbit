@@ -1867,7 +1867,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> rolloutGroupTargets = rolloutGroupManagement
                 .findTargetsOfRolloutGroup(Pageable.unpaged(), rolloutGroups.get(0).getId()).getContent();
 
-        assertThat(rolloutGroupTargets).hasSize(amountTargetsForRollout).containsExactlyElementsOf(targets)
+        assertThat(rolloutGroupTargets).hasSize(amountTargetsForRollout).containsExactlyInAnyOrderElementsOf(targets)
                 .doesNotContainAnyElementsOf(incompatibleTargets);
     }
 
