@@ -108,7 +108,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
                     targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement, distributionSetManagement, softwareModuleTypeManagement);
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
 
             this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,

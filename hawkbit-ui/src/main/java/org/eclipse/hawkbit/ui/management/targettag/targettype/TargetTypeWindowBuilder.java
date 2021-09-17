@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTargetType> {
 
     private final TargetTypeManagement targetTypeManagement;
-    private final TargetManagement targetManagement;
     private final DistributionSetTypeManagement dsTypeManagement;
 
     /**
@@ -34,17 +33,14 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
      *            {@link CommonUiDependencies}
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
-     * @param targetManagement
-     *            DistributionSetManagement
      * @param targetTypeManagement
-     *            SoftwareModuleTypeManagement
+     *            TargetTypeManagement
      */
     public TargetTypeWindowBuilder(final CommonUiDependencies uiDependencies, final TargetTypeManagement targetTypeManagement,
-                                   final TargetManagement targetManagement, final DistributionSetTypeManagement dsTypeManagement) {
+                                    final DistributionSetTypeManagement dsTypeManagement) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
-        this.targetManagement = targetManagement;
         this.dsTypeManagement = dsTypeManagement;
     }
 
@@ -61,7 +57,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
 
     @Override
     public Window getWindowForUpdate(final ProxyTargetType proxyType) {
-        return getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies, targetTypeManagement, targetManagement,
+        return getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies, targetTypeManagement,
                 new TargetTypeWindowLayout(uiDependencies, dsTypeManagement)));
     }
 }

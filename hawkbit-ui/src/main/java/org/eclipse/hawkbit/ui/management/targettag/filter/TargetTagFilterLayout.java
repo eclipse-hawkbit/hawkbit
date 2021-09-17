@@ -57,13 +57,12 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
                                  final TargetFilterQueryManagement targetFilterQueryManagement,
                                  final TargetTypeManagement targetTypeManagement,
                                  final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
-                                 final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState, final DistributionSetTypeManagement distributionSetTypeManagement,
-                                 final DistributionSetManagement distributionSetManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
+                                 final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState, final DistributionSetTypeManagement distributionSetTypeManagement) {
         final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(uiDependencies,
                 targetTagManagement);
 
         final TargetTypeWindowBuilder targetTypeWindowBuilder = new TargetTypeWindowBuilder(uiDependencies,
-                targetTypeManagement, targetManagement, distributionSetTypeManagement);
+                targetTypeManagement, distributionSetTypeManagement);
 
         this.targetTagFilterHeader = new TargetTagFilterHeader(uiDependencies, targetTagFilterLayoutUiState,
                 targetTagWindowBuilder, targetTypeWindowBuilder);

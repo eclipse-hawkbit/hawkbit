@@ -9,8 +9,6 @@
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -18,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
@@ -29,19 +26,17 @@ import org.springframework.util.StringUtils;
 import java.util.Set;
 
 /**
- * Controller for update distribution set type window
+ * Controller for update target type window
  */
 public class UpdateTargetTypeWindowController
         extends AbstractUpdateNamedEntityWindowController<ProxyTargetType, ProxyTargetType, TargetType> {
 
     private final TargetTypeManagement targetTypeManagement;
-    private final TargetManagement targetManagement;
     private final TypeToProxyTypeMapper<DistributionSetType> dsTypeToProxyTypeMapper;
     private final TargetTypeWindowLayout layout;
     private final ProxyTypeValidator validator;
 
     private String nameBeforeEdit;
-    private String keyBeforeEdit;
     private boolean isTargetTypeAssigned;
 
     /**
@@ -50,19 +45,16 @@ public class UpdateTargetTypeWindowController
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param targetTypeManagement
-     *            DistributionSetTypeManagement
-     * @param targetManagement
-     *            DistributionSetManagement
+     *            TargetTypeManagement
      * @param layout
      *            DsTypeWindowLayout
      */
     public UpdateTargetTypeWindowController(final CommonUiDependencies uiDependencies,
-                                            final TargetTypeManagement targetTypeManagement, final TargetManagement targetManagement,
+                                            final TargetTypeManagement targetTypeManagement,
                                             final TargetTypeWindowLayout layout) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
-        this.targetManagement = targetManagement;
         this.dsTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
         this.layout = layout;
         this.validator = new ProxyTypeValidator(uiDependencies);
@@ -79,7 +71,7 @@ public class UpdateTargetTypeWindowController
         dsType.setName(proxyEntity.getName());
         dsType.setDescription(proxyEntity.getDescription());
         dsType.setColour(proxyEntity.getColour());
-        dsType.setSelectedSmTypes(getSmTypesByDsTypeId(proxyEntity.getId()));
+        dsType.setSelectedSmTypes(getDsTypesByDsTypeId(proxyEntity.getId()));
 
         nameBeforeEdit = proxyEntity.getName();
 
@@ -88,7 +80,7 @@ public class UpdateTargetTypeWindowController
         return dsType;
     }
 
-    private Set<ProxyType> getSmTypesByDsTypeId(final Long id) {
+    private Set<ProxyType> getDsTypesByDsTypeId(final Long id) {
         return targetTypeManagement.get(id).get().getCompatibleDistributionSetTypes().stream()
                 .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
     }
@@ -106,8 +98,21 @@ public class UpdateTargetTypeWindowController
 
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
-        //TODO: implement
-        return null;
+
+        Set<Long> selectedDsIds = entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
+
+        Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
+                .filter(dsType -> !selectedDsIds.contains(dsType)).collect(Collectors.toSet());
+        Set<Long> dsTypesForAdd = selectedDsIds.stream()
+                .filter(dsType -> !getDsTypesByDsTypeId(entity.getId()).contains(dsType)).collect(Collectors.toSet());
+
+        dsTypesForRemoval.forEach(dsType -> { targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType);});
+        targetTypeManagement.assignCompatibleDistributionSetTypes(entity.getId(),dsTypesForAdd);
+
+        TargetType targetType = targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId())
+                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
+
+        return targetType;
     }
 
     @Override
@@ -123,7 +128,6 @@ public class UpdateTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        //final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         //TODO: add the validator, check ds type update controller
         return true;
     }
@@ -132,7 +136,4 @@ public class UpdateTargetTypeWindowController
         return !nameBeforeEdit.equals(trimmedName);
     }
 
-    private boolean hasKeyChanged(final String trimmedKey) {
-        return !keyBeforeEdit.equals(trimmedKey);
-    }
 }
