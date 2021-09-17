@@ -28,24 +28,18 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 public class DsTypeSelectedGrid extends Grid<ProxyType> {
     private static final long serialVersionUID = 1L;
 
-    private static final String STAR = " * ";
     private static final String SM_TYPE_SELECTED_NAME_ID = "smTypeSelectedName";
-    private static final String SM_TYPE_SELECTED_MANDATORY = "smTypeSelectedMandatory";
 
     private final VaadinMessageSource i18n;
-    private final transient Runnable mandatoryPropertyChangedCallback;
 
     /**
      * Constructor for SmTypeSelectedGrid
      *
      * @param i18n
      *            VaadinMessageSource
-     * @param mandatoryPropertyChangedCallback
-     *            Runnable
      */
-    public DsTypeSelectedGrid(final VaadinMessageSource i18n, final Runnable mandatoryPropertyChangedCallback) {
+    public DsTypeSelectedGrid(final VaadinMessageSource i18n) {
         this.i18n = i18n;
-        this.mandatoryPropertyChangedCallback = mandatoryPropertyChangedCallback;
 
         init();
     }
@@ -68,19 +62,7 @@ public class DsTypeSelectedGrid extends Grid<ProxyType> {
 
     private void addColumns() {
         GridComponentBuilder.addColumn(this, ProxyType::getName).setId(SM_TYPE_SELECTED_NAME_ID)
-                .setCaption(i18n.getMessage("header.dist.twintable.selected"))
+                .setCaption(i18n.getMessage("header.dt.twintable.selected"))
                 .setDescriptionGenerator(ProxyType::getDescription);
-
-        GridComponentBuilder.addIconColumn(this, this::buildMandatoryTypeCheckBox, SM_TYPE_SELECTED_MANDATORY, STAR)
-                .setDescriptionGenerator(smType -> i18n.getMessage(UIMessageIdProvider.TOOLTIP_CHECK_FOR_MANDATORY));
-    }
-
-    private CheckBox buildMandatoryTypeCheckBox(final ProxyType dsType) {
-        final Binder<ProxyType> binder = new Binder<>();
-        binder.setBean(dsType);
-        binder.addValueChangeListener(event -> mandatoryPropertyChangedCallback.run());
-
-        final String id = "selected.ds.type." + dsType.getId();
-        return FormComponentBuilder.getCheckBox(id, binder, ProxyType::isMandatory, ProxyType::setMandatory);
     }
 }

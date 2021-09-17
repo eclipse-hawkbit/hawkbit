@@ -49,14 +49,10 @@ public class TargetTypeWindowLayoutComponentBuilder {
     public TargetTypeDsTypeSelectLayout createTargetTypeDsSelectLayout(final Binder<ProxyTargetType> binder) {
 
         final TargetTypeDsTypeSelectLayout targetTypeDsTypeSelectLayout = new TargetTypeDsTypeSelectLayout(i18n, distributionSetTypeManagement);
-        targetTypeDsTypeSelectLayout.setRequiredIndicatorVisible(true);
+        targetTypeDsTypeSelectLayout.setRequiredIndicatorVisible(false);
 
-        //TODO: create the proxy type for target type and update the binder
         binder.forField(targetTypeDsTypeSelectLayout)
-                .withValidator((selectedSmTypes, context) -> CollectionUtils.isEmpty(selectedSmTypes)
-                        ? ValidationResult.error(i18n.getMessage("message.error.noSmTypeSelected"))
-                        : ValidationResult.ok())
-                .bind(ProxyType::getSelectedSmTypes, ProxyType::setSelectedSmTypes);
+              .bind(ProxyType::getSelectedSmTypes, ProxyType::setSelectedSmTypes);
 
         return targetTypeDsTypeSelectLayout;
     }

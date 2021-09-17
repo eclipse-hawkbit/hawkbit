@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToProxyTargetTypeMapper;
@@ -19,15 +21,11 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTargetTypeFilterButtons;
-import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTypeFilterButtons;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.common.state.TypeFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -64,12 +62,12 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
 
     @Override
     protected String getMessageKeyEntityTypeSing() {
-        return UIMessageIdProvider.CAPTION_TARGET_TAG;
+        return "caption.entity.target.type";
     }
 
     @Override
     protected String getMessageKeyEntityTypePlur() {
-        return "caption.entity.target.tags";
+        return "caption.entity.target.types";
     }
 
     @Override
@@ -102,7 +100,7 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     protected void editButtonClickListener(ProxyTargetType clickedFilter) {
         final Window updateWindow = targetTypeWindowBuilder.getWindowForUpdate(clickedFilter);
 
-        updateWindow.setCaption(i18n.getMessage("caption.update", i18n.getMessage("caption.tag")));
+        updateWindow.setCaption(i18n.getMessage("caption.update", i18n.getMessage("caption.type")));
         UI.getCurrent().addWindow(updateWindow);
         updateWindow.setVisible(Boolean.TRUE);
     }
@@ -124,13 +122,12 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
 
     @Override
     protected Window getUpdateWindow(ProxyTag clickedFilter) {
-        //return targetTypeWindowBuilder.getWindowForUpdate(clickedFilter);
         return null;
     }
 
     @Override
     protected Collection<Long> filterExistingTagIds(Collection<Long> tagIds) {
-        return null;
+        return targetTypeManagement.get(tagIds).stream().map(Identifiable::getId).collect(Collectors.toSet());
     }
 
     @Override

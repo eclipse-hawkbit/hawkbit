@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
@@ -28,7 +29,7 @@ public class AddTargetTypeWindowController
         extends AbstractAddNamedEntityWindowController<ProxyTargetType, ProxyTargetType, TargetType> {
 
     private final TargetTypeWindowLayout layout;
-    private final ProxyTypeValidator validator;
+    private final ProxyTargetTypeValidator validator;
     private TargetTypeManagement targetTypeManagement;
 
     /**
@@ -47,7 +48,7 @@ public class AddTargetTypeWindowController
 
         this.targetTypeManagement = targetTypeManagement;
         this.layout = layout;
-        this.validator = new ProxyTypeValidator(uiDependencies);
+        this.validator = new ProxyTargetTypeValidator(uiDependencies);
     }
 
     @Override
@@ -57,8 +58,6 @@ public class AddTargetTypeWindowController
 
     @Override
     protected ProxyTargetType buildEntityFromProxy(final ProxyTargetType proxyEntity) {
-        // We ignore the method parameter, because we are interested in the
-        // empty object, that we can populate with defaults
         return new ProxyTargetType();
     }
 
@@ -67,8 +66,10 @@ public class AddTargetTypeWindowController
         TargetType targetType = targetTypeManagement.create(getEntityFactory().targetType().create()
                 .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
 
-        targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
-                entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet()));
+        if (!entity.getSelectedSmTypes().isEmpty()) {
+            targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
+                    entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet()));
+        }
         return targetType;
     }
 
@@ -85,8 +86,6 @@ public class AddTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        //final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        //TODO: Add the validator, check in DsType
-        return true;
+        return validator.isEntityValid(entity, () -> targetTypeManagement.getByName(trimmedName).isPresent());
     }
 }

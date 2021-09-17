@@ -17,9 +17,11 @@ import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
+import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
@@ -34,20 +36,19 @@ public class UpdateTargetTypeWindowController
     private final TargetTypeManagement targetTypeManagement;
     private final TypeToProxyTypeMapper<DistributionSetType> dsTypeToProxyTypeMapper;
     private final TargetTypeWindowLayout layout;
-    private final ProxyTypeValidator validator;
+    private final ProxyTargetTypeValidator validator;
 
     private String nameBeforeEdit;
-    private boolean isTargetTypeAssigned;
 
     /**
-     * Constructor for UpdateDsTypeWindowController
+     * Constructor for UpdateTargetTypeWindowController
      *
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param targetTypeManagement
      *            TargetTypeManagement
      * @param layout
-     *            DsTypeWindowLayout
+     *            TargetTypeWindowLayout
      */
     public UpdateTargetTypeWindowController(final CommonUiDependencies uiDependencies,
                                             final TargetTypeManagement targetTypeManagement,
@@ -57,7 +58,7 @@ public class UpdateTargetTypeWindowController
         this.targetTypeManagement = targetTypeManagement;
         this.dsTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
         this.layout = layout;
-        this.validator = new ProxyTypeValidator(uiDependencies);
+        this.validator = new ProxyTargetTypeValidator(uiDependencies);
     }
 
     @Override
@@ -73,10 +74,7 @@ public class UpdateTargetTypeWindowController
         dsType.setDescription(proxyEntity.getDescription());
         dsType.setColour(proxyEntity.getColour());
         dsType.setSelectedSmTypes(getDsTypesByDsTypeId(proxyEntity.getId()));
-
         nameBeforeEdit = proxyEntity.getName();
-
-        isTargetTypeAssigned = targetTypeManagement.get(proxyEntity.getId()).get() != null;
 
         return dsType;
     }
@@ -84,17 +82,6 @@ public class UpdateTargetTypeWindowController
     private Set<ProxyType> getDsTypesByDsTypeId(final Long id) {
         return targetTypeManagement.get(id).get().getCompatibleDistributionSetTypes().stream()
                 .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
-    }
-
-    @Override
-    protected void adaptLayout(final ProxyTargetType proxyEntity) {
-       /* layout.disableTagName();
-
-        if (isTargetTypeAssigned) {
-            getUiNotification().displayValidationError(
-                    nameBeforeEdit + "  " + getI18n().getMessage("message.error.target.type.update"));
-            layout.disableTargetTypeDsSelectLayout();
-        }  */
     }
 
     @Override
@@ -108,7 +95,10 @@ public class UpdateTargetTypeWindowController
                 .filter(dsType -> !getDsTypesByDsTypeId(entity.getId()).contains(dsType)).collect(Collectors.toSet());
 
         dsTypesForRemoval.forEach(dsType -> { targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType);});
-        targetTypeManagement.assignCompatibleDistributionSetTypes(entity.getId(),dsTypesForAdd);
+
+        if (!dsTypesForAdd.isEmpty()) {
+            targetTypeManagement.assignCompatibleDistributionSetTypes(entity.getId(), dsTypesForAdd);
+        }
 
         TargetType targetType = targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId())
                 .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
@@ -129,12 +119,13 @@ public class UpdateTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        //TODO: add the validator, check ds type update controller
-        return true;
+        return validator.isEntityValid(entity,
+                () -> hasNamedChanged(trimmedName) && targetTypeManagement.getByName(trimmedName).isPresent());
     }
 
-    private boolean hasNameChanged(final String trimmedName) {
+    private boolean hasNamedChanged(final String trimmedName) {
         return !nameBeforeEdit.equals(trimmedName);
     }
+
 
 }

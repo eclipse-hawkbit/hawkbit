@@ -82,6 +82,9 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected String getAddEntityWindowCaptionMsgKey() {
+        if (targetTagFilterLayoutUiState.isTargetTypeFilterTabSelected()) {
+            return UIMessageIdProvider.CAPTION_TYPE;
+        }
         return UIMessageIdProvider.CAPTION_TAG;
     }
 

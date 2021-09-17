@@ -143,13 +143,8 @@ public class TargetTypeDsTypeSelectLayout extends CustomField<Set<ProxyType>> {
     }
 
     private DsTypeSelectedGrid buildSelectedGrid() {
-        // we fire value change event to validate binder in case of mandatory
-        // property change because binder itself does not track modified
-        // software module types within collection
-        final DsTypeSelectedGrid dsTypeSelectedGrid = new DsTypeSelectedGrid(i18n,
-                () -> fireEvent(createValueChange(selectedDsTypes, false)));
+        final DsTypeSelectedGrid dsTypeSelectedGrid = new DsTypeSelectedGrid(i18n);
         dsTypeSelectedGrid.setItems(selectedDsTypes);
-
         return dsTypeSelectedGrid;
     }
 

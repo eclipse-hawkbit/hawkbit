@@ -58,10 +58,4 @@ public class TargetTypeWindowLayout extends TagWindowLayout<ProxyTargetType> {
         return rootLayout;
     }
 
-    /**
-     * Disable the selection of distribution set type software module layout
-     */
-    public void disableTargetTypeDsSelectLayout() {
-        targetTypeDsTypeSelectLayout.setEnabled(false);
-    }
 }

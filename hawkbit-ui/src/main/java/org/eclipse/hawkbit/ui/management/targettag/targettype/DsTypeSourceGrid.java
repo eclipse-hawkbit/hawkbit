@@ -58,7 +58,7 @@ public class DsTypeSourceGrid extends Grid<ProxyType> {
 
     private void addColumns() {
         GridComponentBuilder.addColumn(this, ProxyType::getName).setId(DS_TYPE_SOURCE_NAME_ID)
-                .setCaption(i18n.getMessage("header.dist.twintable.available"))
+                .setCaption(i18n.getMessage("header.dt.twintable.available"))
                 .setDescriptionGenerator(ProxyType::getDescription);
     }
 }
