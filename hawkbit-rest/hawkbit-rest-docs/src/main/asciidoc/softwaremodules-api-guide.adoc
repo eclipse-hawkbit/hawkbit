@@ -15,7 +15,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all softwaremodules within SP. Required Permission: READ_REPOSITORY
+Handles the GET request of retrieving all softwaremodules within Hawkbit. Required Permission: READ_REPOSITORY
 
 === Get software modules
 
@@ -63,7 +63,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the POST request of creating new software modules within SP. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY
+Handles the POST request of creating new software modules within Hawkbit. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY
 
 === Create software modules
 
@@ -112,7 +112,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request for a single softwaremodule within SP. Required Permission: DELETE_REPOSITORY
+Handles the DELETE request for a single softwaremodule within Hawkbit. Required Permission: DELETE_REPOSITORY
 
 === Delete software module
 
@@ -155,7 +155,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the GET request of retrieving a single softwaremodule within SP. Required Permission: READ_REPOSITORY
+Handles the GET request of retrieving a single softwaremodule within Hawkbit. Required Permission: READ_REPOSITORY
 
 === Get software module
 
@@ -202,7 +202,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Handles the PUT request for a single softwaremodule within SP. Required Permission: UPDATE_REPOSITORY
+Handles the PUT request for a single softwaremodule within Hawkbit. Required Permission: UPDATE_REPOSITORY
 
 === Update  software module
 
@@ -358,7 +358,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request for a single SoftwareModule within SP. Required Permission: DELETE_REPOSITORY
+Handles the DELETE request for a single SoftwareModule within Hawkbit. Required Permission: DELETE_REPOSITORY
 
 === Delete arifact
 

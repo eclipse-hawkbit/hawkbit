@@ -782,7 +782,7 @@ public class TestdataFactory {
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
         return softwareModuleTypeManagement.getByKey(key)
                 .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
-                        .key(key).name(key).description(LOREM.words(10)).maxAssignments(maxAssignments)));
+                        .key(key).name(key).description(LOREM.words(10)).colour("#ffffff").maxAssignments(maxAssignments)));
     }
 
     /**

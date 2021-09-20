@@ -80,7 +80,7 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
 
     @Test
     @Description("Handles the GET request of retrieving all target types within Hawkbit with a defined page size and "
-            + "offset, sorted by name in descending order and filtered down to all targets which name starts with 'a'. "
+            + "offset, sorted by name in descending order and filtered down to all targets which name starts with 'targetType'. "
             + "Required Permission: " + SpPermission.READ_TARGET)
     public void getTargetTypesWithParameters() throws Exception {
         testdataFactory.findOrCreateTargetType("targetType1");
@@ -153,7 +153,7 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     }
 
     @Test
-    @Description("Handles the GET request of retrieving a single target type within Hawkbit. Required Permission: "
+    @Description("Handles the DELETE request of retrieving a single target type within Hawkbit. Required Permission: "
             + SpPermission.DELETE_TARGET)
     public void deleteTargetType() throws Exception {
         TargetType testType = testdataFactory.createTargetType("TargetType", Collections.singletonList(standardDsType));
@@ -218,6 +218,7 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                                 fieldWithPath("[]key").description(MgmtApiModelProperties.DS_TYPE_KEY),
                                 fieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("[]colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("[]createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("[]lastModifiedAt")
@@ -226,7 +227,6 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                                 fieldWithPath("[]deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("[]_links.self").ignored())));
-
     }
 
     @Test
@@ -253,7 +253,7 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
     }
 
     @Test
-    @Description("Handles the GET request of retrieving the list of compatible distribution set types in that target type. "
+    @Description("Handles the DELETE request to unassign the list of compatible distribution set types in that target type. "
             + SpPermission.UPDATE_TARGET + " and " + SpPermission.READ_REPOSITORY)
     public void deleteCompatibleDistributionSetType() throws Exception {
         final DistributionSetType dsType = distributionSetTypeManagement.create(
@@ -268,6 +268,6 @@ public class TargetTypesDocumentationTest extends AbstractApiRestDocumentation {
                 .andDo(this.document.document(pathParameters(
                         parameterWithName("targetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID),
                         parameterWithName("distributionSetTypeId").description(ApiModelPropertiesGeneric.ITEM_ID))));
-
     }
+
 }

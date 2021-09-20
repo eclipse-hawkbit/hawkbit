@@ -58,7 +58,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
 
         final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
         softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
+                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234").colour("rgb(106,178,83)"));
 
         mockMvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -75,6 +75,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                         fieldWithPath("content[].lastModifiedBy")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                         fieldWithPath("content[].name").description(ApiModelPropertiesGeneric.NAME),
+                        fieldWithPath("content[].deleted").description(ApiModelPropertiesGeneric.DELETED),
                         fieldWithPath("content[]._links.self").ignored())));
     }
 
@@ -84,7 +85,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
     public void getSoftwareModuleTypesWithParameters() throws Exception {
         final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
         softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
+                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234").colour("rgb(106,178,83)"));
 
         mockMvc.perform(get(
                 MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==a")
@@ -100,7 +101,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
     public void postSoftwareModuleTypes() throws Exception {
 
         final List<SoftwareModuleType> types = Arrays.asList(entityFactory.softwareModuleType().create().key("test1")
-                .name("TestName1").description("Desc1").build());
+                .name("TestName1").description("Desc1").colour("rgb(106,178,83)").build());
 
         this.mockMvc
                 .perform(post(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING)
@@ -109,18 +110,19 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(
                         requestFields(
+                                requestFieldWithPath("[]key").description(MgmtApiModelProperties.SMT_KEY),
+                                requestFieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
+                                requestFieldWithPath("[]maxAssignments").description(MgmtApiModelProperties.SM_MAX_ASSIGNMENTS),
                                 optionalRequestFieldWithPath("[]description")
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
-                                optionalRequestFieldWithPath("[]key").description(MgmtApiModelProperties.SMT_KEY),
-                                optionalRequestFieldWithPath("[]maxAssignments")
-                                        .description(MgmtApiModelProperties.SM_MAX_ASSIGNMENTS),
-                                requestFieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME)),
+                                optionalRequestFieldWithPath("[]colour").description(ApiModelPropertiesGeneric.COLOUR)),
                         responseFields(fieldWithPath("[]key").description(MgmtApiModelProperties.SMT_KEY),
                                 fieldWithPath("[]maxAssignments")
                                         .description(MgmtApiModelProperties.SMT_MAX_ASSIGNMENTS),
                                 fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("[]createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("[]colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("[]deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("[]id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("[]lastModifiedAt")
@@ -138,7 +140,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
     @Description("Handles the DELETE request for a single software module Type within SP. Required Permission: DELETE_REPOSITORY.")
     public void deleteSoftwareModuleType() throws Exception {
         final SoftwareModuleType testType = softwareModuleTypeManagement.create(
-                entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1"));
+                entityFactory.softwareModuleType().create().key("test1").name("TestName1").description("Desc1").colour("rgb(106,178,83)"));
         assertThat(softwareModuleTypeManagement.count()).isEqualTo(4);
         this.mockMvc
                 .perform(delete(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeID}",
@@ -155,7 +157,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
     public void getSoftwareModuleType() throws Exception {
         final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
         softwareModuleTypeManagement
-                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234"));
+                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234").colour("rgb(106,178,83)"));
 
         this.mockMvc
                 .perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeID}",
@@ -169,6 +171,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                                 fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
@@ -185,7 +188,7 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
     public void putSoftwareModuleType() throws Exception {
         final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
 
-        final String body = new JSONObject().put("description", "a new description").toString();
+        final String body = new JSONObject().put("description", "a new description").put("colour", "rgb(86,37,99)").toString();
 
         this.mockMvc
                 .perform(put(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeID}",
@@ -195,12 +198,14 @@ public class SoftwaremoduleTypesDocumentationTest extends AbstractApiRestDocumen
                         pathParameters(parameterWithName("softwareModuleTypeID")
                                 .description(ApiModelPropertiesGeneric.ITEM_ID)),
                         requestFields(
-                                requestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION)),
+                                optionalRequestFieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR)),
                         responseFields(fieldWithPath("key").description(MgmtApiModelProperties.SMT_KEY),
                                 fieldWithPath("maxAssignments").description(MgmtApiModelProperties.SMT_MAX_ASSIGNMENTS),
                                 fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                                 fieldWithPath("description").description(ApiModelPropertiesGeneric.DESCRPTION),
+                                fieldWithPath("colour").description(ApiModelPropertiesGeneric.COLOUR),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("id").description(ApiModelPropertiesGeneric.ITEM_ID),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)

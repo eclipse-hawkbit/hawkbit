@@ -56,7 +56,7 @@ public class TargetTypeManagementTest extends AbstractJpaIntegrationTest{
     }
 
     @Test
-    @Description("Verify that a target type with  invalid properties cannot be created or updated")
+    @Description("Verify that a target type with invalid properties cannot be created or updated")
     public void createAndUpdateTargetTypeWithInvalidFields() {
         final TargetType targetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
@@ -71,7 +71,7 @@ public class TargetTypeManagementTest extends AbstractJpaIntegrationTest{
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTypeManagement.create(
-                        entityFactory.targetType().create().name("a").description(RandomStringUtils.randomAlphanumeric(513))))
+                        entityFactory.targetType().create().name("a").description(RandomStringUtils.randomAlphanumeric(TargetType.DESCRIPTION_MAX_SIZE + 1))))
                 .as("targetType with too long description should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
@@ -80,7 +80,7 @@ public class TargetTypeManagementTest extends AbstractJpaIntegrationTest{
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTypeManagement.update(
-                        entityFactory.targetType().update(targetType.getId()).description(RandomStringUtils.randomAlphanumeric(513))))
+                        entityFactory.targetType().update(targetType.getId()).description(RandomStringUtils.randomAlphanumeric(TargetType.DESCRIPTION_MAX_SIZE + 1))))
                 .as("targetType with too long description should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class)
@@ -94,7 +94,7 @@ public class TargetTypeManagementTest extends AbstractJpaIntegrationTest{
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTypeManagement.create(
-                        entityFactory.targetType().create().name("a").colour(RandomStringUtils.randomAlphanumeric(17))))
+                        entityFactory.targetType().create().name("a").colour(RandomStringUtils.randomAlphanumeric(TargetType.COLOUR_MAX_SIZE + 1))))
                 .as("targetType with too long colour should not be created");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(
@@ -103,7 +103,7 @@ public class TargetTypeManagementTest extends AbstractJpaIntegrationTest{
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .isThrownBy(() -> targetTypeManagement.update(
-                        entityFactory.targetType().update(targetType.getId()).colour(RandomStringUtils.randomAlphanumeric(17))))
+                        entityFactory.targetType().update(targetType.getId()).colour(RandomStringUtils.randomAlphanumeric(TargetType.COLOUR_MAX_SIZE + 1))))
                 .as("targetType with too long colour should not be updated");
 
         assertThatExceptionOfType(ConstraintViolationException.class).isThrownBy(

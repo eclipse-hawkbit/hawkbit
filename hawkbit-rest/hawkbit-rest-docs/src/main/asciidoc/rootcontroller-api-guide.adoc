@@ -69,7 +69,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-The SP server might cancel an operation, e.g. an unfinished update has a sucessor. It is up to the provisiong target to decide to accept the cancelation or reject it.
+The Hawkbit server might cancel an operation, e.g. an unfinished update has a sucessor. It is up to the provisiong target to decide to accept the cancelation or reject it.
 
 === Cancel an action
 

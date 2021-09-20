@@ -45,7 +45,7 @@ public class MgmtTargetType extends MgmtNamedEntity {
 
     /**
      * 
-     * @return the color in format #000000
+     * @return the colour
      */
     public String getColour() {
         return colour;
@@ -53,7 +53,7 @@ public class MgmtTargetType extends MgmtNamedEntity {
 
     /**
      * @param colour
-     *            in format #000000
+     *            the colour to set
      */
     public void setColour(String colour) {
         this.colour = colour;

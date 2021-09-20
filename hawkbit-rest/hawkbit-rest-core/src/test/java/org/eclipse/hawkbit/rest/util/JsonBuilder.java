@@ -148,7 +148,7 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final SoftwareModuleType module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("id", Long.MAX_VALUE).put("key", module.getKey())
+                    .put("colour", module.getColour()).put("id", Long.MAX_VALUE).put("key", module.getKey())
                     .put("maxAssignments", module.getMaxAssignments()).put("createdAt", "0").put("updatedAt", "0")
                     .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
 
@@ -171,7 +171,8 @@ public abstract class JsonBuilder {
         int i = 0;
         for (final SoftwareModuleType module : types) {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                    .put("key", module.getKey()).put("maxAssignments", module.getMaxAssignments()).toString());
+                    .put("colour", module.getColour()).put("key", module.getKey())
+                    .put("maxAssignments", module.getMaxAssignments()).toString());
 
             if (++i < types.size()) {
                 builder.append(",");
@@ -298,9 +299,10 @@ public abstract class JsonBuilder {
             });
 
             result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
-                    .put("id", Long.MAX_VALUE).put("key", type.getKey()).put("createdAt", "0").put("updatedAt", "0")
-                    .put("createdBy", "fghdfkjghdfkjh").put("optionalmodules", osmTypes)
-                    .put("mandatorymodules", msmTypes).put("updatedBy", "fghdfkjghdfkjh"));
+                    .put("colour", type.getColour()).put("id", Long.MAX_VALUE).put("key", type.getKey())
+                    .put("createdAt", "0").put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh")
+                    .put("optionalmodules", osmTypes).put("mandatorymodules", msmTypes)
+                    .put("updatedBy", "fghdfkjghdfkjh"));
 
         }
 
@@ -330,7 +332,7 @@ public abstract class JsonBuilder {
                 });
 
                 result.put(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
-                        .put("key", module.getKey()).put("optionalmodules", osmTypes)
+                        .put("colour", module.getColour()).put("key", module.getKey()).put("optionalmodules", osmTypes)
                         .put("mandatorymodules", msmTypes));
             } catch (final JSONException e) {
                 e.printStackTrace();
@@ -432,7 +434,7 @@ public abstract class JsonBuilder {
 
             builder.append(new JSONObject().put("controllerId", target.getControllerId())
                     .put("description", target.getDescription()).put("name", target.getName()).put("createdAt", "0")
-                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("updatedAt", "0").put("createdBy", "systemtest").put("updatedBy", "systemtest")
                     .put("address", address).put("securityToken", token).put("targetType", targetType).toString());
 
             if (++i < targets.size()) {
@@ -469,7 +471,7 @@ public abstract class JsonBuilder {
 
         return builder.toString();
     }
-    
+
     public static String targetTypes(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
@@ -492,8 +494,8 @@ public abstract class JsonBuilder {
         }
 
         return result.toString();
-    }  
-    
+    }
+
     public static String targetTypesCreatableFieldsOnly(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 

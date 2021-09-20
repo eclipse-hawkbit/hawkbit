@@ -13,11 +13,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
 
 /**
  * Builder to create a new {@link TargetType} entry. Defines all fields
@@ -32,7 +32,7 @@ public interface TargetTypeCreate {
      *            for {@link TargetType#getName()}
      * @return updated builder instance
      */
-    TargetTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotNull String name);
+    TargetTypeCreate name(@Size(min = 1, max = NamedEntity.NAME_MAX_SIZE) @NotEmpty String name);
 
     /**
      * @param description
@@ -53,15 +53,15 @@ public interface TargetTypeCreate {
      *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    TargetTypeCreate compatible(Collection<Long> compatible);
+    TargetTypeCreate compatible(@NotEmpty Collection<Long> compatible);
 
     /**
      * @param compatible
      *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    default TargetTypeCreate compatible(final Long compatible) {
-        return compatible(Arrays.asList(compatible));
+    default TargetTypeCreate compatible(@NotNull final Long compatible) {
+        return compatible(Collections.singletonList(compatible));
     }
 
     /**
@@ -69,8 +69,8 @@ public interface TargetTypeCreate {
      *            for {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return updated builder instance
      */
-    default TargetTypeCreate compatible(final DistributionSetType compatible) {
-        return compatible(Optional.ofNullable(compatible).map(DistributionSetType::getId).orElse(null));
+    default TargetTypeCreate compatible(@NotNull final DistributionSetType compatible) {
+        return compatible(compatible.getId());
     }
 
     /**

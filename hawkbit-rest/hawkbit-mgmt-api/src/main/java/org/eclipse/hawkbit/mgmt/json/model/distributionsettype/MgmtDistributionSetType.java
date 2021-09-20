@@ -32,9 +32,12 @@ public class MgmtDistributionSetType extends MgmtNamedEntity {
 
     @JsonProperty(required = true)
     private String key;
-
+    
     @JsonProperty
     private boolean deleted;
+    
+    @JsonProperty
+    private String colour;
 
     public boolean isDeleted() {
         return deleted;
@@ -72,6 +75,21 @@ public class MgmtDistributionSetType extends MgmtNamedEntity {
      */
     public void setKey(final String key) {
         this.key = key;
+    }
+
+    /**
+     * @return the colour
+     */
+    public String getColour() {
+        return colour;
+    }
+
+    /**
+     * @param colour
+     *            the colour to set
+     */
+    public void setColour(String colour) {
+        this.colour = colour;
     }
 
 }

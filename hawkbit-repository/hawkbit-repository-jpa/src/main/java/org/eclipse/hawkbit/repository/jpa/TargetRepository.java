@@ -202,7 +202,7 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget, Long>,
     }
 
     /**
-     * Counts {@link TargetType} instances of given type in the repository.
+     * Counts {@link Target} instances of given type in the repository.
      *
      * @param targetTypeId
      *            to search for

@@ -83,6 +83,7 @@ final class MgmtDistributionSetTypeMapper {
         result.setKey(type.getKey());
         result.setModuleId(type.getId());
         result.setDeleted(type.isDeleted());
+        result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
                 .withSelfRel());

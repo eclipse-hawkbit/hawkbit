@@ -624,13 +624,24 @@ public interface TargetManagement {
      *
      * @param controllerID
      *            to un-assign for
-     * @return the unassigned target or <null> if no target is unassigned
+     * @return the unassigned target
      *
-     * @throws EntityNotFoundException
-     *             if TAG with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Target unAssignType(@NotEmpty String controllerID);
+
+    /**
+     * Assign a {@link TargetType} assignment to given {@link Target}.
+     *
+     * @param controllerID
+     *            to un-assign for
+     * @return the unassigned target
+     *
+     * @throws EntityNotFoundException
+     *             if TargetType with given target ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Target assignType(@NotEmpty String controllerID, @NotNull long targetTypeId);
 
     /**
      * updates the {@link Target}.

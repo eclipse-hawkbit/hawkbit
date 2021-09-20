@@ -38,8 +38,11 @@ In addition the following vendors offer free trial accounts for their hawkBit co
 - [Kynetics Update Factory](https://www.kynetics.com/iot-platform-update-factory)
 
 # Device Integration
+hawkBit exposes HTTP/JSon based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) that allow any update client to integrate quite easily.
 
-hawkBit does not provide off the shelf clients for devices as part of the project. The long term goal is to provide an [Eclipse hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result allows a wide range of clients to connect to hawkBit. However, the hawkBit [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) is HTTP/JSon based which should allow any update client to integrate quite easily.
+The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent software implementation of the Eclipse hawkBit device API. At the moment the project provides the [hara-ddiclient](https://github.com/eclipse/hara-ddiclient) Kotlin library that facilitates and speeds up the development of DDI API clients running on the JVM. The library is expected to soon see its first release under the Eclipse umbrella, and has been successfully used in production for years under its previous guise.
+
+Additionally, the hawkBit project has the long term goal to provide [Eclipse Hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result will allow a wide range of clients to connect to hawkBit.
 
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 

@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
 
+import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -158,8 +159,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> unassignTargetType(String targetId) {
+    public ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") final String targetId) {
         this.targetManagement.unAssignType(targetId);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId, @RequestBody final MgmtId targetTypeId) {
+        this.targetManagement.assignType(targetId, targetTypeId.getId());
         return ResponseEntity.ok().build();
     }
 

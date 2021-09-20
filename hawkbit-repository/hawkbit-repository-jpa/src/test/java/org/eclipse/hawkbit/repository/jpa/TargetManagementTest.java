@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
@@ -1056,7 +1057,8 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound.get().getTargetType().getId()).isEqualTo(targetTypes.get(0).getId());
 
         // update the target type
-        targetManagement.update(entityFactory.target().update(target.getControllerId()).targetType(targetTypes.get(1).getId()));
+        TargetUpdate targetUpdate = entityFactory.target().update(target.getControllerId()).targetType(targetTypes.get(1).getId());
+        targetManagement.update(targetUpdate);
 
         // opt lock revision must be changed
         Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
@@ -1072,6 +1074,32 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound2).isPresent();
         assertThat(targetFound2.get().getOptLockRevision()).isEqualTo(3);
         assertThat(targetFound2.get().getTargetType()).isNull();
+    }
+
+    @Test
+    @WithUser(allSpPermissions = true)
+    @Description("Checks that target type to a target can be assigned.")
+    public void assignTargetTypeInTarget() {
+        // create a target
+        final Target target = testdataFactory.createTarget("target1", "testtarget");
+        // initial opt lock revision must be one
+        Optional<JpaTarget> targetFound = targetRepository.findById(target.getId());
+        assertThat(targetFound).isPresent();
+        assertThat(targetFound.get().getOptLockRevision()).isEqualTo(1);
+        assertThat(targetFound.get().getTargetType()).isNull();
+
+        // create a target type
+        TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
+        assertThat(targetType).isNotNull();
+
+        // assign target type to target
+        targetManagement.assignType(targetFound.get().getControllerId(), targetType.getId());
+
+        // opt lock revision must be changed
+        Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());
+        assertThat(targetFound1).isPresent();
+        assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
+        assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetType.getId());
     }
 
     @Test
