@@ -67,13 +67,26 @@ public interface RolloutRepository
     void deleteByTenant(@Param("tenant") String tenant);
 
     /**
-     * Retrieves all {@link Rollout} for a specific {link DistributionSet}
+     * Retrieves all {@link Rollout}s for a specific {@link DistributionSet} in
+     * a given {@link RolloutStatus}.
      *
      * @param set
      *            the distribution set
+     * @param status
+     *            the status of the rollout
      * @return {@link Rollout} for specific distribution set
      */
     List<Rollout> findByDistributionSetAndStatusIn(DistributionSet set, Collection<RolloutStatus> status);
 
+    /**
+     * Counts all {@link Rollout}s for a specific {@link DistributionSet} in a
+     * given {@link RolloutStatus}.
+     *
+     * @param distributionSetId
+     *            the distribution set
+     * @param status
+     *            the status of the rollout
+     * @return the count
+     */
     long countByDistributionSetIdAndStatusIn(long distributionSetId, Collection<RolloutStatus> status);
 }

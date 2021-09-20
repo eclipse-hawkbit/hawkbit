@@ -19,7 +19,7 @@ public class InvalidDistributionSetException extends AbstractServerRtException {
 
     /**
      * Creates a new InvalidDistributionSetException with
-     * {@link SpServerError#SP_DS_INCOMPLETE} error.
+     * {@link SpServerError#SP_DS_INVALID} error.
      */
     public InvalidDistributionSetException() {
         super(SpServerError.SP_DS_INVALID);

@@ -56,6 +56,13 @@ public interface TargetFilterQueryRepository
     @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL where d.autoAssignDistributionSet in :ids")
     void unsetAutoAssignDistributionSetAndActionType(@Param("ids") Long... dsIds);
 
+    /**
+     * Counts all target filters that have a given auto assign distribution set
+     * assigned.
+     *
+     * @param autoAssignDistributionSetId
+     * @return the count
+     */
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
 
     /**

@@ -402,7 +402,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         final String tenant = tenantAware.getCurrentTenant();
 
-        final String handlerId = tenant + "-rollout";
+        final String handlerId = createRolloutLockKey(tenant);
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             return;
@@ -414,6 +414,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         } finally {
             lock.unlock();
         }
+    }
+
+    public static String createRolloutLockKey(final String tenant) {
+        return tenant + "-rollout";
     }
 
     private long handleRollout(final long rolloutId) {

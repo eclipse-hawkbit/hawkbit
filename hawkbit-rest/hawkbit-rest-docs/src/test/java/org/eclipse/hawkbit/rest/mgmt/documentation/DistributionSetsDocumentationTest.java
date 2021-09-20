@@ -686,7 +686,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                                 .description(
                                                         MgmtApiModelProperties.DS_INVALIDATION_ACTION_CANCELATION_TYPE)
                                                 .attributes(key("value").value("['force','soft','none']")),
-                                        requestFieldWithPath("cancelRollouts")
+                                        optionalRequestFieldWithPath("cancelRollouts")
                                                 .description(MgmtApiModelProperties.DS_INVALIDATION_CANCEL_ROLLOUTS))));
     }
 }

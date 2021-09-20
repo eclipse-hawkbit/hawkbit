@@ -103,6 +103,15 @@ public final class MgmtRestModelMapper {
         }
     }
 
+    /**
+     * Converts the given repository {@link CancelationType} into a
+     * corresponding {@link MgmtCancelationType}.
+     *
+     * @param cancelationType
+     *            the repository representation of the cancellation type
+     *
+     * @return <null> or the REST cancellation type
+     */
     public static CancelationType convertCancelationType(final MgmtCancelationType cancelationType) {
         if (cancelationType == null) {
             return null;

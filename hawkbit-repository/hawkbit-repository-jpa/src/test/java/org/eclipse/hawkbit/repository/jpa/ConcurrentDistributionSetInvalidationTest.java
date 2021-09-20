@@ -12,11 +12,13 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.Collections;
 
+import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorAction;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
@@ -48,7 +50,7 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50")
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
-        rolloutManagement.create(entityFactory.rollout().create()
+        final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create()
                 .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
                 .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED), 20, conditions);
         final String tenant = tenantAware.getCurrentTenant();
@@ -62,9 +64,10 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
             }));
         });
         handleRolloutsThread.start();
-        // wait a moment so that the rollouts are being handled when the
-        // distribution set gets invalidated
-        Thread.sleep(3000);
+        // wait until at least one RolloutGroup is created, as this means that
+        // the thread has started and has acquired the lock
+        Awaitility.await().until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
+                .runAsSystem(() -> rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getSize() > 0)));
 
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")

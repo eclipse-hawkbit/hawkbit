@@ -20,14 +20,17 @@ public class StopRolloutException extends AbstractServerRtException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * Creates a new CancelActionNotAllowed with
-     * {@link SpServerError#SP_ACTION_NOT_CANCELABLE} error.
+     * Creates a new StopRolloutException with
+     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
      */
     public StopRolloutException() {
         super(SpServerError.SP_STOP_ROLLOUT_FAILED);
     }
 
     /**
+     * Creates a new StopRolloutException with
+     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
+     *
      * @param cause
      *            for the exception
      */
@@ -36,6 +39,9 @@ public class StopRolloutException extends AbstractServerRtException {
     }
 
     /**
+     * Creates a new StopRolloutException with
+     * {@link SpServerError#SP_STOP_ROLLOUT_FAILED} error.
+     *
      * @param message
      *            of the error
      */

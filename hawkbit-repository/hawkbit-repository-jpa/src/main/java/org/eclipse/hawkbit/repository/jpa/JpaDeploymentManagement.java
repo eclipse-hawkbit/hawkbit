@@ -899,12 +899,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     // No transaction, will be created per handled distribution set
     @Transactional(propagation = Propagation.NEVER)
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
-        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getSetIds());
+        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
         final String tenant = tenantAware.getCurrentTenant();
 
-        if (distributionSetInvalidation.getCancelationType() != CancelationType.NONE
-                || distributionSetInvalidation.isCancelRollouts()) {
-            final String handlerId = tenant + "-rollout";
+        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
+                distributionSetInvalidation.isCancelRollouts())) {
+            final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
             final Lock lock = lockRegistry.obtain(handlerId);
             try {
                 if (!lock.tryLock(repositoryProperties.getDsInvalidationLockTimeout(), TimeUnit.SECONDS)) {
@@ -917,7 +917,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 }
             } catch (final InterruptedException e) {
                 LOG.error("InterruptedException while invalidating distribution sets {}!",
-                        distributionSetInvalidation.getSetIds(), e);
+                        distributionSetInvalidation.getDistributionSetIds(), e);
                 Thread.currentThread().interrupt();
             }
         } else {
@@ -929,7 +929,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
             final String tenant) {
         DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
-            distributionSetInvalidation.getSetIds().forEach(setId -> invalidateDistributionSet(setId,
+            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
                     distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
             return 0;
         });
@@ -942,7 +942,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         distributionSetRepository.save(set);
         LOG.debug("Distribution set {} set to invalid", set.getId());
 
-        if (cancelationType != CancelationType.NONE || cancelRollouts) {
+        if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
             cancelRollouts(set);
         }
 
@@ -951,6 +951,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
 
         cancelAutoAssignments(setId);
+    }
+
+    private boolean shouldRolloutsBeCanceled(final CancelationType cancelationType, final boolean cancelRollouts) {
+        return cancelationType != CancelationType.NONE || cancelRollouts;
     }
 
     private void cancelRollouts(final DistributionSet set) {

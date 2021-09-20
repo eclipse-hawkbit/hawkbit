@@ -89,7 +89,7 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_IN_USE, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INVALID, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INCOMPLETE, HttpStatus.BAD_REQUEST);
-        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STOP_ROLLOUT_FAILED, HttpStatus.INTERNAL_SERVER_ERROR);
+        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_STOP_ROLLOUT_FAILED, HttpStatus.LOCKED);
     }
 
     private static HttpStatus getStatusOrDefault(final SpServerError error) {

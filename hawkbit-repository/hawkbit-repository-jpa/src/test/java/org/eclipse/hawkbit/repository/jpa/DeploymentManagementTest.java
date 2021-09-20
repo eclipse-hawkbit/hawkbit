@@ -1392,25 +1392,19 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify invalidation of distribution sets that only removes distribution sets from auto assignments")
     public void verifyInvalidateDistributionSetStopAutoAssignment() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(5,
+        final InvalidationTestData invalidationTestData = createInvalidationTestData(
                 "verifyInvalidateDistributionSetStopAutoAssignment");
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("verifyInvalidateDistributionSetStopAutoAssignment")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables(
-                "verifyInvalidateDistributionSetStopAutoAssignment", "desc", 2, "name==*", distributionSet, "50", "80");
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.NONE, false));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
+                false));
         rolloutManagement.handleRollouts();
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isNotIn(RolloutStatus.STOPPING,
-                RolloutStatus.FINISHED);
-        for (final Target target : targets) {
+        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+                .getAutoAssignDistributionSet()).isNull();
+        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
+                .isNotIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);
+        for (final Target target : invalidationTestData.getTargets()) {
             // if status is pending, the assignment has not been canceled
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
@@ -1422,28 +1416,25 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify invalidation of distribution sets that removes distribution sets from auto assignments and stops rollouts")
     public void verifyInvalidateDistributionSetStopRollouts() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(5, "verifyInvalidateDistributionSetStopRollouts");
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("verifyInvalidateDistributionSetStopRollouts")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables("verifyInvalidateDistributionSetStopRollouts",
-                "desc", 2, "name==*", distributionSet, "50", "80");
+        final InvalidationTestData invalidationTestData = createInvalidationTestData(
+                "verifyInvalidateDistributionSetStopRollouts");
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.NONE, true));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
+                true));
         rolloutManagement.handleRollouts();
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.FINISHED);
-        assertNoScheduledActionsExist(rollout);
-        assertRolloutGroupsAreFinished(rollout);
-        for (final Target target : targets) {
+        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+                .getAutoAssignDistributionSet()).isNull();
+        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
+                .isEqualTo(RolloutStatus.FINISHED);
+        assertNoScheduledActionsExist(invalidationTestData.getRollout());
+        assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
+        for (final Target target : invalidationTestData.getTargets()) {
             // if status is pending, the assignment has not been canceled
-            assertThat(targetRepository.findById(targets.get(0).getId()).get().getUpdateStatus())
-                    .isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(
+                    targetRepository.findById(invalidationTestData.getTargets().get(0).getId()).get().getUpdateStatus())
+                            .isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(actionRepository.findByTarget(target).size()).isEqualTo(1);
             assertThat(actionRepository.findByTarget(target).get(0).getStatus()).isEqualTo(Status.RUNNING);
         }
@@ -1452,27 +1443,21 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and force cancels assignments")
     public void verifyInvalidateDistributionSetStopAllAndForceCancel() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(5,
+        final InvalidationTestData invalidationTestData = createInvalidationTestData(
                 "verifyInvalidateDistributionSetStopAllAndForceCancel");
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(
-                entityFactory.targetFilterQuery().create().name("verifyInvalidateDistributionSetStopAllAndForceCancel")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables(
-                "verifyInvalidateDistributionSetStopAllAndForceCancel", "desc", 2, "name==*", distributionSet, "50",
-                "80");
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.FORCE, true));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.FORCE,
+                true));
         rolloutManagement.handleRollouts();
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isEqualTo(RolloutStatus.FINISHED);
-        assertNoScheduledActionsExist(rollout);
-        assertRolloutGroupsAreFinished(rollout);
-        for (final Target target : targets) {
+        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+                .getAutoAssignDistributionSet()).isNull();
+        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
+                .isEqualTo(RolloutStatus.FINISHED);
+        assertNoScheduledActionsExist(invalidationTestData.getRollout());
+        assertRolloutGroupsAreFinished(invalidationTestData.getRollout());
+        for (final Target target : invalidationTestData.getTargets()) {
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.IN_SYNC);
             assertThat(actionRepository.findByTarget(target).size()).isEqualTo(1);
@@ -1494,23 +1479,18 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and cancels assignments")
     public void verifyInvalidateDistributionSetStopAll() {
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(5, "verifyInvalidateDistributionSetStopAll");
-        assignDistributionSet(distributionSet, targets);
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
-                .create(entityFactory.targetFilterQuery().create().name("verifyInvalidateDistributionSetStopAll")
-                        .query("name==*").autoAssignDistributionSet(distributionSet));
-        final Rollout rollout = testdataFactory.createRolloutByVariables("verifyInvalidateDistributionSetStopAll",
-                "desc", 2, "name==*", distributionSet, "50", "80");
+        final InvalidationTestData invalidationTestData = createInvalidationTestData(
+                "verifyInvalidateDistributionSetStopAll");
 
         deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true));
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.SOFT,
+                true));
 
-        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
-                .isNull();
-        assertThat(rolloutRepository.findById(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
-                RolloutStatus.FINISHED);
-        for (final Target target : targets) {
+        assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
+                .getAutoAssignDistributionSet()).isNull();
+        assertThat(rolloutRepository.findById(invalidationTestData.getRollout().getId()).get().getStatus())
+                .isIn(RolloutStatus.STOPPING, RolloutStatus.FINISHED);
+        for (final Target target : invalidationTestData.getTargets()) {
             assertThat(targetRepository.findById(target.getId()).get().getUpdateStatus())
                     .isEqualTo(TargetUpdateStatus.PENDING);
             assertThat(actionRepository.findByTarget(target).size()).isEqualTo(1);
@@ -1538,6 +1518,66 @@ public class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .as("Invalid distributionSet should throw an exception")
                 .isThrownBy(() -> deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                         Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true)));
+    }
+
+    private InvalidationTestData createInvalidationTestData(final String testName) {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5, testName);
+        assignDistributionSet(distributionSet, targets);
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
+                .create().name(testName).query("name==*").autoAssignDistributionSet(distributionSet));
+        final Rollout rollout = testdataFactory.createRolloutByVariables(testName, "desc", 2, "name==*",
+                distributionSet, "50", "80");
+
+        return new InvalidationTestData(distributionSet, targets, targetFilterQuery, rollout);
+    }
+
+    private static class InvalidationTestData {
+        private DistributionSet distributionSet;
+        private List<Target> targets;
+        private TargetFilterQuery targetFilterQuery;
+        private Rollout rollout;
+
+        public InvalidationTestData(final DistributionSet distributionSet, final List<Target> targets,
+                final TargetFilterQuery targetFilterQuery, final Rollout rollout) {
+            super();
+            this.distributionSet = distributionSet;
+            this.targets = targets;
+            this.targetFilterQuery = targetFilterQuery;
+            this.rollout = rollout;
+        }
+
+        public DistributionSet getDistributionSet() {
+            return distributionSet;
+        }
+
+        public void setDistributionSet(final DistributionSet distributionSet) {
+            this.distributionSet = distributionSet;
+        }
+
+        public List<Target> getTargets() {
+            return targets;
+        }
+
+        public void setTargets(final List<Target> targets) {
+            this.targets = targets;
+        }
+
+        public TargetFilterQuery getTargetFilterQuery() {
+            return targetFilterQuery;
+        }
+
+        public void setTargetFilterQuery(final TargetFilterQuery targetFilterQuery) {
+            this.targetFilterQuery = targetFilterQuery;
+        }
+
+        public Rollout getRollout() {
+            return rollout;
+        }
+
+        public void setRollout(final Rollout rollout) {
+            this.rollout = rollout;
+        }
     }
 
     /**

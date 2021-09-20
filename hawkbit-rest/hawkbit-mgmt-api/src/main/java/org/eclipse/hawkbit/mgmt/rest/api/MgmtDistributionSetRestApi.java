@@ -382,6 +382,15 @@ public interface MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam);
 
+    /**
+     * Invalidates a distribution set
+     *
+     * @param distributionSetId
+     *            the ID of the distribution set to invalidate
+     * @param invalidateRequestBody
+     *            the definition if rollouts and actions should be canceled
+     * @return status OK if the invalidation was successful
+     */
     @PostMapping(value = "/{distributionSetId}/invalidate", consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })

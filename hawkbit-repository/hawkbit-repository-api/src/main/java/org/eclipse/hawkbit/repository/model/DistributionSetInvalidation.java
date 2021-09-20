@@ -10,25 +10,38 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.Collection;
 
+/**
+ * Holds the information about the invalidation of a distribution set
+ */
 public class DistributionSetInvalidation {
 
-    private Collection<Long> setIds;
+    private Collection<Long> distributionSetIds;
     private CancelationType cancelationType;
     private boolean cancelRollouts;
 
-    public DistributionSetInvalidation(final Collection<Long> setIds, final CancelationType cancelationType,
+    /**
+     * Parametric constructor
+     *
+     * @param distributionSetIds
+     *            defines which distribution sets should be canceled
+     * @param cancelationType
+     *            defines if actions should be canceled
+     * @param cancelRollouts
+     *            defines if rollouts should be canceled
+     */
+    public DistributionSetInvalidation(final Collection<Long> distributionSetIds, final CancelationType cancelationType,
             final boolean cancelRollouts) {
-        this.setIds = setIds;
+        this.distributionSetIds = distributionSetIds;
         this.cancelationType = cancelationType;
         this.cancelRollouts = cancelRollouts;
     }
 
-    public Collection<Long> getSetIds() {
-        return setIds;
+    public Collection<Long> getDistributionSetIds() {
+        return distributionSetIds;
     }
 
-    public void setSetIds(final Collection<Long> setIds) {
-        this.setIds = setIds;
+    public void setDistributionSetIds(final Collection<Long> distributionSetIds) {
+        this.distributionSetIds = distributionSetIds;
     }
 
     public CancelationType getCancelationType() {
@@ -47,6 +60,10 @@ public class DistributionSetInvalidation {
         this.cancelRollouts = cancelRollouts;
     }
 
+    /**
+     * Defines if and how actions should be canceled when invalidating a
+     * distribution set
+     */
     public enum CancelationType {
         FORCE, SOFT, NONE;
     }

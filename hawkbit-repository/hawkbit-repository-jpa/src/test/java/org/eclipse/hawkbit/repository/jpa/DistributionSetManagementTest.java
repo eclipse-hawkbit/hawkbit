@@ -986,6 +986,24 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Deletes an invalid distribution set")
+    public void deleteInvalidDistributionSet() {
+        final DistributionSet set = testdataFactory.createAndInvalidateDistributionSet();
+        assertThat(distributionSetRepository.findById(set.getId())).isNotEmpty();
+        distributionSetManagement.delete(set.getId());
+        assertThat(distributionSetRepository.findById(set.getId())).isEmpty();
+    }
+
+    @Test
+    @Description("Deletes an incomplete distribution set")
+    public void deleteIncompleteDistributionSet() {
+        final DistributionSet set = testdataFactory.createIncompleteDistributionSet();
+        assertThat(distributionSetRepository.findById(set.getId())).isNotEmpty();
+        distributionSetManagement.delete(set.getId());
+        assertThat(distributionSetRepository.findById(set.getId())).isEmpty();
+    }
+
+    @Test
     @Description("Queries and loads the metadata related to a given software module.")
     public void findAllDistributionSetMetadataByDsId() {
         // create a DS
@@ -1082,6 +1100,33 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
                 .as("Incomplete distributionSet should throw an exception")
                 .isThrownBy(() -> distributionSetManagement.getValidAndComplete(distributionSet.getId()));
+    }
+
+    @Test
+    @Description("Verify that an exception is thrown when trying to create or update metadata for an invalid distribution set.")
+    public void createMetadataForInvalidDistributionSet() {
+        final String knownKey1 = "myKnownKey1";
+        final String knownKey2 = "myKnownKey2";
+        final String knownValue = "myKnownValue";
+        final String knownUpdateValue = "knownUpdateValue";
+
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        distributionSetManagement.createMetaData(ds.getId(),
+                Collections.singletonList(entityFactory.generateDsMetadata(knownKey1, knownValue)));
+
+        deploymentManagement.invalidateDistributionSet(
+                new DistributionSetInvalidation(Arrays.asList(ds.getId()), CancelationType.NONE, false));
+
+        // assert that no new metadata can be created
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.createMetaData(ds.getId(),
+                        Collections.singletonList(entityFactory.generateDsMetadata(knownKey2, knownValue))));
+
+        // assert that an existing metadata can not be updated
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement
+                        .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey1, knownUpdateValue)));
     }
 
 }
