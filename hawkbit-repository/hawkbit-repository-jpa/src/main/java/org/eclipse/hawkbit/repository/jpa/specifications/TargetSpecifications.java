@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.MapJoin;
@@ -65,6 +66,37 @@ public final class TargetSpecifications {
             targetRoot.fetch(JpaTarget_.tags, JoinType.LEFT);
             query.distinct(true);
             return predicate;
+        };
+    }
+
+    /**
+     * Can be added to specification chain to order result by provided distribution
+     * set
+     * 
+     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3. Based on
+     * target id
+     *
+     * NOTE: Other specs, pagables and sort objects may alter the queries orderBy
+     * entry too, possibly invalidating the applied order, keep in mind when using
+     * this
+     * 
+     * @param distributionSetIdForOrder
+     *            distribution set to consider
+     * @return specification that applies order by ds, may be overwritten
+     */
+    public static Specification<JpaTarget> orderedByLinkedDistributionSet(long distributionSetIdForOrder) {
+        return (targetRoot, query, cb) -> {
+            // Enhance query with custom select based sort
+            final Expression<Object> selectCase = cb.selectCase()
+                    .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
+                            distributionSetIdForOrder), 1)
+                    .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
+                            distributionSetIdForOrder), 2)
+                    .otherwise(100);
+            query.orderBy(cb.asc(selectCase), cb.desc(targetRoot.get(JpaTarget_.id)));
+
+            // Spec only provides order, so no further filtering
+            return query.getRestriction();
         };
     }
 
