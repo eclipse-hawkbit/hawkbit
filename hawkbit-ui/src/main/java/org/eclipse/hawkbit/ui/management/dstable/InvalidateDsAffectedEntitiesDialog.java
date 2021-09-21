@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.ConfirmStyle;
@@ -50,14 +52,13 @@ public class InvalidateDsAffectedEntitiesDialog {
      *            {@link VaadinMessageSource}
      * @param callback
      *            callback for dialog result
-     * @param affectedRollouts
-     *            number of affected {@link Rollout}s
-     * @param affectedAutoAssignments
-     *            number of affected auto assignments
+     * @param affectedEntities
+     *            number of affected {@link Rollout}s, {@link Action}s and
+     *            auto-assignments
      */
     public InvalidateDsAffectedEntitiesDialog(final List<ProxyDistributionSet> allDistributionSetsForInvalidation,
-            final VaadinMessageSource i18n, final Consumer<Boolean> callback, final long affectedActions,
-            final long affectedRollouts, final long affectedAutoAssignments) {
+            final VaadinMessageSource i18n, final Consumer<Boolean> callback,
+            final DistributionSetInvalidationCount affectedEntities) {
 
         this.i18n = i18n;
 
@@ -69,19 +70,21 @@ public class InvalidateDsAffectedEntitiesDialog {
         consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
 
-        final Label stoppedSingleAssignmentsLabel = new Label(i18n.getMessage(
-                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ACTIONS, affectedActions));
+        final Label stoppedSingleAssignmentsLabel = new Label(
+                i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ACTIONS,
+                        affectedEntities.getActionCount()));
         stoppedSingleAssignmentsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_ACTIONS);
         content.addComponent(stoppedSingleAssignmentsLabel);
 
-        final Label stoppedRolloutsLabel = new Label(i18n.getMessage(
-                UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS, affectedRollouts));
+        final Label stoppedRolloutsLabel = new Label(
+                i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS,
+                        affectedEntities.getRolloutsCount()));
         stoppedRolloutsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS);
         content.addComponent(stoppedRolloutsLabel);
 
         final Label stoppedAutoAssignmentsLabel = new Label(i18n.getMessage(
                 UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS,
-                affectedAutoAssignments));
+                affectedEntities.getAutoAssignmentCount()));
         stoppedAutoAssignmentsLabel.setId(UIComponentIdProvider.INVALIDATE_DS_AFFECTED_ENTITIES_AUTOASSIGNMENTS);
         content.addComponent(stoppedAutoAssignmentsLabel);
 
