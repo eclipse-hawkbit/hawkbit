@@ -326,16 +326,21 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         final TargetType incompatibleType = testdataFactory.createTargetType("incompatibleType",
                 Collections.emptyList());
-        testdataFactory.createTargetsWithType(10, incompatibleType);
-        final Target compatibleTarget = testdataFactory.createTarget();
+        final TargetType compatibleType = testdataFactory.createTargetType("compatibleType",
+                Collections.singletonList(testDs.getType()));
+        testdataFactory.createTargetsWithType(10, "incompatible", incompatibleType);
+        final Target compatibleTarget = testdataFactory.createTargetsWithType(1, "compatible", compatibleType).get(0);
+        final Target targetWithoutType = testdataFactory.createTarget();
 
-        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatible(testDs.getId(), testFilter.getQuery());
-        assertThat(compatibleCount).isEqualTo(1);
+        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatible(testDs.getId(),
+                testFilter.getQuery());
+        assertThat(compatibleCount).isEqualTo(2);
 
         autoAssignChecker.check();
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
-        assertThat(actions).hasSize(1);
-        assertThat(actions.get(0).getTarget().getId()).isEqualTo(compatibleTarget.getId());
+        assertThat(actions).hasSize(2);
+        final List<Long> actionTargets = actions.stream().map(a -> a.getTarget().getId()).collect(Collectors.toList());
+        assertThat(actionTargets).containsExactlyInAnyOrder(compatibleTarget.getId(), targetWithoutType.getId());
     }
 }

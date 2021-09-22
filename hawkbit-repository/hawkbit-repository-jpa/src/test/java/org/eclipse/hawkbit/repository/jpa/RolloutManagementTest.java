@@ -1835,16 +1835,20 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify the that only compatible targets are part of a Rollout.")
     void createAndStartRolloutWithTargetTypes() {
-        final int amountTargetsForRollout = 10;
-        final int amountIncompatibleTargetsForRollout = 5;
         final String rolloutName = "rolloutTestCompatibility";
 
         final DistributionSet testDs = testdataFactory.createDistributionSet("test-ds");
-        final TargetType targetType = testdataFactory.createTargetType("test-type", Collections.emptyList());
+        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompatible-type",
+                Collections.emptyList());
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compatible-type",
+                Collections.singletonList(testDs.getType()));
 
-        final List<Target> targets = testdataFactory.createTargets(amountTargetsForRollout, "testTarget-");
-        final List<Target> incompatibleTargets = testdataFactory
-                .createTargetsWithType(amountIncompatibleTargetsForRollout, targetType);
+        final List<Target> incompatibleTargets = testdataFactory.createTargetsWithType(10, "incompatible",
+                incompatibleTargetType);
+        final List<Target> targetsWithoutType = testdataFactory.createTargets(10, "testTarget-");
+        final List<Target> targets = testdataFactory.createTargetsWithType(10, "compatibleTarget-",
+                compatibleTargetType);
+        targets.addAll(targetsWithoutType);
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         final RolloutCreate rolloutToCreate = entityFactory.rollout().create().name(rolloutName)
@@ -1860,14 +1864,14 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .findByRollout(Pageable.unpaged(), testRollout.getId()).getContent();
 
         assertThat(testRollout.getStatus()).isEqualTo(RolloutStatus.READY);
-        assertThat(testRollout.getTotalTargets()).isEqualTo(amountTargetsForRollout);
+        assertThat(testRollout.getTotalTargets()).isEqualTo(targets.size());
         assertThat(rolloutGroups).hasSize(1);
-        assertThat(rolloutGroups.get(0).getTotalTargets()).isEqualTo(amountTargetsForRollout);
+        assertThat(rolloutGroups.get(0).getTotalTargets()).isEqualTo(targets.size());
 
         final List<Target> rolloutGroupTargets = rolloutGroupManagement
                 .findTargetsOfRolloutGroup(Pageable.unpaged(), rolloutGroups.get(0).getId()).getContent();
 
-        assertThat(rolloutGroupTargets).hasSize(amountTargetsForRollout).containsExactlyInAnyOrderElementsOf(targets)
+        assertThat(rolloutGroupTargets).hasSize(targets.size()).containsExactlyInAnyOrderElementsOf(targets)
                 .doesNotContainAnyElementsOf(incompatibleTargets);
     }
 

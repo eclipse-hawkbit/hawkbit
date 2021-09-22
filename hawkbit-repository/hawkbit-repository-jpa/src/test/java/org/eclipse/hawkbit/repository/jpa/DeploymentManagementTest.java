@@ -1368,10 +1368,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         for (int i = 0; i < 100; i++) {
-            final Target target1 = testdataFactory.createTarget("test-target-" + i, "test-target-" + i,
+            final Target target = testdataFactory.createTarget("test-target-" + i, "test-target-" + i,
                     targetType.getId());
             final DeploymentRequest deployment = DeploymentManagement
-                    .deploymentRequest(target1.getControllerId(), ds.getId()).build();
+                    .deploymentRequest(target.getControllerId(), ds.getId()).build();
             deploymentRequests.add(deployment);
         }
 

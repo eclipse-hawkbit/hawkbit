@@ -39,9 +39,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -377,7 +379,9 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are compatible with
-     * given DistributionSetType
+     * given {@link DistributionSetType}. Compatibility is evaluated by checking the
+     * {@link TargetType} of a target. Targets that don't have a {@link TargetType}
+     * are compatible with all {@link DistributionSetType}
      *
      * @param distributionSetTypeId
      *            the ID of the distribution set type which must compatible

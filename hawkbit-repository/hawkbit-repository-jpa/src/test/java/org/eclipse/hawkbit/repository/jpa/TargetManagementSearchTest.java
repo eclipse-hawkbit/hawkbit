@@ -724,7 +724,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
         final List<Target> targets = testdataFactory.createTargets(20, "withOutType");
-        final List<Target> targetWithCompatibleTypes = testdataFactory.createTargetsWithType(20, targetType);
+        final List<Target> targetWithCompatibleTypes = testdataFactory.createTargetsWithType(20, "compatible",
+                targetType);
 
         final List<Target> result = targetManagement
                 .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
@@ -739,21 +740,29 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type",
                 "test-ds-type");
         final DistributionSet testDs = createDistSetWithType(dsType);
-        final TargetType incompatibleTargetType = testdataFactory.createTargetType("testType",
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType",
+                Collections.singletonList(dsType));
+        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompTestType",
                 Collections.singletonList(testdataFactory.createDistributionSet().getType()));
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
 
         final List<Target> targetsWithOutType = testdataFactory.createTargets(20, "withOutType");
-        final List<Target> targetsWithIncompatibleType = testdataFactory.createTargetsWithType(20,
+        final List<Target> targetsWithCompatibleType = testdataFactory.createTargetsWithType(20, "compatible",
+                compatibleTargetType);
+        final List<Target> targetsWithIncompatibleType = testdataFactory.createTargetsWithType(20, "incompatible",
                 incompatibleTargetType);
+
+        final List<Target> testTargets = new ArrayList<>();
+        testTargets.addAll(targetsWithOutType);
+        testTargets.addAll(targetsWithCompatibleType);
 
         final List<Target> result = targetManagement
                 .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
 
-        assertThat(result).as("count of targets").hasSize(targetsWithOutType.size())
-                .as("contains all compatible targets").containsAll(targetsWithOutType)
-                .as("does not contain incompatible targets").doesNotContainAnyElementsOf(targetsWithIncompatibleType);
+        assertThat(result).as("count of targets").hasSize(testTargets.size()).as("contains all compatible targets")
+                .containsExactlyInAnyOrderElementsOf(testTargets).as("does not contain incompatible targets")
+                .doesNotContainAnyElementsOf(targetsWithIncompatibleType);
     }
 
     private DistributionSet createDistSetWithType(final DistributionSetType type) {
