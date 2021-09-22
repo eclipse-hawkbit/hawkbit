@@ -303,6 +303,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_PLURAL = "message.invalidate.distributionset.fail.plural";
 
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_UNREPEATABLE_HINT = "message.invalidate.distributionset.unrepeatable.hint";
+
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
 
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_MESSAGE = "vaadin.system.sessionexpired.message";

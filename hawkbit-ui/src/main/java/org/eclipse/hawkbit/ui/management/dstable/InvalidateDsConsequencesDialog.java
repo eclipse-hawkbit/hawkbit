@@ -82,6 +82,7 @@ public class InvalidateDsConsequencesDialog {
         content.addComponent(createCancelationTypeInfo());
         content.addComponent(cancelationTypeGroup);
         content.addComponent(stopRolloutsCheckBox);
+        content.addComponent(createConsequencesHint());
         addValueChangeListeners();
 
         final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
@@ -165,6 +166,14 @@ public class InvalidateDsConsequencesDialog {
         cancellationTypeOptions.setSelectedItem(CancelationType.NONE);
 
         return cancellationTypeOptions;
+    }
+
+    private Label createConsequencesHint() {
+        String hint = i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_UNREPEATABLE_HINT);
+        final Label hintLabel = new Label(hint);
+        hintLabel.setWidthFull();
+        hintLabel.setStyleName(ValoTheme.LABEL_TINY);
+        return hintLabel;
     }
 
     /**
