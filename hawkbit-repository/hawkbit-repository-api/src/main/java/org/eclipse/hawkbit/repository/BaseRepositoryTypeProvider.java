@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 /**
  * Provider that returns a base repository implementation dynamically based on repository type
  */
+@FunctionalInterface
 public interface BaseRepositoryTypeProvider {
 
     /**
