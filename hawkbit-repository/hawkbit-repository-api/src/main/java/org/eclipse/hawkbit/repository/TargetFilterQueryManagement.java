@@ -240,7 +240,7 @@ public interface TargetFilterQueryManagement {
      * @throws IncompleteDistributionSetException
      *             if the provided auto-assign {@link DistributionSet} is
      *             incomplete
-     * 
+     *
      * @throws InvalidDistributionSetException
      *             if the provided auto-assign {@link DistributionSet} is
      *             invalidated
@@ -248,4 +248,14 @@ public interface TargetFilterQueryManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetFilterQuery updateAutoAssignDS(
             @NotNull @Valid AutoAssignDistributionSetUpdate autoAssignDistributionSetUpdate);
+
+    /**
+     * Removes the given {@link DistributionSet} from all auto assignments.
+     *
+     * @param setId
+     *            the {@link DistributionSet} to be removed from auto
+     *            assignments.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    void cancelAutoAssignmentForDistributionSet(long setId);
 }

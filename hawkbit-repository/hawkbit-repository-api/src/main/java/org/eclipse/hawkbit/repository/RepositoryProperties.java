@@ -63,7 +63,7 @@ public class RepositoryProperties {
      * Defines a timeout for the lock during invalidation of distribution sets
      * (in seconds).
      */
-    private long dsInvalidationLockTimeout = 30;
+    private long dsInvalidationLockTimeout = 5;
 
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;

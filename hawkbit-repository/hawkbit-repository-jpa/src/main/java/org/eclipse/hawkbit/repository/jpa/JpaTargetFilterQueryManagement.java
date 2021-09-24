@@ -184,7 +184,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final String rsqlFilter) {
         final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
 
-        final DistributionSet distributionSet = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
 
@@ -292,11 +292,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return actionType;
     }
 
-    private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) distributionSetManagement.get(setId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
-    }
-
     private JpaTargetFilterQuery findTargetFilterQueryOrThrowExceptionIfNotFound(final Long queryId) {
         return targetFilterQueryRepository.findById(queryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, queryId));
@@ -316,5 +311,12 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private void assertMaxTargetsQuota(final String query) {
         QuotaHelper.assertAssignmentQuota(targetManagement.countByRsql(query),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
+    }
+
+    @Override
+    @Transactional
+    public void cancelAutoAssignmentForDistributionSet(final long setId) {
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
+        LOGGER.debug("Auto assignments for distribution sets {} deactivated", setId);
     }
 }

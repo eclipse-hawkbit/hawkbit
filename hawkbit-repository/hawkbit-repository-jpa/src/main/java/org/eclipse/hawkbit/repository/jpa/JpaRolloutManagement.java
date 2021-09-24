@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.repository.jpa.JpaDistributionSetInvalidationManagement.ROLLOUT_STATUS_STOPPABLE;
 import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 import java.util.Arrays;
@@ -603,6 +604,18 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
         DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()),
                 tenantAware);
+    }
+
+    @Override
+    @Transactional
+    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
+        // stop all rollouts for this distribution set
+        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+            final JpaRollout jpaRollout = (JpaRollout) rollout;
+            jpaRollout.setStatus(RolloutStatus.STOPPING);
+            rolloutRepository.save(jpaRollout);
+            LOGGER.debug("Rollout {} stopped", jpaRollout.getId());
+        });
     }
 
 }

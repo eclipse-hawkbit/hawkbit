@@ -573,7 +573,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule softwareModule = testdataFactory.createSoftwareModuleOs();
         distributionSetManagement.assignSoftwareModules(distributionSet.getId(),
                 Collections.singletonList(softwareModule.getId()));
-        deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
+        distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
                 Collections.singletonList(distributionSet.getId()), CancelationType.NONE, false));
 
         assertThatExceptionOfType(InvalidDistributionSetException.class)
@@ -1114,7 +1114,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.createMetaData(ds.getId(),
                 Collections.singletonList(entityFactory.generateDsMetadata(knownKey1, knownValue)));
 
-        deploymentManagement.invalidateDistributionSet(
+        distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(Arrays.asList(ds.getId()), CancelationType.NONE, false));
 
         // assert that no new metadata can be created

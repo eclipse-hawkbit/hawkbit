@@ -12,7 +12,6 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -22,8 +21,6 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -48,7 +45,6 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -56,7 +52,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -72,10 +67,8 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -94,7 +87,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.annotation.Backoff;
@@ -104,7 +96,6 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
@@ -139,10 +130,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         + ACTION_PAGE_LIMIT + ")");
     }
 
-    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
-            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
-            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
-
     private final EntityManager entityManager;
     private final DistributionSetManagement distributionSetManagement;
     private final DistributionSetRepository distributionSetRepository;
@@ -159,9 +146,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantAware tenantAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
-    private final RolloutRepository rolloutRepository;
-    private final TargetFilterQueryRepository targetFilterQueryRepository;
-    private final LockRegistry lockRegistry;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement,
@@ -171,8 +155,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties, final RolloutRepository rolloutRepository,
-            final TargetFilterQueryRepository targetFilterQueryRepository, final LockRegistry lockRegistry) {
+            final RepositoryProperties repositoryProperties) {
         super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -193,9 +176,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.tenantAware = tenantAware;
         this.database = database;
         retryTemplate = createRetryTemplate();
-        this.rolloutRepository = rolloutRepository;
-        this.targetFilterQueryRepository = targetFilterQueryRepository;
-        this.lockRegistry = lockRegistry;
     }
 
     @Override
@@ -896,81 +876,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    // No transaction, will be created per handled distribution set
-    @Transactional(propagation = Propagation.NEVER)
-    public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
-        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
-        final String tenant = tenantAware.getCurrentTenant();
-
-        if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
-                distributionSetInvalidation.isCancelRollouts())) {
-            final String handlerId = JpaRolloutManagement.createRolloutLockKey(tenant);
-            final Lock lock = lockRegistry.obtain(handlerId);
-            try {
-                if (!lock.tryLock(repositoryProperties.getDsInvalidationLockTimeout(), TimeUnit.SECONDS)) {
-                    throw new StopRolloutException("Timeout while trying to invalidate distribution sets");
-                }
-                try {
-                    invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
-                } finally {
-                    lock.unlock();
-                }
-            } catch (final InterruptedException e) {
-                LOG.error("InterruptedException while invalidating distribution sets {}!",
-                        distributionSetInvalidation.getDistributionSetIds(), e);
-                Thread.currentThread().interrupt();
-            }
-        } else {
-            // no lock is needed as no rollout will be stopped
-            invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
-        }
-    }
-
-    private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
-            final String tenant) {
-        DeploymentHelper.runInNewTransaction(txManager, tenant + "-invalidateDS", status -> {
-            distributionSetInvalidation.getDistributionSetIds().forEach(setId -> invalidateDistributionSet(setId,
-                    distributionSetInvalidation.getCancelationType(), distributionSetInvalidation.isCancelRollouts()));
-            return 0;
-        });
-    }
-
-    private void invalidateDistributionSet(final long setId, final CancelationType cancelationType,
-            final boolean cancelRollouts) {
-        final JpaDistributionSet set = (JpaDistributionSet) distributionSetManagement.getValidAndComplete(setId);
-        set.invalidate();
-        distributionSetRepository.save(set);
-        LOG.debug("Distribution set {} set to invalid", set.getId());
-
-        if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
-            cancelRollouts(set);
-        }
-
-        if (cancelationType != CancelationType.NONE) {
-            cancelActions(cancelationType, set);
-        }
-
-        cancelAutoAssignments(setId);
-    }
-
-    private boolean shouldRolloutsBeCanceled(final CancelationType cancelationType, final boolean cancelRollouts) {
-        return cancelationType != CancelationType.NONE || cancelRollouts;
-    }
-
-    private void cancelRollouts(final DistributionSet set) {
-
-        // stop all rollouts for this distribution set
-        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
-            final JpaRollout jpaRollout = (JpaRollout) rollout;
-            jpaRollout.setStatus(RolloutStatus.STOPPING);
-            rolloutRepository.save(jpaRollout);
-            LOG.debug("Rollout {} stopped", jpaRollout.getId());
-        });
-
-    }
-
-    private void cancelActions(final CancelationType cancelationType, final DistributionSet set) {
-        actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+    @Transactional
+    public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set) {
+        actionRepository.findByDistributionSetAndActiveIsTrueAndActionStatusIsNotCanceling(set).forEach(action -> {
             final JpaAction jpaAction = (JpaAction) action;
             cancelAction(jpaAction.getId());
             LOG.debug("Action {} canceled", jpaAction.getId());
@@ -982,29 +890,5 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 LOG.debug("Action {} force canceled", jpaAction.getId());
             });
         }
-    }
-
-    private void cancelAutoAssignments(final long setId) {
-        // remove distribution set from all auto assignments
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
-        LOG.debug("Auto assignments for distribution sets {} deactivated", setId);
-    }
-
-    @Override
-    public long countRolloutsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream()
-                .mapToLong(
-                        setId -> rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE))
-                .sum();
-    }
-
-    @Override
-    public long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
-    }
-
-    @Override
-    public long countActionsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
     }
 }

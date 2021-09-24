@@ -846,4 +846,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSet;
     }
 
+    @Override
+    @Transactional
+    public void invalidate(final DistributionSet set) {
+        final JpaDistributionSet jpaSet = (JpaDistributionSet) set;
+        jpaSet.invalidate();
+        distributionSetRepository.save(jpaSet);
+    }
+
 }

@@ -20,9 +20,9 @@ import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -49,29 +49,29 @@ public interface RolloutManagement {
 
     /**
      * Process rollout based on its current {@link Rollout#getStatus()}.
-     * 
+     *
      * For {@link RolloutStatus#CREATING} that means creating the
      * {@link RolloutGroup}s with {@link Target}s and when finished switch to
      * {@link RolloutStatus#READY}.
-     * 
+     *
      * For {@link RolloutStatus#READY} that means switching to
      * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set
      * and time of calling this method is beyond this point in time. This auto
      * start mechanism is optional. Call {@link #start(Long)} otherwise.
-     * 
+     *
      * For {@link RolloutStatus#STARTING} that means starting the first
      * {@link RolloutGroup}s in line and when finished switch to
      * {@link RolloutStatus#RUNNING}.
-     * 
+     *
      * For {@link RolloutStatus#RUNNING} that means checking to activate further
      * groups based on the defined thresholds. Switched to
      * {@link RolloutStatus#FINISHED} is all groups are finished.
-     * 
+     *
      * For {@link RolloutStatus#DELETING} that means either soft delete in case
      * rollout was already {@link RolloutStatus#RUNNING} which results in status
      * change {@link RolloutStatus#DELETED} or hard delete from the persistence
      * otherwise.
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
     void handleRollouts();
@@ -217,7 +217,7 @@ public interface RolloutManagement {
 
     /**
      * Retrieves all rollouts found by the given specification.
-     * 
+     *
      * @param pageable
      *            the page request to sort and limit the result
      * @param rsqlParam
@@ -226,7 +226,7 @@ public interface RolloutManagement {
      *            flag if deleted rollouts should be included
      *
      * @return a page of found rollouts
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -282,7 +282,7 @@ public interface RolloutManagement {
      * @param deleted
      *            flag if deleted rollouts should be included
      * @return rollout details of targets count for different statuses
-     * 
+     *
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
@@ -293,7 +293,7 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            rollout id
-     * 
+     *
      * @return <code>true</code> if rollout exists
      */
     boolean exists(long rolloutId);
@@ -318,7 +318,7 @@ public interface RolloutManagement {
      * @throws RolloutIllegalStateException
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *             Only running rollouts can be paused.
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
     void pauseRollout(long rolloutId);
@@ -330,7 +330,7 @@ public interface RolloutManagement {
      *
      * @param rolloutId
      *            the rollout to be resumed
-     * 
+     *
      * @throws EntityNotFoundException
      *             if rollout with given ID does not exist
      * @throws RolloutIllegalStateException
@@ -368,14 +368,14 @@ public interface RolloutManagement {
      * {@link RolloutStatus#WAITING_FOR_APPROVAL}. If the rollout is approved,
      * it switches state to {@link RolloutStatus#READY}, otherwise it switches
      * to state {@link RolloutStatus#APPROVAL_DENIED}
-     * 
+     *
      * @param rolloutId
      *            the rollout to be approved or denied.
      * @param decision
      *            decision whether a rollout is approved or denied.
      * @param remark
      *            user remark on approve / deny decision
-     * 
+     *
      * @return approved or denied rollout
      *
      * @throws EntityNotFoundException
@@ -399,7 +399,7 @@ public interface RolloutManagement {
      *            the rollout to be started
      *
      * @return started rollout
-     * 
+     *
      * @throws EntityNotFoundException
      *             if rollout with given ID does not exist
      * @throws RolloutIllegalStateException
@@ -416,13 +416,13 @@ public interface RolloutManagement {
      *            rollout to be updated
      *
      * @return Rollout updated rollout
-     * 
+     *
      * @throws EntityNotFoundException
      *             if rollout or DS with given IDs do not exist
      * @throws EntityReadOnlyException
      *             if rollout is in soft deleted state, i.e. only kept as
      *             reference
-     * 
+     *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     Rollout update(@NotNull @Valid RolloutUpdate update);
@@ -430,12 +430,24 @@ public interface RolloutManagement {
     /**
      * Deletes a rollout. A rollout might be deleted asynchronously by
      * indicating the rollout by {@link RolloutStatus#DELETING}
-     * 
-     * 
+     *
+     *
      * @param rolloutId
      *            the ID of the rollout to be deleted
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_DELETE)
     void delete(long rolloutId);
+
+    /**
+     * Cancels all rollouts that refer to the given {@link DistributionSet}.
+     * This is called when a distribution set is invalidated and the cancel
+     * rollouts option is activated.
+     *
+     * @param set
+     *            the {@link DistributionSet} for that the rollouts should be
+     *            canceled
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    void cancelRolloutsForDistributionSet(DistributionSet set);
 
 }

@@ -336,9 +336,8 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         return valid;
     }
 
-    public JpaDistributionSet invalidate() {
+    public void invalidate() {
         this.valid = false;
-        return this;
     }
 
     @Override

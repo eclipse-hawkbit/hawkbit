@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -141,6 +142,9 @@ public class TestdataFactory {
 
     @Autowired
     private DistributionSetManagement distributionSetManagement;
+
+    @Autowired
+    private DistributionSetInvalidationManagement distributionSetInvalidationManagement;
 
     @Autowired
     private DistributionSetTypeManagement distributionSetTypeManagement;
@@ -654,12 +658,12 @@ public class TestdataFactory {
      * @param targetName
      *            name of the target
      * @param targetTypeId
-     *          target type id
+     *            target type id
      * @return persisted {@link Target}
      */
     public Target createTarget(final String controllerId, final String targetName, final Long targetTypeId) {
-        final Target target = targetManagement
-                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
+        final Target target = targetManagement.create(
+                entityFactory.target().create().controllerId(controllerId).name(targetName).targetType(targetTypeId));
         assertTargetProperlyCreated(target);
         return target;
     }
@@ -782,9 +786,9 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModuleType}
      */
     public SoftwareModuleType findOrCreateSoftwareModuleType(final String key, final int maxAssignments) {
-        return softwareModuleTypeManagement.getByKey(key)
-                .orElseGet(() -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
-                        .key(key).name(key).description(LOREM.words(10)).colour("#ffffff").maxAssignments(maxAssignments)));
+        return softwareModuleTypeManagement.getByKey(key).orElseGet(
+                () -> softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create().key(key).name(key)
+                        .description(LOREM.words(10)).colour("#ffffff").maxAssignments(maxAssignments)));
     }
 
     /**
@@ -1189,8 +1193,8 @@ public class TestdataFactory {
 
     /**
      * Finds {@link TargetType} in repository with given
-     * {@link TargetType#getName()} or creates if it does not exist yet.
-     * No ds types are assigned on creation.
+     * {@link TargetType#getName()} or creates if it does not exist yet. No ds
+     * types are assigned on creation.
      *
      * @param targetTypeName
      *            {@link TargetType#getName()}
@@ -1199,25 +1203,26 @@ public class TestdataFactory {
      */
     public TargetType findOrCreateTargetType(final String targetTypeName) {
         return targetTypeManagement.getByName(targetTypeName)
-                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
-                        .name(targetTypeName).description(targetTypeName + " description").colour(DEFAULT_COLOUR)));
+                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
+                        .description(targetTypeName + " description").colour(DEFAULT_COLOUR)));
     }
-    
+
     /**
      * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. Compatible distribution set types are assigned on creation 
+     * {@link TargetType#getName()}. Compatible distribution set types are
+     * assigned on creation
      *
      * @param targetTypeName
      *            {@link TargetType#getName()}
      *
      * @return persisted {@link TargetType}
      */
-    public TargetType createTargetType(final String targetTypeName, List<DistributionSetType> compatibleDsTypes) {
-        return targetTypeManagement.create(entityFactory.targetType().create()
-                        .name(targetTypeName).description(targetTypeName + " description").colour(DEFAULT_COLOUR)
-                        .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
+    public TargetType createTargetType(final String targetTypeName, final List<DistributionSetType> compatibleDsTypes) {
+        return targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
+                .description(targetTypeName + " description").colour(DEFAULT_COLOUR)
+                .compatible(compatibleDsTypes.stream().map(DistributionSetType::getId).collect(Collectors.toList())));
     }
-        
+
     /**
      * Creates {@link TargetType} in repository with given
      * {@link TargetType#getName()}. No ds types are assigned on creation.
@@ -1227,16 +1232,15 @@ public class TestdataFactory {
      *
      * @return persisted {@link TargetType}
      */
-    public List<TargetType> createTargetTypes(final String targetTypePrefix, int count) {
+    public List<TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
         final List<TargetTypeCreate> result = Lists.newArrayListWithExpectedSize(count);
         for (int i = 0; i < count; i++) {
-            result.add(entityFactory.targetType().create().name(targetTypePrefix + i).description(targetTypePrefix + " description")
-                    .colour(DEFAULT_COLOUR));
+            result.add(entityFactory.targetType().create().name(targetTypePrefix + i)
+                    .description(targetTypePrefix + " description").colour(DEFAULT_COLOUR));
         }
         return targetTypeManagement.create(result);
     }
 
-    
     /**
      * Creates a distribution set and directly invalidates it. No actions will
      * be canceled and no rollouts will be stopped with this invalidation.
@@ -1245,7 +1249,7 @@ public class TestdataFactory {
      */
     public DistributionSet createAndInvalidateDistributionSet() {
         final DistributionSet distributionSet = createDistributionSet();
-        deploymentManagement.invalidateDistributionSet(
+        distributionSetInvalidationManagement.invalidateDistributionSet(
                 new DistributionSetInvalidation(Arrays.asList(distributionSet.getId()), CancelationType.NONE, false));
         return distributionSet;
     }

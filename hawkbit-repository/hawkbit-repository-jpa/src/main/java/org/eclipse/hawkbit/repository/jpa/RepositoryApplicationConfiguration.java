@@ -727,14 +727,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final JpaProperties properties, final RepositoryProperties repositoryProperties,
-            final RolloutRepository rolloutRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
-            final LockRegistry lockRegistry) {
+            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
                 distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
-                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties,
-                rolloutRepository, targetFilterQueryRepository, lockRegistry);
+                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
     }
 
     /**
@@ -929,6 +926,25 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     RsqlVisitorFactoryHolder rsqlVisitorFactoryHolder() {
         return RsqlVisitorFactoryHolder.getInstance();
+    }
+
+    /**
+     * {@link JpaDistributionSetInvalidationManagement} bean.
+     *
+     * @return a new {@link JpaDistributionSetInvalidationManagement}
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    JpaDistributionSetInvalidationManagement distributionSetInvalidationManagement(
+            final DistributionSetManagement distributionSetManagement, final RolloutManagement rolloutManagement,
+            final DeploymentManagement deploymentManagement,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
+            final RolloutRepository rolloutRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
+            final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
+            final TenantAware tenantAware, final LockRegistry lockRegistry) {
+        return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
+                deploymentManagement, targetFilterQueryManagement, actionRepository, rolloutRepository,
+                targetFilterQueryRepository, txManager, repositoryProperties, tenantAware, lockRegistry);
     }
 
 }

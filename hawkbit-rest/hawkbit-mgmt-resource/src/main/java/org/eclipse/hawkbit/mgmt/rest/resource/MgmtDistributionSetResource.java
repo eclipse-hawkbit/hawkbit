@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -86,11 +87,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private final SystemSecurityContext systemSecurityContext;
 
+    private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
+
     MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deployManagament, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext,
+            final DistributionSetInvalidationManagement distributionSetInvalidationManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
@@ -99,6 +103,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.entityFactory = entityFactory;
         this.distributionSetManagement = distributionSetManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
     }
 
     @Override
@@ -382,9 +387,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<Void> invalidateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @Valid @RequestBody final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
-        deployManagament.invalidateDistributionSet(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
-                MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
-                invalidateRequestBody.isCancelRollouts()));
+        distributionSetInvalidationManagement
+                .invalidateDistributionSet(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
+                        MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
+                        invalidateRequestBody.isCancelRollouts()));
         return ResponseEntity.ok().build();
     }
 }

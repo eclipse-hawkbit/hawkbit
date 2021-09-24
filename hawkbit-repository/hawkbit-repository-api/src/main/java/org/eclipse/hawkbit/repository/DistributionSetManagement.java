@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
@@ -179,6 +181,15 @@ public interface DistributionSetManagement
      *            id of {@link DistributionSet}
      *
      * @return the found valid {@link DistributionSet}
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     *
+     * @throws InvalidDistributionSetException
+     *             if distribution set with given ID is invalidated
+     *
+     * @throws IncompleteDistributionSetException
+     *             if distribution set with given ID is incomplete
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet getValidAndComplete(long id);
@@ -191,6 +202,12 @@ public interface DistributionSetManagement
      *            id of {@link DistributionSet}
      *
      * @return the found valid {@link DistributionSet}
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     *
+     * @throws InvalidDistributionSetException
+     *             if distribution set with given ID is invalidated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet getValid(long id);
@@ -203,6 +220,9 @@ public interface DistributionSetManagement
      *            id of {@link DistributionSet}
      *
      * @return the found valid {@link DistributionSet}
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSet getOrElseThrowException(long id);
@@ -456,5 +476,14 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByTypeId(long typeId);
+
+    /**
+     * Sets the specified {@link DistributionSet} as invalidated.
+     *
+     * @param set
+     *            the ID of the {@link DistributionSet} to be set to invalid
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void invalidate(DistributionSet set);
 
 }

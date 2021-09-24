@@ -27,7 +27,7 @@ import org.springframework.security.core.GrantedAuthority;
  *
  * <p>
  * The Permissions cover CRUD for two data areas:
- * 
+ *
  * XX_Target_CRUD which covers the following entities: {@link Target} entities
  * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s
  * XX_Repository CRUD which covers: {@link DistributionSet}s,
@@ -157,7 +157,7 @@ public final class SpPermission {
 
     /**
      * Return all permission.
-     * 
+     *
      * @param exclusionRoles
      *            roles which will excluded
      * @return all permissions
@@ -184,10 +184,10 @@ public final class SpPermission {
      * Contains all the spring security evaluation expressions for the
      * {@link PreAuthorize} annotation for method security.
      * </p>
-     * 
+     *
      * <p>
      * Examples:
-     * 
+     *
      * {@code
      * hasRole([role])   Returns true if the current principal has the specified role.
      * hasAnyRole([role1,role2])  Returns true if the current principal has any of the supplied roles (given as a comma-separated list of strings)
@@ -330,6 +330,15 @@ public final class SpPermission {
          */
         public static final String HAS_AUTH_UPDATE_REPOSITORY = HAS_AUTH_PREFIX + UPDATE_REPOSITORY + HAS_AUTH_SUFFIX
                 + HAS_AUTH_OR + IS_SYSTEM_CODE;
+
+        /**
+         * Spring security eval hasAuthority expression to check if spring
+         * context contains {@link SpPermission#READ_REPOSITORY} and
+         * {@link SpPermission#UPDATE_REPOSITORY} or {@link #IS_SYSTEM_CODE}.
+         */
+        public static final String HAS_AUTH_READ_REPOSITORY_AND_UPDATE_REPOSITORY = BRACKET_OPEN + HAS_AUTH_PREFIX
+                + READ_REPOSITORY + HAS_AUTH_SUFFIX + HAS_AUTH_AND + HAS_AUTH_PREFIX + UPDATE_REPOSITORY
+                + HAS_AUTH_SUFFIX + BRACKET_CLOSE + HAS_AUTH_OR + IS_SYSTEM_CODE;
 
         /**
          * Spring security eval hasAuthority expression to check if spring

@@ -71,8 +71,9 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
 
         assertThatExceptionOfType(StopRolloutException.class)
                 .as("Invalidation of distributionSet should throw an exception")
-                .isThrownBy(() -> deploymentManagement.invalidateDistributionSet(new DistributionSetInvalidation(
-                        Collections.singletonList(distributionSet.getId()), CancelationType.SOFT, true)));
+                .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(
+                        new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
+                                CancelationType.SOFT, true)));
     }
 
 }
