@@ -84,7 +84,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      *            the state the actions should not have
      * @return the found {@link Action}s
      */
-    List<Action> findByDistributionSetAndActiveIsTrueAndActionStatusIsNot(DistributionSet set, Status status);
+    List<Action> findByDistributionSetAndActiveIsTrueAndStatusIsNot(DistributionSet set, Status status);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

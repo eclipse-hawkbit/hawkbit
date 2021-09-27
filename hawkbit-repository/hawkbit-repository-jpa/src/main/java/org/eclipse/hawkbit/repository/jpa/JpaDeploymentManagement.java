@@ -889,12 +889,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional
     public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set) {
-        actionRepository.findByDistributionSetAndActiveIsTrueAndActionStatusIsNot(set, Status.CANCELING)
-                .forEach(action -> {
-                    final JpaAction jpaAction = (JpaAction) action;
-                    cancelAction(jpaAction.getId());
-                    LOG.debug("Action {} canceled", jpaAction.getId());
-                });
+        actionRepository.findByDistributionSetAndActiveIsTrueAndStatusIsNot(set, Status.CANCELING).forEach(action -> {
+            final JpaAction jpaAction = (JpaAction) action;
+            cancelAction(jpaAction.getId());
+            LOG.debug("Action {} canceled", jpaAction.getId());
+        });
         if (cancelationType == CancelationType.FORCE) {
             actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
                 final JpaAction jpaAction = (JpaAction) action;
