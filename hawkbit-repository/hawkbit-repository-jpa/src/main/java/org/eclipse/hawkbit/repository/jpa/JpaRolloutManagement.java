@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.repository.jpa.JpaDistributionSetInvalidationManagement.ROLLOUT_STATUS_STOPPABLE;
 import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.addSuccessAndErrorConditionsAndActions;
 
 import java.util.Arrays;
@@ -103,6 +102,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
             RolloutStatus.STOPPING);
+
+    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
+            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
+            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -456,6 +459,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public long countByFilters(final String searchText) {
         return rolloutRepository.count(JpaRolloutHelper.likeNameOrDescription(searchText, false));
+    }
+
+    @Override
+    public long countByDistributionSetIdAndRolloutIsStoppable(final long setId) {
+        return rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE);
     }
 
     @Override

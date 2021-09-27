@@ -96,6 +96,17 @@ public interface RolloutManagement {
     long countByFilters(@NotEmpty String searchText);
 
     /**
+     * Counts all {@link Rollout}s for a specific {@link DistributionSet} that
+     * are stoppable
+     *
+     * @param setId
+     *            the distribution set
+     * @return the count
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    long countByDistributionSetIdAndRolloutIsStoppable(long setId);
+
+    /**
      * Persists a new rollout entity. The filter within the
      * {@link Rollout#getTargetFilterQuery()} is used to retrieve the targets
      * which are effected by this rollout to create. The amount of groups will

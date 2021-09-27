@@ -146,6 +146,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return targetFilterQueryRepository.count();
     }
 
+    @Override
+    public long countByAutoAssignDistributionSetId(final long autoAssignDistributionSetId) {
+        return targetFilterQueryRepository.countByAutoAssignDistributionSetId(autoAssignDistributionSetId);
+    }
+
     private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll,
             final Pageable pageable) {
         return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());

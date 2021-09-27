@@ -107,6 +107,17 @@ public interface TargetFilterQueryManagement {
     long count();
 
     /**
+     * Counts all target filters that have a given auto assign distribution set
+     * assigned.
+     *
+     * @param autoAssignDistributionSetId
+     *            the id of the distribution set
+     * @return the count
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);
+
+    /**
      * Retrieves all {@link TargetFilterQuery}s which match the given name
      * filter.
      *

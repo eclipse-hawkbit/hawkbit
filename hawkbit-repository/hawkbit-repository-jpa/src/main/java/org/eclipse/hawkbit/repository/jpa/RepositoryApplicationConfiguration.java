@@ -938,13 +938,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     JpaDistributionSetInvalidationManagement distributionSetInvalidationManagement(
             final DistributionSetManagement distributionSetManagement, final RolloutManagement rolloutManagement,
             final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
-            final RolloutRepository rolloutRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
-            final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
-            final TenantAware tenantAware, final LockRegistry lockRegistry) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final PlatformTransactionManager txManager,
+            final RepositoryProperties repositoryProperties, final TenantAware tenantAware,
+            final LockRegistry lockRegistry) {
         return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
-                deploymentManagement, targetFilterQueryManagement, actionRepository, rolloutRepository,
-                targetFilterQueryRepository, txManager, repositoryProperties, tenantAware, lockRegistry);
+                deploymentManagement, targetFilterQueryManagement, txManager, repositoryProperties, tenantAware,
+                lockRegistry);
     }
 
 }

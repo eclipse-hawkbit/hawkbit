@@ -61,6 +61,7 @@ public interface TargetFilterQueryRepository
      * assigned.
      *
      * @param autoAssignDistributionSetId
+     *            the id of the distribution set
      * @return the count
      */
     long countByAutoAssignDistributionSetId(long autoAssignDistributionSetId);

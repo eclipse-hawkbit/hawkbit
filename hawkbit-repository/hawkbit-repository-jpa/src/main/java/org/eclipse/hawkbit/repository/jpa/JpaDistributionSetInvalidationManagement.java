@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
@@ -27,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
-import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,17 +39,10 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetInvalidationManagement.class);
 
-    protected static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
-            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
-            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
-
     private final DistributionSetManagement distributionSetManagement;
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
-    private final ActionRepository actionRepository;
-    private final RolloutRepository rolloutRepository;
-    private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
     private final TenantAware tenantAware;
@@ -60,17 +50,13 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     protected JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
-            final RolloutRepository rolloutRepository, final TargetFilterQueryRepository targetFilterQueryRepository,
-            final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
-            final TenantAware tenantAware, final LockRegistry lockRegistry) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final PlatformTransactionManager txManager,
+            final RepositoryProperties repositoryProperties, final TenantAware tenantAware,
+            final LockRegistry lockRegistry) {
         this.distributionSetManagement = distributionSetManagement;
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
-        this.actionRepository = actionRepository;
-        this.rolloutRepository = rolloutRepository;
-        this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.txManager = txManager;
         this.repositoryProperties = repositoryProperties;
         this.tenantAware = tenantAware;
@@ -132,7 +118,8 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
         targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
     }
 
-    private boolean shouldRolloutsBeCanceled(final CancelationType cancelationType, final boolean cancelRollouts) {
+    private static boolean shouldRolloutsBeCanceled(final CancelationType cancelationType,
+            final boolean cancelRollouts) {
         return cancelationType != CancelationType.NONE || cancelRollouts;
     }
 
@@ -149,14 +136,11 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     }
 
     private long countRolloutsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream()
-                .mapToLong(
-                        setId -> rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE))
-                .sum();
+        return setIds.stream().mapToLong(rolloutManagement::countByDistributionSetIdAndRolloutIsStoppable).sum();
     }
 
     private long countAutoAssignmentsForInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(targetFilterQueryRepository::countByAutoAssignDistributionSetId).sum();
+        return setIds.stream().mapToLong(targetFilterQueryManagement::countByAutoAssignDistributionSetId).sum();
     }
 
     private long countActionsForInvalidation(final Collection<Long> setIds, final CancelationType cancelationType) {
@@ -170,14 +154,12 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     }
 
     private long countActionsForForcedInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
+        return setIds.stream().mapToLong(deploymentManagement::countActionsByDistributionSetIdAndActiveIsTrue).sum();
     }
 
     private long countActionsForSoftInvalidation(final Collection<Long> setIds) {
-        return setIds.stream()
-                .mapToLong(distributionSet -> actionRepository
-                        .countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING))
-                .sum();
+        return setIds.stream().mapToLong(distributionSet -> deploymentManagement
+                .countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING)).sum();
     }
 
 }

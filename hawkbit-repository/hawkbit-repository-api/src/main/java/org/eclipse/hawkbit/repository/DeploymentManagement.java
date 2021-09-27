@@ -231,6 +231,29 @@ public interface DeploymentManagement {
     long countActionsByTarget(@NotEmpty String controllerId);
 
     /**
+     * Counts all active {@link Action}s referring to the given DistributionSet.
+     *
+     * @param distributionSet
+     *            DistributionSet to count the {@link Action}s from
+     * @return the count of actions referring to the given distributionSet
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActionsByDistributionSetIdAndActiveIsTrue(Long distributionSet);
+
+    /**
+     * Counts all active {@link Action}s referring to the given DistributionSet
+     * that are not in a given state.
+     *
+     * @param distributionSet
+     *            DistributionSet to count the {@link Action}s from
+     * @param status
+     *            the state the actions should not have
+     * @return the count of actions referring to the given distributionSet
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);
+
+    /**
      * Get the {@link Action} entity for given actionId.
      *
      * @param actionId

@@ -76,14 +76,15 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Retrieves all active {@link Action}s which are referring the given
-     * {@link DistributionSet} and are not in CANCELING state
+     * {@link DistributionSet} and are not in the given state
      *
      * @param set
      *            the {@link DistributionSet} on which will be filtered
+     * @param status
+     *            the state the actions should not have
      * @return the found {@link Action}s
      */
-    @Query("Select a from JpaAction a where a.distributionSet = :set and a.active = true and not a.status = org.eclipse.hawkbit.repository.model.Action.Status.CANCELING ")
-    List<Action> findByDistributionSetAndActiveIsTrueAndActionStatusIsNotCanceling(DistributionSet set);
+    List<Action> findByDistributionSetAndActiveIsTrueAndActionStatusIsNot(DistributionSet set, Status status);
 
     /**
      * Retrieves all {@link Action}s which are referring the given
@@ -381,10 +382,13 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByDistributionSetIdAndActiveIsTrue(Long distributionSet);
 
     /**
-     * Counts all active {@link Action}s referring to the given DistributionSet.
+     * Counts all active {@link Action}s referring to the given DistributionSet
+     * that are not in a given state.
      *
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
+     * @param status
+     *            the state the actions should not have
      * @return the count of actions referring to the given distributionSet
      */
     Long countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);

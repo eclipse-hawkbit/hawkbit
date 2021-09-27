@@ -8,11 +8,9 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
  * A DistributionSetInvalidationManagement service provides operations to
@@ -31,8 +29,7 @@ public interface DistributionSetInvalidationManagement {
      *            defines the {@link DistributionSet} and options what should be
      *            canceled
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_REPOSITORY)
-    public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation);
+    void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation);
 
     /**
      * Counts all entities for a list of {@link DistributionSet}s that will be
@@ -46,7 +43,6 @@ public interface DistributionSetInvalidationManagement {
      *         information about the count of affected rollouts,
      *         auto-assignments and actions
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     DistributionSetInvalidationCount countEntitiesForInvalidation(
             final DistributionSetInvalidation distributionSetInvalidation);
 

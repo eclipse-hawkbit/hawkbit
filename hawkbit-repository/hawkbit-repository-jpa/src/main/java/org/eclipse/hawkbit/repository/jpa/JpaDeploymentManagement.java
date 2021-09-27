@@ -773,6 +773,17 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    public long countActionsByDistributionSetIdAndActiveIsTrue(final Long distributionSet) {
+        return actionRepository.countByDistributionSetIdAndActiveIsTrue(distributionSet);
+    }
+
+    @Override
+    public long countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(final Long distributionSet,
+            final Status status) {
+        return actionRepository.countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, status);
+    }
+
+    @Override
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long dsId) {
         throwExceptionIfDistributionSetDoesNotExist(dsId);
         return actionRepository.findByDistributionSetId(pageable, dsId);
@@ -878,11 +889,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     @Transactional
     public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set) {
-        actionRepository.findByDistributionSetAndActiveIsTrueAndActionStatusIsNotCanceling(set).forEach(action -> {
-            final JpaAction jpaAction = (JpaAction) action;
-            cancelAction(jpaAction.getId());
-            LOG.debug("Action {} canceled", jpaAction.getId());
-        });
+        actionRepository.findByDistributionSetAndActiveIsTrueAndActionStatusIsNot(set, Status.CANCELING)
+                .forEach(action -> {
+                    final JpaAction jpaAction = (JpaAction) action;
+                    cancelAction(jpaAction.getId());
+                    LOG.debug("Action {} canceled", jpaAction.getId());
+                });
         if (cancelationType == CancelationType.FORCE) {
             actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
                 final JpaAction jpaAction = (JpaAction) action;
