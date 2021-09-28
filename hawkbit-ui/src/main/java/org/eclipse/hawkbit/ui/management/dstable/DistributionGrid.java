@@ -239,7 +239,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 i18n, clickEvent -> invalidateDistributionSetSupport.openConsequencesWindowOnInvalidateAction(ds),
                 VaadinIcons.BAN, UIMessageIdProvider.TOOLTIP_INVALIDATE_DISTRIBUTIONSET,
                 SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(),
-                ds.getIsValid());
+                ds.getIsValid() && permissionChecker.hasDistributionSetInvalidatePermission());
         return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_INVALIDATE_BUTTON_ID, null);
     }
 
