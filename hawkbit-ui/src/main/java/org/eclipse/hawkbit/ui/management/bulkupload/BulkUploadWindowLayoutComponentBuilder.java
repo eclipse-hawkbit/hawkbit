@@ -34,7 +34,7 @@ public final class BulkUploadWindowLayoutComponentBuilder {
     private final VaadinMessageSource i18n;
     private final DistributionSetStatelessDataProvider distributionSetDataProvider;
 
-    private final TargetTypeInfoDataProvider targetTypeInfoDataProvider;
+    private final TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider;
 
     /**
      * Constructor
@@ -43,10 +43,12 @@ public final class BulkUploadWindowLayoutComponentBuilder {
      *            i18n
      * @param distributionSetManagement
      *            to build DistributionSet ComboBox
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      */
     public BulkUploadWindowLayoutComponentBuilder(final VaadinMessageSource i18n,
                                                   final DistributionSetManagement distributionSetManagement,
-                                                  TargetTypeManagement targetTypeManagement) {
+                                                  final TargetTypeManagement targetTypeManagement) {
         this.i18n = i18n;
 
         this.targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(

@@ -12,7 +12,6 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -89,12 +88,12 @@ public interface TargetTypeManagement {
      *
      * @param pageable
      *            page parameter
-     * @param filter
+     * @param filterString
      *            has text of filters to be applied.
      * @return the page of found {@link TargetType}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByTargetTypeFilter(@NotNull Pageable pageable, @NotNull TargetTypeFilter filter);
+    Page<TargetType> findByTargetTypeFilter(@NotNull Pageable pageable, String filterString);
 
     /**
      * @param id

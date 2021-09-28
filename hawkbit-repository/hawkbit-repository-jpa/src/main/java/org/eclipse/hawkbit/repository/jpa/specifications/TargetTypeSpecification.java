@@ -153,9 +153,7 @@ public final class TargetTypeSpecification {
      *            to be filtered on
      * @return the {@link TargetType} {@link Specification}
      */
-    public static Specification<JpaTargetType> likeNameOrDescription(final String subString) {
-        return (targetRoot, query, cb) -> cb.or(
-                cb.like(cb.lower(targetRoot.get(JpaTargetType_.name)), subString.toLowerCase()),
-                cb.like(cb.lower(targetRoot.get(JpaTargetType_.description)), subString.toLowerCase()));
+    public static Specification<JpaTargetType> hasLikeName(final String subString) {
+        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(JpaTargetType_.name)), subString.toLowerCase());
     }
 }

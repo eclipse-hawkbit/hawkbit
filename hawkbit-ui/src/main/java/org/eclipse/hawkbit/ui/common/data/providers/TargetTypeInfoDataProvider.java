@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.ui.common.data.providers;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeFilter.TargetTypeFilterBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.IdentifiableEntityToProxyIdentifiableEntityMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-import org.springframework.util.StringUtils;
 
 /**
  * Data provider for {@link TargetTypeManagement}, which dynamically loads a
@@ -40,13 +38,7 @@ public class TargetTypeInfoDataProvider<T extends ProxyIdentifiableEntity>
 
     @Override
     protected Page<TargetType> loadBackendEntities(PageRequest pageRequest, String filter) {
-        final TargetTypeFilterBuilder builder =  new TargetTypeFilterBuilder();
-
-        if (!StringUtils.isEmpty(filter)) {
-            builder.setFilterString(filter);
-        }
-
-        return targetTypeManagement.findByTargetTypeFilter(pageRequest, builder.build());
+        return targetTypeManagement.findByTargetTypeFilter(pageRequest, filter);
     }
 
     @Override

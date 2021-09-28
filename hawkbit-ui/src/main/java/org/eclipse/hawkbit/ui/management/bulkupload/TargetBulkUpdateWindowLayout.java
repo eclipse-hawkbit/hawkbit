@@ -264,7 +264,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     public void onStartOfUpload() {
         targetBulkUploadUiState.setDsInfo(binder.getBean().getDistributionSetInfo());
-        targetBulkUploadUiState.setProxyTypeInfo(binder.getBean().getTypeInfo());
+        targetBulkUploadUiState.setTypeInfo(binder.getBean().getTypeInfo());
         targetBulkUploadUiState.setTagIdsWithNameToAssign(getTagIdsWithNameToAssign());
         targetBulkUploadUiState.setDescription(binder.getBean().getDescription());
 
@@ -374,7 +374,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
      */
     public void clearUiState() {
         targetBulkUploadUiState.setDsInfo(null);
-        targetBulkUploadUiState.setProxyTypeInfo(null);
+        targetBulkUploadUiState.setTypeInfo(null);
         targetBulkUploadUiState.getTagIdsWithNameToAssign().clear();
         targetBulkUploadUiState.setDescription(null);
     }
@@ -385,7 +385,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     public void restoreComponentsValue() {
         final ProxyBulkUploadWindow bulkUploadInputsToRestore = new ProxyBulkUploadWindow();
         bulkUploadInputsToRestore.setDistributionSetInfo(targetBulkUploadUiState.getDsInfo());
-        bulkUploadInputsToRestore.setTypeInfo(targetBulkUploadUiState.getProxyTypeInfo());
+        bulkUploadInputsToRestore.setTypeInfo(targetBulkUploadUiState.getTypeInfo());
         bulkUploadInputsToRestore.setDescription(targetBulkUploadUiState.getDescription());
         bulkUploadInputsToRestore.setTagIdsWithNameToAssign(targetBulkUploadUiState.getTagIdsWithNameToAssign());
 

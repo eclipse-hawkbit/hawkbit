@@ -85,8 +85,6 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            DeploymentManagement
      * @param uiProperties
      *            UiProperties
-     * @param targetTypeManagement
-     *            TargetTypeManagement
      * @param targetTagManagement
      *            TargetTagManagement
      * @param distributionSetManagement
