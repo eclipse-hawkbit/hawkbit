@@ -582,8 +582,7 @@ public class JpaTargetManagement implements TargetManagement {
         }
 
         allTargets.removeAll(alreadyAssignedTargets);
-        // some or none are assigned -> assign
-        //allTargets.forEach(target -> target.addTag(tag));
+
         final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(alreadyAssignedTargets.size(),
                 Collections
                         .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),

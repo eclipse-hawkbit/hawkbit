@@ -42,7 +42,6 @@ public class ProxyTargetType extends ProxyType {
         setId(id);
         setName(name);
         setColour(colour);
-       // super(id, name, colour);
     }
 
     public boolean isNoTargetType() {

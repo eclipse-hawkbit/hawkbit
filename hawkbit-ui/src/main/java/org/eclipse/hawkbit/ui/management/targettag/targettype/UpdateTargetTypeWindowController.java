@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -17,12 +19,10 @@ import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToProxyTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
-import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
 import org.springframework.util.StringUtils;
 
 import java.util.Set;
@@ -80,30 +80,37 @@ public class UpdateTargetTypeWindowController
     }
 
     private Set<ProxyType> getDsTypesByDsTypeId(final Long id) {
-        return targetTypeManagement.get(id).get().getCompatibleDistributionSetTypes().stream()
-                .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
+        Optional<TargetType> targetType = targetTypeManagement.get(id);
+        if (targetType.isPresent()){
+            return targetType.get().getCompatibleDistributionSetTypes().stream()
+                    .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
+        } else {
+            return new HashSet<>();
+        }
+
     }
 
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
+
+        Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId).collect(Collectors.toSet());
 
         Set<Long> selectedDsIds = entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
 
         Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
                 .filter(dsType -> !selectedDsIds.contains(dsType)).collect(Collectors.toSet());
         Set<Long> dsTypesForAdd = selectedDsIds.stream()
-                .filter(dsType -> !getDsTypesByDsTypeId(entity.getId()).contains(dsType)).collect(Collectors.toSet());
+                .filter(dsType -> !dsTypesIds.contains(dsType)).collect(Collectors.toSet());
 
-        dsTypesForRemoval.forEach(dsType -> { targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType);});
+        dsTypesForRemoval.forEach(dsType -> targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType));
 
         if (!dsTypesForAdd.isEmpty()) {
             targetTypeManagement.assignCompatibleDistributionSetTypes(entity.getId(), dsTypesForAdd);
         }
 
-        TargetType targetType = targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId())
+        return targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId())
                 .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
 
-        return targetType;
     }
 
     @Override
