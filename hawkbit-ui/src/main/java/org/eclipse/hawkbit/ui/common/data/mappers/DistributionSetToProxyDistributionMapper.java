@@ -32,6 +32,7 @@ public class DistributionSetToProxyDistributionMapper
                 HawkbitCommonUtil.getFormattedNameVersion(distributionSet.getName(), distributionSet.getVersion()));
         proxyDistribution.setIsComplete(distributionSet.isComplete());
         proxyDistribution.setRequiredMigrationStep(distributionSet.isRequiredMigrationStep());
+        proxyDistribution.setIsValid(distributionSet.isValid());
 
         final DistributionSetType type = distributionSet.getType();
         final ProxyTypeInfo typeInfo = new ProxyTypeInfo(type.getId(), type.getName(), type.getKey());
