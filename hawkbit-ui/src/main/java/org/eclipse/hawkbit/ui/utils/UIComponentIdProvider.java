@@ -1338,6 +1338,22 @@ public final class UIComponentIdProvider {
      * Table multiselect for selecting DistType
      */
     public static final String SELECT_DIST_TYPE = "select-dist-type";
+
+    /**
+     * Table multiselect for unselecting DistType
+     */
+    public static final String UNSELECT_DIST_TYPE = "unselect-dist-type";
+
+    /**
+     * ID for DistType source value table
+     */
+    public static final String DIST_TYPE_TABLE_SOURCE_ID = "dsTypeSourceId";
+
+    /**
+     * ID for DistType selected value table
+     */
+    public static final String DIST_TYPE_TABLE_SELECTED_ID = "dsTypeSelectedId";
+
     /**
      * ID for download anonymous checkbox
      */

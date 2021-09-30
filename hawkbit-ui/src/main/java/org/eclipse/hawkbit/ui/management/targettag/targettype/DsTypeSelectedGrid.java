@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.grid.AbstractGrid;
 import org.eclipse.hawkbit.ui.common.grid.selection.RangeSelectionModel;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -27,8 +28,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
  */
 public class DsTypeSelectedGrid extends Grid<ProxyType> {
     private static final long serialVersionUID = 1L;
-
-    private static final String SM_TYPE_SELECTED_NAME_ID = "smTypeSelectedName";
 
     private final VaadinMessageSource i18n;
 
@@ -61,7 +60,7 @@ public class DsTypeSelectedGrid extends Grid<ProxyType> {
     }
 
     private void addColumns() {
-        GridComponentBuilder.addColumn(this, ProxyType::getName).setId(SM_TYPE_SELECTED_NAME_ID)
+        GridComponentBuilder.addColumn(this, ProxyType::getName).setId(UIComponentIdProvider.DIST_TYPE_TABLE_SELECTED_ID)
                 .setCaption(i18n.getMessage("header.dt.twintable.selected"))
                 .setDescriptionGenerator(ProxyType::getDescription);
     }
