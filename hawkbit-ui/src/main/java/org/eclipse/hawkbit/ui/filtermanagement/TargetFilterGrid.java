@@ -183,7 +183,7 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
         }
 
         final Button link = GridComponentBuilder.buildLink(targetFilter, "distSetButton", caption,
-                permissionChecker.hasReadRepositoryPermission(),
+                permissionChecker.hasAutoAssignmentUpdatePermission(),
                 clickEvent -> onClickOfAutoAssignmentLink(targetFilter));
 
         final String description = i18n.getMessage(UIMessageIdProvider.BUTTON_AUTO_ASSIGNMENT_DESCRIPTION);
