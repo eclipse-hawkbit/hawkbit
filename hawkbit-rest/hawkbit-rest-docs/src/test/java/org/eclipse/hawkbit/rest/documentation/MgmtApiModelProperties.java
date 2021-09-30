@@ -67,6 +67,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_ALREADY_ASSIGNED_TARGETS = "Targets that had this distribution set already assigned (in \"offline\" case this includes targets that have arbitrary updates running)";
     public static final String DS_TOTAL_ASSIGNED_TARGETS = "Overall assigned as part of this request.";
     public static final String DS_ID = "Id of the distribution set.";
+    public static final String DS_INVALIDATION_ACTION_CANCELATION_TYPE = "Type of cancelation for actions referring to the given distribution set.";
+    public static final String DS_INVALIDATION_CANCEL_ROLLOUTS = "Defines if rollouts referring to this distribution set should be canceled.";
 
     // Target
     public static final String INSTALLED_AT = "Installation time of current installed DistributionSet.";
@@ -183,6 +185,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_TYPE = "The type of the distribution set.";
 
     public static final String DS_COMPLETE = "True of the distribution set software module setup is complete as defined by the distribution set type.";
+
+    public static final String DS_VALID = "True by default and false after the distribution set is invalidated by the user.";
 
     public static final String DS_TYPE_MANDATORY_MODULES = "Mandatory module type IDs.";
 

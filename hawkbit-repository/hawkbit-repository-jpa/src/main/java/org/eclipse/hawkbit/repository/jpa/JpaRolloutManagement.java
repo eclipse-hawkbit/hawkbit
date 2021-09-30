@@ -100,7 +100,12 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
-            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING);
+            RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
+            RolloutStatus.STOPPING);
+
+    private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
+            RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
+            RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -126,8 +131,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private final Database database;
 
-    public JpaRolloutManagement(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final RolloutGroupManagement rolloutGroupManagement,
+    public JpaRolloutManagement(final TargetManagement targetManagement,
+            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
             final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
             final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
@@ -151,7 +156,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
-        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
+        specList.add(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
         return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
@@ -400,7 +406,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
         final String tenant = tenantAware.getCurrentTenant();
 
-        final String handlerId = tenant + "-rollout";
+        final String handlerId = createRolloutLockKey(tenant);
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             return;
@@ -412,6 +418,10 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         } finally {
             lock.unlock();
         }
+    }
+
+    public static String createRolloutLockKey(final String tenant) {
+        return tenant + "-rollout";
     }
 
     private long handleRollout(final long rolloutId) {
@@ -452,6 +462,11 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     @Override
+    public long countByDistributionSetIdAndRolloutIsStoppable(final long setId) {
+        return rolloutRepository.countByDistributionSetIdAndStatusIn(setId, ROLLOUT_STATUS_STOPPABLE);
+    }
+
+    @Override
     public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
             final boolean deleted) {
         final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
@@ -483,8 +498,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
         // null
         rollout.setStartAt(update.getStartAt().orElse(null));
         update.getSet().ifPresent(setId -> {
-            final DistributionSet set = distributionSetManagement.get(setId)
-                    .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
+            final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
 
             rollout.setDistributionSet(set);
         });
@@ -596,7 +610,20 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     }
 
     private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
-        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()), tenantAware);
+        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()),
+                tenantAware);
+    }
+
+    @Override
+    @Transactional
+    public void cancelRolloutsForDistributionSet(final DistributionSet set) {
+        // stop all rollouts for this distribution set
+        rolloutRepository.findByDistributionSetAndStatusIn(set, ROLLOUT_STATUS_STOPPABLE).forEach(rollout -> {
+            final JpaRollout jpaRollout = (JpaRollout) rollout;
+            jpaRollout.setStatus(RolloutStatus.STOPPING);
+            rolloutRepository.save(jpaRollout);
+            LOGGER.debug("Rollout {} stopped", jpaRollout.getId());
+        });
     }
 
 }
