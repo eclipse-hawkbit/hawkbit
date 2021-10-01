@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.grid.support.assignment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.AbstractAssignmentResult;
@@ -18,7 +19,7 @@ import org.springframework.util.CollectionUtils;
 
 /**
  * Support for assigning the items between two grids.
- * 
+ *
  * @param <S>
  *            The item-type of source items
  * @param <T>
@@ -27,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 public abstract class AssignmentSupport<S, T> {
     protected final UINotification notification;
     protected final VaadinMessageSource i18n;
+    protected final List<String> lastSpecificErrorMessages = new ArrayList<>();
 
     protected AssignmentSupport(final UINotification notification, final VaadinMessageSource i18n) {
         this.notification = notification;
@@ -46,7 +48,7 @@ public abstract class AssignmentSupport<S, T> {
         if (sourceItemsToAssign instanceof List) {
             assignSourceItemsToTargetItem((List<S>) sourceItemsToAssign, targetItem);
         } else {
-            showGenericErrorNotification();
+            showErrorNotification();
         }
     }
 
@@ -60,26 +62,35 @@ public abstract class AssignmentSupport<S, T> {
      */
     public void assignSourceItemsToTargetItem(final List<S> sourceItemsToAssign, final T targetItem) {
         if (sourceItemsToAssign.isEmpty()) {
-            showGenericErrorNotification();
+            showErrorNotification();
             return;
         }
 
         final List<S> filteredSourceItems = getFilteredSourceItems(sourceItemsToAssign, targetItem);
         if (filteredSourceItems.isEmpty()) {
-            showGenericErrorNotification();
+            showErrorNotification();
             return;
         }
 
         performAssignment(filteredSourceItems, targetItem);
     }
 
-    private void showGenericErrorNotification() {
-        notification.displayValidationError(i18n.getMessage("message.action.did.not.work"));
+    private void showErrorNotification() {
+        if (lastSpecificErrorMessages.isEmpty()) {
+            notification.displayValidationError(i18n.getMessage("message.action.did.not.work"));
+        } else {
+            lastSpecificErrorMessages.forEach(notification::displayValidationError);
+            lastSpecificErrorMessages.clear();
+        }
+    }
+
+    protected void addSpecificValidationErrorMessage(final String errorMessage) {
+        lastSpecificErrorMessages.add(errorMessage);
     }
 
     /**
      * Can be overriden in child classes in order to filter source items list.
-     * 
+     *
      * @param targetItem
      *            may be used for further filtering of source items
      */

@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSup
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.InvalidDistributionSetErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -49,7 +50,7 @@ public class MgmtUiConfiguration {
 
     /**
      * Permission checker for UI.
-     * 
+     *
      * @param permissionService
      *            PermissionService
      *
@@ -63,7 +64,7 @@ public class MgmtUiConfiguration {
 
     /**
      * Utility for Vaadin messages source.
-     * 
+     *
      * @param source
      *            Delegate MessageSource
      *
@@ -77,7 +78,7 @@ public class MgmtUiConfiguration {
 
     /**
      * Localized system message provider bean.
-     * 
+     *
      * @param uiProperties
      *            UiProperties
      * @param i18n
@@ -93,12 +94,12 @@ public class MgmtUiConfiguration {
 
     /**
      * UI Error handler bean.
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @param uiErrorDetailsExtractor
      *            ui error details extractors
-     * 
+     *
      * @return UI Error handler
      */
     @Bean
@@ -110,7 +111,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI Upload Error details extractor bean.
-     * 
+     *
      * @return UI Upload Error details extractor
      */
     @Bean
@@ -120,7 +121,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI ConstraintViolation Error details extractor bean.
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @return UI ConstraintViolation Error details extractor
@@ -132,7 +133,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI Entity not found Error details extractor bean.
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @return UI EntityNotFound Error details extractor
@@ -140,6 +141,19 @@ public class MgmtUiConfiguration {
     @Bean
     UiErrorDetailsExtractor entityNotFoundErrorExtractor(final VaadinMessageSource i18n) {
         return new EntityNotFoundErrorExtractor(i18n);
+    }
+
+    /**
+     * Details extractor bean for action not possible because of distribution
+     * set is invalid.
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @return UI invalid distributionset Error details extractor
+     */
+    @Bean
+    UiErrorDetailsExtractor invalidDistributionSetErrorExtractor(final VaadinMessageSource i18n) {
+        return new InvalidDistributionSetErrorExtractor(i18n);
     }
 
     /**
@@ -154,7 +168,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI target entity mapper bean.
-     * 
+     *
      * @param i18n
      *            VaadinMessageSource
      * @return UI target entity mapper
@@ -166,7 +180,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI Management target data supplier bean.
-     * 
+     *
      * @param targetManagement
      *            TargetManagement
      * @param targetToProxyTargetMapper
@@ -183,7 +197,7 @@ public class MgmtUiConfiguration {
 
     /**
      * UI Filter target data supplier bean.
-     * 
+     *
      * @param targetManagement
      *            TargetManagement
      * @param targetToProxyTargetMapper
