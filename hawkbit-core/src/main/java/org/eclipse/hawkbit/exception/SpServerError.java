@@ -278,7 +278,7 @@ public enum SpServerError {
     SP_TARGET_TYPE_UNDEFINED("hawkbit.server.error.target.type.undefined",
             "Target type is not defined. A target type has to be specified when creating a target"),
 
-    SP_TARGET_TYPE_IN_USE("hawkbit.server.error.target.type.used", "Target type is still in use by a target.");
+    SP_TARGET_TYPE_IN_USE("hawkbit.server.error.target.type.used", "Target type is still in use by a target."),
 
     SP_STOP_ROLLOUT_FAILED("hawkbit.server.error.stopRolloutFailed", "Stopping the rollout failed");
 
