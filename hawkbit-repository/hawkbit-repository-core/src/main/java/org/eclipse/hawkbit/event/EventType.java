@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -60,7 +61,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
  * The {@link EventType} class declares the event-type and it's corresponding
  * encoding value in the payload of an remote header. The event-type is encoded
  * into the payload of the message which is distributed.
- * 
+ *
  * To encode and decode the event class type we need some conversation mapping
  * between the actual class and the corresponding integer value which is the
  * encoded value in the byte-payload.
@@ -146,6 +147,9 @@ public class EventType {
         TYPES.put(40, TenantConfigurationCreatedEvent.class);
         TYPES.put(41, TenantConfigurationUpdatedEvent.class);
         TYPES.put(42, TenantConfigurationDeletedEvent.class);
+
+        // rollout stopped due to invalidated distribution set
+        TYPES.put(43, RolloutStoppedEvent.class);
     }
 
     private int value;
@@ -159,7 +163,7 @@ public class EventType {
 
     /**
      * Constructor.
-     * 
+     *
      * @param value
      *            the value to initialize
      */
@@ -177,7 +181,7 @@ public class EventType {
 
     /**
      * Returns a {@link EventType} based on the given class type.
-     * 
+     *
      * @param clazz
      *            the clazz type to retrieve the corresponding {@link EventType}
      *            .

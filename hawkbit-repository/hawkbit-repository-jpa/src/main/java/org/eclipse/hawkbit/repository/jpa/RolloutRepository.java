@@ -15,6 +15,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
@@ -33,7 +34,7 @@ public interface RolloutRepository
 
     /**
      * Retrieves all {@link Rollout} for given status.
-     * 
+     *
      * @param status
      *            the status of the rollouts to find
      * @return the list of {@link Rollout} for specific status
@@ -44,7 +45,7 @@ public interface RolloutRepository
 
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}
-     * 
+     *
      * @param name
      *            the rollout name
      * @return {@link Rollout} for specific name
@@ -64,4 +65,28 @@ public interface RolloutRepository
     @Transactional
     @Query("DELETE FROM JpaRollout t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
+
+    /**
+     * Retrieves all {@link Rollout}s for a specific {@link DistributionSet} in
+     * a given {@link RolloutStatus}.
+     *
+     * @param set
+     *            the distribution set
+     * @param status
+     *            the status of the rollout
+     * @return {@link Rollout} for specific distribution set
+     */
+    List<Rollout> findByDistributionSetAndStatusIn(DistributionSet set, Collection<RolloutStatus> status);
+
+    /**
+     * Counts all {@link Rollout}s for a specific {@link DistributionSet} in a
+     * given {@link RolloutStatus}.
+     *
+     * @param distributionSetId
+     *            the distribution set
+     * @param status
+     *            the status of the rollout
+     * @return the count
+     */
+    long countByDistributionSetIdAndStatusIn(long distributionSetId, Collection<RolloutStatus> status);
 }

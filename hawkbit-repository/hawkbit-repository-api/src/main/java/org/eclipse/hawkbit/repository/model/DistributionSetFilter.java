@@ -20,6 +20,7 @@ public final class DistributionSetFilter {
     public static class DistributionSetFilterBuilder {
         private Boolean isDeleted;
         private Boolean isComplete;
+        private Boolean isValid;
         private DistributionSetType type;
         private String searchText;
         private String filterString;
@@ -57,6 +58,11 @@ public final class DistributionSetFilter {
             return this;
         }
 
+        public DistributionSetFilterBuilder setIsValid(final Boolean isValid) {
+            this.isValid = isValid;
+            return this;
+        }
+
         public DistributionSetFilterBuilder setSearchText(final String searchText) {
             this.searchText = searchText;
             return this;
@@ -86,6 +92,7 @@ public final class DistributionSetFilter {
 
     private final Boolean isDeleted;
     private final Boolean isComplete;
+    private final Boolean isValid;
     private final DistributionSetType type;
     private final String searchText;
     private final String filterString;
@@ -104,6 +111,7 @@ public final class DistributionSetFilter {
     public DistributionSetFilter(final DistributionSetFilterBuilder builder) {
         this.isDeleted = builder.isDeleted;
         this.isComplete = builder.isComplete;
+        this.isValid = builder.isValid;
         this.type = builder.type;
         this.searchText = builder.searchText;
         this.filterString = builder.filterString;
@@ -127,6 +135,10 @@ public final class DistributionSetFilter {
 
     public Boolean getIsDeleted() {
         return isDeleted;
+    }
+
+    public Boolean getIsValid() {
+        return isValid;
     }
 
     public String getSearchText() {

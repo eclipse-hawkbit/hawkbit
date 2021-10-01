@@ -45,7 +45,7 @@ public final class DistributionSetSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by its
      * DELETED attribute.
-     * 
+     *
      * @param isDeleted
      *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
      *            attribute is ignored
@@ -59,7 +59,7 @@ public final class DistributionSetSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by its
      * COMPLETED attribute.
-     * 
+     *
      * @param isCompleted
      *            TRUE/FALSE are compared to the attribute COMPLETED. If NULL
      *            the attribute is ignored
@@ -67,6 +67,20 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> isCompleted(final Boolean isCompleted) {
         return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSet_.complete), isCompleted);
+
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link DistributionSet}s by its
+     * VALID attribute.
+     *
+     * @param isValid
+     *            TRUE/FALSE are compared to the attribute VALID. If NULL the
+     *            attribute is ignored
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> isValid(final Boolean isValid) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSet_.valid), isValid);
 
     }
 
@@ -111,7 +125,7 @@ public final class DistributionSetSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by "like
      * name or like description or like version".
-     * 
+     *
      * @param subString
      *            to be filtered on
      * @return the {@link DistributionSet} {@link Specification}
@@ -126,7 +140,7 @@ public final class DistributionSetSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by "like
      * name and like version".
-     * 
+     *
      * @param name
      *            to be filtered on
      * @param version
@@ -142,7 +156,7 @@ public final class DistributionSetSpecification {
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by "has at
      * least one of the given tag names".
-     * 
+     *
      * @param tagNames
      *            to be filtered on
      * @param selectDSWithNoTag
@@ -187,7 +201,7 @@ public final class DistributionSetSpecification {
     /**
      * returns query criteria {@link Specification} comparing case insensitive
      * "NAME == AND VERSION ==".
-     * 
+     *
      * @param name
      *            to be filtered on
      * @param version

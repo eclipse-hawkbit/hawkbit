@@ -116,6 +116,9 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Column(name = "complete")
     private boolean complete;
 
+    @Column(name = "valid")
+    private boolean valid;
+
     /**
      * Default constructor.
      */
@@ -145,6 +148,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
         super(name, version, description);
 
         this.requiredMigrationStep = requiredMigrationStep;
+        this.valid = true;
         this.type = type;
         if (moduleList != null) {
             moduleList.forEach(this::addModule);
@@ -325,6 +329,15 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     @Override
     public boolean isComplete() {
         return complete;
+    }
+
+    @Override
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void invalidate() {
+        this.valid = false;
     }
 
     @Override

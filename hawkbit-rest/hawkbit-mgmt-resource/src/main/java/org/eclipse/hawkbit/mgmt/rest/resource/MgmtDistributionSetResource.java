@@ -9,10 +9,13 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
+
+import javax.validation.Valid;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -20,6 +23,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtInvalidateDistributionSetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -29,6 +33,7 @@ import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -40,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -81,11 +87,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private final SystemSecurityContext systemSecurityContext;
 
+    private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
+
     MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deployManagament, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext,
+            final DistributionSetInvalidationManagement distributionSetInvalidationManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
@@ -94,6 +103,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.entityFactory = entityFactory;
         this.distributionSetManagement = distributionSetManagement;
         this.systemSecurityContext = systemSecurityContext;
+        this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
     }
 
     @Override
@@ -125,7 +135,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     @Override
     public ResponseEntity<MgmtDistributionSet> getDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId) {
-        final DistributionSet foundDs = findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        final DistributionSet foundDs = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(foundDs);
         MgmtDistributionSetMapper.addLinks(foundDs, response);
@@ -206,7 +216,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
         // check if distribution set exists otherwise throw exception
         // immediately
-        findDistributionSetWithExceptionIfNotFound(distributionSetId);
+        distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
@@ -254,11 +264,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final List<Entry<String, Long>> offlineAssignments = assignments.stream()
                     .map(assignment -> new SimpleEntry<String, Long>(assignment.getId(), distributionSetId))
                     .collect(Collectors.toList());
-            return ResponseEntity
-                    .ok(MgmtDistributionSetMapper
-                            .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));
+            return ResponseEntity.ok(MgmtDistributionSetMapper
+                    .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));
         }
-        
+
         final List<DeploymentRequest> deploymentRequests = assignments.stream()
                 .map(assignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(assignment, distributionSetId))
                 .collect(Collectors.toList());
@@ -374,8 +383,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 softwaremodules.getTotalElements()));
     }
 
-    private DistributionSet findDistributionSetWithExceptionIfNotFound(final Long distributionSetId) {
-        return distributionSetManagement.get(distributionSetId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
+    @Override
+    public ResponseEntity<Void> invalidateDistributionSet(
+            @PathVariable("distributionSetId") final Long distributionSetId,
+            @Valid @RequestBody final MgmtInvalidateDistributionSetRequestBody invalidateRequestBody) {
+        distributionSetInvalidationManagement
+                .invalidateDistributionSet(new DistributionSetInvalidation(Arrays.asList(distributionSetId),
+                        MgmtRestModelMapper.convertCancelationType(invalidateRequestBody.getActionCancelationType()),
+                        invalidateRequestBody.isCancelRollouts()));
+        return ResponseEntity.ok().build();
     }
 }

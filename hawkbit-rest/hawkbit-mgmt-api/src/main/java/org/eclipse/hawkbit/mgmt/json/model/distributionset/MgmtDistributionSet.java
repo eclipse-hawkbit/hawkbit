@@ -49,6 +49,17 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     @JsonProperty
     private boolean deleted;
 
+    @JsonProperty
+    private boolean valid;
+
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(final boolean valid) {
+        this.valid = valid;
+    }
+
     public boolean isDeleted() {
         return deleted;
     }
