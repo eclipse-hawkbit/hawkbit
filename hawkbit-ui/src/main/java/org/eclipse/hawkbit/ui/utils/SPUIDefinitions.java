@@ -206,6 +206,11 @@ public final class SPUIDefinitions {
     public static final String INCOMPLETE_DISTRIBUTION = "incomplete-distribution";
 
     /**
+     * marker for invalid distribution sets
+     */
+    public static final String INVALID_DISTRIBUTION = "invalid-distribution";
+
+    /**
      * Filter by type layout width.
      */
     public static final float FILTER_BY_TYPE_WIDTH = 150.0F;

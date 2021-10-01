@@ -8,14 +8,21 @@
  */
 package org.eclipse.hawkbit.ui.management.dstable;
 
-import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
 import com.vaadin.server.Sizeable;
@@ -31,10 +38,9 @@ public class InvalidateDistributionSetSupport {
     private final UINotification notification;
     private final DistributionGrid grid;
 
-    private final DistributionSetManagement dsManagement;
+    private final DistributionSetInvalidationManagement dsInvalidationManagement;
 
     private InvalidateDsConsequencesDialog consequencesDialog;
-    private InvalidateDsAffectedEntitiesDialog affectedEntitiesDialog;
 
     /**
      * Constructor for InvalidateDistributionSetSupport
@@ -45,28 +51,30 @@ public class InvalidateDistributionSetSupport {
      *            VaadinMessageSource
      * @param notification
      *            UINotification
-     * @param dsManagement
-     *            {@link DistributionSetManagement}
+     * @param dsInvalidationManagement
+     *            {@link DistributionSetInvalidationManagement}
      */
     public InvalidateDistributionSetSupport(final DistributionGrid grid, final VaadinMessageSource i18n,
-            final UINotification notification, final DistributionSetManagement dsManagement) {
+            final UINotification notification, final DistributionSetInvalidationManagement dsInvalidationManagement) {
         this.grid = grid;
         this.i18n = i18n;
         this.notification = notification;
-        this.dsManagement = dsManagement;
+        this.dsInvalidationManagement = dsInvalidationManagement;
     }
 
     /**
      * Open confirmation pop up window for invalidate distribution set
      *
-     * @param distributionSet
+     * @param clickedDistributionSet
      *            {@link ProxyDistributionSet} that should be invalidated
      */
-    public void openConsequencesWindowOnInvalidateAction(final ProxyDistributionSet distributionSet) {
+    public void openConsequencesWindowOnInvalidateAction(final ProxyDistributionSet clickedDistributionSet) {
+        final List<ProxyDistributionSet> allDistributionSetsForInvalidation = getDistributionSetsForInvalidation(
+                clickedDistributionSet);
 
-        consequencesDialog = new InvalidateDsConsequencesDialog(distributionSet, i18n, ok -> {
+        consequencesDialog = new InvalidateDsConsequencesDialog(allDistributionSetsForInvalidation, i18n, ok -> {
             if (ok) {
-                openAffectedEntitiesWindowOnInvalidateAction(distributionSet);
+                openAffectedEntitiesWindowOnInvalidateAction(allDistributionSetsForInvalidation);
             }
         });
         consequencesDialog.getWindow().setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
@@ -75,56 +83,82 @@ public class InvalidateDistributionSetSupport {
         consequencesDialog.getWindow().bringToFront();
     }
 
-    private void openAffectedEntitiesWindowOnInvalidateAction(final ProxyDistributionSet distributionSet) {
-        long affectedRolloutsByDSInvalidation = 0;
-        if (consequencesDialog.getStopRollouts()) {
-            affectedRolloutsByDSInvalidation = getAffectedRolloutsByDSInvalidation(distributionSet);
-        }
-        final long affectedAutoAssignmentsByDSInvalidation = getAffectedAutoAssignmentsByDSInvalidation(
-                distributionSet);
+    private void openAffectedEntitiesWindowOnInvalidateAction(
+            final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
 
-        affectedEntitiesDialog = new InvalidateDsAffectedEntitiesDialog(distributionSet, i18n, ok -> {
-            if (ok) {
-                handleOkForInvalidateDistributionSet(distributionSet,
-                        i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS,
-                                distributionSet.getName()),
-                        i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL,
-                                distributionSet.getName()));
-            }
-        }, affectedRolloutsByDSInvalidation, affectedAutoAssignmentsByDSInvalidation);
+        final DistributionSetInvalidationCount entitiesForInvalidationCount = dsInvalidationManagement
+                .countEntitiesForInvalidation(
+                        getDistributionSetInvalidation(consequencesDialog.isStopRolloutsSelected(),
+                                getDistributionSetIds(allDistributionSetsForInvalidation), CancelationType.NONE));
+
+        final InvalidateDsAffectedEntitiesDialog affectedEntitiesDialog = new InvalidateDsAffectedEntitiesDialog(
+                allDistributionSetsForInvalidation, i18n, ok -> {
+                    if (ok) {
+                        handleOkForInvalidateDistributionSet(allDistributionSetsForInvalidation);
+                    }
+                }, entitiesForInvalidationCount.getRolloutsCount(),
+                entitiesForInvalidationCount.getAutoAssignmentCount());
         affectedEntitiesDialog.getWindow().setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
 
         UI.getCurrent().addWindow(affectedEntitiesDialog.getWindow());
         affectedEntitiesDialog.getWindow().bringToFront();
     }
 
-    private void handleOkForInvalidateDistributionSet(final ProxyDistributionSet distributionSet,
-            final String successNotificationText, final String failureNotificationText) {
+    private void handleOkForInvalidateDistributionSet(
+            final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
 
         try {
-            // TODO use boolean flag in repo call
-            final boolean stopRollouts = consequencesDialog.getStopRollouts();
-            dsManagement.invalidate(distributionSet.getId());
-            final DistributionSetInvalidation distributionSetInvalidation = new DistributionSetInvalidation(
-                    Lists.newArrayList(distributionSet.getId()), CancelationType.NONE, stopRollouts, true);
-            dsManagement.invalidate(distributionSetInvalidation);
-            notification.displaySuccess(successNotificationText);
-            grid.refreshItem(distributionSet);
+            dsInvalidationManagement.invalidateDistributionSet(
+                    getDistributionSetInvalidation(consequencesDialog.isStopRolloutsSelected(),
+                            getDistributionSetIds(allDistributionSetsForInvalidation), CancelationType.NONE));
+            notification.displaySuccess(createSuccessNotificationText(allDistributionSetsForInvalidation));
+            grid.refreshAll();
         } catch (final RuntimeException ex) {
-            LOG.warn("Invalidating DistributionSet '{}' failed: {}", distributionSet.getName(), ex.getMessage());
-            notification.displayWarning(failureNotificationText);
+            LOG.warn("Invalidating DistributionSets '{}' failed: {}", StringUtils.collectionToCommaDelimitedString(
+                    getDistributionSetIds(allDistributionSetsForInvalidation)), ex.getMessage());
+            notification.displayWarning(createFailureNotificationText(allDistributionSetsForInvalidation));
             throw ex;
         }
     }
 
-    private long getAffectedRolloutsByDSInvalidation(final ProxyDistributionSet distributionSet) {
-        return dsManagement.countRolloutsForInvalidation(Lists.newArrayList(distributionSet.getId()));
+    private DistributionSetInvalidation getDistributionSetInvalidation(final boolean stopRollouts,
+            final List<Long> distSetIds, final CancelationType cancelationType) {
+        return new DistributionSetInvalidation(distSetIds, cancelationType, stopRollouts);
     }
 
-    private long getAffectedAutoAssignmentsByDSInvalidation(final ProxyDistributionSet distributionSet) {
-        return dsManagement.countAutoAssignmentsForInvalidation(Lists.newArrayList(distributionSet.getId()));
+    private String createFailureNotificationText(final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
+        String failureNotificationText = "";
+        if (allDistributionSetsForInvalidation.size() == 1) {
+            failureNotificationText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_SINGULAR,
+                    allDistributionSetsForInvalidation.get(0).getNameVersion());
+        } else {
+            failureNotificationText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_PLURAL,
+                    allDistributionSetsForInvalidation.size());
+        }
+        return failureNotificationText;
     }
 
+    private String createSuccessNotificationText(final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
+        String successNotificationText = "";
+        if (allDistributionSetsForInvalidation.size() == 1) {
+            successNotificationText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_SINGULAR,
+                    allDistributionSetsForInvalidation.get(0).getNameVersion());
+        } else {
+            successNotificationText = i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_PLURAL,
+                    allDistributionSetsForInvalidation.size());
+        }
+        return successNotificationText;
+    }
+
+    private static List<Long> getDistributionSetIds(
+            final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
+        return allDistributionSetsForInvalidation.stream().map(ProxyDistributionSet::getId)
+                .collect(Collectors.toList());
+    }
 
     private List<ProxyDistributionSet> getDistributionSetsForInvalidation(final ProxyDistributionSet clickedItem) {
         final List<ProxyDistributionSet> selectedItems = Lists.newArrayList(grid.getSelectedItems());

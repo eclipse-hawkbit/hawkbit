@@ -28,6 +28,8 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
 
     private boolean requiredMigrationStep;
 
+    private Boolean isValid;
+
     /**
      * Default constructor
      */
