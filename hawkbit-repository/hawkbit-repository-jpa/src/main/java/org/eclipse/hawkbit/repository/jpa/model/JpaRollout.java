@@ -93,7 +93,8 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
             @ConversionValue(objectValue = "DELETING", dataValue = "9"),
             @ConversionValue(objectValue = "DELETED", dataValue = "10"),
             @ConversionValue(objectValue = "WAITING_FOR_APPROVAL", dataValue = "11"),
-            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12") })
+            @ConversionValue(objectValue = "APPROVAL_DENIED", dataValue = "12"),
+            @ConversionValue(objectValue = "STOPPING", dataValue = "13") })
     @Convert("rolloutstatus")
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;

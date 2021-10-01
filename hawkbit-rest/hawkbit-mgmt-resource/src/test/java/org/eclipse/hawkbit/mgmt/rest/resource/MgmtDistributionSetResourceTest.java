@@ -40,8 +40,12 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -1349,5 +1353,38 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
         assertThat(actions).size().isEqualTo(1);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
+    }
+
+    @Test
+    @Description("Verify invalidation of distribution sets that removes distribution sets from auto assignments, stops rollouts and cancels assignments")
+    public void invalidateDistributionSet() throws Exception {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(5, "invalidateDistributionSet");
+        assignDistributionSet(distributionSet, targets);
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("invalidateDistributionSet").query("name==*")
+                        .autoAssignDistributionSet(distributionSet));
+        final Rollout rollout = testdataFactory.createRolloutByVariables("invalidateDistributionSet", "desc", 2,
+                "name==*", distributionSet, "50", "80");
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("actionCancelationType", "soft");
+        jsonObject.put("cancelRollouts", true);
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/invalidate", distributionSet.getId())
+                .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk());
+
+        assertThat(targetFilterQueryManagement.get(targetFilterQuery.getId()).get().getAutoAssignDistributionSet())
+                .isNull();
+        assertThat(rolloutManagement.get(rollout.getId()).get().getStatus()).isIn(RolloutStatus.STOPPING,
+                RolloutStatus.FINISHED);
+        for (final Target target : targets) {
+            assertThat(targetManagement.get(target.getId()).get().getUpdateStatus())
+                    .isEqualTo(TargetUpdateStatus.PENDING);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getNumberOfElements()).isEqualTo(1);
+            assertThat(deploymentManagement.findActionsByTarget(target.getControllerId(), PageRequest.of(0, 100))
+                    .getContent().get(0).getStatus()).isEqualTo(Status.CANCELING);
+        }
     }
 }

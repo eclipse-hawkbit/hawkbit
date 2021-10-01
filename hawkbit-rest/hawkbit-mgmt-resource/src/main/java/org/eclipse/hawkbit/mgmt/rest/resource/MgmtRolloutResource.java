@@ -110,7 +110,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         // exception is thrown
         targetFilterQueryManagement.verifyTargetFilterQuerySyntax(rolloutRequestBody.getTargetFilterQuery());
 
-        final DistributionSet distributionSet = findDistributionSetOrThrowException(rolloutRequestBody);
+        final DistributionSet distributionSet = distributionSetManagement
+                .getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
 
         final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
@@ -233,11 +234,5 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
-    }
-
-    private DistributionSet findDistributionSetOrThrowException(final MgmtRolloutRestRequestBody rolloutRequestBody) {
-        return this.distributionSetManagement.get(rolloutRequestBody.getDistributionSetId()).orElseThrow(
-                () -> new EntityNotFoundException(DistributionSet.class, rolloutRequestBody.getDistributionSetId()));
-
     }
 }

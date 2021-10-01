@@ -25,9 +25,10 @@ import java.util.List;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -294,7 +295,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         assertThat(exceptionInfo.getExceptionClass()).isEqualTo(MessageNotReadableException.class.getName());
         assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REST_BODY_NOT_READABLE.getKey());
     }
-    
+
     @Test
     @Description("Ensures that the creation of a target filter query based on an invalid RSQL query results in a HTTP Bad Request error (400).")
     public void createTargetFilterWithInvalidQuery() throws Exception {
@@ -324,7 +325,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(
+                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
     }
 
@@ -356,7 +358,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(put(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId())
                 .content("{\"query\":\"controllerId==target*\"}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isForbidden())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
+                .andExpect(
+                        jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
     }
@@ -470,9 +473,8 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
                 .content("{\"id\":" + incompleteDistributionSet.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
-                        equalTo(InvalidAutoAssignDistributionSetException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE,
-                        equalTo(SpServerError.SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID.getKey())));
+                        equalTo(IncompleteDistributionSetException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DS_INCOMPLETE.getKey())));
     }
 
     @Step
@@ -483,11 +485,9 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
-                .andDo(print()).andExpect(status().isBadRequest())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS,
-                        equalTo(InvalidAutoAssignDistributionSetException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE,
-                        equalTo(SpServerError.SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID.getKey())));
+                .andDo(print()).andExpect(status().isNotFound())
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(EntityNotFoundException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_REPO_ENTITY_NOT_EXISTS.getKey())));
     }
 
     @Test

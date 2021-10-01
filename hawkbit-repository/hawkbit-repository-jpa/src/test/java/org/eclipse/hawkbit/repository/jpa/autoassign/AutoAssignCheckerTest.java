@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -162,7 +162,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        assertThatExceptionOfType(InvalidAutoAssignDistributionSetException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(() -> {
             final Long filterId = targetFilterQueryManagement.create(
                     entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
                     .getId();

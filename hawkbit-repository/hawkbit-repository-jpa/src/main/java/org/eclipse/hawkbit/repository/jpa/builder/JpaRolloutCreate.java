@@ -11,9 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.builder;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractRolloutUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate> implements RolloutCreate {
     private final DistributionSetManagement distributionSetManagement;
@@ -28,7 +26,7 @@ public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate>
 
         rollout.setName(name);
         rollout.setDescription(description);
-        rollout.setDistributionSet(findDistributionSetAndThrowExceptionIfNotFound(set));
+        rollout.setDistributionSet(distributionSetManagement.getValidAndComplete(set));
         rollout.setTargetFilterQuery(targetFilterQuery);
         rollout.setStartAt(startAt);
         rollout.setWeight(weight);
@@ -42,10 +40,5 @@ public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate>
         }
 
         return rollout;
-    }
-
-    private DistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return distributionSetManagement.get(setId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 }
