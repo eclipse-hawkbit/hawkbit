@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -139,8 +138,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 DsManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsManagementFilterParams());
-        this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, notification,
-                dsInvalidationManagement);
+        this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, uiProperties,
+                notification, permissionChecker, dsInvalidationManagement);
 
         initStyleGenerator();
         init();

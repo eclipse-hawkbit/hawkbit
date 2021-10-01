@@ -202,8 +202,8 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
             UI.getCurrent().addWindow(autoAssignmentWindow);
             autoAssignmentWindow.setVisible(Boolean.TRUE);
         } else {
-            notification.displayValidationError(
-                    i18n.getMessage("message.permission.insufficient", SpPermission.READ_REPOSITORY));
+            notification.displayValidationError(i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_ERROR_PERMISSION_INSUFFICIENT, SpPermission.READ_REPOSITORY));
         }
     }
 }

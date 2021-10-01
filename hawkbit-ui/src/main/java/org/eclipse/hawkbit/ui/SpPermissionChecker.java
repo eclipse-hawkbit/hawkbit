@@ -179,10 +179,11 @@ public class SpPermissionChecker implements Serializable {
 
     /**
      *
-     * @return <code>true</code> if default invalidation of distribution set is allowed
+     * @return <code>true</code> if default invalidation of distribution set is
+     *         allowed
      */
     public boolean hasDistributionSetInvalidatePermission() {
-        return hasUpdateRepositoryPermission() && hasAutoAssignmentUpdatePermission();
+        return hasUpdateRepositoryPermission() && hasUpdateTargetPermission();
     }
 
 }
