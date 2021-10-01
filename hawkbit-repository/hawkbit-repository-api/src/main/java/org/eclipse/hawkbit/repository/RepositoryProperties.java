@@ -59,6 +59,12 @@ public class RepositoryProperties {
      */
     private int actionWeightIfAbsent = 1000;
 
+    /**
+     * Defines a timeout for the lock during invalidation of distribution sets
+     * (in seconds).
+     */
+    private long dsInvalidationLockTimeout = 5;
+
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;
     }
@@ -105,6 +111,14 @@ public class RepositoryProperties {
 
     public void setActionWeightIfAbsent(final int actionWeightIfAbsent) {
         this.actionWeightIfAbsent = actionWeightIfAbsent;
+    }
+
+    public long getDsInvalidationLockTimeout() {
+        return dsInvalidationLockTimeout;
+    }
+
+    public void setDsInvalidationLockTimeout(final long dsInvalidationLockTimeout) {
+        this.dsInvalidationLockTimeout = dsInvalidationLockTimeout;
     }
 
 }

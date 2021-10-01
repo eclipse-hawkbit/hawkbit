@@ -46,6 +46,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -72,7 +74,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -243,8 +244,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(firstGroup.getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
 
         // verify other groups are scheduled
-        final List<RolloutGroup> scheduledGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> scheduledGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         scheduledGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED)
                 .as("group which should be in scheduled state is in " + group.getStatus() + " state"));
         // verify that the first group actions has been started and are in state
@@ -436,8 +438,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(errorGroup.get(0).getStatus()).isEqualTo(RolloutGroupStatus.ERROR);
 
         // all other groups should still be in scheduled state
-        final List<RolloutGroup> scheduleGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> scheduleGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         scheduleGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED));
     }
 
@@ -470,8 +473,9 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(rollout.getStatus()).isEqualTo(RolloutStatus.PAUSED);
 
         // all other groups should still be in scheduled state
-        final List<RolloutGroup> scheduleGroups = rolloutGroupManagement.findByRollout(
-                new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId()).getContent();
+        final List<RolloutGroup> scheduleGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(1, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
         scheduleGroups.forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED));
 
         // resume the rollout again after it gets paused by error action
@@ -521,8 +525,7 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         // verify all groups are in finished state
         rolloutGroupManagement
-                .findByRollout(new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "id")),
-                        createdRollout.getId())
+                .findByRollout(new OffsetBasedPageRequest(0, 100, Sort.by(Direction.ASC, "id")), createdRollout.getId())
                 .forEach(group -> assertThat(group.getStatus()).isEqualTo(RolloutGroupStatus.FINISHED));
 
         // verify that rollout itself is in finished state
@@ -1821,6 +1824,56 @@ public class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
         assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to create a rollout with an invalidated distribution set.")
+    public void createRolloutWithInvalidDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> testdataFactory.createRolloutByVariables("createRolloutWithInvalidDistributionSet",
+                        "desc", 2, "name==*", distributionSet, "50", "80"));
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to create a rollout with an incomplete distribution set.")
+    public void createRolloutWithIncompleteDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
+
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Incomplete distributionSet should throw an exception")
+                .isThrownBy(() -> testdataFactory.createRolloutByVariables("createRolloutWithIncompleteDistributionSet",
+                        "desc", 2, "name==*", distributionSet, "50", "80"));
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to update a rollout with an invalidated distribution set.")
+    public void updateRolloutWithInvalidDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.createTarget();
+        final Rollout rollout = testdataFactory.createRolloutByVariables("updateRolloutWithInvalidDistributionSet",
+                "desc", 2, "name==*", distributionSet, "50", "80");
+        final DistributionSet invalidDistributionSet = testdataFactory.createAndInvalidateDistributionSet();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception").isThrownBy(() -> rolloutManagement
+                        .update(entityFactory.rollout().update(rollout.getId()).set(invalidDistributionSet.getId())));
+    }
+
+    @Test
+    @Description("Verifies that an exception is thrown when trying to update a rollout with an incomplete distribution set.")
+    public void updateRolloutWithIncompleteDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testdataFactory.createTarget();
+        final Rollout rollout = testdataFactory.createRolloutByVariables("updateRolloutWithIncompleteDistributionSet",
+                "desc", 2, "name==*", distributionSet, "50", "80");
+        final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
+
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Incomplete distributionSet should throw an exception").isThrownBy(() -> rolloutManagement.update(
+                        entityFactory.rollout().update(rollout.getId()).set(incompleteDistributionSet.getId())));
     }
 
     private RolloutGroupCreate generateRolloutGroup(final int index, final Integer percentage,

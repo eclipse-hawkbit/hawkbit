@@ -35,6 +35,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -43,7 +44,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEv
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -67,6 +67,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -130,6 +131,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private final EntityManager entityManager;
+    private final DistributionSetManagement distributionSetManagement;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
     private final ActionStatusRepository actionStatusRepository;
@@ -146,6 +148,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final RetryTemplate retryTemplate;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
+            final DistributionSetManagement distributionSetManagement,
             final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
             final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
             final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
@@ -156,6 +159,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         super(actionRepository, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
+        this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
         this.actionStatusRepository = actionStatusRepository;
         this.auditorProvider = auditorProvider;
@@ -254,8 +258,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by
      * their IDs with a specific {@link ActionType} and {@code forcetime}.
-     * 
-     * 
+     *
+     *
      * In case the update was executed offline (i.e. not managed by hawkBit) the
      * handling differs my means that:<br/>
      * A. it ignores targets completely that are in
@@ -285,7 +289,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
 
-        final JpaDistributionSet distributionSetEntity = getAndValidateDsById(dsID);
+        final JpaDistributionSet distributionSetEntity = (JpaDistributionSet) distributionSetManagement
+                .getValidAndComplete(dsID);
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().collect(Collectors.toList());
 
@@ -361,18 +366,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final int alreadyAssignedTargetsCount = totalTargetsForAssignment - assignedActions.size();
 
         return new DistributionSetAssignmentResult(distributionSet, alreadyAssignedTargetsCount, assignedActions);
-    }
-
-    private JpaDistributionSet getAndValidateDsById(final Long dsID) {
-        final JpaDistributionSet distributionSet = distributionSetRepository.findById(dsID)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, dsID));
-
-        if (!distributionSet.isComplete()) {
-            throw new IncompleteDistributionSetException("Distribution set of type "
-                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
-        }
-
-        return distributionSet;
     }
 
     private void checkQuotaForAssignment(final Collection<DeploymentRequest> deploymentRequests) {
@@ -656,8 +649,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer,
-                database);
+        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class,
+                virtualPropertyReplacer, database);
         return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
                 cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
     }
@@ -780,6 +773,17 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    public long countActionsByDistributionSetIdAndActiveIsTrue(final Long distributionSet) {
+        return actionRepository.countByDistributionSetIdAndActiveIsTrue(distributionSet);
+    }
+
+    @Override
+    public long countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(final Long distributionSet,
+            final Status status) {
+        return actionRepository.countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, status);
+    }
+
+    @Override
     public Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long dsId) {
         throwExceptionIfDistributionSetDoesNotExist(dsId);
         return actionRepository.findByDistributionSetId(pageable, dsId);
@@ -832,7 +836,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
-    public boolean hasPendingCancellations(String controllerId) {
+    public boolean hasPendingCancellations(final String controllerId) {
         return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(controllerId,
                 Action.Status.CANCELING);
     }
@@ -880,5 +884,22 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         template.setRetryPolicy(retryPolicy);
 
         return template;
+    }
+
+    @Override
+    @Transactional
+    public void cancelActionsForDistributionSet(final CancelationType cancelationType, final DistributionSet set) {
+        actionRepository.findByDistributionSetAndActiveIsTrueAndStatusIsNot(set, Status.CANCELING).forEach(action -> {
+            final JpaAction jpaAction = (JpaAction) action;
+            cancelAction(jpaAction.getId());
+            LOG.debug("Action {} canceled", jpaAction.getId());
+        });
+        if (cancelationType == CancelationType.FORCE) {
+            actionRepository.findByDistributionSetAndActiveIsTrue(set).forEach(action -> {
+                final JpaAction jpaAction = (JpaAction) action;
+                forceQuitAction(jpaAction.getId());
+                LOG.debug("Action {} force canceled", jpaAction.getId());
+            });
+        }
     }
 }

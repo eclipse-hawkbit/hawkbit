@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.AbstractActionEvent;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -67,7 +68,7 @@ public class RolloutStatusCache {
     /**
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link Rollout}s.
-     * 
+     *
      * @param rollouts
      *            rolloutIds to retrieve cache entries for
      * @return map of cached entries
@@ -81,7 +82,7 @@ public class RolloutStatusCache {
     /**
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link Rollout}s.
-     * 
+     *
      * @param rolloutId
      *            to retrieve cache entries for
      * @return map of cached entries
@@ -95,7 +96,7 @@ public class RolloutStatusCache {
     /**
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link RolloutGroup}s.
-     * 
+     *
      * @param rolloutGroups
      *            rolloutGroupsIds to retrieve cache entries for
      * @return map of cached entries
@@ -109,7 +110,7 @@ public class RolloutStatusCache {
     /**
      * Retrieves cached list of {@link TotalTargetCountActionStatus} of
      * {@link RolloutGroup}.
-     * 
+     *
      * @param groupId
      *            to retrieve cache entries for
      * @return map of cached entries
@@ -123,7 +124,7 @@ public class RolloutStatusCache {
     /**
      * Put map of {@link TotalTargetCountActionStatus} for multiple
      * {@link Rollout}s into cache.
-     * 
+     *
      * @param put
      *            map of cached entries
      */
@@ -135,12 +136,12 @@ public class RolloutStatusCache {
     /**
      * Put {@link TotalTargetCountActionStatus} for one {@link Rollout}s into
      * cache.
-     * 
+     *
      * @param rolloutId
      *            the cache entries belong to
      * @param status
      *            list to cache
-     * 
+     *
      */
     public void putRolloutStatus(final Long rolloutId, final List<TotalTargetCountActionStatus> status) {
         final Cache cache = cacheManager.getCache(CACHE_RO_NAME);
@@ -150,7 +151,7 @@ public class RolloutStatusCache {
     /**
      * Put {@link TotalTargetCountActionStatus} for multiple
      * {@link RolloutGroup}s into cache.
-     * 
+     *
      * @param put
      *            map of cached entries
      */
@@ -162,7 +163,7 @@ public class RolloutStatusCache {
     /**
      * Put {@link TotalTargetCountActionStatus} for multiple
      * {@link RolloutGroup}s into cache.
-     * 
+     *
      * @param groupId
      *            the cache entries belong to
      * @param status
@@ -221,6 +222,18 @@ public class RolloutStatusCache {
     void invalidateCachedTotalTargetCountOnRolloutGroupDelete(final RolloutGroupDeletedEvent event) {
         final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_GR_NAME));
         cache.evict(event.getEntityId());
+    }
+
+    @EventListener(classes = RolloutStoppedEvent.class)
+    void invalidateCachedTotalTargetCountOnRolloutStopped(final RolloutStoppedEvent event) {
+        final Cache cache = tenantAware.runAsTenant(event.getTenant(), () -> cacheManager.getCache(CACHE_RO_NAME));
+        cache.evict(event.getRolloutId());
+
+        for (final long groupId : event.getRolloutGroupIds()) {
+            final Cache groupCache = tenantAware.runAsTenant(event.getTenant(),
+                    () -> cacheManager.getCache(CACHE_GR_NAME));
+            groupCache.evict(groupId);
+        }
     }
 
     /**
