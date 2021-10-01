@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModi
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
@@ -38,7 +39,7 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
  * Support for assigning software modules to distribution set.
- * 
+ *
  */
 public class SwModulesToDistributionSetAssignmentSupport
         extends DeploymentAssignmentSupport<ProxySoftwareModule, ProxyDistributionSet> {
@@ -110,18 +111,25 @@ public class SwModulesToDistributionSetAssignmentSupport
 
     private boolean isTargetDsValid(final ProxyDistributionSet ds, final DistributionSetType dsType) {
         if (dsType == null) {
-            notification.displayValidationError(i18n.getMessage("message.dist.type.notfound", ds.getNameVersion()));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.dist.type.notfound", ds.getNameVersion()));
+            return false;
+        }
+
+        if (!ds.getIsValid()) {
+            /* Distribution is invalidated */
+            addSpecificValidationErrorMessage(
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID, ds.getNameVersion()));
             return false;
         }
 
         if (targetManagement.existsByInstalledOrAssignedDistributionSet(ds.getId())) {
             /* Distribution is already assigned/installed */
-            notification.displayValidationError(i18n.getMessage("message.dist.inuse", ds.getNameVersion()));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.dist.inuse", ds.getNameVersion()));
             return false;
         }
 
         if (dsManagement.isInUse(ds.getId())) {
-            notification.displayValidationError(
+            addSpecificValidationErrorMessage(
                     i18n.getMessage("message.error.notification.ds.target.assigned", ds.getName(), ds.getVersion()));
             return false;
         }
@@ -137,8 +145,8 @@ public class SwModulesToDistributionSetAssignmentSupport
     private boolean checkDuplicateSmToDsAssignment(final ProxySoftwareModule sm, final ProxyDistributionSet ds,
             final Collection<Long> smIdsAlreadyAssignedToDs) {
         if (!CollectionUtils.isEmpty(smIdsAlreadyAssignedToDs) && smIdsAlreadyAssignedToDs.contains(sm.getId())) {
-            notification.displayValidationError(i18n.getMessage("message.software.dist.already.assigned",
-                    sm.getNameAndVersion(), ds.getNameVersion()));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.already.assigned", sm.getNameAndVersion(),
+                    ds.getNameVersion()));
             return false;
         }
 
@@ -150,9 +158,8 @@ public class SwModulesToDistributionSetAssignmentSupport
         if (!dsType.containsModuleType(sm.getTypeInfo().getId())) {
             final String smTypeName = smTypeManagement.get(sm.getTypeInfo().getId()).map(SoftwareModuleType::getName)
                     .orElse("");
-
-            notification.displayValidationError(i18n.getMessage("message.software.dist.type.notallowed",
-                    sm.getNameAndVersion(), ds.getNameVersion(), smTypeName));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.type.notallowed", sm.getNameAndVersion(),
+                    ds.getNameVersion(), smTypeName));
             return false;
         }
 

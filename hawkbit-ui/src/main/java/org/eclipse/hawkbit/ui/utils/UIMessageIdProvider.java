@@ -25,6 +25,10 @@ public final class UIMessageIdProvider {
 
     public static final String BUTTON_SAVE = "button.save";
 
+    public static final String BUTTON_NEXT = "button.next";
+
+    public static final String BUTTON_CONFIRM = "button.confirm";
+
     public static final String BUTTON_NO_AUTO_ASSIGNMENT = "button.no.auto.assignment";
 
     public static final String BUTTON_AUTO_ASSIGNMENT_DESCRIPTION = "button.auto.assignment.desc";
@@ -71,6 +75,12 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ENTITY_ASSIGN_ACTION_CONFIRMBOX = "caption.entity.assign.action.confirmbox";
 
+    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_SINGULAR = "caption.invalidate.distributionset.consequences.singular";
+
+    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_PLURAL = "caption.invalidate.distributionset.consequences.plural";
+
+    public static final String CAPTION_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES = "caption.invalidate.distributionset.affected.entities";
+
     public static final String CAPTION_CONFIG_CREATE = "caption.config.create";
 
     public static final String CAPTION_CONFIG_EDIT = "caption.config.edit";
@@ -93,6 +103,8 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_AUTO_ASSIGNMENT_ENABLE = "label.auto.assign.enable";
 
+    public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "label.invalidate.distributionset.stop.rollouts";
+
     public static final String MESSAGE_NO_DATA = "message.no.data";
 
     public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
@@ -111,11 +123,17 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_AUTOASSIGN_CREATE_ERROR_MISSINGELEMENTS = "message.autoassign.create.error.missingElements";
 
+    public static final String MESSAGE_DISTRIBUTION_ASSIGNED = "message.dist.already.assigned";
+
+    public static final String MESSAGE_DISTRIBUTION_NOT_ASSIGNED = "message.dist.not.assigned";
+
     public static final String MESSAGE_ERROR_NAMEREQUIRED = "message.error.nameRequired";
 
     public static final String MESSAGE_ERROR_VERSIONREQUIRED = "message.error.versionRequired";
 
     public static final String MESSAGE_ERROR_DISTRIBUTIONSET_REQUIRED = "message.error.distributionSetRequired";
+
+    public static final String MESSAGE_ERROR_DISTRIBUTIONSET_INVALID = "message.error.distributionset.invalid";
 
     public static final String MESSAGE_ERROR_TFQ_REQUIRED = "message.error.tfqRequired";
 
@@ -170,6 +188,12 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_ARTIFACT_ICON = "tooltip.artifact.icon";
 
     public static final String TOOLTIP_DISTRIBUTION_SET_PIN = "tooltip.distribution.set.pin";
+
+    public static final String TOOLTIP_INVALIDATE_DISTRIBUTIONSET = "tooltip.invalidate.distributionset";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALID = "tooltip.distributionset.invalid";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INCOMPLETE = "tooltip.distributionset.incomplete";
 
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
@@ -233,11 +257,35 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
 
+    public static final String CAPTION_ERROR = "caption.error";
+
+    public static final String MESSAGE_ERROR = "message.error";
+
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
 
     public static final String MESSAGE_CLEAR_FILE_UPLOAD_QUEUE = "message.clear.file.upload.queue.confirm";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_SINGULAR = "message.invalidate.distributionset.consequences.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_CONSEQUENCES_PLURAL = "message.invalidate.distributionset.consequences.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_SINGULAR = "message.invalidate.distributionset.affected.entities.intro.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_PLURAL = "message.invalidate.distributionset.affected.entities.intro.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS = "message.invalidate.distributionset.affected.entities.rollouts";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "message.invalidate.distributionset.affected.entities.autoassignments";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_SINGULAR = "message.invalidate.distributionset.success.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_SUCCESS_PLURAL = "message.invalidate.distributionset.success.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_SINGULAR = "message.invalidate.distributionset.fail.singular";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_PLURAL = "message.invalidate.distributionset.fail.plural";
 
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
 

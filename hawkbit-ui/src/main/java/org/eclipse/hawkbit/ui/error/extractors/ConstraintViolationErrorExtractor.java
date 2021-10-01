@@ -17,6 +17,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.CollectionUtils;
 
@@ -43,7 +44,8 @@ public class ConstraintViolationErrorExtractor extends AbstractSingleUiErrorDeta
             getViolationsDescription(ex).ifPresent(violationsDescription -> descriptionBuilder.append(":")
                     .append(System.lineSeparator()).append(violationsDescription));
 
-            return UiErrorDetails.create(i18n.getMessage("caption.error"), descriptionBuilder.toString());
+            return UiErrorDetails.create(i18n.getMessage(UIMessageIdProvider.CAPTION_ERROR),
+                    descriptionBuilder.toString());
         });
     }
 
