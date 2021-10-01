@@ -141,7 +141,7 @@ import com.google.common.collect.Maps;
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryBaseClass = SimpleJpaWithNoCountRepository.class)
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
