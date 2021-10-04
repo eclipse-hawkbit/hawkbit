@@ -13,7 +13,6 @@ import com.vaadin.ui.FormLayout;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 
 /**
@@ -45,8 +44,7 @@ public class TargetTypeWindowLayout extends TagWindowLayout<ProxyTargetType> {
 
     @Override
     protected FormLayout buildFormLayout() {
-        final FormLayout formLayout = super.buildFormLayout();
-        return formLayout;
+        return super.buildFormLayout();
     }
 
     @Override

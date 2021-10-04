@@ -9,12 +9,10 @@
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
 import com.vaadin.data.Binder;
-import com.vaadin.data.ValidationResult;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Builder for Distribution set type window layout component

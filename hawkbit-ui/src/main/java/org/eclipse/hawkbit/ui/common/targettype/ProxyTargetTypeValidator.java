@@ -5,7 +5,6 @@ import java.util.function.BooleanSupplier;
 import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.springframework.util.StringUtils;
 
 

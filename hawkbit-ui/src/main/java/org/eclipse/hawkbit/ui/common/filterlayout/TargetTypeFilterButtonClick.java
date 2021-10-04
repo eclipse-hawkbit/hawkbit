@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 
 import java.util.Map;
