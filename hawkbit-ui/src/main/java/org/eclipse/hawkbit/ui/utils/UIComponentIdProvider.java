@@ -52,9 +52,13 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_PIN_ICON = "target.pin.icon";
     /**
-     * ID-Targ.PIN.
+     * ID-DistributionSet pin icon.
      */
     public static final String DIST_PIN_ICON = "dist.pin.icon";
+    /**
+     * ID-DistributionSet invalidate icon.
+     */
+    public static final String DIST_INVALIDATE_ICON = "dist.invalidate.icon";
     /**
      * ID-Targ.DELETE.
      */
@@ -1391,6 +1395,28 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
+
+    /**
+     * Distribution set invalidate consequences window id
+     */
+    public static final String INVALIDATE_DS_CONSEQUENCES = "invalidate.distributionset.consequences.window";
+    /**
+     * Distribution set invalidate affected entities window id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
+    /**
+     * Distribution set invalidate affected rollouts label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS = "invalidate.distributionset.affectedentities.rollouts";
+    /**
+     * Distribution set invalidate affected autoassignments label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "invalidate.distributionset.affectedentities.autoassignments";
+    /**
+     * Distribution set invalidate consequences window, stop rollouts checkbox
+     */
+    public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
+
     /**
      * Id of the unread notification button
      */

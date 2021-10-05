@@ -67,6 +67,11 @@ public class DistributionSetDetailsHeader extends AbstractDetailsHeader<ProxyDis
     }
 
     @Override
+    protected boolean editSelectedEntityAllowed() {
+        return selectedEntity != null && selectedEntity.getIsValid();
+    }
+
+    @Override
     protected void onEdit() {
         if (selectedEntity == null) {
             return;

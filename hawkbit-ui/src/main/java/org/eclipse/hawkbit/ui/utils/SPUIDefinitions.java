@@ -203,7 +203,12 @@ public final class SPUIDefinitions {
     public static final String FILTER_RESET_ICON = "filter-reset-icon";
 
     /* Action History */
-    public static final String DISABLE_DISTRIBUTION = "incomplete-distribution";
+    public static final String INCOMPLETE_DISTRIBUTION = "incomplete-distribution";
+
+    /**
+     * marker for invalid distribution sets
+     */
+    public static final String INVALID_DISTRIBUTION = "invalid-distribution";
 
     /**
      * Filter by type layout width.

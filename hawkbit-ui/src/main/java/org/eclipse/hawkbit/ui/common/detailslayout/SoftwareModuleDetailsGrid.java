@@ -184,7 +184,7 @@ public class SoftwareModuleDetailsGrid extends Grid<ProxySoftwareModuleDetails>
         if (smId != null && !StringUtils.isEmpty(smNameVersion)) {
             smLabelWithUnassignButtonLayout.addComponent(buildSmLabel(smId, smNameVersion));
 
-            if (isUnassignSmAllowed && permissionChecker.hasUpdateRepositoryPermission()) {
+            if (isUnassignSmAllowed && permissionChecker.hasUpdateRepositoryPermission() && masterEntity.getIsValid()) {
                 smLabelWithUnassignButtonLayout.addComponent(buildSmUnassignButton(smId, smNameVersion));
             }
         }

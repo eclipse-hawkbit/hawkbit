@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -87,18 +88,18 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
 
     @Autowired
     DeploymentView(final UIEventBus eventBus, final SpPermissionChecker permChecker, final VaadinMessageSource i18n,
-                   final UINotification uiNotification, final ManagementUIState managementUIState,
-                   final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
-                   final SoftwareModuleManagement smManagement, final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-                   final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-                   final EntityFactory entityFactory, final UiProperties uiProperties,
-                   final TargetTagManagement targetTagManagement,
-                   final TargetTypeManagement targetTypeManagement,
+            final UINotification uiNotification, final ManagementUIState managementUIState,
+            final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
+            final SoftwareModuleManagement smManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetInvalidationManagement dsInvalidationManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
+            final TargetTagManagement targetTagManagement, final TargetTypeManagement targetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
-                   final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-                   final TenantConfigurationManagement configManagement,
-                   final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
-                   final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
+            final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+            final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -133,7 +134,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             this.distributionTagLayout = new DistributionTagLayout(uiDependencies, distributionSetTagManagement,
                     distributionSetManagement, managementUIState.getDistributionTagLayoutUiState());
             this.distributionGridLayout = new DistributionGridLayout(uiDependencies, targetManagement,
-                    distributionSetManagement, smManagement, distributionSetTypeManagement,
+                    distributionSetManagement, dsInvalidationManagement, smManagement, distributionSetTypeManagement,
                     distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
                     systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),
                     managementUIState.getDistributionTagLayoutUiState(),
