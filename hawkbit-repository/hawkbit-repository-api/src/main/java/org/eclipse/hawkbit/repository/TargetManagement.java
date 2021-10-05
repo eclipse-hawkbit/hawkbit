@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -583,6 +584,25 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
+
+
+    /**
+     * Toggles {@link TargetType} assignment to given {@link Target}s by means
+     * that if some (or all) of the targets in the list have the {@link Tag} not
+     * yet assigned, they will be. Only if all of theme have the tag already assigned
+     * they will be removed instead.
+     *
+     * @param controllerIds
+     *            to toggle for
+     * @param tagName
+     *            to toggle
+     * @return TagAssigmentResult with all meta data of the assignment outcome.
+     *
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetTypeAssignmentResult toggleTargetTypeAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.

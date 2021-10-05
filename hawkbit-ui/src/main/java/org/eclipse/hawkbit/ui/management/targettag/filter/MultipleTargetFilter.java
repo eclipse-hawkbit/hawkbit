@@ -14,10 +14,12 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
@@ -29,6 +31,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.GridActionsVisibilityListen
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGenericSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
+import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -51,33 +54,41 @@ public class MultipleTargetFilter extends Accordion {
     private final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState;
 
     private final VerticalLayout simpleFilterTab;
+    private final VerticalLayout targetTypeFilterTab;
+
     private final TargetTagFilterButtons filterByButtons;
+    private final TargetTypeFilterButtons targetTypeFilterButtons;
     private final FilterByStatusLayout filterByStatusFooter;
     private final TargetFilterQueryButtons customFilterTab;
 
-    private final transient GridActionsVisibilityListener gridActionsVisibilityListener;
+    private final transient GridActionsVisibilityListener targetTagGridActionsVisibilityListener;
+    private final transient GridActionsVisibilityListener targetTypeGridActionsVisibilityListener;
     private final transient EntityModifiedListener<ProxyTag> entityTagModifiedListener;
     private final transient EntityModifiedListener<ProxyTargetFilterQuery> entityFilterQueryModifiedListener;
 
+    private final transient EntityModifiedListener<ProxyTargetType> entityTargetTypeModifiedListener;
+
     MultipleTargetFilter(final CommonUiDependencies uiDependencies,
-            final TargetFilterQueryManagement targetFilterQueryManagement,
-            final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
-            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetTagWindowBuilder targetTagWindowBuilder) {
+                         final TargetFilterQueryManagement targetFilterQueryManagement,
+                         final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
+                         final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+                         final TargetTagWindowBuilder targetTagWindowBuilder, final TargetTypeWindowBuilder targetTypeWindowBuilder, final TargetTypeManagement targetTypeManagement) {
         this.i18n = uiDependencies.getI18n();
         this.eventBus = uiDependencies.getEventBus();
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
 
         this.filterByButtons = new TargetTagFilterButtons(uiDependencies, targetTagManagement, targetManagement,
                 targetTagFilterLayoutUiState, targetTagWindowBuilder);
+        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
         this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, targetTagFilterLayoutUiState);
         this.simpleFilterTab = buildSimpleFilterTab();
+        this.targetTypeFilterTab = buildTargetTypeFilterTab();
         this.customFilterTab = new TargetFilterQueryButtons(i18n, eventBus, targetFilterQueryManagement,
                 targetTagFilterLayoutUiState);
 
         final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_TAG_FILTER,
                 EventView.DEPLOYMENT);
-        this.gridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
+        this.targetTagGridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
                 filterByButtons::hideActionColumns, filterByButtons::showEditColumn, filterByButtons::showDeleteColumn);
         this.entityTagModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTag.class)
                 .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
@@ -85,6 +96,12 @@ public class MultipleTargetFilter extends Accordion {
         this.entityFilterQueryModifiedListener = new EntityModifiedListener.Builder<>(eventBus,
                 ProxyTargetFilterQuery.class).viewAware(layoutViewAware)
                         .entityModifiedAwareSupports(getFilterQueryModifiedAwareSupports()).build();
+
+        this.targetTypeGridActionsVisibilityListener = new GridActionsVisibilityListener(eventBus, layoutViewAware,
+                targetTypeFilterButtons::hideActionColumns, targetTypeFilterButtons::showEditColumn, targetTypeFilterButtons::showDeleteColumn);
+        this.entityTargetTypeModifiedListener = new EntityModifiedListener.Builder<>(eventBus, ProxyTargetType.class)
+                .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
+                .entityModifiedAwareSupports(getTargetTypeModifiedAwareSupports()).build();
 
         init();
         addTabs();
@@ -119,9 +136,38 @@ public class MultipleTargetFilter extends Accordion {
         return simpleTab;
     }
 
+    private VerticalLayout buildTargetTypeFilterTab() {
+        final VerticalLayout targetTypeTab = new VerticalLayout();
+        targetTypeTab.setSpacing(false);
+        targetTypeTab.setMargin(false);
+        targetTypeTab.setSizeFull();
+        targetTypeTab.setCaption(i18n.getMessage("caption.filter.type"));
+        targetTypeTab.addStyleName(SPUIStyleDefinitions.TARGET_TYPE_FILTER_HEADER);
+
+        final VerticalLayout targetTypeGridLayout = new VerticalLayout();
+        targetTypeGridLayout.setSpacing(false);
+        targetTypeGridLayout.setMargin(false);
+        targetTypeGridLayout.setSizeFull();
+        targetTypeGridLayout.setId(UIComponentIdProvider.TARGET_TYPE_DROP_AREA_ID);
+        targetTypeGridLayout.addComponent(targetTypeFilterButtons.getNoTargetTypeButton());
+        targetTypeGridLayout.addComponent(targetTypeFilterButtons);
+        targetTypeGridLayout.setComponentAlignment(targetTypeFilterButtons, Alignment.MIDDLE_CENTER);
+        targetTypeGridLayout.setExpandRatio(targetTypeFilterButtons, 1.0F);
+
+        targetTypeTab.addComponent(targetTypeGridLayout);
+        targetTypeTab.setExpandRatio(targetTypeGridLayout, 1.0F);
+
+        return targetTypeTab;
+    }
+
     private List<EntityModifiedAwareSupport> getTagModifiedAwareSupports() {
         return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(filterByButtons::refreshAll),
                 EntityModifiedGenericSupport.of(null, null, filterByButtons::resetFilterOnTagsDeleted));
+    }
+
+    private List<EntityModifiedAwareSupport> getTargetTypeModifiedAwareSupports() {
+        return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(targetTypeFilterButtons::refreshAll),
+                EntityModifiedGenericSupport.of(null, null, targetTypeFilterButtons::resetFilterOnTagsDeleted));
     }
 
     private List<EntityModifiedAwareSupport> getFilterQueryModifiedAwareSupports() {
@@ -138,6 +184,7 @@ public class MultipleTargetFilter extends Accordion {
     private void addTabs() {
         addTab(simpleFilterTab).setId(UIComponentIdProvider.SIMPLE_FILTER_ACCORDION_TAB);
         addTab(customFilterTab).setId(UIComponentIdProvider.CUSTOM_FILTER_ACCORDION_TAB);
+        addTab(targetTypeFilterTab).setId(UIComponentIdProvider.TARGET_TYPE_FILTER_ACCORDION_TAB);
     }
 
     /**
@@ -146,20 +193,30 @@ public class MultipleTargetFilter extends Accordion {
     public void selectedTabChanged() {
         final String selectedTabId = getTab(getSelectedTab()).getId();
 
+
         if (UIComponentIdProvider.SIMPLE_FILTER_ACCORDION_TAB.equals(selectedTabId)) {
             customFilterTab.clearAppliedTargetFilterQuery();
 
             targetTagFilterLayoutUiState.setCustomFilterTabSelected(false);
+            targetTagFilterLayoutUiState.setTargetTypeFilterTabSelected(false);
 
             eventBus.publish(EventTopics.TARGET_FILTER_TAB_CHANGED, this, TargetFilterTabChangedEventPayload.SIMPLE);
-        } else {
+        }
+        if (UIComponentIdProvider.TARGET_TYPE_FILTER_ACCORDION_TAB.equals(selectedTabId)){
+            targetTagFilterLayoutUiState.setTargetTypeFilterTabSelected(true);
+            targetTagFilterLayoutUiState.setCustomFilterTabSelected(false);
+            eventBus.publish(EventTopics.TARGET_FILTER_TAB_CHANGED, this, TargetFilterTabChangedEventPayload.TARGET_TYPE);
+        }
+        if (UIComponentIdProvider.CUSTOM_FILTER_ACCORDION_TAB.equals(selectedTabId)){
             filterByButtons.clearTargetTagFilters();
             filterByStatusFooter.clearStatusAndOverdueFilters();
 
             targetTagFilterLayoutUiState.setCustomFilterTabSelected(true);
+            targetTagFilterLayoutUiState.setTargetTypeFilterTabSelected(false);
 
             eventBus.publish(EventTopics.TARGET_FILTER_TAB_CHANGED, this, TargetFilterTabChangedEventPayload.CUSTOM);
         }
+
     }
 
     /**
@@ -170,11 +227,18 @@ public class MultipleTargetFilter extends Accordion {
             customFilterTab.restoreState();
 
             setSelectedTab(customFilterTab);
-        } else {
+        }
+        if (targetTagFilterLayoutUiState.isCustomFilterTabSelected()) {
             filterByButtons.restoreState();
             filterByStatusFooter.restoreState();
 
             setSelectedTab(simpleFilterTab);
+        }
+        if (targetTagFilterLayoutUiState.isTargetTypeFilterTabSelected()) {
+            filterByButtons.restoreState();
+            filterByStatusFooter.restoreState();
+
+            setSelectedTab(targetTypeFilterTab);
         }
     }
 
@@ -190,17 +254,21 @@ public class MultipleTargetFilter extends Accordion {
      * Subscribe event listeners
      */
     public void subscribeListeners() {
-        gridActionsVisibilityListener.subscribe();
+        targetTagGridActionsVisibilityListener.subscribe();
         entityTagModifiedListener.subscribe();
         entityFilterQueryModifiedListener.subscribe();
+        targetTypeGridActionsVisibilityListener.subscribe();
+        entityTargetTypeModifiedListener.subscribe();
     }
 
     /**
      * Unsubscribe event listeners
      */
     public void unsubscribeListeners() {
-        gridActionsVisibilityListener.unsubscribe();
+        targetTagGridActionsVisibilityListener.unsubscribe();
         entityTagModifiedListener.unsubscribe();
         entityFilterQueryModifiedListener.unsubscribe();
+        targetTypeGridActionsVisibilityListener.unsubscribe();
+        entityTargetTypeModifiedListener.unsubscribe();
     }
 }

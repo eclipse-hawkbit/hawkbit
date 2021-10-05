@@ -65,6 +65,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -552,6 +553,43 @@ public class JpaTargetManagement implements TargetManagement {
 
         // no reason to persist the tag
         entityManager.detach(tag);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetTypeAssignmentResult toggleTargetTypeAssignment(final Collection<String> controllerIds, final String tagName) {
+        final TargetType type = targetTypeRepository.findByName(tagName)
+                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, tagName));
+        final List<JpaTarget> allTargets = targetRepository
+                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
+
+        if (allTargets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, controllerIds,
+                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        }
+
+        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
+                TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+
+        // all are already assigned -> unassign
+        if (alreadyAssignedTargets.size() == allTargets.size()) {
+            alreadyAssignedTargets.forEach(target -> target.setTargetType(null));
+            return new TargetTypeAssignmentResult(0, Collections.emptyList(),
+                    Collections.unmodifiableList(alreadyAssignedTargets), type);
+        }
+
+        allTargets.removeAll(alreadyAssignedTargets);
+
+        final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(alreadyAssignedTargets.size(),
+                Collections
+                        .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
+                Collections.emptyList(), type);
+
+        // no reason to persist the type
+        entityManager.detach(type);
         return result;
     }
 

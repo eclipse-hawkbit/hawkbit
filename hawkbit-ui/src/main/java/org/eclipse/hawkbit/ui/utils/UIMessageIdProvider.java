@@ -89,9 +89,13 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_TAG = "caption.tag";
 
+    public static final String CAPTION_TYPE = "caption.type";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
+
+    public static final String LABEL_NO_TARGET_TYPE = "label.no.target.type";
 
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
 

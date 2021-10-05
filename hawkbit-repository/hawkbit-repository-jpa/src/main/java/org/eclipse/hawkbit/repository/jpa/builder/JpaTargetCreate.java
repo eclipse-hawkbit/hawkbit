@@ -32,7 +32,7 @@ public class JpaTargetCreate extends AbstractTargetUpdateCreate<TargetCreate> im
      *          Target type management
      */
     JpaTargetCreate(final TargetTypeManagement targetTypeManagement) {
-        super(null);
+        super(null, targetTypeManagement);
         this.targetTypeManagement = targetTypeManagement;
     }
 
