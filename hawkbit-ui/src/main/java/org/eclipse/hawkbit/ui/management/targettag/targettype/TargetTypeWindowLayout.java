@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
 import com.vaadin.ui.ComponentContainer;
-import com.vaadin.ui.FormLayout;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
