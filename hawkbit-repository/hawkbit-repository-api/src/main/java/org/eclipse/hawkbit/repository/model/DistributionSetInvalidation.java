@@ -65,7 +65,7 @@ public class DistributionSetInvalidation {
      * distribution set
      */
     public enum CancelationType {
-        FORCE, SOFT, NONE;
+        FORCE, SOFT, NONE
     }
 
 }
