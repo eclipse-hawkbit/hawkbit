@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
 import org.springframework.util.StringUtils;
 
 /**
- * Add distribution set type window controller
+ * Add target type window controller
  */
 public class AddTargetTypeWindowController
         extends AbstractAddNamedEntityWindowController<ProxyTargetType, ProxyTargetType, TargetType> {

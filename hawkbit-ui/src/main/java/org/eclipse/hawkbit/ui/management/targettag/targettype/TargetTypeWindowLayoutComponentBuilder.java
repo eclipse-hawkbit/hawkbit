@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
- * Builder for Distribution set type window layout component
+ * Builder for target type window layout component
  */
 public class TargetTypeWindowLayoutComponentBuilder {
 
@@ -23,7 +23,7 @@ public class TargetTypeWindowLayoutComponentBuilder {
     private final DistributionSetTypeManagement distributionSetTypeManagement;
 
     /**
-     * Constructor for DsTypeWindowLayoutComponentBuilder
+     * Constructor for TargetTypeWindowLayoutComponentBuilder
      *
      * @param i18n
      *          VaadinMessageSource
@@ -37,12 +37,12 @@ public class TargetTypeWindowLayoutComponentBuilder {
     }
 
     /**
-     * Create distribution set software module layout
+     * Create target type layout
      *
      * @param binder
      *          Vaadin binder
      *
-     * @return layout of distribution set software module selection
+     * @return layout of target type distribution set selection
      */
     public TargetTypeDsTypeSelectLayout createTargetTypeDsSelectLayout(final Binder<ProxyTargetType> binder) {
 

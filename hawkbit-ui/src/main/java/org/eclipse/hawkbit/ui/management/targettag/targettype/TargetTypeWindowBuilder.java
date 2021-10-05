@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 /**
- * Builder for distribution set type window
+ * Builder for target type window
  */
 public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTargetType> {
 

@@ -16,7 +16,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
 
 /**
- * Distribution set window layout
+ * Target type window layout
  */
 public class TargetTypeWindowLayout extends TagWindowLayout<ProxyTargetType> {
     private final TargetTypeWindowLayoutComponentBuilder targetTypeWindowLayoutComponentBuilder;
@@ -40,11 +40,6 @@ public class TargetTypeWindowLayout extends TagWindowLayout<ProxyTargetType> {
         this.targetTypeDsTypeSelectLayout = targetTypeWindowLayoutComponentBuilder.createTargetTypeDsSelectLayout(binder);
 
         this.colorPickerComponent.getColorPickerBtn().setCaption(i18n.getMessage("label.choose.type.color"));
-    }
-
-    @Override
-    protected FormLayout buildFormLayout() {
-        return super.buildFormLayout();
     }
 
     @Override

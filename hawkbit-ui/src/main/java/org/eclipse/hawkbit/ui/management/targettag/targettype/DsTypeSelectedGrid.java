@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
- * Software Module Selected Type grid which is shown on the Distribution Type
+ * Distribution Set Selected Type grid which is shown on the Target Type
  * Create/Update popup layout.
  */
 public class DsTypeSelectedGrid extends Grid<ProxyType> {
@@ -28,7 +28,7 @@ public class DsTypeSelectedGrid extends Grid<ProxyType> {
     private final VaadinMessageSource i18n;
 
     /**
-     * Constructor for SmTypeSelectedGrid
+     * Constructor for DsTypeSelectedGrid
      *
      * @param i18n
      *            VaadinMessageSource

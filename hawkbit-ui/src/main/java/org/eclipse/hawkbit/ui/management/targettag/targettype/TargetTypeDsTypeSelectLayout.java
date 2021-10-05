@@ -34,7 +34,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Layout for the software modules select grids for managing Distribution Set
+ * Layout for the distribution sets select grids for managing Target
  * Types on the Distributions View.
  */
 public class TargetTypeDsTypeSelectLayout extends CustomField<Set<ProxyType>> {
