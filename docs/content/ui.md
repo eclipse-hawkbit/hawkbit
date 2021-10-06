@@ -31,12 +31,12 @@ Target status overview, target management and manual deployments.
 
 - Start roll out by drag and drop targets on a DS.
 - Target list supports CTRL-A for "select all".
-- Delete sets, tags or targets by dragging them on delete icon.
 - Select _Target_ to see _Action_ History.
 - Bulk target upload: create bulk targets by upload.
-
+- DS invalidation allows to mark broken updates and avoid the distribution of such
 
 Hints for bulk upload:
+
 - Expected file type : csv.
 - Expected file format : Each line with two values (ControllerID,Target Name). ControllerID is mandatory.
 - Example:
@@ -46,6 +46,20 @@ Controller_id_2,targetName2
 ```
 
 ![Deployment Management view](../images/ui/deployment_mgmt.png)
+
+### Distribution set invalidation
+
+It is possible to mark broken updates and avoid the distribution of such by invalidating the corresponding distribution
+set in the Distributions list of the Deployment view. 
+
+Invalidating a distribution set removes all auto-assignments that reference this distribution set. Optionally, all
+rollouts that reference the distribution set can be stopped and existing update actions are removed, either by a
+soft-cancel or a forced-cancel.
+
+Invalidated distribution sets cannot be valid again, but remain invalid. They cannot be assigned to targets, neither
+through a rollout, auto-assignment nor a single assignment.
+
+![Distribution set invalidation](../images/ui/deployment_ds_invalidation.png)
 
 ## Distribution Management
 
