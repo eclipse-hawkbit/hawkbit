@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -37,7 +37,7 @@ import java.util.Collection;
 import org.springframework.util.CollectionUtils;
 
 /**
- * Target Tag filter buttons table.
+ * Target Type filter buttons table.
  */
 public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     private static final long serialVersionUID = 1L;
@@ -87,9 +87,9 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
         final String targetTypeToDeleteName = targetTypeToDelete.getName();
         final Long targetTypeToDeleteId = targetTypeToDelete.getId();
 
-        final Set<Long> clickedTagIds = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIds();
+        final Set<Long> clickedTypeIds = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIds();
 
-        if (!CollectionUtils.isEmpty(clickedTagIds) && clickedTagIds.contains(targetTypeToDeleteId)) {
+        if (!CollectionUtils.isEmpty(clickedTypeIds) && clickedTypeIds.contains(targetTypeToDeleteId)) {
             uiNotification.displayValidationError(i18n.getMessage("message.targettype.delete", targetTypeToDeleteName));
             return false;
         } else {

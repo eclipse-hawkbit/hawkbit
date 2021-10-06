@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * Multi button click behaviour of tag filter buttons layout.
+ * Multi button click behaviour of type filter buttons layout.
  */
 public class TargetTypeFilterButtonClick extends AbstractFilterMultiButtonClick<ProxyTargetType> {
     private static final long serialVersionUID = 1L;

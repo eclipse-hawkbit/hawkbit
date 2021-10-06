@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Class for defining the tag filter buttons.
+ * Class for defining the type filter buttons.
  */
 public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButtons<ProxyTargetType, Void> {
     private static final long serialVersionUID = 1L;
@@ -47,7 +47,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
     private final TargetTypeFilterButtonClick targetTypeFilterButtonClick;
 
     /**
-     * Constructor for AbstractTagFilterButtons
+     * Constructor for AbstractTargetTypeFilterButtons
      *
      * @param uiDependencies
      *            {@link CommonUiDependencies}
@@ -85,17 +85,17 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
         return targetTypeFilterButtonClick;
     }
 
-    private void onFilterChangedEvent(final Map<Long, String> activeTagIdsWithName) {
+    private void onFilterChangedEvent(final Map<Long, String> activeTypeIdsWithName) {
         getDataCommunicator().reset();
 
-        publishFilterChangedEvent(activeTagIdsWithName);
+        publishFilterChangedEvent(activeTypeIdsWithName);
     }
 
-    private void publishFilterChangedEvent(final Map<Long, String> activeTagIdsWithName) {
+    private void publishFilterChangedEvent(final Map<Long, String> activeTypeIdsWithName) {
         eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(getFilterMasterEntityType(),
-                FilterType.TYPE, activeTagIdsWithName.values(), getView()));
+                FilterType.TYPE, activeTypeIdsWithName.values(), getView()));
 
-        tagFilterLayoutUiState.setClickedTagIdsWithName(activeTagIdsWithName);
+        tagFilterLayoutUiState.setClickedTagIdsWithName(activeTypeIdsWithName);
     }
 
     /**
@@ -113,22 +113,22 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
     protected abstract EventView getView();
 
     private void onNoTagChangedEvent(final ClickBehaviourType clickType) {
-        final boolean isNoTagActivated = ClickBehaviourType.CLICKED == clickType;
+        final boolean isNoTypeActivated = ClickBehaviourType.CLICKED == clickType;
 
-        if (isNoTagActivated) {
+        if (isNoTypeActivated) {
             getNoTargetTypeButton().addStyleName(SPUIStyleDefinitions.SP_NO_TAG_BTN_CLICKED_STYLE);
         } else {
             getNoTargetTypeButton().removeStyleName(SPUIStyleDefinitions.SP_NO_TAG_BTN_CLICKED_STYLE);
         }
 
-        publishNoTagChangedEvent(isNoTagActivated);
+        publishNoTypeChangedEvent(isNoTypeActivated);
     }
 
-    private void publishNoTagChangedEvent(final boolean isNoTagActivated) {
+    private void publishNoTypeChangedEvent(final boolean isNoTypeActivated) {
         eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(getFilterMasterEntityType(),
-                FilterType.NO_TAG, isNoTagActivated, getView()));
+                FilterType.NO_TAG, isNoTypeActivated, getView()));
 
-        tagFilterLayoutUiState.setNoTagClicked(isNoTagActivated);
+        tagFilterLayoutUiState.setNoTagClicked(isNoTypeActivated);
     }
 
 
