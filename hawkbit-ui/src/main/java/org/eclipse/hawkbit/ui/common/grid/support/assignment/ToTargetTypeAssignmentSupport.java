@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2020 Bosch.IO GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -31,12 +31,12 @@ public abstract class ToTargetTypeAssignmentSupport<T, R extends NamedEntity> ex
 
     @Override
     protected void performAssignment(final List<T> sourceItemsToAssign, final ProxyTargetType targetItem) {
-        final String tagName = targetItem.getName();
+        final String typeName = targetItem.getName();
 
-        final AbstractAssignmentResult<R> tagsAssignmentResult = toggleTagAssignment(sourceItemsToAssign, tagName);
+        final AbstractAssignmentResult<R> typeAssignmentResult = toggleTagAssignment(sourceItemsToAssign, typeName);
 
-        final String assignmentMsg = createAssignmentMessage(tagsAssignmentResult,
-                i18n.getMessage(getAssignedEntityTypeMsgKey()), i18n.getMessage("caption.tag"), tagName);
+        final String assignmentMsg = createAssignmentMessage(typeAssignmentResult,
+                i18n.getMessage(getAssignedEntityTypeMsgKey()), i18n.getMessage("caption.tag"), typeName);
         notification.displaySuccess(assignmentMsg);
 
         publishTagAssignmentEvent(sourceItemsToAssign);

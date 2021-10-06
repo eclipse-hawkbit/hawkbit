@@ -20,18 +20,18 @@ public class TargetTypeFilterButtonClick extends AbstractFilterMultiButtonClick<
     private static final long serialVersionUID = 1L;
 
     private final transient Consumer<Map<Long, String>> filterChangedCallback;
-    private final transient Consumer<ClickBehaviourType> noTagChangedCallback;
+    private final transient Consumer<ClickBehaviourType> noTypeChangedCallback;
 
     TargetTypeFilterButtonClick(final Consumer<Map<Long, String>> filterChangedCallback,
-                                final Consumer<ClickBehaviourType> noTagChangedCallback) {
+                                final Consumer<ClickBehaviourType> noTypeChangedCallback) {
         this.filterChangedCallback = filterChangedCallback;
-        this.noTagChangedCallback = noTagChangedCallback;
+        this.noTypeChangedCallback = noTypeChangedCallback;
     }
 
     @Override
     protected void filterUnClicked(ProxyTargetType clickedFilter) {
         if (clickedFilter.isNoTargetType()) {
-            noTagChangedCallback.accept(ClickBehaviourType.UNCLICKED);
+            noTypeChangedCallback.accept(ClickBehaviourType.UNCLICKED);
         } else {
             filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
         }
@@ -40,7 +40,7 @@ public class TargetTypeFilterButtonClick extends AbstractFilterMultiButtonClick<
     @Override
     protected void filterClicked(ProxyTargetType clickedFilter) {
         if (clickedFilter.isNoTargetType()) {
-            noTagChangedCallback.accept(ClickBehaviourType.CLICKED);
+            noTypeChangedCallback.accept(ClickBehaviourType.CLICKED);
         } else {
             filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
         }

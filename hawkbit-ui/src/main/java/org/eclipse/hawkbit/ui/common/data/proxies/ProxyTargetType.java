@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
 import com.google.common.base.MoreObjects;
-import org.eclipse.hawkbit.repository.model.Tag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 
 import java.util.Objects;
 
 /**
- * Proxy for {@link Tag}.
+ * Proxy for {@link TargetType}.
  */
 public class ProxyTargetType extends ProxyType {
 
@@ -29,14 +29,14 @@ public class ProxyTargetType extends ProxyType {
     }
 
     /**
-     * Constructor for ProxyTag
+     * Constructor for ProxyTargetType
      *
      * @param id
-     *          Tag id
+     *          Type id
      * @param name
-     *          Tag name
+     *          Type name
      * @param colour
-     *          Tag oolour
+     *          Type colour
      */
     public ProxyTargetType(final Long id, final String name, final String colour) {
         setId(id);
