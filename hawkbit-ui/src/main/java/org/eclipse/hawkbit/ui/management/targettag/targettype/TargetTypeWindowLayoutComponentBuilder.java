@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import com.vaadin.data.Binder;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
@@ -50,7 +49,7 @@ public class TargetTypeWindowLayoutComponentBuilder {
         targetTypeDsTypeSelectLayout.setRequiredIndicatorVisible(false);
 
         binder.forField(targetTypeDsTypeSelectLayout)
-              .bind(ProxyType::getSelectedSmTypes, ProxyType::setSelectedSmTypes);
+              .bind(ProxyTargetType::getSelectedDsTypes, ProxyTargetType::setSelectedDsTypes);
 
         return targetTypeDsTypeSelectLayout;
     }
