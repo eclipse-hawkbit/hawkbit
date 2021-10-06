@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -28,7 +28,7 @@ public class TargetTypeAssignmentResult extends AbstractAssignmentResult<Target>
      * @param unassigned
      *            {@link List} of unassigned {@link Target}s.
      * @param targetType
-     *            the assigned or unassigned tag
+     *            the assigned or unassigned target type
      */
     public TargetTypeAssignmentResult(final int alreadyAssigned, final List<? extends Target> assigned,
                                       final List<? extends Target> unassigned, final TargetType targetType) {
