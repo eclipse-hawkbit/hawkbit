@@ -73,7 +73,7 @@ public class UpdateTargetTypeWindowController
         dsType.setName(proxyEntity.getName());
         dsType.setDescription(proxyEntity.getDescription());
         dsType.setColour(proxyEntity.getColour());
-        dsType.setSelectedSmTypes(getDsTypesByDsTypeId(proxyEntity.getId()));
+        dsType.setSelectedDsTypes(getDsTypesByDsTypeId(proxyEntity.getId()));
         nameBeforeEdit = proxyEntity.getName();
 
         return dsType;
@@ -95,7 +95,7 @@ public class UpdateTargetTypeWindowController
 
         Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId).collect(Collectors.toSet());
 
-        Set<Long> selectedDsIds = entity.getSelectedSmTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
+        Set<Long> selectedDsIds = entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
 
         Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
                 .filter(dsType -> !selectedDsIds.contains(dsType)).collect(Collectors.toSet());

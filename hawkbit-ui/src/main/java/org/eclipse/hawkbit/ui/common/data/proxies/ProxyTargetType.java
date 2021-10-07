@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
 import com.google.common.base.MoreObjects;
+import java.util.Set;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
 import java.util.Objects;
@@ -16,11 +17,13 @@ import java.util.Objects;
 /**
  * Proxy for {@link TargetType}.
  */
-public class ProxyTargetType extends ProxyType {
+public class ProxyTargetType extends ProxyFilterButton {
 
     private static final long serialVersionUID = 1L;
 
     private boolean isNoTargetType;
+
+    private Set<ProxyType> selectedDsTypes;
 
     /**
      * Constructor
@@ -50,6 +53,25 @@ public class ProxyTargetType extends ProxyType {
 
     public void setNoTargetType(boolean noTargetType) {
         isNoTargetType = noTargetType;
+    }
+
+    /**
+     * Gets the selected distribution sets types
+     *
+     * @return selectedDsTypes
+     */
+    public Set<ProxyType> getSelectedDsTypes() {
+        return selectedDsTypes;
+    }
+
+    /**
+     * Sets the selectedDsTypes
+     *
+     * @param selectedDsTypes
+     *            Selected distribution sets types
+     */
+    public void setSelectedDsTypes(final Set<ProxyType> selectedDsTypes) {
+        this.selectedDsTypes = selectedDsTypes;
     }
 
     @Override
