@@ -39,7 +39,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     private static final String TARGET_CAPTION = "caption.target";
 
     private final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState;
-    private final TargetBulkUploadUiState targetBulkUploadUiState;
+    private final transient TargetBulkUploadUiState targetBulkUploadUiState;
     private final TargetGridLayoutUiState targetGridLayoutUiState;
 
     private final transient BulkUploadWindowBuilder bulkUploadWindowBuilder;

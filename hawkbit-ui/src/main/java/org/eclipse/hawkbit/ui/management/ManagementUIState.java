@@ -36,7 +36,7 @@ public class ManagementUIState implements Serializable {
 
     private final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState;
     private final TargetGridLayoutUiState targetGridLayoutUiState;
-    private final TargetBulkUploadUiState targetBulkUploadUiState;
+    private final transient TargetBulkUploadUiState targetBulkUploadUiState;
     private final DistributionGridLayoutUiState distributionGridLayoutUiState;
     private final TagFilterLayoutUiState distributionTagLayoutUiState;
     private final ActionHistoryGridLayoutUiState actionHistoryGridLayoutUiState;

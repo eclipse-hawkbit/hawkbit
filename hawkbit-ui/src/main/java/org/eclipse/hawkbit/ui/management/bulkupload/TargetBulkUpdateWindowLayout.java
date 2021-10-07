@@ -58,7 +58,7 @@ public class TargetBulkUpdateWindowLayout extends CustomComponent {
     private final VaadinMessageSource i18n;
     private final UINotification uinotification;
 
-    private final TargetBulkUploadUiState targetBulkUploadUiState;
+    private final transient TargetBulkUploadUiState targetBulkUploadUiState;
 
     private final ComboBox<ProxyDistributionSet> dsCombo;
     private final ComboBox<ProxyTypeInfo> targetTypeCombo;
