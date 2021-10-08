@@ -88,12 +88,8 @@ public final class BulkUploadWindowLayoutComponentBuilder {
     public ComboBox<ProxyTypeInfo> createTargetTypeCombo(final Binder<ProxyBulkUploadWindow> binder) {
         final BoundComponent<ComboBox<ProxyTypeInfo>> boundComboBox = FormComponentBuilder
                 .createTypeCombo(binder, targetTypeDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE, false);
-        boundComboBox.setRequired(false);
-
         final ComboBox<ProxyTypeInfo> comboBox = boundComboBox.getComponent();
-        comboBox.setEmptySelectionAllowed(true);
         comboBox.setSizeFull();
-
         return comboBox;
     }
 
