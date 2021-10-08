@@ -70,7 +70,6 @@ public class AddTargetWindowController
     protected void adaptLayout(final ProxyTarget proxyEntity) {
         layout.setControllerIdEnabled(true);
         layout.setNameRequired(false);
-        layout.setTypeRequired(false);
     }
 
     @Override

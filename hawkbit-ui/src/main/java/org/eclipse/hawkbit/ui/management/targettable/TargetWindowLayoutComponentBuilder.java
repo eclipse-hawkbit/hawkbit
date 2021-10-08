@@ -8,23 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.validator.RegexpValidator;
 import com.vaadin.ui.ComboBox;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
-import org.eclipse.hawkbit.ui.common.data.mappers.NamedEntityToTypeInfoMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-
-import com.vaadin.data.Binder;
-import com.vaadin.data.validator.RegexpValidator;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 
 /**
  * Builder for target window layout component
@@ -35,19 +32,14 @@ public class TargetWindowLayoutComponentBuilder {
 
     private final VaadinMessageSource i18n;
 
-    private final TargetTypeManagement targetTypeManagement;
-
     /**
      * Constructor for TargetWindowLayoutComponentBuilder
      *
      * @param i18n
      *            VaadinMessageSource
-     * @param targetTypeManagement
-     *            TargetTypeManagement
      */
-    public TargetWindowLayoutComponentBuilder(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
+    public TargetWindowLayoutComponentBuilder(final VaadinMessageSource i18n) {
         this.i18n = i18n;
-        this.targetTypeManagement = targetTypeManagement;
     }
 
     /**
@@ -99,13 +91,13 @@ public class TargetWindowLayoutComponentBuilder {
      *
      * @param binder
      *            binder the input will be bound to
+     * @param targetTypeDataProvider
+     *            TargetTypeDataProvider
      * @return input component
      */
-    public BoundComponent<ComboBox<ProxyTypeInfo>> createTargetTypeCombo(final Binder<ProxyTarget> binder) {
-        TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
-                targetTypeManagement, new NamedEntityToTypeInfoMapper<>());
+    public BoundComponent<ComboBox<ProxyTypeInfo>> createTargetTypeCombo(final Binder<ProxyTarget> binder, TargetTypeDataProvider<ProxyTypeInfo> targetTypeDataProvider) {
         return FormComponentBuilder
-                .createTypeCombo(binder, targetTypeInfoDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE);
+                .createTypeCombo(binder, targetTypeDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE, false);
     }
 
 }

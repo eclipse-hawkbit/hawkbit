@@ -8,18 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.management.bulkupload;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.eclipse.hawkbit.ui.common.data.aware.TypeInfoAware;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Target bulk upload ui state
  */
-public class TargetBulkUploadUiState implements TypeInfoAware {
+public class TargetBulkUploadUiState implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private boolean isInProgress;
 
@@ -97,12 +98,10 @@ public class TargetBulkUploadUiState implements TypeInfoAware {
         this.description = description;
     }
 
-    @Override
     public void setTypeInfo(ProxyTypeInfo typeInfo) {
         this.proxyTypeInfo = typeInfo;
     }
 
-    @Override
     public ProxyTypeInfo getTypeInfo() {
         return proxyTypeInfo;
     }

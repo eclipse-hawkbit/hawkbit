@@ -141,13 +141,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Page<TargetType> findByTargetTypeFilter(Pageable pageable, String filterString) {
-        if (!StringUtils.isEmpty(filterString)) {
-            Specification<JpaTargetType> spec = TargetTypeSpecification.hasLikeName(filterString.trim() + "%");
-            return convertPage(targetTypeRepository.findAll(spec, pageable), pageable);
-        }
-
-        return convertPage(targetTypeRepository.findAll(pageable), pageable);
+    public Page<TargetType> findByName(Pageable pageable, String name) {
+        return convertPage(targetTypeRepository.findAll(TargetTypeSpecification.likeName(name), pageable), pageable);
     }
 
     @Override

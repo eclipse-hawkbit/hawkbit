@@ -13,9 +13,9 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
-import org.eclipse.hawkbit.ui.common.data.mappers.NamedEntityToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeInfoDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyBulkUploadWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
@@ -34,7 +34,7 @@ public final class BulkUploadWindowLayoutComponentBuilder {
     private final VaadinMessageSource i18n;
     private final DistributionSetStatelessDataProvider distributionSetDataProvider;
 
-    private final TargetTypeInfoDataProvider<ProxyTypeInfo> targetTypeInfoDataProvider;
+    private final TargetTypeDataProvider<ProxyTypeInfo> targetTypeDataProvider;
 
     /**
      * Constructor
@@ -51,8 +51,8 @@ public final class BulkUploadWindowLayoutComponentBuilder {
                                                   final TargetTypeManagement targetTypeManagement) {
         this.i18n = i18n;
 
-        this.targetTypeInfoDataProvider = new TargetTypeInfoDataProvider<>(
-                targetTypeManagement, new NamedEntityToTypeInfoMapper<>());
+        this.targetTypeDataProvider = new TargetTypeDataProvider<>(
+                targetTypeManagement, new TargetTypeToTypeInfoMapper());
 
         this.distributionSetDataProvider = new DistributionSetStatelessDataProvider(distributionSetManagement,
                 new DistributionSetToProxyDistributionMapper());
@@ -87,7 +87,7 @@ public final class BulkUploadWindowLayoutComponentBuilder {
      */
     public ComboBox<ProxyTypeInfo> createTargetTypeCombo(final Binder<ProxyBulkUploadWindow> binder) {
         final BoundComponent<ComboBox<ProxyTypeInfo>> boundComboBox = FormComponentBuilder
-                .createTypeCombo(binder, targetTypeInfoDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE);
+                .createTypeCombo(binder, targetTypeDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE, false);
         boundComboBox.setRequired(false);
 
         final ComboBox<ProxyTypeInfo> comboBox = boundComboBox.getComponent();

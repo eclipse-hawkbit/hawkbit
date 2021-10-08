@@ -16,6 +16,8 @@ import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -39,12 +41,15 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
      */
     public TargetWindowLayout(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
         super();
-        this.targetComponentBuilder = new TargetWindowLayoutComponentBuilder(i18n, targetTypeManagement);
+        this.targetComponentBuilder = new TargetWindowLayoutComponentBuilder(i18n);
 
         this.targetControllerId = targetComponentBuilder.createControllerIdField(binder);
         this.targetName = targetComponentBuilder.createNameField(binder);
         this.targetDescription = targetComponentBuilder.createDescriptionField(binder);
-        this.targetTypeCombo = targetComponentBuilder.createTargetTypeCombo(binder);
+
+        TargetTypeDataProvider<ProxyTypeInfo> targetTypeDataProvider = new TargetTypeDataProvider<>(
+                targetTypeManagement, new TargetTypeToTypeInfoMapper());
+        this.targetTypeCombo = targetComponentBuilder.createTargetTypeCombo(binder, targetTypeDataProvider);
     }
 
     @Override
@@ -83,8 +88,4 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
         targetName.setRequired(isNameRequired);
     }
 
-    public void setTypeRequired(boolean isTypeRequired) {
-        targetTypeCombo.getComponent().setEmptySelectionAllowed(true);
-        targetTypeCombo.setRequired(isTypeRequired);
-    }
 }

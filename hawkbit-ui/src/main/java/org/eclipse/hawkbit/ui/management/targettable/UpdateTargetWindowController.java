@@ -72,7 +72,6 @@ public class UpdateTargetWindowController
     protected void adaptLayout(final ProxyTarget proxyEntity) {
         layout.setControllerIdEnabled(false);
         layout.setNameRequired(true);
-        layout.setTypeRequired(false);
     }
 
     @Override
@@ -81,7 +80,14 @@ public class UpdateTargetWindowController
                 .name(entity.getName()).description(entity.getDescription())
                 .targetType(entity.getTypeInfo() != null ? entity.getTypeInfo().getId() : null);
 
-        return targetManagement.update(targetUpdate);
+        Target updatedTarget = targetManagement.update(targetUpdate);
+
+        // Un-assigning target type needs another DB request to update the target type value to Null
+        if (entity.getTypeInfo() == null){
+            return targetManagement.unAssignType(entity.getControllerId());
+        }
+
+        return updatedTarget;
     }
 
     @Override

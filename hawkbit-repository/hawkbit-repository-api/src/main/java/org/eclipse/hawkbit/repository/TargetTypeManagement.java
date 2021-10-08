@@ -88,12 +88,12 @@ public interface TargetTypeManagement {
      *
      * @param pageable
      *            page parameter
-     * @param filterString
+     * @param name
      *            has text of filters to be applied.
      * @return the page of found {@link TargetType}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByTargetTypeFilter(@NotNull Pageable pageable, String filterString);
+    Page<TargetType> findByName(@NotNull Pageable pageable, String name);
 
     /**
      * @param id

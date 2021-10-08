@@ -149,11 +149,11 @@ public final class TargetTypeSpecification {
     /**
      * {@link Specification} for retrieving {@link TargetType}s by "like name".
      *
-     * @param subString
+     * @param name
      *            to be filtered on
      * @return the {@link TargetType} {@link Specification}
      */
-    public static Specification<JpaTargetType> hasLikeName(final String subString) {
-        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(JpaTargetType_.name)), subString.toLowerCase());
+    public static Specification<JpaTargetType> likeName(final String name) {
+        return (targetRoot, query, cb) -> cb.like(cb.lower(targetRoot.get(JpaTargetType_.name)), name.toLowerCase());
     }
 }

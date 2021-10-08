@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.common.builder;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
 import org.eclipse.hawkbit.ui.common.data.aware.ActionTypeAware;
 import org.eclipse.hawkbit.ui.common.data.aware.DescriptionAware;
@@ -22,6 +23,7 @@ import org.eclipse.hawkbit.ui.common.data.aware.VersionAware;
 import org.eclipse.hawkbit.ui.common.data.providers.AbstractProxyDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -326,15 +328,18 @@ public final class FormComponentBuilder {
      */
     public static <T extends TypeInfoAware> BoundComponent<ComboBox<ProxyTypeInfo>> createTypeCombo(
             final Binder<T> binder, final AbstractProxyDataProvider<ProxyTypeInfo, ?, String> dataProvider,
-            final VaadinMessageSource i18n, final String componentId) {
+            final VaadinMessageSource i18n, final String componentId, final boolean isRequired) {
         final ComboBox<ProxyTypeInfo> typeCombo = SPUIComponentProvider.getComboBox(componentId,
-                i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), false,
-                ProxyTypeInfo::getName, dataProvider);
+                i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), !isRequired,
+                ProxyTypeInfo::getName, dataProvider.withConvertedFilter(filterString -> filterString.trim() + "%"));
 
-        final Binding<T, ProxyTypeInfo> binding = binder.forField(typeCombo)
-                .asRequired(i18n.getMessage("message.error.typeRequired"))
-                .bind(TypeInfoAware::getTypeInfo, TypeInfoAware::setTypeInfo);
+        final BindingBuilder<T, ProxyTypeInfo> bindingBuilder = binder.forField(typeCombo);
 
+        if (isRequired){
+            bindingBuilder.asRequired(i18n.getMessage("message.error.typeRequired"));
+        }
+
+        final Binding<T, ProxyTypeInfo> binding = bindingBuilder.bind(TypeInfoAware::getTypeInfo, TypeInfoAware::setTypeInfo);
         return new BoundComponent<>(typeCombo, binding);
     }
 

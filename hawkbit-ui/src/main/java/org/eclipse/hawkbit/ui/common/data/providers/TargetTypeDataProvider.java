@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.StringUtils;
 
 /**
  * Data provider for {@link TargetTypeManagement}, which dynamically loads a
@@ -25,12 +26,12 @@ import org.springframework.data.domain.Sort.Direction;
  * @param <T>
  *            output type
  */
-public class TargetTypeInfoDataProvider<T extends ProxyIdentifiableEntity>
+public class TargetTypeDataProvider<T extends ProxyIdentifiableEntity>
         extends AbstractProxyDataProvider<T, TargetType, String> {
     private static final long serialVersionUID = 1L;
     private final transient TargetTypeManagement targetTypeManagement;
 
-    public TargetTypeInfoDataProvider(final TargetTypeManagement targetTypeManagement, IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
+    public TargetTypeDataProvider(final TargetTypeManagement targetTypeManagement, IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
         super(mapper, Sort.by(Direction.ASC, "name"));
         this.targetTypeManagement = targetTypeManagement;
 
@@ -38,7 +39,10 @@ public class TargetTypeInfoDataProvider<T extends ProxyIdentifiableEntity>
 
     @Override
     protected Page<TargetType> loadBackendEntities(PageRequest pageRequest, String filter) {
-        return targetTypeManagement.findByTargetTypeFilter(pageRequest, filter);
+        if (!StringUtils.isEmpty(filter)){
+            return targetTypeManagement.findByName(pageRequest, filter);
+        }
+        return targetTypeManagement.findAll(pageRequest);
     }
 
     @Override
