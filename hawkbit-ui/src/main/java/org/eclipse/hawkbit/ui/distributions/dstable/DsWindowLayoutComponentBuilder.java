@@ -59,7 +59,7 @@ public class DsWindowLayoutComponentBuilder {
      */
     public ComboBox<ProxyTypeInfo> createDistributionSetTypeCombo(final Binder<ProxyDistributionSet> binder) {
         return FormComponentBuilder
-                .createTypeCombo(binder, dsTypeDataProvider, i18n, UIComponentIdProvider.DIST_ADD_DISTSETTYPE)
+                .createTypeCombo(binder, dsTypeDataProvider, i18n, UIComponentIdProvider.DIST_ADD_DISTSETTYPE, true)
                 .getComponent();
     }
 
