@@ -12,10 +12,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
@@ -35,7 +38,10 @@ public class InvalidateDistributionSetSupport {
     private static final Logger LOG = LoggerFactory.getLogger(InvalidateDistributionSetSupport.class);
 
     private final VaadinMessageSource i18n;
+    private final UiProperties uiProperties;
     private final UINotification notification;
+    private final SpPermissionChecker permissionChecker;
+
     private final DistributionGrid grid;
 
     private final DistributionSetInvalidationManagement dsInvalidationManagement;
@@ -55,10 +61,14 @@ public class InvalidateDistributionSetSupport {
      *            {@link DistributionSetInvalidationManagement}
      */
     public InvalidateDistributionSetSupport(final DistributionGrid grid, final VaadinMessageSource i18n,
-            final UINotification notification, final DistributionSetInvalidationManagement dsInvalidationManagement) {
+            final UiProperties uiProperties, final UINotification notification,
+            final SpPermissionChecker permissionChecker,
+            final DistributionSetInvalidationManagement dsInvalidationManagement) {
         this.grid = grid;
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
         this.notification = notification;
+        this.permissionChecker = permissionChecker;
         this.dsInvalidationManagement = dsInvalidationManagement;
     }
 
@@ -72,11 +82,12 @@ public class InvalidateDistributionSetSupport {
         final List<ProxyDistributionSet> allDistributionSetsForInvalidation = getDistributionSetsForInvalidation(
                 clickedDistributionSet);
 
-        consequencesDialog = new InvalidateDsConsequencesDialog(allDistributionSetsForInvalidation, i18n, ok -> {
-            if (ok) {
-                openAffectedEntitiesWindowOnInvalidateAction(allDistributionSetsForInvalidation);
-            }
-        });
+        consequencesDialog = new InvalidateDsConsequencesDialog(allDistributionSetsForInvalidation, i18n, uiProperties,
+                ok -> {
+                    if (Boolean.TRUE.equals(ok) && hasSufficientPermission()) {
+                        openAffectedEntitiesWindowOnInvalidateAction(allDistributionSetsForInvalidation);
+                    }
+                });
         consequencesDialog.getWindow().setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
 
         UI.getCurrent().addWindow(consequencesDialog.getWindow());
@@ -89,15 +100,15 @@ public class InvalidateDistributionSetSupport {
         final DistributionSetInvalidationCount entitiesForInvalidationCount = dsInvalidationManagement
                 .countEntitiesForInvalidation(
                         getDistributionSetInvalidation(consequencesDialog.isStopRolloutsSelected(),
-                                getDistributionSetIds(allDistributionSetsForInvalidation), CancelationType.NONE));
+                                getDistributionSetIds(allDistributionSetsForInvalidation),
+                                consequencesDialog.getCancelationType()));
 
         final InvalidateDsAffectedEntitiesDialog affectedEntitiesDialog = new InvalidateDsAffectedEntitiesDialog(
                 allDistributionSetsForInvalidation, i18n, ok -> {
-                    if (ok) {
+                    if (Boolean.TRUE.equals(ok) && hasSufficientPermission()) {
                         handleOkForInvalidateDistributionSet(allDistributionSetsForInvalidation);
                     }
-                }, entitiesForInvalidationCount.getRolloutsCount(),
-                entitiesForInvalidationCount.getAutoAssignmentCount());
+                }, entitiesForInvalidationCount);
         affectedEntitiesDialog.getWindow().setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
 
         UI.getCurrent().addWindow(affectedEntitiesDialog.getWindow());
@@ -106,11 +117,11 @@ public class InvalidateDistributionSetSupport {
 
     private void handleOkForInvalidateDistributionSet(
             final List<ProxyDistributionSet> allDistributionSetsForInvalidation) {
-
         try {
             dsInvalidationManagement.invalidateDistributionSet(
                     getDistributionSetInvalidation(consequencesDialog.isStopRolloutsSelected(),
-                            getDistributionSetIds(allDistributionSetsForInvalidation), CancelationType.NONE));
+                            getDistributionSetIds(allDistributionSetsForInvalidation),
+                            consequencesDialog.getCancelationType()));
             notification.displaySuccess(createSuccessNotificationText(allDistributionSetsForInvalidation));
             grid.refreshAll();
         } catch (final RuntimeException ex) {
@@ -119,6 +130,21 @@ public class InvalidateDistributionSetSupport {
             notification.displayWarning(createFailureNotificationText(allDistributionSetsForInvalidation));
             throw ex;
         }
+    }
+
+    private boolean hasSufficientPermission() {
+        if (consequencesDialog.isStopRolloutsSelected() && !permissionChecker.hasRolloutUpdatePermission()) {
+            notification.displayValidationError(i18n.getMessage(
+                    UIMessageIdProvider.MESSAGE_ERROR_PERMISSION_INSUFFICIENT, SpPermission.UPDATE_ROLLOUT));
+            return false;
+        }
+        if (consequencesDialog.getCancelationType() != CancelationType.NONE
+                && !permissionChecker.hasUpdateTargetPermission()) {
+            notification.displayValidationError(i18n
+                    .getMessage(UIMessageIdProvider.MESSAGE_ERROR_PERMISSION_INSUFFICIENT, SpPermission.UPDATE_TARGET));
+            return false;
+        }
+        return true;
     }
 
     private DistributionSetInvalidation getDistributionSetInvalidation(final boolean stopRollouts,

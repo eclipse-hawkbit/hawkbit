@@ -11,11 +11,18 @@ package org.eclipse.hawkbit.ui.management.dstable;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Link;
+import com.vaadin.ui.RadioButtonGroup;
+import com.vaadin.ui.themes.ValoTheme;
+import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.ConfirmStyle;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;
 import org.eclipse.hawkbit.ui.common.builder.WindowBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
+import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleTiny;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
@@ -35,27 +42,35 @@ public class InvalidateDsConsequencesDialog {
 
     private final Consumer<Boolean> callback;
 
+    private final VaadinMessageSource i18n;
+
+    private final UiProperties uiProperties;
+
     private final CommonDialogWindow window;
 
     private final CheckBox stopRolloutsCheckBox;
 
-    private final VaadinMessageSource i18n;
+    private final RadioButtonGroup<CancelationType> cancelationTypeGroup;
 
     /**
      * Constructor for {@link InvalidateDsConsequencesDialog}
      *
      * @param allDistributionSetsForInvalidation
-     *            {@link List} of {@link ProxyDistributionSet} that are selected
-     *            for invalidation
+     *            {@link List} of {@link ProxyDistributionSet} that are selected for
+     *            invalidation
      * @param i18n
      *            {@link VaadinMessageSource}
      * @param callback
      *            callback for dialog result
      */
     public InvalidateDsConsequencesDialog(final List<ProxyDistributionSet> allDistributionSetsForInvalidation,
-            final VaadinMessageSource i18n, final Consumer<Boolean> callback) {
+            final VaadinMessageSource i18n, final UiProperties uiProperties, final Consumer<Boolean> callback) {
 
         this.i18n = i18n;
+        this.uiProperties = uiProperties;
+        this.cancelationTypeGroup = createCancelationTypeOptionGroup();
+        this.stopRolloutsCheckBox = createStopRolloutsCheckbox();
+
         final VerticalLayout content = new VerticalLayout();
         content.setSpacing(true);
         content.setMargin(true);
@@ -64,10 +79,11 @@ public class InvalidateDsConsequencesDialog {
         consequencesLabel.setWidthFull();
         content.addComponent(consequencesLabel);
 
-        stopRolloutsCheckBox = new CheckBox();
-        stopRolloutsCheckBox.setId(UIComponentIdProvider.INVALIDATE_DS_STOP_ROLLOUTS);
-        stopRolloutsCheckBox.setCaption(i18n.getMessage(UIMessageIdProvider.LABEL_INVALIDATE_DS_STOP_ROLLOUTS));
+        content.addComponent(createCancelationTypeInfo());
+        content.addComponent(cancelationTypeGroup);
         content.addComponent(stopRolloutsCheckBox);
+        content.addComponent(createConsequencesHint());
+        addValueChangeListeners();
 
         final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CREATE_UPDATE_WINDOW)
                 .id(UIComponentIdProvider.INVALIDATE_DS_CONSEQUENCES)
@@ -118,6 +134,48 @@ public class InvalidateDsConsequencesDialog {
         }
     }
 
+    private CheckBox createStopRolloutsCheckbox() {
+        final CheckBox checkBox = new CheckBox();
+        checkBox.setId(UIComponentIdProvider.INVALIDATE_DS_STOP_ROLLOUTS);
+        checkBox.setCaption(i18n.getMessage(UIMessageIdProvider.LABEL_INVALIDATE_DS_STOP_ROLLOUTS));
+        return checkBox;
+    }
+
+    private HorizontalLayout createCancelationTypeInfo() {
+        final HorizontalLayout horizontalLabelInfo = new HorizontalLayout();
+        final Label typeLabel = new Label(
+                i18n.getMessage(UIMessageIdProvider.LABEL_INVALIDATE_DS_TYPE_OF_CANCELLATION));
+        final Link linkToInvalidationHelp = SPUIComponentProvider.getHelpLink(i18n,
+                uiProperties.getLinks().getDocumentation().getDistributionSetInvalidation());
+        horizontalLabelInfo.addComponent(typeLabel);
+        horizontalLabelInfo.addComponent(linkToInvalidationHelp);
+        return horizontalLabelInfo;
+    }
+
+    private RadioButtonGroup<CancelationType> createCancelationTypeOptionGroup() {
+        final RadioButtonGroup<CancelationType> cancellationTypeOptions = new RadioButtonGroup<>();
+        cancellationTypeOptions.setId(UIComponentIdProvider.INVALIDATE_DS_CANCELATION_TYPE);
+        cancellationTypeOptions.addStyleName(ValoTheme.OPTIONGROUP_HORIZONTAL);
+        cancellationTypeOptions.setSizeUndefined();
+
+        cancellationTypeOptions.setItems(CancelationType.values());
+        cancellationTypeOptions.setItemCaptionGenerator(this::getCancelationTypeCaptionMessageId);
+        cancellationTypeOptions.setItemDescriptionGenerator(this::getCancelationTypeToolTipMessageId);
+
+        // default shall be "None"
+        cancellationTypeOptions.setSelectedItem(CancelationType.NONE);
+
+        return cancellationTypeOptions;
+    }
+
+    private Label createConsequencesHint() {
+        String hint = i18n.getMessage(UIMessageIdProvider.MESSAGE_INVALIDATE_DISTRIBUTIONSET_UNREPEATABLE_HINT);
+        final Label hintLabel = new Label(hint);
+        hintLabel.setWidthFull();
+        hintLabel.setStyleName(ValoTheme.LABEL_TINY);
+        return hintLabel;
+    }
+
     /**
      * Returns the user selection stop rollouts
      *
@@ -127,10 +185,52 @@ public class InvalidateDsConsequencesDialog {
         return stopRolloutsCheckBox.getValue();
     }
 
+    CancelationType getCancelationType() {
+        return cancelationTypeGroup.getValue();
+    }
+
+    private void addValueChangeListeners() {
+        cancelationTypeGroup.addValueChangeListener(event -> {
+            if (event.getValue() == CancelationType.NONE) {
+                stopRolloutsCheckBox.setValue(false);
+                stopRolloutsCheckBox.setEnabled(true);
+            } else {
+                stopRolloutsCheckBox.setValue(true);
+                stopRolloutsCheckBox.setEnabled(false);
+            }
+        });
+    }
+
     /**
      * @return confirmation window
      */
     public Window getWindow() {
         return window;
+    }
+
+    private String getCancelationTypeCaptionMessageId(CancelationType item) {
+        switch (item) {
+        case FORCE:
+            return i18n.getMessage(UIMessageIdProvider.LABEL_CANCEL_ACTION_FORCE);
+        case SOFT:
+            return i18n.getMessage(UIMessageIdProvider.LABEL_CANCEL_ACTION_SOFT);
+        case NONE:
+            return i18n.getMessage(UIMessageIdProvider.LABEL_CANCEL_ACTION_NONE);
+        default:
+            return null;
+        }
+    }
+
+    private String getCancelationTypeToolTipMessageId(CancelationType item) {
+        switch (item) {
+        case FORCE:
+            return i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALIDATE_FORCED);
+        case SOFT:
+            return i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALIDATE_SOFT);
+        case NONE:
+            return i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALIDATE_NONE);
+        default:
+            return null;
+        }
     }
 }

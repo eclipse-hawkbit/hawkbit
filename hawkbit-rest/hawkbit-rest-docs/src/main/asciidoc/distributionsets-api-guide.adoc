@@ -835,7 +835,12 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Invalidate a distribution set. Once a distribution set is invalidated, it can not be valid again. An invalidated distribution set cannot be assigned to targets anymore. The distribution set that is going to be invalidated will be removed from all auto assignments. Furthermore, the user can choose to cancel all rollouts and (force) cancel all actions connected to this distribution set. Required permission: UPDATE_REPOSITORY
+Invalidate a distribution set.
+Once a distribution set is invalidated, it can not be valid again.
+An invalidated distribution set cannot be assigned to targets anymore.
+The distribution set that is going to be invalidated will be removed from all auto assignments.
+Furthermore, the user can choose to cancel all rollouts and (force) cancel all actions connected to this distribution set.
+Required permission: UPDATE_REPOSITORY, UPDATE_TARGET
 
 === Invalidate a distribution set
 
