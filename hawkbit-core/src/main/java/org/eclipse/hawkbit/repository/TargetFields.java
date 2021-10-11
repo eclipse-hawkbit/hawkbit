@@ -135,4 +135,15 @@ public enum TargetFields implements FieldNameProvider {
     public String getFieldName() {
         return fieldName;
     }
+
+    @Override
+    public String[] getSubAttributes(final String propertyField) {
+        if (this == METADATA || this == ATTRIBUTE) {
+            // expected e.g. metadata.a.b.c where a.b.c is the metadata key name,
+            // same for attributes
+            final String metadataKeyValue = propertyField.substring(propertyField.indexOf('.') + 1);
+            return new String[] { fieldName, metadataKeyValue };
+        }
+        return FieldNameProvider.super.getSubAttributes(propertyField);
+    }
 }

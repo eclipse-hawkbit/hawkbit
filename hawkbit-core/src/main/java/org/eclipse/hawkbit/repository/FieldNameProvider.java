@@ -34,6 +34,17 @@ public interface FieldNameProvider {
     String getFieldName();
 
     /**
+     * Returns the sub attributes
+     *
+     * @param propertyFieldName
+     *            the given field
+     * @return array consisting of sub attributes
+     */
+    default String[] getSubAttributes(final String propertyFieldName) {
+        return propertyFieldName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+    }
+
+    /**
      * Contains the sub entity the given field.
      *
      * @param propertyField
@@ -84,7 +95,7 @@ public interface FieldNameProvider {
 
     /**
      * Returns the name of the field, that identifies the entity.
-     * 
+     *
      * @return the name of the identifier, by default 'id'
      */
     default String identifierFieldName() {

@@ -8,15 +8,16 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
 
 public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldNameProvider> {
 
@@ -30,7 +31,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
     protected A getFieldEnumByName(final ComparisonNode node) {
         String enumName = node.getSelector();
-        final String[] graph = getSubAttributesFrom(enumName);
+        final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
         if (graph.length != 0) {
             enumName = graph[0];
         }
@@ -42,13 +43,9 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
         }
     }
 
-    protected static String[] getSubAttributesFrom(final String property) {
-        return property.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
-    }
-
     protected String getAndValidatePropertyFieldName(final A propertyEnum, final ComparisonNode node) {
 
-        final String[] graph = getSubAttributesFrom(node.getSelector());
+        final String[] graph = propertyEnum.getSubAttributes(node.getSelector());
 
         validateMapParameter(propertyEnum, node, graph);
 

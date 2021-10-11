@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.assertj.core.util.Maps;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -148,12 +149,15 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by attribute")
     public void testFilterByAttribute() {
+        createTargetWithAttributes("test.dot", "value.dot");
+
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision!=1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1*", 2);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==noExist*", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision=in=(1.1,notexist)", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision=out=(1.1)", 1);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot==value.dot", 1);
     }
 
     @Test
@@ -214,6 +218,8 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by metadata")
     public void testFilterByMetadata() {
+        createTargetWithMetadata("key.dot", "value.dot");
+
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==*v*", 2);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==noExist*", 0);
@@ -223,6 +229,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist!=metaValue", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=notExist", 2);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".key.dot==value.dot", 1);
     }
 
     @Test
@@ -259,6 +266,10 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         final String rsql5 = "wrongfield == abcd";
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsql5, TargetFields.class));
+
+        final String rsql6 = "ATTRIBUTE.test.dot == test and ATTRIBUTE.subkey2 == test"
+                + " and METADATA.test.dot == abcd and METADATA.metavalue2 == asdfg";
+        RSQLUtility.validateRsqlFor(rsql6, TargetFields.class);
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
@@ -266,5 +277,19 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);
+    }
+
+    private Target createTargetWithMetadata(final String metadataKeyName, final String metadataValue) {
+        final Target target = testdataFactory.createTarget();
+        createTargetMetadata(target.getControllerId(),
+                entityFactory.generateTargetMetadata(metadataKeyName, metadataValue));
+        return target;
+    }
+
+    private Target createTargetWithAttributes(final String attributeName, final String attributeValue) {
+        final Target target = testdataFactory.createTarget();
+        controllerManagement.updateControllerAttributes(target.getControllerId(),
+                Maps.newHashMap(attributeName, attributeValue), null);
+        return target;
     }
 }
