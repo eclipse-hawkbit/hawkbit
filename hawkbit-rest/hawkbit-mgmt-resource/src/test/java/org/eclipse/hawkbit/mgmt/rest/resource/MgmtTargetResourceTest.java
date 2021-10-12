@@ -2246,6 +2246,16 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
                 .content("{\"id\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        // verify response json exception message if body does not include id field
+        final MvcResult mvcResult = mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + targetControllerId + "/targettype")
+                        .content("{\"unknownfield\":" + invalidTargetTypeId + "}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest()).andReturn();
+        final ExceptionInfo exceptionInfo = ResourceUtility
+                .convertException(mvcResult.getResponse().getContentAsString());
+        assertThat(exceptionInfo.getExceptionClass()).isEqualTo(ConstraintViolationException.class.getName());
+        assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
+        assertThat(exceptionInfo.getMessage()).contains("targetTypeId must not be null");
     }
 
     @Test
@@ -2268,4 +2278,41 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         assertThat(targetManagement.getByControllerID(targetControllerId).get().getTargetType()).isNull();
     }
 
+    @Test
+    public void invalidRequestsOnTargetTypeResource() throws Exception {
+        final String knownTargetId = "targetId";
+        final Target target = testdataFactory.createTarget(knownTargetId);
+        final TargetType targettype = testdataFactory.createTargetType("targettype", Collections.emptyList());
+
+        // GET is not allowed
+        mvc.perform(get(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId)).andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+
+        // PUT is not allowed
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING
+                        + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING, knownTargetId))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isMethodNotAllowed());
+
+        // POST does not exist with path parameter targettype
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING
+                + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        // DELETE does not exist  with path parameter targettype
+        mvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING
+                + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING + "/123", knownTargetId))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+
+        // Invalid content
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                        knownTargetId)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isUnsupportedMediaType());
+
+        // Bad request if id field is missing
+        mvc.perform(post(
+                MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + MgmtRestConstants.TARGET_TARGET_TYPE_V1_REQUEST_MAPPING,
+                knownTargetId).content("{\"unknownfield\":123}").contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
 }
