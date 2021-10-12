@@ -158,6 +158,17 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision=in=(1.1,notexist)", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision=out=(1.1)", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".test.dot==value.dot", 1);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key.dot*==value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key.*==value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key.==value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key*==value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".*==value.dot", 0);
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + ".==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "*==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
     }
 
     @Test
@@ -230,6 +241,17 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".notExist!=metaValue", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey!=notExist", 2);
         assertRSQLQuery(TargetFields.METADATA.name() + ".key.dot==value.dot", 1);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".key.dot*==value.dot", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".key.*==value.dot", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".key.==value.dot", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".key*==value.dot", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + ".*==value.dot", 0);
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + ".==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "*==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
     }
 
     @Test
@@ -277,6 +299,12 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
         assertThat(countTargetsAll).isEqualTo(expcetedTargets);
+    }
+
+    private <T extends Throwable> void assertRSQLQueryThrowsException(final String rsqlParam,
+            final Class<T> expectedException) {
+        assertThatExceptionOfType(expectedException)
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, TargetFields.class));
     }
 
     private Target createTargetWithMetadata(final String metadataKeyName, final String metadataValue) {
