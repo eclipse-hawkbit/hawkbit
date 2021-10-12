@@ -109,6 +109,14 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "label.invalidate.distributionset.stop.rollouts";
 
+    public static final String LABEL_INVALIDATE_DS_TYPE_OF_CANCELLATION = "label.invalidate.ds.cancelation.type";
+
+    public static final String LABEL_CANCEL_ACTION_NONE = "label.cancel.action.none";
+
+    public static final String LABEL_CANCEL_ACTION_FORCE = "label.cancel.action.force";
+
+    public static final String LABEL_CANCEL_ACTION_SOFT = "label.cancel.action.soft";
+
     public static final String MESSAGE_NO_DATA = "message.no.data";
 
     public static final String MESSAGE_DATA_AVAILABLE = "message.data.available";
@@ -146,6 +154,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_ERROR_ENTITY_DELETED = "message.entity.error.deleted";
 
     public static final String MESSAGE_ERROR_ENTITY_READONLY = "message.entity.error.readonly";
+
+    public static final String MESSAGE_ERROR_PERMISSION_INSUFFICIENT = "message.permission.insufficient";
 
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
@@ -198,6 +208,12 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_DISTRIBUTIONSET_INVALID = "tooltip.distributionset.invalid";
 
     public static final String TOOLTIP_DISTRIBUTIONSET_INCOMPLETE = "tooltip.distributionset.incomplete";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_FORCED = "tooltip.distributionset.invalidate.forced";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_SOFT = "tooltip.distributionset.invalidate.soft";
+
+    public static final String TOOLTIP_DISTRIBUTIONSET_INVALIDATE_NONE = "tooltip.distributionset.invalidate.none";
 
     public static final String TOOLTIP_TIMEFORCED_ITEM = "tooltip.timeforced.item";
 
@@ -279,6 +295,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_INTRO_PLURAL = "message.invalidate.distributionset.affected.entities.intro.plural";
 
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ACTIONS = "message.invalidate.distributionset.affected.entities.actions";
+
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_ROLLOUTS = "message.invalidate.distributionset.affected.entities.rollouts";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "message.invalidate.distributionset.affected.entities.autoassignments";
@@ -290,6 +308,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_SINGULAR = "message.invalidate.distributionset.fail.singular";
 
     public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_FAIL_PLURAL = "message.invalidate.distributionset.fail.plural";
+
+    public static final String MESSAGE_INVALIDATE_DISTRIBUTIONSET_UNREPEATABLE_HINT = "message.invalidate.distributionset.unrepeatable.hint";
 
     public static final String VAADIN_SYSTEM_SESSIONEXPIRED_CAPTION = "vaadin.system.sessionexpired.caption";
 

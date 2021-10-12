@@ -8,18 +8,20 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.validator.RegexpValidator;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-
-import com.vaadin.data.Binder;
-import com.vaadin.data.validator.RegexpValidator;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 
 /**
  * Builder for target window layout component
@@ -82,6 +84,20 @@ public class TargetWindowLayoutComponentBuilder {
     public TextArea createDescriptionField(final Binder<ProxyTarget> binder) {
         return FormComponentBuilder.createDescriptionInput(binder, i18n, UIComponentIdProvider.TARGET_ADD_DESC)
                 .getComponent();
+    }
+
+    /**
+     * create target type combo
+     *
+     * @param binder
+     *            binder the input will be bound to
+     * @param targetTypeDataProvider
+     *            TargetTypeDataProvider
+     * @return input component
+     */
+    public BoundComponent<ComboBox<ProxyTypeInfo>> createTargetTypeCombo(final Binder<ProxyTarget> binder, TargetTypeDataProvider<ProxyTypeInfo> targetTypeDataProvider) {
+        return FormComponentBuilder
+                .createTypeCombo(binder, targetTypeDataProvider, i18n, UIComponentIdProvider.TARGET_ADD_TARGETTYPE, false);
     }
 
 }

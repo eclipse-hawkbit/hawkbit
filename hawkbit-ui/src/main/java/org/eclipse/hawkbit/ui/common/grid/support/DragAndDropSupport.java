@@ -229,8 +229,8 @@ public class DragAndDropSupport<T extends ProxyIdentifiableEntity> {
 
         final List<String> requiredPermissions = assignmentStrategy.getMissingPermissionsForDrop();
         if (!CollectionUtils.isEmpty(requiredPermissions)) {
-            notification
-                    .displayValidationError(i18n.getMessage("message.permission.insufficient", requiredPermissions));
+            notification.displayValidationError(
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_PERMISSION_INSUFFICIENT, requiredPermissions));
             return false;
         }
 

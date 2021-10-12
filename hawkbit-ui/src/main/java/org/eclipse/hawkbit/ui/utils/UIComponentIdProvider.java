@@ -331,6 +331,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TABLE_POLLING_STATUS_LABEL_ID = "target.table.poll.statusId";
 
     /**
+     * ID-Target.targetType.
+     */
+    public static final String TARGET_ADD_TARGETTYPE = "target.add.targettype";
+
+    /**
      * Action history table active-state label Id.
      */
     public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";
@@ -728,6 +733,11 @@ public final class UIComponentIdProvider {
      * Id of Controller Id label in target details.
      */
     public static final String TARGET_CONTROLLER_ID = "target.controller.id";
+
+    /**
+     * Id of target type Id label in target details.
+     */
+    public static final String TARGET_TYPE_ID = "target.type.id";
 
     /**
      * Id of created at label in details.
@@ -1405,6 +1415,10 @@ public final class UIComponentIdProvider {
      */
     public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
     /**
+     * Distribution set invalidate affected actions label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ACTIONS = "invalidate.distributionset.affectedentities.actions";
+    /**
      * Distribution set invalidate affected rollouts label id
      */
     public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS = "invalidate.distributionset.affectedentities.rollouts";
@@ -1416,7 +1430,10 @@ public final class UIComponentIdProvider {
      * Distribution set invalidate consequences window, stop rollouts checkbox
      */
     public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
-
+    /**
+     * Distribution set invalidate consequences window, cancelation type radio button group
+     */
+    public static final String INVALIDATE_DS_CANCELATION_TYPE = "invalidate.distributionset.consequences.cancelation.type.radio";
     /**
      * Id of the unread notification button
      */

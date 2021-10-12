@@ -111,7 +111,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
                     targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
                     targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),

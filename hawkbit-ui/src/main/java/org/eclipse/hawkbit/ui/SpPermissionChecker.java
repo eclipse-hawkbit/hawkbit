@@ -168,4 +168,22 @@ public class SpPermissionChecker implements Serializable {
     public boolean hasRolloutApprovalPermission() {
         return hasRolloutReadPermission() && permissionService.hasPermission(SpPermission.APPROVE_ROLLOUT);
     }
+
+    /**
+     *
+     * @return <code>true</code> if auto assignment can be added/updated to target filter
+     */
+    public boolean hasAutoAssignmentUpdatePermission() {
+        return hasUpdateTargetPermission() && hasReadRepositoryPermission();
+    }
+
+    /**
+     *
+     * @return <code>true</code> if default invalidation of distribution set is
+     *         allowed
+     */
+    public boolean hasDistributionSetInvalidatePermission() {
+        return hasUpdateRepositoryPermission() && hasUpdateTargetPermission();
+    }
+
 }
