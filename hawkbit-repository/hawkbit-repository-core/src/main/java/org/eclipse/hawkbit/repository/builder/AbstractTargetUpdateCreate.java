@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.net.URI;
 import java.util.Optional;
-import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -38,11 +37,8 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     protected Long targetTypeId;
 
-    private final TargetTypeManagement targetTypeManagement;
-
-    protected AbstractTargetUpdateCreate(final String controllerId, final TargetTypeManagement targetTypeManagement) {
+    protected AbstractTargetUpdateCreate(final String controllerId) {
         this.controllerId = StringUtils.trimWhitespace(controllerId);
-        this.targetTypeManagement = targetTypeManagement;
     }
 
     public T status(final TargetUpdateStatus status) {
@@ -112,4 +108,5 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     public Long getTargetTypeId() {
         return targetTypeId;
     }
+
 }
