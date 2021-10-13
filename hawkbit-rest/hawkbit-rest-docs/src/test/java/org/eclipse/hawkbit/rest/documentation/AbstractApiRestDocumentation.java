@@ -180,7 +180,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
             final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
             final boolean createRollout) {
 
-        final TargetType targetType = testdataFactory.createTargetType("defaultType", Collections.emptyList());
+        final TargetType targetType = testdataFactory.findOrCreateTargetType("defaultType");
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
                 .targetType(targetType.getId()).lastTargetQuery(System.currentTimeMillis()));
