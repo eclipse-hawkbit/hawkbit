@@ -9,8 +9,8 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItem;
@@ -1611,8 +1611,8 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         // create target with attributes
         final String knownTargetId = "targetIdNeedsUpdate";
         final Map<String, String> knownControllerAttrs = new HashMap<>();
-        knownControllerAttrs.put("a", "1");
-        knownControllerAttrs.put("b", "2");
+        knownControllerAttrs.put("a.1", "1");
+        knownControllerAttrs.put("b.2", "2");
         testdataFactory.createTarget(knownTargetId);
         controllerManagement.updateControllerAttributes(knownTargetId, knownControllerAttrs, null);
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isFalse();
@@ -1721,7 +1721,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
         final String knownControllerId = "targetIdWithMetadata";
         testdataFactory.createTarget(knownControllerId);
 
-        final String knownKey1 = "knownKey1";
+        final String knownKey1 = "known.key.1";
         final String knownKey2 = "knownKey2";
 
         final String knownValue1 = "knownValue1";
