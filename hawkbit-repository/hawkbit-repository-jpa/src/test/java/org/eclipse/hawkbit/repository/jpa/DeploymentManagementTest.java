@@ -496,16 +496,16 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Offline assign multiple DSs to multiple Targets in multiassignment mode.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+    @Description("Offline assign multiple DSs to a single Target in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 4),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void multiOfflineAssignment() {
-        final List<String> targetIds = testdataFactory.createTargets(2).stream().map(Target::getControllerId)
+        final List<String> targetIds = testdataFactory.createTargets(1).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
-        final List<Long> dsIds = testdataFactory.createDistributionSets(2).stream().map(DistributionSet::getId)
+        final List<Long> dsIds = testdataFactory.createDistributionSets(4).stream().map(DistributionSet::getId)
                 .collect(Collectors.toList());
 
         enableMultiAssignments();
@@ -608,17 +608,17 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Assign multiple DSs to multiple Targets in one request in multiassignment mode.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+    @Description("Assign multiple DSs to a single Target in one request in multiassignment mode.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 4),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void multiAssignmentInOneRequest() {
-        final List<Target> targets = testdataFactory.createTargets(2);
-        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+        final List<Target> targets = testdataFactory.createTargets(1);
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(4);
         final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
 
         enableMultiAssignments();
@@ -638,19 +638,19 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Assign multiple DSs to multiple Targets in one request in multiAssignment mode and cancel each created action afterwards.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 2),
+    @Description("Assign multiple DSs to single Target in one request in multiAssignment mode and cancel each created action afterwards.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 4),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = MultiActionCancelEvent.class, count = 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void cancelMultiAssignmentActions() {
-        final List<Target> targets = testdataFactory.createTargets(2);
-        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(2);
+        final List<Target> targets = testdataFactory.createTargets(1);
+        final List<DistributionSet> distributionSets = testdataFactory.createDistributionSets(4);
         final List<DeploymentRequest> deploymentRequests = createAssignmentRequests(distributionSets, targets, 34);
 
         enableMultiAssignments();
@@ -847,8 +847,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     /**
      * test a simple deployment by calling the
-     * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)}
-     * and checking the active action and the action history of the targets.
+     * {@link TargetRepository#assignDistributionSet(DistributionSet, Iterable)} and
+     * checking the active action and the action history of the targets.
      *
      */
     @Test
@@ -1091,10 +1091,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     /**
-     * test the deletion of {@link DistributionSet}s including exception in case
-     * of {@link Target}s are assigned by
-     * {@link Target#getAssignedDistributionSet()} or
-     * {@link Target#getInstalledDistributionSet()}
+     * test the deletion of {@link DistributionSet}s including exception in case of
+     * {@link Target}s are assigned by {@link Target#getAssignedDistributionSet()}
+     * or {@link Target#getInstalledDistributionSet()}
      */
     @Test
     @Description("Deletes distribution set. Expected behaviour is that a soft delete is performed "
@@ -1410,32 +1409,33 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Verify that the DistributionSet assignments work for multiple targets of different target types within the same request.")
+    @Description("Verify that the DistributionSet assignments work for multiple targets of different target types.")
     void verifyDSAssignmentForMultipleTargetsWithDifferentTargetTypes() {
-        final DistributionSet ds1 = testdataFactory.createDistributionSet("test-ds1");
-        final DistributionSet ds2 = testdataFactory.createDistributionSet("test-ds2");
+        final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
         final TargetType targetType1 = testdataFactory.createTargetType("test-type1",
-                Collections.singletonList(ds1.getType()));
+                Collections.singletonList(ds.getType()));
         final TargetType targetType2 = testdataFactory.createTargetType("test-type2",
-                Collections.singletonList(ds2.getType()));
+                Collections.singletonList(ds.getType()));
         final Target target1 = testdataFactory.createTarget("test-target1", "test-target1", targetType1.getId());
         final Target target2 = testdataFactory.createTarget("test-target2", "test-target2", targetType2.getId());
 
         final DeploymentRequest deployment1 = DeploymentManagement
-                .deploymentRequest(target1.getControllerId(), ds1.getId()).build();
+                .deploymentRequest(target1.getControllerId(), ds.getId()).build();
         final DeploymentRequest deployment2 = DeploymentManagement
-                .deploymentRequest(target2.getControllerId(), ds2.getId()).build();
+                .deploymentRequest(target2.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = Arrays.asList(deployment1, deployment2);
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
 
-        final Optional<DistributionSet> assignedDs1 = targetManagement.getByControllerID(target1.getControllerId())
-                .map(JpaTarget.class::cast).map(JpaTarget::getAssignedDistributionSet);
-        final Optional<DistributionSet> assignedDs2 = targetManagement.getByControllerID(target2.getControllerId())
-                .map(JpaTarget.class::cast).map(JpaTarget::getAssignedDistributionSet);
+        final Optional<DistributionSet> assignedDsTarget1 = targetManagement
+                .getByControllerID(target1.getControllerId()).map(JpaTarget.class::cast)
+                .map(JpaTarget::getAssignedDistributionSet);
+        final Optional<DistributionSet> assignedDsTarget2 = targetManagement
+                .getByControllerID(target2.getControllerId()).map(JpaTarget.class::cast)
+                .map(JpaTarget::getAssignedDistributionSet);
 
-        assertThat(assignedDs1).contains(ds1);
-        assertThat(assignedDs2).contains(ds2);
+        assertThat(assignedDsTarget1).contains(ds);
+        assertThat(assignedDsTarget2).contains(ds);
     }
 
     @Test
@@ -1457,8 +1457,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * Helper methods that creates 2 lists of targets and a list of distribution
      * sets.
      * <p>
-     * <b>All created distribution sets are assigned to all targets of the
-     * target list deployedTargets.</b>
+     * <b>All created distribution sets are assigned to all targets of the target
+     * list deployedTargets.</b>
      *
      * @param undeployedTargetPrefix
      *            prefix to be used as target controller prefix
@@ -1467,8 +1467,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
      * @param deployedTargetPrefix
      *            prefix to be used as target controller prefix
      * @param noOfDeployedTargets
-     *            number of targets to which the created distribution sets
-     *            assigned
+     *            number of targets to which the created distribution sets assigned
      * @param noOfDistributionSets
      *            number of distribution sets
      * @param distributionSetPrefix

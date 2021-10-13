@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -237,27 +236,61 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void checkForTargetTypeCompatibility(final List<DeploymentRequest> deploymentRequests) {
-        final Map<String, Long> targetDistSetAssignments = new HashMap<>();
-        for (final DeploymentRequest deploymentRequest : deploymentRequests) {
-            targetDistSetAssignments.put(deploymentRequest.getControllerId(), deploymentRequest.getDistributionSetId());
+        final List<String> controllerIds = deploymentRequests.stream().map(DeploymentRequest::getControllerId)
+                .distinct().collect(Collectors.toList());
+        final List<Long> distSetIds = deploymentRequests.stream().map(DeploymentRequest::getDistributionSetId)
+                .distinct().collect(Collectors.toList());
+
+        if (distSetIds.size() == 1) {
+            checkCompatibilityByDistSetId(distSetIds.get(0), controllerIds);
+            return;
         }
 
-        final List<JpaTarget> allTargets = targetRepository.findAll(TargetSpecifications
-                .hasControllerIdIn(targetDistSetAssignments.keySet()).and(TargetSpecifications.hasTargetType()));
-        final Map<Long, JpaDistributionSet> allDistSets = distributionSetRepository
-                .findAllById(targetDistSetAssignments.values()).stream()
-                .collect(Collectors.toMap(JpaDistributionSet::getId, jpaDistributionSet -> jpaDistributionSet));
+        // Check for multi assignment case
+        if (distSetIds.size() > 1 && controllerIds.size() == 1) {
+            checkCompatibilityByControllerId(controllerIds.get(0), distSetIds);
+            return;
+        }
 
-        for (final JpaTarget target : allTargets) {
-            final Long distId = targetDistSetAssignments.get(target.getControllerId());
-            final JpaDistributionSet jpaDistributionSet = allDistSets.get(distId);
-            if (jpaDistributionSet == null) {
-                throw new EntityNotFoundException(DistributionSet.class, distId);
-            }
-            if (!target.getTargetType().containsCompatibleDistributionSetType(jpaDistributionSet.getType().getId())) {
-                throw new DistributionSetTypeNotInTargetTypeException(target.getTargetType().getId(),
-                        jpaDistributionSet.getType().getId());
-            }
+        throw new IllegalStateException("List of deployment requests has illegal state");
+    }
+
+    private void checkCompatibilityByDistSetId(final Long distSetId, final List<String> controllerIds) {
+        final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
+        final long compatibleTargets = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+                .map(ids -> targetRepository.count(TargetSpecifications.hasControllerIdIn(ids)
+                        .and(TargetSpecifications.isCompatibleWithDistributionSetType(distSetType.getId()))))
+                .mapToLong(Long::longValue).sum();
+        // Only load all targets if incompatibility was detected
+        if (controllerIds.size() > compatibleTargets) {
+            Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT).forEach(ids -> {
+                final Optional<JpaTarget> inCompatibleTarget = targetRepository
+                        .findAll(TargetSpecifications.hasControllerIdIn(ids).and(TargetSpecifications.hasTargetType()))
+                        .stream().filter(jpaTarget -> !jpaTarget.getTargetType()
+                                .containsCompatibleDistributionSetType(distSetType))
+                        .findFirst();
+                inCompatibleTarget.ifPresent(target -> {
+                    throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(),
+                            target.getTargetType().getId());
+                });
+            });
+        }
+    }
+
+    private void checkCompatibilityByControllerId(final String controllerId, final List<Long> distSetIds) {
+        final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        if (target.getTargetType() != null) {
+            final Optional<DistributionSetType> incompatibleDistSet = distributionSetManagement.get(distSetIds).stream()
+                    .map(DistributionSet::getType).filter(distributionSetType -> !target.getTargetType()
+                            .containsCompatibleDistributionSetType(distributionSetType))
+                    .findFirst();
+
+            incompatibleDistSet.ifPresent(distSetType -> {
+                throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(),
+                        target.getTargetType().getId());
+            });
         }
     }
 
