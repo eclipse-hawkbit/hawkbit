@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -26,7 +26,6 @@ import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.TargetFields;
@@ -65,7 +64,6 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -84,8 +82,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -553,43 +549,6 @@ public class JpaTargetManagement implements TargetManagement {
 
         // no reason to persist the tag
         entityManager.detach(tag);
-        return result;
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTypeAssignmentResult toggleTargetTypeAssignment(final Collection<String> controllerIds, final String tagName) {
-        final TargetType type = targetTypeRepository.findByName(tagName)
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, tagName));
-        final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-
-        if (allTargets.size() < controllerIds.size()) {
-            throw new EntityNotFoundException(Target.class, controllerIds,
-                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
-        }
-
-        final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
-                TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
-
-        // all are already assigned -> unassign
-        if (alreadyAssignedTargets.size() == allTargets.size()) {
-            alreadyAssignedTargets.forEach(target -> target.setTargetType(null));
-            return new TargetTypeAssignmentResult(0, Collections.emptyList(),
-                    Collections.unmodifiableList(alreadyAssignedTargets), type);
-        }
-
-        allTargets.removeAll(alreadyAssignedTargets);
-
-        final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(alreadyAssignedTargets.size(),
-                Collections
-                        .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
-                Collections.emptyList(), type);
-
-        // no reason to persist the type
-        entityManager.detach(type);
         return result;
     }
 

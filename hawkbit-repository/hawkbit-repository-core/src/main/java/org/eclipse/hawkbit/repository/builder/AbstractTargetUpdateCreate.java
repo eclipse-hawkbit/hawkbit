@@ -10,12 +10,9 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.net.URI;
 import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.ValidString;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.util.StringUtils;
 
@@ -115,10 +112,4 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
     public Long getTargetTypeId() {
         return targetTypeId;
     }
-
-    public TargetType findTargetTypeWithExceptionIfNotFound(final Long targetTypeId) {
-        return targetTypeManagement.get(targetTypeId)
-                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, targetTypeId));
-    }
-
 }

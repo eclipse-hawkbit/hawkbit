@@ -8,11 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -20,7 +26,6 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
-import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -52,14 +57,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
 
 /**
  * Target status and deployment management view

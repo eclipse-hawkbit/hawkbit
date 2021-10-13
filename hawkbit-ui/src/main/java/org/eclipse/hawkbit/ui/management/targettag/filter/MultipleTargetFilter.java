@@ -8,9 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
+import com.vaadin.ui.Accordion;
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.themes.ValoTheme;
 import java.util.Arrays;
 import java.util.List;
-
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -36,11 +39,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.ui.Accordion;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
 
 /**
  * Target filter tabsheet with 'simple' and 'complex' filter options.
@@ -79,7 +77,7 @@ public class MultipleTargetFilter extends Accordion {
 
         this.filterByButtons = new TargetTagFilterButtons(uiDependencies, targetTagManagement, targetManagement,
                 targetTagFilterLayoutUiState, targetTagWindowBuilder);
-        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
+        this.targetTypeFilterButtons = new TargetTypeFilterButtons(uiDependencies, targetTypeManagement, targetTagFilterLayoutUiState, targetTypeWindowBuilder);
         this.filterByStatusFooter = new FilterByStatusLayout(i18n, eventBus, targetTagFilterLayoutUiState);
         this.simpleFilterTab = buildSimpleFilterTab();
         this.targetTypeFilterTab = buildTargetTypeFilterTab();
@@ -167,7 +165,7 @@ public class MultipleTargetFilter extends Accordion {
 
     private List<EntityModifiedAwareSupport> getTargetTypeModifiedAwareSupports() {
         return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(targetTypeFilterButtons::refreshAll),
-                EntityModifiedGenericSupport.of(null, null, targetTypeFilterButtons::resetFilterOnTagsDeleted));
+                EntityModifiedGenericSupport.of(null, null, targetTypeFilterButtons::resetFilterOnTargetTypeDeleted));
     }
 
     private List<EntityModifiedAwareSupport> getFilterQueryModifiedAwareSupports() {

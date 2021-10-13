@@ -9,10 +9,12 @@
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
 import com.vaadin.ui.Button;
-import com.vaadin.ui.Window;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Set;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -27,11 +29,6 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.springframework.util.CollectionUtils;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * Class for defining the type filter buttons.
@@ -62,7 +59,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
         this.uiNotification = uiDependencies.getUiNotification();
         this.tagFilterLayoutUiState = tagFilterLayoutUiState;
         this.noTargetTypeButton = buildNoTargetTypeButton();
-        this.targetTypeFilterButtonClick = new TargetTypeFilterButtonClick(this::onFilterChangedEvent, this::onNoTagChangedEvent);
+        this.targetTypeFilterButtonClick = new TargetTypeFilterButtonClick(this::onFilterChangedEvent, this::onNoTargetTypeChangedEvent);
     }
 
     private Button buildNoTargetTypeButton() {
@@ -85,17 +82,17 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
         return targetTypeFilterButtonClick;
     }
 
-    private void onFilterChangedEvent(final Map<Long, String> activeTypeIdsWithName) {
+    private void onFilterChangedEvent(final Map<Long, String> activeTargetTypeIdsWithName) {
         getDataCommunicator().reset();
 
-        publishFilterChangedEvent(activeTypeIdsWithName);
+        publishFilterChangedEvent(activeTargetTypeIdsWithName);
     }
 
-    private void publishFilterChangedEvent(final Map<Long, String> activeTypeIdsWithName) {
+    private void publishFilterChangedEvent(final Map<Long, String> activeTargetTypeIdsWithName) {
         eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(getFilterMasterEntityType(),
-                FilterType.TYPE, activeTypeIdsWithName.values(), getView()));
+                FilterType.TYPE, activeTargetTypeIdsWithName.values(), getView()));
 
-        tagFilterLayoutUiState.setClickedTagIdsWithName(activeTypeIdsWithName);
+        tagFilterLayoutUiState.setClickedTagIdsWithName(activeTargetTypeIdsWithName);
     }
 
     /**
@@ -112,7 +109,7 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
      */
     protected abstract EventView getView();
 
-    private void onNoTagChangedEvent(final ClickBehaviourType clickType) {
+    private void onNoTargetTypeChangedEvent(final ClickBehaviourType clickType) {
         final boolean isNoTypeActivated = ClickBehaviourType.CLICKED == clickType;
 
         if (isNoTypeActivated) {
@@ -133,79 +130,53 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
 
 
     /**
-     * Tag deletion operation.
+     * Target type deletion operation.
      * 
-     * @param tagToDelete
-     *            tag to delete
+     * @param targetTypeToDelete
+     *            target type to delete
      */
-    protected abstract void deleteTag(final ProxyTargetType tagToDelete);
+    protected abstract void deleteTargetType(final ProxyTargetType targetTypeToDelete);
 
     /**
-     * Reset the filter by removing the deleted tags
+     * Reset the filter by removing the deleted target type
      *
-     * @param deletedTagIds
-     *            List of deleted tags Id
+     * @param deletedTargetTypeIds
+     *            List of deleted target type Ids
      */
-    public void resetFilterOnTagsDeleted(final Collection<Long> deletedTagIds) {
-        if (isAtLeastOneClickedTagInIds(deletedTagIds)) {
-            deletedTagIds.forEach(getFilterButtonClickBehaviour()::removePreviouslyClickedFilter);
+    public void resetFilterOnTargetTypeDeleted(final Collection<Long> deletedTargetTypeIds) {
+        if (isAtLeastOneClickedTargetTypeInIds(deletedTargetTypeIds)) {
+            deletedTargetTypeIds.forEach(getFilterButtonClickBehaviour()::removePreviouslyClickedFilter);
             publishFilterChangedEvent(getFilterButtonClickBehaviour().getPreviouslyClickedFilterIdsWithName());
         }
     }
 
     /**
-     * @param tagIds
-     *            List of tags Id
+     * @param targetTypeIds
+     *            List of target types Ids
      *
-     * @return true if at least one tag found in list of clicked tag Ids else
+     * @return true if at least one target type found in list of clicked target type Ids else
      *         false
      */
-    private boolean isAtLeastOneClickedTagInIds(final Collection<Long> tagIds) {
-        final Set<Long> clickedTagIds = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIds();
+    private boolean isAtLeastOneClickedTargetTypeInIds(final Collection<Long> targetTypeIds) {
+        final Set<Long> clickedTargetTypeIds = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIds();
 
-        return !CollectionUtils.isEmpty(clickedTagIds) && !Collections.disjoint(clickedTagIds, tagIds);
+        return !CollectionUtils.isEmpty(clickedTargetTypeIds) && !Collections.disjoint(clickedTargetTypeIds, targetTypeIds);
     }
 
-
     /**
-     * Provides the window for updating tag
-     *
-     * @param clickedFilter
-     *            tag to update
-     * @return update window
-     */
-    protected abstract Window getUpdateWindow(final ProxyTag clickedFilter);
-
-
-    /**
-     * @return Button component of no tag
+     * @return Button component of no target type
      */
     public Button getNoTargetTypeButton() {
         return noTargetTypeButton;
     }
 
-    /**
-     * Remove the tag filters
-     */
-    public void clearTargetTagFilters() {
-        if (getFilterButtonClickBehaviour().getPreviouslyClickedFiltersSize() > 0) {
-            if (tagFilterLayoutUiState.isNoTagClicked()) {
-                tagFilterLayoutUiState.setNoTagClicked(false);
-                getNoTargetTypeButton().removeStyleName(SPUIStyleDefinitions.SP_NO_TAG_BTN_CLICKED_STYLE);
-            }
-
-            getFilterButtonClickBehaviour().clearPreviouslyClickedFilters();
-            tagFilterLayoutUiState.setClickedTagIdsWithName(Collections.emptyMap());
-        }
-    }
-
     @Override
     public void restoreState() {
-        final Map<Long, String> tagsToRestore = tagFilterLayoutUiState.getClickedTagIdsWithName();
+        final Map<Long, String> targetTypesToRestore = tagFilterLayoutUiState.getClickedTagIdsWithName();
 
-        if (!CollectionUtils.isEmpty(tagsToRestore)) {
-            removeNonExistingTags(tagsToRestore);
-            getFilterButtonClickBehaviour().setPreviouslyClickedFilterIdsWithName(tagsToRestore);
+        if (!CollectionUtils.isEmpty(targetTypesToRestore)) {
+            removeNonExistingTargetTypes(targetTypesToRestore);
+            getFilterButtonClickBehaviour().setPreviouslyClickedFilterIdsWithName(targetTypesToRestore);
         }
 
         if (tagFilterLayoutUiState.isNoTagClicked()) {
@@ -213,34 +184,23 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
         }
     }
 
-    private boolean removeNonExistingTags(final Map<Long, String> tagIdsWithName) {
-        final Collection<Long> tagIds = tagIdsWithName.keySet();
-        final Collection<Long> existingTagIds = filterExistingTagIds(tagIds);
-        if (tagIds.size() != existingTagIds.size()) {
-            return tagIds.retainAll(existingTagIds);
+    private boolean removeNonExistingTargetTypes(final Map<Long, String> targetTypeIdsWithName) {
+        final Collection<Long> targetTypeIds = targetTypeIdsWithName.keySet();
+        final Collection<Long> existingTargetTypeIds = filterExistingTargetTypeIds(targetTypeIds);
+        if (targetTypeIds.size() != existingTargetTypeIds.size()) {
+            return targetTypeIds.retainAll(existingTargetTypeIds);
         }
 
         return false;
     }
 
     /**
-     * Filters out non-existant tags by ids.
+     * Filters out non-existant target type by ids.
      *
-     * @param tagIds
-     *            provided tag ids
-     * @return filtered list of existing tag ids
+     * @param targetTypeIds
+     *            provided target type ids
+     * @return filtered list of existing target type ids
      */
-    protected abstract Collection<Long> filterExistingTagIds(final Collection<Long> tagIds);
+    protected abstract Collection<Long> filterExistingTargetTypeIds(final Collection<Long> targetTypeIds);
 
-    /**
-     * Re-evaluates a filter (usually after view enter).
-     *
-     */
-    public void reevaluateFilter() {
-        final Map<Long, String> clickedTags = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIdsWithName();
-
-        if (!CollectionUtils.isEmpty(clickedTags) && removeNonExistingTags(clickedTags)) {
-            publishFilterChangedEvent(clickedTags);
-        }
-    }
 }

@@ -12,18 +12,16 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -34,9 +32,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
-import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -584,25 +581,6 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
-
-
-    /**
-     * Toggles {@link TargetType} assignment to given {@link Target}s by means
-     * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. Only if all of theme have the tag already assigned
-     * they will be removed instead.
-     *
-     * @param controllerIds
-     *            to toggle for
-     * @param tagName
-     *            to toggle
-     * @return TagAssigmentResult with all meta data of the assignment outcome.
-     *
-     * @throws EntityNotFoundException
-     *             if tag with given name does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult toggleTargetTypeAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.

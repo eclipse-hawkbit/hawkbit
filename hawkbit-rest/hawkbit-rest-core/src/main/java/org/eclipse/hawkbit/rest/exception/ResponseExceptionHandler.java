@@ -8,15 +8,14 @@
  */
 package org.eclipse.hawkbit.rest.exception;
 
+import com.google.common.collect.Iterables;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -31,8 +30,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
-
-import com.google.common.collect.Iterables;
 
 /**
  * General controller advice for exception handling.
@@ -86,7 +83,6 @@ public class ResponseExceptionHandler {
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_CONFIGURATION_VALUE_CHANGE_NOT_ALLOWED, HttpStatus.FORBIDDEN);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_MULTIASSIGNMENT_NOT_ENABLED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_NO_WEIGHT_PROVIDED_IN_MULTIASSIGNMENT_MODE, HttpStatus.BAD_REQUEST);
-        ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_UNDEFINED, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_TARGET_TYPE_IN_USE, HttpStatus.CONFLICT);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INVALID, HttpStatus.BAD_REQUEST);
         ERROR_TO_HTTP_STATUS.put(SpServerError.SP_DS_INCOMPLETE, HttpStatus.BAD_REQUEST);
