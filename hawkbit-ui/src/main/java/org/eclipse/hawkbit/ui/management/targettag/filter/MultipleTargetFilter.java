@@ -165,7 +165,7 @@ public class MultipleTargetFilter extends Accordion {
 
     private List<EntityModifiedAwareSupport> getTargetTypeModifiedAwareSupports() {
         return Arrays.asList(EntityModifiedGridRefreshAwareSupport.of(targetTypeFilterButtons::refreshAll),
-                EntityModifiedGenericSupport.of(null, null, targetTypeFilterButtons::resetFilterOnTargetTypeDeleted));
+                EntityModifiedGenericSupport.of(null, null, null));
     }
 
     private List<EntityModifiedAwareSupport> getFilterQueryModifiedAwareSupports() {

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.management.targettag.filter;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import java.util.Collection;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -28,7 +27,6 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTargetTypeFilterButton
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
-import org.springframework.util.CollectionUtils;
 
 /**
  * Target Type filter buttons table.
@@ -49,7 +47,7 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
 
         init();
         setDataProvider(
-                new TargetTypeDataProvider(targetTypeManagement, new TargetTypeToProxyTargetTypeMapper<>()));
+                new TargetTypeDataProvider<>(targetTypeManagement, new TargetTypeToProxyTargetTypeMapper<>()));
     }
 
     @Override
@@ -70,22 +68,15 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     @Override
     protected boolean deleteFilterButtons(Collection<ProxyTargetType> filterButtonsToDelete) {
         final ProxyTargetType targetTypeToDelete = filterButtonsToDelete.iterator().next();
-        final String targetTypeToDeleteName = targetTypeToDelete.getName();
         final Long targetTypeToDeleteId = targetTypeToDelete.getId();
 
-        final Set<Long> clickedTypeIds = getFilterButtonClickBehaviour().getPreviouslyClickedFilterIds();
-
-        if (!CollectionUtils.isEmpty(clickedTypeIds) && clickedTypeIds.contains(targetTypeToDeleteId)) {
-            uiNotification.displayValidationError(i18n.getMessage("message.targettype.delete", targetTypeToDeleteName));
-            return false;
-        } else {
             deleteTargetType(targetTypeToDelete);
 
             eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
                     new EntityModifiedEventPayload(EntityModifiedEventPayload.EntityModifiedEventType.ENTITY_REMOVED, getFilterMasterEntityType(),
                             ProxyTargetType.class, targetTypeToDeleteId));
             return true;
-        }
+
     }
 
     @Override

@@ -8,41 +8,33 @@
  */
 package org.eclipse.hawkbit.ui.common.filterlayout;
 
+import java.util.function.BiConsumer;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
-
-import java.util.Map;
-import java.util.function.Consumer;
 
 /**
  * Multi button click behaviour of type filter buttons layout.
  */
-public class TargetTypeFilterButtonClick extends AbstractFilterMultiButtonClick<ProxyTargetType> {
+public class TargetTypeFilterButtonClick extends AbstractFilterSingleButtonClick<ProxyTargetType> {
     private static final long serialVersionUID = 1L;
 
-    private final transient Consumer<Map<Long, String>> filterChangedCallback;
-    private final transient Consumer<ClickBehaviourType> noTypeChangedCallback;
+    private final transient BiConsumer<ProxyTargetType, ClickBehaviourType> filterChangedCallback;
 
-    TargetTypeFilterButtonClick(final Consumer<Map<Long, String>> filterChangedCallback,
-                                final Consumer<ClickBehaviourType> noTypeChangedCallback) {
+    TargetTypeFilterButtonClick(final BiConsumer<ProxyTargetType, ClickBehaviourType> filterChangedCallback) {
         this.filterChangedCallback = filterChangedCallback;
-        this.noTypeChangedCallback = noTypeChangedCallback;
     }
 
     @Override
     protected void filterUnClicked(ProxyTargetType clickedFilter) {
-        if (clickedFilter.isNoTargetType()) {
-            noTypeChangedCallback.accept(ClickBehaviourType.UNCLICKED);
-        } else {
-            filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
-        }
+        filterChangedCallback.accept(clickedFilter, ClickBehaviourType.UNCLICKED);
     }
 
     @Override
     protected void filterClicked(ProxyTargetType clickedFilter) {
-        if (clickedFilter.isNoTargetType()) {
-            noTypeChangedCallback.accept(ClickBehaviourType.CLICKED);
-        } else {
-            filterChangedCallback.accept(previouslyClickedFilterIdsWithName);
-        }
+        filterChangedCallback.accept(clickedFilter, ClickBehaviourType.CLICKED);
+    }
+
+    @Override
+    public boolean isFilterPreviouslyClicked(final ProxyTargetType clickedFilter) {
+        return false;
     }
 }
