@@ -72,6 +72,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -241,56 +242,46 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<Long> distSetIds = deploymentRequests.stream().map(DeploymentRequest::getDistributionSetId)
                 .distinct().collect(Collectors.toList());
 
+        if (controllerIds.size() > 1 && distSetIds.size() > 1) {
+            throw new IllegalStateException(
+                    "Assigning multiple Targets to multiple Distribution Sets simultaneously is not allowed!");
+        }
+
         if (distSetIds.size() == 1) {
-            checkCompatibilityByDistSetId(distSetIds.get(0), controllerIds);
-            return;
+            checkCompatibilityForSingleDsAssignment(distSetIds.iterator().next(), controllerIds);
+        } else {
+            checkCompatibilityForMultiDsAssignment(controllerIds.iterator().next(), distSetIds);
         }
-
-        // Check for multi assignment case
-        if (distSetIds.size() > 1 && controllerIds.size() == 1) {
-            checkCompatibilityByControllerId(controllerIds.get(0), distSetIds);
-            return;
-        }
-
-        throw new IllegalStateException("List of deployment requests has illegal state");
     }
 
-    private void checkCompatibilityByDistSetId(final Long distSetId, final List<String> controllerIds) {
+    private void checkCompatibilityForSingleDsAssignment(final Long distSetId, final List<String> controllerIds) {
         final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
-        final long compatibleTargets = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository.count(TargetSpecifications.hasControllerIdIn(ids)
-                        .and(TargetSpecifications.isCompatibleWithDistributionSetType(distSetType.getId()))))
-                .mapToLong(Long::longValue).sum();
-        // Only load all targets if incompatibility was detected
-        if (controllerIds.size() > compatibleTargets) {
-            Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT).forEach(ids -> {
-                final Optional<JpaTarget> inCompatibleTarget = targetRepository
-                        .findAll(TargetSpecifications.hasControllerIdIn(ids).and(TargetSpecifications.hasTargetType()))
-                        .stream().filter(jpaTarget -> !jpaTarget.getTargetType()
-                                .containsCompatibleDistributionSetType(distSetType))
-                        .findFirst();
-                inCompatibleTarget.ifPresent(target -> {
-                    throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(),
-                            target.getTargetType().getId());
-                });
-            });
+        final Set<Long> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+                .stream()
+                .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)
+                        .and(TargetSpecifications.notCompatibleWithDistributionSetType(distSetType.getId()))))
+                .flatMap(List::stream).map(Target::getTargetType).map(TargetType::getId).collect(Collectors.toSet());
+
+        if (!incompatibleTargetTypes.isEmpty()) {
+            throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(), incompatibleTargetTypes);
         }
     }
 
-    private void checkCompatibilityByControllerId(final String controllerId, final List<Long> distSetIds) {
+    private void checkCompatibilityForMultiDsAssignment(final String controllerId, final List<Long> distSetIds) {
         final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (target.getTargetType() != null) {
-            final Optional<DistributionSetType> incompatibleDistSet = distributionSetManagement.get(distSetIds).stream()
-                    .map(DistributionSet::getType).filter(distributionSetType -> !target.getTargetType()
-                            .containsCompatibleDistributionSetType(distributionSetType))
-                    .findFirst();
+            // we assume that list of assigned DS is less than MAX_ENTRIES_IN_STATEMENT
+            final Set<DistributionSetType> incompatibleDistSetTypes = distributionSetManagement.get(distSetIds).stream()
+                    .map(DistributionSet::getType).collect(Collectors.toSet());
+            incompatibleDistSetTypes.removeAll(target.getTargetType().getCompatibleDistributionSetTypes());
 
-            incompatibleDistSet.ifPresent(distSetType -> {
-                throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(),
-                        target.getTargetType().getId());
-            });
+            if (!incompatibleDistSetTypes.isEmpty()) {
+                final Set<Long> distSetTypeIds = incompatibleDistSetTypes.stream().map(DistributionSetType::getId)
+                        .collect(Collectors.toSet());
+                throw new DistributionSetTypeNotInTargetTypeException(distSetTypeIds, target.getTargetType().getId());
+            }
         }
     }
 

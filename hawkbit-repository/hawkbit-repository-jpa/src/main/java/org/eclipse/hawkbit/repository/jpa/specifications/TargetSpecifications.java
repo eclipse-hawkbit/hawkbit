@@ -384,7 +384,7 @@ public final class TargetSpecifications {
      * are compatible with all {@link DistributionSetType}
      *
      * @param distributionSetTypeId
-     *            the ID of the distribution set type which must compatible
+     *            the ID of the distribution set type which must be compatible
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
@@ -393,14 +393,39 @@ public final class TargetSpecifications {
             // isNull predicate first
             final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
 
-            final Join<JpaTarget, JpaTargetType> targetTypeJoin = targetRoot.join(JpaTarget_.targetType, JoinType.LEFT);
-            targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
-            final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
-                    .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
-
-            return cb.or(targetTypeIsNull,
-                    cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), distributionSetTypeId));
+            return cb.or(targetTypeIsNull, getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId));
         };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are NOT compatible
+     * with given {@link DistributionSetType}. Compatibility is evaluated by
+     * checking the {@link TargetType} of a target. Targets that don't have a
+     * {@link TargetType} are compatible with all {@link DistributionSetType}
+     *
+     * @param distributionSetTypeId
+     *            the ID of the distribution set type which must be incompatible
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> notCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
+        return (targetRoot, query, cb) -> {
+            // Since the targetRoot is changed by joining we need to get the
+            // isNotNull predicate first
+            final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
+
+            return cb.and(targetTypeNotNull,
+                    cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)));
+        };
+    }
+
+    private static Predicate getDistSetTypeEqualPredicate(final Root<JpaTarget> root, final CriteriaBuilder cb,
+            final Long dsTypeId) {
+        final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
+        targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
+        final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
+                .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
+
+        return cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), dsTypeId);
     }
 
     /**
