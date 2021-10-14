@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
@@ -55,8 +56,9 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
         distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
 
-        distributionSetManagement
+        final DistributionSet ds3 = distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("test123").version("noDescription"));
+        distributionSetManagement.invalidate(ds3);
     }
 
     @Test
@@ -117,7 +119,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by complete property")
-    public void testFilterByAttribute() {
+    public void testFilterByAttributeComplete() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
         try {
             assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
@@ -126,6 +128,17 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 1);
+    }
+
+    @Test
+    @Description("Test filter distribution set by valid property")
+    public void testFilterByAttributeValid() {
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "==true", 4);
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "==false", 1);
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
+                .isThrownBy(() -> assertRSQLQuery(DistributionSetFields.VALID.name() + "==noExist*", 0));
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "=in=(true)", 4);
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "=out=(true)", 1);
     }
 
     @Test
@@ -160,10 +173,10 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
+    private void assertRSQLQuery(final String rsqlParam, final long expectedEntity) {
         final Page<DistributionSet> find = distributionSetManagement.findByRsql(PageRequest.of(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
-        assertThat(find).as("Founded entity is should not be null").isNotNull();
-        assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);
+        assertThat(find).as("Found entity is should not be null").isNotNull();
+        assertThat(countAll).as("Found entity size is wrong").isEqualTo(expectedEntity);
     }
 }
