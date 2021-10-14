@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 
 /**
- * Multi button click behaviour of type filter buttons layout.
+ * Button click behaviour of target type filter buttons layout.
  */
 public class TargetTypeFilterButtonClick extends AbstractFilterSingleButtonClick<ProxyTargetType> {
     private static final long serialVersionUID = 1L;
