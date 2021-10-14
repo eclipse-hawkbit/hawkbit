@@ -14,6 +14,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToProxyTargetTypeMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
@@ -68,15 +69,7 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     @Override
     protected boolean deleteFilterButtons(Collection<ProxyTargetType> filterButtonsToDelete) {
         final ProxyTargetType targetTypeToDelete = filterButtonsToDelete.iterator().next();
-        final Long targetTypeToDeleteId = targetTypeToDelete.getId();
-
-            deleteTargetType(targetTypeToDelete);
-
-            eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
-                    new EntityModifiedEventPayload(EntityModifiedEventPayload.EntityModifiedEventType.ENTITY_REMOVED, getFilterMasterEntityType(),
-                            ProxyTargetType.class, targetTypeToDeleteId));
-            return true;
-
+        return deleteTargetType(targetTypeToDelete);
     }
 
     @Override
@@ -104,8 +97,17 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     }
 
     @Override
-    protected void deleteTargetType(ProxyTargetType targetTypeToDelete) {
+    protected boolean deleteTargetType(ProxyTargetType targetTypeToDelete) {
+        try{
             targetTypeManagement.delete(targetTypeToDelete.getId());
+            eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
+                    new EntityModifiedEventPayload(EntityModifiedEventPayload.EntityModifiedEventType.ENTITY_REMOVED, getFilterMasterEntityType(),
+                            ProxyTargetType.class, targetTypeToDelete.getId()));
+            return true;
+        } catch (TargetTypeInUseException exception){
+            uiNotification.displayValidationError(i18n.getMessage(exception.getMessage()));
+        }
+        return false;
     }
 
     @Override

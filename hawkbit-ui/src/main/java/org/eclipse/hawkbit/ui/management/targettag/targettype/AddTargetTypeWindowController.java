@@ -29,7 +29,7 @@ public class AddTargetTypeWindowController
 
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
-    private TargetTypeManagement targetTypeManagement;
+    private final TargetTypeManagement targetTypeManagement;
 
     /**
      * Constructor for AddTargetTypeWindowController

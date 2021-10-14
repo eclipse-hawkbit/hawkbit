@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
 import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -24,8 +25,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
 import org.springframework.util.StringUtils;
-
-import java.util.Set;
 
 /**
  * Controller for update target type window
@@ -133,6 +132,4 @@ public class UpdateTargetTypeWindowController
     private boolean hasNamedChanged(final String trimmedName) {
         return !nameBeforeEdit.equals(trimmedName);
     }
-
-
 }

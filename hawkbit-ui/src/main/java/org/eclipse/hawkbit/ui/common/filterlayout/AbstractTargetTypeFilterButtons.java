@@ -99,8 +99,10 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
      * 
      * @param targetTypeToDelete
      *            target type to delete
+     *
+     * @return true if target type is deleted, in error case false.
      */
-    protected abstract void deleteTargetType(final ProxyTargetType targetTypeToDelete);
+    protected abstract boolean deleteTargetType(final ProxyTargetType targetTypeToDelete);
 
     /**
      * @return Button component of no target type
