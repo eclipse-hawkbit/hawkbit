@@ -1136,7 +1136,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that target type is not assigned to target if invalid.")
-    public void assignTargetTypeInTargetWithInvalidType() {
+    public void assignInvalidTargetTypeToTarget() {
         // create a target
         final Target target = testdataFactory.createTarget("target1", "testtarget");
         // initial opt lock revision must be one
@@ -1163,7 +1163,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @WithUser(allSpPermissions = true)
     @Description("Checks that target type can be unassigned from target.")
-    public void unAssignTargetTypeInTarget() {
+    public void unAssignTargetTypeFromTarget() {
         // create a target type
         TargetType targetType = testdataFactory.findOrCreateTargetType("targettype");
         assertThat(targetType).isNotNull();
