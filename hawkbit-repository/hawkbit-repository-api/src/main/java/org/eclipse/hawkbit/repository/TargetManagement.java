@@ -632,7 +632,7 @@ public interface TargetManagement {
      *             if TargetType with given target ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target assignType(@NotEmpty String controllerID, @NotNull long targetTypeId);
+    Target assignType(@NotEmpty String controllerID, @NotNull Long targetTypeId);
 
     /**
      * updates the {@link Target}.
