@@ -18,7 +18,6 @@ import java.util.Optional;
 import java.util.concurrent.locks.Lock;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintDeclarationException;
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.AbstractRolloutManagement;
@@ -54,12 +53,12 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
-import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
@@ -80,13 +79,10 @@ import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -203,7 +199,8 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
-        final Long totalTargets = targetManagement.countByRsql(rollout.getTargetFilterQuery());
+        final Long totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
+                rollout.getDistributionSet().getType().getId());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
@@ -248,6 +245,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
             final RolloutGroupConditions conditions, final Rollout rollout) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         final JpaRollout savedRollout = (JpaRollout) rollout;
+        final DistributionSetType distributionSetType = savedRollout.getDistributionSet().getType();
 
         // prepare the groups
         final List<RolloutGroup> groups = groupList.stream()
@@ -255,13 +253,13 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
                 .collect(Collectors.toList());
         groups.forEach(RolloutHelper::verifyRolloutGroupHasConditions);
 
-        RolloutHelper.verifyRemainingTargets(
-                calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt()));
+        RolloutHelper.verifyRemainingTargets(calculateRemainingTargets(groups, savedRollout.getTargetFilterQuery(),
+                savedRollout.getCreatedAt(), distributionSetType.getId()));
 
         // check if we need to enforce the 'max targets per group' quota
         if (quotaManagement.getMaxTargetsPerRolloutGroup() > 0) {
-            validateTargetsInGroups(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt())
-                    .getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
+            validateTargetsInGroups(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt(),
+                    distributionSetType.getId()).getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
         }
 
         // create and persist the groups (w/o filling them with targets)
@@ -297,21 +295,6 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
     private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
                 new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
-    }
-
-    @Override
-    @Async
-    public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
-            final String targetFilter, final Long createdAt) {
-
-        final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
-        if (totalTargets == 0) {
-            throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
-        }
-
-        return new AsyncResult<>(validateTargetsInGroups(
-                groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
     }
 
     @Override
@@ -524,7 +507,7 @@ public class JpaRolloutManagement extends AbstractRolloutManagement {
 
     @Override
     public Page<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
-        Page<JpaRollout> rollouts;
+        final Page<JpaRollout> rollouts;
         final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
         rollouts = rolloutRepository.findAll(spec, pageable);
         setRolloutStatusDetails(rollouts);

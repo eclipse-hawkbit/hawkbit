@@ -152,6 +152,20 @@ public interface TargetManagement {
     long countByRsql(@NotEmpty String rsqlParam);
 
     /**
+     * Count all targets for given {@link TargetFilterQuery} and that are compatible
+     * with the passed {@link DistributionSetType}.
+     *
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
+     * @param dsTypeId
+     *            ID of the {@link DistributionSetType} the targets need to be
+     *            compatible
+     * @return the found number {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long dsTypeId);
+
+    /**
      * Count {@link TargetFilterQuery}s for given target filter query.
      *
      * @param targetFilterQueryId

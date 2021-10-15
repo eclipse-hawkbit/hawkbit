@@ -42,9 +42,10 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
-import org.eclipse.hawkbit.repository.exception.DistributionSetTypeNotInTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -256,14 +257,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void checkCompatibilityForSingleDsAssignment(final Long distSetId, final List<String> controllerIds) {
         final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
-        final Set<Long> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+        final Set<String> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)
                         .and(TargetSpecifications.notCompatibleWithDistributionSetType(distSetType.getId()))))
-                .flatMap(List::stream).map(Target::getTargetType).map(TargetType::getId).collect(Collectors.toSet());
+                .flatMap(List::stream).map(Target::getTargetType).map(TargetType::getName).collect(Collectors.toSet());
 
         if (!incompatibleTargetTypes.isEmpty()) {
-            throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(), incompatibleTargetTypes);
+            throw new IncompatibleTargetTypeException(incompatibleTargetTypes, distSetType.getName());
         }
     }
 
@@ -278,9 +279,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             incompatibleDistSetTypes.removeAll(target.getTargetType().getCompatibleDistributionSetTypes());
 
             if (!incompatibleDistSetTypes.isEmpty()) {
-                final Set<Long> distSetTypeIds = incompatibleDistSetTypes.stream().map(DistributionSetType::getId)
+                final Set<String> distSetTypeNames = incompatibleDistSetTypes.stream().map(DistributionSetType::getName)
                         .collect(Collectors.toSet());
-                throw new DistributionSetTypeNotInTargetTypeException(distSetTypeIds, target.getTargetType().getId());
+                throw new IncompatibleTargetTypeException(target.getTargetType().getName(), distSetTypeNames);
             }
         }
     }

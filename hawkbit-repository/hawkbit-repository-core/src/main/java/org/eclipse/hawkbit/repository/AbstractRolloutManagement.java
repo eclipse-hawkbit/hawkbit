@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintDeclarationException;
 
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupsValidation;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -82,11 +85,12 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     }
 
     protected RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
-            final long totalTargets) {
+            final long totalTargets, final Long dsTypeId) {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         final Map<String, Long> targetFilterCounts = groups.stream()
                 .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
-                .collect(Collectors.toMap(Function.identity(), targetManagement::countByRsql));
+                .collect(Collectors.toMap(Function.identity(),
+                        groupTargetFilter -> targetManagement.countByRsqlAndCompatible(groupTargetFilter, dsTypeId)));
 
         long unusedTargetsCount = 0;
 
@@ -139,14 +143,14 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     }
 
     protected long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
-            final Long createdAt) {
+            final Long createdAt, final Long dsTypeId) {
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
+        final long totalTargets = targetManagement.countByRsqlAndCompatible(baseFilter, dsTypeId);
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets);
+        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets, dsTypeId);
 
         return totalTargets - validation.getTargetsInGroups();
     }
@@ -154,15 +158,21 @@ public abstract class AbstractRolloutManagement implements RolloutManagement {
     @Override
     @Async
     public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
-            final String targetFilter, final Long createdAt) {
+            final String targetFilter, final Long createdAt, final Long distSetId) {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
-        final long totalTargets = targetManagement.countByRsql(baseFilter);
+
+        final DistributionSetType distributionSetType = distributionSetManagement.get(distSetId)
+                .map(DistributionSet::getType)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distSetId));
+        final long totalTargets = targetManagement.countByRsqlAndCompatible(baseFilter, distributionSetType.getId());
+
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        return new AsyncResult<>(validateTargetsInGroups(
-                groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()), baseFilter, totalTargets));
+        return new AsyncResult<>(
+                validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
+                        baseFilter, totalTargets, distributionSetType.getId()));
     }
 }

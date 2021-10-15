@@ -811,6 +811,18 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public long countByRsqlAndCompatible(final String targetFilterQuery, final Long dsTypeId) {
+        final Specification<JpaTarget> rsqlSpec = RSQLUtility.buildRsqlSpecification(targetFilterQuery,
+                TargetFields.class, virtualPropertyReplacer, database);
+        final Specification<JpaTarget> isCompatible = TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId);
+
+        return targetRepository.count((root, query, cb) -> {
+            query.distinct(true);
+            return rsqlSpec.and(isCompatible).toPredicate(root, query, cb);
+        });
+    }
+
+    @Override
     public Optional<Target> get(final long id) {
         return targetRepository.findById(id).map(t -> t);
     }
