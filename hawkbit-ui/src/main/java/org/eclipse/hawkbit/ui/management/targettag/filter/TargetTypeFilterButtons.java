@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Target Type filter buttons table.
  */
+@SuppressWarnings("squid:S2160")
 public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     private static final long serialVersionUID = 1L;
 
