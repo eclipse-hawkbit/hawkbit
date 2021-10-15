@@ -128,7 +128,7 @@ Custom target filter overview and filter management.
 The basic syntax to filter is: `field<basic_operator>value <composite_operator> field<basic_operator>value <...>`
 
 - `field`: is the name of the resource field.
-- `value`: is the expacted value of the target field.
+- `value`: is the expected value of the target field.
     - Use `*` for wildcard matches.
 - `<basic_operator>`: Are operators to do simple queries. Supported basic operators are:
   - `==` : equal
