@@ -13,8 +13,12 @@ import java.util.Collection;
 import java.util.Map;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.FilterChangedEventPayload;
+import org.eclipse.hawkbit.ui.common.event.FilterType;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehaviour.ClickBehaviourType;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
@@ -77,7 +81,14 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
 
     private void onFilterChangedEvent(final ProxyTargetType targetType,
                                       final ClickBehaviourType clickType) {
-        getDataCommunicator().reset();
+        final Long targetTypeId = ClickBehaviourType.CLICKED == clickType ? targetType.getId()
+                : null;
+        publishFilterChangedEvent(targetTypeId);
+    }
+
+    private void publishFilterChangedEvent(final Long targetTypeId) {
+        eventBus.publish(EventTopics.FILTER_CHANGED, this, new FilterChangedEventPayload<>(ProxyTarget.class,
+                FilterType.TARGET_TYPE, targetTypeId, EventView.DEPLOYMENT));
     }
 
     /**

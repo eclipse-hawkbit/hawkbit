@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -79,13 +79,9 @@ public class UpdateTargetTypeWindowController
     }
 
     private Set<ProxyType> getDsTypesByDsTypeId(final Long id) {
-        Optional<TargetType> targetType = targetTypeManagement.get(id);
-        if (targetType.isPresent()){
-            return targetType.get().getCompatibleDistributionSetTypes().stream()
-                    .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet());
-        } else {
-            return new HashSet<>();
-        }
+        Optional<TargetType> targetType = targetTypeManagement.findByTargetId(id);
+        return targetType.map(type -> type.getCompatibleDistributionSetTypes().stream()
+                .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet())).orElse(Collections.emptySet());
 
     }
 
