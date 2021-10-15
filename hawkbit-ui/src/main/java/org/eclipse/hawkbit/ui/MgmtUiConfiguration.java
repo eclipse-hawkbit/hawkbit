@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.InvalidDistributionSetErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.IncompatibleTargetTypeErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -141,6 +142,18 @@ public class MgmtUiConfiguration {
     @Bean
     UiErrorDetailsExtractor entityNotFoundErrorExtractor(final VaadinMessageSource i18n) {
         return new EntityNotFoundErrorExtractor(i18n);
+    }
+
+    /**
+     * UI incompatible Target Type error details extractor bean.
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @return UI IncompatibleTargetType Error details extractor
+     */
+    @Bean
+    UiErrorDetailsExtractor incompatibleTargetTypeErrorExtractor(final VaadinMessageSource i18n) {
+        return new IncompatibleTargetTypeErrorExtractor(i18n);
     }
 
     /**

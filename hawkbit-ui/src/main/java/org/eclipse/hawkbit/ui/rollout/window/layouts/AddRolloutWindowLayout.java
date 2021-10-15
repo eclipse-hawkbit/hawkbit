@@ -11,7 +11,11 @@ package org.eclipse.hawkbit.ui.rollout.window.layouts;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow.GroupDefinitionMode;
@@ -34,6 +38,7 @@ import com.vaadin.ui.TabSheet;
 public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
 
     private final TargetManagement targetManagement;
+    private final DistributionSetManagement distributionSetManagement;
 
     private final RolloutFormLayout rolloutFormLayout;
     private final SimpleGroupsLayout simpleGroupsLayout;
@@ -42,6 +47,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     private final VisualGroupDefinitionLayout visualGroupDefinitionLayout;
 
     private String filterQuery;
+    private Long distributionSetId;
     private Long totalTargets;
     private int noOfGroups;
     private List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions;
@@ -56,6 +62,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         super(dependencies);
 
         this.targetManagement = dependencies.getTargetManagement();
+        this.distributionSetManagement = dependencies.getDistributionSetManagement();
 
         this.rolloutFormLayout = rolloutComponentBuilder.createRolloutFormLayout();
         this.simpleGroupsLayout = rolloutComponentBuilder.createSimpleGroupsLayout();
@@ -82,21 +89,39 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     }
 
     private void addValueChangeListeners() {
-        rolloutFormLayout.setFilterQueryChangedListener(this::onTargetFilterQueryChange);
+        rolloutFormLayout.setFilterQueryOrDistSetChangedListener(this::onFilterQueryOrDistSetChange);
         groupsDefinitionTabs.addSelectedTabChangeListener(event -> onGroupDefinitionTabChanged());
         simpleGroupsLayout.setNoOfGroupsChangedListener(this::onNoOfSimpleGroupsChanged);
         advancedGroupsLayout.setAdvancedGroupDefinitionsChangedListener(this::onAdvancedGroupsChanged);
     }
 
-    private void onTargetFilterQueryChange(final String filterQuery) {
+    private void onFilterQueryOrDistSetChange(final String filterQuery, final Long distSetId) {
         this.filterQuery = filterQuery;
+        this.distributionSetId = distSetId;
 
-        totalTargets = !StringUtils.isEmpty(filterQuery) ? targetManagement.countByRsql(filterQuery) : null;
+        totalTargets = null;
+        if (!StringUtils.isEmpty(filterQuery)) {
+            totalTargets = getTotalTargets(filterQuery, distSetId);
+        }
         updateTotalTargetsAwareComponents();
 
         if (isAdvancedGroupsTabSelected()) {
             advancedGroupsLayout.setTargetFilter(filterQuery);
+            advancedGroupsLayout.setDistributionSetId(distSetId);
         }
+    }
+
+    private long getTotalTargets(final String filterQuery, final Long distSetId) {
+        if (distSetId != null) {
+            return targetManagement.countByRsqlAndCompatible(filterQuery, getTypeForDs(distSetId));
+        }
+        return targetManagement.countByRsql(filterQuery);
+    }
+
+    private Long getTypeForDs(final Long distSetId) {
+        return distributionSetManagement.get(distSetId).map(DistributionSet::getType).map(DistributionSetType::getId)
+                .orElseThrow(() -> new DistributionSetTypeUndefinedException(
+                        "No type found for DistributionSet with ID: " + distSetId));
     }
 
     private void updateTotalTargetsAwareComponents() {
@@ -129,6 +154,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
             adaptAdvancedGroupsValidation();
 
             advancedGroupsLayout.setTargetFilter(filterQuery);
+            advancedGroupsLayout.setDistributionSetId(distributionSetId);
 
             visualGroupDefinitionLayout.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
             visualGroupDefinitionLayout.setAdvancedRolloutGroupDefinitions(advancedRolloutGroupDefinitions);
@@ -209,7 +235,6 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
             proxyEntity.setAdvancedRolloutGroupDefinitions(advancedGroupsLayout.getAdvancedRolloutGroupDefinitions());
             proxyEntity.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
         }
-
         return proxyEntity;
     }
 }
