@@ -8,12 +8,13 @@
  */
 package org.eclipse.hawkbit.ui.management.bulkupload;
 
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
+import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
-import org.eclipse.hawkbit.ui.common.event.BulkUploadEventPayload;
 
 /**
  * Target bulk upload ui state
@@ -26,6 +27,7 @@ public class TargetBulkUploadUiState implements Serializable {
     private ProxyDistributionSetInfo dsInfo;
     private final Map<Long, String> tagIdsWithNameToAssign = new HashMap<>();
     private String description;
+    private ProxyTypeInfo proxyTypeInfo;
 
     /**
      * @return true whe upload in progress else false
@@ -94,6 +96,14 @@ public class TargetBulkUploadUiState implements Serializable {
      */
     public void setDescription(final String description) {
         this.description = description;
+    }
+
+    public void setTypeInfo(ProxyTypeInfo typeInfo) {
+        this.proxyTypeInfo = typeInfo;
+    }
+
+    public ProxyTypeInfo getTypeInfo() {
+        return proxyTypeInfo;
     }
 
     /**

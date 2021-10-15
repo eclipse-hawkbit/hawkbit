@@ -331,6 +331,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TABLE_POLLING_STATUS_LABEL_ID = "target.table.poll.statusId";
 
     /**
+     * ID-Target.targetType.
+     */
+    public static final String TARGET_ADD_TARGETTYPE = "target.add.targettype";
+
+    /**
      * Action history table active-state label Id.
      */
     public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";
@@ -718,6 +723,11 @@ public final class UIComponentIdProvider {
      * Id of Controller Id label in target details.
      */
     public static final String TARGET_CONTROLLER_ID = "target.controller.id";
+
+    /**
+     * Id of target type Id label in target details.
+     */
+    public static final String TARGET_TYPE_ID = "target.type.id";
 
     /**
      * Id of created at label in details.

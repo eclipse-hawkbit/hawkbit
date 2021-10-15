@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -92,7 +93,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final DistributionSetTypeManagement distributionSetTypeManagement,
             final DistributionSetInvalidationManagement dsInvalidationManagement,
             final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement,
+            final TargetTagManagement targetTagManagement, final TargetTypeManagement targetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final TenantConfigurationManagement configManagement,
@@ -109,7 +110,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
                     targetFilterQueryManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState());
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
                     targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),

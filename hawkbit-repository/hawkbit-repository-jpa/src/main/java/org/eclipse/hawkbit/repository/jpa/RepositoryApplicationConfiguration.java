@@ -244,8 +244,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param dsTypeManagement
-     *            for loading
-     *            {@link TargetType#getCompatibleDistributionSetTypes()}
+     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return TargetTypeBuilder bean
      */
     @Bean
@@ -261,9 +260,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param softwareManagement
-     *            for loading
-     *            {@link DistributionSetType#getMandatoryModuleTypes()} and
-     *            {@link DistributionSetType#getOptionalModuleTypes()}
+     *            for loading {@link DistributionSetType#getMandatoryModuleTypes()}
+     *            and {@link DistributionSetType#getOptionalModuleTypes()}
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
@@ -305,8 +303,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly,
-     *         e.g. JPA entities.
+     *         accessible in beans which cannot access the service directly, e.g.
+     *         JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -314,9 +312,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantConfigurationManagement} singleton bean which
-     *         make it accessible in beans which cannot access the service
-     *         directly, e.g. JPA entities.
+     * @return the {@link TenantConfigurationManagement} singleton bean which make
+     *         it accessible in beans which cannot access the service directly, e.g.
+     *         JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -325,9 +323,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible
-     *         in beans which cannot access the service directly, e.g. JPA
-     *         entities.
+     *         current {@link SystemManagement} service and make it accessible in
+     *         beans which cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     SystemManagementHolder systemManagementHolder() {
@@ -335,10 +332,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantAwareHolder} singleton bean which holds the
-     *         current {@link TenantAware} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA
-     *         entities.
+     * @return the {@link TenantAwareHolder} singleton bean which holds the current
+     *         {@link TenantAware} service and make it accessible in beans which
+     *         cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -346,10 +342,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which
-     *         holds the current {@link SecurityTokenGenerator} service and make
-     *         it accessible in beans which cannot access the service via
-     *         injection
+     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
+     *         the current {@link SecurityTokenGenerator} service and make it
+     *         accessible in beans which cannot access the service via injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
@@ -532,25 +527,24 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * {@link JpaTenantConfigurationManagement} bean.
+     * {@link JpaTargetManagement} bean.
      *
-     * @return a new {@link TenantConfigurationManagement}
+     * @return a new {@link JpaTargetManagement}
      */
     @Bean
     @ConditionalOnMissingBean
     TargetManagement targetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
-            final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties) {
-        return new JpaTargetManagement(entityManager, quotaManagement, targetRepository, targetTypeRepository,
-                targetMetadataRepository, rolloutGroupRepository, distributionSetRepository,
-                targetFilterQueryRepository, targetTagRepository, eventPublisherHolder, tenantAware, afterCommit,
-                virtualPropertyReplacer, properties.getDatabase());
+            final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
+        return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
+                targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
+                targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
+                properties.getDatabase());
     }
 
     /**
