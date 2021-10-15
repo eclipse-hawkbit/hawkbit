@@ -2255,7 +2255,7 @@ public class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest
                 .convertException(mvcResult.getResponse().getContentAsString());
         assertThat(exceptionInfo.getExceptionClass()).isEqualTo(ConstraintViolationException.class.getName());
         assertThat(exceptionInfo.getErrorCode()).isEqualTo(SpServerError.SP_REPO_CONSTRAINT_VIOLATION.getKey());
-        assertThat(exceptionInfo.getMessage()).contains("targetTypeId must not be null");
+        assertThat(exceptionInfo.getMessage()).contains("targetTypeId");
     }
 
     @Test
