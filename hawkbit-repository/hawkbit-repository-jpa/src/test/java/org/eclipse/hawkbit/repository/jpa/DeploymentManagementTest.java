@@ -41,11 +41,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.DistributionSetTypeNotInTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
-import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -1361,30 +1360,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Tests that an exception is thrown when a target is assigned to an incomplete distribution set")
-    public void verifyAssignTargetsToIncompleteDistribution() {
-        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
-        final Target target = testdataFactory.createTarget();
-
-        assertThatExceptionOfType(IncompleteDistributionSetException.class)
-                .as("Incomplete distributionSet should throw an exception")
-                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
-
-    }
-
-    @Test
-    @Description("Tests that an exception is thrown when a target is assigned to an invalidated distribution set")
-    public void verifyAssignTargetsToInvalidDistribution() {
-        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
-        final Target target = testdataFactory.createTarget();
-
-        assertThatExceptionOfType(InvalidDistributionSetException.class)
-                .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
-
-    }
-
-    @Test
     @Description("Verify that the DistributionSet assignments work for multiple targets of the same target type within the same request.")
     void verifyDSAssignmentForMultipleTargetsWithSameTargetType() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
@@ -1449,7 +1424,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .deploymentRequest(target.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = Collections.singletonList(deploymentRequest);
 
-        assertThatExceptionOfType(DistributionSetTypeNotInTargetTypeException.class)
+        assertThatExceptionOfType(IncompatibleTargetTypeException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
     }
 
