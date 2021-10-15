@@ -28,6 +28,8 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTargetTypeFilterButton
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Target Type filter buttons table.
@@ -37,6 +39,8 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
 
     private final transient TargetTypeManagement targetTypeManagement;
     private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
+
+    private static final Logger LOG = LoggerFactory.getLogger(TargetTypeFilterButtons.class);
 
     TargetTypeFilterButtons(final CommonUiDependencies uiDependencies,
                             final TargetTypeManagement targetTypeManagement, final TagFilterLayoutUiState tagFilterLayoutUiState,
@@ -105,6 +109,7 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
                             ProxyTargetType.class, targetTypeToDelete.getId()));
             return true;
         } catch (TargetTypeInUseException exception){
+            LOG.trace("Target type already in use exception: {}", exception.getMessage());
             uiNotification.displayValidationError(i18n.getMessage(exception.getMessage()));
         }
         return false;
