@@ -380,9 +380,9 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
-        return getCheckBox(null, id, binder, getter, setter);
+        return createCheckBox(null, id, binder, getter, setter);
     }
 
     /**
@@ -402,7 +402,7 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String caption, final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String caption, final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
         final CheckBox checkBox;
         if (StringUtils.isEmpty(caption)) {

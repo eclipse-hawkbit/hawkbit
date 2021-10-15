@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.Optional;
+
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -31,6 +34,7 @@ public class AddSmWindowController
         extends AbstractAddNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
+    private final Optional<ArtifactEncryption> artifactEncryption;
     private final SmWindowLayout layout;
     private final EventView view;
     private final ProxySmValidator validator;
@@ -48,10 +52,11 @@ public class AddSmWindowController
      *            EventView
      */
     public AddSmWindowController(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final SmWindowLayout layout, final EventView view) {
+            final Optional<ArtifactEncryption> artifactEncryption, final SmWindowLayout layout, final EventView view) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
+        this.artifactEncryption = artifactEncryption;
         this.layout = layout;
         this.view = view;
         this.validator = new ProxySmValidator(uiDependencies);
@@ -60,6 +65,13 @@ public class AddSmWindowController
     @Override
     public EntityWindowLayout<ProxySoftwareModule> getLayout() {
         return layout;
+    }
+
+    @Override
+    protected void adaptLayout(final ProxySoftwareModule proxyEntity) {
+        if (artifactEncryption.isPresent()) {
+            layout.showEncryptionField();
+        }
     }
 
     @Override
@@ -75,7 +87,20 @@ public class AddSmWindowController
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
                 .vendor(entity.getVendor()).description(entity.getDescription());
 
-        return smManagement.create(smCreate);
+        final SoftwareModule sm = smManagement.create(smCreate);
+        addMetadataEncryptionKeyIfRequested(entity.isEncrypted(), sm.getId());
+
+        return sm;
+    }
+
+    private void addMetadataEncryptionKeyIfRequested(final boolean encryptionRequested, final long smId) {
+        artifactEncryption.ifPresent(encryptor -> {
+            if (encryptionRequested) {
+                smManagement.createMetaData(
+                        getEntityFactory().softwareModuleMetadata().create(smId).key(encryptor.encryptionAlgorithm())
+                                .value(encryptor.generateEncryptionKey()).targetVisible(true));
+            }
+        });
     }
 
     @Override

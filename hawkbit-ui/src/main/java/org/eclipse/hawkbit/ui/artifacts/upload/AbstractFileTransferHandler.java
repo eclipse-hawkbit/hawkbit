@@ -12,12 +12,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
+import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
@@ -26,6 +29,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
+import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
@@ -38,6 +42,7 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -103,9 +108,20 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
+        final Optional<ArtifactEncryption> artifactEncryption = getArtifactEncryptionBean();
+        final SoftwareModuleManagement smManagement = SpringContextHolder.getInstance()
+                .getBean(SoftwareModuleManagement.class);
         SpringContextHolder.getInstance().getBean("uiExecutor", Executor.class)
-                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(),
-                        uploadLock));
+                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType,
+                        artifactEncryption, smManagement, UI.getCurrent(), uploadLock));
+    }
+
+    private Optional<ArtifactEncryption> getArtifactEncryptionBean() {
+        try {
+            return Optional.of(SpringContextHolder.getInstance().getBean(ArtifactEncryption.class));
+        } catch (final NoSuchBeanDefinitionException ex) {
+            return Optional.empty();
+        }
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -215,7 +231,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 outputStream.close();
             } catch (final IOException e1) {
-                LOG.warn("Closing output stream caused an exception {}", e1);
+                LOG.warn("Closing output stream caused by", e1);
             }
         }
 
@@ -226,7 +242,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 inputStream.close();
             } catch (final IOException e1) {
-                LOG.warn("Closing input stream caused an exception {}", e1);
+                LOG.warn("Closing input stream caused by", e1);
             }
         }
     }
@@ -235,6 +251,8 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         private final InputStream inputStream;
         private final FileUploadId fileUploadId;
         private final String mimeType;
+        private final Optional<ArtifactEncryption> artifactEncryption;
+        private final SoftwareModuleManagement smManagement;
         private final UI vaadinUi;
         private final Lock uploadLock;
 
@@ -253,10 +271,13 @@ public abstract class AbstractFileTransferHandler implements Serializable {
          *            Lock
          */
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
-                final String mimeType, final UI vaadinUi, final Lock uploadLock) {
+                final String mimeType, final Optional<ArtifactEncryption> artifactEncryption,
+                final SoftwareModuleManagement smManagement, final UI vaadinUi, final Lock uploadLock) {
             this.inputStream = inputStream;
             this.fileUploadId = fileUploadId;
             this.mimeType = mimeType;
+            this.artifactEncryption = artifactEncryption;
+            this.smManagement = smManagement;
             this.vaadinUi = vaadinUi;
             this.uploadLock = uploadLock;
         }
@@ -297,23 +318,36 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             if (fileUploadId == null) {
                 throw new ArtifactUploadFailedException();
             }
+
             final String filename = fileUploadId.getFilename();
-            LOG.debug("Transfering file {} directly to repository", filename);
-            final Artifact artifact = uploadArtifact(filename);
+            final InputStream stream = artifactEncryption.flatMap(this::encryptArtifactIfKeyPresent)
+                    .orElse(inputStream);
+            final Artifact artifact = uploadArtifact(filename, stream);
+
             if (isUploadInterrupted()) {
                 LOG.warn("Upload of {} was interrupted", filename);
                 handleUploadFailure(artifact);
                 publishUploadFinishedEvent(fileUploadId);
                 return;
             }
+
             publishUploadSucceeded(fileUploadId, artifact.getSize());
             publishUploadFinishedEvent(fileUploadId);
             publishArtifactsChanged(fileUploadId);
         }
 
-        private Artifact uploadArtifact(final String filename) {
+        private Optional<InputStream> encryptArtifactIfKeyPresent(final ArtifactEncryption encryptor) {
+            final Optional<String> encryptionKey = smManagement
+                    .getMetaDataBySoftwareModuleId(fileUploadId.getSoftwareModuleId(), encryptor.encryptionAlgorithm())
+                    .map(MetaData::getValue);
+
+            return encryptionKey.map(key -> encryptor.encryptStream(key, inputStream));
+        }
+
+        private Artifact uploadArtifact(final String filename, final InputStream stream) {
+            LOG.debug("Transfering file {} directly to repository", filename);
             try {
-                return artifactManagement.create(new ArtifactUpload(inputStream, fileUploadId.getSoftwareModuleId(),
+                return artifactManagement.create(new ArtifactUpload(stream, fileUploadId.getSoftwareModuleId(),
                         filename, null, null, null, true, mimeType, -1));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
                 throw new ArtifactUploadFailedException(e);

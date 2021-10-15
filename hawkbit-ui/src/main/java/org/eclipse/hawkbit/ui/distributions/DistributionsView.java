@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.ui.distributions;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
@@ -86,8 +88,8 @@ public class DistributionsView extends AbstractEventListenersAwareView implement
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final ArtifactManagement artifactManagement, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final ArtifactManagement artifactManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         this.permChecker = permChecker;
         this.manageDistUIState = manageDistUIState;
 
@@ -105,8 +107,8 @@ public class DistributionsView extends AbstractEventListenersAwareView implement
                     manageDistUIState.getDsTypeFilterLayoutUiState(),
                     manageDistUIState.getDistributionSetGridLayoutUiState());
             this.swModuleGridLayout = new SwModuleGridLayout(uiDependencies, softwareModuleManagement,
-                    softwareModuleTypeManagement, artifactManagement, manageDistUIState.getSmTypeFilterLayoutUiState(),
-                    manageDistUIState.getSwModuleGridLayoutUiState());
+                    softwareModuleTypeManagement, artifactManagement, artifactEncryption,
+                    manageDistUIState.getSmTypeFilterLayoutUiState(), manageDistUIState.getSwModuleGridLayoutUiState());
             this.distSMTypeFilterLayout = new DistSMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
                     manageDistUIState.getSmTypeFilterLayoutUiState());
 

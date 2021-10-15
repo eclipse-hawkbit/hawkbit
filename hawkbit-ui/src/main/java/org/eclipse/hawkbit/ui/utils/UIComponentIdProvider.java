@@ -1400,7 +1400,8 @@ public final class UIComponentIdProvider {
      */
     public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
     /**
-     * Distribution set invalidate consequences window, cancelation type radio button group
+     * Distribution set invalidate consequences window, cancelation type radio
+     * button group
      */
     public static final String INVALIDATE_DS_CANCELATION_TYPE = "invalidate.distributionset.consequences.cancelation.type.radio";
     /**
@@ -1545,6 +1546,11 @@ public final class UIComponentIdProvider {
      * Id of the file upload cancel confirmation window
      */
     public static final String UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG = "upload.queue.clear.confirmation.window";
+
+    /**
+     * Artifact encryption checkbox id.
+     */
+    public static final String ARTIFACT_ENCRYPTION_ID = "artifact.encryption.id";
 
     /**
      * /* Private Constructor.

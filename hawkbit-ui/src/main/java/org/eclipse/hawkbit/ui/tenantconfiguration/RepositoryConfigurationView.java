@@ -98,7 +98,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         gridLayout.setColumnExpandRatio(1, 1.0F);
         gridLayout.setSizeFull();
 
-        final CheckBox actionAutoCloseCheckBox = FormComponentBuilder.getCheckBox(
+        final CheckBox actionAutoCloseCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLOSE_CHECKBOX, getBinder(),
                 ProxySystemConfigRepository::isActionAutoclose, ProxySystemConfigRepository::setActionAutoclose);
         actionAutoCloseCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
@@ -107,7 +107,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         gridLayout.addComponent(actionAutoCloseCheckBox, 0, 0);
         gridLayout.addComponent(actionAutocloseConfigurationItem, 1, 0);
 
-        multiAssignmentsCheckBox = FormComponentBuilder.getCheckBox(
+        multiAssignmentsCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.REPOSITORY_MULTI_ASSIGNMENTS_CHECKBOX, getBinder(),
                 ProxySystemConfigRepository::isMultiAssignments, ProxySystemConfigRepository::setMultiAssignments);
         multiAssignmentsCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
@@ -125,7 +125,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         gridLayout.addComponent(multiAssignmentsCheckBox, 0, 1);
         gridLayout.addComponent(multiAssignmentsConfigurationItem, 1, 1);
 
-        final CheckBox actionAutoCleanupCheckBox = FormComponentBuilder.getCheckBox(
+        final CheckBox actionAutoCleanupCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX, getBinder(),
                 ProxySystemConfigRepository::isActionAutocleanup, ProxySystemConfigRepository::setActionAutocleanup);
         actionAutoCleanupCheckBox.setStyleName(DIST_CHECKBOX_STYLE);

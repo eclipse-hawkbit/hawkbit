@@ -10,7 +10,9 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
@@ -63,8 +65,10 @@ public class SoftwareModuleGridLayout extends AbstractSoftwareModuleGridLayout {
     public SoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final Optional<ArtifactEncryption> artifactEncryption,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState) {
-        super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, EventView.UPLOAD);
+        super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, artifactEncryption,
+                EventView.UPLOAD);
 
         this.softwareModuleGridHeader = new SoftwareModuleGridHeader(uiDependencies, smTypeFilterLayoutUiState,
                 smGridLayoutUiState, getSmWindowBuilder(), getEventView());

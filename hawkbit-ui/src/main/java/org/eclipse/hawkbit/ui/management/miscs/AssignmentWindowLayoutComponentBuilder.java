@@ -81,7 +81,7 @@ public class AssignmentWindowLayoutComponentBuilder {
      * @return Maintenance window checkbox
      */
     public CheckBox createEnableMaintenanceWindowToggle(final Binder<ProxyAssignmentWindow> binder) {
-        final CheckBox maintenanceWindowToggle = FormComponentBuilder.getCheckBox(
+        final CheckBox maintenanceWindowToggle = FormComponentBuilder.createCheckBox(
                 i18n.getMessage("caption.maintenancewindow.enabled"),
                 UIComponentIdProvider.MAINTENANCE_WINDOW_ENABLED_ID, binder,
                 ProxyAssignmentWindow::isMaintenanceWindowEnabled, ProxyAssignmentWindow::setMaintenanceWindowEnabled);

@@ -78,6 +78,7 @@ public class UpdateSmWindowController
         layout.disableSmTypeSelect();
         layout.disableNameField();
         layout.disableVersionField();
+        layout.disableEncryptionField();
     }
 
     @Override

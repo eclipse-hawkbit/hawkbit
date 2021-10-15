@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.mappers.TypeToTypeInfoMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleTypeDataProvider;
@@ -17,6 +16,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.FormLayout;
@@ -34,6 +34,7 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
     private final TextField smVersion;
     private final TextField smVendor;
     private final TextArea smDescription;
+    private final CheckBox artifactEncryption;
 
     /**
      * Constructor for AbstractTagWindowLayout
@@ -47,7 +48,7 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
         super();
 
         final SoftwareModuleTypeDataProvider<ProxyTypeInfo> smTypeDataProvider = new SoftwareModuleTypeDataProvider<>(
-                smTypeManagement, new TypeToTypeInfoMapper<SoftwareModuleType>());
+                smTypeManagement, new TypeToTypeInfoMapper<>());
         this.smComponentBuilder = new SmWindowLayoutComponentBuilder(i18n, smTypeDataProvider);
 
         this.smTypeSelect = smComponentBuilder.createSoftwareModuleTypeCombo(binder);
@@ -55,6 +56,7 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
         this.smVersion = smComponentBuilder.createVersionField(binder);
         this.smVendor = smComponentBuilder.createVendorField(binder);
         this.smDescription = smComponentBuilder.createDescription(binder);
+        this.artifactEncryption = smComponentBuilder.createArtifactEncryptionCheck(binder);
     }
 
     /**
@@ -79,6 +81,9 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
 
         smWindowLayout.addComponent(smDescription);
 
+        smWindowLayout.addComponent(artifactEncryption);
+        artifactEncryption.setVisible(false);
+
         return smWindowLayout;
     }
 
@@ -101,5 +106,19 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
      */
     public void disableVersionField() {
         smVersion.setEnabled(false);
+    }
+
+    /**
+     * Disable the software module artifact encryption
+     */
+    public void disableEncryptionField() {
+        artifactEncryption.setEnabled(false);
+    }
+
+    /**
+     * Show the software module artifact encryption
+     */
+    public void showEncryptionField() {
+        artifactEncryption.setVisible(true);
     }
 }

@@ -71,7 +71,7 @@ public class RolloutConfigurationView extends BaseConfigurationView<ProxySystemC
         gridLayout.setColumnExpandRatio(1, 1.0F);
         gridLayout.setSizeFull();
 
-        final CheckBox approvalCheckbox = FormComponentBuilder.getCheckBox(
+        final CheckBox approvalCheckbox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.ROLLOUT_APPROVAL_ENABLED_CHECKBOX, getBinder(),
                 ProxySystemConfigRollout::isRolloutApproval, ProxySystemConfigRollout::setRolloutApproval);
 
