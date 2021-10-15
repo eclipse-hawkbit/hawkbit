@@ -27,7 +27,7 @@ public interface FieldNameProvider {
     /**
      * Separator for the sub attributes
      */
-    String SUB_ATTRIBUTE_SEPERATOR = ".";
+    String SUB_ATTRIBUTE_SEPARATOR = ".";
 
     /**
      * @return the string representation of the underlying persistence field
@@ -44,7 +44,7 @@ public interface FieldNameProvider {
      */
     default String[] getSubAttributes(final String propertyFieldName) {
         if (isMap()) {
-            final String[] subAttributes = propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPERATOR, 2);
+            final String[] subAttributes = propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPARATOR, 2);
             // [0] fieldname |[1] keyname
             final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
             if (StringUtils.isEmpty(mapKeyName)) {
@@ -52,7 +52,7 @@ public interface FieldNameProvider {
             }
             return new String[] { getFieldName(), mapKeyName };
         }
-        return propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+        return propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPARATOR);
     }
 
     /**
@@ -69,7 +69,7 @@ public interface FieldNameProvider {
             return true;
         }
         for (final String attribute : subEntityAttributes) {
-            final String[] graph = attribute.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
+            final String[] graph = attribute.split("\\" + SUB_ATTRIBUTE_SEPARATOR);
 
             for (final String subAttribute : graph) {
                 if (subAttribute.equalsIgnoreCase(propertyField)) {

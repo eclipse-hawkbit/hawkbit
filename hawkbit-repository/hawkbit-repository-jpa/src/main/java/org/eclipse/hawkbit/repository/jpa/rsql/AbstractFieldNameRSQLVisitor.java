@@ -31,7 +31,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
     protected A getFieldEnumByName(final ComparisonNode node) {
         String enumName = node.getSelector();
-        final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+        final String[] graph = enumName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR);
         if (graph.length != 0) {
             enumName = graph[0];
         }
@@ -59,7 +59,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
         for (int i = 1; i < graph.length; i++) {
 
             final String propertyField = graph[i];
-            fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR).append(propertyField);
+            fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
 
             // the key of map is not in the graph
             if (propertyEnum.isMap() && graph.length == (i + 1)) {
@@ -123,7 +123,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
                     final String enumFieldName = enumField.name().toLowerCase();
 
                     if (enumField.isMap()) {
-                        return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + "keyName";
+                        return enumFieldName + FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR + "keyName";
                     }
 
                     return enumFieldName;
@@ -133,7 +133,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
                 .filter(enumField -> !enumField.getSubEntityAttributes().isEmpty()).flatMap(enumField -> {
                     final List<String> subEntity = enumField
                             .getSubEntityAttributes().stream().map(fieldName -> enumField.name().toLowerCase()
-                                    + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR + fieldName)
+                                    + FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR + fieldName)
                             .collect(Collectors.toList());
 
                     return subEntity.stream();
