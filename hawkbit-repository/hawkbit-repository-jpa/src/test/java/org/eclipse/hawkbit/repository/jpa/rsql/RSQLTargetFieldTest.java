@@ -163,6 +163,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key.==value.dot", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key*==value.dot", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".*==value.dot", 0);
+        assertRSQLQuery(TargetFields.ATTRIBUTE.name() + "..==value.dot", 0);
         assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + ".==value.dot",
                 RSQLParameterUnsupportedFieldException.class);
         assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "*==value.dot",
@@ -246,6 +247,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".key.==value.dot", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".key*==value.dot", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".*==value.dot", 0);
+        assertRSQLQuery(TargetFields.METADATA.name() + "..==value.dot", 0);
         assertRSQLQueryThrowsException(TargetFields.METADATA.name() + ".==value.dot",
                 RSQLParameterUnsupportedFieldException.class);
         assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "*==value.dot",

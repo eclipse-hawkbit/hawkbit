@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-import com.google.common.base.Strings;
-
 /**
  * Describing the fields of the Target model which can be used in the REST API
  * e.g. for sorting etc.
@@ -136,23 +134,5 @@ public enum TargetFields implements FieldNameProvider {
     @Override
     public String getFieldName() {
         return fieldName;
-    }
-
-    @Override
-    public String[] getSubAttributes(final String propertyField) {
-        if (this == METADATA || this == ATTRIBUTE) {
-            // expected e.g. metadata.a.b.c where a.b.c is the metadata key
-            // name,
-            // same for attributes
-            if (!propertyField.contains(".")) {
-                return new String[] { fieldName };
-            }
-            final String metadataKeyValue = propertyField.substring(propertyField.indexOf('.') + 1);
-            if (Strings.isNullOrEmpty(metadataKeyValue)) {
-                return new String[] { fieldName };
-            }
-            return new String[] { fieldName, metadataKeyValue };
-        }
-        return FieldNameProvider.super.getSubAttributes(propertyField);
     }
 }

@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
+import org.springframework.util.StringUtils;
+
 /**
  * An interface for declaring the name of the field described in the database
  * which is used as string representation of the field, e.g. for sorting the
@@ -41,7 +43,16 @@ public interface FieldNameProvider {
      * @return array consisting of sub attributes
      */
     default String[] getSubAttributes(final String propertyFieldName) {
-        return propertyFieldName.split("\\" + FieldNameProvider.SUB_ATTRIBUTE_SEPERATOR);
+        if (isMap()) {
+            final String[] subAttributes = propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPERATOR, 2);
+            // [0] fieldname |[1] keyname
+            final String mapKeyName = subAttributes.length == 2 ? subAttributes[1] : null;
+            if (StringUtils.isEmpty(mapKeyName)) {
+                return new String[] { getFieldName() };
+            }
+            return new String[] { getFieldName(), mapKeyName };
+        }
+        return propertyFieldName.split("\\" + SUB_ATTRIBUTE_SEPERATOR);
     }
 
     /**
@@ -85,7 +96,7 @@ public interface FieldNameProvider {
     }
 
     /**
-     * Is the entity field a {@link Map}.
+     * Is the entity field a {@link Map} consisting of key-value pairs.
      *
      * @return <code>true</code> is a map <code>false</code> is not a map
      */
