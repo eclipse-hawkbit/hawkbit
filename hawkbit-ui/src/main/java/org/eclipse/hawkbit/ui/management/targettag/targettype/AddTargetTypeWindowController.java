@@ -62,14 +62,10 @@ public class AddTargetTypeWindowController
 
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
-        TargetType targetType = targetTypeManagement.create(getEntityFactory().targetType().create()
-                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
-
-        if (!entity.getSelectedDsTypes().isEmpty()) {
-            targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
-                    entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet()));
-        }
-        return targetType;
+        return targetTypeManagement.create(getEntityFactory().targetType().create()
+                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour())
+                .compatible(entity.getSelectedDsTypes().stream().map(ProxyType::getId)
+                        .collect(Collectors.toSet())));
     }
 
     @Override
