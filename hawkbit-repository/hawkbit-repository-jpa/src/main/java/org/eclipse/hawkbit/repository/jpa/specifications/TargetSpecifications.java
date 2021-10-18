@@ -413,8 +413,11 @@ public final class TargetSpecifications {
             // isNotNull predicate first
             final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
 
+            // We need to check for isNull(equal(...)) and not(equal(...)) since we allow
+            // target types that don't have any compatible distribution set type
             return cb.and(targetTypeNotNull,
-                    cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)));
+                    cb.or(cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)),
+                            cb.not(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId))));
         };
     }
 
