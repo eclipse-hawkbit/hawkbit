@@ -181,6 +181,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
             final boolean createRollout) {
 
         final TargetType targetType = testdataFactory.findOrCreateTargetType("defaultType");
+        targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
+                Collections.singletonList(distributionSet.getType().getId()));
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
                 .targetType(targetType.getId()).lastTargetQuery(System.currentTimeMillis()));
