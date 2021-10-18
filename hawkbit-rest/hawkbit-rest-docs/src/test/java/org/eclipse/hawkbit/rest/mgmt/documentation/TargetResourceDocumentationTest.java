@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +36,9 @@ import org.eclipse.hawkbit.repository.ActionStatusFields;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.rest.documentation.AbstractApiRestDocumentation;
 import org.eclipse.hawkbit.rest.documentation.ApiModelPropertiesGeneric;
 import org.eclipse.hawkbit.rest.documentation.MgmtApiModelProperties;
@@ -104,6 +107,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .type("String"),
                         fieldWithPath("content[].lastControllerRequestAt")
                                 .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
+                        fieldWithPath("content[].targetType")
+                                .description(MgmtApiModelProperties.TARGETTYPE_ID).type("Number"),
                         fieldWithPath("content[]._links.self").ignored())));
     }
 
@@ -118,7 +123,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the POST request of creating new targets within SP. The request body must always be a list of targets. Required Permission: CREATE_TARGET.")
     public void postTargets() throws Exception {
-        final String target = createTargetJsonForPostRequest("123456", "controllerId", "test");
+        final TargetType defaultType = testdataFactory.createTargetType("defaultType", Collections.emptyList());
+        final String target = createTargetJsonForPostRequest("123456", "controllerId", "test", defaultType);
 
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)
                 .contentType(MediaType.APPLICATION_JSON).content(target)).andExpect(status().isCreated())
@@ -129,9 +135,11 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         optionalRequestFieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
                         optionalRequestFieldWithPath("[]address").description(MgmtApiModelProperties.ADDRESS),
                         optionalRequestFieldWithPath("[]securityToken")
-                                .description(MgmtApiModelProperties.SECURITY_TOKEN)),
+                                .description(MgmtApiModelProperties.SECURITY_TOKEN),
+                        optionalRequestFieldWithPath("[]targetType").description(MgmtApiModelProperties.TARGETTYPE_ID)),
                         responseFields(fieldWithPath("[]controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                fieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
+                                fieldWithPath(
+                                        "[]name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
                                 fieldWithPath("[]address").description(MgmtApiModelProperties.ADDRESS),
                                 fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
@@ -148,6 +156,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("[]securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
                                 fieldWithPath("[]requestAttributes")
                                         .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                                fieldWithPath("[]targetType")
+                                        .description(MgmtApiModelProperties.TARGETTYPE_ID),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 
@@ -801,14 +811,54 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(MgmtApiModelProperties.META_DATA_VALUE))));
     }
 
+    @Test
+    @Description("Update the target type of a target." + " Required Permission: " + SpPermission.UPDATE_TARGET)
+    public void postAssignTargetType() throws Exception {
+        final Target testTarget = testdataFactory.createTarget(targetId);
+        final DistributionSetType distributionSetTypeA = testdataFactory.findOrCreateDistributionSetType("jar", "jar");
+        final DistributionSetType distributionSetTypeB = testdataFactory.findOrCreateDistributionSetType("zip", "zip");
+        final TargetType targetType = testdataFactory.createTargetType("deviceType-A",
+                Arrays.asList(distributionSetTypeA, distributionSetTypeB));
+
+        final JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id", targetType.getId());
+
+        mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/targettype",
+                testTarget.getControllerId(), targetType.getId()).content(String.valueOf(jsonObject))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                        requestFields(requestFieldWithPath("id").description(MgmtApiModelProperties.TARGETTYPE_ID))));
+    }
+
+    @Test
+    @Description("Reset the target type of a target." + " Required Permission: " + SpPermission.UPDATE_TARGET)
+    public void deleteUnassignTargetType() throws Exception {
+        final Target testTarget = testdataFactory.createTarget(targetId);
+        final DistributionSetType distributionSetTypeA = testdataFactory.findOrCreateDistributionSetType("jar", "jar");
+        final DistributionSetType distributionSetTypeB = testdataFactory.findOrCreateDistributionSetType("zip", "zip");
+        final TargetType targetType = testdataFactory.createTargetType("deviceType-A",
+                Arrays.asList(distributionSetTypeA, distributionSetTypeB));
+        targetManagement.assignType(testTarget.getControllerId(), targetType.getId());
+
+        mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/targettype",
+                        testTarget.getControllerId()).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID))
+                        ));
+    }
+
     private String createTargetJsonForPostRequest(final String controllerId, final String name,
-            final String description) throws JsonProcessingException {
+            final String description, final TargetType targetType) throws JsonProcessingException {
         final Map<String, Object> target = new HashMap<>();
         target.put("controllerId", controllerId);
         target.put("description", description);
         target.put("name", name);
         target.put("address", "https://192.168.0.1");
         target.put("securityToken", "2345678DGGDGFTDzztgf");
+        target.put("targetType", targetType.getId());
         return "[" + this.objectMapper.writeValueAsString(target) + "]";
     }
 
