@@ -61,6 +61,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -1417,13 +1418,30 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify that the DistributionSet assignment fails for target with incompatible target type.")
     void verifyDSAssignmentFailsForTargetsWithIncompatibleTargetTypes() {
         final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
-        final TargetType targetType = testdataFactory.createTargetType("test-type", Collections.emptyList());
+        final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type", "dsType");
+        final TargetType targetType = testdataFactory.createTargetType("target-type",
+                Collections.singletonList(dsType));
         final Target target = testdataFactory.createTarget("test-target", "test-target", targetType.getId());
 
         final DeploymentRequest deploymentRequest = DeploymentManagement
                 .deploymentRequest(target.getControllerId(), ds.getId()).build();
         final List<DeploymentRequest> deploymentRequests = Collections.singletonList(deploymentRequest);
 
+        assertThatExceptionOfType(IncompatibleTargetTypeException.class)
+                .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
+    }
+
+    @Test
+    @Description("Verify that the DistributionSet assignment fails for target with target type that is not compatible with any dsType.")
+    void verifyDSAssignmentFailsForTargetsWithTargetTypesThatAreNotCompatibleWithAnyDs() {
+        final DistributionSet ds = testdataFactory.createDistributionSet("test-ds");
+        final TargetType emptyTargetType = testdataFactory.createTargetType("target-type", Collections.emptyList());
+        final Target targetWithEmptyType = testdataFactory.createTarget("test-target", "test-target",
+                emptyTargetType.getId());
+
+        final DeploymentRequest deploymentRequestWithEmptyType = DeploymentManagement
+                .deploymentRequest(targetWithEmptyType.getControllerId(), ds.getId()).build();
+        final List<DeploymentRequest> deploymentRequests = Collections.singletonList(deploymentRequestWithEmptyType);
         assertThatExceptionOfType(IncompatibleTargetTypeException.class)
                 .isThrownBy(() -> deploymentManagement.assignDistributionSets(deploymentRequests));
     }
