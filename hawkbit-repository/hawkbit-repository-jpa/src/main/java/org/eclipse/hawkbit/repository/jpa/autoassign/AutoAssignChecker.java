@@ -84,14 +84,15 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             do {
 
                 final List<String> controllerIds = targetManagement
-                        .findByTargetFilterQueryAndNonDS(PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
+                        .findByTargetFilterQueryAndNonDSAndCompatible(
+                                PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
                                 targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
                         .getContent().stream().map(Target::getControllerId).collect(Collectors.toList());
                 count = runTransactionalAssignment(targetFilterQuery, controllerIds);
 
             } while (count == Constants.MAX_ENTRIES_IN_STATEMENT);
 
-        } catch (PersistenceException | AbstractServerRtException e) {
+        } catch (final PersistenceException | AbstractServerRtException e) {
             LOGGER.error("Error during auto assign check of target filter query " + targetFilterQuery.getId(), e);
         }
 
