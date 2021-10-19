@@ -49,10 +49,10 @@ public class TargetDataCsvExporter {
         this.dateFormat = new SimpleDateFormat(dateFormatPattern);
     }
 
-    public void writeTargetsByFilterId(final Long targetFilterId, final OutputStream out) {
+    public void writeTargetsByFilterQueryString(final String targetFilterQueryString, final OutputStream out) {
         try {
             addHeader(out);
-            convertTargets(targetFilterId, out);
+            convertTargets(targetFilterQueryString, out);
             out.flush();
             out.close();
         } catch (final IOException e) {
@@ -64,13 +64,16 @@ public class TargetDataCsvExporter {
         out.write(HEADER_KEYS.stream().collect(Collectors.joining(separator)).concat("\n").getBytes());
     }
 
-    private void convertTargets(final Long targetFilterId, final OutputStream out) throws IOException {
+    private void convertTargets(final String targetFilterQueryString, final OutputStream out) throws IOException {
         Pageable pageable = PageRequest.of(0, SPUIDefinitions.PAGE_SIZE);
         Slice<Target> targets;
 
+        String lineSeparator = System.getProperty("line.separator");
+
         do {
-            targets = targetManagement.findByTargetFilterQuery(pageable, targetFilterId);
-            out.write(targets.stream().map(this::convertTarget).collect(Collectors.joining("\n")).getBytes());
+            targets = targetManagement.findByRsql(pageable, targetFilterQueryString);
+
+            out.write(targets.stream().map(this::convertTarget).collect(Collectors.joining(lineSeparator)).getBytes());
         } while ((pageable = targets.nextPageable()) != Pageable.unpaged());
     }
 

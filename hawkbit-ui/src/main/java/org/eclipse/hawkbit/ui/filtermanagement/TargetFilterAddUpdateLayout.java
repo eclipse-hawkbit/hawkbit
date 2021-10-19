@@ -180,7 +180,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
                         "E MMM dd HH:mm:ss z yyyy");
 
                 SpringContextHolder.getInstance().getBean("uiExecutor", Executor.class)
-                        .execute(() -> csvExporter.writeTargetsByFilterId(proxyEntity.getId(), out));
+                        .execute(() -> csvExporter.writeTargetsByFilterQueryString(proxyEntity.getQuery(), out));
 
             } catch (final IOException ex) {
                 LOG.warn("Creating piped Stream failed: ", ex);
