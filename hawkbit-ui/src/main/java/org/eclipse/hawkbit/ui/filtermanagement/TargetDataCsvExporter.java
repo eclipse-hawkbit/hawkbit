@@ -56,8 +56,12 @@ public class TargetDataCsvExporter {
             out.flush();
             out.close();
         } catch (final IOException e) {
-            LOG.error("Exception during csv conversion: ", e);
+            LOG.error("Exception during CSV conversion: ", e);
         }
+    }
+
+    public int getNumberOfColumns() {
+        return HEADER_KEYS.size();
     }
 
     private void addHeader(final OutputStream out) throws IOException {
@@ -74,6 +78,11 @@ public class TargetDataCsvExporter {
             targets = targetManagement.findByRsql(pageable, targetFilterQueryString);
 
             out.write(targets.stream().map(this::convertTarget).collect(Collectors.joining(lineSeparator)).getBytes());
+
+            // Write line separators between target pages
+            if (targets.nextPageable() != Pageable.unpaged())
+                out.write(lineSeparator.getBytes());
+
         } while ((pageable = targets.nextPageable()) != Pageable.unpaged());
     }
 
