@@ -46,6 +46,8 @@ import com.vaadin.ui.TextField;
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.Executor;
 
 import static com.vaadin.server.StreamResource.StreamSource;
@@ -58,6 +60,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
     private final SpPermissionChecker permChecker;
 
     private static final String FILTER_QUERY_CAPTION = "textfield.query";
+    private static final String TARGET_DATA_CSV_FILENAME_SUFFIX = "target-filter-export";
 
     private final TargetFilterAddUpdateLayoutComponentBuilder filterComponentBuilder;
 
@@ -188,7 +191,13 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
             return in;
         };
 
-        return new StreamResource(streamSource, proxyEntity.getName() + ".csv");
+        String fileName = (proxyEntity == null || proxyEntity.getName() == null) ? generateCsvExportFileName(TARGET_DATA_CSV_FILENAME_SUFFIX) : generateCsvExportFileName(proxyEntity.getName());
+        return new StreamResource(streamSource, fileName + ".csv");
+    }
+
+    private String generateCsvExportFileName(String fileNameSuffix) {
+        String timeStamp = new SimpleDateFormat("yyyy-MM-dd-HH-mm").format(new Date());
+        return timeStamp + "-" + fileNameSuffix;
     }
 
     private void addValueChangeListeners() {
