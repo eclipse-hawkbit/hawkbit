@@ -45,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -1358,6 +1359,30 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignmentResult.getAssignedEntity()).isEmpty();
 
         assertThat(distributionSetRepository.findAll()).hasSize(1);
+    }
+
+    @Test
+    @Description("Tests that an exception is thrown when a target is assigned to an incomplete distribution set")
+    public void verifyAssignTargetsToIncompleteDistribution() {
+        final DistributionSet distributionSet = testdataFactory.createIncompleteDistributionSet();
+        final Target target = testdataFactory.createTarget();
+
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Incomplete distributionSet should throw an exception")
+                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
+
+    }
+
+    @Test
+    @Description("Tests that an exception is thrown when a target is assigned to an invalidated distribution set")
+    public void verifyAssignTargetsToInvalidDistribution() {
+        final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
+        final Target target = testdataFactory.createTarget();
+
+        assertThatExceptionOfType(InvalidDistributionSetException.class)
+                .as("Invalid distributionSet should throw an exception")
+                .isThrownBy(() -> assignDistributionSet(distributionSet, target));
+
     }
 
     @Test

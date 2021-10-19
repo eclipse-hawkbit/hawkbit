@@ -104,8 +104,8 @@ public interface TargetManagement {
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned
      *
-     * @return the found number {@link Target}s
-     * 
+     * @return the found number of {@link Target}s
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -118,8 +118,8 @@ public interface TargetManagement {
      *
      * @param distId
      *            to search for
-     * @return number of found {@link Target}s.
-     * 
+     * @return number of found of {@link Target}s.
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -146,7 +146,7 @@ public interface TargetManagement {
      *
      * @param rsqlParam
      *            filter definition in RSQL syntax
-     * @return the found number {@link Target}s
+     * @return the found number of {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByRsql(@NotEmpty String rsqlParam);
@@ -159,8 +159,8 @@ public interface TargetManagement {
      *            filter definition in RSQL syntax
      * @param dsTypeId
      *            ID of the {@link DistributionSetType} the targets need to be
-     *            compatible
-     * @return the found number {@link Target}s
+     *            compatible with
+     * @return the found number of{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long dsTypeId);
@@ -170,9 +170,9 @@ public interface TargetManagement {
      *
      * @param targetFilterQueryId
      *            {@link TargetFilterQuery#getId()}
-     * @return the found number {@link Target}s
-     * 
-     * @throws EntityNotFoundException
+     * @return the found number of {@link Target}s
+     *
+     * @throws  EntityNotFoundException
      *             if {@link TargetFilterQuery} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)

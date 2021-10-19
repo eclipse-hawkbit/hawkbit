@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.ui.error.UiErrorDetails;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
@@ -34,7 +35,8 @@ public class IncompatibleTargetTypeErrorExtractor extends AbstractSingleUiErrorD
     @Override
     protected Optional<UiErrorDetails> findDetails(final Throwable error) {
         return findExceptionOf(error, IncompatibleTargetTypeException.class)
-                .map(ex -> UiErrorDetails.create(i18n.getMessage("caption.error"), i18n.getMessage(
-                        "message.target.type.incompatible", ex.getTargetTypeName(), ex.getDistributionSetTypeName())));
+                .map(ex -> UiErrorDetails.create(i18n.getMessage("caption.error"),
+                        i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE,
+                                ex.getTargetTypeName(), ex.getDistributionSetTypeName())));
     }
 }

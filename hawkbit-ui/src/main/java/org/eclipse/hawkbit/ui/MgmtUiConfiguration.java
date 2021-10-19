@@ -20,8 +20,8 @@ import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSup
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
-import org.eclipse.hawkbit.ui.error.extractors.InvalidDistributionSetErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.IncompatibleTargetTypeErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.InvalidDistributionSetErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;

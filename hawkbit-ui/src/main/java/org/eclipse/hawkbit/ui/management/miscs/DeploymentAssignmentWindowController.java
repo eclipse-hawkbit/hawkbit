@@ -143,8 +143,9 @@ public class DeploymentAssignmentWindowController {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
             LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
         } catch (final IncompatibleTargetTypeException ex) {
-            notification.displayValidationError(i18n.getMessage("message.target.type.incompatible",
-                    ex.getTargetTypeName(), ex.getDistributionSetTypeName()));
+            notification
+                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE,
+                            ex.getTargetTypeName(), ex.getDistributionSetTypeName()));
             LOG.info("Incompatible target type assignment", ex);
         }
     }
