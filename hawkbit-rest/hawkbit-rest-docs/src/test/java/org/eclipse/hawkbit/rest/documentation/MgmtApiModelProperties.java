@@ -32,6 +32,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_MANDATORY_SMT = "Link to mandatory software modules types in this distribution set type.";
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
+    public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
@@ -81,6 +82,7 @@ public final class MgmtApiModelProperties {
     public static final String POLL_OVERDUE = "Defines if the target poll time is overdue based on the next expected poll time plus the configured overdue poll time threshold.";
 
     // Target type
+    public static final String TARGETTYPE_ID = "ID of the target type";
     public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
     public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
 
