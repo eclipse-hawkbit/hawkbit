@@ -33,7 +33,6 @@ import org.springframework.data.domain.Page;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.springframework.util.StringUtils;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target")
@@ -311,19 +310,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter by target type")
     public void shouldFilterTargetsByTypeIdNameAndDescription() {
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==" + targetType1.getName(), 1);
-        assertRSQLQuery("targettype." + TargetTypeFields.DESCRIPTION.name() + "==" + StringUtils.quote(targetType1.getDescription()), 1);
-
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==*1", 1);
-        assertRSQLQuery("targettype." + TargetTypeFields.DESCRIPTION.name() + "==*1", 1);
-
-        // " != "-check returns different count due to null values of targettype id
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "!=" + targetType2.getName(), 4);
-
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==noExist*", 0);
-        assertRSQLQuery("targettype." + TargetTypeFields.DESCRIPTION.name() + "==noExist*", 0);
 
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> assertRSQLQuery("targettype.ID==1", 0));
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
+                .isThrownBy(() -> assertRSQLQuery("targettype.description==Description", 0));
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedTargets) {

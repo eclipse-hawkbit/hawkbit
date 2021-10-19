@@ -90,8 +90,7 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The target type.
      */
-    TARGETTYPE("targetType", TargetTypeFields.NAME.getFieldName(),
-            TargetTypeFields.DESCRIPTION.getFieldName());
+    TARGETTYPE("targetType", TargetTypeFields.NAME.getFieldName());
 
     private final String fieldName;
     private List<String> subEntityAttribues;
