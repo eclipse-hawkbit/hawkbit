@@ -337,11 +337,18 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         }
 
         private Optional<InputStream> encryptArtifactIfKeyPresent(final ArtifactEncryption encryptor) {
-            final Optional<String> encryptionKey = smManagement
-                    .getMetaDataBySoftwareModuleId(fileUploadId.getSoftwareModuleId(), encryptor.encryptionAlgorithm())
+            final Long smId = fileUploadId.getSoftwareModuleId();
+            final String alg = encryptor.encryptionAlgorithm();
+            final String key = alg + ".key";
+            final String iv = alg + ".iv";
+
+            final Optional<String> encryptionKey = smManagement.getMetaDataBySoftwareModuleId(smId, key)
+                    .map(MetaData::getValue);
+            final Optional<String> encryptionIV = smManagement.getMetaDataBySoftwareModuleId(smId, iv)
                     .map(MetaData::getValue);
 
-            return encryptionKey.map(key -> encryptor.encryptStream(key, inputStream));
+            return encryptionKey.flatMap(
+                    keyValue -> encryptionIV.map(ivValue -> encryptor.encryptStream(keyValue, ivValue, inputStream)));
         }
 
         private Artifact uploadArtifact(final String filename, final InputStream stream) {

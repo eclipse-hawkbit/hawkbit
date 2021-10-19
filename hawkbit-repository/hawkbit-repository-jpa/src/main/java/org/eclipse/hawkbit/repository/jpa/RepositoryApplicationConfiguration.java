@@ -16,6 +16,7 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -946,4 +947,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 lockRegistry);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    public ArtifactEncryption artifactEncryption() {
+        return new DefaultArtifactEncryption();
+    }
 }

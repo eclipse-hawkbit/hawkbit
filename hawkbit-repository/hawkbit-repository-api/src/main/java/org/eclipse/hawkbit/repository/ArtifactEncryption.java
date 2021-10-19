@@ -8,5 +8,8 @@ public interface ArtifactEncryption {
 
     String generateEncryptionKey();
 
-    InputStream encryptStream(final String encryptionKey, final InputStream stream);
+    String generateEncryptionIV();
+
+    InputStream encryptStream(final String base64EncryptionKey, final String base64EncryptionIV,
+            final InputStream stream);
 }

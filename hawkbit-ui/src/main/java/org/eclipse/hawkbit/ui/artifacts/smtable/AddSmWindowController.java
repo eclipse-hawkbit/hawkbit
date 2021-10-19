@@ -96,9 +96,14 @@ public class AddSmWindowController
     private void addMetadataEncryptionKeyIfRequested(final boolean encryptionRequested, final long smId) {
         artifactEncryption.ifPresent(encryptor -> {
             if (encryptionRequested) {
-                smManagement.createMetaData(
-                        getEntityFactory().softwareModuleMetadata().create(smId).key(encryptor.encryptionAlgorithm())
-                                .value(encryptor.generateEncryptionKey()).targetVisible(true));
+                final String alg = encryptor.encryptionAlgorithm();
+                final String key = alg + ".key";
+                final String iv = alg + ".iv";
+
+                smManagement.createMetaData(getEntityFactory().softwareModuleMetadata().create(smId).key(key)
+                        .value(encryptor.generateEncryptionKey()).targetVisible(true));
+                smManagement.createMetaData(getEntityFactory().softwareModuleMetadata().create(smId).key(iv)
+                        .value(encryptor.generateEncryptionIV()).targetVisible(true));
             }
         });
     }
