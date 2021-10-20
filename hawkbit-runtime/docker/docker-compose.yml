@@ -31,7 +31,7 @@ services:
     image: "mysql:5.7"
     environment:
       MYSQL_DATABASE: "hawkbit"
-      MYSQL_USER: "root"
+      # MYSQL_USER: "root" # Mysql docker container keeps restarting
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     restart: always
     ports:
