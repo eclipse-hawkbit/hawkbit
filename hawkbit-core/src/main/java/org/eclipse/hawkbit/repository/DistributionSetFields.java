@@ -63,7 +63,12 @@ public enum DistributionSetFields implements FieldNameProvider {
     /**
      * The metadata.
      */
-    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
+
+    /**
+     * The valid field.
+     */
+    VALID("valid");
 
     private final String fieldName;
     private boolean mapField;

@@ -85,7 +85,12 @@ public enum TargetFields implements FieldNameProvider {
     /**
      * The metadata.
      */
-    METADATA("metadata", new SimpleImmutableEntry<>("key", "value"));
+    METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
+
+    /**
+     * The target type.
+     */
+    TARGETTYPE("targetType", TargetTypeFields.NAME.getFieldName());
 
     private final String fieldName;
     private List<String> subEntityAttribues;
