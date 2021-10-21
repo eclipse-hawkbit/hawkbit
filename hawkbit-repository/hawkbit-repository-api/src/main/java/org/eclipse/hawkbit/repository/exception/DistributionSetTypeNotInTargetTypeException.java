@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 
@@ -24,14 +26,27 @@ public class DistributionSetTypeNotInTargetTypeException extends EntityNotFoundE
      * Constructor
      *
      * @param distributionSetTypeId
-     *            that is not part of given {@link TargetType}
-     * @param targetTypeId
-     *            of the {@link TargetType} where given
-     *            {@link DistributionSetType} is not part of
+     *            that is not compatible with given {@link TargetType}s
+     * @param targetTypeIds
+     *            of the {@link TargetType}s where given {@link DistributionSetType}
+     *            is not part of
      */
     public DistributionSetTypeNotInTargetTypeException(final Long distributionSetTypeId,
-                                                               final Long targetTypeId) {
-        super(DistributionSetType.class.getSimpleName() + " with id {" + distributionSetTypeId + "} is not part of "
-                + TargetType.class.getSimpleName() + " with id {" + targetTypeId + "}.");
+            final Collection<Long> targetTypeIds) {
+        super("DistributionSetType " + distributionSetTypeId + " is not compatible to TargetTypes " + targetTypeIds);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param distributionSetTypeIds
+     *            that are not compatible with given {@link TargetType}
+     * @param targetTypeId
+     *            of the {@link TargetType} where given {@link DistributionSetType}s
+     *            are not part of
+     */
+    public DistributionSetTypeNotInTargetTypeException(final Collection<Long> distributionSetTypeIds,
+            final Long targetTypeId) {
+        super("DistributionSetTypes " + distributionSetTypeIds + " are not compatible to TargetTypes " + targetTypeId);
     }
 }

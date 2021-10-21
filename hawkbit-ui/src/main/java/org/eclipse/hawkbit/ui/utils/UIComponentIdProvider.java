@@ -52,9 +52,13 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_PIN_ICON = "target.pin.icon";
     /**
-     * ID-Targ.PIN.
+     * ID-DistributionSet pin icon.
      */
     public static final String DIST_PIN_ICON = "dist.pin.icon";
+    /**
+     * ID-DistributionSet invalidate icon.
+     */
+    public static final String DIST_INVALIDATE_ICON = "dist.invalidate.icon";
     /**
      * ID-Targ.DELETE.
      */
@@ -327,6 +331,11 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TABLE_POLLING_STATUS_LABEL_ID = "target.table.poll.statusId";
 
     /**
+     * ID-Target.targetType.
+     */
+    public static final String TARGET_ADD_TARGETTYPE = "target.add.targettype";
+
+    /**
      * Action history table active-state label Id.
      */
     public static final String ACTION_HISTORY_TABLE_ACTIVESTATE_LABEL_ID = "action.history.table.activeStateId";
@@ -572,6 +581,16 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TAG_DROP_AREA_ID = "target.tag.drop.area";
 
     /**
+     * ID-Target tag table.
+     */
+    public static final String TARGET_TYPE_TABLE_ID = "target.type.tableId";
+
+    /**
+     * ID-Target type table drop area.
+     */
+    public static final String TARGET_TYPE_DROP_AREA_ID = "target.type.drop.area";
+
+    /**
      * ID-Distibution tag table.
      */
     public static final String DISTRIBUTION_TAG_TABLE_ID = "distriution.tag.tableId";
@@ -714,6 +733,11 @@ public final class UIComponentIdProvider {
      * Id of Controller Id label in target details.
      */
     public static final String TARGET_CONTROLLER_ID = "target.controller.id";
+
+    /**
+     * Id of target type Id label in target details.
+     */
+    public static final String TARGET_TYPE_ID = "target.type.id";
 
     /**
      * Id of created at label in details.
@@ -914,6 +938,11 @@ public final class UIComponentIdProvider {
      * ID - simple filter- Accordion-Tab
      */
     public static final String SIMPLE_FILTER_ACCORDION_TAB = "simple.filter.accordion.tab";
+
+    /**
+     * ID - target type filter- Accordion-Tab
+     */
+    public static final String TARGET_TYPE_FILTER_ACCORDION_TAB = "target.type.filter.accordion.tab";
 
     /**
      * ID - custom filter- Accordion-Tab
@@ -1323,6 +1352,22 @@ public final class UIComponentIdProvider {
      * Table multiselect for selecting DistType
      */
     public static final String SELECT_DIST_TYPE = "select-dist-type";
+
+    /**
+     * Table multiselect for unselecting DistType
+     */
+    public static final String UNSELECT_DIST_TYPE = "unselect-dist-type";
+
+    /**
+     * ID for DistType source value table
+     */
+    public static final String DIST_TYPE_TABLE_SOURCE_ID = "dsTypeSourceId";
+
+    /**
+     * ID for DistType selected value table
+     */
+    public static final String DIST_TYPE_TABLE_SELECTED_ID = "dsTypeSelectedId";
+
     /**
      * ID for download anonymous checkbox
      */
@@ -1360,6 +1405,35 @@ public final class UIComponentIdProvider {
     public static final String DIST_SET_SELECT_CONS_WINDOW_ID = "distribution.set.select.consequences.window";
 
     public static final String DIST_SET_SELECT_ENABLE_ID = "distribution.set.select.enable";
+
+    /**
+     * Distribution set invalidate consequences window id
+     */
+    public static final String INVALIDATE_DS_CONSEQUENCES = "invalidate.distributionset.consequences.window";
+    /**
+     * Distribution set invalidate affected entities window id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES = "invalidate.distributionset.affectedentities.window";
+    /**
+     * Distribution set invalidate affected actions label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ACTIONS = "invalidate.distributionset.affectedentities.actions";
+    /**
+     * Distribution set invalidate affected rollouts label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_ROLLOUTS = "invalidate.distributionset.affectedentities.rollouts";
+    /**
+     * Distribution set invalidate affected autoassignments label id
+     */
+    public static final String INVALIDATE_DS_AFFECTED_ENTITIES_AUTOASSIGNMENTS = "invalidate.distributionset.affectedentities.autoassignments";
+    /**
+     * Distribution set invalidate consequences window, stop rollouts checkbox
+     */
+    public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
+    /**
+     * Distribution set invalidate consequences window, cancelation type radio button group
+     */
+    public static final String INVALIDATE_DS_CANCELATION_TYPE = "invalidate.distributionset.consequences.cancelation.type.radio";
     /**
      * Id of the unread notification button
      */
@@ -1485,6 +1559,10 @@ public final class UIComponentIdProvider {
      * Target tag button id prefix.
      */
     public static final String TARGET_TAG_ID_PREFIXS = "target.tag";
+    /**
+     * Target type button id prefix.
+     */
+    public static final String TARGET_TYPE_ID_PREFIXS = "target.type";
     /**
      * Distribution tag button id prefix.
      */

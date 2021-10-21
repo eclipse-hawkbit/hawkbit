@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
+import org.eclipse.hawkbit.repository.exception.DistributionSetTypeNotInTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
@@ -71,6 +72,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -229,8 +231,58 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             deploymentRequests = deploymentRequests.stream().distinct().collect(Collectors.toList());
             checkIfRequiresMultiAssignment(deploymentRequests);
         }
+        checkForTargetTypeCompatibility(deploymentRequests);
         checkQuotaForAssignment(deploymentRequests);
         return deploymentRequests;
+    }
+
+    private void checkForTargetTypeCompatibility(final List<DeploymentRequest> deploymentRequests) {
+        final List<String> controllerIds = deploymentRequests.stream().map(DeploymentRequest::getControllerId)
+                .distinct().collect(Collectors.toList());
+        final List<Long> distSetIds = deploymentRequests.stream().map(DeploymentRequest::getDistributionSetId)
+                .distinct().collect(Collectors.toList());
+
+        if (controllerIds.size() > 1 && distSetIds.size() > 1) {
+            throw new IllegalStateException(
+                    "Assigning multiple Targets to multiple Distribution Sets simultaneously is not allowed!");
+        }
+
+        if (distSetIds.size() == 1) {
+            checkCompatibilityForSingleDsAssignment(distSetIds.iterator().next(), controllerIds);
+        } else {
+            checkCompatibilityForMultiDsAssignment(controllerIds.iterator().next(), distSetIds);
+        }
+    }
+
+    private void checkCompatibilityForSingleDsAssignment(final Long distSetId, final List<String> controllerIds) {
+        final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
+        final Set<Long> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+                .stream()
+                .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)
+                        .and(TargetSpecifications.notCompatibleWithDistributionSetType(distSetType.getId()))))
+                .flatMap(List::stream).map(Target::getTargetType).map(TargetType::getId).collect(Collectors.toSet());
+
+        if (!incompatibleTargetTypes.isEmpty()) {
+            throw new DistributionSetTypeNotInTargetTypeException(distSetType.getId(), incompatibleTargetTypes);
+        }
+    }
+
+    private void checkCompatibilityForMultiDsAssignment(final String controllerId, final List<Long> distSetIds) {
+        final Target target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        if (target.getTargetType() != null) {
+            // we assume that list of assigned DS is less than MAX_ENTRIES_IN_STATEMENT
+            final Set<DistributionSetType> incompatibleDistSetTypes = distributionSetManagement.get(distSetIds).stream()
+                    .map(DistributionSet::getType).collect(Collectors.toSet());
+            incompatibleDistSetTypes.removeAll(target.getTargetType().getCompatibleDistributionSetTypes());
+
+            if (!incompatibleDistSetTypes.isEmpty()) {
+                final Set<Long> distSetTypeIds = incompatibleDistSetTypes.stream().map(DistributionSetType::getId)
+                        .collect(Collectors.toSet());
+                throw new DistributionSetTypeNotInTargetTypeException(distSetTypeIds, target.getTargetType().getId());
+            }
+        }
     }
 
     private static Map<Long, List<TargetWithActionType>> convertRequest(
@@ -256,8 +308,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and {@code forcetime}.
+     * method assigns the {@link DistributionSet} to all {@link Target}s by their
+     * IDs with a specific {@link ActionType} and {@code forcetime}.
      *
      *
      * In case the update was executed offline (i.e. not managed by hawkBit) the
@@ -265,8 +317,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * A. it ignores targets completely that are in
      * {@link TargetUpdateStatus#PENDING}.<br/>
      * B. it created completed actions.<br/>
-     * C. sets both installed and assigned DS on the target and switches the
-     * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
+     * C. sets both installed and assigned DS on the target and switches the status
+     * to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
      * @param initiatedBy
@@ -281,9 +333,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *            the assignment strategy (online /offline)
      * @return the assignment result
      *
-     * @throw IncompleteDistributionSetException if mandatory
-     *        {@link SoftwareModuleType} are not assigned as define by the
-     *        {@link DistributionSetType}.
+     * @throws IncompleteDistributionSetException
+     *             if mandatory {@link SoftwareModuleType} are not assigned as
+     *             define by the {@link DistributionSetType}.
      */
     private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsID,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
@@ -351,9 +403,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * split tIDs length into max entries in-statement because many database
-     * have constraint of max entries in in-statements e.g. Oracle with maximum
-     * 1000 elements, so we need to split the entries here and execute multiple
+     * split tIDs length into max entries in-statement because many database have
+     * constraint of max entries in in-statements e.g. Oracle with maximum 1000
+     * elements, so we need to split the entries here and execute multiple
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
@@ -813,10 +865,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return 0;
         }
         /*
-         * We use a native query here because Spring JPA does not support to
-         * specify a LIMIT clause on a DELETE statement. However, for this
-         * specific use case (action cleanup), we must specify a row limit to
-         * reduce the overall load on the database.
+         * We use a native query here because Spring JPA does not support to specify a
+         * LIMIT clause on a DELETE statement. However, for this specific use case
+         * (action cleanup), we must specify a row limit to reduce the overall load on
+         * the database.
          */
 
         final int statusCount = status.size();

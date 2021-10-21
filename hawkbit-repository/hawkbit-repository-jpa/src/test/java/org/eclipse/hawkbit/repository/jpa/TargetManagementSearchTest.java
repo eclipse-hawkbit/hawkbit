@@ -22,12 +22,15 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.UpdateMode;
+import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.jupiter.api.Test;
@@ -43,13 +46,13 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("Target Management Searches")
-public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
+class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests different parameter combinations for target search operations. "
             + "That includes both the test itself, as a count operation with the same filters "
             + "and query definitions by RSQL (named and un-named).")
-    public void targetSearchWithVariousFilterCombinations() {
+    void targetSearchWithVariousFilterCombinations() {
         final TargetTag targTagX = targetTagManagement.create(entityFactory.tag().create().name("TargTag-X"));
         final TargetTag targTagY = targetTagManagement.create(entityFactory.tag().create().name("TargTag-Y"));
         final TargetTag targTagZ = targetTagManagement.create(entityFactory.tag().create().name("TargTag-Z"));
@@ -181,12 +184,11 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
             final List<TargetUpdateStatus> pending, final Target expected) {
         final String query = "updatestatus==pending and installedds.name==" + installedSet.getName();
         assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(pending, null, null, installedSet.getId(), Boolean.FALSE, new String[0]))
+                .findByFilters(PAGE, new FilterParams(pending, null, null, installedSet.getId(), Boolean.FALSE))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
                         .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null,
-                                installedSet.getId(), Boolean.FALSE, new String[0])))
+                                installedSet.getId(), Boolean.FALSE)))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -268,12 +270,11 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 + setA.getName() + ") and (name==*targ-A* or description==*targ-A*)";
 
         assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(pending, null, "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))
+                .findByFilters(PAGE, new FilterParams(pending, null, "%targ-A%", setA.getId(), Boolean.FALSE))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
                         .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, new String[0])))
+                                setA.getId(), Boolean.FALSE)))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -286,11 +287,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 + setA.getName() + ")";
 
         assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE, new String[0]))
-                .getContent())
+                .findByFilters(PAGE, new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE)).getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(pending, null, null, setA.getId(), Boolean.FALSE)))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -301,8 +301,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
             final List<Target> expected) {
         final String query = "updatestatus==pending";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE, new String[0]))
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE))
                 .getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
                         .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, null,
@@ -339,8 +338,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .findByFilters(PAGE, new FilterParams(unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0]))
                 .getContent()).as("has number of elements").hasSize(99)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, "%targ-A%", null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(unknown, null, "%targ-A%", null, Boolean.FALSE)))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -354,11 +353,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 + setA.getName() + ")";
 
         assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE, new String[0]))
-                .getContent())
+                .findByFilters(PAGE, new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE)).getContent())
                         .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(unknown, null, null, setA.getId(), Boolean.FALSE)))
                         .as("and filter query returns the same result")
                         .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
     }
@@ -385,12 +383,11 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
             final List<Target> expected) {
         final String query = "updatestatus==unknown";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, null, null, null, Boolean.FALSE, new String[0]))
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(unknown, null, null, null, Boolean.FALSE))
                 .getContent()).as("has number of elements").hasSize(397)
                         .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, null,
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(unknown, null, null, null, Boolean.FALSE)))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -404,11 +401,10 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String query = "lastcontrollerrequestat=le=${overdue_ts};updatestatus==UNKNOWN";
 
         assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE, new String[0]))
-                .getContent()).as("has number of elements").hasSize(198)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, Boolean.TRUE, null, null,
-                                Boolean.FALSE, new String[0])))
+                .findByFilters(PAGE, new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE)).getContent())
+                        .as("has number of elements").hasSize(198).as("that number is also returned by count query")
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(unknown, Boolean.TRUE, null, null, Boolean.FALSE)))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -420,12 +416,11 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 + " or installedds.name==" + setA.getName() + ")";
 
         assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE, new String[0]))
+                .findByFilters(PAGE, new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE))
                 .getContent())
                         .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(null, null, "%targ-A%", setA.getId(), Boolean.FALSE)))
                         .as("and contains the following elements").containsExactly(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -436,12 +431,11 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     private void verifyThat3TargetsHaveDSAssigned(final DistributionSet setA, final List<Target> expected) {
         final String query = "assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(null, null, null, setA.getId(), Boolean.FALSE, new String[0]))
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, setA.getId(), Boolean.FALSE))
                 .getContent())
                         .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, null, setA.getId(),
-                                Boolean.FALSE, new String[0])))
+                        .hasSize(Ints.saturatedCast(
+                                targetManagement.countByFilters(null, null, null, setA.getId(), Boolean.FALSE)))
                         .as("and contains the following elements").containsAll(expected)
                         .as("and filter query returns the same result")
                         .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
@@ -560,18 +554,17 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void verifyThatRepositoryContains400Targets() {
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, null, null, new String[0]))
-                .getContent()).as("Overall we expect that many targets in the repository").hasSize(400)
-                        .as("which is also reflected by repository count")
-                        .hasSize(Ints.saturatedCast(targetManagement.count()))
-                        .as("which is also reflected by call without specification")
-                        .containsAll(targetManagement.findAll(PAGE).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, null, null)).getContent())
+                .as("Overall we expect that many targets in the repository").hasSize(400)
+                .as("which is also reflected by repository count").hasSize(Ints.saturatedCast(targetManagement.count()))
+                .as("which is also reflected by call without specification")
+                .containsAll(targetManagement.findAll(PAGE).getContent());
 
     }
 
     @Test
     @Description("Tests the correct order of targets based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
-    public void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {
+    void targetSearchWithVariousFilterCombinationsAndOrderByDistributionSet() {
 
         final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
         List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
@@ -588,7 +581,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .stream().map(Action::getTarget).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
-                new FilterParams(null, null, null, null, Boolean.FALSE, new String[0]));
+                new FilterParams(null, null, null, null, Boolean.FALSE));
 
         final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
 
@@ -608,7 +601,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Tests the correct order of targets with applied overdue filter based on selected distribution set. The system expects to have an order based on installed, assigned DS.")
-    public void targetSearchWithOverdueFilterAndOrderByDistributionSet() {
+    void targetSearchWithOverdueFilterAndOrderByDistributionSet() {
 
         final Long lastTargetQueryAlwaysOverdue = 0L;
         final Long lastTargetQueryNotOverdue = Instant.now().toEpochMilli();
@@ -641,7 +634,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .stream().map(Action::getTarget).collect(Collectors.toList());
 
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
-                new FilterParams(null, Boolean.TRUE, null, null, Boolean.FALSE, new String[0]));
+                new FilterParams(null, Boolean.TRUE, null, null, Boolean.FALSE));
 
         final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
 
@@ -664,7 +657,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verfies that targets with given assigned DS are returned from repository.")
-    public void findTargetByAssignedDistributionSet() {
+    void findTargetByAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         testdataFactory.createTargets(10, "unassigned", "unassigned");
         List<Target> assignedtargets = testdataFactory.createTargets(10, "assigned", "assigned");
@@ -672,8 +665,8 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedtargets);
 
         // get final updated version of targets
-        assignedtargets = targetManagement.getByControllerID(
-                assignedtargets.stream().map(target -> target.getControllerId()).collect(Collectors.toList()));
+        assignedtargets = targetManagement
+                .getByControllerID(assignedtargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, assignedSet.getId()))
                 .as("Contains the assigned targets").containsAll(assignedtargets)
@@ -683,7 +676,7 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that targets without given assigned DS are returned from repository.")
-    public void findTargetWithoutAssignedDistributionSet() {
+    void findTargetWithoutAssignedDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final TargetFilterQuery tfq = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("tfq").query("name==*"));
@@ -693,15 +686,15 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedTargets);
 
         final List<Target> result = targetManagement
-                .findByTargetFilterQueryAndNonDS(PAGE, assignedSet.getId(), tfq.getQuery()).getContent();
+                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, assignedSet.getId(), tfq.getQuery()).getContent();
         assertThat(result).as("count of targets").hasSize(unassignedTargets.size()).as("contains all targets")
                 .containsAll(unassignedTargets);
 
     }
 
     @Test
-    @Description("Verfies that targets with given installed DS are returned from repository.")
-    public void findTargetByInstalledDistributionSet() {
+    @Description("Verifies that targets with given installed DS are returned from repository.")
+    void findTargetByInstalledDistributionSet() {
         final DistributionSet assignedSet = testdataFactory.createDistributionSet("");
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
         testdataFactory.createTargets(10, "unassigned", "unassigned");
@@ -720,5 +713,61 @@ public class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .as("Contains the assigned targets").containsAll(installedtargets)
                 .as("and that means the following expected amount").hasSize(10);
 
+    }
+
+    @Test
+    @Description("Verifies that all compatible targets are returned from repository.")
+    void shouldFindAllTargetsCompatibleWithDS() {
+        final DistributionSet testDs = testdataFactory.createDistributionSet();
+        final TargetType targetType = testdataFactory.createTargetType("testType",
+                Collections.singletonList(testDs.getType()));
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
+        final List<Target> targets = testdataFactory.createTargets(20, "withOutType");
+        final List<Target> targetWithCompatibleTypes = testdataFactory.createTargetsWithType(20, "compatible",
+                targetType);
+
+        final List<Target> result = targetManagement
+                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
+
+        assertThat(result).as("count of targets").hasSize(targets.size() + targetWithCompatibleTypes.size())
+                .as("contains all targets").containsAll(targetWithCompatibleTypes).containsAll(targets);
+    }
+
+    @Test
+    @Description("Verifies that incompatible targets are not returned from repository.")
+    void shouldNotFindTargetsIncompatibleWithDS() {
+        final DistributionSetType dsType = testdataFactory.findOrCreateDistributionSetType("test-ds-type",
+                "test-ds-type");
+        final DistributionSet testDs = createDistSetWithType(dsType);
+        final TargetType compatibleTargetType = testdataFactory.createTargetType("compTestType",
+                Collections.singletonList(dsType));
+        final TargetType incompatibleTargetType = testdataFactory.createTargetType("incompTestType",
+                Collections.singletonList(testdataFactory.createDistributionSet().getType()));
+        final TargetFilterQuery tfq = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("test-filter").query("name==*"));
+
+        final List<Target> targetsWithOutType = testdataFactory.createTargets(20, "withOutType");
+        final List<Target> targetsWithCompatibleType = testdataFactory.createTargetsWithType(20, "compatible",
+                compatibleTargetType);
+        final List<Target> targetsWithIncompatibleType = testdataFactory.createTargetsWithType(20, "incompatible",
+                incompatibleTargetType);
+
+        final List<Target> testTargets = new ArrayList<>();
+        testTargets.addAll(targetsWithOutType);
+        testTargets.addAll(targetsWithCompatibleType);
+
+        final List<Target> result = targetManagement
+                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
+
+        assertThat(result).as("count of targets").hasSize(testTargets.size()).as("contains all compatible targets")
+                .containsExactlyInAnyOrderElementsOf(testTargets).as("does not contain incompatible targets")
+                .doesNotContainAnyElementsOf(targetsWithIncompatibleType);
+    }
+
+    private DistributionSet createDistSetWithType(final DistributionSetType type) {
+        final DistributionSetCreate dsCreate = entityFactory.distributionSet().create().name("test-ds").version("1.0")
+                .type(type);
+        return distributionSetManagement.create(dsCreate);
     }
 }

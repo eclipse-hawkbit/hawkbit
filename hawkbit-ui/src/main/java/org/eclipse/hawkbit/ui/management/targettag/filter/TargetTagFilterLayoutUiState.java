@@ -24,6 +24,8 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     private final Collection<TargetUpdateStatus> clickedTargetUpdateStatusFilters = new ArrayList<>();
     private boolean isOverdueFilterClicked;
     private boolean isCustomFilterTabSelected;
+    private boolean isTargetTypeFilterTabSelected;
+
 
     /**
      * @return Id of clicked target filter query
@@ -94,4 +96,13 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     public void setCustomFilterTabSelected(final boolean isCustomFilterTabSelected) {
         this.isCustomFilterTabSelected = isCustomFilterTabSelected;
     }
+
+    public boolean isTargetTypeFilterTabSelected() {
+        return isTargetTypeFilterTabSelected;
+    }
+
+    public void setTargetTypeFilterTabSelected(boolean targetTypeFilterTabSelected) {
+        isTargetTypeFilterTabSelected = targetTypeFilterTabSelected;
+    }
+
 }

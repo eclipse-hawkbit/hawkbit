@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -42,6 +43,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToDistributi
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -58,6 +60,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     private static final long serialVersionUID = 1L;
 
     private static final String DS_PIN_BUTTON_ID = "dsPinnButton";
+    private static final String DS_INVALIDATE_BUTTON_ID = "dsInvalidateButton";
 
     private final TargetGridLayoutUiState targetGridLayoutUiState;
     private final DistributionGridLayoutUiState distributionGridLayoutUiState;
@@ -66,6 +69,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
     private final transient DeploymentManagement deploymentManagement;
 
     private final transient PinSupport<ProxyDistributionSet, String> pinSupport;
+
+    private final transient InvalidateDistributionSetSupport invalidateDistributionSetSupport;
 
     /**
      * Constructor for DistributionGrid
@@ -76,6 +81,8 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      *            TargetManagement
      * @param distributionSetManagement
      *            DistributionSetManagement
+     * @param dsInvalidationManagement
+     *            {@link DistributionSetInvalidationManagement}
      * @param deploymentManagement
      *            DeploymentManagement
      * @param uiProperties
@@ -88,8 +95,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
      *            TagFilterLayoutUiState
      */
     public DistributionGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement, final DeploymentManagement deploymentManagement,
-            final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
+            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetInvalidationManagement dsInvalidationManagement,
+            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
+            final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState) {
         super(uiDependencies, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
@@ -129,8 +138,10 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 DsManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsManagementFilterParams());
+        this.invalidateDistributionSetSupport = new InvalidateDistributionSetSupport(this, i18n, uiProperties,
+                notification, permissionChecker, dsInvalidationManagement);
 
-        initTargetPinningStyleGenerator();
+        initStyleGenerator();
         init();
     }
 
@@ -179,8 +190,24 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         return installedDsId != null ? Collections.singletonList(installedDsId) : Collections.emptyList();
     }
 
-    private void initTargetPinningStyleGenerator() {
-        setStyleGenerator(ds -> pinSupport.getAssignedOrInstalledRowStyle(ds.getId()));
+    private void initStyleGenerator() {
+        setStyleGenerator(this::getRowStyle);
+    }
+
+    private String getRowStyle(final ProxyDistributionSet distributionSet) {
+        final StringBuilder style = new StringBuilder();
+
+        final String assignedInstalledStyle = pinSupport.getAssignedOrInstalledRowStyle(distributionSet.getId());
+        if (assignedInstalledStyle != null) {
+            style.append(assignedInstalledStyle);
+        }
+
+        if (!distributionSet.getIsValid()) {
+            style.append(" ");
+            style.append(SPUIDefinitions.INVALID_DISTRIBUTION);
+        }
+
+        return style.toString();
     }
 
     @Override
@@ -194,7 +221,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
         addVersionColumn();
 
         GridComponentBuilder.joinToActionColumn(i18n, getDefaultHeaderRow(),
-                Arrays.asList(addPinColumn(), addDeleteColumn()));
+                Arrays.asList(addPinColumn(), addDeleteColumn(), addInvalidateColumn()));
     }
 
     private Column<ProxyDistributionSet, Button> addPinColumn() {
@@ -204,6 +231,16 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 UIComponentIdProvider.DIST_PIN_ICON + "." + ds.getId(), true);
         return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_PIN_BUTTON_ID, null,
                 pinSupport::getPinningStyle);
+    }
+
+
+    private Column<ProxyDistributionSet, Button> addInvalidateColumn() {
+        final ValueProvider<ProxyDistributionSet, Button> buttonProvider = ds -> GridComponentBuilder.buildActionButton(
+                i18n, clickEvent -> invalidateDistributionSetSupport.openConsequencesWindowOnInvalidateAction(ds),
+                VaadinIcons.BAN, UIMessageIdProvider.TOOLTIP_INVALIDATE_DISTRIBUTIONSET,
+                SPUIStyleDefinitions.STATUS_ICON_NEUTRAL, UIComponentIdProvider.DIST_INVALIDATE_ICON + "." + ds.getId(),
+                ds.getIsValid() && permissionChecker.hasDistributionSetInvalidatePermission());
+        return GridComponentBuilder.addIconColumn(this, buttonProvider, DS_INVALIDATE_BUTTON_ID, null);
     }
 
     @Override

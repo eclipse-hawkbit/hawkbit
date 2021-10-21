@@ -1025,7 +1025,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     public void createMetadata() throws Exception {
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
 
-        final String knownKey1 = "knownKey1";
+        final String knownKey1 = "known.key.1.1";
         final String knownKey2 = "knownKey2";
 
         final String knownValue1 = "knownValue1";

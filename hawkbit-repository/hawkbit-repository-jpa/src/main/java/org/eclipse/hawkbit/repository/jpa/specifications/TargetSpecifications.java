@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.MapJoin;
@@ -26,18 +26,24 @@ import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -66,37 +72,6 @@ public final class TargetSpecifications {
             targetRoot.fetch(JpaTarget_.tags, JoinType.LEFT);
             query.distinct(true);
             return predicate;
-        };
-    }
-
-    /**
-     * Can be added to specification chain to order result by provided distribution
-     * set
-     * 
-     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3. Based on
-     * target id
-     *
-     * NOTE: Other specs, pagables and sort objects may alter the queries orderBy
-     * entry too, possibly invalidating the applied order, keep in mind when using
-     * this
-     * 
-     * @param distributionSetIdForOrder
-     *            distribution set to consider
-     * @return specification that applies order by ds, may be overwritten
-     */
-    public static Specification<JpaTarget> orderedByLinkedDistributionSet(long distributionSetIdForOrder) {
-        return (targetRoot, query, cb) -> {
-            // Enhance query with custom select based sort
-            final Expression<Object> selectCase = cb.selectCase()
-                    .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
-                            distributionSetIdForOrder), 1)
-                    .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
-                            distributionSetIdForOrder), 2)
-                    .otherwise(100);
-            query.orderBy(cb.asc(selectCase), cb.desc(targetRoot.get(JpaTarget_.id)));
-
-            // Spec only provides order, so no further filtering
-            return query.getRestriction();
         };
     }
 
@@ -182,7 +157,7 @@ public final class TargetSpecifications {
      *
      * @param updateStatus
      *            to be filtered on
-     * 
+     *
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> hasTargetUpdateStatus(final Collection<TargetUpdateStatus> updateStatus) {
@@ -208,7 +183,7 @@ public final class TargetSpecifications {
      *
      * @param updateStatus
      *            to be filtered on
-     * 
+     *
      * @return the {@link Target} {@link Specification}
      */
     public static Specification<JpaTarget> notEqualToTargetUpdateStatus(final TargetUpdateStatus updateStatus) {
@@ -217,15 +192,14 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are overdue. A
-     * target is overdue if it did not respond during the configured
-     * intervals:<br>
+     * target is overdue if it did not respond during the configured intervals:<br>
      * <em>poll_itvl + overdue_itvl</em>
      *
      * @param overdueTimestamp
      *            the calculated timestamp to compare with the last respond of a
      *            target (lastTargetQuery).<br>
-     *            The <code>overdueTimestamp</code> has to be calculated with
-     *            the following expression:<br>
+     *            The <code>overdueTimestamp</code> has to be calculated with the
+     *            following expression:<br>
      *            <em>overdueTimestamp = nowTimestamp - poll_itvl -
      *            overdue_itvl</em>
      *
@@ -237,8 +211,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId or like name or like description".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
+     * like name or like description".
      *
      * @param searchText
      *            to be filtered on
@@ -272,8 +246,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId or like name or like description or like attribute value".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
+     * like name or like description or like attribute value".
      *
      * @param searchText
      *            to be filtered on
@@ -284,8 +258,7 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like
-     * controllerId".
+     * {@link Specification} for retrieving {@link Target}s by "like controllerId".
      *
      * @param distributionId
      *            to be filtered on
@@ -296,8 +269,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * Finds all targets by given {@link Target#getControllerId()}s and which
-     * are not yet assigned to given {@link DistributionSet}.
+     * Finds all targets by given {@link Target#getControllerId()}s and which are
+     * not yet assigned to given {@link DistributionSet}.
      *
      * @param tIDs
      *            to search for.
@@ -330,8 +303,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "has no tag
-     * names"or "has at least on of the given tag names".
+     * {@link Specification} for retrieving {@link Target}s by "has no tag names"or
+     * "has at least on of the given tag names".
      *
      * @param tagNames
      *            to be filtered on
@@ -373,8 +346,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
+     * {@link Specification} for retrieving {@link Target}s by assigned distribution
+     * set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -402,6 +375,57 @@ public final class TargetSpecifications {
 
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are compatible with
+     * given {@link DistributionSetType}. Compatibility is evaluated by checking the
+     * {@link TargetType} of a target. Targets that don't have a {@link TargetType}
+     * are compatible with all {@link DistributionSetType}
+     *
+     * @param distributionSetTypeId
+     *            the ID of the distribution set type which must be compatible
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
+        return (targetRoot, query, cb) -> {
+            // Since the targetRoot is changed by joining we need to get the
+            // isNull predicate first
+            final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
+
+            return cb.or(targetTypeIsNull, getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are NOT compatible
+     * with given {@link DistributionSetType}. Compatibility is evaluated by
+     * checking the {@link TargetType} of a target. Targets that don't have a
+     * {@link TargetType} are compatible with all {@link DistributionSetType}
+     *
+     * @param distributionSetTypeId
+     *            the ID of the distribution set type which must be incompatible
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> notCompatibleWithDistributionSetType(final Long distributionSetTypeId) {
+        return (targetRoot, query, cb) -> {
+            // Since the targetRoot is changed by joining we need to get the
+            // isNotNull predicate first
+            final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
+
+            return cb.and(targetTypeNotNull,
+                    cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)));
+        };
+    }
+
+    private static Predicate getDistSetTypeEqualPredicate(final Root<JpaTarget> root, final CriteriaBuilder cb,
+            final Long dsTypeId) {
+        final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
+        targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
+        final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
+                .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
+
+        return cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), dsTypeId);
     }
 
     /**
@@ -455,8 +479,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have no Action
-     * of the {@link RolloutGroup}.
+     * {@link Specification} for retrieving {@link Target}s that have no Action of
+     * the {@link RolloutGroup}.
      *
      * @param group
      *            the {@link RolloutGroup}
@@ -477,8 +501,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned
-     * distribution set.
+     * {@link Specification} for retrieving {@link Target}s by assigned distribution
+     * set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -502,5 +526,15 @@ public final class TargetSpecifications {
             final SetJoin<JpaTarget, JpaTargetTag> tags = targetRoot.join(JpaTarget_.tags, JoinType.LEFT);
             return cb.equal(tags.get(JpaTargetTag_.id), tagId);
         };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that have a
+     * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTargetType() {
+        return (targetRoot, query, cb) -> cb.isNotNull(targetRoot.get(JpaTarget_.targetType));
     }
 }

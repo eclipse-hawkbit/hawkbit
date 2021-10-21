@@ -88,7 +88,7 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
         initFilterMappings();
         getFilterSupport().setFilter(new DsDistributionsFilterParams());
 
-        initIsCompleteStyleGenerator();
+        initStyleGenerator();
         init();
     }
 
@@ -99,8 +99,20 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
                 dSTypeFilterLayoutUiState.getClickedTypeId());
     }
 
-    private void initIsCompleteStyleGenerator() {
-        setStyleGenerator(ds -> ds.getIsComplete() ? null : SPUIDefinitions.DISABLE_DISTRIBUTION);
+    private void initStyleGenerator() {
+        setStyleGenerator(DistributionSetGrid::getRowStyle);
+    }
+
+    private static String getRowStyle(final ProxyDistributionSet ds) {
+        final StringBuilder style = new StringBuilder();
+        if (!ds.getIsComplete()) {
+            style.append(SPUIDefinitions.INCOMPLETE_DISTRIBUTION);
+        }
+        if (!ds.getIsValid()) {
+            style.append(" ");
+            style.append(SPUIDefinitions.INVALID_DISTRIBUTION);
+        }
+        return style.toString();
     }
 
     @Override

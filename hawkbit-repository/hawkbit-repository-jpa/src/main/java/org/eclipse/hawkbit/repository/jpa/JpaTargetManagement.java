@@ -20,13 +20,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Root;
-
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -57,6 +56,7 @@ import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -84,8 +84,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link TargetManagement}.
  *
@@ -96,6 +94,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final EntityManager entityManager;
 
+    private final DistributionSetManagement distributionSetManagement;
+
     private final QuotaManagement quotaManagement;
 
     private final TargetRepository targetRepository;
@@ -105,8 +105,6 @@ public class JpaTargetManagement implements TargetManagement {
     private final TargetMetadataRepository targetMetadataRepository;
 
     private final RolloutGroupRepository rolloutGroupRepository;
-
-    private final DistributionSetRepository distributionSetRepository;
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
 
@@ -122,22 +120,22 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final Database database;
 
-    public JpaTargetManagement(final EntityManager entityManager, final QuotaManagement quotaManagement,
+    public JpaTargetManagement(final EntityManager entityManager,
+            final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final TargetRepository targetRepository, final TargetTypeRepository targetTypeRepository,
             final TargetMetadataRepository targetMetadataRepository,
             final RolloutGroupRepository rolloutGroupRepository,
-            final DistributionSetRepository distributionSetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
+        this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
         this.targetRepository = targetRepository;
         this.targetTypeRepository = targetTypeRepository;
         this.targetMetadataRepository = targetMetadataRepository;
         this.rolloutGroupRepository = rolloutGroupRepository;
-        this.distributionSetRepository = distributionSetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetTagRepository = targetTagRepository;
         this.eventPublisherHolder = eventPublisherHolder;
@@ -383,17 +381,16 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByAssignedDistributionSet(final Pageable pageReq, final long distributionSetID) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetID);
 
-        return convertPage(
-                targetRepository.findAll(TargetSpecifications.hasAssignedDistributionSet(distributionSetID), pageReq),
-                pageReq);
+        return convertPage(targetRepository
+                .findAll(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()), pageReq), pageReq);
     }
 
     @Override
     public Page<Target> findByAssignedDistributionSetAndRsql(final Pageable pageReq, final long distributionSetID,
             final String rsqlParam) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetID);
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer, database);
@@ -401,16 +398,10 @@ public class JpaTargetManagement implements TargetManagement {
         return convertPage(
                 targetRepository
                         .findAll((Specification<JpaTarget>) (root, query,
-                                cb) -> cb.and(TargetSpecifications.hasAssignedDistributionSet(distributionSetID)
+                                cb) -> cb.and(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())
                                         .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
                                 pageReq),
                 pageReq);
-    }
-
-    private void throwEntityNotFoundIfDsDoesNotExist(final Long distributionSetID) {
-        if (!distributionSetRepository.existsById(distributionSetID)) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetID);
-        }
     }
 
     public static Page<Target> convertPage(final Page<JpaTarget> findAll, final Pageable pageable) {
@@ -423,16 +414,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public Page<Target> findByInstalledDistributionSet(final Pageable pageReq, final long distributionSetID) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetID);
-        return convertPage(
-                targetRepository.findAll(TargetSpecifications.hasInstalledDistributionSet(distributionSetID), pageReq),
-                pageReq);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetID);
+        return convertPage(targetRepository
+                .findAll(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()), pageReq), pageReq);
     }
 
     @Override
     public Page<Target> findByInstalledDistributionSetAndRsql(final Pageable pageable, final long distributionSetId,
             final String rsqlParam) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer, database);
@@ -440,7 +430,7 @@ public class JpaTargetManagement implements TargetManagement {
         return convertPage(
                 targetRepository
                         .findAll((Specification<JpaTarget>) (root, query,
-                                cb) -> cb.and(TargetSpecifications.hasInstalledDistributionSet(distributionSetId)
+                                cb) -> cb.and(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId())
                                         .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
                                 pageable),
                 pageable);
@@ -476,10 +466,10 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications.isOverdue(TimestampCalculator.calculateOverdueTimestamp()));
         }
         if (filterParams.getFilterByDistributionId() != null) {
-            throwEntityNotFoundIfDsDoesNotExist(filterParams.getFilterByDistributionId());
+            final DistributionSet validDistSet = distributionSetManagement
+                    .getOrElseThrowException(filterParams.getFilterByDistributionId());
 
-            specList.add(TargetSpecifications
-                    .hasInstalledOrAssignedDistributionSet(filterParams.getFilterByDistributionId()));
+            specList.add(TargetSpecifications.hasInstalledOrAssignedDistributionSet(validDistSet.getId()));
         }
         if (!StringUtils.isEmpty(filterParams.getFilterBySearchText())) {
             specList.add(TargetSpecifications
@@ -615,7 +605,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target assignType(final String controllerID, final long targetTypeId) {
+    public Target assignType(final String controllerID, final Long targetTypeId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);
@@ -653,51 +643,53 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByAssignedDistributionSet(final long distId) {
-        throwEntityNotFoundIfDsDoesNotExist(distId);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
 
-        return targetRepository.count(TargetSpecifications.hasAssignedDistributionSet(distId));
+        return targetRepository.count(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
     }
 
     @Override
     public long countByInstalledDistributionSet(final long distId) {
-        throwEntityNotFoundIfDsDoesNotExist(distId);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
 
-        return targetRepository.count(TargetSpecifications.hasInstalledDistributionSet(distId));
+        return targetRepository.count(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
     }
 
     @Override
     public boolean existsByInstalledOrAssignedDistributionSet(final long distId) {
-        throwEntityNotFoundIfDsDoesNotExist(distId);
+        final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
 
-        return targetRepository.exists(TargetSpecifications.hasInstalledOrAssignedDistributionSet(distId));
+        return targetRepository
+                .exists(TargetSpecifications.hasInstalledOrAssignedDistributionSet(validDistSet.getId()));
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNonDS(final Pageable pageRequest, final long distributionSetId,
-            final String targetFilterQuery) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
+    public Page<Target> findByTargetFilterQueryAndNonDSAndCompatible(final Pageable pageRequest,
+            final long distributionSetId, final String targetFilterQuery) {
+        final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
+        final Specification<JpaTarget> dsNotInActions = TargetSpecifications
+                .hasNotDistributionSetInActions(distributionSetId);
+        final Specification<JpaTarget> isCompatibleWithDsType = TargetSpecifications
+                .isCompatibleWithDistributionSetType(distSetTypeId);
 
-        return findTargetsBySpec(
-                (root, cq,
-                        cb) -> cb.and(spec.toPredicate(root, cq, cb), TargetSpecifications
-                                .hasNotDistributionSetInActions(distributionSetId).toPredicate(root, cq, cb)),
-                pageRequest);
-
+        return findTargetsBySpec(spec.and(dsNotInActions).and(isCompatibleWithDsType), pageRequest);
     }
 
     @Override
-    public Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(final Pageable pageRequest,
-            final Collection<Long> groups, final String targetFilterQuery) {
+    public Page<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(final Pageable pageRequest,
+            final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType) {
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
+        final Specification<JpaTarget> notInRolloutGroups = TargetSpecifications.isNotInRolloutGroups(groups);
+        final Specification<JpaTarget> isCompatibleWithDsType = TargetSpecifications
+                .isCompatibleWithDistributionSetType(dsType.getId());
 
-        return findTargetsBySpec((root, cq, cb) -> cb.and(spec.toPredicate(root, cq, cb),
-                TargetSpecifications.isNotInRolloutGroups(groups).toPredicate(root, cq, cb)), pageRequest);
-
+        return findTargetsBySpec((spec.and(notInRolloutGroups).and(isCompatibleWithDsType)), pageRequest);
     }
 
     @Override
@@ -712,24 +704,27 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNotInRolloutGroups(final Collection<Long> groups, final String targetFilterQuery) {
+    public long countByRsqlAndNotInRolloutGroupsAndCompatible(final Collection<Long> groups,
+            final String targetFilterQuery, final DistributionSetType dsType) {
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
         final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
-                TargetSpecifications.isNotInRolloutGroups(groups));
+                TargetSpecifications.isNotInRolloutGroups(groups),
+                TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()));
 
         return countByCriteriaAPI(specList);
     }
 
     @Override
-    public long countByRsqlAndNonDS(final long distributionSetId, final String targetFilterQuery) {
-        throwEntityNotFoundIfDsDoesNotExist(distributionSetId);
+    public long countByRsqlAndNonDSAndCompatible(final long distributionSetId, final String targetFilterQuery) {
+        final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
+        final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                 virtualPropertyReplacer, database);
-        final List<Specification<JpaTarget>> specList = Lists.newArrayListWithExpectedSize(2);
-        specList.add(spec);
-        specList.add(TargetSpecifications.hasNotDistributionSetInActions(distributionSetId));
+        final List<Specification<JpaTarget>> specList = Arrays.asList(spec,
+                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId));
 
         return countByCriteriaAPI(specList);
     }

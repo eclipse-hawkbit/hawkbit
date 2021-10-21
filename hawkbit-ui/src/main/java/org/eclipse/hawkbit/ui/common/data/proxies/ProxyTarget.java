@@ -13,11 +13,12 @@ import java.net.URI;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.eclipse.hawkbit.ui.common.data.aware.TypeInfoAware;
 
 /**
  * Proxy for {@link Target}.
  */
-public class ProxyTarget extends ProxyNamedEntity {
+public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
 
     private static final long serialVersionUID = 1L;
 
@@ -38,6 +39,8 @@ public class ProxyTarget extends ProxyNamedEntity {
     private String securityToken;
 
     private boolean isRequestAttributes;
+
+    private ProxyTypeInfo typeInfo;
 
     /**
      * Gets the controllerId
@@ -205,5 +208,15 @@ public class ProxyTarget extends ProxyNamedEntity {
      */
     public void setRequestAttributes(final boolean isRequestAttributes) {
         this.isRequestAttributes = isRequestAttributes;
+    }
+
+    @Override
+    public void setTypeInfo(ProxyTypeInfo typeInfo) {
+        this.typeInfo = typeInfo;
+    }
+
+    @Override
+    public ProxyTypeInfo getTypeInfo() {
+        return typeInfo;
     }
 }

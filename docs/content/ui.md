@@ -31,12 +31,12 @@ Target status overview, target management and manual deployments.
 
 - Start roll out by drag and drop targets on a DS.
 - Target list supports CTRL-A for "select all".
-- Delete sets, tags or targets by dragging them on delete icon.
 - Select _Target_ to see _Action_ History.
 - Bulk target upload: create bulk targets by upload.
-
+- DS invalidation allows to mark broken updates and avoid the distribution of such
 
 Hints for bulk upload:
+
 - Expected file type : csv.
 - Expected file format : Each line with two values (ControllerID,Target Name). ControllerID is mandatory.
 - Example:
@@ -46,6 +46,20 @@ Controller_id_2,targetName2
 ```
 
 ![Deployment Management view](../images/ui/deployment_mgmt.png)
+
+### Distribution set invalidation
+
+It is possible to mark broken updates and avoid the distribution of such by invalidating the corresponding distribution
+set in the Distributions list of the Deployment view. 
+
+Invalidating a distribution set removes all auto-assignments that reference this distribution set. Optionally, all
+rollouts that reference the distribution set can be stopped and existing update actions are removed, either by a
+soft-cancel or a forced-cancel.
+
+Invalidated distribution sets cannot be valid again, but remain invalid. They cannot be assigned to targets, neither
+through a rollout, auto-assignment nor a single assignment.
+
+![Distribution set invalidation](../images/ui/deployment_ds_invalidation.png)
 
 ## Distribution Management
 
@@ -114,7 +128,8 @@ Custom target filter overview and filter management.
 The basic syntax to filter is: `field<basic_operator>value <composite_operator> field<basic_operator>value <...>`
 
 - `field`: is the name of the resource field.
-- `value`: is the value of the target field
+- `value`: is the expected value of the target field.
+    - Use `*` for wildcard matches.
 - `<basic_operator>`: Are operators to do simple queries. Supported basic operators are:
   - `==` : equal
   - `!=` : not equal
@@ -122,8 +137,6 @@ The basic syntax to filter is: `field<basic_operator>value <composite_operator> 
 - `<composite_operator>`: Are operators to join simple queries: Supported composite operators are:
   - `and`
   - `or`
-  - Use `=IN=` for 'in' parameter.(Example: name=IN=(target1,target2).
-  - Use `*` for wildcard matches.
 
 ### Examples
 
