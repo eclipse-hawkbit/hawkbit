@@ -203,7 +203,12 @@ public final class SPUIDefinitions {
     public static final String FILTER_RESET_ICON = "filter-reset-icon";
 
     /* Action History */
-    public static final String DISABLE_DISTRIBUTION = "incomplete-distribution";
+    public static final String INCOMPLETE_DISTRIBUTION = "incomplete-distribution";
+
+    /**
+     * marker for invalid distribution sets
+     */
+    public static final String INVALID_DISTRIBUTION = "invalid-distribution";
 
     /**
      * Filter by type layout width.
@@ -256,6 +261,11 @@ public final class SPUIDefinitions {
      * Id of "NO TAG" button.
      */
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
+
+    /**
+     * Id of "NO TARGET TYPE" button.
+     */
+    public static final String NO_TARGET_TYPE_BUTTON_ID = "no_target_type_button";
 
     /**
      * DELETE column/button.

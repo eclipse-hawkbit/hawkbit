@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.util.Collections;
+
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
@@ -34,8 +37,11 @@ public class RolloutEventTest extends AbstractRemoteEntityEventTest<Rollout> {
     @Override
     protected Rollout createEntity() {
         testdataFactory.createTarget("12345");
-        final DistributionSet ds = distributionSetManagement.create(entityFactory.distributionSet()
-                .create().name("incomplete").version("2").description("incomplete").type("os"));
+        final SoftwareModule module = softwareModuleManagement.create(
+                entityFactory.softwareModule().create().name("swm").version("2").description("desc").type("os"));
+        final DistributionSet ds = distributionSetManagement
+                .create(entityFactory.distributionSet().create().name("complete").version("2").description("complete")
+                        .type("os").modules(Collections.singletonList(module.getId())));
 
         return rolloutManagement.create(
                 entityFactory.rollout().create().name("exampleRollout").targetFilterQuery("controllerId==*").set(ds),

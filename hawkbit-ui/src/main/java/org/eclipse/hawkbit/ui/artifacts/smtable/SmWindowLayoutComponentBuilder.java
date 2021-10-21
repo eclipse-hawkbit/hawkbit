@@ -56,7 +56,7 @@ public class SmWindowLayoutComponentBuilder {
      */
     public ComboBox<ProxyTypeInfo> createSoftwareModuleTypeCombo(final Binder<ProxySoftwareModule> binder) {
         return FormComponentBuilder
-                .createTypeCombo(binder, smTypeDataProvider, i18n, UIComponentIdProvider.SW_MODULE_TYPE).getComponent();
+                .createTypeCombo(binder, smTypeDataProvider, i18n, UIComponentIdProvider.SW_MODULE_TYPE, true).getComponent();
     }
 
     /**

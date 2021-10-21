@@ -103,6 +103,8 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         return Arrays.asList(
                 new ProxyKeyValueDetails(UIComponentIdProvider.TARGET_CONTROLLER_ID, i18n.getMessage("label.target.id"),
                         entity.getControllerId()),
+                new ProxyKeyValueDetails(UIComponentIdProvider.TARGET_TYPE_ID, i18n.getMessage("label.target.type"),
+                        entity.getTypeInfo() != null ? entity.getTypeInfo().getName() : ""),
                 new ProxyKeyValueDetails(UIComponentIdProvider.TARGET_LAST_QUERY_DT,
                         i18n.getMessage("label.target.lastpolldate"),
                         SPDateTimeUtil.getFormattedDate(entity.getLastTargetQuery())),

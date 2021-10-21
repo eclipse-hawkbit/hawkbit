@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
+import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
@@ -28,23 +29,26 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final transient TargetTagWindowBuilder targetTagWindowBuilder;
 
+    private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
+
+
     /**
      * Constructor for TargetTagFilterHeader
-     *
-     * @param uiDependencies
+     *  @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param targetTagFilterLayoutUiState
      *            TargetTagFilterLayoutUiState
      * @param targetTagWindowBuilder
-     *            TargetTagWindowBuilder
+     * @param targetTypeWindowBuilder
      */
     public TargetTagFilterHeader(final CommonUiDependencies uiDependencies,
-            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetTagWindowBuilder targetTagWindowBuilder) {
+                                 final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+                                 final TargetTagWindowBuilder targetTagWindowBuilder, TargetTypeWindowBuilder targetTypeWindowBuilder) {
         super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
         this.targetTagWindowBuilder = targetTagWindowBuilder;
+        this.targetTypeWindowBuilder = targetTypeWindowBuilder;
 
         buildHeader();
     }
@@ -70,11 +74,17 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     @Override
     protected Window getWindowForAdd() {
+        if (targetTagFilterLayoutUiState.isTargetTypeFilterTabSelected()) {
+            return targetTypeWindowBuilder.getWindowForAdd();
+        }
         return targetTagWindowBuilder.getWindowForAdd();
     }
 
     @Override
     protected String getAddEntityWindowCaptionMsgKey() {
+        if (targetTagFilterLayoutUiState.isTargetTypeFilterTabSelected()) {
+            return UIMessageIdProvider.CAPTION_TYPE;
+        }
         return UIMessageIdProvider.CAPTION_TAG;
     }
 

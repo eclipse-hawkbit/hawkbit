@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -89,8 +90,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
     protected String host = "management-api.host";
 
     /**
-     * The generated REST docs snippets will be outputted to an own resource folder.
-     * The child class has to specify the name of that output folder where to put its corresponding snippets.
+     * The generated REST docs snippets will be outputted to an own resource
+     * folder. The child class has to specify the name of that output folder
+     * where to put its corresponding snippets.
      *
      * @return the name of the resource folder
      */
@@ -101,8 +103,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
         this.document = document(getResourceName() + "/{method-name}", preprocessRequest(prettyPrint()),
                 preprocessResponse(prettyPrint()));
         this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
-                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocContext).uris()
-                        .withScheme("https").withHost(host + ".com").withPort(443))
+                .apply(MockMvcRestDocumentation.documentationConfiguration(restDocContext).uris().withScheme("https")
+                        .withHost(host + ".com").withPort(443))
                 .alwaysDo(this.document).addFilter(filterHttpResponse).build();
         arrayPrefix = "[]";
     }
@@ -163,33 +165,39 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
             final boolean timeforced, final DistributionSet distributionSet) {
-        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null, false);
+        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null,
+                false);
     }
 
     protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
             final boolean timeforced, final DistributionSet distributionSet, final boolean createRollout) {
-        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null, createRollout);
+        return createTargetByGivenNameWithAttributes(name, inSync, timeforced, distributionSet, null, null, null,
+                createRollout);
     }
 
     protected Target createTargetByGivenNameWithAttributes(final String name, final boolean inSync,
             final boolean timeforced, final DistributionSet distributionSet, final String maintenanceWindowSchedule,
-            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone, final boolean createRollout) {
+            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
+            final boolean createRollout) {
 
+        final TargetType targetType = testdataFactory.findOrCreateTargetType("defaultType");
+        targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
+                Collections.singletonList(distributionSet.getType().getId()));
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
-                .lastTargetQuery(System.currentTimeMillis()));
-        
+                .targetType(targetType.getId()).lastTargetQuery(System.currentTimeMillis()));
+
         final List<Target> updatedTargets;
         if (createRollout) {
 
             final Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "rollout desc", 1,
                     "name==" + name, distributionSet, "50", "5", timeforced ? ActionType.TIMEFORCED : ActionType.FORCED,
                     isMultiAssignmentsEnabled() ? 600 : null);
-            
+
             // start the rollout and handle it
             rolloutManagement.start(rollout.getId());
             rolloutManagement.handleRollouts();
-            
+
             updatedTargets = Collections.singletonList(savedTarget);
 
         } else {
@@ -208,7 +216,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
             updatedTargets = makeAssignment(deploymentRequestBuilder.build()).getAssignedEntity().stream()
                     .map(Action::getTarget).collect(Collectors.toList());
         }
-        
+
         if (inSync) {
             feedbackToByInSync(distributionSet);
         }
@@ -276,6 +284,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                         .type("String"),
                 fieldWithPath(fieldArrayPrefix + "lastControllerRequestAt")
                         .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
+                fieldWithPath(fieldArrayPrefix + "targetType")
+                        .description(MgmtApiModelProperties.TARGETTYPE_ID).type("Number"),
                 fieldWithPath(fieldArrayPrefix + "_links.self").ignored());
 
         if (!isArray) {
@@ -295,7 +305,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                             .description(MgmtApiModelProperties.LINKS_ATTRIBUTES),
                     fieldWithPath(fieldArrayPrefix + "_links.actions")
                             .description(MgmtApiModelProperties.LINKS_ACTIONS),
-                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA)));
+                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA),
+                    fieldWithPath(fieldArrayPrefix + "_links.targetType")
+                            .description(MgmtApiModelProperties.LINK_TO_TARGET_TYPE)));
 
         }
         fields.addAll(Arrays.asList(descriptors));
@@ -318,6 +330,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                         .description(MgmtApiModelProperties.DS_REQUIRED_STEP),
                 fieldWithPath(arrayPrefix + "complete").description(MgmtApiModelProperties.DS_COMPLETE),
                 fieldWithPath(arrayPrefix + "deleted").description(ApiModelPropertiesGeneric.DELETED),
+                fieldWithPath(arrayPrefix + "valid").description(MgmtApiModelProperties.DS_VALID),
                 fieldWithPath(arrayPrefix + "version").description(MgmtApiModelProperties.VERSION),
                 fieldWithPath(arrayPrefix + "_links.self").ignored(), fieldWithPath(arrayPrefix + "modules").ignored());
 

@@ -8,12 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -23,6 +30,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -49,14 +57,6 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
-
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
 
 /**
  * Target status and deployment management view
@@ -88,9 +88,10 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final UINotification uiNotification, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement smManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetInvalidationManagement dsInvalidationManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
+            final TargetTagManagement targetTagManagement, final TargetTypeManagement targetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
             final TenantConfigurationManagement configManagement,
@@ -104,10 +105,10 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
 
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
-                    targetFilterQueryManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState());
+                    targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement, deploymentManagement,
                     uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
                     targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
@@ -130,7 +131,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             this.distributionTagLayout = new DistributionTagLayout(uiDependencies, distributionSetTagManagement,
                     distributionSetManagement, managementUIState.getDistributionTagLayoutUiState());
             this.distributionGridLayout = new DistributionGridLayout(uiDependencies, targetManagement,
-                    distributionSetManagement, smManagement, distributionSetTypeManagement,
+                    distributionSetManagement, dsInvalidationManagement, smManagement, distributionSetTypeManagement,
                     distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
                     systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),
                     managementUIState.getDistributionTagLayoutUiState(),

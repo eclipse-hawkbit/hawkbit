@@ -117,6 +117,11 @@ public final class SPUIStyleDefinitions {
     public static final String SIMPLE_FILTER_HEADER = "simple-tag-filter-header";
 
     /**
+     * Target type filter header layout.
+     */
+    public static final String TARGET_TYPE_FILTER_HEADER = "target-type-filter-header";
+
+    /**
      * Simple tag filter header layout.
      */
     public static final String TAG_BUTTON_WITH_BACKGROUND = "button-tag-with-background";

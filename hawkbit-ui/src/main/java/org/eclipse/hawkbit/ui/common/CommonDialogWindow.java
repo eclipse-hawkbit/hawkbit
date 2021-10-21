@@ -64,12 +64,12 @@ public class CommonDialogWindow extends Window {
      * Different kinds of confirm buttons
      */
     public enum ConfirmStyle {
-        SAVE, OK
+        SAVE, OK, CONFIRM, NEXT
     }
 
     /**
      * Constructor
-     * 
+     *
      * @param caption
      *            the caption
      * @param content
@@ -189,7 +189,7 @@ public class CommonDialogWindow extends Window {
 
     /**
      * Hide the line that explains the mandatory decorator
-     * 
+     *
      */
     public void hideMandatoryExplanation() {
         if (mandatoryLabel != null) {
@@ -217,6 +217,14 @@ public class CommonDialogWindow extends Window {
         if (confirmStyle == ConfirmStyle.SAVE) {
             confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.SAVE_BUTTON,
                     i18n.getMessage(UIMessageIdProvider.BUTTON_SAVE), "", "", true, VaadinIcons.HARDDRIVE,
+                    buttonDecorator);
+        } else if (confirmStyle == ConfirmStyle.NEXT) {
+            confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_NEXT), "", ValoTheme.BUTTON_PRIMARY, false, null,
+                    buttonDecorator);
+        } else if (confirmStyle == ConfirmStyle.CONFIRM) {
+            confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON,
+                    i18n.getMessage(UIMessageIdProvider.BUTTON_CONFIRM), "", ValoTheme.BUTTON_PRIMARY, false, null,
                     buttonDecorator);
         } else {
             confirmButton = SPUIComponentProvider.getButton(UIComponentIdProvider.OK_BUTTON,

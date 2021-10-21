@@ -42,6 +42,19 @@ public class ProxyTypeInfo extends ProxyIdentifiableEntity {
         this.key = key;
     }
 
+    /**
+     * Constructor
+     *
+     * @param id
+     *            type ID
+     * @param name
+     *            type name
+     */
+    public ProxyTypeInfo(final Long id, final String name) {
+        super(id);
+        this.name = name;
+    }
+
     public String getName() {
         return name;
     }

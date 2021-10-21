@@ -61,6 +61,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
 
         proxyRolloutWindow.setName(getI18n().getMessage("textfield.rollout.copied.name", proxyRolloutWindow.getName()));
 
+        removeDistributionSetIfInvalid(proxyRolloutWindow);
         setTargetFilterId(proxyRolloutWindow);
 
         if (proxyRolloutWindow.getForcedTime() == null
@@ -82,6 +83,14 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         }
 
         return proxyRolloutWindow;
+    }
+
+    private void removeDistributionSetIfInvalid(final ProxyRolloutWindow proxyRolloutWindow) {
+        final boolean dsIsValid = proxyRolloutWindow.getRolloutForm().getDistributionSetInfo().isValid();
+        if (!dsIsValid) {
+            proxyRolloutWindow.getRolloutForm().setDistributionSetInfo(null);
+        }
+
     }
 
     private void setTargetFilterId(final ProxyRolloutWindow proxyRolloutWindow) {

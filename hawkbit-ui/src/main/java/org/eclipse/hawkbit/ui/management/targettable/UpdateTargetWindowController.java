@@ -56,6 +56,7 @@ public class UpdateTargetWindowController
         target.setControllerId(proxyEntity.getControllerId());
         target.setName(proxyEntity.getName());
         target.setDescription(proxyEntity.getDescription());
+        target.setTypeInfo(proxyEntity.getTypeInfo());
 
         controllerIdBeforeEdit = proxyEntity.getControllerId();
 
@@ -76,9 +77,17 @@ public class UpdateTargetWindowController
     @Override
     protected Target persistEntityInRepository(final ProxyTarget entity) {
         final TargetUpdate targetUpdate = getEntityFactory().target().update(entity.getControllerId())
-                .name(entity.getName()).description(entity.getDescription());
+                .name(entity.getName()).description(entity.getDescription())
+                .targetType(entity.getTypeInfo() != null ? entity.getTypeInfo().getId() : null);
 
-        return targetManagement.update(targetUpdate);
+        Target updatedTarget = targetManagement.update(targetUpdate);
+
+        // Un-assigning target type needs another DB request to update the target type value to Null
+        if (entity.getTypeInfo() == null){
+            return targetManagement.unAssignType(entity.getControllerId());
+        }
+
+        return updatedTarget;
     }
 
     @Override

@@ -77,7 +77,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to find the {@link Page} to show notification on.
-     * 
+     *
      * @param event
      *            error event
      * @return current {@link Page} for error notification
@@ -130,7 +130,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to build an error notification based on caption and description.
-     * 
+     *
      * @param caption
      *            notification caption
      * @param description
@@ -144,7 +144,7 @@ public class HawkbitUIErrorHandler implements ErrorHandler {
 
     /**
      * Method to show notification on the given page.
-     * 
+     *
      * @param page
      *            page to show notification on
      * @param notification

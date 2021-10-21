@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
@@ -155,6 +156,9 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         case RUNNING:
             handleRunningRollout((JpaRollout) rollout);
             break;
+        case STOPPING:
+            handleStopRollout((JpaRollout) rollout);
+            break;
         default:
             LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
             break;
@@ -242,6 +246,39 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         rolloutRepository.save(rollout);
 
         sendRolloutGroupDeletedEvents(rollout);
+    }
+
+    private void handleStopRollout(final JpaRollout rollout) {
+        LOGGER.debug("handleStopRollout called for {}", rollout.getId());
+        // clean up all scheduled actions
+        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
+        deleteScheduledActions(rollout, scheduledActions);
+
+        // avoid another scheduler round and re-check if all scheduled actions
+        // has been cleaned up. we flush first to ensure that the we include the
+        // deletion above
+        entityManager.flush();
+        final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
+                Status.SCHEDULED) > 0;
+
+        if (hasScheduledActionsLeft) {
+            return;
+        }
+
+        rolloutGroupRepository.findByRolloutAndStatusNotIn(rollout,
+                Arrays.asList(RolloutGroupStatus.FINISHED, RolloutGroupStatus.ERROR)).forEach(rolloutGroup -> {
+                    rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
+                    rolloutGroupRepository.save(rolloutGroup);
+                });
+
+        rollout.setStatus(RolloutStatus.FINISHED);
+        rolloutRepository.save(rollout);
+
+        final List<Long> groupIds = rollout.getRolloutGroups().stream().map(RolloutGroup::getId)
+                .collect(Collectors.toList());
+
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(new RolloutStoppedEvent(
+                tenantAware.getCurrentTenant(), eventPublisherHolder.getApplicationId(), rollout.getId(), groupIds)));
     }
 
     private void handleReadyRollout(final Rollout rollout) {
@@ -493,7 +530,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroups(readyGroups, groupTargetFilter));
+                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatible(readyGroups, groupTargetFilter,
+                        rollout.getDistributionSet().getType()));
         final long expectedInGroup = Math
                 .round((double) (group.getTargetPercentage() / 100) * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
@@ -537,8 +575,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroups(pageRequest,
-                    readyGroups, targetFilter);
+            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
+                    pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
 
             createAssignmentOfTargetsToGroup(targets, group);
 
@@ -547,8 +585,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Schedules a group of the rollout. Scheduled Actions are created to
-     * achieve this. The creation of those Actions is allowed to fail.
+     * Schedules a group of the rollout. Scheduled Actions are created to achieve
+     * this. The creation of those Actions is allowed to fail.
      */
     private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
         final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
@@ -611,8 +649,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     /**
      * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action
-     * is created in-active.
+     * scheduled actions the scheduled actions gets canceled. A scheduled action is
+     * created in-active.
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
