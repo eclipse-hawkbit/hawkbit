@@ -8,7 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.rollout.window.components;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.HasValue.ValueChangeListener;
+import com.vaadin.data.HasValue;
 import com.vaadin.data.ValidationException;
 import com.vaadin.data.Validator;
 import com.vaadin.data.validator.LongRangeValidator;
@@ -72,7 +72,8 @@ public class RolloutFormLayout extends ValidatableLayout {
     private Long rolloutId;
     private Long totalTargets;
 
-    private BiConsumer<String, Long> filterQueryOrDistSetChangedListener;
+    private Consumer<String> filterQueryChangedListener;
+    private Consumer<Long> distSetChangedListener;
 
     /**
      * Constructor for RolloutFormLayout
@@ -191,8 +192,8 @@ public class RolloutFormLayout extends ValidatableLayout {
     }
 
     private void addValueChangeListeners() {
-        targetFilterQueryCombo.getComponent().addValueChangeListener(combinedChangeListener());
-        dsCombo.addValueChangeListener(combinedChangeListener());
+        targetFilterQueryCombo.getComponent().addValueChangeListener(filterQueryChangedListener());
+        dsCombo.addValueChangeListener(distSetChangedListener());
 
         actionTypeLayout.getComponent().getActionTypeOptionGroup().addValueChangeListener(
                 event -> actionTypeLayout.setRequired(event.getValue() == ActionType.TIMEFORCED));
@@ -200,14 +201,18 @@ public class RolloutFormLayout extends ValidatableLayout {
                 event -> autoStartOptionGroupLayout.setRequired(event.getValue() == AutoStartOption.SCHEDULED));
     }
 
-    private <T> ValueChangeListener<T> combinedChangeListener() {
+    private HasValue.ValueChangeListener<ProxyTargetFilterQuery> filterQueryChangedListener() {
         return event -> {
-            if (filterQueryOrDistSetChangedListener != null) {
-                final String rsqlQuery = targetFilterQueryCombo.getComponent().isEmpty() ? null
-                        : targetFilterQueryCombo.getComponent().getValue().getQuery();
-                final Long distSetId = dsCombo.isEmpty() ? null : dsCombo.getValue().getId();
+            if (filterQueryChangedListener != null) {
+                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue().getQuery() : null);
+            }
+        };
+    }
 
-                filterQueryOrDistSetChangedListener.accept(rsqlQuery, distSetId);
+    private HasValue.ValueChangeListener<ProxyDistributionSet> distSetChangedListener() {
+        return event -> {
+            if (distSetChangedListener != null) {
+                distSetChangedListener.accept(event.getValue() != null ? event.getValue().getTypeInfo().getId() : null);
             }
         };
     }
@@ -286,14 +291,23 @@ public class RolloutFormLayout extends ValidatableLayout {
     }
 
     /**
-     * Sets the changed listener for filter query or distribution set
+     * Sets the changed listener for filter query
      *
-     * @param filterQueryOrDistSetChangedListener
+     * @param filterQueryChangedListener
      *            Changed listener
      */
-    public void setFilterQueryOrDistSetChangedListener(
-            final BiConsumer<String, Long> filterQueryOrDistSetChangedListener) {
-        this.filterQueryOrDistSetChangedListener = filterQueryOrDistSetChangedListener;
+    public void setFilterQueryChangedListener(final Consumer<String> filterQueryChangedListener) {
+        this.filterQueryChangedListener = filterQueryChangedListener;
+    }
+
+    /**
+     * Sets the changed listener for distribution set
+     *
+     * @param distSetChangedListener
+     *            Changed listener
+     */
+    public void setDistSetChangedListener(final Consumer<Long> distSetChangedListener) {
+        this.distSetChangedListener = distSetChangedListener;
     }
 
     /**

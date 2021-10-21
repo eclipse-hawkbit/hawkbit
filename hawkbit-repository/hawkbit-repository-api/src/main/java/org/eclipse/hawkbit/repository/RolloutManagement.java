@@ -190,8 +190,8 @@ public interface RolloutManagement {
      *            the rollout
      * @param createdAt
      *            timestamp when the rollout was created
-     * @param distSetId
-     *            ID of the distribution set of the rollout
+     * @param dsTypeId
+     *            ID of the type of distribution set of the rollout
      * @return the validation information
      * @throws RolloutIllegalStateException
      *             thrown when no targets are targeted by the rollout
@@ -201,7 +201,7 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ_AND_TARGET_READ)
     ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(@Valid List<RolloutGroupCreate> groups,
-            String targetFilter, Long createdAt, @NotNull Long distSetId);
+            String targetFilter, Long createdAt, @NotNull Long dsTypeId);
 
     /**
      * Retrieves all rollouts.

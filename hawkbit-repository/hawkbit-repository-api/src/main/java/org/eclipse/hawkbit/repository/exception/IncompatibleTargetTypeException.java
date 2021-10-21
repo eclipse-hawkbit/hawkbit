@@ -61,11 +61,11 @@ public class IncompatibleTargetTypeException extends AbstractServerRtException {
         this.distributionSetTypeNames = Collections.singleton(distributionSetTypeName);
     }
 
-    public Collection<String> getTargetTypeName() {
+    public Collection<String> getTargetTypeNames() {
         return targetTypeNames;
     }
 
-    public Collection<String> getDistributionSetTypeName() {
+    public Collection<String> getDistributionSetTypeNames() {
         return distributionSetTypeNames;
     }
 }

@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
-import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.InvalidMaintenanceScheduleException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -142,11 +141,6 @@ public class DeploymentAssignmentWindowController {
         } catch (final MultiAssignmentIsNotEnabledException e) {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
             LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
-        } catch (final IncompatibleTargetTypeException ex) {
-            notification
-                    .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE,
-                            ex.getTargetTypeName(), ex.getDistributionSetTypeName()));
-            LOG.info("Incompatible target type assignment", ex);
         }
     }
 

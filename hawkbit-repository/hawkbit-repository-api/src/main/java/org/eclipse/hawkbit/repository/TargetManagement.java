@@ -118,7 +118,7 @@ public interface TargetManagement {
      *
      * @param distId
      *            to search for
-     * @return number of found of {@link Target}s.
+     * @return number of found {@link Target}s.
      *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist

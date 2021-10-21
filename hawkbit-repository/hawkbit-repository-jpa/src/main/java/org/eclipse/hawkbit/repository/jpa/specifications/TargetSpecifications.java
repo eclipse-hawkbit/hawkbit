@@ -393,7 +393,7 @@ public final class TargetSpecifications {
             // isNull predicate first
             final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
 
-            return cb.or(targetTypeIsNull, getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId));
+            return cb.or(targetTypeIsNull, cb.equal(getDsTypeIdPath(targetRoot), distributionSetTypeId));
         };
     }
 
@@ -413,22 +413,21 @@ public final class TargetSpecifications {
             // isNotNull predicate first
             final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
 
-            // We need to check for isNull(equal(...)) and not(equal(...)) since we allow
+            // We need to check for isNull(...) and notEqual(...) since we allow
             // target types that don't have any compatible distribution set type
             return cb.and(targetTypeNotNull,
-                    cb.or(cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)),
-                            cb.not(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId))));
+                    cb.or(cb.isNull(getDsTypeIdPath(targetRoot)),
+                            cb.notEqual(getDsTypeIdPath(targetRoot), distributionSetTypeId)));
         };
     }
 
-    private static Predicate getDistSetTypeEqualPredicate(final Root<JpaTarget> root, final CriteriaBuilder cb,
-            final Long dsTypeId) {
+    private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
         final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
         targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
         final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
                 .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
 
-        return cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), dsTypeId);
+        return dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id);
     }
 
     /**

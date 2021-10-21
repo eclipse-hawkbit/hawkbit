@@ -37,6 +37,6 @@ public class IncompatibleTargetTypeErrorExtractor extends AbstractSingleUiErrorD
         return findExceptionOf(error, IncompatibleTargetTypeException.class)
                 .map(ex -> UiErrorDetails.create(i18n.getMessage("caption.error"),
                         i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE,
-                                ex.getTargetTypeName(), ex.getDistributionSetTypeName())));
+                                ex.getTargetTypeNames(), ex.getDistributionSetTypeNames())));
     }
 }
