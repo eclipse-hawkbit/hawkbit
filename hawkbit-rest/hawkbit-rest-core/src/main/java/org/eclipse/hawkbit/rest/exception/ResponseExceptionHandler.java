@@ -8,15 +8,14 @@
  */
 package org.eclipse.hawkbit.rest.exception;
 
+import com.google.common.collect.Iterables;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
-
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -31,8 +30,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartException;
-
-import com.google.common.collect.Iterables;
 
 /**
  * General controller advice for exception handling.
