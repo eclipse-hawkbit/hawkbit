@@ -212,7 +212,11 @@ public class RolloutFormLayout extends ValidatableLayout {
     private HasValue.ValueChangeListener<ProxyDistributionSet> distSetChangedListener() {
         return event -> {
             if (distSetChangedListener != null) {
-                distSetChangedListener.accept(event.getValue() != null ? event.getValue().getTypeInfo().getId() : null);
+                if (event.getValue() != null && event.getValue().getTypeInfo() != null) {
+                    distSetChangedListener.accept(event.getValue().getTypeInfo().getId());
+                } else {
+                    distSetChangedListener.accept(null);
+                }
             }
         };
     }
