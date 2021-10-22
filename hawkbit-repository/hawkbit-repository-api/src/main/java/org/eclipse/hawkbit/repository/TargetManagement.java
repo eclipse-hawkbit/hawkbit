@@ -109,7 +109,7 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      *
-     * @deprecated {@link this#countByFilters(FilterParams)} should be used instead.
+     * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)} should be used instead.
      */
     @Deprecated
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)

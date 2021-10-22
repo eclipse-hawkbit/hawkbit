@@ -141,12 +141,12 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     }
 
     @Override
-    protected boolean deleteTargetType(ProxyTargetType typeToDelete) {
+    protected boolean deleteTargetType(ProxyTargetType targetTypeToDelete) {
         try{
-            targetTypeManagement.delete(typeToDelete.getId());
+            targetTypeManagement.delete(targetTypeToDelete.getId());
             eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
                     new EntityModifiedEventPayload(EntityModifiedEventPayload.EntityModifiedEventType.ENTITY_REMOVED, getFilterMasterEntityType(),
-                            ProxyTargetType.class, typeToDelete.getId()));
+                            ProxyTargetType.class, targetTypeToDelete.getId()));
             return true;
         } catch (TargetTypeInUseException exception){
             LOG.trace("Target type already in use exception: {}", exception.getMessage());
