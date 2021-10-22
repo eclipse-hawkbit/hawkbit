@@ -89,9 +89,17 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_TAG = "caption.tag";
 
+    public static final String CAPTION_ERROR = "caption.error";
+
+    public static final String CAPTION_INSUFFICIENT_PERMISSION = "caption.no.permission";
+
+    public static final String CAPTION_TYPE = "caption.type";
+
     public static final String LABEL_DROP_AREA_UPLOAD = "label.drop.area.upload";
 
     public static final String LABEL_NO_TAG = "label.no.tag";
+
+    public static final String LABEL_NO_TARGET_TYPE = "label.no.target.type";
 
     public static final String LABEL_CREATE_FILTER = "label.create.filter";
 
@@ -150,6 +158,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_ERROR_ENTITY_DELETED = "message.entity.error.deleted";
 
     public static final String MESSAGE_ERROR_ENTITY_READONLY = "message.entity.error.readonly";
+
+    public static final String MESSAGE_ERROR = "message.error";
 
     public static final String MESSAGE_ERROR_PERMISSION_INSUFFICIENT = "message.permission.insufficient";
 
@@ -274,10 +284,6 @@ public final class UIMessageIdProvider {
     public static final String CAPTION_ARTIFACT_FILESIZE_BYTES = "artifact.filesize.bytes.caption";
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
-
-    public static final String CAPTION_ERROR = "caption.error";
-
-    public static final String MESSAGE_ERROR = "message.error";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 

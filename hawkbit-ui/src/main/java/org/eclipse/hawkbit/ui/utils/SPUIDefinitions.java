@@ -263,6 +263,11 @@ public final class SPUIDefinitions {
     public static final String NO_TAG_BUTTON_ID = "no_tag_button";
 
     /**
+     * Id of "NO TARGET TYPE" button.
+     */
+    public static final String NO_TARGET_TYPE_BUTTON_ID = "no_target_type_button";
+
+    /**
      * DELETE column/button.
      */
     public static final String DELETE = "Delete";

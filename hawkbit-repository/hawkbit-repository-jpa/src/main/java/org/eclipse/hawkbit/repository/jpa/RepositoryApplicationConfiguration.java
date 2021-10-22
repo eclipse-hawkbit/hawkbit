@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -140,7 +141,7 @@ import com.google.common.collect.Maps;
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryBaseClass = SimpleJpaWithNoCountRepository.class)
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
@@ -938,4 +939,15 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 lockRegistry);
     }
 
+    /**
+     * Our default {@link BaseRepositoryTypeProvider} bean always provides the NoCountBaseRepository
+     *
+     * @return a {@link BaseRepositoryTypeProvider} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
+        return new NoCountBaseRepositoryTypeProvider();
+
+    }
 }
