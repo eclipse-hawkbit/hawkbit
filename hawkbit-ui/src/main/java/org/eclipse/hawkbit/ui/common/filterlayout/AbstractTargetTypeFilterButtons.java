@@ -22,7 +22,6 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterButtonClickBehav
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.decorators.SPUITagButtonStyle;
 import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutUiState;
-import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTypeFilterButtonClick;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -78,10 +77,10 @@ public abstract class AbstractTargetTypeFilterButtons extends AbstractFilterButt
                 i18n.getMessage(UIMessageIdProvider.TOOLTIP_CLICK_TO_FILTER), "button-no-tag", false, null,
                 SPUITagButtonStyle.class);
 
-        final ProxyTargetType dummyNoTargetType = new ProxyTargetType();
-        dummyNoTargetType.setNoTargetType(true);
+        final ProxyTargetType proxyTargetType = new ProxyTargetType();
+        proxyTargetType.setNoTargetType(true);
 
-        noTargetType.addClickListener(event -> getFilterButtonClickBehaviour().processFilterClick(dummyNoTargetType));
+        noTargetType.addClickListener(event -> getFilterButtonClickBehaviour().processFilterClick(proxyTargetType));
 
         noTargetType.addStyleName("filter-drop-hint-layout");
         return noTargetType;
