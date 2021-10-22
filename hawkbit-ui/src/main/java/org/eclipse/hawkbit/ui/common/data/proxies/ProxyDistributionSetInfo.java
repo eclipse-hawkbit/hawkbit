@@ -103,6 +103,8 @@ public class ProxyDistributionSetInfo extends ProxyIdentifiableEntity {
         return Objects.hash(getId(), getName(), getVersion(), getDsTypeId(), isValid());
     }
 
+    // equals method requires all of the used conditions
+    @SuppressWarnings("squid:S1067")
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) {
