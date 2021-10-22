@@ -257,6 +257,13 @@ public enum SpServerError {
             "The given action type for auto-assignment is invalid: allowed values are ['forced', 'soft', 'downloadonly']"),
 
     /**
+     * Error message informing that the distribution set for auto-assignment is
+     * invalid.
+     */
+    SP_AUTO_ASSIGN_DISTRIBUTION_SET_INVALID("hawkbit.server.error.repo.invalidAutoAssignDistributionSet",
+            "The given distribution set for auto-assignment is invalid: it is either incomplete (i.e. mandatory modules are missing) or soft deleted"),
+
+    /**
      * Error message informing the user that the requested tenant configuration
      * change is not allowed.
      */

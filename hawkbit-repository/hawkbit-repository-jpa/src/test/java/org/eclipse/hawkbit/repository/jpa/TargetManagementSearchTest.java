@@ -58,7 +58,11 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final TargetTag targTagZ = targetTagManagement.create(entityFactory.tag().create().name("TargTag-Z"));
         final TargetTag targTagW = targetTagManagement.create(entityFactory.tag().create().name("TargTag-W"));
 
-        final DistributionSet setA = testdataFactory.createDistributionSet("");
+        final DistributionSet setA = testdataFactory.createDistributionSet("A");
+        final DistributionSet setB = testdataFactory.createDistributionSet("B");
+
+        final TargetType targetTypeX = testdataFactory.createTargetType("TargetTypeX",
+                Collections.singletonList(setB.getType()));
 
         final DistributionSet installedSet = testdataFactory.createDistributionSet("another");
 
@@ -92,12 +96,17 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final List<Target> targDs = testdataFactory.createTargets(100, targetDsDIdPref,
                 targetDsDIdPref.concat(" description"), lastTargetNull);
 
+        final String targetDsEIdPref = "targ-E";
+        final List<Target> targEs = testdataFactory.createTargetsWithType(100, targetDsEIdPref, targetTypeX);
+
         final String assignedC = targCs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedC);
         final String assignedA = targAs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedA);
         final String assignedB = targBs.iterator().next().getControllerId();
         assignDistributionSet(setA.getId(), assignedB);
+        final String assignedE = targEs.iterator().next().getControllerId();
+        assignDistributionSet(setB.getId(), assignedE);
         final String installedC = targCs.iterator().next().getControllerId();
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
 
@@ -136,7 +145,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat1TargetHasAttributeValue("%c-attribute%", targAttribute.getControllerId());
         verifyThat1TargetHasAttributeValue("%" + targAttributeId.getControllerId() + "%",
                 targAttributeId.getControllerId());
-        verifyThatRepositoryContains400Targets();
+        verifyThatRepositoryContains500Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);
         verifyThat1TargetHasTagHasDescOrNameAndDs(targTagW, setA, targetManagement.getByControllerID(assignedC).get());
@@ -147,19 +156,19 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat1TargetWithDescOrNameHasDS(setA, targetManagement.getByControllerID(assignedA).get());
         List<Target> expected = concat(targAs, targBs, targCs, targDs);
         expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
-        verifyThat397TargetsAreInStatusUnknown(unknown, expected);
+        verifyThat496TargetsAreInStatusUnknown(unknown, expected);
         expected = concat(targBs, targCs);
         expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
         verifyThat198TargetsAreInStatusUnknownAndHaveGivenTags(targTagY, targTagW, unknown, expected);
-        verfyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(setA, unknown);
+        verifyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(setA, unknown);
         expected = concat(targAs);
         expected.remove(targetManagement.getByControllerID(assignedA).get());
         verifyThat99TargetsWithNameOrDescriptionAreInGivenStatus(unknown, expected);
         expected = concat(targBs);
         expected.remove(targetManagement.getByControllerID(assignedB).get());
         verifyThat99TargetsWithGivenNameOrDescAndTagAreInStatusUnknown(targTagW, unknown, expected);
-        verifyThat3TargetsAreInStatusPending(pending,
-                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+        verifyThat4TargetsAreInStatusPending(pending,
+                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC, assignedE)));
         verifyThat3TargetsWithGivenDSAreInPending(setA, pending,
                 targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
         verifyThat1TargetWithGivenNameOrDescAndDSIsInPending(setA, pending,
@@ -171,8 +180,13 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat2TargetsWithGivenTagAreInPending(targTagW, pending,
                 targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
         verifyThat200targetsWithGivenTagAreInStatusPendingorUnknown(targTagW, both, concat(targBs, targCs));
-        verfiyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
+        verifyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
                 targetManagement.getByControllerID(installedC).get());
+        verifyThat1TargetHasTypeAndDSAssigned(targetTypeX, setB, targetManagement.getByControllerID(assignedE).get());
+        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(setA,  targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(installedSet,  targetManagement.getByControllerID(Collections.singletonList(installedC)));
+        verifyThat100TargetsContainsGivenTextAndHaveTypeAssigned(targetTypeX, targEs);
+        verifyThat400TargetsContainsGivenTextAndHaveNoTypeAssigned(concat(targAs, targBs, targCs, targDs));
 
         expected = concat(targBs, targCs);
         expected.removeAll(targetManagement.getByControllerID(Arrays.asList(assignedB, assignedC)));
@@ -180,354 +194,314 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
-    private void verfiyThat1TargetAIsInStatusPendingAndHasDSInstalled(final DistributionSet installedSet,
+    private void verifyThat1TargetAIsInStatusPendingAndHasDSInstalled(final DistributionSet installedSet,
             final List<TargetUpdateStatus> pending, final Target expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, null, installedSet.getId(), Boolean.FALSE);
         final String query = "updatestatus==pending and installedds.name==" + installedSet.getName();
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, null, installedSet.getId(), Boolean.FALSE))
-                .getContent())
-                        .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null,
-                                installedSet.getId(), Boolean.FALSE)))
-                        .as("and contains the following elements").containsExactly(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat200targetsWithGivenTagAreInStatusPendingorUnknown(final TargetTag targTagW,
             final List<TargetUpdateStatus> both, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(both, null, null, null, Boolean.FALSE, targTagW.getName());
         final String query = "(updatestatus==pending or updatestatus==unknown) and tag==" + targTagW.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(both, null, null, null, Boolean.FALSE, targTagW.getName()))
-                .getContent()).as("has number of elements").hasSize(200)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(both, null, null, null,
-                                Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(200).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat2TargetsWithGivenTagAreInPending(final TargetTag targTagW,
             final List<TargetUpdateStatus> pending, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, null, null, Boolean.FALSE,
+                targTagW.getName());
         final String query = "updatestatus==pending and tag==" + targTagW.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE, targTagW.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(2).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, null,
-                                Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(2).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat2TargetsWithGivenTagAndDSIsInPending(final TargetTag targTagW, final DistributionSet setA,
             final List<TargetUpdateStatus> pending, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE,
+                targTagW.getName());
         final String query = "updatestatus==pending and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ") and tag==" + targTagW.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE, targTagW.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(2).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, setA.getId(),
-                                Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(2).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat1TargetWithGivenNameOrDescAndTagAndDSIsInPending(final TargetTag targTagW,
             final DistributionSet setA, final List<TargetUpdateStatus> pending, final Target expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, "%targ-B%", setA.getId(), Boolean.FALSE,
+                targTagW.getName());
         final String query = "updatestatus==pending and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ") and (name==*targ-B* or description==*targ-B*) and tag==" + targTagW.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(pending, null, "%targ-B%", setA.getId(), Boolean.FALSE, targTagW.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, "%targ-B%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsExactly(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat1TargetWithGivenNameOrDescAndDSIsInPending(final DistributionSet setA,
             final List<TargetUpdateStatus> pending, final Target expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, "%targ-A%", setA.getId(), Boolean.FALSE);
         final String query = "updatestatus==pending and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ") and (name==*targ-A* or description==*targ-A*)";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, "%targ-A%", setA.getId(), Boolean.FALSE))
-                .getContent())
-                        .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE)))
-                        .as("and contains the following elements").containsExactly(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat3TargetsWithGivenDSAreInPending(final DistributionSet setA,
             final List<TargetUpdateStatus> pending, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE);
         final String query = "updatestatus==pending and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ")";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(pending, null, null, setA.getId(), Boolean.FALSE)).getContent())
-                        .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(pending, null, null, setA.getId(), Boolean.FALSE)))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(3).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
-    private void verifyThat3TargetsAreInStatusPending(final List<TargetUpdateStatus> pending,
+    private void verifyThat4TargetsAreInStatusPending(final List<TargetUpdateStatus> pending,
             final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(pending, null, null, null, Boolean.FALSE);
         final String query = "updatestatus==pending";
 
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(pending, null, null, null, Boolean.FALSE))
-                .getContent())
-                        .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(pending, null, null, null,
-                                Boolean.FALSE, new String[0])))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(4).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat99TargetsWithGivenNameOrDescAndTagAreInStatusUnknown(final TargetTag targTagW,
             final List<TargetUpdateStatus> unknown, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(unknown, null, "%targ-B%", null, Boolean.FALSE,
+                targTagW.getName());
         final String query = "updatestatus==unknown and (name==*targ-B* or description==*targ-B*) and tag=="
                 + targTagW.getName();
 
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(unknown, null, "%targ-B%", null, Boolean.FALSE, targTagW.getName()))
-                .getContent()).as("has number of elements").hasSize(99)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, "%targ-B%", null,
-                                Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(99).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat99TargetsWithNameOrDescriptionAreInGivenStatus(final List<TargetUpdateStatus> unknown,
             final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(unknown, null, "%targ-A%", null, Boolean.FALSE);
         final String query = "updatestatus==unknown and (name==*targ-A* or description==*targ-A*)";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, null, "%targ-A%", null, Boolean.FALSE, new String[0]))
-                .getContent()).as("has number of elements").hasSize(99)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(unknown, null, "%targ-A%", null, Boolean.FALSE)))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(99).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
-    private void verfyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(final DistributionSet setA,
+    private void verifyThat0TargetsAreInStatusUnknownAndHaveDSAssigned(final DistributionSet setA,
             final List<TargetUpdateStatus> unknown) {
+        final FilterParams filterParams = new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE);
         final String query = "updatestatus==unknown and (assignedds.name==" + setA.getName() + " or installedds.name=="
                 + setA.getName() + ")";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, null, null, setA.getId(), Boolean.FALSE)).getContent())
-                        .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(unknown, null, null, setA.getId(), Boolean.FALSE)))
-                        .as("and filter query returns the same result")
-                        .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(0).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and filter query returns the same result")
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
     }
 
     @Step
     private void verifyThat198TargetsAreInStatusUnknownAndHaveGivenTags(final TargetTag targTagY,
             final TargetTag targTagW, final List<TargetUpdateStatus> unknown, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(unknown, null, null, null, Boolean.FALSE, targTagY.getName(),
+                targTagW.getName());
         final String query = "updatestatus==unknown and (tag==" + targTagY.getName() + " or tag==" + targTagW.getName()
                 + ")";
 
-        assertThat(targetManagement.findByFilters(PAGE,
-                new FilterParams(unknown, null, null, null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))
-                .getContent()).as("has number of elements").hasSize(198)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(unknown, null, null, null,
-                                Boolean.FALSE, targTagY.getName(), targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(198).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
-    private void verifyThat397TargetsAreInStatusUnknown(final List<TargetUpdateStatus> unknown,
+    private void verifyThat496TargetsAreInStatusUnknown(final List<TargetUpdateStatus> unknown,
             final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(unknown, null, null, null, Boolean.FALSE);
         final String query = "updatestatus==unknown";
 
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(unknown, null, null, null, Boolean.FALSE))
-                .getContent()).as("has number of elements").hasSize(397)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(unknown, null, null, null, Boolean.FALSE)))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(496).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat198TargetsAreInStatusUnknownAndOverdue(final List<TargetUpdateStatus> unknown,
             final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE);
         // be careful: simple filters are concatenated using AND-gating
         final String query = "lastcontrollerrequestat=le=${overdue_ts};updatestatus==UNKNOWN";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(unknown, Boolean.TRUE, null, null, Boolean.FALSE)).getContent())
-                        .as("has number of elements").hasSize(198).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(unknown, Boolean.TRUE, null, null, Boolean.FALSE)))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(198).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat1TargetWithDescOrNameHasDS(final DistributionSet setA, final Target expected) {
+        final FilterParams filterParams = new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE);
         final String query = "(name==*targ-A* or description==*targ-A*) and (assignedds.name==" + setA.getName()
                 + " or installedds.name==" + setA.getName() + ")";
 
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE))
-                .getContent())
-                        .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, "%targ-A%", setA.getId(), Boolean.FALSE)))
-                        .as("and contains the following elements").containsExactly(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat3TargetsHaveDSAssigned(final DistributionSet setA, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(null, null, null, setA.getId(), Boolean.FALSE);
         final String query = "assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName();
 
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, setA.getId(), Boolean.FALSE))
-                .getContent())
-                        .as("has number of elements").hasSize(3).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, null, setA.getId(), Boolean.FALSE)))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(3).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat0TargetsWithNameOrdescAndDSHaveTag(final TargetTag targTagX, final DistributionSet setA) {
+        final FilterParams filterParams = new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE,
+                targTagX.getName());
         final String query = "(name==*targ-C* or description==*targ-C*) and tag==" + targTagX.getName()
                 + " and (assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName() + ")";
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE, targTagX.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-C%",
-                                setA.getId(), Boolean.FALSE, targTagX.getName())))
-                        .as("and filter query returns the same result")
-                        .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(0).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and filter query returns the same result")
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
     }
 
     @Step
     private void verifyThat0TargetsWithTagAndDescOrNameHasDS(final TargetTag targTagW, final DistributionSet setA) {
+        final FilterParams filterParams = new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE,
+                targTagW.getName());
         final String query = "(name==*targ-A* or description==*targ-A*) and tag==" + targTagW.getName()
                 + " and (assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName() + ")";
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(null, null, "%targ-A%", setA.getId(), Boolean.FALSE, targTagW.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(0).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-A%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
-                        .as("and filter query returns the same result")
-                        .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(0).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and filter query returns the same result")
+                .hasSize(targetManagement.findByRsql(PAGE, query).getContent().size());
     }
 
     @Step
     private void verifyThat1TargetHasTagHasDescOrNameAndDs(final TargetTag targTagW, final DistributionSet setA,
             final Target expected) {
+        final FilterParams filterParams = new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE,
+                targTagW.getName());
         final String query = "(name==*targ-c* or description==*targ-C*) and tag==" + targTagW.getName()
                 + " and (assignedds.name==" + setA.getName() + " or installedds.name==" + setA.getName() + ")";
-        assertThat(targetManagement
-                .findByFilters(PAGE,
-                        new FilterParams(null, null, "%targ-C%", setA.getId(), Boolean.FALSE, targTagW.getName()))
-                .getContent())
-                        .as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-C%",
-                                setA.getId(), Boolean.FALSE, targTagW.getName())))
-                        .as("and contains the following elements").containsExactly(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
     private void verifyThat1TargetHasNameAndId(final String name, final String controllerId) {
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, name, null, Boolean.FALSE))
-                .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints
-                                .saturatedCast(targetManagement.countByFilters(null, null, name, null, Boolean.FALSE)));
+        final FilterParams filterParamsByName = new FilterParams(null, null, name, null, Boolean.FALSE);
+        assertThat(targetManagement.findByFilters(PAGE, filterParamsByName).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParamsByName)));
 
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, controllerId, null, Boolean.FALSE))
-                .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, controllerId, null, Boolean.FALSE)));
+        final FilterParams filterParamsByControllerId = new FilterParams(null, null, controllerId, null, Boolean.FALSE);
+        assertThat(targetManagement.findByFilters(PAGE, filterParamsByControllerId).getContent())
+                .as("has number of elements").hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParamsByControllerId)));
     }
 
     @Step
     private void verifyThat1TargetHasAttributeValue(final String value, final String controllerId) {
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, value, null, Boolean.FALSE))
-                .getContent()).as("has number of elements").hasSize(1).as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(
-                                targetManagement.countByFilters(null, null, value, null, Boolean.FALSE)));
+        final FilterParams filterParams = new FilterParams(null, null, value, null, Boolean.FALSE);
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)));
     }
 
     @Step
     private void verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(final TargetTag targTagY,
             final TargetTag targTagW, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(null, null, "%targ-B%", null, Boolean.FALSE,
+                targTagY.getName(), targTagW.getName());
         final String query = "(name==*targ-B* or description==*targ-B*) and (tag==" + targTagY.getName() + " or tag=="
                 + targTagW.getName() + ")";
-        assertThat(targetManagement.findByFilters(PAGE,
-                new FilterParams(null, null, "%targ-B%", null, Boolean.FALSE, targTagY.getName(), targTagW.getName()))
-                .getContent()).as("has number of elements").hasSize(100)
-                        .as("that number is also returned by count query")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, "%targ-B%", null,
-                                Boolean.FALSE, targTagY.getName(), targTagW.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(100).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @SafeVarargs
@@ -539,27 +513,66 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void verifyThat200TargetsHaveTagD(final TargetTag targTagD, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(null, null, null, null, Boolean.FALSE, targTagD.getName());
         final String query = "tag==" + targTagD.getName();
-        assertThat(targetManagement
-                .findByFilters(PAGE, new FilterParams(null, null, null, null, Boolean.FALSE, targTagD.getName()))
-                .getContent()).as("Expected number of results is").hasSize(200)
-                        .as("and is expected number of results is equal to ")
-                        .hasSize(Ints.saturatedCast(targetManagement.countByFilters(null, null, null, null,
-                                Boolean.FALSE, targTagD.getName())))
-                        .as("and contains the following elements").containsAll(expected)
-                        .as("and filter query returns the same result")
-                        .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
-
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("Expected number of results is")
+                .hasSize(200).as("and is expected number of results is equal to ")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected)
+                .as("and filter query returns the same result")
+                .containsAll(targetManagement.findByRsql(PAGE, query).getContent());
     }
 
     @Step
-    private void verifyThatRepositoryContains400Targets() {
-        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, null, null, null)).getContent())
-                .as("Overall we expect that many targets in the repository").hasSize(400)
+    private void verifyThatRepositoryContains500Targets() {
+        final FilterParams filterParams = new FilterParams(null, null, null, null, null);
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent())
+                .as("Overall we expect that many targets in the repository").hasSize(500)
                 .as("which is also reflected by repository count").hasSize(Ints.saturatedCast(targetManagement.count()))
                 .as("which is also reflected by call without specification")
                 .containsAll(targetManagement.findAll(PAGE).getContent());
+    }
 
+    @Step
+    private void verifyThat1TargetHasTypeAndDSAssigned(final TargetType type, final DistributionSet set,
+            final Target expected) {
+        final FilterParams filterParams = new FilterParams(null, set.getId(), Boolean.FALSE, type.getId());
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(1).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsExactly(expected);
+    }
+
+    @Step
+    private void verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(final DistributionSet set, final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams(null, set.getId(), Boolean.TRUE, null);
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(expected.size()).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected);
+    }
+
+    @Step
+    private void verifyThat100TargetsContainsGivenTextAndHaveTypeAssigned(final TargetType targetType,
+            final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams("%targ-E%", null, Boolean.FALSE, targetType.getId());
+        List<Target> filteredTargets = targetManagement.findByFilters(PAGE, filterParams).getContent();
+        assertThat(filteredTargets).as("has number of elements").hasSize(100)
+                .as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)));
+        // Comparing the controller ids, as one of the targets was modified, so a 1:1
+        // comparison of the objects is not possible
+        assertThat(filteredTargets.stream().map(Target::getControllerId).collect(Collectors.toList()))
+                .containsAll(expected.stream().map(Target::getControllerId).collect(Collectors.toList()));
+    }
+
+    @Step
+    private void verifyThat400TargetsContainsGivenTextAndHaveNoTypeAssigned(final List<Target> expected) {
+        final FilterParams filterParams = new FilterParams("%targ-%", null, Boolean.TRUE, null);
+        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
+                .hasSize(400).as("that number is also returned by count query")
+                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)))
+                .as("and contains the following elements").containsAll(expected);
     }
 
     @Test
@@ -770,4 +783,26 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 .type(type);
         return distributionSetManagement.create(dsCreate);
     }
+
+    @Test
+    @Description("Verifies that targets with given target type are returned from repository.")
+    public void findTargetByTargetType() {
+        TargetType testType = testdataFactory.createTargetType("testType", Collections.singletonList(standardDsType));
+        List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
+        List<Target> assigned = testdataFactory.createTargetsWithType(11, "assigned", testType);
+
+        assertThat(targetManagement.findByTargetTypeId(PAGE, testType.getId()))
+                .as("Contains the targets with set type").containsAll(assigned)
+                .as("and that means the following expected amount").hasSize(11);
+        assertThat(targetManagement.countByTargetTypeId(testType.getId()))
+                .as("Count the targets with set type").isEqualTo(11);
+
+        assertThat(targetManagement.findByTargetTypeId(PAGE, null))
+                .as("Contains the targets without a type").containsAll(unassigned)
+                .as("and that means the following expected amount").hasSize(9);
+        assertThat(targetManagement.countByTargetTypeId(null))
+                .as("Counts the targets without a type").isEqualTo(9);
+
+    }
+
 }

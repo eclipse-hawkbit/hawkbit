@@ -140,7 +140,8 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
         super.restoreState();
 
         if (targetTagFilterLayoutUiState.isCustomFilterTabSelected()) {
-            onSimpleFilterReset();
+            onFilterReset();
+            disabledSearchIcon();
         }
 
         if (isBulkUploadInProgress()) {
@@ -153,12 +154,10 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     }
 
     /**
-     * Reset the distribution set filer drop area support
+     * Reset the distribution set filer drop area support and the search
      */
-    public void onSimpleFilterReset() {
+    public void onFilterReset() {
         getSearchHeaderSupport().resetSearch();
-        getSearchHeaderSupport().disableSearch();
-
         distributionSetFilterDropAreaSupport.reset();
     }
 
@@ -247,5 +246,11 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
      */
     public void enableSearchIcon() {
         getSearchHeaderSupport().enableSearch();
+    }
+    /**
+     * Disable search icon in the search header
+     */
+    public void disabledSearchIcon() {
+        getSearchHeaderSupport().disableSearch();
     }
 }

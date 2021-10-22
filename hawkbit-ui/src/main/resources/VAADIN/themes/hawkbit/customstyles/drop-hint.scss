@@ -22,7 +22,11 @@
   .filter-drop-hint-layout.show-drop-hint {
     border: 1px dashed $hawkbit-primary-color !important;
   }
-  
+
+  .filter-drop-hint-layout.show-drop-hint.v-button-dragtarget{
+    background-color: desaturate(lighten($hawkbit-primary-color, 50%), 20%);
+  }
+
   .filter-drop-hint-layout.show-drop-hint.v-horizontallayout-drag-center{
     background-color: desaturate(lighten($hawkbit-primary-color, 50%), 20%);
   }

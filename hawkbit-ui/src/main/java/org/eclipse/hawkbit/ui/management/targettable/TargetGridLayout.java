@@ -204,11 +204,19 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      */
     public void onTargetFilterTabChanged(final TargetFilterTabChangedEventPayload eventPayload) {
         final boolean isCustomFilterTabSelected = TargetFilterTabChangedEventPayload.CUSTOM == eventPayload;
+        final boolean isTargetTypeFilterTabSelected = TargetFilterTabChangedEventPayload.TARGET_TYPE == eventPayload;
+        final boolean isSimpleTypeFilterTabSelected = TargetFilterTabChangedEventPayload.SIMPLE == eventPayload;
 
+        targetGridHeader.onFilterReset();
         if (isCustomFilterTabSelected) {
-            targetGridHeader.onSimpleFilterReset();
+            targetGridHeader.disabledSearchIcon();
             targetGrid.onCustomTabSelected();
-        } else {
+        }
+        if(isTargetTypeFilterTabSelected){
+            targetGridHeader.enableSearchIcon();
+            targetGrid.onTargetTypeTabSelected();
+        }
+        if (isSimpleTypeFilterTabSelected){
             targetGridHeader.enableSearchIcon();
             targetGrid.onSimpleTabSelected();
         }

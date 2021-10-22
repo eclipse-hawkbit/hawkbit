@@ -155,6 +155,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR_ENTITY_READONLY = "message.entity.error.readonly";
 
+    public static final String MESSAGE_TARGET_TARGETTYPE_ASSIGNED = "message.target.targetype.assign.error";
+
     public static final String MESSAGE_ERROR_PERMISSION_INSUFFICIENT = "message.permission.insufficient";
 
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";

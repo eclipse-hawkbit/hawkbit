@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +66,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
@@ -245,6 +247,16 @@ public class JpaTargetManagement implements TargetManagement {
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
         return matadata;
+    }
+
+    @Override
+    public Slice<Target> findByTargetTypeId(Pageable pageRequest, Long targetTypeId) {
+        return findTargetsBySpec(TargetSpecifications.hasTargetType(targetTypeId), pageRequest);
+    }
+
+    @Override
+    public long countByTargetTypeId(Long targetTypeId) {
+        return targetRepository.count(TargetSpecifications.hasTargetType(targetTypeId));
     }
 
     @Override
@@ -449,11 +461,16 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final String... tagNames) {
-        final List<Specification<JpaTarget>> specList = buildSpecificationList(new FilterParams(status, overdueState,
-                searchText, installedOrAssignedDistributionSetId, selectTargetWithNoTag, tagNames));
+    public long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
+                               Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
+            String... tagNames) {
+        return countByFilters(new FilterParams(status, overdueState, searchText, installedOrAssignedDistributionSetId,
+                selectTargetWithNoTag, tagNames));
+    }
+
+    @Override
+    public long countByFilters(final FilterParams filterParams) {
+        final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
         return countByCriteriaAPI(specList);
     }
 
@@ -479,6 +496,11 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications.hasTags(filterParams.getFilterByTagNames(),
                     filterParams.getSelectTargetWithNoTag()));
         }
+
+        if (hasTypesFilterActive(filterParams)) {
+            specList.add(TargetSpecifications.hasTargetType(filterParams.getFilterByTargetType()));
+        }
+
         return specList;
     }
 
@@ -488,6 +510,13 @@ public class JpaTargetManagement implements TargetManagement {
                 && filterParams.getFilterByTagNames().length > 0;
 
         return isNoTagActive || isAtLeastOneTagActive;
+    }
+
+    private static boolean hasTypesFilterActive(final FilterParams filterParams) {
+        final boolean isNoTypeActive = Boolean.TRUE.equals(filterParams.getSelectTargetWithNoTargetType());
+        final boolean isTypeActive = filterParams.getFilterByTargetType() != null;
+
+        return isNoTypeActive || isTypeActive;
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
@@ -543,6 +572,58 @@ public class JpaTargetManagement implements TargetManagement {
         // no reason to persist the tag
         entityManager.detach(tag);
         return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetTypeAssignmentResult assignTargetType(final Collection<String> controllerIds, final Long typeId) {
+        final TargetType type = targetTypeRepository.findById(typeId)
+                .orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
+
+        final List<JpaTarget> targetsWithSameType = findTargetsByInSpecification(controllerIds,
+                TargetSpecifications.hasTargetType(typeId).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+
+        final List<JpaTarget> targetsWithoutSameType = findTargetsByInSpecification(controllerIds,
+                TargetSpecifications.hasNoTargetType(typeId).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+
+        // set new target type to all targets without that type
+        targetsWithoutSameType.forEach(target -> target.setTargetType(type));
+
+        final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(targetsWithSameType.size(),
+                Collections
+                        .unmodifiableList(targetsWithoutSameType.stream().map(targetRepository::save).collect(Collectors.toList())),
+                Collections.emptyList(), type);
+
+        // no reason to persist the type
+        entityManager.detach(type);
+        return result;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public TargetTypeAssignmentResult unAssignTargetType(final Collection<String> controllerIds) {
+        final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds, TargetSpecifications.hasControllerIdIn(controllerIds));
+
+        if (allTargets.size() < controllerIds.size()) {
+            throw new EntityNotFoundException(Target.class, controllerIds,
+                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+        }
+
+        // set new target type to null for all targets
+        allTargets.forEach(target -> target.setTargetType(null));
+
+        return new TargetTypeAssignmentResult(0, Collections.emptyList(), Collections
+                .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())), null);
+    }
+
+    private List<JpaTarget> findTargetsByInSpecification(Collection<String> controllerIds,
+            Specification<JpaTarget> specification) {
+        return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+                .map(ids -> targetRepository.findAll(specification)).flatMap(List::stream).collect(Collectors.toList());
     }
 
     @Override

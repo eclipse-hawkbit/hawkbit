@@ -529,12 +529,34 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have a
-     * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
+     * {@link Specification} for retrieving {@link Target}s by target type id
+     *
+     * @param typeId
+     *            the id of the target type
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasTargetType() {
-        return (targetRoot, query, cb) -> cb.isNotNull(targetRoot.get(JpaTarget_.targetType));
+    public static Specification<JpaTarget> hasTargetType(final Long typeId) {
+        return (targetRoot, query, cb) -> {
+            final Join<JpaTarget, JpaTargetType> types = targetRoot.join(JpaTarget_.targetType, JoinType.LEFT);
+            return cb.equal(types.get(JpaTargetType_.id), typeId);
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that don't have target
+     * type assigned
+     *
+     * @param typeId
+     *            the id of the target type
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNoTargetType(final Long typeId) {
+        return (targetRoot, query, cb) -> {
+            final Predicate typeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
+            final Join<JpaTarget, JpaTargetType> types = targetRoot.join(JpaTarget_.targetType, JoinType.LEFT);
+            return cb.or(typeIsNull, cb.notEqual(types.get(JpaTargetType_.id), typeId));
+        };
     }
 }

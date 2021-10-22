@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.AssignmentSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.DistributionSetsToTargetAssignmentSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetTagsToTargetAssignmentSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TypeToTargetAssignmentSupport;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutUiState;
@@ -157,9 +158,12 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 uiDependencies, systemSecurityContext, configManagement, assignmentController);
         final TargetTagsToTargetAssignmentSupport targetTagsToTargetAssignment = new TargetTagsToTargetAssignmentSupport(
                 uiDependencies, targetManagement);
+        final TypeToTargetAssignmentSupport typeToTargetAssignmentSupport = new TypeToTargetAssignmentSupport(
+                uiDependencies, targetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.DIST_TABLE_ID, distributionsToTargetAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToTargetAssignment);
+        sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TYPE_TABLE_ID, typeToTargetAssignmentSupport);
 
         setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiDependencies.getUiNotification(),
                 sourceTargetAssignmentStrategies, eventBus));
@@ -263,6 +267,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 targetTagFilterLayoutUiState.isNoTagClicked());
         getFilterSupport().addMapping(FilterType.TAG, TargetManagementFilterParams::setTargetTags,
                 targetTagFilterLayoutUiState.getClickedTagIdsWithName().values());
+        getFilterSupport().addMapping(FilterType.NO_TARGET_TYPE, TargetManagementFilterParams::setNoTargetTypeClicked,
+                targetTagFilterLayoutUiState.isNoTargetTypeClicked());
+        getFilterSupport().addMapping(FilterType.TARGET_TYPE, TargetManagementFilterParams::setTargetTypeId,
+                targetTagFilterLayoutUiState.getClickedTargetTypeFilterId());
         getFilterSupport().addMapping(FilterType.QUERY, TargetManagementFilterParams::setTargetFilterQueryId,
                 targetTagFilterLayoutUiState.getClickedTargetFilterQueryId());
         getFilterSupport().addMapping(FilterType.DISTRIBUTION, TargetManagementFilterParams::setDistributionId,
@@ -286,11 +294,12 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
         getFilter().ifPresent(filter -> {
             filter.setDistributionId(null);
             filter.setNoTagClicked(false);
+            filter.setNoTargetTypeClicked(false);
             filter.setOverdueState(false);
             filter.setSearchText(null);
             filter.setTargetTags(Collections.emptyList());
             filter.setTargetUpdateStatusList(Collections.emptyList());
-
+            getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetTypeId, null);
             getFilterSupport().refreshFilter();
         });
     }
@@ -299,7 +308,25 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      * Update filter on simple tab selection
      */
     public void onSimpleTabSelected() {
+        getFilter().ifPresent(filter -> filter.setNoTargetTypeClicked(false));
         getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetFilterQueryId, null);
+        getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetTypeId, null);
+    }
+
+    /**
+     * Update filter on target type tab selection
+     */
+    public void onTargetTypeTabSelected() {
+        getFilter().ifPresent(filter -> {
+            filter.setDistributionId(null);
+            filter.setNoTagClicked(false);
+            filter.setOverdueState(false);
+            filter.setSearchText(null);
+            filter.setTargetTags(Collections.emptyList());
+            filter.setTargetUpdateStatusList(Collections.emptyList());
+            getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetFilterQueryId, null);
+            getFilterSupport().refreshFilter();
+        });
     }
 
     @Override
