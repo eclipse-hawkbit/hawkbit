@@ -285,10 +285,6 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_SOFTWARE_MODULE = "caption.software.module";
 
-    public static final String CAPTION_ERROR = "caption.error";
-
-    public static final String MESSAGE_ERROR = "message.error";
-
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_SUCCESS = "message.bulk.upload.result.success";
 
     public static final String MESSAGE_TARGET_BULKUPLOAD_RESULT_FAIL = "message.bulk.upload.result.fail";
