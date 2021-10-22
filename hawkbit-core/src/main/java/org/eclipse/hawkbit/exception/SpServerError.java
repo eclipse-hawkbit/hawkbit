@@ -161,15 +161,15 @@ public enum SpServerError {
             "Storage quota will be exceeded if file is uploaded."),
 
     /**
-     * error message, which describes that the action can not be canceled cause
-     * the action is inactive.
+     * error message, which describes that the action can not be canceled cause the
+     * action is inactive.
      */
     SP_ACTION_NOT_CANCELABLE("hawkbit.server.error.action.notcancelable",
             "Only active actions which are in status pending are cancelable."),
 
     /**
-     * error message, which describes that the action can not be force quit
-     * cause the action is inactive.
+     * error message, which describes that the action can not be force quit cause
+     * the action is inactive.
      */
     SP_ACTION_NOT_FORCE_QUITABLE("hawkbit.server.error.action.notforcequitable",
             "Only active actions which are in status pending can be force quit."),
@@ -250,8 +250,7 @@ public enum SpServerError {
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
 
     /**
-     * Error message informing that the action type for auto-assignment is
-     * invalid.
+     * Error message informing that the action type for auto-assignment is invalid.
      */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
             "The given action type for auto-assignment is invalid: allowed values are ['forced', 'soft', 'downloadonly']"),
@@ -276,6 +275,9 @@ public enum SpServerError {
             "The requested operation requires a weight to be specified when multi assignments is enabled."),
 
     SP_TARGET_TYPE_IN_USE("hawkbit.server.error.target.type.used", "Target type is still in use by a target."),
+
+    SP_TARGET_TYPE_INCOMPATIBLE("hawkbit.server.error.target.type.incompatible",
+            "Target type of target is not compatible with distribution set."),
 
     SP_STOP_ROLLOUT_FAILED("hawkbit.server.error.stopRolloutFailed", "Stopping the rollout failed");
 

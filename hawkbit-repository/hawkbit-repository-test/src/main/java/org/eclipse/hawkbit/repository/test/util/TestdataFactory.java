@@ -1205,8 +1205,7 @@ public class TestdataFactory {
 
     /**
      * Finds {@link TargetType} in repository with given
-     * {@link TargetType#getName()} or creates if it does not exist yet. No ds
-     * types
+     * {@link TargetType#getName()} or creates if it does not exist yet. No ds types
      * are assigned on creation.
      *
      * @param targetTypeName
@@ -1222,8 +1221,7 @@ public class TestdataFactory {
 
     /**
      * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. Compatible distribution set types are
-     * assigned
+     * {@link TargetType#getName()}. Compatible distribution set types are assigned
      * on creation
      *
      * @param targetTypeName
@@ -1256,8 +1254,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set and directly invalidates it. No actions will
-     * be canceled and no rollouts will be stopped with this invalidation.
+     * Creates a distribution set and directly invalidates it. No actions will be
+     * canceled and no rollouts will be stopped with this invalidation.
      *
      * @return created invalidated {@link DistributionSet}
      */
@@ -1269,8 +1267,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set that has no software modules assigned, so it
-     * is incomplete.
+     * Creates a distribution set that has no software modules assigned, so it is
+     * incomplete.
      *
      * @return created incomplete {@link DistributionSet}
      */

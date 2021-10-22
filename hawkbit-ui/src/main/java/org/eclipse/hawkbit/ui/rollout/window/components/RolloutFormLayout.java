@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.HasValue;
 import com.vaadin.data.ValidationException;
 import com.vaadin.data.Validator;
 import com.vaadin.data.validator.LongRangeValidator;
@@ -72,6 +73,7 @@ public class RolloutFormLayout extends ValidatableLayout {
     private Long totalTargets;
 
     private Consumer<String> filterQueryChangedListener;
+    private Consumer<Long> distSetChangedListener;
 
     /**
      * Constructor for RolloutFormLayout
@@ -190,16 +192,33 @@ public class RolloutFormLayout extends ValidatableLayout {
     }
 
     private void addValueChangeListeners() {
-        targetFilterQueryCombo.getComponent().addValueChangeListener(event -> {
-            if (filterQueryChangedListener != null) {
-                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue().getQuery() : null);
-            }
-        });
+        targetFilterQueryCombo.getComponent().addValueChangeListener(filterQueryChangedListener());
+        dsCombo.addValueChangeListener(distSetChangedListener());
 
         actionTypeLayout.getComponent().getActionTypeOptionGroup().addValueChangeListener(
                 event -> actionTypeLayout.setRequired(event.getValue() == ActionType.TIMEFORCED));
         autoStartOptionGroupLayout.getComponent().getAutoStartOptionGroup().addValueChangeListener(
                 event -> autoStartOptionGroupLayout.setRequired(event.getValue() == AutoStartOption.SCHEDULED));
+    }
+
+    private HasValue.ValueChangeListener<ProxyTargetFilterQuery> filterQueryChangedListener() {
+        return event -> {
+            if (filterQueryChangedListener != null) {
+                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue().getQuery() : null);
+            }
+        };
+    }
+
+    private HasValue.ValueChangeListener<ProxyDistributionSet> distSetChangedListener() {
+        return event -> {
+            if (distSetChangedListener != null) {
+                if (event.getValue() != null && event.getValue().getTypeInfo() != null) {
+                    distSetChangedListener.accept(event.getValue().getTypeInfo().getId());
+                } else {
+                    distSetChangedListener.accept(null);
+                }
+            }
+        };
     }
 
     /**
@@ -283,6 +302,16 @@ public class RolloutFormLayout extends ValidatableLayout {
      */
     public void setFilterQueryChangedListener(final Consumer<String> filterQueryChangedListener) {
         this.filterQueryChangedListener = filterQueryChangedListener;
+    }
+
+    /**
+     * Sets the changed listener for distribution set
+     *
+     * @param distSetChangedListener
+     *            Changed listener
+     */
+    public void setDistSetChangedListener(final Consumer<Long> distSetChangedListener) {
+        this.distSetChangedListener = distSetChangedListener;
     }
 
     /**

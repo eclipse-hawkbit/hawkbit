@@ -163,6 +163,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR_PERMISSION_INSUFFICIENT = "message.permission.insufficient";
 
+    public static final String MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE = "message.target.type.incompatible";
+
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";

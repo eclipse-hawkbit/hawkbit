@@ -664,17 +664,15 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
-            final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
+            final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final RolloutExecutor rolloutExecutor) {
-        return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
-                distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy,
-                tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
+        return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
+                rolloutApprovalStrategy, tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
     }
 
     /**
