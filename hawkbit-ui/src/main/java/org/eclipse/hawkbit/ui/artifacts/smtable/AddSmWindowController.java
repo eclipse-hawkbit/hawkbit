@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
@@ -34,7 +32,7 @@ public class AddSmWindowController
         extends AbstractAddNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
-    private final Optional<ArtifactEncryption> artifactEncryption;
+    private final ArtifactEncryption artifactEncryption;
     private final SmWindowLayout layout;
     private final EventView view;
     private final ProxySmValidator validator;
@@ -52,7 +50,7 @@ public class AddSmWindowController
      *            EventView
      */
     public AddSmWindowController(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final Optional<ArtifactEncryption> artifactEncryption, final SmWindowLayout layout, final EventView view) {
+            final ArtifactEncryption artifactEncryption, final SmWindowLayout layout, final EventView view) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
@@ -69,8 +67,8 @@ public class AddSmWindowController
 
     @Override
     protected void adaptLayout(final ProxySoftwareModule proxyEntity) {
-        if (artifactEncryption.isPresent()) {
-            layout.showEncryptionField();
+        if (artifactEncryption == null) {
+            layout.hideEncryptionField();
         }
     }
 

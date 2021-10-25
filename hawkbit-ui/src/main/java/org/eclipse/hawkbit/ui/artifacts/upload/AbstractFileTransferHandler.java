@@ -12,15 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Lock;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
-import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
@@ -41,7 +38,6 @@ import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.util.StringUtils;
 import org.vaadin.spring.events.EventBus;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -107,20 +103,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void startTransferToRepositoryThread(final InputStream inputStream, final FileUploadId fileUploadId,
             final String mimeType) {
-        final Optional<ArtifactEncryption> artifactEncryption = getArtifactEncryptionBean();
-        final SoftwareModuleManagement smManagement = SpringContextHolder.getInstance()
-                .getBean(SoftwareModuleManagement.class);
         SpringContextHolder.getInstance().getBean("uiExecutor", Executor.class)
-                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType,
-                        artifactEncryption, smManagement, UI.getCurrent(), uploadLock));
-    }
-
-    private Optional<ArtifactEncryption> getArtifactEncryptionBean() {
-        try {
-            return Optional.of(SpringContextHolder.getInstance().getBean(ArtifactEncryption.class));
-        } catch (final NoSuchBeanDefinitionException ex) {
-            return Optional.empty();
-        }
+                .execute(new TransferArtifactToRepositoryRunnable(inputStream, fileUploadId, mimeType, UI.getCurrent(),
+                        uploadLock));
     }
 
     private void interruptUploadAndSetReason(final String failureReason) {
@@ -250,8 +235,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         private final InputStream inputStream;
         private final FileUploadId fileUploadId;
         private final String mimeType;
-        private final Optional<ArtifactEncryption> artifactEncryption;
-        private final SoftwareModuleManagement smManagement;
         private final UI vaadinUi;
         private final Lock uploadLock;
 
@@ -270,13 +253,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
          *            Lock
          */
         public TransferArtifactToRepositoryRunnable(final InputStream inputStream, final FileUploadId fileUploadId,
-                final String mimeType, final Optional<ArtifactEncryption> artifactEncryption,
-                final SoftwareModuleManagement smManagement, final UI vaadinUi, final Lock uploadLock) {
+                final String mimeType, final UI vaadinUi, final Lock uploadLock) {
             this.inputStream = inputStream;
             this.fileUploadId = fileUploadId;
             this.mimeType = mimeType;
-            this.artifactEncryption = artifactEncryption;
-            this.smManagement = smManagement;
             this.vaadinUi = vaadinUi;
             this.uploadLock = uploadLock;
         }

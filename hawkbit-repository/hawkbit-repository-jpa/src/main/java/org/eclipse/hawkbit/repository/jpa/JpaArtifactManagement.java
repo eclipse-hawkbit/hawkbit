@@ -66,12 +66,12 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final QuotaManagement quotaManagement;
 
-    private final Optional<ArtifactEncryption> artifactEncryption;
+    private final ArtifactEncryption artifactEncryption;
 
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            final Optional<ArtifactEncryption> artifactEncryption) {
+            final ArtifactEncryption artifactEncryption) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
@@ -133,12 +133,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private InputStream wrapInEncryptionStreamIfSmEncrypted(final long smId, final InputStream stream) {
-        return artifactEncryption.map(encryptor -> {
-            if (encryptor.isEncrypted(smId)) {
-                return encryptor.encryptStream(smId, stream);
-            }
-            return stream;
-        }).orElse(stream);
+        if (artifactEncryption != null && artifactEncryption.isEncrypted(smId)) {
+            return artifactEncryption.encryptStream(smId, stream);
+        }
+
+        return stream;
     }
 
     private void assertArtifactQuota(final long id, final int requested) {

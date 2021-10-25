@@ -114,7 +114,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final Database database;
 
-    private final Optional<ArtifactEncryption> artifactEncryption;
+    private final ArtifactEncryption artifactEncryption;
 
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
@@ -123,7 +123,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final Optional<ArtifactEncryption> artifactEncryption) {
+            final ArtifactEncryption artifactEncryption) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -167,11 +167,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
-        artifactEncryption.ifPresent(encryptor -> {
-            if (encryptionRequested) {
-                encryptor.generateSecrets(smId);
-            }
-        });
+        if (artifactEncryption != null && encryptionRequested) {
+            artifactEncryption.generateSecrets(smId);
+        }
     }
 
     @Override

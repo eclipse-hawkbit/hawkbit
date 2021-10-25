@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
@@ -106,6 +105,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -631,7 +631,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final Optional<ArtifactEncryption> artifactEncryption) {
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
                 quotaManagement, virtualPropertyReplacer, properties.getDatabase(), artifactEncryption);
@@ -754,7 +754,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            final Optional<ArtifactEncryption> artifactEncryption) {
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
                 quotaManagement, tenantAware, artifactEncryption);
     }

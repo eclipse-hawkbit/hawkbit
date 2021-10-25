@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.distributions.smtable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -69,7 +68,7 @@ public class SwModuleGridLayout extends AbstractSoftwareModuleGridLayout {
     public SwModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final ArtifactManagement artifactManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final ArtifactManagement artifactManagement, final ArtifactEncryption artifactEncryption,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
             final GridLayoutUiState swModuleGridLayoutUiState) {
         super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, artifactEncryption,

@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.common.softwaremodule;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
@@ -50,7 +49,7 @@ public abstract class AbstractSoftwareModuleGridLayout extends AbstractGridCompo
     protected AbstractSoftwareModuleGridLayout(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final Optional<ArtifactEncryption> artifactEncryption, final EventView eventView) {
+            final ArtifactEncryption artifactEncryption, final EventView eventView) {
 
         this.eventView = eventView;
         smWindowBuilder = new SmWindowBuilder(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement,

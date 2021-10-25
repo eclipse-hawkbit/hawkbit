@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.ui.distributions;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -88,7 +87,8 @@ public class DistributionsView extends AbstractEventListenersAwareView implement
             final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
             final EntityFactory entityFactory, final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final ArtifactManagement artifactManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final ArtifactManagement artifactManagement,
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
             final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext) {
         this.permChecker = permChecker;
         this.manageDistUIState = manageDistUIState;

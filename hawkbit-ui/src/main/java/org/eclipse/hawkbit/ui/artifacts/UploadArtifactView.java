@@ -13,7 +13,6 @@ import static org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUpl
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.servlet.MultipartConfigElement;
 
@@ -88,7 +87,8 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
             final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
-            final Optional<ArtifactEncryption> artifactEncryption, final DashboardMenu dashboardMenu) {
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
+            final DashboardMenu dashboardMenu) {
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;

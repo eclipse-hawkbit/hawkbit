@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
@@ -29,7 +27,7 @@ public class UpdateSmWindowController
         extends AbstractUpdateNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
-    private final Optional<ArtifactEncryption> artifactEncryption;
+    private final ArtifactEncryption artifactEncryption;
     private final SmWindowLayout layout;
     private final ProxySmValidator validator;
 
@@ -47,7 +45,7 @@ public class UpdateSmWindowController
      *            SmWindowLayout
      */
     public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
-            final SoftwareModuleManagement smManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final SoftwareModuleManagement smManagement, final ArtifactEncryption artifactEncryption,
             final SmWindowLayout layout) {
         super(uiDependencies);
 
@@ -76,7 +74,11 @@ public class UpdateSmWindowController
     }
 
     private boolean isSmEncrypted(final long smId) {
-        return artifactEncryption.map(encryptor -> encryptor.isEncrypted(smId)).orElse(false);
+        if (artifactEncryption != null) {
+            return artifactEncryption.isEncrypted(smId);
+        }
+
+        return false;
     }
 
     @Override
@@ -89,7 +91,12 @@ public class UpdateSmWindowController
         layout.disableSmTypeSelect();
         layout.disableNameField();
         layout.disableVersionField();
-        layout.disableEncryptionField();
+
+        if (artifactEncryption != null) {
+            layout.disableEncryptionField();
+        } else {
+            layout.hideEncryptionField();
+        }
     }
 
     @Override

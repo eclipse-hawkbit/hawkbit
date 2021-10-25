@@ -82,7 +82,6 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
         smWindowLayout.addComponent(smDescription);
 
         smWindowLayout.addComponent(artifactEncryption);
-        artifactEncryption.setVisible(false);
 
         return smWindowLayout;
     }
@@ -116,9 +115,9 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
     }
 
     /**
-     * Show the software module artifact encryption
+     * Hide software module artifact encryption
      */
-    public void showEncryptionField() {
-        artifactEncryption.setVisible(true);
+    public void hideEncryptionField() {
+        artifactEncryption.setVisible(false);
     }
 }

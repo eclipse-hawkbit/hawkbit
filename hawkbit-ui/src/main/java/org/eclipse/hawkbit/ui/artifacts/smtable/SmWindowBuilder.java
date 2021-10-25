@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -28,7 +26,7 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
 
     private final SoftwareModuleManagement smManagement;
     private final SoftwareModuleTypeManagement smTypeManagement;
-    private final Optional<ArtifactEncryption> artifactEncryption;
+    private final ArtifactEncryption artifactEncryption;
 
     private final EventView view;
 
@@ -45,7 +43,7 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
      *            EventView
      */
     public SmWindowBuilder(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final SoftwareModuleTypeManagement smTypeManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final SoftwareModuleTypeManagement smTypeManagement, final ArtifactEncryption artifactEncryption,
             final EventView view) {
         super(uiDependencies);
 
