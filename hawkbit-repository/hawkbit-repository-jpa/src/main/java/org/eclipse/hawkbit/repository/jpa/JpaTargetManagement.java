@@ -583,10 +583,10 @@ public class JpaTargetManagement implements TargetManagement {
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
 
         final List<JpaTarget> targetsWithSameType = findTargetsByInSpecification(controllerIds,
-                TargetSpecifications.hasTargetType(typeId).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+                TargetSpecifications.hasTargetType(typeId));
 
         final List<JpaTarget> targetsWithoutSameType = findTargetsByInSpecification(controllerIds,
-                TargetSpecifications.hasNoTargetType(typeId).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
+                TargetSpecifications.hasNoTargetType(typeId));
 
         // set new target type to all targets without that type
         targetsWithoutSameType.forEach(target -> target.setTargetType(type));
@@ -606,7 +606,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTypeAssignmentResult unAssignTargetType(final Collection<String> controllerIds) {
-        final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds, TargetSpecifications.hasControllerIdIn(controllerIds));
+        final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds);
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
@@ -623,7 +623,14 @@ public class JpaTargetManagement implements TargetManagement {
     private List<JpaTarget> findTargetsByInSpecification(Collection<String> controllerIds,
             Specification<JpaTarget> specification) {
         return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository.findAll(specification)).flatMap(List::stream).collect(Collectors.toList());
+                .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids).and(specification)))
+                .flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private List<JpaTarget> findTargetsByInSpecification(Collection<String> controllerIds) {
+        return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+                .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)))
+                .flatMap(List::stream).collect(Collectors.toList());
     }
 
     @Override
