@@ -80,6 +80,6 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForUpdate(final ProxySoftwareModule proxySm) {
         return getWindowForEntity(proxySm, new UpdateSmWindowController(uiDependencies, smManagement,
-                new SmWindowLayout(getI18n(), smTypeManagement)));
+                artifactEncryption, new SmWindowLayout(getI18n(), smTypeManagement)));
     }
 }

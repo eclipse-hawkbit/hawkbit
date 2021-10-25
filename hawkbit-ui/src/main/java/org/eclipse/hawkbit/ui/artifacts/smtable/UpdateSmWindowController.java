@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.Optional;
+
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -26,6 +29,7 @@ public class UpdateSmWindowController
         extends AbstractUpdateNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
+    private final Optional<ArtifactEncryption> artifactEncryption;
     private final SmWindowLayout layout;
     private final ProxySmValidator validator;
 
@@ -43,10 +47,12 @@ public class UpdateSmWindowController
      *            SmWindowLayout
      */
     public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
-            final SoftwareModuleManagement smManagement, final SmWindowLayout layout) {
+            final SoftwareModuleManagement smManagement, final Optional<ArtifactEncryption> artifactEncryption,
+            final SmWindowLayout layout) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
+        this.artifactEncryption = artifactEncryption;
         this.layout = layout;
         this.validator = new ProxySmValidator(uiDependencies);
     }
@@ -61,11 +67,16 @@ public class UpdateSmWindowController
         sm.setVersion(proxyEntity.getVersion());
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
+        sm.setEncrypted(isSmEncrypted(proxyEntity.getId()));
 
         nameBeforeEdit = proxyEntity.getName();
         versionBeforeEdit = proxyEntity.getVersion();
 
         return sm;
+    }
+
+    private boolean isSmEncrypted(final long smId) {
+        return artifactEncryption.map(encryptor -> encryptor.isEncrypted(smId)).orElse(false);
     }
 
     @Override

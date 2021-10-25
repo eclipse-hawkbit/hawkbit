@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -65,14 +66,18 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final QuotaManagement quotaManagement;
 
+    private final Optional<ArtifactEncryption> artifactEncryption;
+
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware,
+            final Optional<ArtifactEncryption> artifactEncryption) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
         this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
+        this.artifactEncryption = artifactEncryption;
     }
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
@@ -109,8 +114,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
-        try (final InputStream quotaStream = wrapInQuotaStream(artifactUpload.getInputStream())) {
-            return artifactRepository.store(tenantAware.getCurrentTenant(), quotaStream, artifactUpload.getFilename(),
+        try (final InputStream wrapedStream = wrapInQuotaStream(
+                wrapInEncryptionStreamIfSmEncrypted(artifactUpload.getModuleId(), artifactUpload.getInputStream()))) {
+            return artifactRepository.store(tenantAware.getCurrentTenant(), wrapedStream, artifactUpload.getFilename(),
                     artifactUpload.getContentType(), new DbArtifactHash(artifactUpload.getProvidedSha1Sum(),
                             artifactUpload.getProvidedMd5Sum(), artifactUpload.getProvidedSha256Sum()));
         } catch (final ArtifactStoreException | IOException e) {
@@ -124,6 +130,15 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 throw new InvalidMD5HashException(e.getMessage(), e);
             }
         }
+    }
+
+    private InputStream wrapInEncryptionStreamIfSmEncrypted(final long smId, final InputStream stream) {
+        return artifactEncryption.map(encryptor -> {
+            if (encryptor.isEncrypted(smId)) {
+                return encryptor.encryptStream(smId, stream);
+            }
+            return stream;
+        }).orElse(stream);
     }
 
     private void assertArtifactQuota(final long id, final int requested) {

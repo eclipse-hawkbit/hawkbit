@@ -45,7 +45,8 @@ public final class MgmtSoftwareModuleMapper {
     private static SoftwareModuleCreate fromRequest(final EntityFactory entityFactory,
             final MgmtSoftwareModuleRequestBodyPost smsRest) {
         return entityFactory.softwareModule().create().type(smsRest.getType()).name(smsRest.getName())
-                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor());
+                .version(smsRest.getVersion()).description(smsRest.getDescription()).vendor(smsRest.getVendor())
+                .encrypted(smsRest.isEncrypted());
     }
 
     static List<SoftwareModuleMetadataCreate> fromRequestSwMetadata(final EntityFactory entityFactory,

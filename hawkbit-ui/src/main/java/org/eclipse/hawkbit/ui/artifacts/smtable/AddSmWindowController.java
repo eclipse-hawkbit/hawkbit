@@ -85,27 +85,9 @@ public class AddSmWindowController
     protected SoftwareModule persistEntityInRepository(final ProxySoftwareModule entity) {
         final SoftwareModuleCreate smCreate = getEntityFactory().softwareModule().create()
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
-                .vendor(entity.getVendor()).description(entity.getDescription());
+                .vendor(entity.getVendor()).description(entity.getDescription()).encrypted(entity.isEncrypted());
 
-        final SoftwareModule sm = smManagement.create(smCreate);
-        addMetadataEncryptionKeyIfRequested(entity.isEncrypted(), sm.getId());
-
-        return sm;
-    }
-
-    private void addMetadataEncryptionKeyIfRequested(final boolean encryptionRequested, final long smId) {
-        artifactEncryption.ifPresent(encryptor -> {
-            if (encryptionRequested) {
-                final String alg = encryptor.encryptionAlgorithm();
-                final String key = alg + ".key";
-                final String iv = alg + ".iv";
-
-                smManagement.createMetaData(getEntityFactory().softwareModuleMetadata().create(smId).key(key)
-                        .value(encryptor.generateEncryptionKey()).targetVisible(true));
-                smManagement.createMetaData(getEntityFactory().softwareModuleMetadata().create(smId).key(iv)
-                        .value(encryptor.generateEncryptionIV()).targetVisible(true));
-            }
-        });
+        return smManagement.create(smCreate);
     }
 
     @Override

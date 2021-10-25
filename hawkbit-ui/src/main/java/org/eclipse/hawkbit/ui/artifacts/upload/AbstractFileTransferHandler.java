@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
-import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.artifacts.ArtifactUploadState;
 import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus;
@@ -320,9 +319,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             }
 
             final String filename = fileUploadId.getFilename();
-            final InputStream stream = artifactEncryption.flatMap(this::encryptArtifactIfKeyPresent)
-                    .orElse(inputStream);
-            final Artifact artifact = uploadArtifact(filename, stream);
+            final Artifact artifact = uploadArtifact(filename);
 
             if (isUploadInterrupted()) {
                 LOG.warn("Upload of {} was interrupted", filename);
@@ -336,25 +333,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             publishArtifactsChanged(fileUploadId);
         }
 
-        private Optional<InputStream> encryptArtifactIfKeyPresent(final ArtifactEncryption encryptor) {
-            final Long smId = fileUploadId.getSoftwareModuleId();
-            final String alg = encryptor.encryptionAlgorithm();
-            final String key = alg + ".key";
-            final String iv = alg + ".iv";
-
-            final Optional<String> encryptionKey = smManagement.getMetaDataBySoftwareModuleId(smId, key)
-                    .map(MetaData::getValue);
-            final Optional<String> encryptionIV = smManagement.getMetaDataBySoftwareModuleId(smId, iv)
-                    .map(MetaData::getValue);
-
-            return encryptionKey.flatMap(
-                    keyValue -> encryptionIV.map(ivValue -> encryptor.encryptStream(keyValue, ivValue, inputStream)));
-        }
-
-        private Artifact uploadArtifact(final String filename, final InputStream stream) {
+        private Artifact uploadArtifact(final String filename) {
             LOG.debug("Transfering file {} directly to repository", filename);
             try {
-                return artifactManagement.create(new ArtifactUpload(stream, fileUploadId.getSoftwareModuleId(),
+                return artifactManagement.create(new ArtifactUpload(inputStream, fileUploadId.getSoftwareModuleId(),
                         filename, null, null, null, true, mimeType, -1));
             } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
                 throw new ArtifactUploadFailedException(e);

@@ -4,12 +4,9 @@ import java.io.InputStream;
 
 public interface ArtifactEncryption {
 
-    String encryptionAlgorithm();
+    boolean isEncrypted(final long softwareModuleId);
 
-    String generateEncryptionKey();
+    void generateSecrets(final long softwareModuleId);
 
-    String generateEncryptionIV();
-
-    InputStream encryptStream(final String base64EncryptionKey, final String base64EncryptionIV,
-            final InputStream stream);
+    InputStream encryptStream(final long softwareModuleId, final InputStream stream);
 }

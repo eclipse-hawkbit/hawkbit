@@ -31,6 +31,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -113,13 +114,16 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final Database database;
 
+    private final Optional<ArtifactEncryption> artifactEncryption;
+
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
+            final Optional<ArtifactEncryption> artifactEncryption) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -130,6 +134,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.quotaManagement = quotaManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
+        this.artifactEncryption = artifactEncryption;
     }
 
     @Override
@@ -155,7 +160,18 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public SoftwareModule create(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
-        return softwareModuleRepository.save(create.build());
+        final SoftwareModule sm = softwareModuleRepository.save(create.build());
+        generateEncryptionSecretsIfRequested(create.isEncrypted().orElse(false), sm.getId());
+
+        return sm;
+    }
+
+    private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
+        artifactEncryption.ifPresent(encryptor -> {
+            if (encryptionRequested) {
+                encryptor.generateSecrets(smId);
+            }
+        });
     }
 
     @Override
@@ -295,8 +311,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                SoftwareModuleFields.class, virtualPropertyReplacer, database);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }

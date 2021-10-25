@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
@@ -629,10 +630,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
+            final Optional<ArtifactEncryption> artifactEncryption) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
-                quotaManagement, virtualPropertyReplacer, properties.getDatabase());
+                quotaManagement, virtualPropertyReplacer, properties.getDatabase(), artifactEncryption);
     }
 
     /**
@@ -751,9 +753,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware,
+            final Optional<ArtifactEncryption> artifactEncryption) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                quotaManagement, tenantAware);
+                quotaManagement, tenantAware, artifactEncryption);
     }
 
     /**
@@ -945,11 +948,5 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
                 deploymentManagement, targetFilterQueryManagement, txManager, repositoryProperties, tenantAware,
                 lockRegistry);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public ArtifactEncryption artifactEncryption() {
-        return new DefaultArtifactEncryption();
     }
 }
