@@ -9,12 +9,14 @@
 package org.eclipse.hawkbit.repository.jpa.rsql;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -47,16 +49,17 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         ds2 = distributionSetManagement.update(entityFactory.distributionSet().update(ds2.getId()).description("DS%"));
         createDistributionSetMetadata(ds2.getId(), entityFactory.generateDsMetadata("metaKey", "value"));
 
-        final DistributionSetTag targetTag = distributionSetTagManagement
+        final DistributionSetTag distSetTag = distributionSetTagManagement
                 .create(entityFactory.tag().create().name("Tag1"));
         distributionSetTagManagement.create(entityFactory.tag().create().name("Tag2"));
         distributionSetTagManagement.create(entityFactory.tag().create().name("Tag3"));
         distributionSetTagManagement.create(entityFactory.tag().create().name("Tag4"));
 
-        distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), targetTag.getId());
+        distributionSetManagement.assignTag(Arrays.asList(ds.getId(), ds2.getId()), distSetTag.getId());
 
-        distributionSetManagement
+        final DistributionSet ds3 = distributionSetManagement
                 .create(entityFactory.distributionSet().create().name("test123").version("noDescription"));
+        distributionSetManagement.invalidate(ds3);
     }
 
     @Test
@@ -117,7 +120,7 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter distribution set by complete property")
-    public void testFilterByAttribute() {
+    public void testFilterByAttributeComplete() {
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
         try {
             assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
@@ -126,6 +129,17 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         }
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
         assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 1);
+    }
+
+    @Test
+    @Description("Test filter distribution set by valid property")
+    public void testFilterByAttributeValid() {
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "==true", 4);
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "==false", 1);
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class)
+                .isThrownBy(() -> assertRSQLQuery(DistributionSetFields.VALID.name() + "==noExist*", 0));
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "=in=(true)", 4);
+        assertRSQLQuery(DistributionSetFields.VALID.name() + "=out=(true)", 1);
     }
 
     @Test
@@ -151,19 +165,49 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set by metadata")
     public void testFilterByMetadata() {
+        createDistributionSetWithMetadata("key.dot", "value.dot");
+
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==*v*", 2);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey=in=(metaValue,notexist)", 1);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".metaKey=out=(metaValue,notexist)", 1);
         assertRSQLQuery(DistributionSetFields.METADATA.name() + ".notExist==metaValue", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key.dot==value.dot", 1);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key.dot*==value.dot", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key.*==value.dot", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key.==value.dot", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".key*==value.dot", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + ".*==value.dot", 0);
+        assertRSQLQuery(DistributionSetFields.METADATA.name() + "..==value.dot", 0);
+        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + ".==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + "*==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(DistributionSetFields.METADATA.name() + "==value.dot",
+                RSQLParameterUnsupportedFieldException.class);
 
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
+    private void assertRSQLQuery(final String rsqlParam, final long expectedEntity) {
         final Page<DistributionSet> find = distributionSetManagement.findByRsql(PageRequest.of(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
-        assertThat(find).as("Founded entity is should not be null").isNotNull();
-        assertThat(countAll).as("Founded entity size is wrong").isEqualTo(excpectedEntity);
+        assertThat(find).as("Found entity is should not be null").isNotNull();
+        assertThat(countAll).as("Found entity size is wrong").isEqualTo(expectedEntity);
     }
+
+    private <T extends Throwable> void assertRSQLQueryThrowsException(final String rsqlParam,
+            final Class<T> expectedException) {
+        assertThatExceptionOfType(expectedException)
+                .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, DistributionSetFields.class));
+    }
+
+    private DistributionSet createDistributionSetWithMetadata(final String metadataKeyName,
+            final String metadataValue) {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        createDistributionSetMetadata(distributionSet.getId(),
+                entityFactory.generateDsMetadata(metadataKeyName, metadataValue));
+        return distributionSet;
+    }
+
 }

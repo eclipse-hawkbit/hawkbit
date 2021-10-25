@@ -12,21 +12,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Tag;
@@ -34,8 +33,8 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -103,8 +102,8 @@ public interface TargetManagement {
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned
      *
-     * @return the found number {@link Target}s
-     * 
+     * @return the found number of {@link Target}s
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -118,7 +117,7 @@ public interface TargetManagement {
      * @param distId
      *            to search for
      * @return number of found {@link Target}s.
-     * 
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -137,7 +136,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
-                          + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+            + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     boolean existsByInstalledOrAssignedDistributionSet(long distId);
 
     /**
@@ -145,19 +144,33 @@ public interface TargetManagement {
      *
      * @param rsqlParam
      *            filter definition in RSQL syntax
-     * @return the found number {@link Target}s
+     * @return the found number of {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByRsql(@NotEmpty String rsqlParam);
+
+    /**
+     * Count all targets for given {@link TargetFilterQuery} and that are compatible
+     * with the passed {@link DistributionSetType}.
+     *
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
+     * @param dsTypeId
+     *            ID of the {@link DistributionSetType} the targets need to be
+     *            compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long dsTypeId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.
      *
      * @param targetFilterQueryId
      *            {@link TargetFilterQuery#getId()}
-     * @return the found number {@link Target}s
-     * 
-     * @throws EntityNotFoundException
+     * @return the found number of {@link Target}s
+     *
+     * @throws  EntityNotFoundException
      *             if {@link TargetFilterQuery} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -232,9 +245,9 @@ public interface TargetManagement {
     void deleteByControllerID(@NotEmpty String controllerID);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified distribution set in their action
-     * history.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
+     * that don't have the specified distribution set in their action history and
+     * are compatible with the passed {@link DistributionSetType}.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -248,13 +261,13 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDS(@NotNull Pageable pageRequest, long distributionSetId,
+    Page<Target> findByTargetFilterQueryAndNonDSAndCompatible(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified distribution set in their action
-     * history.
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
+     * that don't have the specified distribution set in their action history and
+     * are compatible with the passed {@link DistributionSetType}.
      *
      * @param distributionSetId
      *            id of the {@link DistributionSet}
@@ -266,11 +279,12 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDS(long distributionSetId, @NotNull String rsqlParam);
+    long countByRsqlAndNonDSAndCompatible(long distributionSetId, @NotNull String rsqlParam);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that are not assigned to one of the {@link RolloutGroup}s
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
+     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
+     * with the passed {@link DistributionSetType}.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -278,24 +292,33 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
+     * @param distributionSetType
+     *            type of the {@link DistributionSet} the targets must be compatible
+     *            with
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNotInRolloutGroups(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    Page<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
+            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
+            @NotNull DistributionSetType distributionSetType);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that are not assigned to one of the {@link RolloutGroup}s
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
+     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
+     * with the passed {@link DistributionSetType}.
      *
      * @param groups
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
+     * @param distributionSetType
+     *            type of the {@link DistributionSet} the targets must be compatible
+     *            with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam);
+    long countByRsqlAndNotInRolloutGroupsAndCompatible(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
+            @NotNull DistributionSetType distributionSetType);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no
@@ -621,7 +644,7 @@ public interface TargetManagement {
      *             if TargetType with given target ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target assignType(@NotEmpty String controllerID, @NotNull long targetTypeId);
+    Target assignType(@NotEmpty String controllerID, @NotNull Long targetTypeId);
 
     /**
      * updates the {@link Target}.

@@ -64,8 +64,8 @@ public class DeploymentAssignmentWindowController {
      * @param deploymentManagement
      *            DeploymentManagement
      */
-    public DeploymentAssignmentWindowController(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
-            final DeploymentManagement deploymentManagement) {
+    public DeploymentAssignmentWindowController(final CommonUiDependencies uiDependencies,
+            final UiProperties uiProperties, final DeploymentManagement deploymentManagement) {
         this.i18n = uiDependencies.getI18n();
         this.eventBus = uiDependencies.getEventBus();
         this.notification = uiDependencies.getUiNotification();

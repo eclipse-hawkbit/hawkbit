@@ -263,4 +263,5 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     private static Page<TargetType> convertPage(final Page<JpaTargetType> findAll, final Pageable pageable) {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
     }
+
 }

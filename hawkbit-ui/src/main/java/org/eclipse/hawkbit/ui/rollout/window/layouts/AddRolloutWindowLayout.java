@@ -42,6 +42,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     private final VisualGroupDefinitionLayout visualGroupDefinitionLayout;
 
     private String filterQuery;
+    private Long dsTypeId;
     private Long totalTargets;
     private int noOfGroups;
     private List<ProxyAdvancedRolloutGroup> advancedRolloutGroupDefinitions;
@@ -82,29 +83,48 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     }
 
     private void addValueChangeListeners() {
-        rolloutFormLayout.setFilterQueryChangedListener(this::onTargetFilterQueryChange);
+        rolloutFormLayout.setFilterQueryChangedListener(this::onFilterQueryChange);
+        rolloutFormLayout.setDistSetChangedListener(this::onDistSetTypeChange);
         groupsDefinitionTabs.addSelectedTabChangeListener(event -> onGroupDefinitionTabChanged());
         simpleGroupsLayout.setNoOfGroupsChangedListener(this::onNoOfSimpleGroupsChanged);
         advancedGroupsLayout.setAdvancedGroupDefinitionsChangedListener(this::onAdvancedGroupsChanged);
     }
 
-    private void onTargetFilterQueryChange(final String filterQuery) {
+    private void onFilterQueryChange(final String filterQuery) {
         this.filterQuery = filterQuery;
-
-        totalTargets = !StringUtils.isEmpty(filterQuery) ? targetManagement.countByRsql(filterQuery) : null;
-        updateTotalTargetsAwareComponents();
+        updateTotalTargets();
 
         if (isAdvancedGroupsTabSelected()) {
             advancedGroupsLayout.setTargetFilter(filterQuery);
         }
     }
 
-    private void updateTotalTargetsAwareComponents() {
+    private void onDistSetTypeChange(final Long dsTypeId) {
+        this.dsTypeId = dsTypeId;
+        updateTotalTargets();
+
+        if (isAdvancedGroupsTabSelected()) {
+            advancedGroupsLayout.setDsTypeId(dsTypeId);
+        }
+    }
+
+    private void updateTotalTargets() {
+        this.totalTargets = getTotalTargets(filterQuery, dsTypeId);
         rolloutFormLayout.setTotalTargets(totalTargets);
         visualGroupDefinitionLayout.setTotalTargets(totalTargets);
         if (isSimpleGroupsTabSelected()) {
             simpleGroupsLayout.setTotalTargets(totalTargets);
         }
+    }
+
+    private Long getTotalTargets(final String filterQuery, final Long distSetTypeId) {
+        if (StringUtils.isEmpty(filterQuery)) {
+            return null;
+        }
+        if (distSetTypeId == null) {
+            return targetManagement.countByRsql(filterQuery);
+        }
+        return targetManagement.countByRsqlAndCompatible(filterQuery, distSetTypeId);
     }
 
     private boolean isSimpleGroupsTabSelected() {
@@ -128,7 +148,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         if (isAdvancedGroupsTabSelected()) {
             adaptAdvancedGroupsValidation();
 
-            advancedGroupsLayout.setTargetFilter(filterQuery);
+            advancedGroupsLayout.setTargetFilterAndDsType(filterQuery, dsTypeId);
 
             visualGroupDefinitionLayout.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
             visualGroupDefinitionLayout.setAdvancedRolloutGroupDefinitions(advancedRolloutGroupDefinitions);
@@ -209,7 +229,6 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
             proxyEntity.setAdvancedRolloutGroupDefinitions(advancedGroupsLayout.getAdvancedRolloutGroupDefinitions());
             proxyEntity.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
         }
-
         return proxyEntity;
     }
 }

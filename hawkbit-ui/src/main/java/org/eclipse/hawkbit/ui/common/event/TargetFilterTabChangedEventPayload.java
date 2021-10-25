@@ -12,5 +12,5 @@ package org.eclipse.hawkbit.ui.common.event;
  * Enum constants for target filter tab change event
  */
 public enum TargetFilterTabChangedEventPayload {
-    SIMPLE, CUSTOM;
+    SIMPLE, CUSTOM, TARGET_TYPE;
 }

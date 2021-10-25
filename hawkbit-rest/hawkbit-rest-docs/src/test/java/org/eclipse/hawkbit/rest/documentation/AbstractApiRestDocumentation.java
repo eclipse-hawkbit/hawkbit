@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.rest.AbstractRestIntegrationTest;
@@ -179,9 +180,12 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
             final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
             final boolean createRollout) {
 
+        final TargetType targetType = testdataFactory.findOrCreateTargetType("defaultType");
+        targetTypeManagement.assignCompatibleDistributionSetTypes(targetType.getId(),
+                Collections.singletonList(distributionSet.getType().getId()));
         final Target savedTarget = targetManagement.create(entityFactory.target().create().controllerId(name)
                 .status(TargetUpdateStatus.UNKNOWN).address("http://192.168.0.1").description("My name is " + name)
-                .lastTargetQuery(System.currentTimeMillis()));
+                .targetType(targetType.getId()).lastTargetQuery(System.currentTimeMillis()));
 
         final List<Target> updatedTargets;
         if (createRollout) {
@@ -280,6 +284,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                         .type("String"),
                 fieldWithPath(fieldArrayPrefix + "lastControllerRequestAt")
                         .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
+                fieldWithPath(fieldArrayPrefix + "targetType")
+                        .description(MgmtApiModelProperties.TARGETTYPE_ID).type("Number"),
                 fieldWithPath(fieldArrayPrefix + "_links.self").ignored());
 
         if (!isArray) {
@@ -299,7 +305,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                             .description(MgmtApiModelProperties.LINKS_ATTRIBUTES),
                     fieldWithPath(fieldArrayPrefix + "_links.actions")
                             .description(MgmtApiModelProperties.LINKS_ACTIONS),
-                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA)));
+                    fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA),
+                    fieldWithPath(fieldArrayPrefix + "_links.targetType")
+                            .description(MgmtApiModelProperties.LINK_TO_TARGET_TYPE)));
 
         }
         fields.addAll(Arrays.asList(descriptors));

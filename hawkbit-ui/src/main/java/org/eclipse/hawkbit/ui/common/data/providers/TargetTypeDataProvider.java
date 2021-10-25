@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Data provider for {@link TargetTypeManagement}, which dynamically loads a
  * batch of {@link TargetType} entities from backend and maps them to
  * corresponding output type.
- * 
+ *
  * @param <T>
  *            output type
  */

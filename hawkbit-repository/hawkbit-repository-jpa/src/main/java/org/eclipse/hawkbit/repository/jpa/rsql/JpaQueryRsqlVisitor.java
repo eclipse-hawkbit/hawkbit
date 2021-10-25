@@ -15,9 +15,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -179,7 +179,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
      */
     @SuppressWarnings("unchecked")
     private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
-        return (Path<Object>) getFieldPath(root, getSubAttributesFrom(finalProperty), enumField.isMap(),
+        return (Path<Object>) getFieldPath(root, enumField.getSubAttributes(finalProperty), enumField.isMap(),
                 this::getJoinFieldPath).orElseThrow(
                         () -> createRSQLParameterUnsupportedException("RSQL field path cannot be empty", null));
     }
@@ -377,7 +377,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private Predicate getOutPredicate(final List<Object> transformedValues, final String finalProperty,
             final A enumField, final Path<Object> fieldPath) {
 
-        final String[] fieldNames = getSubAttributesFrom(finalProperty);
+        final String[] fieldNames = enumField.getSubAttributes(finalProperty);
         final List<String> outParams = transformedValues.stream().filter(String.class::isInstance)
                 .map(String.class::cast).map(String::toUpperCase).collect(Collectors.toList());
 
@@ -423,7 +423,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             return null;
         }
 
-        final String[] graph = getSubAttributesFrom(node.getSelector());
+        final String[] graph = enumField.getSubAttributes(node.getSelector());
 
         final String keyValue = graph[graph.length - 1];
         if (fieldPath instanceof MapJoin) {
@@ -469,7 +469,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             }
 
             final String sqlValue = toSQL((String) transformedValue);
-            final String[] fieldNames = getSubAttributesFrom(finalProperty);
+            final String[] fieldNames = enumField.getSubAttributes(finalProperty);
 
             if (isSimpleField(fieldNames, enumField.isMap())) {
                 return toNullOrNotLikePredicate(fieldPath, sqlValue);

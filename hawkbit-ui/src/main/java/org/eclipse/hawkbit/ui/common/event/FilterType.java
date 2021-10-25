@@ -12,5 +12,5 @@ package org.eclipse.hawkbit.ui.common.event;
  * Enum constants for filter type
  */
 public enum FilterType {
-    SEARCH, TYPE, TAG, NO_TAG, STATUS, OVERDUE, QUERY, DISTRIBUTION, MASTER;
+    SEARCH, TYPE, TARGET_TYPE, TAG, NO_TAG, STATUS, OVERDUE, QUERY, DISTRIBUTION, MASTER;
 }

@@ -471,7 +471,7 @@ public abstract class JsonBuilder {
 
         return builder.toString();
     }
-    
+
     public static String targetTypes(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
@@ -494,8 +494,8 @@ public abstract class JsonBuilder {
         }
 
         return result.toString();
-    }  
-    
+    }
+
     public static String targetTypesCreatableFieldsOnly(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 

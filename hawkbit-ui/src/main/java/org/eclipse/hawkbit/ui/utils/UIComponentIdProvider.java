@@ -581,6 +581,16 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TAG_DROP_AREA_ID = "target.tag.drop.area";
 
     /**
+     * ID-Target tag table.
+     */
+    public static final String TARGET_TYPE_TABLE_ID = "target.type.tableId";
+
+    /**
+     * ID-Target type table drop area.
+     */
+    public static final String TARGET_TYPE_DROP_AREA_ID = "target.type.drop.area";
+
+    /**
      * ID-Distibution tag table.
      */
     public static final String DISTRIBUTION_TAG_TABLE_ID = "distriution.tag.tableId";
@@ -928,6 +938,11 @@ public final class UIComponentIdProvider {
      * ID - simple filter- Accordion-Tab
      */
     public static final String SIMPLE_FILTER_ACCORDION_TAB = "simple.filter.accordion.tab";
+
+    /**
+     * ID - target type filter- Accordion-Tab
+     */
+    public static final String TARGET_TYPE_FILTER_ACCORDION_TAB = "target.type.filter.accordion.tab";
 
     /**
      * ID - custom filter- Accordion-Tab
@@ -1337,6 +1352,22 @@ public final class UIComponentIdProvider {
      * Table multiselect for selecting DistType
      */
     public static final String SELECT_DIST_TYPE = "select-dist-type";
+
+    /**
+     * Table multiselect for unselecting DistType
+     */
+    public static final String UNSELECT_DIST_TYPE = "unselect-dist-type";
+
+    /**
+     * ID for DistType source value table
+     */
+    public static final String DIST_TYPE_TABLE_SOURCE_ID = "dsTypeSourceId";
+
+    /**
+     * ID for DistType selected value table
+     */
+    public static final String DIST_TYPE_TABLE_SELECTED_ID = "dsTypeSelectedId";
+
     /**
      * ID for download anonymous checkbox
      */
@@ -1529,6 +1560,10 @@ public final class UIComponentIdProvider {
      * Target tag button id prefix.
      */
     public static final String TARGET_TAG_ID_PREFIXS = "target.tag";
+    /**
+     * Target type button id prefix.
+     */
+    public static final String TARGET_TYPE_ID_PREFIXS = "target.type";
     /**
      * Distribution tag button id prefix.
      */
