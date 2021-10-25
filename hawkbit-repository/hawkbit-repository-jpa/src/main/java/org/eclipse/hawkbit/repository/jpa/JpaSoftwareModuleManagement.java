@@ -160,7 +160,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public SoftwareModule create(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
-        final SoftwareModule sm = softwareModuleRepository.save(create.build());
+        final JpaSoftwareModule sm = softwareModuleRepository.save(create.build());
+        // flush sm creation in order to get an Id
+        entityManager.flush();
         generateEncryptionSecretsIfRequested(create.isEncrypted().orElse(false), sm.getId());
 
         return sm;
