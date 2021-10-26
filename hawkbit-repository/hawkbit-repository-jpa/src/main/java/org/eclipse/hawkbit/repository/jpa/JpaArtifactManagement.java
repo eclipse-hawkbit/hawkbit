@@ -10,7 +10,10 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
@@ -18,6 +21,7 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -68,16 +72,20 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final ArtifactEncryption artifactEncryption;
 
+    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
+
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            final ArtifactEncryption artifactEncryption) {
+            final ArtifactEncryption artifactEncryption,
+            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
         this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
         this.artifactEncryption = artifactEncryption;
+        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
     }
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
@@ -133,11 +141,22 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private InputStream wrapInEncryptionStreamIfSmEncrypted(final long smId, final InputStream stream) {
-        if (artifactEncryption != null && artifactEncryption.isEncrypted(smId)) {
-            return artifactEncryption.encryptStream(smId, stream);
+        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+            return stream;
         }
 
-        return stream;
+        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
+        final Map<String, String> requiredSecrets = new HashMap<>();
+        for (final String requiredSecretsKey : requiredSecretsKeys) {
+            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
+                    requiredSecretsKey);
+            if (!requiredSecretsValue.isPresent()) {
+                return stream;
+            }
+            requiredSecrets.put(requiredSecretsKey, requiredSecretsValue.get());
+        }
+
+        return artifactEncryption.encryptStream(requiredSecrets, stream);
     }
 
     private void assertArtifactQuota(final long id, final int requested) {

@@ -32,6 +32,7 @@ import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -116,6 +117,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final ArtifactEncryption artifactEncryption;
 
+    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
+
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
@@ -123,7 +126,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final ArtifactEncryption artifactEncryption) {
+            final ArtifactEncryption artifactEncryption,
+            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -135,6 +139,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
         this.artifactEncryption = artifactEncryption;
+        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
     }
 
     @Override
@@ -169,8 +174,11 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
-        if (artifactEncryption != null && encryptionRequested) {
-            artifactEncryption.generateSecrets(smId);
+        if (artifactEncryption != null && artifactEncryptionSecretsStore != null && encryptionRequested) {
+            final Map<String, String> secrets = artifactEncryption.generateSecrets();
+            secrets.forEach((key, value) -> artifactEncryptionSecretsStore.addSecret(smId, key, value));
+            // we want to clear secrets from memory as soon as possible
+            secrets.clear();
         }
     }
 

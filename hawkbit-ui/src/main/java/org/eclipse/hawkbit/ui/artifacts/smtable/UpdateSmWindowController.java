@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import java.util.Set;
+
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -28,6 +31,7 @@ public class UpdateSmWindowController
 
     private final SoftwareModuleManagement smManagement;
     private final ArtifactEncryption artifactEncryption;
+    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
     private final SmWindowLayout layout;
     private final ProxySmValidator validator;
 
@@ -46,11 +50,12 @@ public class UpdateSmWindowController
      */
     public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
             final SoftwareModuleManagement smManagement, final ArtifactEncryption artifactEncryption,
-            final SmWindowLayout layout) {
+            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore, final SmWindowLayout layout) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
         this.artifactEncryption = artifactEncryption;
+        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
         this.layout = layout;
         this.validator = new ProxySmValidator(uiDependencies);
     }
@@ -74,11 +79,18 @@ public class UpdateSmWindowController
     }
 
     private boolean isSmEncrypted(final long smId) {
-        if (artifactEncryption != null) {
-            return artifactEncryption.isEncrypted(smId);
+        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+            return false;
         }
 
-        return false;
+        final Set<String> requiredSecretKeys = artifactEncryption.requiredSecretKeys();
+        for (final String requiredSecretKey : requiredSecretKeys) {
+            if (!artifactEncryptionSecretsStore.getSecret(smId, requiredSecretKey).isPresent()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override

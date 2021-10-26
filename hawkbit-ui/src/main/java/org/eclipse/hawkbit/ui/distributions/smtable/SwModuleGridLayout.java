@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -69,10 +70,11 @@ public class SwModuleGridLayout extends AbstractSoftwareModuleGridLayout {
             final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final ArtifactManagement artifactManagement, final ArtifactEncryption artifactEncryption,
+            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore,
             final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
             final GridLayoutUiState swModuleGridLayoutUiState) {
         super(uiDependencies, softwareModuleManagement, softwareModuleTypeManagement, artifactEncryption,
-                EventView.DISTRIBUTIONS);
+                artifactEncryptionSecretsStore, EventView.DISTRIBUTIONS);
 
         this.swModuleGridHeader = new SoftwareModuleGridHeader(uiDependencies, smTypeFilterLayoutUiState,
                 swModuleGridLayoutUiState, getSmWindowBuilder(), getEventView());

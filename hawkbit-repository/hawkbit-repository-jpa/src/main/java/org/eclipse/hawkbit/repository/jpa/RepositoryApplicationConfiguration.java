@@ -17,6 +17,7 @@ import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -631,10 +632,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            @Autowired(required = false) final ArtifactEncryption artifactEncryption) {
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
+            @Autowired(required = false) final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
-                quotaManagement, virtualPropertyReplacer, properties.getDatabase(), artifactEncryption);
+                quotaManagement, virtualPropertyReplacer, properties.getDatabase(), artifactEncryption,
+                artifactEncryptionSecretsStore);
     }
 
     /**
@@ -752,9 +755,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            @Autowired(required = false) final ArtifactEncryption artifactEncryption) {
+            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
+            @Autowired(required = false) final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                quotaManagement, tenantAware, artifactEncryption);
+                quotaManagement, tenantAware, artifactEncryption, artifactEncryptionSecretsStore);
     }
 
     /**

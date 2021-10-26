@@ -1,12 +1,14 @@
 package org.eclipse.hawkbit.repository;
 
 import java.io.InputStream;
+import java.util.Map;
+import java.util.Set;
 
 public interface ArtifactEncryption {
 
-    boolean isEncrypted(final long softwareModuleId);
+    Set<String> requiredSecretKeys();
 
-    void generateSecrets(final long softwareModuleId);
+    Map<String, String> generateSecrets();
 
-    InputStream encryptStream(final long softwareModuleId, final InputStream stream);
+    InputStream encryptStream(final Map<String, String> secrets, final InputStream stream);
 }
