@@ -104,10 +104,10 @@ public class UpdateSmWindowController
         layout.disableNameField();
         layout.disableVersionField();
 
-        if (artifactEncryption != null) {
-            layout.disableEncryptionField();
-        } else {
+        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
             layout.hideEncryptionField();
+        } else {
+            layout.disableEncryptionField();
         }
     }
 

@@ -174,7 +174,11 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
-        if (artifactEncryption != null && artifactEncryptionSecretsStore != null && encryptionRequested) {
+        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+            return;
+        }
+
+        if (encryptionRequested) {
             final Map<String, String> secrets = artifactEncryption.generateSecrets();
             secrets.forEach((key, value) -> artifactEncryptionSecretsStore.addSecret(smId, key, value));
             // we want to clear secrets from memory as soon as possible
