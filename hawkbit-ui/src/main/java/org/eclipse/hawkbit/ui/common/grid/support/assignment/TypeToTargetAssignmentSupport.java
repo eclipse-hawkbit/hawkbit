@@ -73,7 +73,7 @@ public class TypeToTargetAssignmentSupport  extends AssignmentSupport<ProxyTarge
     }
 
     protected TargetTypeAssignmentResult initiateTargetTypeAssignment(final Long targetType, final String controllerId) {
-        return targetManagement.assignTargetType(Collections.singletonList(controllerId), targetType);
+        return targetManagement.assignType(Collections.singletonList(controllerId), targetType);
     }
 
     protected void publishTypeAssignmentEvent(final List<ProxyTargetType> sourceItemsToAssign) {

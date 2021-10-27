@@ -791,16 +791,18 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
         List<Target> assigned = testdataFactory.createTargetsWithType(11, "assigned", testType);
 
-        assertThat(targetManagement.findByTargetTypeId(PAGE, testType.getId()))
+        assertThat(targetManagement.findByFilters(PAGE,
+                new FilterParams(null,null, false, testType.getId())))
                 .as("Contains the targets with set type").containsAll(assigned)
                 .as("and that means the following expected amount").hasSize(11);
-        assertThat(targetManagement.countByTargetTypeId(testType.getId()))
+        assertThat(targetManagement.countByFilters(new FilterParams(null,null, false, testType.getId())))
                 .as("Count the targets with set type").isEqualTo(11);
 
-        assertThat(targetManagement.findByTargetTypeId(PAGE, null))
+        assertThat(targetManagement.findByFilters(PAGE,
+                new FilterParams(null, null, true, null)))
                 .as("Contains the targets without a type").containsAll(unassigned)
                 .as("and that means the following expected amount").hasSize(9);
-        assertThat(targetManagement.countByTargetTypeId(null))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, true, null)))
                 .as("Counts the targets without a type").isEqualTo(9);
 
     }

@@ -288,9 +288,9 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     }
 
     /**
-     * Update filter on custom tab selection
+     * Update filter on filter tab selection
      */
-    public void onCustomTabSelected() {
+    public void resetAllFilters(){
         getFilter().ifPresent(filter -> {
             filter.setDistributionId(null);
             filter.setNoTagClicked(false);
@@ -299,32 +299,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             filter.setSearchText(null);
             filter.setTargetTags(Collections.emptyList());
             filter.setTargetUpdateStatusList(Collections.emptyList());
-            getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetTypeId, null);
-            getFilterSupport().refreshFilter();
-        });
-    }
-
-    /**
-     * Update filter on simple tab selection
-     */
-    public void onSimpleTabSelected() {
-        getFilter().ifPresent(filter -> filter.setNoTargetTypeClicked(false));
-        getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetFilterQueryId, null);
-        getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetTypeId, null);
-    }
-
-    /**
-     * Update filter on target type tab selection
-     */
-    public void onTargetTypeTabSelected() {
-        getFilter().ifPresent(filter -> {
-            filter.setDistributionId(null);
-            filter.setNoTagClicked(false);
-            filter.setOverdueState(false);
-            filter.setSearchText(null);
-            filter.setTargetTags(Collections.emptyList());
-            filter.setTargetUpdateStatusList(Collections.emptyList());
-            getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetFilterQueryId, null);
+            filter.setTargetTypeId(null);
+            filter.setTargetFilterQueryId(null);
             getFilterSupport().refreshFilter();
         });
     }

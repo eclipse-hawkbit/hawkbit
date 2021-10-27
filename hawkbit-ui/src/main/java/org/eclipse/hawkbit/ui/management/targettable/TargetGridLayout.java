@@ -210,17 +210,15 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         targetGridHeader.onFilterReset();
         if (isCustomFilterTabSelected) {
             targetGridHeader.disabledSearchIcon();
-            targetGrid.onCustomTabSelected();
         }
         if(isTargetTypeFilterTabSelected){
             targetGridHeader.enableSearchIcon();
-            targetGrid.onTargetTypeTabSelected();
         }
         if (isSimpleTypeFilterTabSelected){
             targetGridHeader.enableSearchIcon();
-            targetGrid.onSimpleTabSelected();
         }
 
+        targetGrid.resetAllFilters();
         countMessageLabel.updateFilteredCount();
     }
 

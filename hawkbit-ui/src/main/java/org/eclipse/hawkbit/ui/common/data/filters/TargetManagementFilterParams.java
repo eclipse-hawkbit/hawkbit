@@ -124,7 +124,11 @@ public class TargetManagementFilterParams implements Serializable {
     }
 
     private boolean isAnyComplexFilterSelected() {
-        return distributionId != null || targetFilterQueryId != null || targetTypeId != null || isNoTargetTypeClicked();
+        return distributionId != null || targetFilterQueryId != null || isAnyTypeSelected();
+    }
+
+    private boolean isAnyTypeSelected(){
+        return targetTypeId != null || isNoTargetTypeClicked();
     }
 
     /**

@@ -645,7 +645,7 @@ public interface TargetManagement {
      *             if target type with given id does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult assignTargetType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
+    TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
 
     /**
      * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type
@@ -657,7 +657,7 @@ public interface TargetManagement {
      *         assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult unAssignTargetType(@NotEmpty Collection<String> controllerIds);
+    TargetTypeAssignmentResult unAssignType(@NotEmpty Collection<String> controllerIds);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
@@ -909,27 +909,4 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
 
-    /**
-     * Finds targets by target type.
-     *
-     * @param pageRequest
-     *            Pageable
-     * @param targetTypeId
-     *            of the {@link TargetType}
-     * @return the found Targets
-     *
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetTypeId(Pageable pageRequest, Long targetTypeId);
-
-    /**
-     * Count targets by target type.
-     *
-     * @param targetTypeId
-     *            of the {@link TargetType}
-     * @return the count Targets
-     *
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByTargetTypeId(Long targetTypeId);
 }

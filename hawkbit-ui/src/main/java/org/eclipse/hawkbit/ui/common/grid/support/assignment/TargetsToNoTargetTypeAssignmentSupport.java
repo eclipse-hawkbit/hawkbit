@@ -77,7 +77,7 @@ public class TargetsToNoTargetTypeAssignmentSupport extends AbstractTargetsToTar
         final Collection<String> controllerIdsToAssign = sourceItems.stream().map(ProxyTarget::getControllerId)
                 .collect(Collectors.toList());
 
-        return targetManagement.unAssignTargetType(controllerIdsToAssign);
+        return targetManagement.unAssignType(controllerIdsToAssign);
     }
 
 }

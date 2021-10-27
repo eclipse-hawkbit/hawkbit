@@ -250,16 +250,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetTypeId(Pageable pageRequest, Long targetTypeId) {
-        return findTargetsBySpec(TargetSpecifications.hasTargetType(targetTypeId), pageRequest);
-    }
-
-    @Override
-    public long countByTargetTypeId(Long targetTypeId) {
-        return targetRepository.count(TargetSpecifications.hasTargetType(targetTypeId));
-    }
-
-    @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -499,6 +489,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         if (hasTypesFilterActive(filterParams)) {
             specList.add(TargetSpecifications.hasTargetType(filterParams.getFilterByTargetType()));
+        } else if (hasNoTypeFilterActive(filterParams)) {
+            specList.add(TargetSpecifications.hasNoTargetType());
         }
 
         return specList;
@@ -513,10 +505,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     private static boolean hasTypesFilterActive(final FilterParams filterParams) {
-        final boolean isNoTypeActive = Boolean.TRUE.equals(filterParams.getSelectTargetWithNoTargetType());
-        final boolean isTypeActive = filterParams.getFilterByTargetType() != null;
+        return filterParams.getFilterByTargetType() != null;
+    }
 
-        return isNoTypeActive || isTypeActive;
+    private static boolean hasNoTypeFilterActive(final FilterParams filterParams) {
+        return Boolean.TRUE.equals(filterParams.getSelectTargetWithNoTargetType());
     }
 
     private Slice<Target> findByCriteriaAPI(final Pageable pageable, final List<Specification<JpaTarget>> specList) {
@@ -578,7 +571,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTypeAssignmentResult assignTargetType(final Collection<String> controllerIds, final Long typeId) {
+    public TargetTypeAssignmentResult assignType(final Collection<String> controllerIds, final Long typeId) {
         final TargetType type = targetTypeRepository.findById(typeId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
 
@@ -586,7 +579,7 @@ public class JpaTargetManagement implements TargetManagement {
                 TargetSpecifications.hasTargetType(typeId));
 
         final List<JpaTarget> targetsWithoutSameType = findTargetsByInSpecification(controllerIds,
-                TargetSpecifications.hasNoTargetType(typeId));
+                TargetSpecifications.hasTargetTypeNot(typeId));
 
         // set new target type to all targets without that type
         targetsWithoutSameType.forEach(target -> target.setTargetType(type));
@@ -605,8 +598,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTypeAssignmentResult unAssignTargetType(final Collection<String> controllerIds) {
-        final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds);
+    public TargetTypeAssignmentResult unAssignType(final Collection<String> controllerIds) {
+        final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds, null);
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
@@ -624,12 +617,6 @@ public class JpaTargetManagement implements TargetManagement {
             Specification<JpaTarget> specification) {
         return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids).and(specification)))
-                .flatMap(List::stream).collect(Collectors.toList());
-    }
-
-    private List<JpaTarget> findTargetsByInSpecification(Collection<String> controllerIds) {
-        return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
-                .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)))
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 

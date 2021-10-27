@@ -137,7 +137,7 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
     }
 
     protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
-        return targetManagement.assignTargetType(
+        return targetManagement.assignType(
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), type.getId());
     }
 

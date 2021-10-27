@@ -92,7 +92,7 @@ public class TargetsToTargetTypeAssignmentSupport extends AbstractTargetsToTarge
         final Collection<String> controllerIdsToAssign = sourceItems.stream().map(ProxyTarget::getControllerId)
                 .collect(Collectors.toList());
 
-        return targetManagement.assignTargetType(controllerIdsToAssign, typeId);
+        return targetManagement.assignType(controllerIdsToAssign, typeId);
     }
 
 }
