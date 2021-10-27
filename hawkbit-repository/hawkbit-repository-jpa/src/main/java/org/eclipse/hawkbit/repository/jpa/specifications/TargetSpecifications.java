@@ -418,7 +418,7 @@ public final class TargetSpecifications {
             final Subquery<Long> compatibilitySubQuery = query.subquery(Long.class);
             final Root<JpaTarget> subQueryTargetRoot = compatibilitySubQuery.from(JpaTarget.class);
 
-            compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id)).distinct(true)
+            compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id))
                     .where(cb.and(cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
                             cb.equal(getDsTypeIdPath(subQueryTargetRoot), distributionSetTypeId)));
 
