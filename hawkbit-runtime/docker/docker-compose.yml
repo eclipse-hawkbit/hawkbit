@@ -41,8 +41,6 @@ services:
 
   # ---------------------
   # HawkBit service
-  # username: admin
-  # password: admin
   # ---------------------
   hawkbit:
     image: "hawkbit/hawkbit-update-server:latest-mysql"
