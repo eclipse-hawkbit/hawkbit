@@ -17,24 +17,61 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 public class TargetTypeFilterButtonClick extends AbstractFilterSingleButtonClick<ProxyTargetType> {
     private static final long serialVersionUID = 1L;
 
+    private boolean noTargetTypeBtnClicked;
+
     private final transient BiConsumer<ProxyTargetType, ClickBehaviourType> filterChangedCallback;
 
-    TargetTypeFilterButtonClick(final BiConsumer<ProxyTargetType, ClickBehaviourType> filterChangedCallback) {
+    /**
+     * Constructor
+     *
+     * @param filterChangedCallback
+     *            filterChangedCallback
+     */
+    public TargetTypeFilterButtonClick(
+            final BiConsumer<ProxyTargetType, ClickBehaviourType> filterChangedCallback) {
         this.filterChangedCallback = filterChangedCallback;
+        this.noTargetTypeBtnClicked = false;
+    }
+
+    @Override
+    public void processFilterClick(final ProxyTargetType clickedFilter) {
+        if (isFilterPreviouslyClicked(clickedFilter) || isNoTargetTypePreviouslyClicked(clickedFilter)) {
+            previouslyClickedFilterId = null;
+            filterUnClicked(clickedFilter);
+        } else {
+            previouslyClickedFilterId = clickedFilter.getId();
+            filterClicked(clickedFilter);
+        }
     }
 
     @Override
     protected void filterUnClicked(ProxyTargetType clickedFilter) {
+        if (clickedFilter.isNoTargetType()){
+            noTargetTypeBtnClicked = false;
+        }
         filterChangedCallback.accept(clickedFilter, ClickBehaviourType.UNCLICKED);
     }
 
     @Override
     protected void filterClicked(ProxyTargetType clickedFilter) {
+        noTargetTypeBtnClicked = clickedFilter.isNoTargetType();
         filterChangedCallback.accept(clickedFilter, ClickBehaviourType.CLICKED);
     }
 
     @Override
     public boolean isFilterPreviouslyClicked(final ProxyTargetType clickedFilter) {
-        return false;
+        return (previouslyClickedFilterId != null && previouslyClickedFilterId.equals(clickedFilter.getId()));
     }
+
+    private boolean isNoTargetTypePreviouslyClicked(ProxyTargetType clickedFilter) {
+        return clickedFilter.isNoTargetType() && isNoTargetTypeBtnClicked();
+    }
+
+    /**
+     * @return true if no target type button clicked
+     */
+    public boolean isNoTargetTypeBtnClicked() {
+        return noTargetTypeBtnClicked;
+    }
+
 }

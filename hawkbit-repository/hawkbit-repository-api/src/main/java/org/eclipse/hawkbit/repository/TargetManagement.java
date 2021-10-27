@@ -8,14 +8,6 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
@@ -35,11 +27,21 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Management service for {@link Target}s.
@@ -106,10 +108,28 @@ public interface TargetManagement {
      *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
+     *
+     * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)} should be used instead.
      */
+    @Deprecated
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
             Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
+
+    /**
+     * Count {@link Target}s for all the given filter parameters.
+     *
+     * @param filterParams
+     *            the filters to apply; only filters are enabled that have
+     *            non-null value; filters are AND-gated
+     *
+     * @return the found number {@link Target}s
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByFilters(@NotNull final FilterParams filterParams);
 
     /**
      * Counts number of targets with given with given distribution set Id
@@ -607,6 +627,38 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
+
+    /**
+     * Initiates {@link TargetType} assignment to given {@link Target}s. If some
+     * targets in the list have the {@link TargetType} not yet assigned, they will
+     * get assigned. If all targets are already of that type, there will be no
+     * un-assignment.
+     *
+     * @param controllerIds
+     *            to set the type to
+     * @param typeId
+     *            to assign targets to
+     * @return {@link TargetTypeAssignmentResult} with all meta data of the
+     *         assignment outcome.
+     *
+     * @throws EntityNotFoundException
+     *             if target type with given id does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
+
+    /**
+     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type
+     * of the targets will be set to {@code null}
+     *
+     * @param controllerIds
+     *            to remove the type from
+     * @return {@link TargetTypeAssignmentResult} with all meta data of the
+     *         assignment outcome.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    TargetTypeAssignmentResult unAssignType(@NotEmpty Collection<String> controllerIds);
+
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
      *
@@ -638,6 +690,8 @@ public interface TargetManagement {
      *
      * @param controllerID
      *            to un-assign for
+     * @param targetTypeId
+     *            Target type id
      * @return the unassigned target
      *
      * @throws EntityNotFoundException
@@ -854,4 +908,5 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
+
 }

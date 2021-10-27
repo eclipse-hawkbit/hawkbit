@@ -161,6 +161,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR = "message.error";
 
+    public static final String MESSAGE_TARGET_TARGETTYPE_ASSIGNED = "message.target.targetype.assign.error";
+
     public static final String MESSAGE_ERROR_PERMISSION_INSUFFICIENT = "message.permission.insufficient";
 
     public static final String MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE = "message.target.type.incompatible";

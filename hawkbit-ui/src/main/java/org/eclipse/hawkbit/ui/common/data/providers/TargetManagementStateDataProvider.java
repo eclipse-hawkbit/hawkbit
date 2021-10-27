@@ -64,6 +64,8 @@ public class TargetManagementStateDataProvider
         final boolean noTagClicked = filter.isNoTagClicked();
         final String[] targetTags = filter.getTargetTags().toArray(new String[0]);
         final Long targetFilterQueryId = filter.getTargetFilterQueryId();
+        final boolean noTargetTypeClicked = filter.isNoTargetTypeClicked();
+        final Long targetTypeId = filter.getTargetTypeId();
 
         if (pinnedDistId != null) {
             return targetManagement.findByFilterOrderByLinkedDistributionSet(pageRequest, pinnedDistId,
@@ -76,6 +78,12 @@ public class TargetManagementStateDataProvider
                 return targetManagement.findByTargetFilterQuery(pageRequest, targetFilterQueryId);
             }
 
+            // Type Filter of Deployment Management view
+            if (targetTypeId != null || noTargetTypeClicked) {
+                return targetManagement.findByFilters(pageRequest, new FilterParams(searchText, distributionId, noTargetTypeClicked, targetTypeId));
+            }
+
+            // Simple Filter of Deployment Management view
             return targetManagement.findByFilters(pageRequest, new FilterParams(targetUpdateStatusList, overdueState,
                     searchText, distributionId, noTagClicked, targetTags));
         }
@@ -95,6 +103,8 @@ public class TargetManagementStateDataProvider
         final Long distributionId = filter.getDistributionId();
         final boolean noTagClicked = filter.isNoTagClicked();
         final String[] targetTags = filter.getTargetTags().toArray(new String[0]);
+        final boolean noTargetTypeClicked = filter.isNoTargetTypeClicked();
+        final Long targetTypeId = filter.getTargetTypeId();
         final Long targetFilterQueryId = filter.getTargetFilterQueryId();
 
         if (filter.isAnyFilterSelected()) {
@@ -102,8 +112,14 @@ public class TargetManagementStateDataProvider
                 return targetManagement.countByTargetFilterQuery(targetFilterQueryId);
             }
 
-            return targetManagement.countByFilters(targetUpdateStatusList, overdueState, searchText, distributionId,
-                    noTagClicked, targetTags);
+            // Type Filter of Deployment Management view
+            if (targetTypeId != null || noTargetTypeClicked) {
+                return targetManagement.countByFilters(new FilterParams(searchText, distributionId, noTargetTypeClicked, targetTypeId));
+            }
+
+            // Simple Filter of Deployment Management view
+            return targetManagement.countByFilters(new FilterParams(targetUpdateStatusList, overdueState, searchText, distributionId,
+                    noTagClicked, targetTags));
         }
 
         return targetManagement.count();

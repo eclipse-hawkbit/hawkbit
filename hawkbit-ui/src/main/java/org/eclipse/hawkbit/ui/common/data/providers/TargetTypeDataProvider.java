@@ -31,6 +31,14 @@ public class TargetTypeDataProvider<T extends ProxyIdentifiableEntity>
     private static final long serialVersionUID = 1L;
     private final transient TargetTypeManagement targetTypeManagement;
 
+    /**
+     * Constructor
+     *
+     * @param targetTypeManagement
+     *          TargetTypeManagement
+     * @param mapper
+     *          Mapper
+     */
     public TargetTypeDataProvider(final TargetTypeManagement targetTypeManagement, IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
         super(mapper, Sort.by(Direction.ASC, "name"));
         this.targetTypeManagement = targetTypeManagement;

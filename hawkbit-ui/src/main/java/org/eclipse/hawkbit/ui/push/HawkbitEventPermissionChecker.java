@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -40,6 +41,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreat
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.push.event.ActionChangedEvent;
@@ -71,7 +74,8 @@ public class HawkbitEventPermissionChecker implements UIEventPermissionChecker {
                 Arrays.asList(TargetCreatedEvent.class, TargetUpdatedEvent.class, TargetDeletedEvent.class,
                         TargetTagCreatedEvent.class, TargetTagUpdatedEvent.class, TargetTagDeletedEvent.class,
                         ActionChangedEvent.class, TargetFilterQueryCreatedEvent.class,
-                        TargetFilterQueryUpdatedEvent.class, TargetFilterQueryDeletedEvent.class),
+                        TargetFilterQueryUpdatedEvent.class, TargetFilterQueryDeletedEvent.class,
+                        TargetTypeCreatedEvent.class, TargetTypeUpdatedEvent.class, TargetTypeDeletedEvent.class),
                 permChecker::hasTargetReadPermission);
 
         eventPermissionRules.put(Arrays.asList(DistributionSetCreatedEvent.class, DistributionSetUpdatedEvent.class,

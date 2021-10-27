@@ -392,10 +392,14 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
             // Since the targetRoot is changed by joining we need to get the
             // isNull predicate first
-            final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
+            final Predicate targetTypeIsNull = getTargetTypeIsNullPredicate(targetRoot);
 
             return cb.or(targetTypeIsNull, cb.equal(getDsTypeIdPath(targetRoot), distributionSetTypeId));
         };
+    }
+
+    private static Predicate getTargetTypeIsNullPredicate(Root<JpaTarget> targetRoot) {
+        return targetRoot.get(JpaTarget_.targetType).isNull();
     }
 
     /**
@@ -532,13 +536,39 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have a
-     * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
+     * {@link Specification} for retrieving {@link Target}s by target type id
+     *
+     * @param typeId
+     *            the id of the target type
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasTargetType() {
-        return (targetRoot, query, cb) -> cb.isNotNull(targetRoot.get(JpaTarget_.targetType));
+    public static Specification<JpaTarget> hasTargetType(final long typeId) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id),
+                typeId);
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by target type id is equal to null
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNoTargetType() {
+        return (targetRoot, query, cb) -> cb.isNull(targetRoot.get(JpaTarget_.targetType));
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that don't have target
+     * type assigned
+     *
+     * @param typeId
+     *            the id of the target type
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
+        return (targetRoot, query, cb) -> cb.or(getTargetTypeIsNullPredicate(targetRoot),
+                cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id), typeId));
     }
 
     /**
