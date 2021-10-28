@@ -26,7 +26,7 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -77,7 +77,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
                 .isFalse();
 
         assertThat(artifactManagement.findFirstBySHA1(NOT_EXIST_ID)).isNotPresent();
-        assertThat(artifactManagement.loadArtifactBinary(NOT_EXIST_ID)).isNotPresent();
+        assertThat(artifactManagement.loadArtifactBinary(NOT_EXIST_ID, module.getId())).isNotPresent();
     }
 
     @Test
@@ -382,7 +382,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final Artifact artifact2 = createArtifactForSoftwareModule("file2", sm2.getId(), artifactSize,
                     inputStream2);
 
-            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact2.getSha1Hash()), randomBytes);
+            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact2.getSha1Hash(), sm2.getId()),
+                    randomBytes);
 
             assertThat(artifactRepository.findAll()).hasSize(2);
 
@@ -447,9 +448,10 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         final int artifactSize = 5 * 1024;
         final byte[] randomBytes = randomBytes(artifactSize);
         try (final InputStream input = new ByteArrayInputStream(randomBytes)) {
-            final Artifact artifact = createArtifactForSoftwareModule("file1",
-                    testdataFactory.createSoftwareModuleOs().getId(), artifactSize, input);
-            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact.getSha1Hash()), randomBytes);
+            final SoftwareModule smOs = testdataFactory.createSoftwareModuleOs();
+            final Artifact artifact = createArtifactForSoftwareModule("file1", smOs.getId(), artifactSize, input);
+            assertEqualFileContents(artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), smOs.getId()),
+                    randomBytes);
         }
     }
 
@@ -459,7 +461,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     public void loadArtifactBinaryWithoutDownloadArtifactThrowsPermissionDenied() {
         assertThatExceptionOfType(InsufficientPermissionException.class)
                 .as("Should not have worked with missing permission.")
-                .isThrownBy(() -> artifactManagement.loadArtifactBinary("123"));
+                .isThrownBy(() -> artifactManagement.loadArtifactBinary("123", 1));
     }
 
     @Test
@@ -541,7 +543,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             assertThat(createdArtifact.getSha256Hash()).isEqualTo(artifactHashes.getSha256());
         }
 
-        final Optional<AbstractDbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1());
+        final Optional<DbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1(),
+                sm.getId());
         assertThat(dbArtifact).isPresent();
     }
 
@@ -561,7 +564,8 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
             final Artifact artifact = artifactManagement.create(artifactUpload);
             assertThat(artifact).isNotNull();
         }
-        final Optional<AbstractDbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1());
+        final Optional<DbArtifact> dbArtifact = artifactManagement.loadArtifactBinary(artifactHashes.getSha1(),
+                smOs.getId());
         assertThat(dbArtifact).isPresent();
 
         try (final InputStream inputStream = new ByteArrayInputStream(testData)) {
@@ -622,10 +626,9 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         assertThat(runAsTenant(tenant, () -> artifactRepository.findAll())).hasSize(count);
     }
 
-    private void assertEqualFileContents(final Optional<AbstractDbArtifact> artifact, final byte[] randomBytes)
+    private void assertEqualFileContents(final Optional<DbArtifact> artifact, final byte[] randomBytes)
             throws IOException {
-        try (final InputStream inputStream = artifactManagement.loadArtifactBinary(artifact.get().getHashes().getSha1())
-                .get().getFileInputStream()) {
+        try (final InputStream inputStream = artifact.get().getFileInputStream()) {
             assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(randomBytes), inputStream),
                     "The stored binary matches the given binary");
         }

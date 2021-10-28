@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
@@ -33,6 +33,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
@@ -44,6 +46,8 @@ import com.vaadin.ui.Button;
  */
 public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOG = LoggerFactory.getLogger(ArtifactDetailsGrid.class);
 
     private static final String ARTIFACT_NAME_ID = "artifactName";
     private static final String ARTIFACT_SIZE_ID = "artifactSize";
@@ -170,13 +174,17 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     }
 
     private void attachFileDownloader(final ProxyArtifact artifact, final Button downloadButton) {
-        final StreamResource artifactStreamResource = new StreamResource(() -> artifactManagement
-                .loadArtifactBinary(artifact.getSha1Hash()).map(AbstractDbArtifact::getFileInputStream).orElse(null),
+        final StreamResource artifactStreamResource = new StreamResource(
+                () -> artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), masterEntitySupport.getMasterId())
+                        .map(DbArtifact::getFileInputStream).orElse(null),
                 artifact.getFilename());
 
         final FileDownloader fileDownloader = new FileDownloader(artifactStreamResource);
-        fileDownloader.setErrorHandler(event -> notification
-                .displayValidationError(i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD_FAILURE_MSG)));
+        fileDownloader.setErrorHandler(event -> {
+            LOG.error("Download failed for artifact with id {}, filename {}", artifact.getId(), artifact.getFilename(),
+                    event.getThrowable());
+            notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD_FAILURE_MSG));
+        });
 
         fileDownloader.extend(downloadButton);
     }

@@ -237,10 +237,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // binary
         try (InputStream fileInputStream = artifactManagement
-                .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash())
+                .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash(),
+                        sm.getId())
                 .get().getFileInputStream()) {
-            assertTrue(
-                    IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream), "Wrong artifact content");
+            assertTrue(IOUtils.contentEquals(new ByteArrayInputStream(random), fileInputStream),
+                    "Wrong artifact content");
         }
 
         // hashes

@@ -12,7 +12,7 @@ import java.io.InputStream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadArtifactRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -70,7 +70,7 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), softwareModuleId)
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);

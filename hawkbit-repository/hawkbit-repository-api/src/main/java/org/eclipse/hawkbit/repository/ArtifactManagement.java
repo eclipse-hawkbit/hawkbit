@@ -15,7 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
@@ -69,8 +69,8 @@ public interface ArtifactManagement {
 
     /**
      * Garbage collects artifact binaries if only referenced by given
-     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are marked
-     * as deleted.
+     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
+     * marked as deleted.
      * 
      *
      * @param artifactSha1Hash
@@ -161,15 +161,17 @@ public interface ArtifactManagement {
     Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long swId);
 
     /**
-     * Loads {@link AbstractDbArtifact} from store for given {@link Artifact}.
+     * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
      * @param sha1Hash
      *            to search for
-     * @return loaded {@link AbstractDbArtifact}
+     * @param softwareModuleId
+     *            software module id.
+     * @return loaded {@link DbArtifact}
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<AbstractDbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash);
+    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash, long softwareModuleId);
 
 }

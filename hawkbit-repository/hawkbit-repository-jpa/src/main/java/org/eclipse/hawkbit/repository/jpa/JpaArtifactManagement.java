@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
 import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
@@ -245,10 +246,35 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<AbstractDbArtifact> loadArtifactBinary(final String sha1Hash) {
-        return Optional.ofNullable(artifactRepository.existsByTenantAndSha1(tenantAware.getCurrentTenant(), sha1Hash)
-                ? artifactRepository.getArtifactBySha1(tenantAware.getCurrentTenant(), sha1Hash)
-                : null);
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId) {
+        final String tenant = tenantAware.getCurrentTenant();
+        if (artifactRepository.existsByTenantAndSha1(tenant, sha1Hash)) {
+            return Optional.ofNullable(wrapInEncryptionAwareDbArtifactIfSmEncrypted(softwareModuleId,
+                    artifactRepository.getArtifactBySha1(tenant, sha1Hash)));
+        }
+
+        return Optional.empty();
+    }
+
+    private final DbArtifact wrapInEncryptionAwareDbArtifactIfSmEncrypted(final long smId,
+            final DbArtifact dbArtifact) {
+        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+            return dbArtifact;
+        }
+
+        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
+        final Map<String, String> requiredSecrets = new HashMap<>();
+        for (final String requiredSecretsKey : requiredSecretsKeys) {
+            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
+                    requiredSecretsKey);
+            if (!requiredSecretsValue.isPresent()) {
+                return dbArtifact;
+            }
+            requiredSecrets.put(requiredSecretsKey, requiredSecretsValue.get());
+        }
+
+        return new EncryptionAwareDbArtifact(dbArtifact,
+                stream -> artifactEncryption.decryptStream(requiredSecrets, stream));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

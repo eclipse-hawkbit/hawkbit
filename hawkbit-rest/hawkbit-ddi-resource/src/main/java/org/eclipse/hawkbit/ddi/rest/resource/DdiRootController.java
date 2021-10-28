@@ -18,7 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
@@ -183,7 +183,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+            final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), softwareModuleId)
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
