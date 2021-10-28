@@ -16,8 +16,6 @@ import java.util.Map;
 
 import javax.servlet.MultipartConfigElement;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -88,8 +86,7 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
             final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
-            final DashboardMenu dashboardMenu, @Autowired(required = false) final ArtifactEncryption artifactEncryption,
-            @Autowired(required = false) final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+            final DashboardMenu dashboardMenu) {
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
         this.i18n = i18n;
@@ -102,8 +99,8 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
             this.smTypeFilterLayout = new SMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
                     artifactUploadState.getSmTypeFilterLayoutUiState(), EventView.UPLOAD);
             this.smGridLayout = new SoftwareModuleGridLayout(uiDependencies, softwareModuleManagement,
-                    softwareModuleTypeManagement, artifactEncryption, artifactEncryptionSecretsStore,
-                    artifactUploadState.getSmTypeFilterLayoutUiState(), artifactUploadState.getSmGridLayoutUiState());
+                    softwareModuleTypeManagement, artifactUploadState.getSmTypeFilterLayoutUiState(),
+                    artifactUploadState.getSmGridLayoutUiState());
             this.artifactDetailsGridLayout = new ArtifactDetailsGridLayout(uiDependencies, artifactUploadState,
                     artifactUploadState.getArtifactDetailsGridLayoutUiState(), artifactManagement,
                     softwareModuleManagement, multipartConfigElement);

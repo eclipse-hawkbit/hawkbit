@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
@@ -27,8 +25,6 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
 
     private final SoftwareModuleManagement smManagement;
     private final SoftwareModuleTypeManagement smTypeManagement;
-    private final ArtifactEncryption artifactEncryption;
-    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
 
     private final EventView view;
 
@@ -45,14 +41,11 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
      *            EventView
      */
     public SmWindowBuilder(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final SoftwareModuleTypeManagement smTypeManagement, final ArtifactEncryption artifactEncryption,
-            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore, final EventView view) {
+            final SoftwareModuleTypeManagement smTypeManagement, final EventView view) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
         this.smTypeManagement = smTypeManagement;
-        this.artifactEncryption = artifactEncryption;
-        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
 
         this.view = view;
     }
@@ -67,8 +60,8 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
      */
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(new AddSmWindowController(uiDependencies, smManagement, artifactEncryption,
-                artifactEncryptionSecretsStore, new SmWindowLayout(getI18n(), smTypeManagement), view));
+        return getWindowForNewEntity(new AddSmWindowController(uiDependencies, smManagement,
+                new SmWindowLayout(getI18n(), smTypeManagement), view));
 
     }
 
@@ -81,6 +74,6 @@ public class SmWindowBuilder extends AbstractEntityWindowBuilder<ProxySoftwareMo
     @Override
     public Window getWindowForUpdate(final ProxySoftwareModule proxySm) {
         return getWindowForEntity(proxySm, new UpdateSmWindowController(uiDependencies, smManagement,
-                artifactEncryption, artifactEncryptionSecretsStore, new SmWindowLayout(getI18n(), smTypeManagement)));
+                new SmWindowLayout(getI18n(), smTypeManagement)));
     }
 }

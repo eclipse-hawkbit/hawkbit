@@ -32,6 +32,17 @@ public interface ArtifactEncryptionSecretsStore {
     void addSecret(final long softwareModuleId, final String secretKey, final String secretValue);
 
     /**
+     * Checks if secret is present for particular {@link SoftwareModule} id and
+     * key in the store.
+     *
+     * @param softwareModuleId
+     *            {@link SoftwareModule} id associated with the secret
+     * @param secretKey
+     *            key of the secret
+     */
+    boolean secretExists(final long softwareModuleId, final String secretKey);
+
+    /**
      * Retrieves secret value associated with particular {@link SoftwareModule}
      * id and key from the store.
      *

@@ -31,8 +31,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -115,19 +114,13 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final Database database;
 
-    private final ArtifactEncryption artifactEncryption;
-
-    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
-
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final ArtifactEncryption artifactEncryption,
-            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.softwareModuleRepository = softwareModuleRepository;
@@ -138,8 +131,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.quotaManagement = quotaManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
-        this.artifactEncryption = artifactEncryption;
-        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
     }
 
     @Override
@@ -174,15 +165,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
-            return;
-        }
-
-        if (encryptionRequested) {
-            final Map<String, String> secrets = artifactEncryption.generateSecrets();
-            secrets.forEach((key, value) -> artifactEncryptionSecretsStore.addSecret(smId, key, value));
-            // we want to clear secrets from memory as soon as possible
-            secrets.clear();
+        if (ArtifactEncryptionService.getInstance().isEncryptionSupported() && encryptionRequested) {
+            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(smId);
         }
     }
 

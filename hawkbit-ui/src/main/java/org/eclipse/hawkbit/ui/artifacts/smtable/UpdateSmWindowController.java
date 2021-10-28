@@ -8,10 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import java.util.Set;
-
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -30,8 +27,6 @@ public class UpdateSmWindowController
         extends AbstractUpdateNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
-    private final ArtifactEncryption artifactEncryption;
-    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
     private final SmWindowLayout layout;
     private final ProxySmValidator validator;
 
@@ -49,13 +44,10 @@ public class UpdateSmWindowController
      *            SmWindowLayout
      */
     public UpdateSmWindowController(final CommonUiDependencies uiDependencies,
-            final SoftwareModuleManagement smManagement, final ArtifactEncryption artifactEncryption,
-            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore, final SmWindowLayout layout) {
+            final SoftwareModuleManagement smManagement, final SmWindowLayout layout) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
-        this.artifactEncryption = artifactEncryption;
-        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
         this.layout = layout;
         this.validator = new ProxySmValidator(uiDependencies);
     }
@@ -70,27 +62,12 @@ public class UpdateSmWindowController
         sm.setVersion(proxyEntity.getVersion());
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
-        sm.setEncrypted(isSmEncrypted(proxyEntity.getId()));
+        sm.setEncrypted(ArtifactEncryptionService.getInstance().isSoftwareModuleEncrypted(proxyEntity.getId()));
 
         nameBeforeEdit = proxyEntity.getName();
         versionBeforeEdit = proxyEntity.getVersion();
 
         return sm;
-    }
-
-    private boolean isSmEncrypted(final long smId) {
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
-            return false;
-        }
-
-        final Set<String> requiredSecretKeys = artifactEncryption.requiredSecretKeys();
-        for (final String requiredSecretKey : requiredSecretKeys) {
-            if (!artifactEncryptionSecretsStore.getSecret(smId, requiredSecretKey).isPresent()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     @Override
@@ -104,7 +81,7 @@ public class UpdateSmWindowController
         layout.disableNameField();
         layout.disableVersionField();
 
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+        if (!ArtifactEncryptionService.getInstance().isEncryptionSupported()) {
             layout.hideEncryptionField();
         } else {
             layout.disableEncryptionField();

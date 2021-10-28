@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.InputStream;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
@@ -22,10 +22,10 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 public class EncryptionAwareDbArtifact implements DbArtifact {
 
     private final DbArtifact encryptedDbArtifact;
-    private final Function<InputStream, InputStream> decryptionFunction;
+    private final UnaryOperator<InputStream> decryptionFunction;
 
     public EncryptionAwareDbArtifact(final DbArtifact encryptedDbArtifact,
-            final Function<InputStream, InputStream> decryptionFunction) {
+            final UnaryOperator<InputStream> decryptionFunction) {
         this.encryptedDbArtifact = encryptedDbArtifact;
         this.decryptionFunction = decryptionFunction;
     }

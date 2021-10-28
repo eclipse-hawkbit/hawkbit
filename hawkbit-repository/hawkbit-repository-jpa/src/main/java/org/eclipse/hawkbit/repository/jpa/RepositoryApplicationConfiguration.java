@@ -16,8 +16,6 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -107,7 +105,6 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
 import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -631,13 +628,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
-            @Autowired(required = false) final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
-                quotaManagement, virtualPropertyReplacer, properties.getDatabase(), artifactEncryption,
-                artifactEncryptionSecretsStore);
+                quotaManagement, virtualPropertyReplacer, properties.getDatabase());
     }
 
     /**
@@ -754,11 +748,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            @Autowired(required = false) final ArtifactEncryption artifactEncryption,
-            @Autowired(required = false) final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                quotaManagement, tenantAware, artifactEncryption, artifactEncryptionSecretsStore);
+                quotaManagement, tenantAware);
     }
 
     /**

@@ -8,8 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -33,8 +32,6 @@ public class AddSmWindowController
         extends AbstractAddNamedEntityWindowController<ProxySoftwareModule, ProxySoftwareModule, SoftwareModule> {
 
     private final SoftwareModuleManagement smManagement;
-    private final ArtifactEncryption artifactEncryption;
-    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
     private final SmWindowLayout layout;
     private final EventView view;
     private final ProxySmValidator validator;
@@ -52,14 +49,10 @@ public class AddSmWindowController
      *            EventView
      */
     public AddSmWindowController(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement smManagement,
-            final ArtifactEncryption artifactEncryption,
-            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore, final SmWindowLayout layout,
-            final EventView view) {
+            final SmWindowLayout layout, final EventView view) {
         super(uiDependencies);
 
         this.smManagement = smManagement;
-        this.artifactEncryption = artifactEncryption;
-        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
         this.layout = layout;
         this.view = view;
         this.validator = new ProxySmValidator(uiDependencies);
@@ -72,7 +65,7 @@ public class AddSmWindowController
 
     @Override
     protected void adaptLayout(final ProxySoftwareModule proxyEntity) {
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
+        if (!ArtifactEncryptionService.getInstance().isEncryptionSupported()) {
             layout.hideEncryptionField();
         }
     }

@@ -10,10 +10,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.ArtifactStoreException;
@@ -21,8 +18,7 @@ import org.eclipse.hawkbit.artifact.repository.HashNotMatchException;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.eclipse.hawkbit.repository.ArtifactEncryption;
-import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
@@ -71,22 +67,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
     private final QuotaManagement quotaManagement;
 
-    private final ArtifactEncryption artifactEncryption;
-
-    private final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore;
-
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            final ArtifactEncryption artifactEncryption,
-            final ArtifactEncryptionSecretsStore artifactEncryptionSecretsStore) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
         this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
-        this.artifactEncryption = artifactEncryption;
-        this.artifactEncryptionSecretsStore = artifactEncryptionSecretsStore;
     }
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
@@ -123,8 +111,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
+        final long smId = artifactUpload.getModuleId();
+        final InputStream stream = artifactUpload.getInputStream();
+
         try (final InputStream wrapedStream = wrapInQuotaStream(
-                wrapInEncryptionStreamIfSmEncrypted(artifactUpload.getModuleId(), artifactUpload.getInputStream()))) {
+                isSmEncrypted(smId) ? wrapInEncryptionStream(smId, stream) : stream)) {
             return artifactRepository.store(tenantAware.getCurrentTenant(), wrapedStream, artifactUpload.getFilename(),
                     artifactUpload.getContentType(), new DbArtifactHash(artifactUpload.getProvidedSha1Sum(),
                             artifactUpload.getProvidedMd5Sum(), artifactUpload.getProvidedSha256Sum()));
@@ -141,23 +132,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
         }
     }
 
-    private InputStream wrapInEncryptionStreamIfSmEncrypted(final long smId, final InputStream stream) {
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
-            return stream;
-        }
+    private boolean isSmEncrypted(final long smId) {
+        return ArtifactEncryptionService.getInstance().isEncryptionSupported()
+                && ArtifactEncryptionService.getInstance().isSoftwareModuleEncrypted(smId);
+    }
 
-        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
-        final Map<String, String> requiredSecrets = new HashMap<>();
-        for (final String requiredSecretsKey : requiredSecretsKeys) {
-            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
-                    requiredSecretsKey);
-            if (!requiredSecretsValue.isPresent()) {
-                return stream;
-            }
-            requiredSecrets.put(requiredSecretsKey, requiredSecretsValue.get());
-        }
-
-        return artifactEncryption.encryptStream(requiredSecrets, stream);
+    private InputStream wrapInEncryptionStream(final long smId, final InputStream stream) {
+        return ArtifactEncryptionService.getInstance().encryptSoftwareModuleArtifact(smId, stream);
     }
 
     private void assertArtifactQuota(final long id, final int requested) {
@@ -249,32 +230,22 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId) {
         final String tenant = tenantAware.getCurrentTenant();
         if (artifactRepository.existsByTenantAndSha1(tenant, sha1Hash)) {
-            return Optional.ofNullable(wrapInEncryptionAwareDbArtifactIfSmEncrypted(softwareModuleId,
-                    artifactRepository.getArtifactBySha1(tenant, sha1Hash)));
+            final DbArtifact dbArtifact = artifactRepository.getArtifactBySha1(tenant, sha1Hash);
+            return Optional.ofNullable(
+                    isSmEncrypted(softwareModuleId) ? wrapInEncryptionAwareDbArtifact(softwareModuleId, dbArtifact)
+                            : dbArtifact);
         }
 
         return Optional.empty();
     }
 
-    private final DbArtifact wrapInEncryptionAwareDbArtifactIfSmEncrypted(final long smId,
-            final DbArtifact dbArtifact) {
-        if (artifactEncryption == null || artifactEncryptionSecretsStore == null) {
-            return dbArtifact;
-        }
-
-        final Set<String> requiredSecretsKeys = artifactEncryption.requiredSecretKeys();
-        final Map<String, String> requiredSecrets = new HashMap<>();
-        for (final String requiredSecretsKey : requiredSecretsKeys) {
-            final Optional<String> requiredSecretsValue = artifactEncryptionSecretsStore.getSecret(smId,
-                    requiredSecretsKey);
-            if (!requiredSecretsValue.isPresent()) {
-                return dbArtifact;
-            }
-            requiredSecrets.put(requiredSecretsKey, requiredSecretsValue.get());
+    private final DbArtifact wrapInEncryptionAwareDbArtifact(final long smId, final DbArtifact dbArtifact) {
+        if (dbArtifact == null) {
+            return null;
         }
 
         return new EncryptionAwareDbArtifact(dbArtifact,
-                stream -> artifactEncryption.decryptStream(requiredSecrets, stream));
+                stream -> ArtifactEncryptionService.getInstance().decryptSoftwareModuleArtifact(smId, stream));
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
