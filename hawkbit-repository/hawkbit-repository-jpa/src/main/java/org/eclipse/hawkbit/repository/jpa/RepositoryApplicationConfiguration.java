@@ -16,6 +16,9 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -955,5 +958,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
         return new NoCountBaseRepositoryTypeProvider();
 
+    }
+
+    /**
+     * Default artifact encryption service bean that internally uses
+     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore}
+     * beans for {@link SoftwareModule} artifacts encryption/decryption
+     *
+     * @return a {@link ArtifactEncryptionService} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    ArtifactEncryptionService artifactEncryptionService() {
+        return ArtifactEncryptionService.getInstance();
     }
 }
