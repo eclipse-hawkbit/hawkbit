@@ -111,14 +111,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
+        final String tenant = tenantAware.getCurrentTenant();
         final long smId = artifactUpload.getModuleId();
         final InputStream stream = artifactUpload.getInputStream();
+        final String fileName = artifactUpload.getFilename();
+        final String contentType = artifactUpload.getContentType();
+        final String providedSha1 = artifactUpload.getProvidedSha1Sum();
+        final String providedMd5 = artifactUpload.getProvidedMd5Sum();
+        final String providedSha256 = artifactUpload.getProvidedSha256Sum();
 
         try (final InputStream wrapedStream = wrapInQuotaStream(
                 isSmEncrypted(smId) ? wrapInEncryptionStream(smId, stream) : stream)) {
-            return artifactRepository.store(tenantAware.getCurrentTenant(), wrapedStream, artifactUpload.getFilename(),
-                    artifactUpload.getContentType(), new DbArtifactHash(artifactUpload.getProvidedSha1Sum(),
-                            artifactUpload.getProvidedMd5Sum(), artifactUpload.getProvidedSha256Sum()));
+            return artifactRepository.store(tenant, wrapedStream, fileName, contentType,
+                    new DbArtifactHash(providedSha1, providedMd5, providedSha256));
         } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);
         } catch (final HashNotMatchException e) {

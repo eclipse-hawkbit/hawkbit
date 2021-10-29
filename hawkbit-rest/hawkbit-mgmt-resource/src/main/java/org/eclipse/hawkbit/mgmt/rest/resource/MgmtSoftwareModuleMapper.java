@@ -108,6 +108,7 @@ public final class MgmtSoftwareModuleMapper {
         response.setType(softwareModule.getType().getKey());
         response.setVendor(softwareModule.getVendor());
         response.setDeleted(softwareModule.isDeleted());
+        response.setEncrypted(softwareModule.isEncrypted());
 
         response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getSoftwareModule(response.getModuleId()))
                 .withSelfRel());

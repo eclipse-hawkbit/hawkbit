@@ -90,6 +90,9 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
     private List<JpaSoftwareModuleMetadata> metadata;
 
+    @Column(name = "encrypted")
+    private boolean encrypted;
+
     /**
      * Default constructor.
      */
@@ -184,6 +187,22 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     public void setType(final JpaSoftwareModuleType type) {
         this.type = type;
+    }
+
+    @Override
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    /**
+     * Marks this software module as encrypted.
+     * 
+     * @param encrypted
+     *            {@code true} if the software module should be marked as
+     *            encrypted otherwise {@code false}
+     */
+    public void setEncrypted(final boolean encrypted) {
+        this.encrypted = encrypted;
     }
 
     @Override
