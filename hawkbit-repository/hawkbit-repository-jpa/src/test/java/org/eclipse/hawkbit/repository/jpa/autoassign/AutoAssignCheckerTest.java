@@ -324,7 +324,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies an auto assignment only creates actions for compatible targets")
     void checkAutoAssignmentWithIncompatibleTargets() {
-        final int TARGET_COUNT = 750;
+        final int TARGET_COUNT = 5;
 
         final DistributionSet testDs = testdataFactory.createDistributionSet();
         final DistributionSetType incompatibleDsType1 = testdataFactory
