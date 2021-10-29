@@ -75,7 +75,7 @@ public interface SoftwareModuleCreate {
      *            if should be encrypted
      * @return updated builder instance
      */
-    SoftwareModuleCreate encrypted(Boolean encrypted);
+    SoftwareModuleCreate encrypted(boolean encrypted);
 
     /**
      * @return peek on current state of {@link SoftwareModule} in the builder

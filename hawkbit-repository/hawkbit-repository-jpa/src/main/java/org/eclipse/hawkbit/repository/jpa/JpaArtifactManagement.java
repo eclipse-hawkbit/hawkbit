@@ -106,11 +106,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
 
         assertArtifactQuota(moduleId, 1);
 
-        final AbstractDbArtifact artifact = storeArtifact(artifactUpload);
+        final AbstractDbArtifact artifact = storeArtifact(artifactUpload, softwareModule.isEncrypted());
         return storeArtifactMetadata(softwareModule, filename, artifact, existing);
     }
 
-    private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload) {
+    private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
         final String tenant = tenantAware.getCurrentTenant();
         final long smId = artifactUpload.getModuleId();
         final InputStream stream = artifactUpload.getInputStream();
@@ -121,7 +121,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final String providedSha256 = artifactUpload.getProvidedSha256Sum();
 
         try (final InputStream wrapedStream = wrapInQuotaStream(
-                isSmEncrypted(smId) ? wrapInEncryptionStream(smId, stream) : stream)) {
+                isSmEncrypted ? wrapInEncryptionStream(smId, stream) : stream)) {
             return artifactRepository.store(tenant, wrapedStream, fileName, contentType,
                     new DbArtifactHash(providedSha1, providedMd5, providedSha256));
         } catch (final ArtifactStoreException | IOException e) {
@@ -135,11 +135,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 throw new InvalidMD5HashException(e.getMessage(), e);
             }
         }
-    }
-
-    private boolean isSmEncrypted(final long smId) {
-        return ArtifactEncryptionService.getInstance().isEncryptionSupported()
-                && ArtifactEncryptionService.getInstance().isSoftwareModuleEncrypted(smId);
     }
 
     private InputStream wrapInEncryptionStream(final long smId, final InputStream stream) {
@@ -232,13 +227,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
     }
 
     @Override
-    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId) {
+    public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId,
+            final boolean isEncrypted) {
         final String tenant = tenantAware.getCurrentTenant();
         if (artifactRepository.existsByTenantAndSha1(tenant, sha1Hash)) {
             final DbArtifact dbArtifact = artifactRepository.getArtifactBySha1(tenant, sha1Hash);
             return Optional.ofNullable(
-                    isSmEncrypted(softwareModuleId) ? wrapInEncryptionAwareDbArtifact(softwareModuleId, dbArtifact)
-                            : dbArtifact);
+                    isEncrypted ? wrapInEncryptionAwareDbArtifact(softwareModuleId, dbArtifact) : dbArtifact);
         }
 
         return Optional.empty();

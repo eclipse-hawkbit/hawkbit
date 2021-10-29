@@ -113,11 +113,4 @@ public class SmWindowLayout extends AbstractEntityWindowLayout<ProxySoftwareModu
     public void disableEncryptionField() {
         artifactEncryption.setEnabled(false);
     }
-
-    /**
-     * Hide software module artifact encryption
-     */
-    public void hideEncryptionField() {
-        artifactEncryption.setVisible(false);
-    }
 }

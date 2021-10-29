@@ -150,8 +150,8 @@ public class AmqpControllerAuthenticationTest {
 
         authenticationManager.postConstruct();
 
-        testArtifact = new JpaArtifact(SHA1, "afilename", new JpaSoftwareModule(
-                new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", null, null, null));
+        testArtifact = new JpaArtifact(SHA1, "afilename",
+                new JpaSoftwareModule(new JpaSoftwareModuleType("a key", "a name", null, 1), "a name", "a version"));
         testArtifact.setId(1L);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
@@ -260,7 +260,7 @@ public class AmqpControllerAuthenticationTest {
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
                 eq(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED), eq(Boolean.class)))
-                .thenReturn(CONFIG_VALUE_TRUE);
+                        .thenReturn(CONFIG_VALUE_TRUE);
 
         when(rabbitTemplate.getMessageConverter()).thenReturn(messageConverter);
 

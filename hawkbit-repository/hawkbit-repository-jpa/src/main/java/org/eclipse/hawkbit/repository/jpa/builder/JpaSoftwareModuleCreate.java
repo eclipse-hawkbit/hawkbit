@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import java.util.Optional;
-
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -28,25 +26,26 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
-    private Boolean encrypted;
+    private boolean encrypted;
 
     JpaSoftwareModuleCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
-    public SoftwareModuleCreate encrypted(final Boolean encrypted) {
+    public SoftwareModuleCreate encrypted(final boolean encrypted) {
         this.encrypted = encrypted;
         return this;
     }
 
-    public Optional<Boolean> isEncrypted() {
-        return Optional.ofNullable(encrypted);
+    public boolean isEncrypted() {
+        return encrypted;
     }
 
     @Override
     public JpaSoftwareModule build() {
-        return new JpaSoftwareModule(getSoftwareModuleTypeFromKeyString(type), name, version, description, vendor);
+        return new JpaSoftwareModule(getSoftwareModuleTypeFromKeyString(type), name, version, description, vendor,
+                encrypted);
     }
 
     private SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type) {

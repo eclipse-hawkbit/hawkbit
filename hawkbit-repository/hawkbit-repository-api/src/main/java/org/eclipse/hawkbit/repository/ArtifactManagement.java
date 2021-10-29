@@ -167,11 +167,14 @@ public interface ArtifactManagement {
      *            to search for
      * @param softwareModuleId
      *            software module id.
+     * @param isEncrypted
+     *            flag to indicate if artifact is encrypted.
      * @return loaded {@link DbArtifact}
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DOWNLOAD_ARTIFACT + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.IS_CONTROLLER)
-    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash, long softwareModuleId);
+    Optional<DbArtifact> loadArtifactBinary(@NotEmpty String sha1Hash, long softwareModuleId,
+            final boolean isEncrypted);
 
 }

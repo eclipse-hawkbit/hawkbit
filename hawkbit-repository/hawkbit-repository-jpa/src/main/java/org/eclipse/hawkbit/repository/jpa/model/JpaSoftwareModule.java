@@ -109,16 +109,33 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      *            abstract name of the {@link SoftwareModule}
      * @param version
      *            of the {@link SoftwareModule}
+     */
+    public JpaSoftwareModule(final SoftwareModuleType type, final String name, final String version) {
+        this(type, name, version, null, null, false);
+    }
+
+    /**
+     * parameterized constructor.
+     *
+     * @param type
+     *            of the {@link SoftwareModule}
+     * @param name
+     *            abstract name of the {@link SoftwareModule}
+     * @param version
+     *            of the {@link SoftwareModule}
      * @param description
      *            of the {@link SoftwareModule}
      * @param vendor
      *            of the {@link SoftwareModule}
+     * @param encrypted
+     *            encryption flag of the {@link SoftwareModule}
      */
     public JpaSoftwareModule(final SoftwareModuleType type, final String name, final String version,
-            final String description, final String vendor) {
+            final String description, final String vendor, final boolean encrypted) {
         super(name, version, description);
         this.vendor = vendor;
         this.type = (JpaSoftwareModuleType) type;
+        this.encrypted = encrypted;
     }
 
     public void addArtifact(final Artifact artifact) {

@@ -54,7 +54,8 @@ public class SoftwareModuleDetails extends AbstractGridDetailsLayout<ProxySoftwa
      * @param smMetaDataWindowBuilder
      *            SmMetaDataWindowBuilder
      */
-    public SoftwareModuleDetails(final CommonUiDependencies uiDependencies, final SoftwareModuleManagement softwareManagement,
+    public SoftwareModuleDetails(final CommonUiDependencies uiDependencies,
+            final SoftwareModuleManagement softwareManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
             final SmMetaDataWindowBuilder smMetaDataWindowBuilder) {
         super(uiDependencies.getI18n());
@@ -92,6 +93,10 @@ public class SoftwareModuleDetails extends AbstractGridDetailsLayout<ProxySoftwa
                     type.getMaxAssignments() == 1 ? i18n.getMessage("label.singleAssign.type")
                             : i18n.getMessage("label.multiAssign.type")));
         });
+
+        details.add(new ProxyKeyValueDetails(UIComponentIdProvider.SWM_DTLS_ENCRYPTION,
+                i18n.getMessage("label.artifact.encryption"),
+                entity.isEncrypted() ? i18n.getMessage("label.enabled") : i18n.getMessage("label.disabled")));
 
         return details;
     }

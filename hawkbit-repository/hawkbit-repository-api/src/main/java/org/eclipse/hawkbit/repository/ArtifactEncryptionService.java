@@ -33,28 +33,20 @@ public class ArtifactEncryptionService {
     }
 
     public void addSoftwareModuleEncryptionSecrets(final long smId) {
+        if (!isEncryptionSupported()) {
+            // TODO: substitute with custom exception
+            throw new RuntimeException("Encryption not supported!");
+        }
+
         final Map<String, String> secrets = artifactEncryption.generateSecrets();
         secrets.forEach((key, value) -> artifactEncryptionSecretsStore.addSecret(smId, key, value));
         // we want to clear secrets from memory as soon as possible
         secrets.clear();
     }
 
-    public boolean isSoftwareModuleEncrypted(final long smId) {
-        if (!isEncryptionSupported()) {
-            return false;
-        }
-
-        for (final String requiredSecretsKey : artifactEncryption.requiredSecretKeys()) {
-            if (!artifactEncryptionSecretsStore.secretExists(smId, requiredSecretsKey)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     public InputStream encryptSoftwareModuleArtifact(final long smId, final InputStream artifactStream) {
         if (!isEncryptionSupported()) {
+            // TODO: substitute with custom exception
             throw new RuntimeException("Encryption not supported!");
         }
 
@@ -75,6 +67,7 @@ public class ArtifactEncryptionService {
 
     public InputStream decryptSoftwareModuleArtifact(final long smId, final InputStream encryptedArtifactStream) {
         if (!isEncryptionSupported()) {
+            // TODO: substitute with custom exception
             throw new RuntimeException("Decryption not supported!");
         }
 

@@ -70,7 +70,8 @@ public class MgmtDownloadArtifactResource implements MgmtDownloadArtifactRestApi
         final Artifact artifact = module.getArtifact(artifactId)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, artifactId));
 
-        final DbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), softwareModuleId)
+        final DbArtifact file = artifactManagement
+                .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
                 .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
         final HttpServletRequest request = requestResponseContextHolder.getHttpServletRequest();
         final String ifMatch = request.getHeader(HttpHeaders.IF_MATCH);

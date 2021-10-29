@@ -31,8 +31,8 @@ public class MgmtSoftwareModuleRequestBodyPost {
     @JsonProperty
     private String vendor;
 
-    @JsonProperty(required = false)
-    private Boolean encrypted;
+    @JsonProperty
+    private boolean encrypted;
 
     /**
      * @return the name
@@ -127,7 +127,7 @@ public class MgmtSoftwareModuleRequestBodyPost {
     /**
      * @return if encrypted
      */
-    public Boolean isEncrypted() {
+    public boolean isEncrypted() {
         return encrypted;
     }
 
@@ -137,7 +137,7 @@ public class MgmtSoftwareModuleRequestBodyPost {
      *
      * @return updated body
      */
-    public MgmtSoftwareModuleRequestBodyPost setEncrypted(final Boolean encrypted) {
+    public MgmtSoftwareModuleRequestBodyPost setEncrypted(final boolean encrypted) {
         this.encrypted = encrypted;
         return this;
     }

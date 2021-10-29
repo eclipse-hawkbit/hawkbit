@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
-import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -62,7 +61,7 @@ public class UpdateSmWindowController
         sm.setVersion(proxyEntity.getVersion());
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
-        sm.setEncrypted(ArtifactEncryptionService.getInstance().isSoftwareModuleEncrypted(proxyEntity.getId()));
+        sm.setEncrypted(proxyEntity.isEncrypted());
 
         nameBeforeEdit = proxyEntity.getName();
         versionBeforeEdit = proxyEntity.getVersion();
@@ -80,12 +79,7 @@ public class UpdateSmWindowController
         layout.disableSmTypeSelect();
         layout.disableNameField();
         layout.disableVersionField();
-
-        if (!ArtifactEncryptionService.getInstance().isEncryptionSupported()) {
-            layout.hideEncryptionField();
-        } else {
-            layout.disableEncryptionField();
-        }
+        layout.disableEncryptionField();
     }
 
     @Override

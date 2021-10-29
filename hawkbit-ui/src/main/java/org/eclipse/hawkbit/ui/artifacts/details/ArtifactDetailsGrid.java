@@ -111,9 +111,8 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
                 .map(ProxyIdentifiableEntity::getId).collect(Collectors.toList());
         artifactToBeDeletedIds.forEach(artifactManagement::delete);
 
-        eventBus.publish(EventTopics.ENTITY_MODIFIED, this,
-                new EntityModifiedEventPayload(EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class,
-                        getMasterEntitySupport().getMasterId()));
+        eventBus.publish(EventTopics.ENTITY_MODIFIED, this, new EntityModifiedEventPayload(
+                EntityModifiedEventType.ENTITY_UPDATED, ProxySoftwareModule.class, masterEntitySupport.getMasterId()));
 
         return true;
     }
@@ -175,7 +174,9 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
 
     private void attachFileDownloader(final ProxyArtifact artifact, final Button downloadButton) {
         final StreamResource artifactStreamResource = new StreamResource(
-                () -> artifactManagement.loadArtifactBinary(artifact.getSha1Hash(), masterEntitySupport.getMasterId())
+                // TODO: pass correct isEncrypted parameter
+                () -> artifactManagement
+                        .loadArtifactBinary(artifact.getSha1Hash(), masterEntitySupport.getMasterId(), false)
                         .map(DbArtifact::getFileInputStream).orElse(null),
                 artifact.getFilename());
 

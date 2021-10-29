@@ -66,7 +66,7 @@ public class AddSmWindowController
     @Override
     protected void adaptLayout(final ProxySoftwareModule proxyEntity) {
         if (!ArtifactEncryptionService.getInstance().isEncryptionSupported()) {
-            layout.hideEncryptionField();
+            layout.disableEncryptionField();
         }
     }
 

@@ -157,17 +157,13 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
         final JpaSoftwareModule sm = softwareModuleRepository.save(create.build());
-        // flush sm creation in order to get an Id
-        entityManager.flush();
-        generateEncryptionSecretsIfRequested(create.isEncrypted().orElse(false), sm.getId());
+        if (create.isEncrypted()) {
+            // flush sm creation in order to get an Id
+            entityManager.flush();
+            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(sm.getId());
+        }
 
         return sm;
-    }
-
-    private void generateEncryptionSecretsIfRequested(final boolean encryptionRequested, final long smId) {
-        if (ArtifactEncryptionService.getInstance().isEncryptionSupported() && encryptionRequested) {
-            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(smId);
-        }
     }
 
     @Override
