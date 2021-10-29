@@ -11,10 +11,13 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
@@ -24,6 +27,7 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -319,28 +323,51 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies an auto assignment only creates actions for compatible targets")
-    void checkAutoAssignmentWithIncompatibleTargets() throws Exception {
+    void checkAutoAssignmentWithIncompatibleTargets() {
+        final int TARGET_COUNT = 5;
+
         final DistributionSet testDs = testdataFactory.createDistributionSet();
+        final DistributionSetType incompatibleDsType1 = testdataFactory
+                .findOrCreateDistributionSetType("incompatibleDsType1", "incompDsType1");
+        final DistributionSetType incompatibleDsType2 = testdataFactory
+                .findOrCreateDistributionSetType("incompatibleDsType2", "incompDsType2");
         final TargetFilterQuery testFilter = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
                 .create().name("test-filter").query("name==*").autoAssignDistributionSet(testDs));
 
-        final TargetType incompatibleType = testdataFactory.createTargetType("incompatibleType",
+        final TargetType incompatibleEmptyType = testdataFactory.createTargetType("incompatibleEmptyType",
                 Collections.emptyList());
-        final TargetType compatibleType = testdataFactory.createTargetType("compatibleType",
+        final TargetType incompatibleSingleType = testdataFactory.createTargetType("incompatibleSingleType",
+                Collections.singletonList(incompatibleDsType1));
+        final TargetType incompatibleMultiType = testdataFactory.createTargetType("incompatibleMultiType",
+                Arrays.asList(incompatibleDsType1, incompatibleDsType2));
+        final TargetType compatibleSingleType = testdataFactory.createTargetType("compatibleSingleType",
                 Collections.singletonList(testDs.getType()));
-        testdataFactory.createTargetsWithType(10, "incompatible", incompatibleType);
-        final Target compatibleTarget = testdataFactory.createTargetsWithType(1, "compatible", compatibleType).get(0);
-        final Target targetWithoutType = testdataFactory.createTarget();
+        final TargetType compatibleMultiType = testdataFactory.createTargetType("compatibleMultiType",
+                Arrays.asList(testDs.getType(), incompatibleDsType1));
 
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleEmpty", incompatibleEmptyType);
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleSingle", incompatibleSingleType);
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleMulti", incompatibleMultiType);
+
+        final List<Target> compatibleTargetsSingleType = testdataFactory.createTargetsWithType(TARGET_COUNT,
+                "compatibleSingle", compatibleSingleType);
+        final List<Target> compatibleTargetsMultiType = testdataFactory.createTargetsWithType(TARGET_COUNT,
+                "compatibleMulti", compatibleMultiType);
+        final List<Target> compatibleTargetsWithoutType = testdataFactory.createTargets(TARGET_COUNT,
+                "compatibleSingleWithoutType");
+
+        final List<Long> compatibleTargets = Stream
+                .of(compatibleTargetsSingleType, compatibleTargetsMultiType, compatibleTargetsWithoutType)
+                .flatMap(Collection::stream).map(Target::getId).collect(Collectors.toList());
         final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatible(testDs.getId(),
                 testFilter.getQuery());
-        assertThat(compatibleCount).isEqualTo(2);
+        assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
 
         autoAssignChecker.check();
 
-        final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
-        assertThat(actions).hasSize(2);
+        final List<Action> actions = deploymentManagement.findActionsAll(Pageable.unpaged()).getContent();
+        assertThat(actions).hasSize(compatibleTargets.size());
         final List<Long> actionTargets = actions.stream().map(a -> a.getTarget().getId()).collect(Collectors.toList());
-        assertThat(actionTargets).containsExactlyInAnyOrder(compatibleTarget.getId(), targetWithoutType.getId());
+        assertThat(actionTargets).containsExactlyInAnyOrderElementsOf(compatibleTargets);
     }
 }

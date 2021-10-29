@@ -22,6 +22,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -418,11 +419,14 @@ public final class TargetSpecifications {
             // isNotNull predicate first
             final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
 
-            // We need to check for isNull(...) and notEqual(...) since we allow
-            // target types that don't have any compatible distribution set type
-            return cb.and(targetTypeNotNull,
-                    cb.or(cb.isNull(getDsTypeIdPath(targetRoot)),
-                            cb.notEqual(getDsTypeIdPath(targetRoot), distributionSetTypeId)));
+            final Subquery<Long> compatibilitySubQuery = query.subquery(Long.class);
+            final Root<JpaTarget> subQueryTargetRoot = compatibilitySubQuery.from(JpaTarget.class);
+
+            compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id))
+                    .where(cb.and(cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
+                            cb.equal(getDsTypeIdPath(subQueryTargetRoot), distributionSetTypeId)));
+
+            return cb.and(targetTypeNotNull, cb.not(cb.exists(compatibilitySubQuery)));
         };
     }
 
@@ -586,7 +590,7 @@ public final class TargetSpecifications {
      *            distribution set to consider
      * @return specification that applies order by ds, may be overwritten
      */
-    public static Specification<JpaTarget> orderedByLinkedDistributionSet(long distributionSetIdForOrder) {
+    public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder) {
         return (targetRoot, query, cb) -> {
             // Enhance query with custom select based sort
             final Expression<Object> selectCase = cb.selectCase()
