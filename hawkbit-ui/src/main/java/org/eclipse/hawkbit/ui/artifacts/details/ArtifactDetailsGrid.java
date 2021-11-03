@@ -64,6 +64,8 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     private final transient DeleteSupport<ProxyArtifact> artifactDeleteSupport;
     private final transient MasterEntitySupport<ProxySoftwareModule> masterEntitySupport;
 
+    private boolean artifactsEncrypted;
+
     /**
      * Constructor
      *
@@ -86,7 +88,8 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
                 new FilterSupport<>(new ArtifactDataProvider(artifactManagement, new ArtifactToProxyArtifactMapper())));
         initFilterMappings();
 
-        this.masterEntitySupport = new MasterEntitySupport<>(getFilterSupport());
+        this.masterEntitySupport = new MasterEntitySupport<>(getFilterSupport(), null,
+                sm -> artifactsEncrypted = sm != null && sm.isEncrypted());
 
         init();
     }
@@ -173,12 +176,9 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
     }
 
     private void attachFileDownloader(final ProxyArtifact artifact, final Button downloadButton) {
-        final StreamResource artifactStreamResource = new StreamResource(
-                // TODO: pass correct isEncrypted parameter
-                () -> artifactManagement
-                        .loadArtifactBinary(artifact.getSha1Hash(), masterEntitySupport.getMasterId(), false)
-                        .map(DbArtifact::getFileInputStream).orElse(null),
-                artifact.getFilename());
+        final StreamResource artifactStreamResource = new StreamResource(() -> artifactManagement
+                .loadArtifactBinary(artifact.getSha1Hash(), masterEntitySupport.getMasterId(), artifactsEncrypted)
+                .map(DbArtifact::getFileInputStream).orElse(null), artifact.getFilename());
 
         final FileDownloader fileDownloader = new FileDownloader(artifactStreamResource);
         fileDownloader.setErrorHandler(event -> {

@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2021 Bosch.IO GmbH and others.
+ *
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
 package org.eclipse.hawkbit.repository;
 
 import java.io.InputStream;
@@ -6,9 +14,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionException;
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionException.EncryptionOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class ArtifactEncryptionService {
+public final class ArtifactEncryptionService {
 
     private static final ArtifactEncryptionService SINGLETON = new ArtifactEncryptionService();
 
@@ -34,8 +44,7 @@ public class ArtifactEncryptionService {
 
     public void addSoftwareModuleEncryptionSecrets(final long smId) {
         if (!isEncryptionSupported()) {
-            // TODO: substitute with custom exception
-            throw new RuntimeException("Encryption not supported!");
+            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
         }
 
         final Map<String, String> secrets = artifactEncryption.generateSecrets();
@@ -46,8 +55,7 @@ public class ArtifactEncryptionService {
 
     public InputStream encryptSoftwareModuleArtifact(final long smId, final InputStream artifactStream) {
         if (!isEncryptionSupported()) {
-            // TODO: substitute with custom exception
-            throw new RuntimeException("Encryption not supported!");
+            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
         }
 
         return artifactEncryption.encryptStream(getSoftwareModuleEncryptionSecrets(smId), artifactStream);
@@ -67,8 +75,7 @@ public class ArtifactEncryptionService {
 
     public InputStream decryptSoftwareModuleArtifact(final long smId, final InputStream encryptedArtifactStream) {
         if (!isEncryptionSupported()) {
-            // TODO: substitute with custom exception
-            throw new RuntimeException("Decryption not supported!");
+            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
         }
 
         return artifactEncryption.decryptStream(getSoftwareModuleEncryptionSecrets(smId), encryptedArtifactStream);
