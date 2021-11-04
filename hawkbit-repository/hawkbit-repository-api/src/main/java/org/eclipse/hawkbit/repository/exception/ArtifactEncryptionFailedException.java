@@ -8,24 +8,27 @@
  */
 package org.eclipse.hawkbit.repository.exception;
 
+import org.eclipse.hawkbit.exception.AbstractServerRtException;
+import org.eclipse.hawkbit.exception.SpServerError;
+
 /**
  *
  * Exception being thrown in case of error while generating encryption secrets,
  * encrypting or decrypting artifacts.
  *
  */
-public final class ArtifactEncryptionException extends RuntimeException {
+public final class ArtifactEncryptionFailedException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
 
     private final EncryptionOperation encryptionOperation;
 
-    public ArtifactEncryptionException(final EncryptionOperation encryptionOperation) {
+    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation) {
         this(encryptionOperation, null);
     }
 
-    public ArtifactEncryptionException(final EncryptionOperation encryptionOperation, final Throwable cause) {
-        super(cause);
+    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final Throwable cause) {
+        super(SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, cause);
         this.encryptionOperation = encryptionOperation;
     }
 
@@ -33,8 +36,13 @@ public final class ArtifactEncryptionException extends RuntimeException {
         return encryptionOperation;
     }
 
+    /**
+     *
+     * Encryption operation that caused the exception.
+     *
+     */
     public enum EncryptionOperation {
-        NOT_SUPPORTED, GENERATE_KEYS, ENCRYPT, DECRYPT;
+        GENERATE_SECRETS, ENCRYPT, DECRYPT;
     }
 
 }

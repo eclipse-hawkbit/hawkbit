@@ -165,6 +165,14 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR_TARGET_TYPE_INCOMPATIBLE = "message.target.type.incompatible";
 
+    public static final String MESSAGE_ERROR_ENCRYPTION_NOT_SUPPORTED = "message.encryption.unsupported";
+
+    public static final String MESSAGE_ERROR_ENCRYPTION_SECRETS_FAILED = "message.encryption.secrets.failed";
+
+    public static final String MESSAGE_ERROR_ENCRYPTION_FAILD = "message.encryption.failed";
+
+    public static final String MESSAGE_ERROR_DECRYPTION_FAILD = "message.decryption.failed";
+
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";

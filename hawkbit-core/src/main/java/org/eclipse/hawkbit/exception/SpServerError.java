@@ -100,6 +100,18 @@ public enum SpServerError {
     /**
     *
     */
+    SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED("hawkbit.server.error.artifact.encryptionNotSupported",
+            "Artifact encryption is not supported."),
+
+    /**
+    *
+    */
+    SP_ARTIFACT_ENCRYPTION_FAILED("hawkbit.server.error.artifact.encryptionFailed",
+            "Artifact encryption operation failed."),
+
+    /**
+    *
+    */
     SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH("hawkbit.server.error.artifact.uploadFailed.checksum.md5.match",
             "Upload of artifact failed as the provided MD5 checksum did not match with the provided artifact."),
 
@@ -161,15 +173,15 @@ public enum SpServerError {
             "Storage quota will be exceeded if file is uploaded."),
 
     /**
-     * error message, which describes that the action can not be canceled cause the
-     * action is inactive.
+     * error message, which describes that the action can not be canceled cause
+     * the action is inactive.
      */
     SP_ACTION_NOT_CANCELABLE("hawkbit.server.error.action.notcancelable",
             "Only active actions which are in status pending are cancelable."),
 
     /**
-     * error message, which describes that the action can not be force quit cause
-     * the action is inactive.
+     * error message, which describes that the action can not be force quit
+     * cause the action is inactive.
      */
     SP_ACTION_NOT_FORCE_QUITABLE("hawkbit.server.error.action.notforcequitable",
             "Only active actions which are in status pending can be force quit."),
@@ -250,7 +262,8 @@ public enum SpServerError {
             "Information for schedule, duration or timezone is missing; or there is no valid maintenance window available in future."),
 
     /**
-     * Error message informing that the action type for auto-assignment is invalid.
+     * Error message informing that the action type for auto-assignment is
+     * invalid.
      */
     SP_AUTO_ASSIGN_ACTION_TYPE_INVALID("hawkbit.server.error.repo.invalidAutoAssignActionType",
             "The given action type for auto-assignment is invalid: allowed values are ['forced', 'soft', 'downloadonly']"),

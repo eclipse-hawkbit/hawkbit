@@ -14,8 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionException;
-import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionException.EncryptionOperation;
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public final class ArtifactEncryptionService {
@@ -44,7 +43,7 @@ public final class ArtifactEncryptionService {
 
     public void addSoftwareModuleEncryptionSecrets(final long smId) {
         if (!isEncryptionSupported()) {
-            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
+            throw new ArtifactEncryptionUnsupportedException("Encryption secrets generation is not supported.");
         }
 
         final Map<String, String> secrets = artifactEncryption.generateSecrets();
@@ -55,7 +54,7 @@ public final class ArtifactEncryptionService {
 
     public InputStream encryptSoftwareModuleArtifact(final long smId, final InputStream artifactStream) {
         if (!isEncryptionSupported()) {
-            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
+            throw new ArtifactEncryptionUnsupportedException("Artifact encryption is not supported.");
         }
 
         return artifactEncryption.encryptStream(getSoftwareModuleEncryptionSecrets(smId), artifactStream);
@@ -75,7 +74,7 @@ public final class ArtifactEncryptionService {
 
     public InputStream decryptSoftwareModuleArtifact(final long smId, final InputStream encryptedArtifactStream) {
         if (!isEncryptionSupported()) {
-            throw new ArtifactEncryptionException(EncryptionOperation.NOT_SUPPORTED);
+            throw new ArtifactEncryptionUnsupportedException("Artifact decryption is not supported.");
         }
 
         return artifactEncryption.decryptStream(getSoftwareModuleEncryptionSecrets(smId), encryptedArtifactStream);
