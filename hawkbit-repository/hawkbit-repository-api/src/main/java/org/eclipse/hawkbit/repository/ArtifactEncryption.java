@@ -12,6 +12,8 @@ import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionFailedException;
+
 /**
  * Interface definition for artifact encryption.
  *
@@ -29,6 +31,7 @@ public interface ArtifactEncryption {
      * Generates required secrets key/value pairs.
      *
      * @return secrets key/value pairs
+     * @throws ArtifactEncryptionFailedException
      */
     Map<String, String> generateSecrets();
 
@@ -40,6 +43,7 @@ public interface ArtifactEncryption {
      * @param stream
      *            artifact stream to encrypt
      * @return encrypted input stream
+     * @throws ArtifactEncryptionFailedException
      */
     InputStream encryptStream(final Map<String, String> secrets, final InputStream stream);
 
@@ -51,6 +55,7 @@ public interface ArtifactEncryption {
      * @param stream
      *            artifact stream to decrypt
      * @return decrypted input stream
+     * @throws ArtifactEncryptionFailedException
      */
     InputStream decryptStream(final Map<String, String> secrets, final InputStream stream);
 }

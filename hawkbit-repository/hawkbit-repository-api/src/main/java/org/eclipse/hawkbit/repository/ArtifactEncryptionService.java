@@ -17,6 +17,10 @@ import java.util.Set;
 import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
 import org.springframework.beans.factory.annotation.Autowired;
 
+/**
+ * Service responsible for encryption operations.
+ *
+ */
 public final class ArtifactEncryptionService {
 
     private static final ArtifactEncryptionService SINGLETON = new ArtifactEncryptionService();
@@ -37,10 +41,22 @@ public final class ArtifactEncryptionService {
         return SINGLETON;
     }
 
+    /**
+     * Checks if required encryption and secrets store beans are present.
+     *
+     * @return if encryption is supported
+     */
     public boolean isEncryptionSupported() {
         return artifactEncryption != null && artifactEncryptionSecretsStore != null;
     }
 
+    /**
+     * Generates encryption secrets and saves them in secret store by software
+     * module id reference.
+     *
+     * @param smId
+     *            software module id
+     */
     public void addSoftwareModuleEncryptionSecrets(final long smId) {
         if (!isEncryptionSupported()) {
             throw new ArtifactEncryptionUnsupportedException("Encryption secrets generation is not supported.");
@@ -52,6 +68,16 @@ public final class ArtifactEncryptionService {
         secrets.clear();
     }
 
+    /**
+     * Encrypts artifact stream using the keys retrieved from secrets store by
+     * software module id reference.
+     *
+     * @param smId
+     *            software module id
+     * @param artifactStream
+     *            artifact stream to encrypt
+     * @return encrypted input stream
+     */
     public InputStream encryptSoftwareModuleArtifact(final long smId, final InputStream artifactStream) {
         if (!isEncryptionSupported()) {
             throw new ArtifactEncryptionUnsupportedException("Artifact encryption is not supported.");
@@ -72,6 +98,16 @@ public final class ArtifactEncryptionService {
         return requiredSecrets;
     }
 
+    /**
+     * Decrypts artifact stream using the keys retrieved from secrets store by
+     * software module id reference.
+     *
+     * @param smId
+     *            software module id
+     * @param encryptedArtifactStream
+     *            artifact stream to decrypt
+     * @return decrypted input stream
+     */
     public InputStream decryptSoftwareModuleArtifact(final long smId, final InputStream encryptedArtifactStream) {
         if (!isEncryptionSupported()) {
             throw new ArtifactEncryptionUnsupportedException("Artifact decryption is not supported.");

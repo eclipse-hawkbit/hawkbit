@@ -40,6 +40,7 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileDownloader;
 import com.vaadin.server.StreamResource;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.UI;
 
 /**
  * Artifact Details grid which is shown on the Upload View.
@@ -185,6 +186,11 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
             LOG.error("Download failed for artifact with id {}, filename {}", artifact.getId(), artifact.getFilename(),
                     event.getThrowable());
             notification.displayValidationError(i18n.getMessage(UIMessageIdProvider.ARTIFACT_DOWNLOAD_FAILURE_MSG));
+            UI.getCurrent().access(() -> {
+                // give error details extractors a chance to process specific
+                // error
+                throw new DownloadException(event.getThrowable());
+            });
         });
 
         fileDownloader.extend(downloadButton);
@@ -233,5 +239,13 @@ public class ArtifactDetailsGrid extends AbstractGrid<ProxyArtifact, Long> {
      */
     public MasterEntitySupport<ProxySoftwareModule> getMasterEntitySupport() {
         return masterEntitySupport;
+    }
+
+    private static class DownloadException extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
+        public DownloadException(final Throwable cause) {
+            super(cause);
+        }
     }
 }

@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplie
 import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplierImpl;
 import org.eclipse.hawkbit.ui.error.HawkbitUIErrorHandler;
+import org.eclipse.hawkbit.ui.error.extractors.ArtifactEncryptionErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.ConstraintViolationErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.IncompatibleTargetTypeErrorExtractor;
@@ -180,6 +181,18 @@ public class MgmtUiConfiguration {
     @Bean
     UiErrorDetailsExtractor invalidDistributionSetErrorExtractor(final VaadinMessageSource i18n) {
         return new InvalidDistributionSetErrorExtractor(i18n);
+    }
+
+    /**
+     * UI Artifact ecnryption operations Error details extractor bean.
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @return UI Artifact ecnryption operations Error details extractor
+     */
+    @Bean
+    UiErrorDetailsExtractor artifactEncryptionErrorExtractor(final VaadinMessageSource i18n) {
+        return new ArtifactEncryptionErrorExtractor(i18n);
     }
 
     /**

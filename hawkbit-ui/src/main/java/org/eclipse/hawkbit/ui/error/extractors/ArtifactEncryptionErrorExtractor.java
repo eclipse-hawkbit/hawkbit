@@ -49,11 +49,11 @@ public class ArtifactEncryptionErrorExtractor extends AbstractSingleUiErrorDetai
         case GENERATE_SECRETS:
             return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_ENCRYPTION_SECRETS_FAILED);
         case ENCRYPT:
-            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_ENCRYPTION_FAILD);
+            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_ENCRYPTION_FAILED);
         case DECRYPT:
-            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DECRYPTION_FAILD);
+            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DECRYPTION_FAILED);
         default:
-            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_ENCRYPTION_FAILD);
+            return i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_ENCRYPTION_FAILED);
         }
     }
 }

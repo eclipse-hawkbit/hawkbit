@@ -18,6 +18,8 @@ import java.util.concurrent.locks.Lock;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection;
 import org.eclipse.hawkbit.repository.RegexCharacterCollection.RegexChar;
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionFailedException;
+import org.eclipse.hawkbit.repository.exception.ArtifactEncryptionUnsupportedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
@@ -135,6 +137,10 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     protected void interruptUploadDueToIllegalFilename() {
         interruptUploadAndSetReason(i18n.getMessage("message.uploadedfile.illegalFilename"));
+    }
+
+    protected void interruptUploadDueToEncryptionError() {
+        interruptUploadAndSetReason(i18n.getMessage("message.encryption.failed"));
     }
 
     protected boolean isFileAlreadyContainedInSoftwareModule(final FileUploadId newFileUploadId,
@@ -283,6 +289,9 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             } catch (final AssignmentQuotaExceededException e) {
                 interruptUploadDueToAssignmentQuotaExceeded();
                 LOG.debug("Upload failed due to assignment quota exceeded:", e);
+            } catch (final ArtifactEncryptionUnsupportedException | ArtifactEncryptionFailedException e) {
+                interruptUploadDueToEncryptionError();
+                LOG.warn("Upload failed due to encryption error", e);
             } catch (final RuntimeException e) {
                 interruptUploadDueToUploadFailed();
                 publishUploadFailedAndFinishedEvent(fileUploadId);
@@ -318,7 +327,7 @@ public abstract class AbstractFileTransferHandler implements Serializable {
             try {
                 return artifactManagement.create(new ArtifactUpload(inputStream, fileUploadId.getSoftwareModuleId(),
                         filename, null, null, null, true, mimeType, -1));
-            } catch (final ArtifactUploadFailedException | InvalidSHA1HashException | InvalidMD5HashException e) {
+            } catch (final InvalidSHA1HashException | InvalidMD5HashException e) {
                 throw new ArtifactUploadFailedException(e);
             }
         }

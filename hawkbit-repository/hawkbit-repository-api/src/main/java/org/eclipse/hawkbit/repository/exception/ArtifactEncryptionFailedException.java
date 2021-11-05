@@ -24,11 +24,16 @@ public final class ArtifactEncryptionFailedException extends AbstractServerRtExc
     private final EncryptionOperation encryptionOperation;
 
     public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation) {
-        this(encryptionOperation, null);
+        this(encryptionOperation, null, null);
     }
 
-    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final Throwable cause) {
-        super(SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, cause);
+    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final String message) {
+        this(encryptionOperation, message, null);
+    }
+
+    public ArtifactEncryptionFailedException(final EncryptionOperation encryptionOperation, final String message,
+            final Throwable cause) {
+        super(message, SpServerError.SP_ARTIFACT_ENCRYPTION_FAILED, cause);
         this.encryptionOperation = encryptionOperation;
     }
 
