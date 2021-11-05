@@ -369,7 +369,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        final Message message = new Message("".getBytes(), createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
     }
 
@@ -411,7 +411,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Message message = new Message(null,
+        final Message message = new Message("".getBytes(),
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.REQUEST_ATTRIBUTES_UPDATE));
 
         amqpSenderService.sendMessage(message, URI.create(targetAddress));

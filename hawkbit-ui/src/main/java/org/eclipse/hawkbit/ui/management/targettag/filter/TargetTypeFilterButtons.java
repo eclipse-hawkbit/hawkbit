@@ -8,11 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
+import com.vaadin.ui.Button;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
-import java.util.Collection;
-import java.util.stream.Collectors;
-import org.eclipse.hawkbit.repository.Identifiable;
+import com.vaadin.ui.dnd.DropTargetExtension;
+import com.vaadin.ui.dnd.event.DropEvent;
+import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -25,11 +26,23 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.filterlayout.AbstractTargetTypeFilterButtons;
-import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
+import org.eclipse.hawkbit.ui.common.grid.support.DragAndDropSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.AssignmentSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToNoTargetTypeAssignmentSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetsToTargetTypeAssignmentSupport;
+import org.eclipse.hawkbit.ui.common.layout.listener.EntityDraggingListener;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Target Type filter buttons table.
@@ -37,19 +50,35 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("squid:S2160")
 public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     private static final long serialVersionUID = 1L;
-
-    private final transient TargetTypeManagement targetTypeManagement;
-    private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
-
     private static final Logger LOG = LoggerFactory.getLogger(TargetTypeFilterButtons.class);
 
-    TargetTypeFilterButtons(final CommonUiDependencies uiDependencies,
-                            final TargetTypeManagement targetTypeManagement, final TagFilterLayoutUiState tagFilterLayoutUiState,
-                            final TargetTypeWindowBuilder targetTypeWindowBuilder) {
-        super(uiDependencies, tagFilterLayoutUiState);
+    private final transient TargetManagement targetManagement;
+    private final transient TargetTypeManagement targetTypeManagement;
+    private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
+    private final transient CommonUiDependencies uiDependencies;
+    private transient EntityDraggingListener draggingListener;
 
+    TargetTypeFilterButtons(final CommonUiDependencies uiDependencies,
+                            final TargetTypeManagement targetTypeManagement, final TargetManagement targetManagement, final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+                            final TargetTypeWindowBuilder targetTypeWindowBuilder) {
+        super(uiDependencies, targetTagFilterLayoutUiState, targetTypeManagement);
+
+        this.targetManagement = targetManagement;
         this.targetTypeManagement = targetTypeManagement;
         this.targetTypeWindowBuilder = targetTypeWindowBuilder;
+        this.uiDependencies = uiDependencies;
+
+        final Map<String, AssignmentSupport<?, ProxyTargetType>> sourceTargetAssignmentStrategies = new HashMap<>();
+        final TargetsToTargetTypeAssignmentSupport targetsToTargetTypeAssignment = new TargetsToTargetTypeAssignmentSupport(uiDependencies,
+                targetManagement);
+
+        sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TABLE_ID, targetsToTargetTypeAssignment);
+
+        setDropSupportToNoType();
+        setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiNotification,
+                sourceTargetAssignmentStrategies, eventBus));
+        getDragAndDropSupportSupport().ignoreSelection(true);
+        getDragAndDropSupportSupport().addDragAndDrop();
 
         init();
         setDataProvider(
@@ -74,7 +103,17 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     @Override
     protected boolean deleteFilterButtons(Collection<ProxyTargetType> filterButtonsToDelete) {
         final ProxyTargetType targetTypeToDelete = filterButtonsToDelete.iterator().next();
-        return deleteTargetType(targetTypeToDelete);
+        final String targetTypeToDeleteName = targetTypeToDelete.getName();
+        final Long targetTypeToDeleteId = targetTypeToDelete.getId();
+
+        final Long clickedTargetTypeId = getFilterButtonClickBehaviour().getPreviouslyClickedFilterId();
+
+        if (clickedTargetTypeId != null && clickedTargetTypeId.equals(targetTypeToDeleteId)) {
+            uiNotification.displayValidationError(i18n.getMessage("message.targettype.delete", targetTypeToDeleteName));
+        } else {
+            return deleteTargetType(targetTypeToDelete);
+        }
+        return false;
     }
 
     @Override
@@ -113,12 +152,8 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
             LOG.trace("Target type already in use exception: {}", exception.getMessage());
             uiNotification.displayValidationError(i18n.getMessage(exception.getMessage()));
         }
-        return false;
-    }
 
-    @Override
-    protected Collection<Long> filterExistingTargetTypeIds(Collection<Long> targetTypeIds) {
-        return targetTypeManagement.get(targetTypeIds).stream().map(Identifiable::getId).collect(Collectors.toSet());
+        return false;
     }
 
     @Override
@@ -129,6 +164,45 @@ public class TargetTypeFilterButtons extends AbstractTargetTypeFilterButtons {
     @Override
     protected boolean isEditAllowed() {
         return permissionChecker.hasUpdateRepositoryPermission();
+    }
+
+    private void setDropSupportToNoType() {
+        final TargetsToNoTargetTypeAssignmentSupport targetsToNoTargetTypeAssignmentSupport = new TargetsToNoTargetTypeAssignmentSupport(
+                uiDependencies, targetManagement);
+
+        final DropTargetExtension<Button> dropExtension = new DropTargetExtension<>(getNoTargetTypeButton());
+
+        dropExtension.addDropListener(event -> {
+            List<ProxyTarget> droppedTargets = getDroppedTargets(event);
+            targetsToNoTargetTypeAssignmentSupport.assignSourceItemsToTargetItem(droppedTargets, null);
+        });
+        addDropStylingListener();
+
+    }
+
+    private void addDropStylingListener() {
+        if (draggingListener == null) {
+            draggingListener = new EntityDraggingListener(eventBus,
+                    Collections.singletonList(UIComponentIdProvider.TARGET_TABLE_ID), getNoTargetTypeButton());
+        }
+
+        draggingListener.subscribe();
+    }
+
+    private static List<ProxyTarget> getDroppedTargets(final DropEvent<?> dropEvent) {
+        final List<ProxyTarget> list = new ArrayList<>();
+        dropEvent.getDragSourceExtension().ifPresent(dragSource -> {
+            final Object dragData = dragSource.getDragData();
+            if (dragData instanceof ProxyTarget) {
+                list.add((ProxyTarget) dragData);
+            }
+            if (dragData instanceof List
+                    && ((List<?>) dragData).stream().allMatch(element -> element instanceof ProxyTarget)) {
+                list.addAll(((List<?>) dragData).stream().map(element -> (ProxyTarget) element)
+                        .collect(Collectors.toList()));
+            }
+        });
+        return list;
     }
 
 }

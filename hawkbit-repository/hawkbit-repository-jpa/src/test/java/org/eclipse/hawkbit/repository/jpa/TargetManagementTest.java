@@ -28,6 +28,7 @@ import javax.validation.ConstraintViolationException;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.FilterParams;
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
@@ -57,6 +59,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
@@ -752,7 +755,7 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         toggleTagAssignment(tagABCTargets, tagB);
         toggleTagAssignment(tagABCTargets, tagC);
 
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "X"))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "X")))
                 .as("Target count is wrong").isEqualTo(0);
 
         // search for targets with tag tagA
@@ -782,11 +785,11 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         checkTargetHasNotTags(tagCTargets, tagA, tagB);
 
         // check again target lists refreshed from DB
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "A"))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "A")))
                 .as("Target count is wrong").isEqualTo(targetWithTagA.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "B"))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "B")))
                 .as("Target count is wrong").isEqualTo(targetWithTagB.size());
-        assertThat(targetManagement.countByFilters(null, null, null, null, Boolean.FALSE, "C"))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, null, null, Boolean.FALSE, "C")))
                 .as("Target count is wrong").isEqualTo(targetWithTagC.size());
     }
 
@@ -1107,7 +1110,57 @@ public class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound1.get().getOptLockRevision()).isEqualTo(2);
         assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetType.getId());
     }
+    
+    @Test
+    @WithUser(allSpPermissions = true)
+    @Description("Tests the assignment of types to multiple targets.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
+            @Expect(type = TargetTypeCreatedEvent.class, count = 2),
+            @Expect(type = TargetUpdatedEvent.class, count = 29), @Expect(type = TargetDeletedEvent.class, count = 1) })
+    public void targetTypeBulkAssignments() {
+        final List<Target> typeATargets = testdataFactory.createTargets(10, "typeATargets", "first description");
+        final List<Target> typeBTargets = testdataFactory.createTargets(10, "typeBTargets", "first description");
 
+        // create a target type
+        final TargetType typeA = testdataFactory.createTargetType("A", Collections.singletonList(standardDsType));
+        final TargetType typeB = testdataFactory.createTargetType("B", Collections.singletonList(standardDsType));
+
+        // assign target type to target
+        TargetTypeAssignmentResult resultA = initiateTypeAssignment(typeATargets, typeA);
+        TargetTypeAssignmentResult resultB = initiateTypeAssignment(typeBTargets, typeB);
+        assertThat(resultA.getAssigned()).isEqualTo(10);
+        assertThat(resultB.getAssigned()).isEqualTo(10);
+        checkTargetsHaveType(typeATargets, typeA);
+        checkTargetsHaveType(typeBTargets, typeB);
+
+        // double assignment does not unassign
+        resultA = initiateTypeAssignment(typeATargets, typeA);
+        resultB = initiateTypeAssignment(typeBTargets, typeB);
+        assertThat(resultA.getAssigned()).isZero();
+        assertThat(resultB.getAssigned()).isZero();
+        assertThat(resultA.getAlreadyAssigned()).isEqualTo(10);
+        assertThat(resultB.getAlreadyAssigned()).isEqualTo(10);
+        checkTargetsHaveType(typeATargets, typeA);
+        checkTargetsHaveType(typeBTargets, typeB);
+
+        // verify that type assignment does not throw an error if target list includes an unknown id
+        targetManagement.deleteByControllerID(typeATargets.get(0).getControllerId());
+        final TargetTypeAssignmentResult resultC = initiateTypeAssignment(typeATargets, typeB);
+        assertThat(resultC.getAssigned()).isEqualTo(9);
+        assertThat(resultC.getAlreadyAssigned()).isZero();
+        checkTargetsHaveType(typeATargets, typeB);
+    }
+
+    private void checkTargetsHaveType(final List<Target> targets, final TargetType type) {
+        List<JpaTarget> foundTargets = targetRepository
+                .findAllById(targets.stream().map(Identifiable::getId).collect(Collectors.toList()));
+        for (final Target target : foundTargets) {
+            if (!type.getName().equals(type.getName())) {
+                fail(String.format("Target %s is not of type %s.", target, type));
+            }
+        }
+    }
+    
     @Test
     @Description("Queries and loads the metadata related to a given target.")
     public void findAllTargetMetadataByControllerId() {

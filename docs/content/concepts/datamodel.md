@@ -7,7 +7,7 @@ weight: 53
 The hawkBit data model was designed to have enough flexibility to define complex software structures (e.g. operating system, runtimes, apps, different kind of artifacts) on one side and simplicity compared to the capabilities of a full blown configuration management on the other.
 <!--more-->
 
-It does define a hierarchy of software that starts with a distribution, which can have (sub-)modules and these may have multiple artifacts. However, it does not consider any kind of dependency definitions between modules or artifacts. As a result dependency checks if necessary have to be done outside hawkBit, i.e. on the device itself or before the entity creation in hawkBit by the origin.
+It does define a hierarchy of software that starts with a distribution, which can have (sub-)modules and these may have multiple artifacts. However, it does not consider any kind of dependency definitions between modules or artifacts. As a result, dependency checks - if necessary - have to be done outside hawkBit, i.e. on the device itself or before the entity creation in hawkBit by the origin.
 
 ## Provisioning Target Definition
 
@@ -15,21 +15,22 @@ A Provisioning Target is a neutral definition that may be an actual real device 
 
 The definition in hawkBit might reflect the transactional behavior if necessary on the device side. A vehicle might be updated device by device or as a whole. As a result one way of defining a vehicle in hawkBit could be to have one all inclusive Software Module or one module per (sub-) device.
 
+A Target can have, next to its defined properties (e.g. controller ID, target type, name, description, security token), a generic set of attributes and meta data, both in key:value format. Target attributes are owned and managed by the device whereas target meta data are managed by the operator. If a target is defined to be of a certain target type, then during the assignment of a distribution set, a compatibility check will be performed between the target type and distribution set type.
+
 ## Software Structure Definition
 
 The structure defines the model of the supported software by the provisioning target
 
-Distribution Set Type: defines a package structure that is supported by certain devices
-Consists of Software Module Types both for
-Firmware - device can have only one module of that type (e.g. the operating system)
-Software - device can have multiple modules of that type (e.g. "Apps")
-Software Content Definition
+- Distribution Set Type:defines a package structure that is supported by certain devices
+- Consists of Software Module Types both for
+  - Firmware - device can have only one module of that type (e.g. the operating system)
+  - Software - device can have multiple modules of that type (e.g. "Apps")
 
-Distribution Set: can be deployed to a provisioning target
-Software Module: is a sub element of the distribution
-e.g. OS, application, firmware X, firmware Y
-Artifact: binaries for a software module. Note: the decision which artifacts have to be downloaded are done on the device side.
-e.g. Full package, signatures, binary deltas
+Software Content Definition:
+
+- Distribution Set: can be deployed to a provisioning target
+- Software Module: is a sub element of the distribution, e.g. OS, application, firmware X, firmware Y
+- Artifact: binaries for a software module. Note: the decision which artifacts have to be downloaded are done on the device side, e.g. Full package, signatures, binary deltas
 
 
 ## Entity Relationships

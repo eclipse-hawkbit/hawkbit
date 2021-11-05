@@ -24,6 +24,7 @@ Target status overview, target management and manual deployments.
   - Target update status: click 1-X status to reduce the list of targets that have one of them.
   - Target tag: click 1-X tags to reduce the list to targets that have one of them.
   - Name, description: use search button on the top of the list.
+  - Target type: open Type Filter section to show targets of a specific type
 
 - _DistributionSet_ list allows filters based on:
   - _DistributionSet_ tag: click 1-X tags to reduce the list of sets that have one of them.
