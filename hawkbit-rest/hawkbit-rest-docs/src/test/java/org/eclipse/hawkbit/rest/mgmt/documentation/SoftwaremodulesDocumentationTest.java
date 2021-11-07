@@ -141,6 +141,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("[].name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("[].description").description(ApiModelPropertiesGeneric.DESCRPTION),
                                 fieldWithPath("[].vendor").description(MgmtApiModelProperties.VENDOR),
+                                fieldWithPath("[].encrypted").description(MgmtApiModelProperties.ENCRYPTED),
                                 fieldWithPath("[].deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("[].createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                                 fieldWithPath("[].createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
@@ -188,6 +189,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                                 fieldWithPath("vendor").description(MgmtApiModelProperties.VENDOR),
+                                fieldWithPath("encrypted").description(MgmtApiModelProperties.ENCRYPTED),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("type").description(MgmtApiModelProperties.SM_TYPE),
                                 fieldWithPath("version").description(MgmtApiModelProperties.VERSION),
@@ -227,6 +229,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("type").description(MgmtApiModelProperties.SM_TYPE),
                                 fieldWithPath("version").description(MgmtApiModelProperties.VERSION),
                                 fieldWithPath("vendor").description(MgmtApiModelProperties.VENDOR),
+                                fieldWithPath("encrypted").description(MgmtApiModelProperties.ENCRYPTED),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.type").description(MgmtApiModelProperties.SM_TYPE),
@@ -279,7 +282,9 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
         final byte random[] = RandomStringUtils.random(5).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
-        mockMvc.perform(fileUpload(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId()).file(file))
+        mockMvc.perform(
+                fileUpload(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
+                        sm.getId()).file(file))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -313,7 +318,8 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
         final byte random[] = RandomStringUtils.random(5).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
-        mockMvc.perform(fileUpload(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
+        mockMvc.perform(
+                fileUpload(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts",
                         sm.getId()).file(file).param("filename", "filename").param("file", "s")
                                 .param("md5sum", "md5sum").param("sha1sum", "sha1sum"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
