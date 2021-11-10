@@ -84,6 +84,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                         fieldWithPath("content[].name").description(ApiModelPropertiesGeneric.NAME),
                         fieldWithPath("content[].description").description(ApiModelPropertiesGeneric.DESCRPTION),
                         fieldWithPath("content[].vendor").description(MgmtApiModelProperties.VENDOR),
+                        fieldWithPath("content[].encrypted").description(MgmtApiModelProperties.ENCRYPTED),
                         fieldWithPath("content[].createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                         fieldWithPath("content[].createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                         fieldWithPath("content[].lastModifiedBy")

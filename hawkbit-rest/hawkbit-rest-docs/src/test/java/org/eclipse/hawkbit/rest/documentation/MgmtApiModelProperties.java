@@ -43,7 +43,7 @@ public final class MgmtApiModelProperties {
 
     // software module
     public static final String SM_TYPE = "The software module type " + ApiModelPropertiesGeneric.ENDING;
-    public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts shoud be encrypted upon upload.";
+    public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts should be encrypted upon upload.";
     public static final String ARTIFACT_HASHES = "Hashes of the artifact.";
     public static final String ARTIFACT_SIZE = "Size of the artifact.";
     public static final String ARTIFACT_PROVIDED_FILE = "Binary of file.";

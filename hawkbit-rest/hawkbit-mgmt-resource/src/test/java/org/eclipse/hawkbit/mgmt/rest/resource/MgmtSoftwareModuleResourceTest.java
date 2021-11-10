@@ -29,6 +29,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
@@ -199,7 +200,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
     public void uploadArtifactFailsIfTooLarge() throws Exception {
-        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota", false);
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
         // create a file which exceeds the configured maximum size
@@ -218,7 +219,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verifies that artifact with invalid filename cannot be uploaded to prevent cross site scripting.")
     public void uploadArtifactFailsIfFilenameInvalide() throws Exception {
-        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota");
+        final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota", false);
         final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
 
         final byte[] randomBytes = randomBytes(5 * 1024);
@@ -236,7 +237,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         assertThat(artifactManagement.count()).as("Wrong artifact size").isEqualTo(1);
 
         // binary
-        try (InputStream fileInputStream = artifactManagement
+        try (final InputStream fileInputStream = artifactManagement
                 .loadArtifactBinary(softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getSha1Hash(),
                         sm.getId(), sm.isEncrypted())
                 .get().getFileInputStream()) {
@@ -662,6 +663,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         mvc.perform(post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(modules))
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isUnsupportedMediaType());
+
+        final SoftwareModule swm = entityFactory.softwareModule().create().name("encryptedModule").type(osType)
+                .version("version").vendor("vendor").description("description").encrypted(true).build();
+        // artifact decryption is not supported
+        mvc.perform(
+                post("/rest/v1/softwaremodules").content(JsonBuilder.softwareModules(Collections.singletonList(swm)))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         // not allowed methods
         mvc.perform(put("/rest/v1/softwaremodules")).andDo(MockMvcResultPrinter.print())

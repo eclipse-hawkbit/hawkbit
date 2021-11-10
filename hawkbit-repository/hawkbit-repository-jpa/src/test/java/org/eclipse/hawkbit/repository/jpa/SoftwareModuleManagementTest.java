@@ -520,13 +520,13 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 Arrays.asList(testType.getId()));
 
         // found in test
-        final SoftwareModule unassigned = testdataFactory.createSoftwareModule("thetype", "unassignedfound");
-        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound");
-        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound");
-        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "a");
+        final SoftwareModule unassigned = testdataFactory.createSoftwareModule("thetype", "unassignedfound", false);
+        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound", false);
+        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound", false);
+        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "a", false);
 
         // ignored
-        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted");
+        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted", false);
         final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
 
         final DistributionSet set = distributionSetManagement
@@ -572,13 +572,13 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 Arrays.asList(testType.getId()));
 
         // found in test
-        testdataFactory.createSoftwareModule("thetype", "unassignedfound");
-        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound");
-        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound");
-        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "d");
+        testdataFactory.createSoftwareModule("thetype", "unassignedfound", false);
+        final SoftwareModule one = testdataFactory.createSoftwareModule("thetype", "bfound", false);
+        final SoftwareModule two = testdataFactory.createSoftwareModule("thetype", "cfound", false);
+        final SoftwareModule differentName = testdataFactory.createSoftwareModule("thetype", "d", false);
 
         // ignored
-        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted");
+        final SoftwareModule deleted = testdataFactory.createSoftwareModule("thetype", "deleted", false);
         final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
 
         distributionSetManagement

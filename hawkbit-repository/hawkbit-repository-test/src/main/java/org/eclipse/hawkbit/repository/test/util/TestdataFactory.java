@@ -540,7 +540,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModule(final String typeKey) {
-        return createSoftwareModule(typeKey, "");
+        return createSoftwareModule(typeKey, "", false);
     }
 
     /**
@@ -552,7 +552,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleApp() {
-        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, "");
+        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, "", false);
     }
 
     /**
@@ -567,7 +567,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleApp(final String prefix) {
-        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, prefix);
+        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, prefix, false);
     }
 
     /**
@@ -579,7 +579,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleOs() {
-        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, "");
+        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, "", false);
     }
 
     /**
@@ -594,7 +594,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleOs(final String prefix) {
-        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, prefix);
+        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, prefix, false);
     }
 
     /**
@@ -609,10 +609,10 @@ public class TestdataFactory {
      *
      * @return persisted {@link SoftwareModule}.
      */
-    public SoftwareModule createSoftwareModule(final String typeKey, final String prefix) {
+    public SoftwareModule createSoftwareModule(final String typeKey, final String prefix, final boolean encrypted) {
         return softwareModuleManagement.create(entityFactory.softwareModule().create()
                 .type(findOrCreateSoftwareModuleType(typeKey)).name(prefix + typeKey).version(prefix + DEFAULT_VERSION)
-                .description(LOREM.words(10)).vendor(DEFAULT_VENDOR));
+                .description(LOREM.words(10)).vendor(DEFAULT_VENDOR).encrypted(encrypted));
     }
 
     /**
