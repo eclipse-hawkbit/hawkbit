@@ -195,8 +195,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      * Marks or un-marks this software module as deleted.
      * 
      * @param deleted
-     *            {@code true} if the software module should be marked as
-     *            deleted otherwise {@code false}
+     *            {@code true} if the software module should be marked as deleted
+     *            otherwise {@code false}
      */
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
@@ -215,8 +215,8 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      * Marks this software module as encrypted.
      * 
      * @param encrypted
-     *            {@code true} if the software module should be marked as
-     *            encrypted otherwise {@code false}
+     *            {@code true} if the software module should be marked as encrypted
+     *            otherwise {@code false}
      */
     public void setEncrypted(final boolean encrypted) {
         this.encrypted = encrypted;
@@ -224,8 +224,9 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Override
     public String toString() {
-        return "SoftwareModule [deleted=" + deleted + ", name=" + getName() + ", version=" + getVersion()
-                + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type=" + getType().getName() + "]";
+        return "SoftwareModule [deleted=" + isDeleted() + ", encrypted=" + isEncrypted() + ", name=" + getName()
+                + ", version=" + getVersion() + ", revision=" + getOptLockRevision() + ", Id=" + getId() + ", type="
+                + getType().getName() + "]";
     }
 
     @Override

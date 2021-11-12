@@ -120,9 +120,9 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final String providedMd5 = artifactUpload.getProvidedMd5Sum();
         final String providedSha256 = artifactUpload.getProvidedSha256Sum();
 
-        try (final InputStream wrapedStream = wrapInQuotaStream(
+        try (final InputStream wrappedStream = wrapInQuotaStream(
                 isSmEncrypted ? wrapInEncryptionStream(smId, stream) : stream)) {
-            return artifactRepository.store(tenant, wrapedStream, fileName, contentType,
+            return artifactRepository.store(tenant, wrappedStream, fileName, contentType,
                     new DbArtifactHash(providedSha1, providedMd5, providedSha256));
         } catch (final ArtifactStoreException | IOException e) {
             throw new ArtifactUploadFailedException(e);

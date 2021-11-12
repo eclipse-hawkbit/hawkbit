@@ -12,10 +12,8 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- *
  * Exception being thrown in case of error while generating encryption secrets,
  * encrypting or decrypting artifacts.
- *
  */
 public final class ArtifactEncryptionFailedException extends AbstractServerRtException {
 
@@ -42,9 +40,7 @@ public final class ArtifactEncryptionFailedException extends AbstractServerRtExc
     }
 
     /**
-     *
      * Encryption operation that caused the exception.
-     *
      */
     public enum EncryptionOperation {
         GENERATE_SECRETS, ENCRYPT, DECRYPT;

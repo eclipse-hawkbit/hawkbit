@@ -12,9 +12,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.exception.SpServerError;
 
 /**
- *
  * Exception being thrown when artifact encryption is not supported
- *
  */
 public final class ArtifactEncryptionUnsupportedException extends AbstractServerRtException {
 
