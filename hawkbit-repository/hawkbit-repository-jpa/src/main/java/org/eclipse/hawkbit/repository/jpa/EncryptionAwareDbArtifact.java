@@ -17,17 +17,25 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 /**
  * {@link DbArtifact} implementation that decrypts the underlying artifact
  * binary input stream.
- *
  */
 public class EncryptionAwareDbArtifact implements DbArtifact {
 
     private final DbArtifact encryptedDbArtifact;
     private final UnaryOperator<InputStream> decryptionFunction;
+    private final int encryptionOverhead;
 
     public EncryptionAwareDbArtifact(final DbArtifact encryptedDbArtifact,
             final UnaryOperator<InputStream> decryptionFunction) {
         this.encryptedDbArtifact = encryptedDbArtifact;
         this.decryptionFunction = decryptionFunction;
+        this.encryptionOverhead = 0;
+    }
+
+    public EncryptionAwareDbArtifact(final DbArtifact encryptedDbArtifact,
+            final UnaryOperator<InputStream> decryptionFunction, final int encryptionOverhead) {
+        this.encryptedDbArtifact = encryptedDbArtifact;
+        this.decryptionFunction = decryptionFunction;
+        this.encryptionOverhead = encryptionOverhead;
     }
 
     @Override
@@ -42,7 +50,7 @@ public class EncryptionAwareDbArtifact implements DbArtifact {
 
     @Override
     public long getSize() {
-        return encryptedDbArtifact.getSize();
+        return encryptedDbArtifact.getSize() - encryptionOverhead;
     }
 
     @Override

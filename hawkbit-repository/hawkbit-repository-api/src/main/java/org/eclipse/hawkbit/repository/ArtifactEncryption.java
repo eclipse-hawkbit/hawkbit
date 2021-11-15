@@ -58,4 +58,11 @@ public interface ArtifactEncryption {
      * @throws ArtifactEncryptionFailedException
      */
     InputStream decryptStream(final Map<String, String> secrets, final InputStream stream);
+
+    /**
+     * Size of the underlying encryption algorithm overhead in bytes
+     * 
+     * @return encryption overhead in byte
+     */
+    int encryptionSizeOverhead();
 }

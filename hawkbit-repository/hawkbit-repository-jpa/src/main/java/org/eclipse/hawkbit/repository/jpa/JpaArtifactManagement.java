@@ -243,9 +243,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
         if (dbArtifact == null) {
             return null;
         }
-
+        final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
         return new EncryptionAwareDbArtifact(dbArtifact,
-                stream -> ArtifactEncryptionService.getInstance().decryptSoftwareModuleArtifact(smId, stream));
+                stream -> encryptionService.decryptSoftwareModuleArtifact(smId, stream),
+                encryptionService.encryptionSizeOverhead());
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,

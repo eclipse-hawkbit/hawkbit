@@ -115,4 +115,13 @@ public final class ArtifactEncryptionService {
 
         return artifactEncryption.decryptStream(getSoftwareModuleEncryptionSecrets(smId), encryptedArtifactStream);
     }
+
+    /**
+     * Size of the underlying encryption algorithm overhead in bytes
+     *
+     * @return encryption overhead in byte
+     */
+    public int encryptionSizeOverhead() {
+        return artifactEncryption.encryptionSizeOverhead();
+    }
 }
