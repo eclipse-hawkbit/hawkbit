@@ -26,13 +26,26 @@ public class JpaSoftwareModuleCreate extends AbstractSoftwareModuleUpdateCreate<
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    private boolean encrypted;
+
     JpaSoftwareModuleCreate(final SoftwareModuleTypeManagement softwareModuleTypeManagement) {
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
     }
 
     @Override
+    public SoftwareModuleCreate encrypted(final boolean encrypted) {
+        this.encrypted = encrypted;
+        return this;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    @Override
     public JpaSoftwareModule build() {
-        return new JpaSoftwareModule(getSoftwareModuleTypeFromKeyString(type), name, version, description, vendor);
+        return new JpaSoftwareModule(getSoftwareModuleTypeFromKeyString(type), name, version, description, vendor,
+                encrypted);
     }
 
     private SoftwareModuleType getSoftwareModuleTypeFromKeyString(final String type) {

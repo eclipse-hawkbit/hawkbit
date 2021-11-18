@@ -82,6 +82,6 @@ public class SmTypeSelectedGrid extends Grid<ProxyType> {
         binder.addValueChangeListener(event -> mandatoryPropertyChangedCallback.run());
 
         final String id = "selected.sm.type." + smType.getId();
-        return FormComponentBuilder.getCheckBox(id, binder, ProxyType::isMandatory, ProxyType::setMandatory);
+        return FormComponentBuilder.createCheckBox(id, binder, ProxyType::isMandatory, ProxyType::setMandatory);
     }
 }

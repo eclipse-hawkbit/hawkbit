@@ -29,6 +29,8 @@ public class ProxySoftwareModule extends ProxyNamedEntity implements VersionAwar
 
     private boolean assigned;
 
+    private boolean encrypted;
+
     /**
      * Gets the software module vendor
      *
@@ -128,5 +130,13 @@ public class ProxySoftwareModule extends ProxyNamedEntity implements VersionAwar
     @Override
     public void setVersion(final String version) {
         this.version = version;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(final boolean encrypted) {
+        this.encrypted = encrypted;
     }
 }

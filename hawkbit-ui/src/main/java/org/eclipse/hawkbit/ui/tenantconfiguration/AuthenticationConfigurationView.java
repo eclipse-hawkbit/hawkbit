@@ -106,7 +106,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
     }
 
     protected void initCertificateAuthConfiguration(GridLayout gridLayout, int row) {
-        final CheckBox certificateAuthCheckbox = FormComponentBuilder.getCheckBox(
+        final CheckBox certificateAuthCheckbox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.CERT_AUTH_ALLOWED_CHECKBOX, getBinder(),
                 ProxySystemConfigAuthentication::isCertificateAuth,
                 ProxySystemConfigAuthentication::setCertificateAuth);
@@ -123,7 +123,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
     }
 
     protected void initTargetTokenConfiguration(GridLayout gridLayout, int row) {
-        final CheckBox targetSecTokenCheckBox = FormComponentBuilder.getCheckBox(
+        final CheckBox targetSecTokenCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.TARGET_SEC_TOKEN_ALLOWED_CHECKBOX, getBinder(),
                 ProxySystemConfigAuthentication::isTargetSecToken, ProxySystemConfigAuthentication::setTargetSecToken);
         targetSecTokenCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
@@ -132,7 +132,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
     }
 
     protected void initGatewayTokenConfiguration(GridLayout gridLayout, int row) {
-        final CheckBox gatewaySecTokenCheckBox = FormComponentBuilder.getCheckBox(
+        final CheckBox gatewaySecTokenCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.GATEWAY_SEC_TOKEN_ALLOWED_CHECKBOX, getBinder(),
                 ProxySystemConfigAuthentication::isGatewaySecToken,
                 ProxySystemConfigAuthentication::setGatewaySecToken);
@@ -149,7 +149,7 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
     }
 
     protected void initAnonymousDownloadConfiguration(GridLayout gridLayout, int row) {
-        final CheckBox downloadAnonymousCheckBox = FormComponentBuilder.getCheckBox(
+        final CheckBox downloadAnonymousCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.DOWNLOAD_ANONYMOUS_CHECKBOX, getBinder(),
                 ProxySystemConfigAuthentication::isDownloadAnonymous,
                 ProxySystemConfigAuthentication::setDownloadAnonymous);

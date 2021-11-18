@@ -1,3 +1,1 @@
-ALTER TABLE sp_distribution_set ADD COLUMN valid BOOLEAN;
-
-UPDATE sp_distribution_set SET valid = 1;
+ALTER TABLE sp_distribution_set ADD valid BIT DEFAULT 1;

@@ -16,6 +16,9 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -245,7 +248,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param dsTypeManagement
-     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
+     *            for loading
+     *            {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return TargetTypeBuilder bean
      */
     @Bean
@@ -261,8 +265,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param softwareManagement
-     *            for loading {@link DistributionSetType#getMandatoryModuleTypes()}
-     *            and {@link DistributionSetType#getOptionalModuleTypes()}
+     *            for loading
+     *            {@link DistributionSetType#getMandatoryModuleTypes()} and
+     *            {@link DistributionSetType#getOptionalModuleTypes()}
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
@@ -304,8 +309,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *         accessible in beans which cannot access the service directly,
+     *         e.g. JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -313,9 +318,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     * @return the {@link TenantConfigurationManagement} singleton bean which
+     *         make it accessible in beans which cannot access the service
+     *         directly, e.g. JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -324,8 +329,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA entities.
+     *         current {@link SystemManagement} service and make it accessible
+     *         in beans which cannot access the service directly, e.g. JPA
+     *         entities.
      */
     @Bean
     SystemManagementHolder systemManagementHolder() {
@@ -333,9 +339,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantAwareHolder} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
+     * @return the {@link TenantAwareHolder} singleton bean which holds the
+     *         current {@link TenantAware} service and make it accessible in
+     *         beans which cannot access the service directly, e.g. JPA
+     *         entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -343,9 +350,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
-     *         the current {@link SecurityTokenGenerator} service and make it
-     *         accessible in beans which cannot access the service via injection
+     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which
+     *         holds the current {@link SecurityTokenGenerator} service and make
+     *         it accessible in beans which cannot access the service via
+     *         injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
@@ -940,7 +948,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * Our default {@link BaseRepositoryTypeProvider} bean always provides the NoCountBaseRepository
+     * Our default {@link BaseRepositoryTypeProvider} bean always provides the
+     * NoCountBaseRepository
      *
      * @return a {@link BaseRepositoryTypeProvider} bean
      */
@@ -949,5 +958,18 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
         return new NoCountBaseRepositoryTypeProvider();
 
+    }
+
+    /**
+     * Default artifact encryption service bean that internally uses
+     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore}
+     * beans for {@link SoftwareModule} artifacts encryption/decryption
+     *
+     * @return a {@link ArtifactEncryptionService} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    ArtifactEncryptionService artifactEncryptionService() {
+        return ArtifactEncryptionService.getInstance();
     }
 }

@@ -9,6 +9,7 @@
 
 package org.eclipse.hawkbit.ui.common.grid.support;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 public class MasterEntitySupport<M extends ProxyIdentifiableEntity> implements MasterEntityAwareComponent<M> {
     private final FilterSupport<?, ?> filterSupport;
     private final Function<M, ?> masterEntityToFilterMapper;
+    private final Consumer<M> postMasterChangeCallback;
 
     private Long masterId;
 
@@ -47,8 +49,24 @@ public class MasterEntitySupport<M extends ProxyIdentifiableEntity> implements M
      */
     public MasterEntitySupport(final FilterSupport<?, ?> filterSupport,
             final Function<M, ?> masterEntityToFilterMapper) {
+        this(filterSupport, masterEntityToFilterMapper, null);
+    }
+
+    /**
+     * Constructor for MasterEntitySupport
+     *
+     * @param filterSupport
+     *            Filter support
+     * @param masterEntityToFilterMapper
+     *            Master entity to filter mapper
+     * @param postMasterChangeCallback
+     *            Callback called after master entity change
+     */
+    public MasterEntitySupport(final FilterSupport<?, ?> filterSupport, final Function<M, ?> masterEntityToFilterMapper,
+            final Consumer<M> postMasterChangeCallback) {
         this.filterSupport = filterSupport;
         this.masterEntityToFilterMapper = masterEntityToFilterMapper;
+        this.postMasterChangeCallback = postMasterChangeCallback;
     }
 
     @Override
@@ -60,6 +78,10 @@ public class MasterEntitySupport<M extends ProxyIdentifiableEntity> implements M
         filterSupport.updateFilter(FilterType.MASTER, getMasterEntityFilter(masterEntity));
 
         masterId = masterEntity != null ? masterEntity.getId() : null;
+
+        if (postMasterChangeCallback != null) {
+            postMasterChangeCallback.accept(masterEntity);
+        }
     }
 
     private Object getMasterEntityFilter(final M masterEntity) {
