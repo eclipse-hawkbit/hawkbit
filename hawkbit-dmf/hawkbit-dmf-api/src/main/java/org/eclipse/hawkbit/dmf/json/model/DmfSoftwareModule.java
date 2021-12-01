@@ -32,6 +32,8 @@ public class DmfSoftwareModule {
     @JsonProperty
     private String moduleVersion;
     @JsonProperty
+    private Boolean encrypted;
+    @JsonProperty
     private List<DmfArtifact> artifacts;
     @JsonProperty
     private List<DmfMetadata> metadata;
@@ -83,11 +85,18 @@ public class DmfSoftwareModule {
         }
     }
 
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(final Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
     @Override
     public String toString() {
         return String.format(
-                "DmfSoftwareModule [moduleId=%d, moduleType='%s', moduleVersion='%s', artifacts=%s, metadata=%s]",
-                moduleId, moduleType, moduleVersion, artifacts, metadata);
+                "DmfSoftwareModule [moduleId=%d, moduleType='%s', moduleVersion='%s', encrypted='%s' artifacts=%s, metadata=%s]",
+                moduleId, moduleType, moduleVersion, encrypted, artifacts, metadata);
     }
-
 }

@@ -46,13 +46,13 @@ public class TargetTagWindowBuilder extends AbstractEntityWindowBuilder<ProxyTag
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(new AddTargetTagWindowController(uiDependencies, targetTagManagement,
-                new TagWindowLayout<ProxyTag>(uiDependencies)));
+                new TagWindowLayout<>(uiDependencies)));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTag proxyTag) {
         return getWindowForEntity(proxyTag, new UpdateTargetTagWindowController(uiDependencies, targetTagManagement,
-                new TagWindowLayout<ProxyTag>(uiDependencies)));
+                new TagWindowLayout<>(uiDependencies)));
     }
 }

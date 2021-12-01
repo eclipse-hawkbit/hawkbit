@@ -60,7 +60,7 @@ final class DdiApiModelProperties {
 
     static final String CHUNK_TYPE = "Type of the chunk, e.g. firmware, bundle, app. In update server mapped to Software Module Type.";
 
-    static final String SOFTWARE_MODUL_TYPE = "type of the software module, e.g. firmware, bundle, app";
+    static final String SOFTWARE_MODULE_TYPE = "type of the software module, e.g. firmware, bundle, app";
 
     static final String SOFTWARE_MODULE_VERSION = "version of the software module";
 
@@ -68,7 +68,7 @@ final class DdiApiModelProperties {
 
     static final String SOFTWARE_MODULE_ARTIFACT_LINKS = "artifact links of the software module";
 
-    static final String SOFTWARE_MODUL_ID = "id of the software module";
+    static final String SOFTWARE_MODULE_ID = "id of the software module";
 
     static final String CHUNK_VERSION = "software version of the chunk";
 
@@ -102,15 +102,15 @@ final class DdiApiModelProperties {
 
     static final String CHUNK = "Software chunks of an update. In server mapped by Software Module.";
 
-    static final String SOFTWARE_MODUL = "software modules of an update";
+    static final String SOFTWARE_MODULE = "software modules of an update";
 
     static final String ARTIFACT = "artifact modules of an update";
 
     static final String FILENAME = "file name of artifact";
 
     static final String TARGET_CONFIG_DATA = "Link which is provided whenever the provisioning target or device is supposed "
-                    + "to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial "
-                    + "configuration, after a successful update action, or if requested explicitly (e.g. via the management UI).";
+            + "to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial "
+            + "configuration, after a successful update action, or if requested explicitly (e.g. via the management UI).";
 
     static final String ARTIFACT_HASHES_SHA1 = "SHA1 hash of the artifact in Base 16 format";
     static final String ARTIFACT_HASHES_MD5 = "MD5 hash of the artifact";

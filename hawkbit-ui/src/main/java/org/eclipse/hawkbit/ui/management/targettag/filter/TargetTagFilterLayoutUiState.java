@@ -21,9 +21,19 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     private static final long serialVersionUID = 1L;
 
     private Long clickedTargetFilterQueryId;
+    private Long clickedTargetTypeFilterId;
     private final Collection<TargetUpdateStatus> clickedTargetUpdateStatusFilters = new ArrayList<>();
     private boolean isOverdueFilterClicked;
     private boolean isCustomFilterTabSelected;
+    private boolean isTargetTypeFilterTabSelected;
+
+    public Long getClickedTargetTypeFilterId() {
+        return clickedTargetTypeFilterId;
+    }
+
+    public void setClickedTargetTypeFilterId(Long clickedTargetTypeFilterId) {
+        this.clickedTargetTypeFilterId = clickedTargetTypeFilterId;
+    }
 
     /**
      * @return Id of clicked target filter query
@@ -94,4 +104,13 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     public void setCustomFilterTabSelected(final boolean isCustomFilterTabSelected) {
         this.isCustomFilterTabSelected = isCustomFilterTabSelected;
     }
+
+    public boolean isTargetTypeFilterTabSelected() {
+        return isTargetTypeFilterTabSelected;
+    }
+
+    public void setTargetTypeFilterTabSelected(boolean targetTypeFilterTabSelected) {
+        isTargetTypeFilterTabSelected = targetTypeFilterTabSelected;
+    }
+
 }

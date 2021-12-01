@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
@@ -21,6 +22,7 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
+import javax.persistence.criteria.Subquery;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -391,10 +393,14 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
             // Since the targetRoot is changed by joining we need to get the
             // isNull predicate first
-            final Predicate targetTypeIsNull = targetRoot.get(JpaTarget_.targetType).isNull();
+            final Predicate targetTypeIsNull = getTargetTypeIsNullPredicate(targetRoot);
 
-            return cb.or(targetTypeIsNull, getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId));
+            return cb.or(targetTypeIsNull, cb.equal(getDsTypeIdPath(targetRoot), distributionSetTypeId));
         };
+    }
+
+    private static Predicate getTargetTypeIsNullPredicate(Root<JpaTarget> targetRoot) {
+        return targetRoot.get(JpaTarget_.targetType).isNull();
     }
 
     /**
@@ -413,19 +419,24 @@ public final class TargetSpecifications {
             // isNotNull predicate first
             final Predicate targetTypeNotNull = targetRoot.get(JpaTarget_.targetType).isNotNull();
 
-            return cb.and(targetTypeNotNull,
-                    cb.isNull(getDistSetTypeEqualPredicate(targetRoot, cb, distributionSetTypeId)));
+            final Subquery<Long> compatibilitySubQuery = query.subquery(Long.class);
+            final Root<JpaTarget> subQueryTargetRoot = compatibilitySubQuery.from(JpaTarget.class);
+
+            compatibilitySubQuery.select(subQueryTargetRoot.get(JpaTarget_.id))
+                    .where(cb.and(cb.equal(targetRoot.get(JpaTarget_.id), subQueryTargetRoot.get(JpaTarget_.id)),
+                            cb.equal(getDsTypeIdPath(subQueryTargetRoot), distributionSetTypeId)));
+
+            return cb.and(targetTypeNotNull, cb.not(cb.exists(compatibilitySubQuery)));
         };
     }
 
-    private static Predicate getDistSetTypeEqualPredicate(final Root<JpaTarget> root, final CriteriaBuilder cb,
-            final Long dsTypeId) {
+    private static Path<Long> getDsTypeIdPath(final Root<JpaTarget> root) {
         final Join<JpaTarget, JpaTargetType> targetTypeJoin = root.join(JpaTarget_.targetType, JoinType.LEFT);
         targetTypeJoin.fetch(JpaTargetType_.distributionSetTypes);
         final SetJoin<JpaTargetType, JpaDistributionSetType> dsTypeTargetTypeJoin = targetTypeJoin
                 .join(JpaTargetType_.distributionSetTypes, JoinType.LEFT);
 
-        return cb.equal(dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id), dsTypeId);
+        return dsTypeTargetTypeJoin.get(JpaDistributionSetType_.id);
     }
 
     /**
@@ -529,12 +540,70 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have a
-     * {@link org.eclipse.hawkbit.repository.model.TargetType} assigned
+     * {@link Specification} for retrieving {@link Target}s by target type id
+     *
+     * @param typeId
+     *            the id of the target type
      *
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> hasTargetType() {
-        return (targetRoot, query, cb) -> cb.isNotNull(targetRoot.get(JpaTarget_.targetType));
+    public static Specification<JpaTarget> hasTargetType(final long typeId) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id),
+                typeId);
     }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s by target type id is equal to null
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNoTargetType() {
+        return (targetRoot, query, cb) -> cb.isNull(targetRoot.get(JpaTarget_.targetType));
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that don't have target
+     * type assigned
+     *
+     * @param typeId
+     *            the id of the target type
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasTargetTypeNot(final Long typeId) {
+        return (targetRoot, query, cb) -> cb.or(getTargetTypeIsNullPredicate(targetRoot),
+                cb.notEqual(targetRoot.get(JpaTarget_.targetType).get(JpaTargetType_.id), typeId));
+    }
+
+    /**
+     * Can be added to specification chain to order result by provided distribution
+     * set
+     *
+     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3. Based on
+     * target id
+     *
+     * NOTE: Other specs, pagables and sort objects may alter the queries orderBy
+     * entry too, possibly invalidating the applied order, keep in mind when using
+     * this
+     *
+     * @param distributionSetIdForOrder
+     *            distribution set to consider
+     * @return specification that applies order by ds, may be overwritten
+     */
+    public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder) {
+        return (targetRoot, query, cb) -> {
+            // Enhance query with custom select based sort
+            final Expression<Object> selectCase = cb.selectCase()
+                    .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet).get(JpaDistributionSet_.id),
+                            distributionSetIdForOrder), 1)
+                    .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
+                            distributionSetIdForOrder), 2)
+                    .otherwise(100);
+            query.orderBy(cb.asc(selectCase), cb.desc(targetRoot.get(JpaTarget_.id)));
+
+            // Spec only provides order, so no further filtering
+            return query.getRestriction();
+        };
+    }
+
 }

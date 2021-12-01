@@ -8,9 +8,18 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.Binder.BindingBuilder;
+import com.vaadin.data.Validator;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.server.Setter;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.Type;
 import org.eclipse.hawkbit.ui.common.data.aware.ActionTypeAware;
 import org.eclipse.hawkbit.ui.common.data.aware.DescriptionAware;
@@ -23,7 +32,6 @@ import org.eclipse.hawkbit.ui.common.data.aware.VersionAware;
 import org.eclipse.hawkbit.ui.common.data.providers.AbstractProxyDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetStatelessDataProvider;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSetInfo;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
@@ -38,17 +46,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-
-import com.vaadin.data.Binder;
-import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.Binder.BindingBuilder;
-import com.vaadin.data.Validator;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 
 /**
  * Builder class for from components
@@ -380,9 +377,9 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
-        return getCheckBox(null, id, binder, getter, setter);
+        return createCheckBox(null, id, binder, getter, setter);
     }
 
     /**
@@ -402,7 +399,7 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String caption, final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String caption, final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
         final CheckBox checkBox;
         if (StringUtils.isEmpty(caption)) {

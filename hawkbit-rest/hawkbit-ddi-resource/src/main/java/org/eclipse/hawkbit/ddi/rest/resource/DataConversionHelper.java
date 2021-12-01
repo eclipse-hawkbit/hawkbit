@@ -57,7 +57,7 @@ public final class DataConversionHelper {
 
         return new ResponseList<>(uAction.getDistributionSet().getModules().stream()
                 .map(module -> new DdiChunk(mapChunkLegacyKeys(module.getType().getKey()), module.getVersion(),
-                        module.getName(),
+                        module.getName(), module.isEncrypted() ? Boolean.TRUE : null,
                         createArtifacts(target, module, artifactUrlHandler, systemManagement, request),
                         mapMetadata(metadata.get(module.getId()))))
                 .collect(Collectors.toList()));

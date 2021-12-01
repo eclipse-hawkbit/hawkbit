@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 import com.vaadin.data.Binder;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
@@ -28,6 +29,7 @@ import com.vaadin.ui.TextField;
 public class SmWindowLayoutComponentBuilder {
 
     public static final String TEXTFIELD_VENDOR = "textfield.vendor";
+    public static final String ARTIFACT_ENCRYPTION = "artifact.encryption";
 
     private final VaadinMessageSource i18n;
     private final SoftwareModuleTypeDataProvider<ProxyTypeInfo> smTypeDataProvider;
@@ -56,7 +58,8 @@ public class SmWindowLayoutComponentBuilder {
      */
     public ComboBox<ProxyTypeInfo> createSoftwareModuleTypeCombo(final Binder<ProxySoftwareModule> binder) {
         return FormComponentBuilder
-                .createTypeCombo(binder, smTypeDataProvider, i18n, UIComponentIdProvider.SW_MODULE_TYPE, true).getComponent();
+                .createTypeCombo(binder, smTypeDataProvider, i18n, UIComponentIdProvider.SW_MODULE_TYPE, true)
+                .getComponent();
     }
 
     /**
@@ -112,5 +115,19 @@ public class SmWindowLayoutComponentBuilder {
     public TextArea createDescription(final Binder<ProxySoftwareModule> binder) {
         return FormComponentBuilder
                 .createDescriptionInput(binder, i18n, UIComponentIdProvider.ADD_SW_MODULE_DESCRIPTION).getComponent();
+    }
+
+    /**
+     * Create checkbox for artifact encryption
+     *
+     * @param binder
+     *            binder the input will be bound to
+     *
+     * @return input component
+     */
+    public CheckBox createArtifactEncryptionCheck(final Binder<ProxySoftwareModule> binder) {
+        return FormComponentBuilder.createCheckBox(i18n.getMessage(ARTIFACT_ENCRYPTION),
+                UIComponentIdProvider.ARTIFACT_ENCRYPTION_ID, binder, ProxySoftwareModule::isEncrypted,
+                ProxySoftwareModule::setEncrypted);
     }
 }

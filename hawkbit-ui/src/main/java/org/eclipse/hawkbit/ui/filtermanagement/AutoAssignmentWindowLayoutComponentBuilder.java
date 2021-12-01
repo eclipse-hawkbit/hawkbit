@@ -65,7 +65,7 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
      */
     public CheckBox createEnableCheckbox(final Binder<ProxyTargetFilterQuery> binder) {
         final String caption = i18n.getMessage(UIMessageIdProvider.LABEL_AUTO_ASSIGNMENT_ENABLE);
-        return FormComponentBuilder.getCheckBox(caption, UIComponentIdProvider.DIST_SET_SELECT_ENABLE_ID, binder,
+        return FormComponentBuilder.createCheckBox(caption, UIComponentIdProvider.DIST_SET_SELECT_ENABLE_ID, binder,
                 ProxyTargetFilterQuery::isAutoAssignmentEnabled, ProxyTargetFilterQuery::setAutoAssignmentEnabled);
     }
 

@@ -581,6 +581,16 @@ public final class UIComponentIdProvider {
     public static final String TARGET_TAG_DROP_AREA_ID = "target.tag.drop.area";
 
     /**
+     * ID-Target tag table.
+     */
+    public static final String TARGET_TYPE_TABLE_ID = "target.type.tableId";
+
+    /**
+     * ID-Target type table drop area.
+     */
+    public static final String TARGET_TYPE_DROP_AREA_ID = "target.type.drop.area";
+
+    /**
      * ID-Distibution tag table.
      */
     public static final String DISTRIBUTION_TAG_TABLE_ID = "distriution.tag.tableId";
@@ -672,7 +682,7 @@ public final class UIComponentIdProvider {
     /**
      * Software module table details vendor label id.
      */
-    public static final String DETAILS_VENDOR_LABEL_ID = "details.vendor";
+    public static final String DETAILS_VENDOR_LABEL_ID = "sm.details.vendor";
 
     /**
      * Software module table details description label id.
@@ -687,7 +697,7 @@ public final class UIComponentIdProvider {
     /**
      * Software module table details type label id.
      */
-    public static final String DETAILS_TYPE_LABEL_ID = "details.type";
+    public static final String DETAILS_TYPE_LABEL_ID = "sm.details.type";
 
     /**
      * Table details Required Migration Step label id.
@@ -775,9 +785,14 @@ public final class UIComponentIdProvider {
     public static final String TARGET_MAX_MIN_TABLE_ICON = "target.max.min.table.icon";
 
     /**
-     * Software module table in upload UI.
+     * Id of Assignment type in Software Module Details.
      */
-    public static final String SWM_DTLS_MAX_ASSIGN = "max.assign";
+    public static final String SWM_DTLS_MAX_ASSIGN = "sm.details.max.assign";
+
+    /**
+     * Id of encryption mode in Software Module Details.
+     */
+    public static final String SWM_DTLS_ENCRYPTION = "sm.details.encryption";
 
     /**
      * Documentation Link in Login view and menu.
@@ -928,6 +943,11 @@ public final class UIComponentIdProvider {
      * ID - simple filter- Accordion-Tab
      */
     public static final String SIMPLE_FILTER_ACCORDION_TAB = "simple.filter.accordion.tab";
+
+    /**
+     * ID - target type filter- Accordion-Tab
+     */
+    public static final String TARGET_TYPE_FILTER_ACCORDION_TAB = "target.type.filter.accordion.tab";
 
     /**
      * ID - custom filter- Accordion-Tab
@@ -1337,6 +1357,22 @@ public final class UIComponentIdProvider {
      * Table multiselect for selecting DistType
      */
     public static final String SELECT_DIST_TYPE = "select-dist-type";
+
+    /**
+     * Table multiselect for unselecting DistType
+     */
+    public static final String UNSELECT_DIST_TYPE = "unselect-dist-type";
+
+    /**
+     * ID for DistType source value table
+     */
+    public static final String DIST_TYPE_TABLE_SOURCE_ID = "dsTypeSourceId";
+
+    /**
+     * ID for DistType selected value table
+     */
+    public static final String DIST_TYPE_TABLE_SELECTED_ID = "dsTypeSelectedId";
+
     /**
      * ID for download anonymous checkbox
      */
@@ -1400,7 +1436,8 @@ public final class UIComponentIdProvider {
      */
     public static final String INVALIDATE_DS_STOP_ROLLOUTS = "invalidate.distributionset.consequences.stop.rollouts.checkbox";
     /**
-     * Distribution set invalidate consequences window, cancelation type radio button group
+     * Distribution set invalidate consequences window, cancelation type radio
+     * button group
      */
     public static final String INVALIDATE_DS_CANCELATION_TYPE = "invalidate.distributionset.consequences.cancelation.type.radio";
     /**
@@ -1529,6 +1566,10 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_TAG_ID_PREFIXS = "target.tag";
     /**
+     * Target type button id prefix.
+     */
+    public static final String TARGET_TYPE_ID_PREFIXS = "target.type";
+    /**
      * Distribution tag button id prefix.
      */
     public static final String DISTRIBUTION_TAG_ID_PREFIXS = "dist.tag";
@@ -1545,6 +1586,11 @@ public final class UIComponentIdProvider {
      * Id of the file upload cancel confirmation window
      */
     public static final String UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG = "upload.queue.clear.confirmation.window";
+
+    /**
+     * Artifact encryption checkbox id.
+     */
+    public static final String ARTIFACT_ENCRYPTION_ID = "artifact.encryption.id";
 
     /**
      * /* Private Constructor.

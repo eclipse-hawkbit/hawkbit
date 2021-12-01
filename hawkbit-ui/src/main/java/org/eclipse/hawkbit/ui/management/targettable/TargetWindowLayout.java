@@ -38,6 +38,8 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
      * 
      * @param i18n
      *            I18N
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      */
     public TargetWindowLayout(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
         super();

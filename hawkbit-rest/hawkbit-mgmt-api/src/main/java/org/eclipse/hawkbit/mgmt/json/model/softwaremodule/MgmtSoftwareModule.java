@@ -38,6 +38,9 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     @JsonProperty
     private boolean deleted;
 
+    @JsonProperty
+    private boolean encrypted;
+
     public void setDeleted(final boolean deleted) {
         this.deleted = deleted;
     }
@@ -77,6 +80,14 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
 
     public void setVendor(final String vendor) {
         this.vendor = vendor;
+    }
+
+    public void setEncrypted(final boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
+    public boolean isEncrypted() {
+        return encrypted;
     }
 
 }

@@ -31,6 +31,7 @@ public class SoftwareModuleToProxyMapper
         proxySoftwareModule.setNameAndVersion(
                 HawkbitCommonUtil.concatStrings(":", softwareModule.getName(), softwareModule.getVersion()));
         proxySoftwareModule.setVendor(softwareModule.getVendor());
+        proxySoftwareModule.setEncrypted(softwareModule.isEncrypted());
 
         final SoftwareModuleType type = softwareModule.getType();
         final ProxyTypeInfo typeInfo = new ProxyTypeInfo(type.getId(), type.getName(), type.getKey());

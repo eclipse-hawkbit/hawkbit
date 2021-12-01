@@ -9,9 +9,8 @@
 package org.eclipse.hawkbit.ui.artifacts.upload;
 
 import java.io.Serializable;
+import java.util.Objects;
 
-import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 
@@ -21,18 +20,13 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
  *
  */
 public class FileUploadId implements Serializable {
-
     private static final long serialVersionUID = 1L;
 
     private final String filename;
 
+    private final Long softwareModuleId;
     private final String softwareModuleName;
-
     private final String softwareModuleVersion;
-
-    private Long softwareModuleId;
-
-    private final String id;
 
     /**
      * Creates a new {@link FileUploadId} instance.
@@ -44,36 +38,25 @@ public class FileUploadId implements Serializable {
      */
     public FileUploadId(final String filename, final SoftwareModule softwareModule) {
         this.filename = filename;
+        this.softwareModuleId = softwareModule.getId();
         this.softwareModuleName = softwareModule.getName();
         this.softwareModuleVersion = softwareModule.getVersion();
-        this.softwareModuleId = softwareModule.getId();
-        this.id = createFileUploadIdString(filename, softwareModuleName, softwareModuleVersion);
     }
 
-    /**
-     * Creates a new {@link FileUploadId} instance.
-     * 
-     * @param filename
-     *            the name of the file
-     * @param softwareModuleName
-     *            the name of a {@link SoftwareModule} for which the file is
-     *            uploaded
-     * @param softwareModuleVersion
-     *            the version of a {@link SoftwareModule} for which the file is
-     *            uploaded
-     */
-    public FileUploadId(final String filename, final String softwareModuleName, final String softwareModuleVersion) {
-        this.filename = filename;
-        this.softwareModuleName = softwareModuleName;
-        this.softwareModuleVersion = softwareModuleVersion;
-        this.id = createFileUploadIdString(filename, softwareModuleName, softwareModuleVersion);
+    public String getFilename() {
+        return filename;
     }
 
-    private static String createFileUploadIdString(final String filename, final String softwareModuleName,
-            final String softwareModuleVersion) {
-        return new StringBuilder(filename).append(":")
-                .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModuleName, softwareModuleVersion))
-                .toString();
+    public Long getSoftwareModuleId() {
+        return softwareModuleId;
+    }
+
+    public String getSoftwareModuleName() {
+        return softwareModuleName;
+    }
+
+    public String getSoftwareModuleVersion() {
+        return softwareModuleVersion;
     }
 
     @Override
@@ -88,52 +71,21 @@ public class FileUploadId implements Serializable {
             return false;
         }
         final FileUploadId other = (FileUploadId) obj;
-        return new EqualsBuilder().append(id, other.id).isEquals();
+        return Objects.equals(this.getFilename(), other.getFilename())
+                && Objects.equals(this.getSoftwareModuleId(), other.getSoftwareModuleId())
+                && Objects.equals(this.getSoftwareModuleName(), other.getSoftwareModuleName())
+                && Objects.equals(this.getSoftwareModuleVersion(), other.getSoftwareModuleVersion());
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder().append(id).toHashCode();
+        return Objects.hash(getFilename(), getSoftwareModuleId(), getSoftwareModuleName(), getSoftwareModuleVersion());
     }
 
     @Override
     public String toString() {
-        return id;
-    }
-
-    /**
-     * Getter for the uploaded file name
-     *
-     * @return String
-     */
-    public String getFilename() {
-        return filename;
-    }
-
-    /**
-     * Getter for the software module name
-     *
-     * @return String
-     */
-    public String getSoftwareModuleName() {
-        return softwareModuleName;
-    }
-
-    /**
-     * Getter for the software module version
-     *
-     * @return String
-     */
-    public String getSoftwareModuleVersion() {
-        return softwareModuleVersion;
-    }
-
-    /**
-     * Getter for the software module ID
-     *
-     * @return Long
-     */
-    public Long getSoftwareModuleId() {
-        return softwareModuleId;
+        return new StringBuilder(filename).append(":")
+                .append(HawkbitCommonUtil.getFormattedNameVersion(softwareModuleName, softwareModuleVersion))
+                .toString();
     }
 }

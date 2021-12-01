@@ -35,6 +35,10 @@ public class DdiChunk {
     @NotNull
     private String name;
 
+    @JsonProperty("encrypted")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean encrypted;
+
     @JsonProperty("artifacts")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private List<DdiArtifact> artifacts;
@@ -56,16 +60,19 @@ public class DdiChunk {
      *            of the artifact
      * @param name
      *            of the artifact
+     * @param encrypted
+     *            if artifacts are encrypted
      * @param artifacts
      *            download information
      * @param metadata
      *            optional as additional information for the target/device
      */
-    public DdiChunk(final String part, final String version, final String name, final List<DdiArtifact> artifacts,
-            final List<DdiMetadata> metadata) {
+    public DdiChunk(final String part, final String version, final String name, final Boolean encrypted,
+            final List<DdiArtifact> artifacts, final List<DdiMetadata> metadata) {
         this.part = part;
         this.version = version;
         this.name = name;
+        this.encrypted = encrypted;
         this.artifacts = artifacts;
         this.metadata = metadata;
     }
@@ -80,6 +87,10 @@ public class DdiChunk {
 
     public String getName() {
         return name;
+    }
+
+    public Boolean isEncrypted() {
+        return encrypted;
     }
 
     public List<DdiArtifact> getArtifacts() {

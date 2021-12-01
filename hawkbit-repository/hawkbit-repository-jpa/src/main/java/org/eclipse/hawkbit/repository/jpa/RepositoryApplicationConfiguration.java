@@ -16,7 +16,11 @@ import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
+import org.eclipse.hawkbit.repository.ArtifactEncryption;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -140,7 +144,7 @@ import com.google.common.collect.Maps;
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryBaseClass = SimpleJpaWithNoCountRepository.class)
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
@@ -244,7 +248,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param dsTypeManagement
-     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
+     *            for loading
+     *            {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return TargetTypeBuilder bean
      */
     @Bean
@@ -260,8 +265,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param softwareManagement
-     *            for loading {@link DistributionSetType#getMandatoryModuleTypes()}
-     *            and {@link DistributionSetType#getOptionalModuleTypes()}
+     *            for loading
+     *            {@link DistributionSetType#getMandatoryModuleTypes()} and
+     *            {@link DistributionSetType#getOptionalModuleTypes()}
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
@@ -303,8 +309,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     *         accessible in beans which cannot access the service directly,
+     *         e.g. JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -312,9 +318,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantConfigurationManagement} singleton bean which make
-     *         it accessible in beans which cannot access the service directly, e.g.
-     *         JPA entities.
+     * @return the {@link TenantConfigurationManagement} singleton bean which
+     *         make it accessible in beans which cannot access the service
+     *         directly, e.g. JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -323,8 +329,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA entities.
+     *         current {@link SystemManagement} service and make it accessible
+     *         in beans which cannot access the service directly, e.g. JPA
+     *         entities.
      */
     @Bean
     SystemManagementHolder systemManagementHolder() {
@@ -332,9 +339,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantAwareHolder} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
+     * @return the {@link TenantAwareHolder} singleton bean which holds the
+     *         current {@link TenantAware} service and make it accessible in
+     *         beans which cannot access the service directly, e.g. JPA
+     *         entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -342,9 +350,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
-     *         the current {@link SecurityTokenGenerator} service and make it
-     *         accessible in beans which cannot access the service via injection
+     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which
+     *         holds the current {@link SecurityTokenGenerator} service and make
+     *         it accessible in beans which cannot access the service via
+     *         injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
@@ -663,17 +672,15 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final RolloutGroupManagement rolloutGroupManagement,
-            final DistributionSetManagement distributionSetManagement, final ApplicationContext context,
-            final EventPublisherHolder eventPublisherHolder, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final PlatformTransactionManager txManager, final TenantAware tenantAware, final LockRegistry lockRegistry,
-            final JpaProperties properties, final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+            final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
+            final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final RolloutExecutor rolloutExecutor) {
-        return new JpaRolloutManagement(targetManagement, deploymentManagement, rolloutGroupManagement,
-                distributionSetManagement, context, eventPublisherHolder, virtualPropertyReplacer, txManager,
-                tenantAware, lockRegistry, properties.getDatabase(), rolloutApprovalStrategy,
-                tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
+        return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
+                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
+                rolloutApprovalStrategy, tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
     }
 
     /**
@@ -940,4 +947,29 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 lockRegistry);
     }
 
+    /**
+     * Our default {@link BaseRepositoryTypeProvider} bean always provides the
+     * NoCountBaseRepository
+     *
+     * @return a {@link BaseRepositoryTypeProvider} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    BaseRepositoryTypeProvider baseRepositoryTypeProvider() {
+        return new NoCountBaseRepositoryTypeProvider();
+
+    }
+
+    /**
+     * Default artifact encryption service bean that internally uses
+     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore}
+     * beans for {@link SoftwareModule} artifacts encryption/decryption
+     *
+     * @return a {@link ArtifactEncryptionService} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    ArtifactEncryptionService artifactEncryptionService() {
+        return ArtifactEncryptionService.getInstance();
+    }
 }

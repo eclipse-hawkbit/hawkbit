@@ -100,6 +100,18 @@ public enum SpServerError {
     /**
     *
     */
+    SP_ARTIFACT_ENCRYPTION_NOT_SUPPORTED("hawkbit.server.error.artifact.encryptionNotSupported",
+            "Artifact encryption is not supported."),
+
+    /**
+    *
+    */
+    SP_ARTIFACT_ENCRYPTION_FAILED("hawkbit.server.error.artifact.encryptionFailed",
+            "Artifact encryption operation failed."),
+
+    /**
+    *
+    */
     SP_ARTIFACT_UPLOAD_FAILED_MD5_MATCH("hawkbit.server.error.artifact.uploadFailed.checksum.md5.match",
             "Upload of artifact failed as the provided MD5 checksum did not match with the provided artifact."),
 
@@ -276,6 +288,9 @@ public enum SpServerError {
             "The requested operation requires a weight to be specified when multi assignments is enabled."),
 
     SP_TARGET_TYPE_IN_USE("hawkbit.server.error.target.type.used", "Target type is still in use by a target."),
+
+    SP_TARGET_TYPE_INCOMPATIBLE("hawkbit.server.error.target.type.incompatible",
+            "Target type of target is not compatible with distribution set."),
 
     SP_STOP_ROLLOUT_FAILED("hawkbit.server.error.stopRolloutFailed", "Stopping the rollout failed");
 

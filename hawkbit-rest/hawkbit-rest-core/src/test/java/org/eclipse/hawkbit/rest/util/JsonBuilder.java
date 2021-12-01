@@ -97,7 +97,8 @@ public abstract class JsonBuilder {
             builder.append(new JSONObject().put("name", module.getName()).put("description", module.getDescription())
                     .put("type", module.getType().getKey()).put("id", Long.MAX_VALUE).put("vendor", module.getVendor())
                     .put("version", module.getVersion()).put("createdAt", "0").put("updatedAt", "0")
-                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh").toString());
+                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("encrypted", module.isEncrypted()).toString());
 
             if (++i < modules.size()) {
                 builder.append(",");
@@ -447,7 +448,8 @@ public abstract class JsonBuilder {
         return builder.toString();
     }
 
-    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId) throws JSONException {
+    public static String targets(final List<Target> targets, final boolean withToken, final long targetTypeId)
+            throws JSONException {
         final StringBuilder builder = new StringBuilder();
 
         builder.append("[");
@@ -471,7 +473,7 @@ public abstract class JsonBuilder {
 
         return builder.toString();
     }
-    
+
     public static String targetTypes(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
@@ -487,15 +489,15 @@ public abstract class JsonBuilder {
             });
 
             result.put(new JSONObject().put("name", type.getName()).put("description", type.getDescription())
-                    .put("id", Long.MAX_VALUE).put("colour", type.getColour()).put("createdAt", "0").put("updatedAt", "0")
-                    .put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
+                    .put("id", Long.MAX_VALUE).put("colour", type.getColour()).put("createdAt", "0")
+                    .put("updatedAt", "0").put("createdBy", "fghdfkjghdfkjh").put("updatedBy", "fghdfkjghdfkjh")
                     .put("distributionsets", dsTypes));
 
         }
 
         return result.toString();
-    }  
-    
+    }
+
     public static String targetTypesCreatableFieldsOnly(final List<TargetType> types) throws JSONException {
         final JSONArray result = new JSONArray();
 
@@ -510,11 +512,10 @@ public abstract class JsonBuilder {
                 }
             });
 
-            JSONObject json = new JSONObject().put("name", type.getName()).put("description", type.getDescription())
+            final JSONObject json = new JSONObject().put("name", type.getName()).put("description", type.getDescription())
                     .put("colour", type.getColour());
 
-            if(dsTypes.length() != 0)
-            {
+            if (dsTypes.length() != 0) {
                 json.put("compatibledistributionsettypes", dsTypes);
             }
 

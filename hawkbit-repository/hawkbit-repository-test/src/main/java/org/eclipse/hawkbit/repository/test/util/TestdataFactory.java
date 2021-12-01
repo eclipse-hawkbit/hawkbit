@@ -540,7 +540,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModule(final String typeKey) {
-        return createSoftwareModule(typeKey, "");
+        return createSoftwareModule(typeKey, "", false);
     }
 
     /**
@@ -552,7 +552,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleApp() {
-        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, "");
+        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, "", false);
     }
 
     /**
@@ -567,7 +567,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleApp(final String prefix) {
-        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, prefix);
+        return createSoftwareModule(Constants.SMT_DEFAULT_APP_KEY, prefix, false);
     }
 
     /**
@@ -579,7 +579,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleOs() {
-        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, "");
+        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, "", false);
     }
 
     /**
@@ -594,7 +594,7 @@ public class TestdataFactory {
      * @return persisted {@link SoftwareModule}.
      */
     public SoftwareModule createSoftwareModuleOs(final String prefix) {
-        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, prefix);
+        return createSoftwareModule(Constants.SMT_DEFAULT_OS_KEY, prefix, false);
     }
 
     /**
@@ -609,10 +609,10 @@ public class TestdataFactory {
      *
      * @return persisted {@link SoftwareModule}.
      */
-    public SoftwareModule createSoftwareModule(final String typeKey, final String prefix) {
+    public SoftwareModule createSoftwareModule(final String typeKey, final String prefix, final boolean encrypted) {
         return softwareModuleManagement.create(entityFactory.softwareModule().create()
                 .type(findOrCreateSoftwareModuleType(typeKey)).name(prefix + typeKey).version(prefix + DEFAULT_VERSION)
-                .description(LOREM.words(10)).vendor(DEFAULT_VENDOR));
+                .description(LOREM.words(10)).vendor(DEFAULT_VENDOR).encrypted(encrypted));
     }
 
     /**
@@ -1205,8 +1205,7 @@ public class TestdataFactory {
 
     /**
      * Finds {@link TargetType} in repository with given
-     * {@link TargetType#getName()} or creates if it does not exist yet. No ds
-     * types
+     * {@link TargetType#getName()} or creates if it does not exist yet. No ds types
      * are assigned on creation.
      *
      * @param targetTypeName
@@ -1222,8 +1221,7 @@ public class TestdataFactory {
 
     /**
      * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. Compatible distribution set types are
-     * assigned
+     * {@link TargetType#getName()}. Compatible distribution set types are assigned
      * on creation
      *
      * @param targetTypeName
@@ -1256,8 +1254,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set and directly invalidates it. No actions will
-     * be canceled and no rollouts will be stopped with this invalidation.
+     * Creates a distribution set and directly invalidates it. No actions will be
+     * canceled and no rollouts will be stopped with this invalidation.
      *
      * @return created invalidated {@link DistributionSet}
      */
@@ -1269,8 +1267,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set that has no software modules assigned, so it
-     * is incomplete.
+     * Creates a distribution set that has no software modules assigned, so it is
+     * incomplete.
      *
      * @return created incomplete {@link DistributionSet}
      */

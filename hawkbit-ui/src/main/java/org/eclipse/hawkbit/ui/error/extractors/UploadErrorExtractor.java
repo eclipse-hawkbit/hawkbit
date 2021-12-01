@@ -21,7 +21,7 @@ public class UploadErrorExtractor extends AbstractSingleUiErrorDetailsExtractor 
 
     @Override
     protected Optional<UiErrorDetails> findDetails(final Throwable error) {
-        // UploadException is ignored
+        // UploadException is ignored as it is handled explicitly
         return findExceptionOf(error, UploadException.class).map(ex -> UiErrorDetails.empty());
     }
 }

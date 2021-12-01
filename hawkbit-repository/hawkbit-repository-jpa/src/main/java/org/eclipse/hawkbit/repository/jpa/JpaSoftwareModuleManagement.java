@@ -31,6 +31,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -155,7 +156,14 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public SoftwareModule create(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
-        return softwareModuleRepository.save(create.build());
+        final JpaSoftwareModule sm = softwareModuleRepository.save(create.build());
+        if (create.isEncrypted()) {
+            // flush sm creation in order to get an Id
+            entityManager.flush();
+            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(sm.getId());
+        }
+
+        return sm;
     }
 
     @Override
@@ -295,8 +303,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                SoftwareModuleFields.class, virtualPropertyReplacer, database);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }

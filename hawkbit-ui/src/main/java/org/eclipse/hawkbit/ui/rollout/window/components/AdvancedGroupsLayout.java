@@ -56,6 +56,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
     private final GridLayout layout;
 
     private String targetFilter;
+    private Long dsTypeId;
 
     private final List<AdvancedGroupRow> groupRows;
     private int lastGroupIndex;
@@ -237,7 +238,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
     private void validateTargetsPerGroup() {
         resetErrors();
 
-        if (StringUtils.isEmpty(targetFilter)) {
+        if (StringUtils.isEmpty(targetFilter) || dsTypeId == null) {
             return;
         }
 
@@ -245,7 +246,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
             final List<RolloutGroupCreate> groupsCreate = getRolloutGroupsCreateFromDefinitions(
                     getAdvancedRolloutGroupDefinitions());
             final ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups = rolloutManagement
-                    .validateTargetsInGroups(groupsCreate, targetFilter, System.currentTimeMillis());
+                    .validateTargetsInGroups(groupsCreate, targetFilter, System.currentTimeMillis(), dsTypeId);
 
             final UI ui = UI.getCurrent();
             validateTargetsInGroups.addCallback(validation -> ui.access(() -> updateGroupsByValidation(validation)),
@@ -273,10 +274,9 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
     }
 
     /**
-     * YOU SHOULD NOT CALL THIS METHOD MANUALLY. It's only for the callback.
-     * Only 1 runningValidation should be executed. If this runningValidation is
-     * done, then this method is called. Maybe then a new runningValidation is
-     * executed.
+     * YOU SHOULD NOT CALL THIS METHOD MANUALLY. It's only for the callback. Only 1
+     * runningValidation should be executed. If this runningValidation is done, then
+     * this method is called. Maybe then a new runningValidation is executed.
      * 
      */
     private void updateGroupsByValidation(final RolloutGroupsValidation validation) {
@@ -338,7 +338,30 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
      */
     public void setTargetFilter(final String targetFilter) {
         this.targetFilter = targetFilter;
+        updateValidation();
+    }
 
+    /**
+     * 
+     * @param dsTypeId
+     *            ID of the Distribution set type which is required for the
+     *            compatibility check
+     */
+    public void setDsTypeId(final Long dsTypeId) {
+        this.dsTypeId = dsTypeId;
+        updateValidation();
+    }
+
+    /**
+     * @param targetFilter
+     *            the target filter which is required for verification
+     * @param dsTypeId
+     *            ID of the Distribution set type which is required for the
+     *            compatibility check
+     */
+    public void setTargetFilterAndDsType(final String targetFilter, final Long dsTypeId) {
+        this.targetFilter = targetFilter;
+        this.dsTypeId = dsTypeId;
         updateValidation();
     }
 

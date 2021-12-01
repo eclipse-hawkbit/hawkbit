@@ -22,7 +22,7 @@ import org.springframework.util.StringUtils;
  * Data provider for {@link TargetTypeManagement}, which dynamically loads a
  * batch of {@link TargetType} entities from backend and maps them to
  * corresponding output type.
- * 
+ *
  * @param <T>
  *            output type
  */
@@ -31,6 +31,14 @@ public class TargetTypeDataProvider<T extends ProxyIdentifiableEntity>
     private static final long serialVersionUID = 1L;
     private final transient TargetTypeManagement targetTypeManagement;
 
+    /**
+     * Constructor
+     *
+     * @param targetTypeManagement
+     *          TargetTypeManagement
+     * @param mapper
+     *          Mapper
+     */
     public TargetTypeDataProvider(final TargetTypeManagement targetTypeManagement, IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
         super(mapper, Sort.by(Direction.ASC, "name"));
         this.targetTypeManagement = targetTypeManagement;

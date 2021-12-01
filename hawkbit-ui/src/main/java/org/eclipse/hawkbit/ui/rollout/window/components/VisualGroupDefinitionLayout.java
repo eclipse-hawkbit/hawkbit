@@ -61,7 +61,7 @@ public class VisualGroupDefinitionLayout {
 
         if (groupDefinitionMode == GroupDefinitionMode.SIMPLE) {
             updateBySimpleGroupsDefinition();
-        } else {
+        } else if (groupDefinitionMode == GroupDefinitionMode.ADVANCED) {
             updateByAdvancedGroupsDefinition();
         }
     }

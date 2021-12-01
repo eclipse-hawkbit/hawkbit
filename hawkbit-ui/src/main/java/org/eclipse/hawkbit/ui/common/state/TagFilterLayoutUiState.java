@@ -18,7 +18,25 @@ public class TagFilterLayoutUiState extends HidableLayoutUiState {
     private static final long serialVersionUID = 1L;
 
     private boolean noTagClicked;
+    private boolean noTargetTypeClicked;
     private final Map<Long, String> clickedTagIdsWithName = new HashMap<>();
+
+    /**
+     * @return True if no targetType is clicked or selected
+     */
+    public boolean isNoTargetTypeClicked() {
+        return noTargetTypeClicked;
+    }
+
+    /**
+     * Sets the status of no targetType clicked
+     *
+     * @param noTargetTypeClicked
+     *          boolean
+     */
+    public void setNoTargetTypeClicked(boolean noTargetTypeClicked) {
+        this.noTargetTypeClicked = noTargetTypeClicked;
+    }
 
     /**
      * @return True if not tag is clicked or selected

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.artifacts.smtable;
 
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -63,6 +64,13 @@ public class AddSmWindowController
     }
 
     @Override
+    protected void adaptLayout(final ProxySoftwareModule proxyEntity) {
+        if (!ArtifactEncryptionService.getInstance().isEncryptionSupported()) {
+            layout.disableEncryptionField();
+        }
+    }
+
+    @Override
     protected ProxySoftwareModule buildEntityFromProxy(final ProxySoftwareModule proxyEntity) {
         // We ignore the method parameter, because we are interested in the
         // empty object, that we can populate with defaults
@@ -73,7 +81,7 @@ public class AddSmWindowController
     protected SoftwareModule persistEntityInRepository(final ProxySoftwareModule entity) {
         final SoftwareModuleCreate smCreate = getEntityFactory().softwareModule().create()
                 .type(entity.getTypeInfo().getKey()).name(entity.getName()).version(entity.getVersion())
-                .vendor(entity.getVendor()).description(entity.getDescription());
+                .vendor(entity.getVendor()).description(entity.getDescription()).encrypted(entity.isEncrypted());
 
         return smManagement.create(smCreate);
     }
