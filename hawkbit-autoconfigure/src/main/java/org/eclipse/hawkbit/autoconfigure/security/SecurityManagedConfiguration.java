@@ -653,7 +653,9 @@ public class SecurityManagedConfiguration {
         }
 
         /**
-         * Overwriting VaadinAuthenticationSuccessHandler of default VaadinSharedSecurityConfiguration
+         * Overwriting VaadinAuthenticationSuccessHandler of default
+         * VaadinSharedSecurityConfiguration
+         * 
          * @return the vaadin success authentication handler
          */
         @Primary
@@ -696,6 +698,9 @@ public class SecurityManagedConfiguration {
             }
             // disable as CSRF is handled by Vaadin
             httpSec.csrf().disable();
+            // allow same origin X-Frame-Options for correct file download under
+            // Safari
+            httpSec.headers().frameOptions().sameOrigin();
 
             if (hawkbitSecurityProperties.isRequireSsl()) {
                 httpSec = httpSec.requiresChannel().anyRequest().requiresSecure().and();
@@ -762,7 +767,7 @@ public class SecurityManagedConfiguration {
                     return new FirewalledRequest(request) {
                         @Override
                         public void reset() {
-                            //nothing to do
+                            // nothing to do
                         }
                     };
                 }
