@@ -60,15 +60,15 @@ public class RolloutGroupEventTest extends AbstractRemoteEntityEventTest<Rollout
     protected RemoteEntityEvent<?> assertEntity(final RolloutGroup baseEntity, final RemoteEntityEvent<?> e) {
         final AbstractRolloutGroupEvent event = (AbstractRolloutGroupEvent) e;
 
-        assertThat(event.getEntity()).isSameAs(baseEntity);
+        assertThat(event.getEntity()).isPresent().get().isSameAs(baseEntity);
         assertThat(event.getRolloutId()).isEqualTo(1L);
 
         AbstractRolloutGroupEvent underTestCreatedEvent = createProtoStuffEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).isPresent().get().isEqualTo(baseEntity);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
 
         underTestCreatedEvent = createJacksonEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).isPresent().get().isEqualTo(baseEntity);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
 
         return underTestCreatedEvent;
