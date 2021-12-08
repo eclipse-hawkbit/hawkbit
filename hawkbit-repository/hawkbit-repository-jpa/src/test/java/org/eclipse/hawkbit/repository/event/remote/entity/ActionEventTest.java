@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.junit.jupiter.api.Test;
 
 /**
  * Test the remote entity events.
@@ -55,19 +55,19 @@ public class ActionEventTest extends AbstractRemoteEntityEventTest<Action> {
     protected RemoteEntityEvent<?> assertEntity(final Action baseEntity, final RemoteEntityEvent<?> e) {
         final AbstractActionEvent event = (AbstractActionEvent) e;
 
-        assertThat(event.getEntity()).isSameAs(baseEntity);
+        assertThat(event.getEntity()).hasValue(baseEntity);
         assertThat(event.getTargetId()).isEqualTo(1L);
         assertThat(event.getRolloutId()).isEqualTo(1L);
         assertThat(event.getRolloutGroupId()).isEqualTo(2L);
 
         AbstractActionEvent underTestCreatedEvent = createProtoStuffEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).hasValue(baseEntity);
         assertThat(underTestCreatedEvent.getTargetId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
 
         underTestCreatedEvent = createJacksonEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).hasValue(baseEntity);
         assertThat(underTestCreatedEvent.getTargetId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutId()).isEqualTo(1L);
         assertThat(underTestCreatedEvent.getRolloutGroupId()).isEqualTo(2L);
