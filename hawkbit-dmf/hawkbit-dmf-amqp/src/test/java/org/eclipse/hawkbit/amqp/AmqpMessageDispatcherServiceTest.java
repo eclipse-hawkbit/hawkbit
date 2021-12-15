@@ -144,7 +144,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
         for (final org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule softwareModule : downloadAndUpdateRequest
                 .getSoftwareModules()) {
-            assertThat(softwareModule.getArtifacts().isEmpty()).as("Artifact list for softwaremodule should be empty").isTrue();
+            assertThat(softwareModule.getArtifacts().isEmpty()).as("Artifact list for softwaremodule should be empty")
+                    .isTrue();
 
             assertThat(softwareModule.getMetadata()).containsExactly(
                     new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE));
@@ -185,7 +186,8 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
 
-        assertThat(downloadAndUpdateRequest.getSoftwareModules()).hasSize(3).as("DownloadAndUpdateRequest event should contains 3 software modules");
+        assertThat(downloadAndUpdateRequest.getSoftwareModules()).hasSize(3)
+                .as("DownloadAndUpdateRequest event should contains 3 software modules");
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
 
         for (final DmfSoftwareModule softwareModule : downloadAndUpdateRequest.getSoftwareModules()) {
@@ -228,7 +230,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
         final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getEntity().getAddress());
+                cancelTargetAssignmentDistributionSetEvent.getEntity().get().getAddress());
         assertCancelMessage(sendMessage);
 
     }
@@ -285,9 +287,9 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final DmfActionRequest actionId = convertMessage(sendMessage, DmfActionRequest.class);
-        assertThat( actionId.getActionId()).isEqualTo(Long.valueOf(1)).as("Action ID should be 1");
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC)).isEqualTo(EventTopic.CANCEL_DOWNLOAD)
-            .as("The topc in the message should be a CANCEL_DOWNLOAD value");
+        assertThat(actionId.getActionId()).isEqualTo(Long.valueOf(1)).as("Action ID should be 1");
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
+                .isEqualTo(EventTopic.CANCEL_DOWNLOAD).as("The topc in the message should be a CANCEL_DOWNLOAD value");
     }
 
     private void assertDeleteMessage(final Message sendMessage) {
@@ -305,9 +307,11 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
                 DmfDownloadAndUpdateRequest.class);
         assertThat(downloadAndUpdateRequest.getActionId()).isEqualTo(action);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC)).isEqualTo( EventTopic.DOWNLOAD_AND_INSTALL)
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
+                .isEqualTo(EventTopic.DOWNLOAD_AND_INSTALL)
                 .as("The topic of the event should contain DOWNLOAD_AND_INSTALL");
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN).as("Security token of target");
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN)
+                .as("Security token of target");
 
         return downloadAndUpdateRequest;
     }
@@ -315,17 +319,18 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private void assertUpdateAttributesMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
 
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC)).isEqualTo(EventTopic.REQUEST_ATTRIBUTES_UPDATE)
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
+                .isEqualTo(EventTopic.REQUEST_ATTRIBUTES_UPDATE)
                 .as("The topic of the event should contain REQUEST_ATTRIBUTES_UPDATE");
     }
 
     private void assertEventMessage(final Message sendMessage) {
         assertThat(sendMessage).isNotNull().as("The message should not be null");
 
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID)).isEqualTo(CONTROLLER_ID)
-            .as("The value of the message header THING_ID should be " + CONTROLLER_ID);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.EVENT)
-                .as("The value of the message header TYPE should be EVENT");
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
+                .isEqualTo(CONTROLLER_ID).as("The value of the message header THING_ID should be " + CONTROLLER_ID);
+        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE))
+                .isEqualTo(MessageType.EVENT).as("The value of the message header TYPE should be EVENT");
         assertThat(sendMessage.getMessageProperties().getContentType()).isEqualTo(MessageProperties.CONTENT_TYPE_JSON)
                 .as("The content type message should be " + MessageProperties.CONTENT_TYPE_JSON);
     }

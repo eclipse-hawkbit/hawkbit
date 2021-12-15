@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -303,8 +304,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Target target = cancelEvent.getEntity();
-        if (target != null) {
+        final Optional<Target> eventEntity = cancelEvent.getEntity();
+        if (eventEntity.isPresent()) {
+            final Target target = eventEntity.get();
             sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
                     target.getAddress());
         } else {
@@ -369,7 +371,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Message message = new Message("".getBytes(), createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        final Message message = new Message("".getBytes(),
+                createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
     }
 
