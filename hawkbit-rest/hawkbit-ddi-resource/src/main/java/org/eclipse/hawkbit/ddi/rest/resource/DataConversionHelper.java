@@ -108,17 +108,17 @@ public final class DataConversionHelper {
 
     }
 
-    static DdiControllerBase fromTarget(final Target target, final Action action,
+    static DdiControllerBase fromTarget(final Target target, final Action installedAction, final Action activeAction,
             final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
-        if (action != null) {
-            if (action.isCancelingOrCanceled()) {
+        if (activeAction != null) {
+            if (activeAction.isCancelingOrCanceled()) {
                 result.add(WebMvcLinkBuilder
                         .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerCancelAction(tenantAware.getCurrentTenant(), target.getControllerId(),
-                                        action.getId()))
+                                        activeAction.getId()))
                         .withRel(DdiRestConstants.CANCEL_ACTION));
             } else {
                 // we need to add the hashcode here of the actionWithStatus
@@ -129,9 +129,17 @@ public final class DataConversionHelper {
                 result.add(WebMvcLinkBuilder
                         .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(),
-                                        target.getControllerId(), action.getId(), calculateEtag(action), null))
+                                        target.getControllerId(), activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
             }
+        }
+
+        if(installedAction != null && !installedAction.isActive()) {
+            result.add(WebMvcLinkBuilder
+                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                            .getControllerInstalledAction(tenantAware.getCurrentTenant(),
+                                    target.getControllerId(), installedAction.getId(), null))
+                    .withRel(DdiRestConstants.INSTALLED_BASE_ACTION));
         }
 
         if (target.isRequestControllerAttributes()) {

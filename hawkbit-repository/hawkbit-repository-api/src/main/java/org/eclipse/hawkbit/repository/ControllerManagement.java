@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -499,4 +500,13 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     void deleteExistingTarget(@NotEmpty String controllerId);
+
+    /**
+     * Delete a single target.
+     *
+     * @param controllerId
+     *            of the target to delete
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<Action> getInstalledActionByTarget(final long targetId);
 }

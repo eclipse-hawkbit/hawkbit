@@ -250,4 +250,21 @@ public interface DdiRootControllerRestApi {
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
+
+    /**
+     * Resource for installed software module.
+     *
+     * @param tenant
+     *            of the request
+     * @param controllerId
+     *            of the target
+     * @return the response
+     */
+    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") @NotEmpty final String controllerId,
+            @PathVariable("actionId") @NotEmpty final Long actionId,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+
 }

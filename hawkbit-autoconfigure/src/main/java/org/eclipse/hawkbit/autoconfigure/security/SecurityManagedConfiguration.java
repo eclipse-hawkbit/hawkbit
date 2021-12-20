@@ -162,6 +162,7 @@ public class SecurityManagedConfiguration {
 
         private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/deploymentBase/**",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/installedBase/**",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/cancelAction/**",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/configData",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING

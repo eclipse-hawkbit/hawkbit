@@ -1065,4 +1065,24 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     void setTargetRepository(final TargetRepository targetRepositorySpy) {
         this.targetRepository = targetRepositorySpy;
     }
+
+    @Override
+    public Optional<Action> getInstalledActionByTarget(final long targetId) {
+        throwExceptionIfTargetDoesNotExist(targetId);
+
+        final JpaTarget jpaTarget = targetRepository.findOne(TargetSpecifications.hasId(targetId)).get();
+
+        final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
+        if (null != installedDistributionSet) {
+            final List<Action> action = actionRepository.findActionByTargetAndDistributionSet(targetId,
+                    installedDistributionSet.getId());
+            if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
+                return Optional.empty();
+            }
+            return Optional.ofNullable(action.get(0));
+        } else {
+            return Optional.empty();
+        }
+
+    }
 }
