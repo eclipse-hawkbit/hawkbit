@@ -1184,7 +1184,8 @@ public class TestdataFactory {
      * @return created {@link Rollout}
      */
     public Rollout createRollout(final String prefix) {
-        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup(), prefix);
+        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
+                prefix);
         return createRolloutByVariables(prefix, prefix + " description",
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
