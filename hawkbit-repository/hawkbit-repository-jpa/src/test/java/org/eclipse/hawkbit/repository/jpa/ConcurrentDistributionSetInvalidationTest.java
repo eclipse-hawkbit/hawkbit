@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import java.util.Collections;
 
 import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -45,14 +46,16 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
     @Description("Verify that a large rollout causes a timeout when trying to invalidate a distribution set")
     public void verifyInvalidateDistributionSetWithLargeRolloutThrowsException() throws Exception {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        testdataFactory.createTargets(10000, "verifyInvalidateDistributionSetWithLargeRolloutThrowsException");
+        testdataFactory.createTargets(
+                quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
+                "verifyInvalidateDistributionSetWithLargeRolloutThrowsException");
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "50")
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
         final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create()
                 .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
-                .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED), 20, conditions);
+                .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED), quotaManagement.getMaxRolloutGroupsPerRollout(), conditions);
         final String tenant = tenantAware.getCurrentTenant();
 
         // run in new Thread so that the invalidation can be executed in
@@ -66,7 +69,8 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
         handleRolloutsThread.start();
         // wait until at least one RolloutGroup is created, as this means that
         // the thread has started and has acquired the lock
-        Awaitility.await().until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
+        Awaitility.await().pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+                .until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
                 .runAsSystem(() -> rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getSize() > 0)));
 
         assertThatExceptionOfType(StopRolloutException.class)

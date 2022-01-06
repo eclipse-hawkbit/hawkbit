@@ -285,7 +285,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(cancelDs, targets).getAssignedEntity();
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(quotaManagement.getMaxTargetsPerAutoAssignment());
         assignDistributionSet(cancelDs2, targets).getAssignedEntity();
-        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2 * quotaManagement.getMaxTargetsPerAutoAssignment());
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2L * quotaManagement.getMaxTargetsPerAutoAssignment());
     }
 
     @Test
@@ -1393,7 +1393,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 Collections.singletonList(ds.getType()));
 
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment(); i++) {
             final Target target = testdataFactory.createTarget("test-target-" + i, "test-target-" + i,
                     targetType.getId());
             final DeploymentRequest deployment = DeploymentManagement

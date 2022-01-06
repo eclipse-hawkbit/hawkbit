@@ -567,7 +567,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .get(0);
 
         final List<String> messages = new ArrayList<>();
-        for (int i = 0; i < 51; i++) {
+        for (int i = 0; i < quotaManagement.getMaxMessagesPerActionStatus(); i++) {
             messages.add(String.valueOf(i));
         }
 
