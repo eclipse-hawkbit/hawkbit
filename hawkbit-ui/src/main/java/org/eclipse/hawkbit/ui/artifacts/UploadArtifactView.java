@@ -8,11 +8,12 @@
  */
 package org.eclipse.hawkbit.ui.artifacts;
 
+import static org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress.FileUploadStatus.UPLOAD_STARTED;
+
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import javax.servlet.MultipartConfigElement;
 
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -24,7 +25,10 @@ import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.artifacts.details.ArtifactDetailsGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtable.SoftwareModuleGridLayout;
 import org.eclipse.hawkbit.ui.artifacts.smtype.filter.SMTypeFilterLayout;
+import org.eclipse.hawkbit.ui.artifacts.upload.FileUploadProgress;
+import org.eclipse.hawkbit.ui.common.AbstractEventListenersAwareView;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -32,27 +36,32 @@ import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutResizeListener.ResizeHandler;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.LayoutVisibilityListener.VisibilityHandler;
+import org.eclipse.hawkbit.ui.menu.DashboardEvent;
+import org.eclipse.hawkbit.ui.menu.DashboardMenu;
+import org.eclipse.hawkbit.ui.menu.DashboardMenuItem;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
+import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.navigator.View;
+import com.vaadin.navigator.ViewBeforeLeaveEvent;
 import com.vaadin.server.Page;
 import com.vaadin.server.Page.BrowserWindowResizeEvent;
 import com.vaadin.server.Page.BrowserWindowResizeListener;
 import com.vaadin.spring.annotation.SpringView;
 import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.UI;
 
 /**
  * Display artifacts upload view.
  */
 @UIScope
 @SpringView(name = UploadArtifactView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class UploadArtifactView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class UploadArtifactView extends AbstractEventListenersAwareView implements BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "spUpload";
@@ -63,6 +72,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
     private final SMTypeFilterLayout smTypeFilterLayout;
     private final SoftwareModuleGridLayout smGridLayout;
     private final ArtifactDetailsGridLayout artifactDetailsGridLayout;
+    private final VaadinMessageSource i18n;
+    private final DashboardMenu dashboardMenu;
 
     private HorizontalLayout mainLayout;
 
@@ -74,12 +85,15 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             final UINotification uiNotification, final ArtifactUploadState artifactUploadState,
             final EntityFactory entityFactory, final SoftwareModuleManagement softwareModuleManagement,
             final SoftwareModuleTypeManagement softwareModuleTypeManagement,
-            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement) {
+            final MultipartConfigElement multipartConfigElement, final ArtifactManagement artifactManagement,
+            final DashboardMenu dashboardMenu) {
         this.permChecker = permChecker;
         this.artifactUploadState = artifactUploadState;
+        this.i18n = i18n;
+        this.dashboardMenu = dashboardMenu;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permChecker);
 
         if (permChecker.hasReadRepositoryPermission()) {
             this.smTypeFilterLayout = new SMTypeFilterLayout(uiDependencies, softwareModuleTypeManagement,
@@ -90,6 +104,8 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
             this.artifactDetailsGridLayout = new ArtifactDetailsGridLayout(uiDependencies, artifactUploadState,
                     artifactUploadState.getArtifactDetailsGridLayoutUiState(), artifactManagement,
                     softwareModuleManagement, multipartConfigElement);
+
+            addEventAwareLayouts(Arrays.asList(smTypeFilterLayout, smGridLayout, artifactDetailsGridLayout));
 
             final Map<EventLayout, VisibilityHandler> layoutVisibilityHandlers = new EnumMap<>(EventLayout.class);
             layoutVisibilityHandlers.put(EventLayout.SM_TYPE_FILTER,
@@ -113,16 +129,16 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         }
     }
 
-    @PostConstruct
-    void init() {
+    @Override
+    protected void init() {
         if (permChecker.hasReadRepositoryPermission()) {
-            buildLayout();
-            restoreState();
+            super.init();
             Page.getCurrent().addBrowserWindowResizeListener(this);
         }
     }
 
-    private void buildLayout() {
+    @Override
+    protected void buildLayout() {
         setMargin(false);
         setSpacing(false);
         setSizeFull();
@@ -148,24 +164,33 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         mainLayout.setExpandRatio(artifactDetailsGridLayout, 0.5F);
     }
 
-    private void restoreState() {
+    @Override
+    protected void restoreState() {
+        if (permChecker.hasReadRepositoryPermission()) {
+            restoreSmWidgetsState();
+            restoreArtifactWidgetsState();
+        }
+
+        super.restoreState();
+    }
+
+    private void restoreSmWidgetsState() {
         if (artifactUploadState.getSmTypeFilterLayoutUiState().isHidden()
                 || artifactUploadState.getArtifactDetailsGridLayoutUiState().isMaximized()) {
             hideSmTypeLayout();
         } else {
             showSmTypeLayout();
         }
-        smTypeFilterLayout.restoreState();
 
         if (artifactUploadState.getSmGridLayoutUiState().isMaximized()) {
             maximizeSmGridLayout();
         }
-        smGridLayout.restoreState();
+    }
 
+    private void restoreArtifactWidgetsState() {
         if (artifactUploadState.getArtifactDetailsGridLayoutUiState().isMaximized()) {
             maximizeArtifactGridLayout();
         }
-        artifactDetailsGridLayout.restoreState();
     }
 
     private void showSmTypeLayout() {
@@ -249,15 +274,61 @@ public class UploadArtifactView extends VerticalLayout implements View, BrowserW
         }
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public String getViewName() {
+        return UploadArtifactView.VIEW_NAME;
+    }
+
+    @Override
+    protected void subscribeListeners() {
+        if (permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.subscribe();
+            layoutResizeListener.subscribe();
+        }
+
+        super.subscribeListeners();
+    }
+
+    @Override
+    protected void unsubscribeListeners() {
         if (permChecker.hasReadRepositoryPermission()) {
             layoutVisibilityListener.unsubscribe();
             layoutResizeListener.unsubscribe();
+        }
 
-            smTypeFilterLayout.unsubscribeListener();
-            smGridLayout.unsubscribeListener();
-            artifactDetailsGridLayout.unsubscribeListener();
+        super.unsubscribeListeners();
+    }
+
+    @Override
+    public void beforeLeave(final ViewBeforeLeaveEvent event) {
+        if (isAnyUploadInUploadQueue()) {
+            final ConfirmationDialog confirmDeleteDialog = new ConfirmationDialog(i18n,
+                    i18n.getMessage(UIMessageIdProvider.CAPTION_CLEAR_FILE_UPLOAD_QUEUE),
+                    i18n.getMessage(UIMessageIdProvider.MESSAGE_CLEAR_FILE_UPLOAD_QUEUE), ok -> {
+                        if (Boolean.TRUE.equals(ok)) {
+                            // Clear all queued file uploads
+                            artifactUploadState.clearFileStates();
+                            super.beforeLeave(event);
+                        } else {
+                            // Send a PostViewChangeEvent to the DashboardMenu
+                            // as if the navigation actually
+                            // happened to prevent the DashboardMenu navigation
+                            // from getting stuck
+                            final DashboardMenuItem dashboardMenuItem = dashboardMenu.getByViewName(VIEW_NAME);
+                            dashboardMenu.postViewChange(DashboardEvent.createPostViewChangeEvent(dashboardMenuItem));
+                        }
+                    }, UIComponentIdProvider.UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG);
+            UI.getCurrent().addWindow(confirmDeleteDialog.getWindow());
+            confirmDeleteDialog.getWindow().bringToFront();
+        } else {
+            super.beforeLeave(event);
         }
     }
+
+    private boolean isAnyUploadInUploadQueue() {
+        return artifactUploadState.getAllFileUploadProgressValuesFromOverallUploadProcessList().stream()
+                .map(FileUploadProgress::getFileUploadStatus)
+                .anyMatch(fileUploadStatus -> fileUploadStatus == UPLOAD_STARTED);
+    }
+
 }

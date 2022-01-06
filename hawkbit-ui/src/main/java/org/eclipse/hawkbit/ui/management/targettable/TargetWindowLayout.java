@@ -8,15 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
-import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
-import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
-import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-
+import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.FormLayout;
 import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
+import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
+import org.eclipse.hawkbit.ui.common.data.mappers.TargetTypeToTypeInfoMapper;
+import org.eclipse.hawkbit.ui.common.data.providers.TargetTypeDataProvider;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
+import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
 /**
  * Target add/update window layout.
@@ -27,20 +31,27 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
     private final TextField targetControllerId;
     private final BoundComponent<TextField> targetName;
     private final TextArea targetDescription;
+    private final BoundComponent<ComboBox<ProxyTypeInfo>> targetTypeCombo;
 
     /**
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
      *            I18N
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      */
-    public TargetWindowLayout(final VaadinMessageSource i18n) {
+    public TargetWindowLayout(final VaadinMessageSource i18n, final TargetTypeManagement targetTypeManagement) {
         super();
         this.targetComponentBuilder = new TargetWindowLayoutComponentBuilder(i18n);
 
         this.targetControllerId = targetComponentBuilder.createControllerIdField(binder);
         this.targetName = targetComponentBuilder.createNameField(binder);
         this.targetDescription = targetComponentBuilder.createDescriptionField(binder);
+
+        TargetTypeDataProvider<ProxyTypeInfo> targetTypeDataProvider = new TargetTypeDataProvider<>(
+                targetTypeManagement, new TargetTypeToTypeInfoMapper());
+        this.targetTypeCombo = targetComponentBuilder.createTargetTypeCombo(binder, targetTypeDataProvider);
     }
 
     @Override
@@ -54,6 +65,7 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
         targetWindowLayout.addComponent(targetControllerId);
         targetControllerId.focus();
         targetWindowLayout.addComponent(targetName.getComponent());
+        targetWindowLayout.addComponent(targetTypeCombo.getComponent());
         targetWindowLayout.addComponent(targetDescription);
         return targetWindowLayout;
     }
@@ -77,4 +89,5 @@ public class TargetWindowLayout extends AbstractEntityWindowLayout<ProxyTarget> 
     public void setNameRequired(boolean isNameRequired) {
         targetName.setRequired(isNameRequired);
     }
+
 }

@@ -15,7 +15,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all distribution sets within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving all distribution sets within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get paged list of Distribution Sets
 
@@ -62,7 +62,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/distributionsets
 
 === Implementation Notes
-Handles the POST request of creating new distribution sets within SP. The request body must always be a list of sets. Required permission: CREATE_REPOSITORY
+Handles the POST request of creating new distribution sets within Hawkbit. The request body must always be a list of sets. Required permission: CREATE_REPOSITORY
 
 === Create Distribution Sets
 
@@ -111,7 +111,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request for a single Distribution Set within SP. Required permission: DELETE_REPOSITORY
+Handles the DELETE request for a single Distribution Set within Hawkbit. Required permission: DELETE_REPOSITORY
 
 === Delete Distribution Set
 
@@ -151,7 +151,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving a single distribution set within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get Distribution Set
 
@@ -196,7 +196,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the UPDATE request for a single Distribution Set within SP. Required permission: UPDATE_REPOSITORY
+Handles the UPDATE request for a single Distribution Set within Hawkbit. Required permission: UPDATE_REPOSITORY
 
 === Updating a Distribution Set
 
@@ -246,7 +246,7 @@ include::../errors/429.adoc[]
 == GET /rest/v1/distributionsets/{distributionSetId}/assignedSM
 
 ===  Implementation Notes
-Handles the GET request of retrieving a single distribution set within SP. Required permission: READ_REPOSITORY
+Handles the GET request of retrieving a single distribution set within Hawkbit. Required permission: READ_REPOSITORY
 
 === Get assigned Software Modules
 
@@ -812,6 +812,59 @@ include::{snippets}/distributionsets/update-metadata/response-fields.adoc[]
 ==== Response example
 
 include::{snippets}/distributionsets/update-metadata/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/distributionsets/{distributionSetId}/invalidate 
+
+
+=== Implementation Notes
+
+Invalidate a distribution set.
+Once a distribution set is invalidated, it can not be valid again.
+An invalidated distribution set cannot be assigned to targets anymore.
+The distribution set that is going to be invalidated will be removed from all auto assignments.
+Furthermore, the user can choose to cancel all rollouts and (force) cancel all actions connected to this distribution set.
+Required permission: UPDATE_REPOSITORY, UPDATE_TARGET
+
+=== Invalidate a distribution set
+
+==== Curl
+
+include::{snippets}/distributionsets/invalidate/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/distributionsets/invalidate/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/distributionsets/invalidate/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/distributionsets/invalidate/request-fields.adoc[]
+
+=== Response (Status 200)
+
+==== Response example
+
+include::{snippets}/distributionsets/invalidate/http-response.adoc[]
 
 === Error responses
 

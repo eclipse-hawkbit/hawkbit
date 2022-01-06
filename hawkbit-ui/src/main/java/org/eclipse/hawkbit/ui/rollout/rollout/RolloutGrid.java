@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.rollout.DistributionBarHelper;
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowBuilder;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
@@ -137,6 +138,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 UIComponentIdProvider.ROLLOUT_STATUS_LABEL_ID);
         actionTypeIconSupplier = new ActionTypeIconSupplier<>(i18n, ProxyRollout::getActionType,
                 UIComponentIdProvider.ROLLOUT_ACTION_TYPE_LABEL_ID);
+
         init();
     }
 
@@ -244,7 +246,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     }
 
     private void updateGridItem(final Rollout rollout) {
-        final ProxyRollout proxyRollout = RolloutToProxyRolloutMapper.mapRollout(rollout);
+        final ProxyRollout proxyRollout = rolloutMapper.map(rollout);
 
         if (rollout.getRolloutGroupsCreated() == 0) {
             final Long groupsCount = rolloutGroupManagement.countByRollout(rollout.getId());
@@ -266,8 +268,9 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 
-        GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion).setId(DIST_NAME_VERSION_ID)
-                .setCaption(i18n.getMessage("header.distributionset")).setHidable(true).setExpandRatio(2);
+        GridComponentBuilder.addColumn(this, ProxyRollout::getDsNameVersion, this::getDistributionCellStyle)
+                .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset"))
+                .setDescriptionGenerator(this::createDSTooltipText).setHidable(true).setExpandRatio(2);
 
         GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
@@ -359,6 +362,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         getSelectionSupport().sendSelectionChangedEvent(SelectionChangedEventType.ENTITY_SELECTED, rollout);
         rolloutManagementUIState.setSelectedRolloutName(rollout.getName());
 
+        showRolloutGroupListLayout();
+    }
+
+    private void showRolloutGroupListLayout() {
         eventBus.publish(CommandTopics.CHANGE_LAYOUT_VISIBILITY, this, new LayoutVisibilityEventPayload(
                 VisibilityType.SHOW, EventLayout.ROLLOUT_GROUP_LIST, EventView.ROLLOUT));
     }
@@ -428,14 +435,52 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         uiNotification.displayWarning(
                 i18n.getMessage("rollout.not.exists", rolloutManagementUIState.getSelectedRolloutName()));
 
-        showRolloutListLayout();
+        final EventLayout currentLayout = rolloutManagementUIState.getCurrentLayout().orElse(null);
+        if (currentLayout == null || currentLayout != EventLayout.ROLLOUT_LIST) {
+            showRolloutListLayout();
+        }
     }
 
     private void showRolloutListLayout() {
-        if (rolloutManagementUIState.getCurrentLayout().map(currentLayout -> currentLayout != EventLayout.ROLLOUT_LIST)
-                .orElse(true)) {
-            eventBus.publish(CommandTopics.CHANGE_LAYOUT_VISIBILITY, this,
-                    new LayoutVisibilityEventPayload(VisibilityType.SHOW, EventLayout.ROLLOUT_LIST, EventView.ROLLOUT));
+        eventBus.publish(CommandTopics.CHANGE_LAYOUT_VISIBILITY, this,
+                new LayoutVisibilityEventPayload(VisibilityType.SHOW, EventLayout.ROLLOUT_LIST, EventView.ROLLOUT));
+    }
+
+    /**
+     * Re-fetches and re-selects currently selected rollout in order to update
+     * details layouts.
+     *
+     */
+    public void reselectCurrentRollout() {
+        final Long selectedRolloutId = rolloutManagementUIState.getSelectedRolloutId();
+        if (selectedRolloutId == null) {
+            return;
         }
+
+        final Optional<ProxyRollout> refetchedRollout = mapIdToProxyEntity(selectedRolloutId);
+        refetchedRollout.ifPresent(rollout -> {
+            getSelectionSupport().sendSelectionChangedEvent(SelectionChangedEventType.ENTITY_SELECTED, rollout);
+            rolloutManagementUIState.setSelectedRolloutName(rollout.getName());
+        });
+
+        if (!refetchedRollout.isPresent()) {
+            onSelectedRolloutDeleted(selectedRolloutId);
+        }
+    }
+
+    private String getDistributionCellStyle(final ProxyRollout rollout) {
+        if (!rollout.getDsInfo().isValid()) {
+            return SPUIDefinitions.INVALID_DISTRIBUTION;
+        }
+        return null;
+    }
+
+    protected String createDSTooltipText(final ProxyRollout rollout) {
+        final StringBuilder tooltipText = new StringBuilder(rollout.getDsInfo().getNameVersion());
+        if (!rollout.getDsInfo().isValid()) {
+            tooltipText.append(" - ");
+            tooltipText.append(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALID));
+        }
+        return tooltipText.toString();
     }
 }

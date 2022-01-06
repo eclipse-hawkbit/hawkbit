@@ -20,7 +20,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
@@ -118,9 +118,9 @@ public final class FileStreamingUtil {
      * @throws FileStreamingFailedException
      *             if streaming fails
      */
-    public static ResponseEntity<InputStream> writeFileResponse(final AbstractDbArtifact artifact,
-            final String filename, final long lastModified, final HttpServletResponse response,
-            final HttpServletRequest request, final FileStreamingProgressListener progressListener) {
+    public static ResponseEntity<InputStream> writeFileResponse(final DbArtifact artifact, final String filename,
+            final long lastModified, final HttpServletResponse response, final HttpServletRequest request,
+            final FileStreamingProgressListener progressListener) {
 
         ResponseEntity<InputStream> result;
 
@@ -189,9 +189,9 @@ public final class FileStreamingUtil {
         return result;
     }
 
-    private static ResponseEntity<InputStream> handleFullFileRequest(final AbstractDbArtifact artifact,
-            final String filename, final HttpServletResponse response,
-            final FileStreamingProgressListener progressListener, final ByteRange full) {
+    private static ResponseEntity<InputStream> handleFullFileRequest(final DbArtifact artifact, final String filename,
+            final HttpServletResponse response, final FileStreamingProgressListener progressListener,
+            final ByteRange full) {
         final ByteRange r = full;
         response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
         response.setContentLengthLong(r.getLength());
@@ -257,7 +257,7 @@ public final class FileStreamingUtil {
         }
     }
 
-    private static ResponseEntity<InputStream> handleMultipartRangeRequest(final AbstractDbArtifact artifact,
+    private static ResponseEntity<InputStream> handleMultipartRangeRequest(final DbArtifact artifact,
             final String filename, final HttpServletResponse response,
             final FileStreamingProgressListener progressListener, final List<ByteRange> ranges) {
 
@@ -291,7 +291,7 @@ public final class FileStreamingUtil {
         return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT).build();
     }
 
-    private static ResponseEntity<InputStream> handleStandardRangeRequest(final AbstractDbArtifact artifact,
+    private static ResponseEntity<InputStream> handleStandardRangeRequest(final DbArtifact artifact,
             final String filename, final HttpServletResponse response,
             final FileStreamingProgressListener progressListener, final List<ByteRange> ranges) {
         final ByteRange r = ranges.get(0);

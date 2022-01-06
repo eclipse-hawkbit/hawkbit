@@ -16,7 +16,7 @@ import java.util.Set;
  * A {@link DistributionSet} defines a meta package that combines a set of
  * {@link SoftwareModule}s which have to be or are provisioned to a
  * {@link Target}.
- * 
+ *
  * <p>
  * A {@link Target} has exactly one target {@link DistributionSet} assigned.
  * </p>
@@ -70,5 +70,11 @@ public interface DistributionSet extends NamedVersionedEntity {
      *         {@link #getType()} are present in this {@link DistributionSet}.
      */
     boolean isComplete();
+
+    /**
+     * @return <code>false</code> if this {@link DistributionSet} is
+     *         invalidated.
+     */
+    boolean isValid();
 
 }

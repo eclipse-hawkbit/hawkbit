@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.common.grid.support;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
+import org.springframework.util.CollectionUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.shared.Registration;
@@ -228,7 +230,7 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
     }
 
     /**
-     * @return Id of elected entity from the grid
+     * @return Id of selected entity from the grid
      */
     public Optional<Long> getSelectedEntityId() {
         if (isNoSelectionModel() && selectedEntityIdUiStateProvider != null) {
@@ -248,15 +250,12 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
             return false;
         }
 
-        final int size = grid.getDataCommunicator().getDataProviderSize();
-        if (size > 0) {
-            final T firstItem = grid.getDataCommunicator().fetchItemsWithRange(0, 1).get(0);
+        final List<T> firstItem = grid.getDataCommunicator().fetchItemsWithRange(0, 1);
 
-            if (firstItem != null) {
-                grid.select(firstItem);
+        if (!CollectionUtils.isEmpty(firstItem)) {
+            grid.select(firstItem.get(0));
 
-                return true;
-            }
+            return true;
         }
 
         grid.deselectAll();
@@ -349,6 +348,16 @@ public class SelectionSupport<T extends ProxyIdentifiableEntity> {
         } else {
             selectFirstRow();
         }
+    }
+
+    /**
+     * Re-fetches and re-selects currently selected entity
+     */
+    public void reselectCurrentEntity() {
+        getSelectedEntityId().ifPresent(selectedEntityId -> {
+            deselectAll();
+            selectEntityById(selectedEntityId);
+        });
     }
 
     @PreDestroy

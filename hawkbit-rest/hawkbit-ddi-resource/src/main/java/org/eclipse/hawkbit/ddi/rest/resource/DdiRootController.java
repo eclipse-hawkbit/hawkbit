@@ -18,7 +18,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
-import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
+import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionHistory;
 import org.eclipse.hawkbit.ddi.json.model.DdiArtifact;
@@ -183,7 +183,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @SuppressWarnings("squid:S3655")
             final Artifact artifact = module.getArtifactByFilename(fileName).get();
 
-            final AbstractDbArtifact file = artifactManagement.loadArtifactBinary(artifact.getSha1Hash())
+            final DbArtifact file = artifactManagement
+                    .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
 
             final String ifMatch = requestResponseContextHolder.getHttpServletRequest().getHeader(HttpHeaders.IF_MATCH);
@@ -351,13 +352,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        if (!actionId.equals(feedback.getId())) {
-            LOG.warn(
-                    "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
-                    feedback.getId(), actionId);
-            return ResponseEntity.notFound().build();
-        }
-
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
@@ -370,7 +364,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 
-        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, feedback.getId()));
+        controllerManagement.addUpdateActionStatus(generateUpdateStatus(feedback, controllerId, actionId));
 
         return ResponseEntity.ok().build();
 
@@ -501,13 +495,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
-        if (!actionId.equals(feedback.getId())) {
-            LOG.warn(
-                    "provideBasedeploymentActionFeedback: action in payload ({}) was not identical to action in path ({}).",
-                    feedback.getId(), actionId);
-            return ResponseEntity.notFound().build();
-        }
-
         final Action action = findActionWithExceptionIfNotFound(actionId);
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
@@ -515,7 +502,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
 
         controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, feedback.getId(), entityFactory));
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, actionId, entityFactory));
         return ResponseEntity.ok().build();
     }
 

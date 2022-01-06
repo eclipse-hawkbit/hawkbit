@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.components;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
@@ -158,7 +159,9 @@ public class NotificationUnreadButton extends Button {
     }
 
     private void dispatchEntityModifiedEvents() {
-        remotelyOriginatedEventsStore.values()
+        final Collection<EntityModifiedEventPayload> remotelyOriginatedEvents = remotelyOriginatedEventsStore.values();
+        eventBus.publish(EventTopics.REMOTE_EVENT_DISPATCHED, UI.getCurrent(), remotelyOriginatedEvents);
+        remotelyOriginatedEvents
                 .forEach(eventPayload -> eventBus.publish(EventTopics.ENTITY_MODIFIED, UI.getCurrent(), eventPayload));
     }
 

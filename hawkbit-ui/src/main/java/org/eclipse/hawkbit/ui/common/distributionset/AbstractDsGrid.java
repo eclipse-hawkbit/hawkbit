@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.data.filters.DsFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
@@ -28,6 +29,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.common.state.GridLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 
 import com.vaadin.ui.Button;
@@ -36,9 +38,9 @@ import com.vaadin.ui.Button;
  * Abstract class of distribution set grid
  *
  * @param <F>
- *            Generic type
+ *            Generic filter type
  */
-public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSet, F> {
+public abstract class AbstractDsGrid<F extends DsFilterParams> extends AbstractGrid<ProxyDistributionSet, F> {
     private static final long serialVersionUID = 1L;
 
     protected static final String DS_NAME_ID = "dsName";
@@ -61,8 +63,8 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
         this.dsManagement = dsManagement;
         this.dsToProxyDistributionMapper = new DistributionSetToProxyDistributionMapper();
 
-        setSelectionSupport(new SelectionSupport<ProxyDistributionSet>(this, eventBus, EventLayout.DS_LIST, view,
-                this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.DS_LIST, view, this::mapIdToProxyEntity,
+                this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         if (distributionSetGridLayoutUiState.isMaximized()) {
             getSelectionSupport().disableSelection();
         } else {
@@ -113,11 +115,30 @@ public abstract class AbstractDsGrid<F> extends AbstractGrid<ProxyDistributionSe
     }
 
     protected Column<ProxyDistributionSet, String> addNameColumn() {
-        return GridComponentBuilder.addNameColumn(this, i18n, DS_NAME_ID);
+        final Column<ProxyDistributionSet, String> nameColumn = GridComponentBuilder.addNameColumn(this, i18n,
+                DS_NAME_ID);
+        nameColumn.setDescriptionGenerator(this::createTooltipText);
+        return nameColumn;
+    }
+
+    protected String createTooltipText(final ProxyDistributionSet distributionSet) {
+        final StringBuilder tooltipText = new StringBuilder(distributionSet.getNameVersion());
+        if (!distributionSet.getIsComplete()) {
+            tooltipText.append(" - ");
+            tooltipText.append(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INCOMPLETE));
+        }
+        if (!distributionSet.getIsValid()) {
+            tooltipText.append(" - ");
+            tooltipText.append(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALID));
+        }
+        return tooltipText.toString();
     }
 
     protected Column<ProxyDistributionSet, String> addVersionColumn() {
-        return GridComponentBuilder.addVersionColumn(this, i18n, ProxyDistributionSet::getVersion, DS_VERSION_ID);
+        final Column<ProxyDistributionSet, String> versionColumn = GridComponentBuilder.addVersionColumn(this, i18n,
+                ProxyDistributionSet::getVersion, DS_VERSION_ID);
+        versionColumn.setDescriptionGenerator(this::createTooltipText);
+        return versionColumn;
     }
 
     protected Column<ProxyDistributionSet, Button> addDeleteColumn() {

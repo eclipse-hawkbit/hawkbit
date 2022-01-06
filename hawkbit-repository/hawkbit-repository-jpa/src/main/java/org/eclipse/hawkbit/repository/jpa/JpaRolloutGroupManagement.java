@@ -37,6 +37,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -119,7 +120,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             final String rsqlParam) {
         throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
 
-        final Specification<JpaRolloutGroup> specification = RSQLUtility.parse(rsqlParam, RolloutGroupFields.class,
+        final Specification<JpaRolloutGroup> specification = RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutGroupFields.class,
                 virtualPropertyReplacer, database);
 
         return convertPage(rolloutGroupRepository.findAll((root, query, criteriaBuilder) -> criteriaBuilder.and(
@@ -211,7 +212,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
 
-        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.parse(rsqlParam, TargetFields.class,
+        final Specification<JpaTarget> rsqlSpecification = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer, database);
 
         return convertTPage(targetRepository.findAll((root, query, criteriaBuilder) -> {
@@ -232,9 +233,11 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             // in case of status ready the action has not been created yet and
             // the relation information between target and rollout-group is
             // stored in the #TargetRolloutGroup.
-            return targetRepository.findByRolloutTargetGroupRolloutGroupId(rolloutGroupId, page);
+            return JpaTargetManagement.convertPage(
+                    targetRepository.findAll(TargetSpecifications.isInRolloutGroup(rolloutGroupId), page), page);
         }
-        return targetRepository.findByActionsRolloutGroupId(rolloutGroupId, page);
+        return JpaTargetManagement.convertPage(
+                targetRepository.findAll(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId), page), page);
     }
 
     private static boolean isRolloutStatusReady(final RolloutGroup rolloutGroup) {

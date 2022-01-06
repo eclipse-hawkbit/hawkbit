@@ -52,20 +52,21 @@ public class MetaDataWindowGrid<F> extends AbstractGrid<ProxyMetaData, F> implem
      *            callback method to delete metadata entities
      *
      */
-    public MetaDataWindowGrid(final CommonUiDependencies uiDependencies, final AbstractMetaDataDataProvider<?, F> dataProvider,final BooleanSupplier hasMetadataChangePermission,
+    public MetaDataWindowGrid(final CommonUiDependencies uiDependencies,
+            final AbstractMetaDataDataProvider<?, F> dataProvider, final BooleanSupplier hasMetadataChangePermission,
             final Predicate<Collection<ProxyMetaData>> itemsDeletionCallback) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.hasMetadataChangePermission = hasMetadataChangePermission;
-        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiDependencies.getUiNotification(), "caption.metadata",
-                "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
+        this.metaDataDeleteSupport = new DeleteSupport<>(this, i18n, uiDependencies.getUiNotification(),
+                "caption.metadata", "caption.metadata.plur", ProxyMetaData::getKey, itemsDeletionCallback,
                 UIComponentIdProvider.METADATA_DELETE_CONFIRMATION_DIALOG);
 
         setFilterSupport(new FilterSupport<>(dataProvider));
 
         // we don't need to send selection events, because details layout
         // is part of MetaData Window
-        setSelectionSupport(new SelectionSupport<ProxyMetaData>(this));
+        setSelectionSupport(new SelectionSupport<>(this));
         getSelectionSupport().enableSingleSelection();
 
         init();

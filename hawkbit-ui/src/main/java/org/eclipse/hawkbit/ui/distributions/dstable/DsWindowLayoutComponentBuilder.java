@@ -59,7 +59,7 @@ public class DsWindowLayoutComponentBuilder {
      */
     public ComboBox<ProxyTypeInfo> createDistributionSetTypeCombo(final Binder<ProxyDistributionSet> binder) {
         return FormComponentBuilder
-                .createTypeCombo(binder, dsTypeDataProvider, i18n, UIComponentIdProvider.DIST_ADD_DISTSETTYPE)
+                .createTypeCombo(binder, dsTypeDataProvider, i18n, UIComponentIdProvider.DIST_ADD_DISTSETTYPE, true)
                 .getComponent();
     }
 
@@ -107,7 +107,7 @@ public class DsWindowLayoutComponentBuilder {
      * @return Migration step required checkbox
      */
     public CheckBox createMigrationStepField(final Binder<ProxyDistributionSet> binder) {
-        final CheckBox migrationRequired = FormComponentBuilder.getCheckBox(i18n.getMessage(MIGRATION_STEP),
+        final CheckBox migrationRequired = FormComponentBuilder.createCheckBox(i18n.getMessage(MIGRATION_STEP),
                 UIComponentIdProvider.DIST_ADD_MIGRATION_CHECK, binder, ProxyDistributionSet::isRequiredMigrationStep,
                 ProxyDistributionSet::setRequiredMigrationStep);
 

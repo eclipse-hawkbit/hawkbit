@@ -19,18 +19,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRollout;
  */
 public class RolloutToProxyRolloutMapper extends AbstractNamedEntityToProxyNamedEntityMapper<ProxyRollout, Rollout> {
 
-    /**
-     * Maps the rollout to Proxy rollout
-     *
-     * @param rollout
-     *            Rollout
-     *
-     * @return ProxyRollout
-     */
-    public static ProxyRollout mapRollout(final Rollout rollout) {
-        return new RolloutToProxyRolloutMapper().map(rollout);
-    }
-
     @Override
     public ProxyRollout map(final Rollout rollout) {
         final ProxyRollout proxyRollout = new ProxyRollout();
@@ -38,7 +26,8 @@ public class RolloutToProxyRolloutMapper extends AbstractNamedEntityToProxyNamed
         mapNamedEntityAttributes(rollout, proxyRollout);
 
         final DistributionSet ds = rollout.getDistributionSet();
-        proxyRollout.setDsInfo(new ProxyDistributionSetInfo(ds.getId(), ds.getName(), ds.getVersion()));
+        proxyRollout.setDsInfo(new ProxyDistributionSetInfo(ds.getId(), ds.getName(), ds.getVersion(),
+                ds.getType().getId(), ds.isValid()));
         proxyRollout
                 .setNumberOfGroups(rollout.getRolloutGroupsCreated() > 0 ? rollout.getRolloutGroupsCreated() : null);
         proxyRollout.setForcedTime(rollout.getForcedTime() > 0 ? rollout.getForcedTime() : null);

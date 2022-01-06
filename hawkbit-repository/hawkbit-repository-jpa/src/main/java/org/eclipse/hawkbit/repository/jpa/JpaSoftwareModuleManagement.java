@@ -31,6 +31,7 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
+import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -103,8 +104,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final AuditorAware<String> auditorProvider;
 
     private final ArtifactManagement artifactManagement;
@@ -119,8 +118,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final DistributionSetRepository distributionSetRepository,
             final SoftwareModuleRepository softwareModuleRepository,
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
-            final SoftwareModuleTypeRepository softwareModuleTypeRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final AuditorAware<String> auditorProvider,
+            final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
@@ -128,7 +126,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.softwareModuleRepository = softwareModuleRepository;
         this.softwareModuleMetadataRepository = softwareModuleMetadataRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.auditorProvider = auditorProvider;
         this.artifactManagement = artifactManagement;
         this.quotaManagement = quotaManagement;
@@ -159,7 +156,14 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     public SoftwareModule create(final SoftwareModuleCreate c) {
         final JpaSoftwareModuleCreate create = (JpaSoftwareModuleCreate) c;
 
-        return softwareModuleRepository.save(create.build());
+        final JpaSoftwareModule sm = softwareModuleRepository.save(create.build());
+        if (create.isEncrypted()) {
+            // flush sm creation in order to get an Id
+            entityManager.flush();
+            ArtifactEncryptionService.getInstance().addSoftwareModuleEncryptionSecrets(sm.getId());
+        }
+
+        return sm;
     }
 
     @Override
@@ -222,8 +226,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private Slice<JpaSoftwareModule> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaSoftwareModule>> specList) {
-        return criteriaNoCountDao.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable,
-                JpaSoftwareModule.class);
+        return softwareModuleRepository.findAllWithoutCount(SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
     private Long countSwModuleByCriteriaAPI(final List<Specification<JpaSoftwareModule>> specList) {
@@ -300,8 +303,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.parse(rsqlParam, SoftwareModuleFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                SoftwareModuleFields.class, virtualPropertyReplacer, database);
 
         return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
     }
@@ -608,7 +611,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.parse(rsqlParam,
+        final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 SoftwareModuleMetadataFields.class, virtualPropertyReplacer, database);
         return convertSmMdPage(
                 softwareModuleMetadataRepository

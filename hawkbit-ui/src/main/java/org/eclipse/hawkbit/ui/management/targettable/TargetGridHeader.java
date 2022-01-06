@@ -79,7 +79,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     /**
      * Add distribution set filter drop area
      */
-    public void addDsDroArea() {
+    public void addDsDropArea() {
         final Component distributionSetFilterDropArea = distributionSetFilterDropAreaSupport.getHeaderComponent();
         addComponent(distributionSetFilterDropArea);
         setComponentAlignment(distributionSetFilterDropArea, Alignment.TOP_CENTER);
@@ -140,7 +140,8 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
         super.restoreState();
 
         if (targetTagFilterLayoutUiState.isCustomFilterTabSelected()) {
-            onSimpleFilterReset();
+            onFilterReset();
+            disabledSearchIcon();
         }
 
         if (isBulkUploadInProgress()) {
@@ -153,12 +154,10 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     }
 
     /**
-     * Reset the distribution set filer drop area support
+     * Reset the distribution set filer drop area support and the search
      */
-    public void onSimpleFilterReset() {
+    public void onFilterReset() {
         getSearchHeaderSupport().resetSearch();
-        getSearchHeaderSupport().disableSearch();
-
         distributionSetFilterDropAreaSupport.reset();
     }
 
@@ -186,7 +185,7 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
         bulkUploadTargetWindow.setVisible(true);
     }
 
-    private Boolean isBulkUploadInProgress() {
+    private boolean isBulkUploadInProgress() {
         return targetBulkUploadUiState.isInProgress();
     }
 
@@ -207,11 +206,11 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
             final String failureReason, final float progress, final int successCount, final int failCount) {
         switch (state) {
         case UPLOAD_STARTED:
-            adaptbulkUploadHeaderAndUiState(true);
+            bulkUploadHeaderSupport.showProgressIndicator();
             layout.onStartOfUpload();
             break;
         case UPLOAD_FAILED:
-            adaptbulkUploadHeaderAndUiState(false);
+            bulkUploadHeaderSupport.hideProgressIndicator();
             layout.onUploadFailure(failureReason);
             break;
         case TARGET_PROVISIONING_STARTED:
@@ -227,19 +226,19 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
             layout.onAssignmentFailure(failureReason);
             break;
         case BULK_UPLOAD_COMPLETED:
-            adaptbulkUploadHeaderAndUiState(false);
+            bulkUploadHeaderSupport.hideProgressIndicator();
             layout.onUploadCompletion(successCount, failCount);
             break;
         }
     }
 
-    private void adaptbulkUploadHeaderAndUiState(final boolean isInProgress) {
-        if (isInProgress) {
-            bulkUploadHeaderSupport.showProgressIndicator();
-        } else {
+    /**
+     * Hides progress indicator in case no bulk upload is running.
+     */
+    public void checkBulkUpload() {
+        if (bulkUploadHeaderSupport != null && !isBulkUploadInProgress()) {
             bulkUploadHeaderSupport.hideProgressIndicator();
         }
-        targetBulkUploadUiState.setInProgress(isInProgress);
     }
 
     /**
@@ -247,5 +246,11 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
      */
     public void enableSearchIcon() {
         getSearchHeaderSupport().enableSearch();
+    }
+    /**
+     * Disable search icon in the search header
+     */
+    public void disabledSearchIcon() {
+        getSearchHeaderSupport().disableSearch();
     }
 }

@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -33,7 +34,6 @@ import org.eclipse.hawkbit.ui.common.distributionset.DistributionSetGridHeader;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventView;
-import org.eclipse.hawkbit.ui.common.event.EventViewAware;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.EntityModifiedAwareSupport;
@@ -67,6 +67,8 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
      *            TargetManagement
      * @param distributionSetManagement
      *            DistributionSetManagement
+     * @param dsInvalidationManagement
+     *            {@link DistributionSetInvalidationManagement}
      * @param smManagement
      *            SoftwareModuleManagement
      * @param distributionSetTypeManagement
@@ -91,12 +93,15 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
      *            TargetGridLayoutUiState
      */
     public DistributionGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final DistributionSetManagement distributionSetManagement, final SoftwareModuleManagement smManagement,
+            final DistributionSetManagement distributionSetManagement,
+            final DistributionSetInvalidationManagement dsInvalidationManagement,
+            final SoftwareModuleManagement smManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement,
-            final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
-            final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState,
+            final DistributionSetTagManagement distributionSetTagManagement,
+
+            final SystemManagement systemManagement, final DeploymentManagement deploymentManagement,
+            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
+            final UiProperties uiProperties, final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TagFilterLayoutUiState distributionTagLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState) {
         super(uiDependencies, systemManagement, systemSecurityContext, configManagement, distributionSetManagement,
@@ -107,8 +112,8 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
         this.distributionGridHeader.buildHeader();
 
         this.distributionGrid = new DistributionGrid(uiDependencies, targetManagement, distributionSetManagement,
-                deploymentManagement, uiProperties, distributionGridLayoutUiState, targetGridLayoutUiState,
-                distributionTagLayoutUiState);
+                dsInvalidationManagement, deploymentManagement, uiProperties, distributionGridLayoutUiState,
+                targetGridLayoutUiState, distributionTagLayoutUiState);
 
         this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(uiDependencies, getDsWindowBuilder(),
                 getDsMetaDataWindowBuilder());
@@ -119,17 +124,18 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
         this.distributionDetails.setUnassignSmAllowed(false);
         this.distributionDetails.buildDetails();
 
+        final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.DS_LIST, getEventView());
         addEventListener(new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyDistributionSet.class,
-                new EventViewAware(getEventView()), distributionGrid.getFilterSupport()));
+                layoutViewAware, distributionGrid.getFilterSupport()));
         addEventListener(new PinningChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
                 distributionGrid.getPinSupport()));
-        addEventListener(new SelectionChangedListener<>(uiDependencies.getEventBus(),
-                new EventLayoutViewAware(EventLayout.DS_LIST, getEventView()), getMasterDsAwareComponents()));
+        addEventListener(new SelectionChangedListener<>(uiDependencies.getEventBus(), layoutViewAware,
+                getMasterDsAwareComponents()));
         addEventListener(new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyDistributionSet.class)
-                .entityModifiedAwareSupports(getDsModifiedAwareSupports()).build());
+                .viewAware(layoutViewAware).entityModifiedAwareSupports(getDsModifiedAwareSupports()).build());
         addEventListener(new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
-                .entityModifiedAwareSupports(getTagModifiedAwareSupports()).parentEntityType(ProxyDistributionSet.class)
-                .build());
+                .parentEntityType(ProxyDistributionSet.class).viewAware(layoutViewAware)
+                .entityModifiedAwareSupports(getTagModifiedAwareSupports()).build());
 
         buildLayout(distributionGridHeader, distributionGrid, distributionSetDetailsHeader, distributionDetails);
     }

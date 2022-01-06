@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -84,9 +85,9 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
      * @param view
      *            EventView
      */
-    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies, final TypeFilterLayoutUiState smTypeFilterLayoutUiState,
-            final GridLayoutUiState smGridLayoutUiState, final SoftwareModuleManagement softwareModuleManagement,
-            final EventView view) {
+    public SoftwareModuleGrid(final CommonUiDependencies uiDependencies,
+            final TypeFilterLayoutUiState smTypeFilterLayoutUiState, final GridLayoutUiState smGridLayoutUiState,
+            final SoftwareModuleManagement softwareModuleManagement, final EventView view) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.smTypeFilterLayoutUiState = smTypeFilterLayoutUiState;
@@ -95,8 +96,8 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleToProxyMapper = new SoftwareModuleToProxyMapper();
 
-        setSelectionSupport(new SelectionSupport<ProxySoftwareModule>(this, eventBus, EventLayout.SM_LIST, view,
-                this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.SM_LIST, view, this::mapIdToProxyEntity,
+                this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         if (smGridLayoutUiState.isMaximized()) {
             getSelectionSupport().disableSelection();
         } else {
@@ -110,11 +111,26 @@ public class SoftwareModuleGrid extends AbstractGrid<ProxySoftwareModule, SwFilt
         setFilterSupport(new FilterSupport<>(
                 new SoftwareModuleDataProvider(softwareModuleManagement,
                         new AssignedSoftwareModuleToProxyMapper(softwareModuleToProxyMapper)),
-                getSelectionSupport()::deselectAll));
+                SwFilterParams::new, this::afterFilterRefresh));
         initFilterMappings();
         getFilterSupport().setFilter(new SwFilterParams());
 
         this.numberOfArtifactUploadsForSm = new HashMap<>();
+    }
+
+    private void afterFilterRefresh() {
+        // keep selection on master distribution set change as it does not
+        // filter out any software module entries, only sorts them
+        if (masterFilterHasNotChanged()) {
+            getSelectionSupport().deselectAll();
+        }
+    }
+
+    private boolean masterFilterHasNotChanged() {
+        final Long filterDsId = getFilter().map(SwFilterParams::getLastSelectedDistributionId).orElse(null);
+        final Long masterDsId = getMasterEntitySupport() != null ? getMasterEntitySupport().getMasterId() : null;
+
+        return Objects.equals(filterDsId, masterDsId);
     }
 
     private void initFilterMappings() {

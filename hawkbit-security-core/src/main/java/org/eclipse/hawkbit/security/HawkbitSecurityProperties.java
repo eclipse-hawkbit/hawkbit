@@ -298,6 +298,11 @@ public class HawkbitSecurityProperties {
          */
         private long maxArtifactStorage = 21_474_836_480L;
 
+        /**
+         * Maximum number of distribution set types per target types
+         */
+        private int maxDistributionSetTypesPerTargetType = 50;
+
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
@@ -437,6 +442,10 @@ public class HawkbitSecurityProperties {
 
         public void setMaxArtifactStorage(final long maxArtifactStorage) {
             this.maxArtifactStorage = maxArtifactStorage;
+        }
+
+        public int getMaxDistributionSetTypesPerTargetType() {
+            return maxDistributionSetTypesPerTargetType;
         }
 
         /**

@@ -15,6 +15,7 @@ import static org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpre
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,6 +31,7 @@ import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -87,10 +90,8 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 
-import com.google.common.io.Files;
-
 @ActiveProfiles({ "test" })
-@ExtendWith({JUnitTestLoggerExtension.class, WithSpringAuthorityRule.class})
+@ExtendWith({ JUnitTestLoggerExtension.class, WithSpringAuthorityRule.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest
 @ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -109,7 +110,7 @@ import com.google.common.io.Files;
 public abstract class AbstractIntegrationTest {
     private static final Logger LOG = LoggerFactory.getLogger(AbstractIntegrationTest.class);
 
-    protected static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Direction.ASC, "id"));
+    protected static final Pageable PAGE = PageRequest.of(0, 500, Sort.by(Direction.ASC, "id"));
 
     protected static final URI LOCALHOST = URI.create("http://127.0.0.1");
 
@@ -145,6 +146,9 @@ public abstract class AbstractIntegrationTest {
     protected TargetManagement targetManagement;
 
     @Autowired
+    protected TargetTypeManagement targetTypeManagement;
+
+    @Autowired
     protected TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
@@ -155,6 +159,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected DeploymentManagement deploymentManagement;
+
+    @Autowired
+    protected DistributionSetInvalidationManagement distributionSetInvalidationManagement;
 
     @Autowired
     protected ArtifactManagement artifactManagement;
@@ -379,8 +386,15 @@ public abstract class AbstractIntegrationTest {
 
     }
 
-    private static String artifactDirectory = Files.createTempDir().getAbsolutePath() + "/"
-            + RandomStringUtils.randomAlphanumeric(20);
+    private static String artifactDirectory = createTempDir();
+
+    private static String createTempDir() {
+        try {
+            return Files.createTempDirectory(null).toString() + "/" + RandomStringUtils.randomAlphanumeric(20);
+        } catch (final IOException e) {
+            throw new IllegalStateException("Failed to create temp directory");
+        }
+    }
 
     @AfterEach
     public void cleanUp() {

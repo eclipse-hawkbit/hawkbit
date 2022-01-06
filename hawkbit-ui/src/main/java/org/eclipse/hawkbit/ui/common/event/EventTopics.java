@@ -13,6 +13,7 @@ package org.eclipse.hawkbit.ui.common.event;
  */
 public final class EventTopics {
     public static final String REMOTE_EVENT_RECEIVED = "remoteEventReceived";
+    public static final String REMOTE_EVENT_DISPATCHED = "remoteEventDispatched";
     public static final String ENTITY_MODIFIED = "entityModified";
     public static final String SELECTION_CHANGED = "selectionChanged";
     public static final String TARGET_FILTER_TAB_CHANGED = "targetFilterTabChanged";

@@ -63,13 +63,13 @@ public abstract class AbstractRemoteEntityEventTest<E> extends AbstractRemoteEve
     }
 
     protected RemoteEntityEvent<?> assertEntity(final E baseEntity, final RemoteEntityEvent<?> event) {
-        assertThat(event.getEntity()).isSameAs(baseEntity);
+        assertThat(event.getEntity()).isPresent().get().isSameAs(baseEntity);
 
         RemoteEntityEvent<?> underTestCreatedEvent = createProtoStuffEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).isPresent().get().isEqualTo(baseEntity);
 
         underTestCreatedEvent = createJacksonEvent(event);
-        assertThat(underTestCreatedEvent.getEntity()).isEqualTo(baseEntity);
+        assertThat(underTestCreatedEvent.getEntity()).isPresent().get().isEqualTo(baseEntity);
         return underTestCreatedEvent;
     }
 

@@ -44,10 +44,11 @@ public class ActionStatusMsgGrid extends AbstractGrid<ProxyMessage, Long> {
 
     private final Registration itemClickListenerRegistration;
 
-    protected ActionStatusMsgGrid(final CommonUiDependencies uiDependencies, final DeploymentManagement deploymentManagement) {
+    public ActionStatusMsgGrid(final CommonUiDependencies uiDependencies,
+            final DeploymentManagement deploymentManagement) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
-        setSelectionSupport(new SelectionSupport<ProxyMessage>(this));
+        setSelectionSupport(new SelectionSupport<>(this));
         getSelectionSupport().enableSingleSelection();
 
         addStyleName(SPUIStyleDefinitions.ACTION_HISTORY_MESSAGE_GRID);

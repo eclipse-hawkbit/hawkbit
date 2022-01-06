@@ -65,6 +65,28 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Page<Action> findByDistributionSetId(Pageable pageable, Long dsId);
 
     /**
+     * Retrieves all active {@link Action}s which are referring the given
+     * {@link DistributionSet}.
+     *
+     * @param set
+     *            the {@link DistributionSet} on which will be filtered
+     * @return the found {@link Action}s
+     */
+    List<Action> findByDistributionSetAndActiveIsTrue(DistributionSet set);
+
+    /**
+     * Retrieves all active {@link Action}s which are referring the given
+     * {@link DistributionSet} and are not in the given state
+     *
+     * @param set
+     *            the {@link DistributionSet} on which will be filtered
+     * @param status
+     *            the state the actions should not have
+     * @return the found {@link Action}s
+     */
+    List<Action> findByDistributionSetAndActiveIsTrueAndStatusIsNot(DistributionSet set, Status status);
+
+    /**
      * Retrieves all {@link Action}s which are referring the given
      * {@link Target}.
      *
@@ -103,7 +125,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * Retrieves the active {@link Action}s with the highest weights that refer
      * to the given {@link Target}. If {@link Action}s have the same weight they
      * are ordered ascending by ID (oldest ones first).
-     * 
+     *
      * @param pageable
      *            pageable
      * @param controllerId
@@ -117,7 +139,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Retrieves the active {@link Action}s with the lowest IDs (the oldest one)
      * whose weight is null and that that refers to the given {@link Target}.
-     * 
+     *
      * @param pageable
      *            pageable
      * @param controllerId
@@ -131,7 +153,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Checks if an active action exists for given
      * {@link Target#getControllerId()}.
-     * 
+     *
      * @param controllerId
      *            of target to check
      * @return <code>true</code> if an active action for the target exists.
@@ -264,10 +286,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     List<Action> findByExternalRefInAndActive(@Param("externalRefs") List<String> externalRefs,
             @Param("active") boolean active);
 
-    
     /**
      * Retrieves an {@link Action} that matches the queried externalRef.
-     * 
+     *
      * @param externalRef
      *            of the action. See {@link Action#getExternalRef()}
      * @return the found {@link Action}
@@ -352,6 +373,27 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     Long countByDistributionSetId(Long distributionSet);
 
     /**
+     * Counts all active {@link Action}s referring to the given DistributionSet.
+     *
+     * @param distributionSet
+     *            DistributionSet to count the {@link Action}s from
+     * @return the count of actions referring to the given distributionSet
+     */
+    Long countByDistributionSetIdAndActiveIsTrue(Long distributionSet);
+
+    /**
+     * Counts all active {@link Action}s referring to the given DistributionSet
+     * that are not in a given state.
+     *
+     * @param distributionSet
+     *            DistributionSet to count the {@link Action}s from
+     * @param status
+     *            the state the actions should not have
+     * @return the count of actions referring to the given distributionSet
+     */
+    Long countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);
+
+    /**
      * Counts all actions referring to a given rollout and rolloutgroup which
      * are currently not in the given status. An in-clause statement does not
      * work with the spring-data, so this is specific usecase regarding to the
@@ -396,7 +438,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Counts all actions referring to a given rollout and status.
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
      * @param status
@@ -409,7 +451,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Returns {@code true} if actions for the given rollout exists, otherwise
      * {@code false}
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
      * @return {@code true} if actions for the given rollout exists, otherwise
@@ -421,7 +463,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     /**
      * Returns {@code true} if actions for the given rollout exists, otherwise
      * {@code false}
-     * 
+     *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
      * @param status
@@ -471,7 +513,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
-     * 
+     *
      * @param pageable
      *            page parameters
      * @param rolloutId
@@ -528,7 +570,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
 
     /**
      * Deletes all actions with the given IDs.
-     * 
+     *
      * @param actionIDs
      *            the IDs of the actions to be deleted.
      */

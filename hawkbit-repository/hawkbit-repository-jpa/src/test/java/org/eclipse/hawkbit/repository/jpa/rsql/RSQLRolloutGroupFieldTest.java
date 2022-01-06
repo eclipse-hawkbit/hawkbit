@@ -29,7 +29,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter rollout group")
-public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
+public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
 
     private Long rolloutGroupId;
     private Rollout rollout;
@@ -48,7 +48,6 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter rollout group by  id")
     public void testFilterByParameterId() {
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + rolloutGroupId, 1);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "!=" + rolloutGroupId, 3);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==" + -1, 0);
@@ -62,7 +61,7 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==*", 4);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(RolloutGroupFields.ID.name() + "=in=(" + rolloutGroupId + ",10000000)", 1);
-        assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ",10000000)", 2);
+        assertRSQLQuery(RolloutGroupFields.ID.name() + "=out=(" + rolloutGroupId + ",10000000)", 3);
     }
 
     @Test
@@ -87,12 +86,12 @@ public class RSQLRolloutGroupFields extends AbstractJpaIntegrationTest {
         assertRSQLQuery(RolloutGroupFields.DESCRIPTION.name() + "=out=(group-1,notexist)", 3);
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long expcetedTargets) {
+    private void assertRSQLQuery(final String rsqlParam, final long expectedTargets) {
         final Page<RolloutGroup> findTargetPage = rolloutGroupManagement.findByRolloutAndRsql(PageRequest.of(0, 100),
                 rollout.getId(), rsqlParam);
         final long countTargetsAll = findTargetPage.getTotalElements();
         assertThat(findTargetPage).isNotNull();
-        assertThat(countTargetsAll).isEqualTo(expcetedTargets);
+        assertThat(countTargetsAll).isEqualTo(expectedTargets);
     }
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,

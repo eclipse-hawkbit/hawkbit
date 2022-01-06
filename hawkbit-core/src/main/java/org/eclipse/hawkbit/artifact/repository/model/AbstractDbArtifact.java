@@ -8,20 +8,19 @@
  */
 package org.eclipse.hawkbit.artifact.repository.model;
 
-import java.io.InputStream;
-
 import org.springframework.util.Assert;
 
 /**
  * Database representation of artifact.
  * 
  */
-public abstract class AbstractDbArtifact {
+public abstract class AbstractDbArtifact implements DbArtifact {
 
     private final String artifactId;
-    private final DbArtifactHash hashes;
     private final long size;
     private final String contentType;
+
+    private DbArtifactHash hashes;
 
     protected AbstractDbArtifact(final String artifactId, final DbArtifactHash hashes, final long size,
             final String contentType) {
@@ -33,39 +32,33 @@ public abstract class AbstractDbArtifact {
         this.contentType = contentType;
     }
 
-    /**
-     * @return ID of the artifact
-     */
+    @Override
     public String getArtifactId() {
         return artifactId;
     }
 
-    /**
-     * @return hashes of the artifact
-     */
+    @Override
     public DbArtifactHash getHashes() {
         return hashes;
     }
 
     /**
-     * @return site of the artifact in bytes
+     * Set hashes of the artifact
+     * 
+     * @param hashes
+     *            artifact hashes
      */
+    public void setHashes(final DbArtifactHash hashes) {
+        this.hashes = hashes;
+    }
+
+    @Override
     public long getSize() {
         return size;
     }
 
-    /**
-     * @return content-type if known by the repository or <code>null</code>
-     */
+    @Override
     public String getContentType() {
         return contentType;
     }
-
-    /**
-     * Creates an {@link InputStream} on this artifact. Caller has to take care
-     * of closing the stream. Repeatable calls open a new {@link InputStream}.
-     * 
-     * @return {@link InputStream} to read from artifact.
-     */
-    public abstract InputStream getFileInputStream();
 }

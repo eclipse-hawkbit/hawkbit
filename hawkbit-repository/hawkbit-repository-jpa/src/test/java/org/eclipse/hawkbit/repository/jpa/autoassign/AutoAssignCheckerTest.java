@@ -11,11 +11,15 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -23,8 +27,10 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +48,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Repository")
 @Story("Auto assign checker")
-public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
+class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     private AutoAssignChecker autoAssignChecker;
@@ -52,7 +58,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.")
-    public void autoAssignDistributionSetAndAutoCloseOldActions() {
+    void autoAssignDistributionSetAndAutoCloseOldActions() {
 
         tenantConfigurationManagement
                 .addOrUpdateConfiguration(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED, true);
@@ -96,7 +102,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test auto assignment of a DS to filtered targets")
-    public void checkAutoAssign() {
+    void checkAutoAssign() {
 
         final DistributionSet setA = testdataFactory.createDistributionSet("dsA"); // will
                                                                                    // be
@@ -105,11 +111,11 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final DistributionSet setB = testdataFactory.createDistributionSet("dsB");
 
         // target filter query that matches all targets
-        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                entityFactory.targetFilterQuery()
-                        .updateAutoAssign(targetFilterQueryManagement.create(
-                                entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
-                        .ds(setA.getId()));
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
@@ -131,7 +137,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDS(setA.getId(), targetFilterQuery.getQuery())).isEqualTo(15);
+        assertThat(targetManagement.countByRsqlAndNonDSAndCompatible(setA.getId(), targetFilterQuery.getQuery()))
+                .isEqualTo(15);
 
         // Run the check
         autoAssignChecker.check();
@@ -146,7 +153,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test auto assignment of an incomplete DS to filtered targets, that causes failures")
-    public void checkAutoAssignWithFailures() {
+    void checkAutoAssignWithFailures() {
 
         // incomplete distribution set that will be assigned
         final DistributionSet setF = distributionSetManagement.create(entityFactory.distributionSet().create()
@@ -159,7 +166,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // target filter query that matches first bunch of targets, that should
         // fail
-        assertThatExceptionOfType(InvalidAutoAssignDistributionSetException.class).isThrownBy(() -> {
+        assertThatExceptionOfType(IncompleteDistributionSetException.class).isThrownBy(() -> {
             final Long filterId = targetFilterQueryManagement.create(
                     entityFactory.targetFilterQuery().create().name("filterA").query("id==" + targetDsFIdPref + "*"))
                     .getId();
@@ -221,16 +228,16 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId())
-                .stream().filter(a -> targetIds.contains(a.getTarget().getControllerId()))
-                .forEach(a -> assertThat(a.getInitiatedBy()).as(
-                        "Action should be initiated by the user who initiated the auto assignment")
+        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId()).stream()
+                .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
+                .forEach(a -> assertThat(a.getInitiatedBy())
+                        .as("Action should be initiated by the user who initiated the auto assignment")
                         .isEqualTo(targetFilterQuery.getAutoAssignInitiatedBy()));
     }
 
     @Test
     @Description("Test auto assignment of a distribution set with FORCED, SOFT and DOWNLOAD_ONLY action types")
-    public void checkAutoAssignWithDifferentActionTypes() {
+    void checkAutoAssignWithDifferentActionTypes() {
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         final String targetDsAIdPref = "A";
         final String targetDsBIdPref = "B";
@@ -280,8 +287,8 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("An auto assignment target filter with weight creats actions with weights")
-    public void actionsWithWeightAreCreated() throws Exception {
+    @Description("An auto assignment target filter with weight creates actions with weights")
+    void actionsWithWeightAreCreated() throws Exception {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final int weight = 32;
@@ -299,7 +306,7 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("An auto assignment target filter without weight still works after multi assignment is enabled")
-    public void filterWithoutWeightWorksInMultiAssignmentMode() throws Exception {
+    void filterWithoutWeightWorksInMultiAssignmentMode() throws Exception {
         final int amountOfTargets = 5;
         final DistributionSet ds = testdataFactory.createDistributionSet();
         targetFilterQueryManagement.create(
@@ -312,5 +319,55 @@ public class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
         assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
+    }
+
+    @Test
+    @Description("Verifies an auto assignment only creates actions for compatible targets")
+    void checkAutoAssignmentWithIncompatibleTargets() {
+        final int TARGET_COUNT = 5;
+
+        final DistributionSet testDs = testdataFactory.createDistributionSet();
+        final DistributionSetType incompatibleDsType1 = testdataFactory
+                .findOrCreateDistributionSetType("incompatibleDsType1", "incompDsType1");
+        final DistributionSetType incompatibleDsType2 = testdataFactory
+                .findOrCreateDistributionSetType("incompatibleDsType2", "incompDsType2");
+        final TargetFilterQuery testFilter = targetFilterQueryManagement.create(entityFactory.targetFilterQuery()
+                .create().name("test-filter").query("name==*").autoAssignDistributionSet(testDs));
+
+        final TargetType incompatibleEmptyType = testdataFactory.createTargetType("incompatibleEmptyType",
+                Collections.emptyList());
+        final TargetType incompatibleSingleType = testdataFactory.createTargetType("incompatibleSingleType",
+                Collections.singletonList(incompatibleDsType1));
+        final TargetType incompatibleMultiType = testdataFactory.createTargetType("incompatibleMultiType",
+                Arrays.asList(incompatibleDsType1, incompatibleDsType2));
+        final TargetType compatibleSingleType = testdataFactory.createTargetType("compatibleSingleType",
+                Collections.singletonList(testDs.getType()));
+        final TargetType compatibleMultiType = testdataFactory.createTargetType("compatibleMultiType",
+                Arrays.asList(testDs.getType(), incompatibleDsType1));
+
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleEmpty", incompatibleEmptyType);
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleSingle", incompatibleSingleType);
+        testdataFactory.createTargetsWithType(TARGET_COUNT, "incompatibleMulti", incompatibleMultiType);
+
+        final List<Target> compatibleTargetsSingleType = testdataFactory.createTargetsWithType(TARGET_COUNT,
+                "compatibleSingle", compatibleSingleType);
+        final List<Target> compatibleTargetsMultiType = testdataFactory.createTargetsWithType(TARGET_COUNT,
+                "compatibleMulti", compatibleMultiType);
+        final List<Target> compatibleTargetsWithoutType = testdataFactory.createTargets(TARGET_COUNT,
+                "compatibleSingleWithoutType");
+
+        final List<Long> compatibleTargets = Stream
+                .of(compatibleTargetsSingleType, compatibleTargetsMultiType, compatibleTargetsWithoutType)
+                .flatMap(Collection::stream).map(Target::getId).collect(Collectors.toList());
+        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatible(testDs.getId(),
+                testFilter.getQuery());
+        assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
+
+        autoAssignChecker.check();
+
+        final List<Action> actions = deploymentManagement.findActionsAll(Pageable.unpaged()).getContent();
+        assertThat(actions).hasSize(compatibleTargets.size());
+        final List<Long> actionTargets = actions.stream().map(a -> a.getTarget().getId()).collect(Collectors.toList());
+        assertThat(actionTargets).containsExactlyInAnyOrderElementsOf(compatibleTargets);
     }
 }

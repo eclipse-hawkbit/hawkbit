@@ -61,6 +61,7 @@ public class UpdateSmWindowController
         sm.setVersion(proxyEntity.getVersion());
         sm.setVendor(proxyEntity.getVendor());
         sm.setDescription(proxyEntity.getDescription());
+        sm.setEncrypted(proxyEntity.isEncrypted());
 
         nameBeforeEdit = proxyEntity.getName();
         versionBeforeEdit = proxyEntity.getVersion();
@@ -78,6 +79,7 @@ public class UpdateSmWindowController
         layout.disableSmTypeSelect();
         layout.disableNameField();
         layout.disableVersionField();
+        layout.disableEncryptionField();
     }
 
     @Override

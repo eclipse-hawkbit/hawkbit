@@ -32,6 +32,8 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -100,8 +102,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final ActionRepository actionRepository;
 
-    private final NoCountPagingRepository criteriaNoCountDao;
-
     private final EventPublisherHolder eventPublisherHolder;
 
     private final TenantAware tenantAware;
@@ -122,8 +122,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
-            final NoCountPagingRepository criteriaNoCountDao, final EventPublisherHolder eventPublisherHolder,
-            final TenantAware tenantAware, final VirtualPropertyReplacer virtualPropertyReplacer,
+            final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit, final Database database) {
@@ -136,7 +136,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetMetadataRepository = distributionSetMetadataRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
-        this.criteriaNoCountDao = criteriaNoCountDao;
         this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -216,7 +215,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSet update(final DistributionSetUpdate u) {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
-        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(update.getId());
+        final JpaDistributionSet set = (JpaDistributionSet) getValid(update.getId());
 
         update.getName().ifPresent(set::setName);
         update.getDescription().ifPresent(set::setDescription);
@@ -229,11 +228,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         return distributionSetRepository.save(set);
-    }
-
-    private JpaDistributionSet findDistributionSetAndThrowExceptionIfNotFound(final Long setId) {
-        return (JpaDistributionSet) get(setId)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, setId));
     }
 
     private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long moduleId) {
@@ -318,7 +312,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         assertDistributionSetIsNotAssignedToTargets(setId);
 
-        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
 
         assertSoftwareModuleQuota(setId, modules.size());
 
@@ -332,7 +326,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet unassignSoftwareModule(final long setId, final long moduleId) {
-        final JpaDistributionSet set = findDistributionSetAndThrowExceptionIfNotFound(setId);
+        final JpaDistributionSet set = (JpaDistributionSet) getValid(setId);
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
 
         assertDistributionSetIsNotAssignedToTargets(setId);
@@ -534,7 +528,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      *            of the DS to touch
      */
     private JpaDistributionSet touch(final Long distId) {
-        return touch(get(distId).orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distId)));
+        return touch(getValid(distId));
     }
 
     @Override
@@ -555,7 +549,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
-        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.parse(rsqlParam,
+        final Specification<JpaDistributionSetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 DistributionSetMetadataFields.class, virtualPropertyReplacer, database);
 
         return convertMdPage(
@@ -598,7 +592,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(8);
+        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(9);
 
         Specification<JpaDistributionSet> spec;
 
@@ -609,6 +603,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (distributionSetFilter.getIsDeleted() != null) {
             spec = DistributionSetSpecification.isDeleted(distributionSetFilter.getIsDeleted());
+            specList.add(spec);
+        }
+
+        if (distributionSetFilter.getIsValid() != null) {
+            spec = DistributionSetSpecification.isValid(distributionSetFilter.getIsValid());
             specList.add(spec);
         }
 
@@ -784,8 +783,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Page<DistributionSet> findByRsqlAndTag(final Pageable pageable, final String rsqlParam, final long tagId) {
         throwEntityNotFoundExceptionIfDsTagDoesNotExist(tagId);
 
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                DistributionSetFields.class, virtualPropertyReplacer, database);
 
         return convertDsPage(findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.hasTag(tagId),
                 DistributionSetSpecification.isDeleted(false))), pageable);
@@ -793,14 +792,15 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Slice<DistributionSet> findAll(final Pageable pageable) {
-        return convertDsPage(criteriaNoCountDao.findAll(DistributionSetSpecification.isDeleted(false), pageable,
-                JpaDistributionSet.class), pageable);
+        return convertDsPage(
+                distributionSetRepository.findAllWithoutCount(DistributionSetSpecification.isDeleted(false), pageable),
+                pageable);
     }
 
     @Override
     public Page<DistributionSet> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSet> spec = RSQLUtility.parse(rsqlParam, DistributionSetFields.class,
-                virtualPropertyReplacer, database);
+        final Specification<JpaDistributionSet> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
+                DistributionSetFields.class, virtualPropertyReplacer, database);
 
         return convertDsPage(
                 findByCriteriaAPI(pageable, Arrays.asList(spec, DistributionSetSpecification.isDeleted(false))),
@@ -815,6 +815,43 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public boolean exists(final long id) {
         return distributionSetRepository.existsById(id);
+    }
+
+    @Override
+    public DistributionSet getOrElseThrowException(final long id) {
+        return get(id).orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
+    }
+
+    @Override
+    public DistributionSet getValidAndComplete(final long id) {
+        final DistributionSet distributionSet = getValid(id);
+
+        if (!distributionSet.isComplete()) {
+            throw new IncompleteDistributionSetException("Distribution set of type "
+                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+
+        return distributionSet;
+    }
+
+    @Override
+    public DistributionSet getValid(final long id) {
+        final DistributionSet distributionSet = getOrElseThrowException(id);
+
+        if (!distributionSet.isValid()) {
+            throw new InvalidDistributionSetException("Distribution set of type " + distributionSet.getType().getKey()
+                    + " is invalid: " + distributionSet.getId());
+        }
+
+        return distributionSet;
+    }
+
+    @Override
+    @Transactional
+    public void invalidate(final DistributionSet set) {
+        final JpaDistributionSet jpaSet = (JpaDistributionSet) set;
+        jpaSet.invalidate();
+        distributionSetRepository.save(jpaSet);
     }
 
 }

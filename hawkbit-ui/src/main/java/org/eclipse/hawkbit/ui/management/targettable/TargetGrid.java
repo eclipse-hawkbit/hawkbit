@@ -29,9 +29,9 @@ import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetPollingStat
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.TargetStatusIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.filters.TargetManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetToProxyTargetMapper;
-import org.eclipse.hawkbit.ui.common.data.providers.TargetManagementStateDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
@@ -50,6 +50,7 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.AssignmentSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.DistributionSetsToTargetAssignmentSupport;
 import org.eclipse.hawkbit.ui.common.grid.support.assignment.TargetTagsToTargetAssignmentSupport;
+import org.eclipse.hawkbit.ui.common.grid.support.assignment.TypeToTargetAssignmentSupport;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
 import org.eclipse.hawkbit.ui.management.miscs.DeploymentAssignmentWindowController;
 import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutUiState;
@@ -104,6 +105,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      *            DeploymentManagement
      * @param configManagement
      *            TenantConfigurationManagement
+     * @param targetManagementStateDataSupplier
+     *            data supplier
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param uiProperties
@@ -117,11 +120,13 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      */
     public TargetGrid(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final DeploymentManagement deploymentManagement, final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, final UiProperties uiProperties,
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState) {
-        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
+        super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker(),
+                targetManagementStateDataSupplier.dataCommunicator());
 
         this.targetManagement = targetManagement;
         this.targetGridLayoutUiState = targetGridLayoutUiState;
@@ -129,9 +134,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
         this.distributionGridLayoutUiState = distributionGridLayoutUiState;
         this.targetToProxyTargetMapper = new TargetToProxyTargetMapper(i18n);
 
-        setSelectionSupport(new SelectionSupport<ProxyTarget>(this, eventBus, EventLayout.TARGET_LIST,
-                EventView.DEPLOYMENT, this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState,
-                this::setSelectedEntityIdToUiState));
+        setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.TARGET_LIST, EventView.DEPLOYMENT,
+                this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
         if (targetGridLayoutUiState.isMaximized()) {
             getSelectionSupport().disableSelection();
         } else {
@@ -154,9 +158,12 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 uiDependencies, systemSecurityContext, configManagement, assignmentController);
         final TargetTagsToTargetAssignmentSupport targetTagsToTargetAssignment = new TargetTagsToTargetAssignmentSupport(
                 uiDependencies, targetManagement);
+        final TypeToTargetAssignmentSupport typeToTargetAssignmentSupport = new TypeToTargetAssignmentSupport(
+                uiDependencies, targetManagement);
 
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.DIST_TABLE_ID, distributionsToTargetAssignment);
         sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TAG_TABLE_ID, targetTagsToTargetAssignment);
+        sourceTargetAssignmentStrategies.put(UIComponentIdProvider.TARGET_TYPE_TABLE_ID, typeToTargetAssignmentSupport);
 
         setDragAndDropSupportSupport(new DragAndDropSupport<>(this, i18n, uiDependencies.getUiNotification(),
                 sourceTargetAssignmentStrategies, eventBus));
@@ -164,9 +171,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
             getDragAndDropSupportSupport().addDragAndDrop();
         }
 
-        setFilterSupport(
-                new FilterSupport<>(new TargetManagementStateDataProvider(targetManagement, targetToProxyTargetMapper),
-                        getSelectionSupport()::deselectAll));
+        setFilterSupport(new FilterSupport<>(targetManagementStateDataSupplier.dataProvider(),
+                TargetManagementFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new TargetManagementFilterParams());
 
@@ -261,6 +267,10 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 targetTagFilterLayoutUiState.isNoTagClicked());
         getFilterSupport().addMapping(FilterType.TAG, TargetManagementFilterParams::setTargetTags,
                 targetTagFilterLayoutUiState.getClickedTagIdsWithName().values());
+        getFilterSupport().addMapping(FilterType.NO_TARGET_TYPE, TargetManagementFilterParams::setNoTargetTypeClicked,
+                targetTagFilterLayoutUiState.isNoTargetTypeClicked());
+        getFilterSupport().addMapping(FilterType.TARGET_TYPE, TargetManagementFilterParams::setTargetTypeId,
+                targetTagFilterLayoutUiState.getClickedTargetTypeFilterId());
         getFilterSupport().addMapping(FilterType.QUERY, TargetManagementFilterParams::setTargetFilterQueryId,
                 targetTagFilterLayoutUiState.getClickedTargetFilterQueryId());
         getFilterSupport().addMapping(FilterType.DISTRIBUTION, TargetManagementFilterParams::setDistributionId,
@@ -278,26 +288,21 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     }
 
     /**
-     * Update filter on custom tab selection
+     * Update filter on filter tab selection
      */
-    public void onCustomTabSelected() {
+    public void resetAllFilters(){
         getFilter().ifPresent(filter -> {
             filter.setDistributionId(null);
             filter.setNoTagClicked(false);
+            filter.setNoTargetTypeClicked(false);
             filter.setOverdueState(false);
             filter.setSearchText(null);
             filter.setTargetTags(Collections.emptyList());
             filter.setTargetUpdateStatusList(Collections.emptyList());
-
+            filter.setTargetTypeId(null);
+            filter.setTargetFilterQueryId(null);
             getFilterSupport().refreshFilter();
         });
-    }
-
-    /**
-     * Update filter on simple tab selection
-     */
-    public void onSimpleTabSelected() {
-        getFilterSupport().updateFilter(TargetManagementFilterParams::setTargetFilterQueryId, null);
     }
 
     @Override

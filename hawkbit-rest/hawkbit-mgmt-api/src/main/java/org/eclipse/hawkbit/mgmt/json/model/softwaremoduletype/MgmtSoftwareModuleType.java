@@ -27,7 +27,7 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
     @JsonProperty(value = "id", required = true)
     private Long moduleId;
 
-    @JsonProperty
+    @JsonProperty(required = true)
     private String key;
 
     @JsonProperty
@@ -35,6 +35,9 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
 
     @JsonProperty
     private boolean deleted;
+
+    @JsonProperty
+    private String colour;
 
     public boolean isDeleted() {
         return deleted;
@@ -68,4 +71,11 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
         this.maxAssignments = maxAssignments;
     }
 
+    public String getColour() {
+        return colour;
+    }
+
+    public void setColour(String colour) {
+        this.colour = colour;
+    }
 }

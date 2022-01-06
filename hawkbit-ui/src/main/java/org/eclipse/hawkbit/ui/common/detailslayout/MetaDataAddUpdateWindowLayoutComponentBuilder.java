@@ -91,7 +91,7 @@ public class MetaDataAddUpdateWindowLayoutComponentBuilder {
      * @return Target field CheckBox
      */
     public CheckBox createVisibleForTargetsField(final Binder<ProxyMetaData> binder) {
-        return FormComponentBuilder.getCheckBox(i18n.getMessage(TARGET_VISIBLE),
+        return FormComponentBuilder.createCheckBox(i18n.getMessage(TARGET_VISIBLE),
                 UIComponentIdProvider.METADATA_TARGET_VISIBLE_ID, binder, ProxyMetaData::isVisibleForTargets,
                 ProxyMetaData::setVisibleForTargets);
     }

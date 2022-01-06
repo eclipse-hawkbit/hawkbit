@@ -16,7 +16,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all target filter queries within SP. Required permission: READ_TARGET
+Handles the GET request of retrieving all target filter queries within Hawkbit. Required permission: READ_TARGET
 
 === Get paged list of target filter queries
 
@@ -66,7 +66,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the POST request to create a new target filter query within SP. Required permission: CREATE_TARGET
+Handles the POST request to create a new target filter query within Hawkbit. Required permission: CREATE_TARGET
 
 === Create a target filter query
 
@@ -112,7 +112,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request of deleting a target filter query within SP. Required permission: DELETE_TARGET
+Handles the DELETE request of deleting a target filter query within Hawkbit. Required permission: DELETE_TARGET
 
 === Deleting a target
 
@@ -153,7 +153,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving a single target filter query within SP. Required permission: READ_TARGET
+Handles the GET request of retrieving a single target filter query within Hawkbit. Required permission: READ_TARGET
 
 === Get single target
 
@@ -198,7 +198,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the PUT request of updating a target filter query within SP. Required permission: UPDATE_TARGET
+Handles the PUT request of updating a target filter query within Hawkbit. Required permission: UPDATE_TARGET
 
 === Update a target
 

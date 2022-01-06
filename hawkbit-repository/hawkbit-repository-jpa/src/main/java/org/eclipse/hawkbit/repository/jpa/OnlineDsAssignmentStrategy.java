@@ -32,7 +32,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
@@ -98,7 +97,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
         final Function<List<String>, List<JpaTarget>> mapper;
         if (isMultiAssignmentsEnabled()) {
-            mapper = targetRepository::findAllByControllerId;
+            mapper = ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids));
         } else {
             mapper = ids -> targetRepository
                     .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId));
@@ -167,7 +166,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     private DistributionSetAssignmentResult sendDistributionSetAssignedEvent(
             final DistributionSetAssignmentResult assignmentResult) {
         final List<Action> filteredActions = filterCancellations(assignmentResult.getAssignedEntity())
-                .filter(action -> !hasPendingCancellations(action.getTarget())).collect(Collectors.toList());
+                .collect(Collectors.toList());
         final DistributionSet set = assignmentResult.getDistributionSet();
         sendTargetAssignDistributionSetEvent(set.getTenant(), set.getId(), filteredActions);
         return assignmentResult;
@@ -182,11 +181,6 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetAssignDistributionSetEvent(tenant, distributionSetId, actions,
                         eventPublisherHolder.getApplicationId(), actions.get(0).isMaintenanceWindowAvailable())));
-    }
-
-    private boolean hasPendingCancellations(final Target target) {
-        return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(target.getControllerId(),
-                Status.CANCELING);
     }
 
     /**

@@ -35,9 +35,9 @@ public class DistributionSetStatelessDataProvider
      * Constructor for DistributionSetStatelessDataProvider
      *
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      * @param entityMapper
-     *          DistributionSetToProxyDistributionMapper
+     *            DistributionSetToProxyDistributionMapper
      */
     public DistributionSetStatelessDataProvider(final DistributionSetManagement distributionSetManagement,
             final DistributionSetToProxyDistributionMapper entityMapper) {
@@ -49,7 +49,7 @@ public class DistributionSetStatelessDataProvider
     @Override
     protected Page<DistributionSet> loadBackendEntities(final PageRequest pageRequest, final String filter) {
         final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false)
-                .setIsComplete(true);
+                .setIsComplete(true).setIsValid(true);
 
         if (!StringUtils.isEmpty(filter)) {
             builder.setFilterString(filter);
@@ -60,6 +60,6 @@ public class DistributionSetStatelessDataProvider
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final String filter) {
-        return loadBackendEntities(pageRequest, filter).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
     }
 }

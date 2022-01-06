@@ -5,7 +5,7 @@ weight: 20
 
 ## On Sandbox
 
-We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](/hawkbit/ui/), 
+We offer a sandbox installation that is free for everyone to try out hawkBit's [Management UI](/hawkbit/ui/),
 [Management API](/hawkbit/apis/management_api/), and [Direct Device Integration API](/hawkbit/apis/ddi_api/): &nbsp;
 **[<i class="fas fa-desktop">&nbsp;</i> https://hawkbit.eclipse.org](https://hawkbit.eclipse.org)**
 
@@ -26,10 +26,12 @@ In addition, the following vendors offer free trial accounts for their Eclipse h
 
 | Service / Container | A | B | C |
 |---|---|---|---|
-| hawkBit Update Server |  &#10003; | &#10003; | &#10003; | 
-| hawkBit Device Simulator |   |  | &#10003; | 
-| MySQL |  | &#10003; | &#10003; | 
-| RabbitMQ |  | &#10003; | &#10003; | 
+| hawkBit Update Server |  &#10003; | &#10003; | &#10003; |
+| hawkBit Device Simulator |   |  | &#10003; |
+| MySQL |  | &#10003; | &#10003; |
+| RabbitMQ |  | &#10003; | &#10003; |
+
+HawkBit Update Server uses username=admin and password=admin as default login credentials. They can be overridden by the environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
 
 ### A: Run hawkBit Update Server as Docker Container
 

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TenantConfigurationDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
@@ -52,6 +54,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreat
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpdatedEvent;
@@ -60,7 +64,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
  * The {@link EventType} class declares the event-type and it's corresponding
  * encoding value in the payload of an remote header. The event-type is encoded
  * into the payload of the message which is distributed.
- * 
+ *
  * To encode and decode the event class type we need some conversation mapping
  * between the actual class and the corresponding integer value which is the
  * encoded value in the byte-payload.
@@ -146,6 +150,14 @@ public class EventType {
         TYPES.put(40, TenantConfigurationCreatedEvent.class);
         TYPES.put(41, TenantConfigurationUpdatedEvent.class);
         TYPES.put(42, TenantConfigurationDeletedEvent.class);
+
+        // rollout stopped due to invalidated distribution set
+        TYPES.put(43, RolloutStoppedEvent.class);
+
+        // target type
+        TYPES.put(44, TargetTypeCreatedEvent.class);
+        TYPES.put(45, TargetTypeUpdatedEvent.class);
+        TYPES.put(46, TargetTypeDeletedEvent.class);
     }
 
     private int value;
@@ -159,7 +171,7 @@ public class EventType {
 
     /**
      * Constructor.
-     * 
+     *
      * @param value
      *            the value to initialize
      */
@@ -177,7 +189,7 @@ public class EventType {
 
     /**
      * Returns a {@link EventType} based on the given class type.
-     * 
+     *
      * @param clazz
      *            the clazz type to retrieve the corresponding {@link EventType}
      *            .

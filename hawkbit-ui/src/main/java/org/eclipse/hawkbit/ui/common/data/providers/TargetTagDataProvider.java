@@ -31,9 +31,9 @@ public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, T
      * Constructor for TargetTagDataProvider
      *
      * @param tagManagementService
-     *          TargetTagManagement
+     *            TargetTagManagement
      * @param mapper
-     *          TagToProxyTagMapper of TargetTag
+     *            TagToProxyTagMapper of TargetTag
      */
     public TargetTagDataProvider(final TargetTagManagement tagManagementService,
             final TagToProxyTagMapper<TargetTag> mapper) {
@@ -49,7 +49,7 @@ public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, T
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final Void filter) {
-        return loadBackendEntities(pageRequest, filter).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
     }
 
 }

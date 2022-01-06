@@ -8,7 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.common.data.filters;
 
+import java.util.Objects;
+
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetDistributionsStateDataProvider;
+
+import com.google.common.base.MoreObjects;
 
 /**
  * Filter params for {@link DistributionSetDistributionsStateDataProvider}.
@@ -39,6 +43,17 @@ public class DsDistributionsFilterParams extends DsFilterParams {
     }
 
     /**
+     * Copy Constructor.
+     *
+     * @param filter
+     *            A filter to be copied
+     */
+    public DsDistributionsFilterParams(final DsDistributionsFilterParams filter) {
+        super(filter);
+        this.dsTypeId = filter.getDsTypeId();
+    }
+
+    /**
      * @return DsTypeId
      */
     public Long getDsTypeId() {
@@ -53,5 +68,29 @@ public class DsDistributionsFilterParams extends DsFilterParams {
      */
     public void setDsTypeId(final Long dsTypeId) {
         this.dsTypeId = dsTypeId;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final DsDistributionsFilterParams other = (DsDistributionsFilterParams) obj;
+        return Objects.equals(this.getSearchText(), other.getSearchText())
+                && Objects.equals(this.getDsTypeId(), other.getDsTypeId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSearchText(), getDsTypeId());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this).add("searchText", getSearchText()).add("dsTypeId", getDsTypeId())
+                .toString();
     }
 }

@@ -18,7 +18,7 @@ toc::[]
 
 === Implementation notes
 
-Handles the GET request of retrieving all rollouts within SP. Required Permission: READ_ROLLOUT
+Handles the GET request of retrieving all rollouts within Hawkbit. Required Permission: READ_ROLLOUT
 
 === Get paged list of Rollouts
 
@@ -65,7 +65,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving a single rollout within SP. Required Permission: READ_ROLLOUT
+Handles the GET request of retrieving a single rollout within Hawkbit. Required Permission: READ_ROLLOUT
 
 === Get Rollout
 
@@ -108,7 +108,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts
 
 === Implementation Notes
-Handles the POST request of creating new rollout within SP. Required Permission: CREATE_ROLLOUT
+Handles the POST request of creating new rollout within Hawkbit. Required Permission: CREATE_ROLLOUT
 
 === Create Rollout with defined amount of groups
 
@@ -182,7 +182,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts/{rolloutId}/approve
 
 === Implementation Notes
-Handles the POST request of approving a created rollout within SP.
+Handles the POST request of approving a created rollout within Hawkbit.
 Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL.
 Required Permission: APPROVE_ROLLOUT
 
@@ -219,7 +219,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts/{rolloutId}/deny
 
 === Implementation Notes
-Handles the POST request of denying a created rollout within SP.
+Handles the POST request of denying a created rollout within Hawkbit.
 Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL.
 Required Permission: APPROVE_ROLLOUT
 
@@ -257,7 +257,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts/{rolloutId}/start
 
 === Implementation Notes
-Handles the POST request of starting a created rollout within SP. Required Permission: HANDLE_ROLLOUT
+Handles the POST request of starting a created rollout within Hawkbit. Required Permission: HANDLE_ROLLOUT
 
 === Start Rollout
 
@@ -293,7 +293,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts/{rolloutId}/pause
 
 === Implementation Notes
-Handles the POST request of pausing a running rollout within SP. Required Permission: HANDLE_ROLLOUT
+Handles the POST request of pausing a running rollout within Hawkbit. Required Permission: HANDLE_ROLLOUT
 
 === Pause Rollout
 
@@ -326,7 +326,7 @@ include::../errors/429.adoc[]
 == POST /rest/v1/rollouts/{rolloutId}/resume
 
 === Implementation Notes
-Handles the POST request of resuming a paused rollout within SP. Required Permission: HANDLE_ROLLOUT
+Handles the POST request of resuming a paused rollout within Hawkbit. Required Permission: HANDLE_ROLLOUT
 
 === Resume Rollout
 
@@ -360,7 +360,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the DELETE request of deleting a rollout within SP. Required Permission: DELETE_ROLLOUT
+Handles the DELETE request of deleting a rollout within Hawkbit. Required Permission: DELETE_ROLLOUT
 
 === Deleting a rollout
 
@@ -400,7 +400,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving all deploy groups of a specific rollout within SP. Required Permission: READ_ROLLOUT
+Handles the GET request of retrieving all deploy groups of a specific rollout within Hawkbit. Required Permission: READ_ROLLOUT
 
 === Get Deploy Groups
 
@@ -452,7 +452,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of a single deploy group of a specific rollout within SP. Required Permission: READ_ROLLOUT
+Handles the GET request of a single deploy group of a specific rollout within Hawkbit. Required Permission: READ_ROLLOUT
 
 === Get Deploy Groups
 
@@ -496,7 +496,7 @@ include::../errors/429.adoc[]
 
 === Implementation Notes
 
-Handles the GET request of retrieving all targets of a single deploy group of a specific rollout within SP. Required Permissions: READ_ROLLOUT, READ_TARGET.
+Handles the GET request of retrieving all targets of a single deploy group of a specific rollout within Hawkbit. Required Permissions: READ_ROLLOUT, READ_TARGET.
 
 === Get Deploy Group Targets
 

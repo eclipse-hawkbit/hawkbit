@@ -28,7 +28,7 @@ public class TargetMetaDataDataProvider extends AbstractMetaDataDataProvider<Tar
      * Constructor for TargetManagement
      *
      * @param targetManagement
-     *          TargetManagement
+     *            TargetManagement
      */
     public TargetMetaDataDataProvider(final TargetManagement targetManagement) {
         super();
@@ -52,7 +52,7 @@ public class TargetMetaDataDataProvider extends AbstractMetaDataDataProvider<Tar
             return 0L;
         }
 
-        return targetManagement.findMetaDataByControllerId(pageRequest, currentlySelectedControllerId)
+        return targetManagement.findMetaDataByControllerId(PageRequest.of(0, 1), currentlySelectedControllerId)
                 .getTotalElements();
     }
 }

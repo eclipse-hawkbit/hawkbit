@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleTypeDeletedEven
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetFilterQueryDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetTagDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetTagUpdatedEvent;
@@ -36,6 +37,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryCreat
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetFilterQueryUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
@@ -45,6 +48,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayloadIdentifier;
@@ -134,6 +138,13 @@ public class HawkbitEventProvider implements UIEventProvider {
                 ProxyTargetFilterQuery.class, EntityModifiedEventType.ENTITY_UPDATED));
         EVENTS.put(TargetFilterQueryDeletedEvent.class, new EntityModifiedEventPayloadIdentifier(
                 ProxyTargetFilterQuery.class, EntityModifiedEventType.ENTITY_REMOVED));
+
+        EVENTS.put(TargetTypeCreatedEvent.class, new EntityModifiedEventPayloadIdentifier(
+                ProxyTargetType.class, EntityModifiedEventType.ENTITY_ADDED));
+        EVENTS.put(TargetTypeUpdatedEvent.class, new EntityModifiedEventPayloadIdentifier(
+                ProxyTargetType.class, EntityModifiedEventType.ENTITY_UPDATED));
+        EVENTS.put(TargetTypeDeletedEvent.class, new EntityModifiedEventPayloadIdentifier(
+                ProxyTargetType.class, EntityModifiedEventType.ENTITY_REMOVED));
     }
 
     @Override

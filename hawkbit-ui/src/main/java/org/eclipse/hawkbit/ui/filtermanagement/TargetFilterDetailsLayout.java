@@ -9,12 +9,12 @@
 package org.eclipse.hawkbit.ui.filtermanagement;
 
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
-import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetFilterStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -38,7 +38,7 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
     private final transient FilterChangedListener<ProxyTarget> targetFilterListener;
 
     /**
-     * TargetFilterDetailsLayout constructor
+     * TargetFilterDetailsLayout constructor.
      *
      * @param uiDependencies
      *            {@link CommonUiDependencies}
@@ -46,31 +46,35 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
      *            properties
      * @param rsqlValidationOracle
      *            to get RSQL validation and suggestions
-     * @param targetManagement
-     *            management to get targets matching the filters
      * @param targetFilterManagement
      *            management to CRUD target filters
+     * @param targetFilterStateDataSupplier
+     *            target grid data supplier
      * @param uiState
      *            to persist the user interaction
      */
     public TargetFilterDetailsLayout(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
-            final RsqlValidationOracle rsqlValidationOracle, final TargetManagement targetManagement,
-            final TargetFilterQueryManagement targetFilterManagement, final TargetFilterDetailsLayoutUiState uiState) {
+            final RsqlValidationOracle rsqlValidationOracle, final TargetFilterQueryManagement targetFilterManagement,
+            final TargetFilterStateDataSupplier targetFilterStateDataSupplier,
+            final TargetFilterDetailsLayoutUiState uiState) {
 
         this.targetFilterDetailsGridHeader = new TargetFilterDetailsGridHeader(uiDependencies, targetFilterManagement,
                 uiProperties, rsqlValidationOracle, uiState);
-        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetManagement, uiState);
+        this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetFilterStateDataSupplier,
+                uiState);
         this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
 
         initGridDataUpdatedListener();
 
+        final EventViewAware viewAware = new EventViewAware(EventView.TARGET_FILTER);
+        final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_FILTER_QUERY_FORM,
+                EventView.TARGET_FILTER);
+
         this.showFilterQueryFormListener = new ShowEntityFormLayoutListener<>(uiDependencies.getEventBus(),
-                ProxyTargetFilterQuery.class,
-                new EventLayoutViewAware(EventLayout.TARGET_FILTER_QUERY_FORM, EventView.TARGET_FILTER),
-                targetFilterDetailsGridHeader::showAddFilterLayout,
+                ProxyTargetFilterQuery.class, layoutViewAware, targetFilterDetailsGridHeader::showAddFilterLayout,
                 targetFilterDetailsGridHeader::showEditFilterLayout);
         this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
-                new EventViewAware(EventView.TARGET_FILTER), targetFilterTargetGrid.getFilterSupport());
+                viewAware, targetFilterTargetGrid.getFilterSupport());
 
         buildLayout(targetFilterDetailsGridHeader, targetFilterTargetGrid, targetFilterCountMessageLabel);
     }
@@ -80,9 +84,7 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
                 .updateTotalFilteredTargetsCount(targetFilterTargetGrid.getDataSize()));
     }
 
-    /**
-     * restore the saved state
-     */
+    @Override
     public void restoreState() {
         targetFilterDetailsGridHeader.restoreState();
         if (targetFilterDetailsGridHeader.isFilterQueryValid()) {
@@ -90,10 +92,14 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
         }
     }
 
-    /**
-     * unsubscribe all listener
-     */
-    public void unsubscribeListener() {
+    @Override
+    public void subscribeListeners() {
+        showFilterQueryFormListener.subscribe();
+        targetFilterListener.subscribe();
+    }
+
+    @Override
+    public void unsubscribeListeners() {
         showFilterQueryFormListener.unsubscribe();
         targetFilterListener.unsubscribe();
     }

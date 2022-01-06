@@ -33,9 +33,9 @@ public class TargetFilterQueryDataProvider
      * Constructor for TargetFilterQueryDataProvider
      *
      * @param targetFilterQueryManagement
-     *          TargetFilterQueryManagement
+     *            TargetFilterQueryManagement
      * @param entityMapper
-     *          TargetFilterQueryToProxyTargetFilterMapper
+     *            TargetFilterQueryToProxyTargetFilterMapper
      */
     public TargetFilterQueryDataProvider(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetFilterQueryToProxyTargetFilterMapper entityMapper) {
@@ -59,6 +59,6 @@ public class TargetFilterQueryDataProvider
             return targetFilterQueryManagement.count();
         }
 
-        return targetFilterQueryManagement.findByName(pageRequest, filter).getTotalElements();
+        return targetFilterQueryManagement.findByName(PageRequest.of(0, 1), filter).getTotalElements();
     }
 }

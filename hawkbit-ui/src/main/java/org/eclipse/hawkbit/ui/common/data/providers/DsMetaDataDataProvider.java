@@ -28,7 +28,7 @@ public class DsMetaDataDataProvider extends AbstractMetaDataDataProvider<Distrib
      * Constructor for DsMetaDataDataProvider
      *
      * @param distributionSetManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
      */
     public DsMetaDataDataProvider(final DistributionSetManagement distributionSetManagement) {
         super();
@@ -51,6 +51,6 @@ public class DsMetaDataDataProvider extends AbstractMetaDataDataProvider<Distrib
             return 0L;
         }
 
-        return loadBackendEntities(pageRequest, dsId).getTotalElements();
+        return loadBackendEntities(PageRequest.of(0, 1), dsId).getTotalElements();
     }
 }

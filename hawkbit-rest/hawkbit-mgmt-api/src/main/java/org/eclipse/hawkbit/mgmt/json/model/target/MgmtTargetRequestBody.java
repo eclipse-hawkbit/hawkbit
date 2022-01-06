@@ -27,10 +27,34 @@ public class MgmtTargetRequestBody {
     @JsonProperty
     private Boolean requestAttributes;
 
+    @JsonProperty
+    private Long targetType;
+
+    /**
+     * @return Target type ID
+     */
+    public Long getTargetType() {
+        return targetType;
+    }
+
+    /**
+     * @param targetType
+     *          Target type ID
+     */
+    public void setTargetType(Long targetType) {
+        this.targetType = targetType;
+    }
+
+    /**
+     * @return token
+     */
     public String getSecurityToken() {
         return securityToken;
     }
 
+    /**
+     * @param securityToken Token
+     */
     public void setSecurityToken(final String securityToken) {
         this.securityToken = securityToken;
     }
@@ -83,18 +107,32 @@ public class MgmtTargetRequestBody {
         return this;
     }
 
+    /**
+     * @return address
+     */
     public String getAddress() {
         return address;
     }
 
+    /**
+     * @param address
+     *          Address
+     */
     public void setAddress(final String address) {
         this.address = address;
     }
 
+    /**
+     * @return boolean true or false
+     */
     public Boolean isRequestAttributes() {
         return requestAttributes;
     }
 
+    /**
+     * @param requestAttributes
+     *          Attributes
+     */
     public void setRequestAttributes(final Boolean requestAttributes) {
         this.requestAttributes = requestAttributes;
     }

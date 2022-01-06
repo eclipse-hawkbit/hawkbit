@@ -6,11 +6,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-/*
- * Licenses The source code is released under Apache 2.0. The application uses the Vaadin Charts 2
- * add-on, which is released under the Commercial Vaadin Addon License:
- * https://vaadin.com/license/cval-3
- */
 package org.eclipse.hawkbit.ui.menu;
 
 import java.util.ArrayList;
@@ -267,8 +262,8 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     /**
-     * Creates the wrapper which contains the menu item and the adjacent label
-     * for displaying the occurred events
+     * Creates the wrapper which contains the menu item and the adjacent label for
+     * displaying the occurred events
      * 
      * @param menuItemButton
      *            the menu item
@@ -294,8 +289,8 @@ public final class DashboardMenu extends CustomComponent {
      * Returns all views which are currently accessible by the current logged in
      * user.
      *
-     * @return a list of all views which are currently visible and accessible
-     *         for the current logged in user
+     * @return a list of all views which are currently visible and accessible for
+     *         the current logged in user
      */
     private List<DashboardMenuItem> getAccessibleViews() {
         return this.dashboardVaadinViews.stream()
@@ -331,8 +326,8 @@ public final class DashboardMenu extends CustomComponent {
     }
 
     /**
-     * notifies the dashboard that the view has been changed and the button
-     * needs to be re-styled.
+     * notifies the dashboard that the view has been changed and the button needs to
+     * be re-styled.
      *
      * @param event
      *            the post view change event
@@ -346,8 +341,8 @@ public final class DashboardMenu extends CustomComponent {
      *
      * @param viewName
      *            the name of the view to retrieve
-     * @return the dashboard view for a given viewname or {@code null} if view
-     *         with given viewname does not exists
+     * @return the dashboard view for a given viewname or {@code null} if view with
+     *         given viewname does not exists
      */
     public DashboardMenuItem getByViewName(final String viewName) {
 
@@ -393,8 +388,7 @@ public final class DashboardMenu extends CustomComponent {
         private final DashboardMenuItem view;
 
         /**
-         * creates a new button in case of pressed switches to the given
-         * {@code view}.
+         * creates a new button in case of pressed switches to the given {@code view}.
          *
          * @param view
          *            the view to switch to in case the button is pressed

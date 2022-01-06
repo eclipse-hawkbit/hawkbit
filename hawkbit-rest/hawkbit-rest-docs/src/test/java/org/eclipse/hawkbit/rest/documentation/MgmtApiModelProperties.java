@@ -32,6 +32,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_MANDATORY_SMT = "Link to mandatory software modules types in this distribution set type.";
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
+    public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
@@ -42,6 +43,7 @@ public final class MgmtApiModelProperties {
 
     // software module
     public static final String SM_TYPE = "The software module type " + ApiModelPropertiesGeneric.ENDING;
+    public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts should be encrypted upon upload.";
     public static final String ARTIFACT_HASHES = "Hashes of the artifact.";
     public static final String ARTIFACT_SIZE = "Size of the artifact.";
     public static final String ARTIFACT_PROVIDED_FILE = "Binary of file.";
@@ -67,6 +69,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_ALREADY_ASSIGNED_TARGETS = "Targets that had this distribution set already assigned (in \"offline\" case this includes targets that have arbitrary updates running)";
     public static final String DS_TOTAL_ASSIGNED_TARGETS = "Overall assigned as part of this request.";
     public static final String DS_ID = "Id of the distribution set.";
+    public static final String DS_INVALIDATION_ACTION_CANCELATION_TYPE = "Type of cancelation for actions referring to the given distribution set.";
+    public static final String DS_INVALIDATION_CANCEL_ROLLOUTS = "Defines if rollouts referring to this distribution set should be canceled.";
 
     // Target
     public static final String INSTALLED_AT = "Installation time of current installed DistributionSet.";
@@ -77,6 +81,11 @@ public final class MgmtApiModelProperties {
     public static final String POLL_NEXT_EXPECTED_REQUEST_AT = "Next expected time when the target polls the server.";
     public static final String POLL_STATUS = "Poll status of the target. In many scenarios that target will poll the update server on a regular basis to look for potential updates. If that poll does not happen it might imply that the target is offline.";
     public static final String POLL_OVERDUE = "Defines if the target poll time is overdue based on the next expected poll time plus the configured overdue poll time threshold.";
+
+    // Target type
+    public static final String TARGETTYPE_ID = "ID of the target type";
+    public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
+    public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
 
     // rollout
     public static final String ROLLOUT_FILTER_QUERY = "target filter query language expression";
@@ -117,6 +126,8 @@ public final class MgmtApiModelProperties {
     public static final String TARGET_ATTRIBUTES = "Target attributes.";
 
     public static final String TARGET_LIST = "List of provisioning targets.";
+
+    public static final String TARGET_TYPE_LIST = "List of target types";
 
     public static final String SM_LIST = "List of software modules.";
 
@@ -177,6 +188,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_TYPE = "The type of the distribution set.";
 
     public static final String DS_COMPLETE = "True of the distribution set software module setup is complete as defined by the distribution set type.";
+
+    public static final String DS_VALID = "True by default and false after the distribution set is invalidated by the user.";
 
     public static final String DS_TYPE_MANDATORY_MODULES = "Mandatory module type IDs.";
 

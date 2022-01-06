@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -24,11 +25,11 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventLayoutViewAware;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.EventView;
-import org.eclipse.hawkbit.ui.common.event.EventViewAware;
 import org.eclipse.hawkbit.ui.common.event.TargetFilterTabChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.layout.AbstractGridComponentLayout;
 import org.eclipse.hawkbit.ui.common.layout.MasterEntityAwareComponent;
@@ -40,11 +41,11 @@ import org.eclipse.hawkbit.ui.common.layout.listener.GenericEventListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.PinningChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectGridEntityListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.SelectionChangedListener;
+import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedCountAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedPinAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelectionAwareSupport;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedTagTokenAwareSupport;
-import org.eclipse.hawkbit.ui.management.CountMessageLabel;
 import org.eclipse.hawkbit.ui.management.bulkupload.BulkUploadWindowBuilder;
 import org.eclipse.hawkbit.ui.management.bulkupload.TargetBulkUploadUiState;
 import org.eclipse.hawkbit.ui.management.dstable.DistributionGridLayoutUiState;
@@ -60,7 +61,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
     private final TargetGrid targetGrid;
     private final TargetDetailsHeader targetDetailsHeader;
     private final TargetDetails targetDetails;
-    private final transient CountMessageLabel countMessageLabel;
+    private final transient TargetCountMessageLabel countMessageLabel;
 
     private final transient GenericEventListener<TargetFilterTabChangedEventPayload> filterTabChangedListener;
     private final transient FilterChangedListener<ProxyTarget> targetFilterListener;
@@ -78,6 +79,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            {@link CommonUiDependencies}
      * @param targetManagement
      *            TargetManagement
+     * @param targetTypeManagement
+     *            TargetTypeManagement
      * @param deploymentManagement
      *            DeploymentManagement
      * @param uiProperties
@@ -90,6 +93,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            Executor
      * @param configManagement
      *            TenantConfigurationManagement
+     * @param targetManagementStateDataSupplier
+     *            target grid data supplier
      * @param systemSecurityContext
      *            SystemSecurityContext
      * @param targetTagFilterLayoutUiState
@@ -102,63 +107,62 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            DistributionGridLayoutUiState
      */
     public TargetGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
-            final Executor uiExecutor, final TenantConfigurationManagement configManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final TargetGridLayoutUiState targetGridLayoutUiState,
-            final TargetBulkUploadUiState targetBulkUploadUiState,
-            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
-        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
+                            final TargetTypeManagement targetTypeManagement,
+                            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
+                            final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
+                            final Executor uiExecutor, final TenantConfigurationManagement configManagement,
+                            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+                            final SystemSecurityContext systemSecurityContext,
+                            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+                            final TargetGridLayoutUiState targetGridLayoutUiState,
+                            final TargetBulkUploadUiState targetBulkUploadUiState,
+                            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
+        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement, targetTypeManagement,
                 EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
-        final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies, uiProperties,
-                uiExecutor, targetManagement, deploymentManagement, targetTagManagement, distributionSetManagement,
-                targetBulkUploadUiState);
+        final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,
+                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTypeManagement, targetTagManagement,
+                distributionSetManagement, targetBulkUploadUiState);
 
         this.targetGridHeader = new TargetGridHeader(uiDependencies, targetWindowBuilder, bulkUploadWindowBuilder,
                 targetTagFilterLayoutUiState, targetGridLayoutUiState, targetBulkUploadUiState);
         this.targetGridHeader.buildHeader();
-        this.targetGridHeader.addDsDroArea();
+        this.targetGridHeader.addDsDropArea();
         this.targetGrid = new TargetGrid(uiDependencies, targetManagement, deploymentManagement, configManagement,
-                systemSecurityContext, uiProperties, targetGridLayoutUiState, distributionGridLayoutUiState,
-                targetTagFilterLayoutUiState);
+                targetManagementStateDataSupplier, systemSecurityContext, uiProperties, targetGridLayoutUiState,
+                distributionGridLayoutUiState, targetTagFilterLayoutUiState);
 
-        this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder, targetMetaDataWindowBuilder);
-        this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement, deploymentManagement,
+        this.targetDetailsHeader = new TargetDetailsHeader(uiDependencies, targetWindowBuilder,
                 targetMetaDataWindowBuilder);
+        this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
+                deploymentManagement, targetMetaDataWindowBuilder);
 
-        this.countMessageLabel = new CountMessageLabel(targetManagement, uiDependencies.getI18n());
+        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(), targetManagement,
+                targetGrid.getFilterSupport());
 
-        initGridDataUpdatedListener();
-
+        final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_LIST,
+                EventView.DEPLOYMENT);
         this.filterTabChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);
         this.targetFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(), ProxyTarget.class,
-                new EventViewAware(EventView.DEPLOYMENT), targetGrid.getFilterSupport());
-        this.pinningChangedListener = new PinningChangedListener<>(uiDependencies.getEventBus(), ProxyDistributionSet.class,
-                targetGrid.getPinSupport());
-        this.targetChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(),
-                new EventLayoutViewAware(EventLayout.TARGET_LIST, EventView.DEPLOYMENT),
+                layoutViewAware, targetGrid.getFilterSupport(), countMessageLabel::updateFilteredCount);
+        this.pinningChangedListener = new PinningChangedListener<>(uiDependencies.getEventBus(),
+                ProxyDistributionSet.class, targetGrid.getPinSupport(), countMessageLabel::updatePinningDetails);
+        this.targetChangedListener = new SelectionChangedListener<>(uiDependencies.getEventBus(), layoutViewAware,
                 getMasterTargetAwareComponents());
-        this.selectTargetListener = new SelectGridEntityListener<>(uiDependencies.getEventBus(),
-                new EventLayoutViewAware(EventLayout.TARGET_LIST, EventView.DEPLOYMENT),
+        this.selectTargetListener = new SelectGridEntityListener<>(uiDependencies.getEventBus(), layoutViewAware,
                 targetGrid.getSelectionSupport());
-        this.targetModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTarget.class)
-                .entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
+        this.targetModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
+                ProxyTarget.class).viewAware(layoutViewAware)
+                        .entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
         this.tagModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
-                .entityModifiedAwareSupports(getTagModifiedAwareSupports()).parentEntityType(ProxyTarget.class).build();
+                .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
+                .entityModifiedAwareSupports(getTagModifiedAwareSupports()).build();
         this.bulkUploadListener = new BulkUploadChangedListener(uiDependencies.getEventBus(),
                 targetGridHeader::onBulkUploadChanged);
 
         buildLayout(targetGridHeader, targetGrid, targetDetailsHeader, targetDetails);
-    }
-
-    private void initGridDataUpdatedListener() {
-        targetGrid.addDataChangedListener(event -> countMessageLabel.displayTargetCountStatus(targetGrid.getDataSize(),
-                targetGrid.getFilter().orElse(null)));
     }
 
     private List<MasterEntityAwareComponent<ProxyTarget>> getMasterTargetAwareComponents() {
@@ -170,7 +174,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
                 EntityModifiedSelectionAwareSupport.of(targetGrid.getSelectionSupport(),
                         targetGrid::mapIdToProxyEntity),
                 EntityModifiedPinAwareSupport.of(targetGrid.getPinSupport(), true, true),
-                EntityModifiedGridRefreshAwareSupport.of(targetGrid::refreshAll));
+                EntityModifiedGridRefreshAwareSupport.of(targetGrid::refreshAll),
+                EntityModifiedCountAwareSupport.of(countMessageLabel));
     }
 
     private List<EntityModifiedAwareSupport> getTagModifiedAwareSupports() {
@@ -199,14 +204,22 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      */
     public void onTargetFilterTabChanged(final TargetFilterTabChangedEventPayload eventPayload) {
         final boolean isCustomFilterTabSelected = TargetFilterTabChangedEventPayload.CUSTOM == eventPayload;
+        final boolean isTargetTypeFilterTabSelected = TargetFilterTabChangedEventPayload.TARGET_TYPE == eventPayload;
+        final boolean isSimpleTypeFilterTabSelected = TargetFilterTabChangedEventPayload.SIMPLE == eventPayload;
 
+        targetGridHeader.onFilterReset();
         if (isCustomFilterTabSelected) {
-            targetGridHeader.onSimpleFilterReset();
-            targetGrid.onCustomTabSelected();
-        } else {
-            targetGridHeader.enableSearchIcon();
-            targetGrid.onSimpleTabSelected();
+            targetGridHeader.disabledSearchIcon();
         }
+        if(isTargetTypeFilterTabSelected){
+            targetGridHeader.enableSearchIcon();
+        }
+        if (isSimpleTypeFilterTabSelected){
+            targetGridHeader.enableSearchIcon();
+        }
+
+        targetGrid.resetAllFilters();
+        countMessageLabel.updateFilteredCount();
     }
 
     /**
@@ -225,18 +238,36 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         showDetailsLayout();
     }
 
-    /**
-     * Restore the target grid state
-     */
+    @Override
     public void restoreState() {
         targetGridHeader.restoreState();
         targetGrid.restoreState();
+        countMessageLabel.updateTotalAndFilteredCount();
+        countMessageLabel.updatePinningDetails();
     }
 
-    /**
-     * Unsubscribe all the listeners
-     */
-    public void unsubscribeListener() {
+    @Override
+    public void onViewEnter() {
+        targetGridHeader.checkBulkUpload();
+        targetGrid.getSelectionSupport().reselectCurrentEntity();
+        countMessageLabel.updateTotalAndFilteredCount();
+        countMessageLabel.updatePinningDetails();
+    }
+
+    @Override
+    public void subscribeListeners() {
+        filterTabChangedListener.subscribe();
+        targetFilterListener.subscribe();
+        pinningChangedListener.subscribe();
+        targetChangedListener.subscribe();
+        selectTargetListener.subscribe();
+        targetModifiedListener.subscribe();
+        tagModifiedListener.subscribe();
+        bulkUploadListener.subscribe();
+    }
+
+    @Override
+    public void unsubscribeListeners() {
         filterTabChangedListener.unsubscribe();
         targetFilterListener.unsubscribe();
         pinningChangedListener.unsubscribe();
@@ -252,7 +283,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *
      * @return Count message label
      */
-    public CountMessageLabel getCountMessageLabel() {
+    public TargetCountMessageLabel getCountMessageLabel() {
         return countMessageLabel;
     }
 }

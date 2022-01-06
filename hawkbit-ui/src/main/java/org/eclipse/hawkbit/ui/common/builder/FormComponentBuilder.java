@@ -8,6 +8,16 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
+import com.vaadin.data.Binder;
+import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.Binder.BindingBuilder;
+import com.vaadin.data.Validator;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.server.Setter;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Type;
@@ -36,17 +46,6 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
-
-import com.vaadin.data.Binder;
-import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.Binder.BindingBuilder;
-import com.vaadin.data.Validator;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 
 /**
  * Builder class for from components
@@ -326,15 +325,18 @@ public final class FormComponentBuilder {
      */
     public static <T extends TypeInfoAware> BoundComponent<ComboBox<ProxyTypeInfo>> createTypeCombo(
             final Binder<T> binder, final AbstractProxyDataProvider<ProxyTypeInfo, ?, String> dataProvider,
-            final VaadinMessageSource i18n, final String componentId) {
+            final VaadinMessageSource i18n, final String componentId, final boolean isRequired) {
         final ComboBox<ProxyTypeInfo> typeCombo = SPUIComponentProvider.getComboBox(componentId,
-                i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), false,
-                ProxyTypeInfo::getName, dataProvider);
+                i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), i18n.getMessage(CAPTION_TYPE), !isRequired,
+                ProxyTypeInfo::getName, dataProvider.withConvertedFilter(filterString -> filterString.trim() + "%"));
 
-        final Binding<T, ProxyTypeInfo> binding = binder.forField(typeCombo)
-                .asRequired(i18n.getMessage("message.error.typeRequired"))
-                .bind(TypeInfoAware::getTypeInfo, TypeInfoAware::setTypeInfo);
+        final BindingBuilder<T, ProxyTypeInfo> bindingBuilder = binder.forField(typeCombo);
 
+        if (isRequired){
+            bindingBuilder.asRequired(i18n.getMessage("message.error.typeRequired"));
+        }
+
+        final Binding<T, ProxyTypeInfo> binding = bindingBuilder.bind(TypeInfoAware::getTypeInfo, TypeInfoAware::setTypeInfo);
         return new BoundComponent<>(typeCombo, binding);
     }
 
@@ -375,9 +377,9 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
-        return getCheckBox(null, id, binder, getter, setter);
+        return createCheckBox(null, id, binder, getter, setter);
     }
 
     /**
@@ -397,7 +399,7 @@ public final class FormComponentBuilder {
      *            setter for the binder
      * @return the bound box
      */
-    public static <T> CheckBox getCheckBox(final String caption, final String id, final Binder<T> binder,
+    public static <T> CheckBox createCheckBox(final String caption, final String id, final Binder<T> binder,
             final ValueProvider<T, Boolean> getter, final Setter<T, Boolean> setter) {
         final CheckBox checkBox;
         if (StringUtils.isEmpty(caption)) {

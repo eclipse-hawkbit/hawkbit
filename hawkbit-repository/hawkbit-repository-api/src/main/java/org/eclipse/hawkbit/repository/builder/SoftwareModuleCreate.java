@@ -71,6 +71,13 @@ public interface SoftwareModuleCreate {
     }
 
     /**
+     * @param encrypted
+     *            if should be encrypted
+     * @return updated builder instance
+     */
+    SoftwareModuleCreate encrypted(boolean encrypted);
+
+    /**
      * @return peek on current state of {@link SoftwareModule} in the builder
      */
     SoftwareModule build();

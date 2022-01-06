@@ -8,6 +8,19 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+
+import java.net.URI;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -55,17 +68,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.util.CollectionUtils;
 
-import java.net.URI;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
-
 /**
  * {@link AmqpMessageDispatcherService} create all outgoing AMQP messages and
  * delegate the messages to a {@link AmqpMessageSenderService}.
@@ -104,8 +106,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @param targetManagement
      *            to access target information
      * @param serviceMatcher
-     *            to check in cluster case if the message is from the same cluster
-     *            node
+     *            to check in cluster case if the message is from the same
+     *            cluster node
      * @param distributionSetManagement
      *            to retrieve modules
      */
@@ -128,8 +130,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after the Distribution set
-     * has been assign to a Target.
+     * Method to send a message to a RabbitMQ Exchange after the Distribution
+     * set has been assign to a Target.
      *
      * @param assignedEvent
      *            the object to be send.
@@ -139,14 +141,14 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(assignedEvent)) {
             return;
         }
-        LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
-        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
-            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
-                    ds);
-            targetManagement.getByControllerID(assignedEvent.getActions().keySet()).forEach(
-                    target -> sendUpdateMessageToTarget(assignedEvent.getActions().get(target.getControllerId()),
-                            target, softwareModules));
-        });
+
+        final List<Target> filteredTargetList = getTargetsWithoutPendingCancellations(
+                assignedEvent.getActions().keySet());
+
+        if (!filteredTargetList.isEmpty()) {
+            LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
+            sendUpdateMessageToTarget(assignedEvent, filteredTargetList);
+        }
     }
 
     /**
@@ -162,6 +164,27 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         }
         LOG.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
+    }
+
+    private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
+        return targetManagement.getByControllerID(controllerIds).stream().filter(target -> {
+            if (hasPendingCancellations(target.getControllerId())) {
+                LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                        target.getControllerId());
+                return false;
+            }
+            return true;
+        }).collect(Collectors.toList());
+    }
+
+    private void sendUpdateMessageToTarget(final TargetAssignDistributionSetEvent assignedEvent,
+            final List<Target> targets) {
+        distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
+                    ds);
+            targets.forEach(target -> sendUpdateMessageToTarget(
+                    assignedEvent.getActions().get(target.getControllerId()), target, softwareModules));
+        });
     }
 
     private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
@@ -235,9 +258,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     /**
      * Method to get the type of event depending on whether the action is a
-     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or not
-     * based on defined maintenance schedule. In case of no maintenance schedule or
-     * if there is a valid window available, the topic
+     * DOWNLOAD_ONLY action or if it has a valid maintenance window available or
+     * not based on defined maintenance schedule. In case of no maintenance
+     * schedule or if there is a valid window available, the topic
      * {@link EventTopic#DOWNLOAD_AND_INSTALL} is returned else
      * {@link EventTopic#DOWNLOAD} is returned.
      *
@@ -253,8 +276,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Determines the {@link EventTopic} for the given {@link Action}, depending on
-     * its action type.
+     * Determines the {@link EventTopic} for the given {@link Action}, depending
+     * on its action type.
      *
      * @param action
      *            to obtain the corresponding {@link EventTopic} for
@@ -269,8 +292,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after the assignment of the
-     * Distribution set to a Target has been canceled.
+     * Method to send a message to a RabbitMQ Exchange after the assignment of
+     * the Distribution set to a Target has been canceled.
      *
      * @param cancelEvent
      *            that is to be converted to a DMF message
@@ -281,8 +304,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Target target = cancelEvent.getEntity();
-        if (target != null) {
+        final Optional<Target> eventEntity = cancelEvent.getEntity();
+        if (eventEntity.isPresent()) {
+            final Target target = eventEntity.get();
             sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
                     target.getAddress());
         } else {
@@ -293,11 +317,12 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     /**
-     * Method to send a message to a RabbitMQ Exchange after a Target was deleted.
+     * Method to send a message to a RabbitMQ Exchange after a Target was
+     * deleted.
      *
      * @param deleteEvent
-     *            the TargetDeletedEvent which holds the necessary data for sending
-     *            a target delete message.
+     *            the TargetDeletedEvent which holds the necessary data for
+     *            sending a target delete message.
      */
     @EventListener(classes = TargetDeletedEvent.class)
     protected void targetDelete(final TargetDeletedEvent deleteEvent) {
@@ -323,7 +348,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = createDownloadAndUpdateRequest(target, action.getId(), modules);
+        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = createDownloadAndUpdateRequest(target,
+                action.getId(), modules);
         final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), getEventTypeForTarget(action)));
         amqpSenderService.sendMessage(message, targetAddress);
@@ -345,7 +371,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Message message = new Message(null, createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
+        final Message message = new Message("".getBytes(),
+                createConnectorMessagePropertiesDeleteThing(tenant, controllerId));
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
     }
 
@@ -359,6 +386,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private boolean isFromSelf(final RemoteApplicationEvent event) {
         return serviceMatcher == null || serviceMatcher.isFromSelf(event);
+    }
+
+    private boolean hasPendingCancellations(final String controllerId) {
+        return deploymentManagement.hasPendingCancellations(controllerId);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,
@@ -383,7 +414,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Message message = new Message(null,
+        final Message message = new Message("".getBytes(),
                 createConnectorMessagePropertiesEvent(tenant, controllerId, EventTopic.REQUEST_ATTRIBUTES_UPDATE));
 
         amqpSenderService.sendMessage(message, URI.create(targetAddress));
@@ -419,6 +450,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         amqpSoftwareModule.setModuleId(entry.getKey().getId());
         amqpSoftwareModule.setModuleType(entry.getKey().getType().getKey());
         amqpSoftwareModule.setModuleVersion(entry.getKey().getVersion());
+        amqpSoftwareModule.setEncrypted(entry.getKey().isEncrypted() ? Boolean.TRUE : null);
         amqpSoftwareModule.setArtifacts(convertArtifacts(target, entry.getKey().getArtifacts()));
 
         if (!CollectionUtils.isEmpty(entry.getValue())) {

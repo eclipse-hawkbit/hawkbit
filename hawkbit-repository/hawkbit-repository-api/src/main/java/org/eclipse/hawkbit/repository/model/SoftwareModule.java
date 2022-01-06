@@ -67,4 +67,9 @@ public interface SoftwareModule extends NamedVersionedEntity {
      */
     List<DistributionSet> getAssignedTo();
 
+    /**
+     * @return {@code true} if this software module is marked as encrypted
+     *         otherwise {@code false}
+     */
+    boolean isEncrypted();
 }

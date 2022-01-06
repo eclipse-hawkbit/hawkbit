@@ -26,6 +26,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
@@ -75,6 +77,9 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
 
     @Autowired
     protected TargetTagRepository targetTagRepository;
+
+    @Autowired
+    protected TargetTypeRepository targetTypeRepository;
 
     @Autowired
     protected DistributionSetTagRepository distributionSetTagRepository;
@@ -130,4 +135,10 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
         return distributionSetManagement.toggleTagAssignment(
                 sets.stream().map(DistributionSet::getId).collect(Collectors.toList()), tag.getName());
     }
+
+    protected TargetTypeAssignmentResult initiateTypeAssignment(final Collection<Target> targets, final TargetType type) {
+        return targetManagement.assignType(
+                targets.stream().map(Target::getControllerId).collect(Collectors.toList()), type.getId());
+    }
+
 }

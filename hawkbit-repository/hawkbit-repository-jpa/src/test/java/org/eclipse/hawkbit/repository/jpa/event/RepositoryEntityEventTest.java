@@ -20,10 +20,14 @@ import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
+import org.eclipse.hawkbit.repository.event.remote.TargetTypeDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.RemoteEntityEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.event.RepositoryEntityEventTest.RepositoryTestConfiguration;
@@ -31,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +67,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         final TargetCreatedEvent targetCreatedEvent = eventListener.waitForEvent(TargetCreatedEvent.class);
         assertThat(targetCreatedEvent).isNotNull();
-        assertThat(targetCreatedEvent.getEntity().getId()).isEqualTo(createdTarget.getId());
+        assertThat(getIdOfEntity(targetCreatedEvent)).isEqualTo(createdTarget.getId());
     }
 
     @Test
@@ -73,7 +78,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
 
         final TargetUpdatedEvent targetUpdatedEvent = eventListener.waitForEvent(TargetUpdatedEvent.class);
         assertThat(targetUpdatedEvent).isNotNull();
-        assertThat(targetUpdatedEvent.getEntity().getId()).isEqualTo(createdTarget.getId());
+        assertThat(getIdOfEntity(targetUpdatedEvent)).isEqualTo(createdTarget.getId());
     }
 
     @Test
@@ -86,6 +91,39 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final TargetDeletedEvent targetDeletedEvent = eventListener.waitForEvent(TargetDeletedEvent.class);
         assertThat(targetDeletedEvent).isNotNull();
         assertThat(targetDeletedEvent.getEntityId()).isEqualTo(createdTarget.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type created event is published when a target type has been created")
+    public void targetTypeCreatedEventIsPublished() throws InterruptedException {
+        final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+
+        final TargetTypeCreatedEvent targetTypeCreatedEvent = eventListener.waitForEvent(TargetTypeCreatedEvent.class);
+        assertThat(targetTypeCreatedEvent).isNotNull();
+        assertThat(getIdOfEntity(targetTypeCreatedEvent)).isEqualTo(createdTargetType.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type updated event is published when a target type has been updated")
+    public void targetTypeUpdatedEventIsPublished() throws InterruptedException {
+        final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement
+                .update(entityFactory.targetType().update(createdTargetType.getId()).name("updatedtargettype"));
+
+        final TargetTypeUpdatedEvent targetTypeUpdatedEvent = eventListener.waitForEvent(TargetTypeUpdatedEvent.class);
+        assertThat(targetTypeUpdatedEvent).isNotNull();
+        assertThat(getIdOfEntity(targetTypeUpdatedEvent)).isEqualTo(createdTargetType.getId());
+    }
+
+    @Test
+    @Description("Verifies that the target type deleted event is published when a target type has been deleted")
+    public void targetTypeDeletedEventIsPublished() throws InterruptedException {
+        final TargetType createdTargetType = testdataFactory.findOrCreateTargetType("targettype");
+        targetTypeManagement.delete(createdTargetType.getId());
+
+        final TargetTypeDeletedEvent targetTypeDeletedEvent = eventListener.waitForEvent(TargetTypeDeletedEvent.class);
+        assertThat(targetTypeDeletedEvent).isNotNull();
+        assertThat(targetTypeDeletedEvent.getEntityId()).isEqualTo(createdTargetType.getId());
     }
 
     @Test
@@ -119,7 +157,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final DistributionSetCreatedEvent dsCreatedEvent = eventListener
                 .waitForEvent(DistributionSetCreatedEvent.class);
         assertThat(dsCreatedEvent).isNotNull();
-        assertThat(dsCreatedEvent.getEntity().getId()).isEqualTo(createDistributionSet.getId());
+        assertThat(getIdOfEntity(dsCreatedEvent)).isEqualTo(createDistributionSet.getId());
     }
 
     @Test
@@ -143,7 +181,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final SoftwareModuleCreatedEvent softwareModuleCreatedEvent = eventListener
                 .waitForEvent(SoftwareModuleCreatedEvent.class);
         assertThat(softwareModuleCreatedEvent).isNotNull();
-        assertThat(softwareModuleCreatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
+        assertThat(getIdOfEntity(softwareModuleCreatedEvent)).isEqualTo(softwareModule.getId());
     }
 
     @Test
@@ -156,7 +194,7 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
         final SoftwareModuleUpdatedEvent softwareModuleUpdatedEvent = eventListener
                 .waitForEvent(SoftwareModuleUpdatedEvent.class);
         assertThat(softwareModuleUpdatedEvent).isNotNull();
-        assertThat(softwareModuleUpdatedEvent.getEntity().getId()).isEqualTo(softwareModule.getId());
+        assertThat(getIdOfEntity(softwareModuleUpdatedEvent)).isEqualTo(softwareModule.getId());
     }
 
     @Test
@@ -169,6 +207,11 @@ public class RepositoryEntityEventTest extends AbstractJpaIntegrationTest {
                 .waitForEvent(SoftwareModuleDeletedEvent.class);
         assertThat(softwareModuleDeletedEvent).isNotNull();
         assertThat(softwareModuleDeletedEvent.getEntityId()).isEqualTo(softwareModule.getId());
+    }
+
+    private static Long getIdOfEntity(final RemoteEntityEvent<?> event) {
+        event.getEntityId();
+        return event.getEntity().get().getId();
     }
 
     public static class RepositoryTestConfiguration {

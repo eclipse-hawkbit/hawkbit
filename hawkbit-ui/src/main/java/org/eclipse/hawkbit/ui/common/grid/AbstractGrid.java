@@ -19,7 +19,9 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataProviderListener;
+import com.vaadin.data.provider.Query;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.components.grid.GridSelectionModel;
 
@@ -70,6 +72,25 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      */
     protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
             final SpPermissionChecker permissionChecker) {
+        this(i18n, eventBus, permissionChecker, new DataCommunicator<>());
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param i18n
+     *            i18n
+     * @param eventBus
+     *            eventBus
+     * @param permissionChecker
+     *            permissionChecker
+     * @param dataCommunicator
+     *            dataCommunicator
+     */
+    protected AbstractGrid(final VaadinMessageSource i18n, final UIEventBus eventBus,
+            final SpPermissionChecker permissionChecker, final DataCommunicator<T> dataCommunicator) {
+        super(dataCommunicator);
+
         this.i18n = i18n;
         this.eventBus = eventBus;
         this.permissionChecker = permissionChecker;
@@ -136,7 +157,7 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      * Get total number of items.
      */
     public int getDataSize() {
-        return getDataCommunicator().getDataProviderSize();
+        return getDataProvider().size(new Query<>());
     }
 
     /**

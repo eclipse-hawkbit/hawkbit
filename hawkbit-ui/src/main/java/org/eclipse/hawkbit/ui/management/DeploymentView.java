@@ -8,14 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
@@ -25,12 +30,15 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
+import org.eclipse.hawkbit.ui.common.AbstractEventListenersAwareView;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.data.suppliers.TargetManagementStateDataSupplier;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.EventViewAware;
@@ -50,22 +58,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
-import com.vaadin.navigator.View;
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
-import com.vaadin.ui.VerticalLayout;
-
 /**
  * Target status and deployment management view
  */
 @UIScope
 @SpringView(name = DeploymentView.VIEW_NAME, ui = AbstractHawkbitUI.class)
-public class DeploymentView extends VerticalLayout implements View, BrowserWindowResizeListener {
+public class DeploymentView extends AbstractEventListenersAwareView implements BrowserWindowResizeListener {
     private static final long serialVersionUID = 1L;
 
     public static final String VIEW_NAME = "deployment";
@@ -90,26 +88,29 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             final UINotification uiNotification, final ManagementUIState managementUIState,
             final DeploymentManagement deploymentManagement, final DistributionSetManagement distributionSetManagement,
             final SoftwareModuleManagement smManagement,
-            final DistributionSetTypeManagement distributionSetTypeManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory, final UiProperties uiProperties,
-            final TargetTagManagement targetTagManagement,
+            final DistributionSetTypeManagement distributionSetTypeManagement,
+            final DistributionSetInvalidationManagement dsInvalidationManagement,
+            final TargetManagement targetManagement, final EntityFactory entityFactory, final UiProperties uiProperties,
+            final TargetTagManagement targetTagManagement, final TargetTypeManagement targetTypeManagement,
             final DistributionSetTagManagement distributionSetTagManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final SystemManagement systemManagement,
-            final TenantConfigurationManagement configManagement, final SystemSecurityContext systemSecurityContext,
-            @Qualifier("uiExecutor") final Executor uiExecutor) {
+            final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+            final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
-        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus, uiNotification,
-                permChecker);
+        final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
+                uiNotification, permChecker);
 
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
-                    targetFilterQueryManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState());
+                    targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, deploymentManagement, uiProperties,
-                    targetTagManagement, distributionSetManagement, uiExecutor, configManagement, systemSecurityContext,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement, deploymentManagement,
+                    uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
+                    targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
                     managementUIState.getDistributionGridLayoutUiState());
@@ -117,6 +118,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,
                     managementUIState.getActionHistoryGridLayoutUiState());
+
+            addEventAwareLayouts(Arrays.asList(targetTagFilterLayout, targetGridLayout, actionHistoryLayout));
         } else {
             this.targetTagFilterLayout = null;
             this.targetGridLayout = null;
@@ -128,11 +131,13 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
             this.distributionTagLayout = new DistributionTagLayout(uiDependencies, distributionSetTagManagement,
                     distributionSetManagement, managementUIState.getDistributionTagLayoutUiState());
             this.distributionGridLayout = new DistributionGridLayout(uiDependencies, targetManagement,
-                    distributionSetManagement, smManagement, distributionSetTypeManagement,
+                    distributionSetManagement, dsInvalidationManagement, smManagement, distributionSetTypeManagement,
                     distributionSetTagManagement, systemManagement, deploymentManagement, configManagement,
                     systemSecurityContext, uiProperties, managementUIState.getDistributionGridLayoutUiState(),
                     managementUIState.getDistributionTagLayoutUiState(),
                     managementUIState.getTargetGridLayoutUiState());
+
+            addEventAwareLayouts(Arrays.asList(distributionTagLayout, distributionGridLayout));
         } else {
             this.distributionTagLayout = null;
             this.distributionGridLayout = null;
@@ -162,16 +167,16 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
     }
 
-    @PostConstruct
-    void init() {
+    @Override
+    protected void init() {
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
-            buildLayout();
-            restoreState();
+            super.init();
             Page.getCurrent().addBrowserWindowResizeListener(this);
         }
     }
 
-    private void buildLayout() {
+    @Override
+    protected void buildLayout() {
         setMargin(false);
         setSpacing(false);
         setSizeFull();
@@ -245,7 +250,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         mainLayout.setExpandRatio(actionHistoryLayout, 0.6F);
     }
 
-    private void restoreState() {
+    @Override
+    protected void restoreState() {
         if (permChecker.hasTargetReadPermission()) {
             restoreTargetWidgetsState();
         }
@@ -253,6 +259,8 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         if (permChecker.hasReadRepositoryPermission()) {
             restoreDsWidgetsState();
         }
+
+        super.restoreState();
     }
 
     private void restoreTargetWidgetsState() {
@@ -263,17 +271,14 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         } else {
             showTargetTagLayout();
         }
-        targetTagFilterLayout.restoreState();
 
         if (managementUIState.getTargetGridLayoutUiState().isMaximized()) {
             maximizeTargetGridLayout();
         }
-        targetGridLayout.restoreState();
 
         if (managementUIState.getActionHistoryGridLayoutUiState().isMaximized()) {
             maximizeActionHistoryGridLayout();
         }
-        actionHistoryLayout.restoreState();
     }
 
     private void restoreDsWidgetsState() {
@@ -284,12 +289,10 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         } else {
             showDsTagLayout();
         }
-        distributionTagLayout.restoreState();
 
         if (managementUIState.getDistributionGridLayoutUiState().isMaximized()) {
             maximizeDsGridLayout();
         }
-        distributionGridLayout.restoreState();
     }
 
     private void showTargetTagLayout() {
@@ -456,22 +459,28 @@ public class DeploymentView extends VerticalLayout implements View, BrowserWindo
         }
     }
 
-    @PreDestroy
-    void destroy() {
+    @Override
+    public String getViewName() {
+        return DeploymentView.VIEW_NAME;
+    }
+
+    @Override
+    protected void subscribeListeners() {
+        if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
+            layoutVisibilityListener.subscribe();
+            layoutResizeListener.subscribe();
+        }
+
+        super.subscribeListeners();
+    }
+
+    @Override
+    protected void unsubscribeListeners() {
         if (permChecker.hasTargetReadPermission() || permChecker.hasReadRepositoryPermission()) {
             layoutVisibilityListener.unsubscribe();
             layoutResizeListener.unsubscribe();
         }
 
-        if (permChecker.hasTargetReadPermission()) {
-            targetTagFilterLayout.unsubscribeListener();
-            targetGridLayout.unsubscribeListener();
-            actionHistoryLayout.unsubscribeListener();
-        }
-
-        if (permChecker.hasReadRepositoryPermission()) {
-            distributionTagLayout.unsubscribeListener();
-            distributionGridLayout.unsubscribeListener();
-        }
+        super.unsubscribeListeners();
     }
 }
