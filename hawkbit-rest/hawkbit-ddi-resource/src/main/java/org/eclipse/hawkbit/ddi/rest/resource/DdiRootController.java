@@ -290,25 +290,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
-                    systemManagement,
-                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
-                    controllerManagement);
-
-            final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
-                    actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
-                            : actionHistoryMessageCount);
-
-            final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
-                    : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
-
-            final HandlingType downloadType = calculateDownloadType(action);
-            final HandlingType updateType = calculateUpdateType(action, downloadType);
-
-            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
-
-            final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
+            final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deployment: {}", controllerId, base);
 
@@ -510,9 +492,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     @Override
     public ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(@PathVariable("tenant") final String tenant,
-            @PathVariable("controllerId") @NotEmpty String controllerId,
-            @PathVariable("actionId") @NotEmpty Long actionId, Integer actionHistoryMessageCount) {
-        LOG.debug("getControllerInstalledAction({},{})", controllerId);
+            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
+        LOG.debug("getControllerInstalledAction({})", controllerId);
 
         final Target target = controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
@@ -523,41 +505,43 @@ public class DdiRootController implements DdiRootControllerRestApi {
             return ResponseEntity.notFound().build();
         }
 
-        if (!action.isCancelingOrCanceled()) {
+        if (!action.isActive() && !action.isCancelingOrCanceled()) {
+            final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
 
-            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
-                    systemManagement,
-                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
-                    controllerManagement);
-
-            final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
-                    actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
-                            : actionHistoryMessageCount);
-
-            final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
-                    : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
-
-            final HandlingType downloadType = calculateDownloadType(action);
-            final HandlingType updateType = calculateUpdateType(action, downloadType);
-
-            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
-
-            final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
-
-            LOG.debug("Found an active UpdateAction for target {}. returning deployment: {}", controllerId, base);
-
-            controllerManagement.registerRetrieved(action.getId(), RepositoryConstants.SERVER_MESSAGE_PREFIX
-                    + "Target retrieved update action and should start now the download.");
-
+            LOG.debug("Found an installed UpdateAction for target {}. returning deployment: {}", controllerId, base);
+            controllerManagement.addInformationalActionStatus(
+                    entityFactory.actionStatus().create(action.getId()).status(action.getStatus())
+                            .message(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target retrieved installed action"));
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
 
         return ResponseEntity.notFound().build();
     }
 
+    private DdiDeploymentBase generateDdiDeploymentBase(Target target, Action action,
+            Integer actionHistoryMessageCount) {
+        final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
+                systemManagement, new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
+                controllerManagement);
+
+        final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
+                actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
+                        : actionHistoryMessageCount);
+
+        final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
+                : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
+
+        final HandlingType downloadType = calculateDownloadType(action);
+        final HandlingType updateType = calculateUpdateType(action, downloadType);
+
+        final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
+
+        return new DdiDeploymentBase(Long.toString(action.getId()),
+                new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
+    }
+
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
-                                                                 final Long actionid, final EntityFactory entityFactory) {
+            final Long actionid, final EntityFactory entityFactory) {
 
         final List<String> messages = new ArrayList<>();
         Status status;

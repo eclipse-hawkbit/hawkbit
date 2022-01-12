@@ -62,8 +62,7 @@ public interface DdiRootControllerRestApi {
      *            of the request
      * @param controllerId
      *            of the target that matches to controller id
-     * @param request
-     *            the HTTP request injected by spring
+     * 
      * @return the response
      */
     @GetMapping(value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE,
@@ -83,10 +82,6 @@ public interface DdiRootControllerRestApi {
      *            of the parent software module
      * @param fileName
      *            of the related local artifact
-     * @param response
-     *            of the servlet
-     * @param request
-     *            from the client
      *
      * @return response of the servlet which in case of success is status code
      *         {@link HttpStatus#OK} or in case of partial download
@@ -109,10 +104,6 @@ public interface DdiRootControllerRestApi {
      *            of the parent software module
      * @param fileName
      *            of the related local artifact
-     * @param response
-     *            of the servlet
-     * @param request
-     *            the HTTP request injected by spring
      *
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
@@ -144,14 +135,16 @@ public interface DdiRootControllerRestApi {
      *            resource utilization by controllers, maximum number of
      *            messages that are retrieved from database is limited by
      *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
-     *            actionHistoryMessageCount less then zero, retrieves the
-     *            maximum allowed number of action status messages from history;
-     *            actionHistoryMessageCount equal to zero, does not retrieve any
-     *            message; and actionHistoryMessageCount greater then zero,
-     *            retrieves the specified number of messages, limited by maximum
-     *            allowed number.
-     * @param request
-     *            the HTTP request injected by spring
+     * 
+     *            actionHistoryMessageCount less than zero: retrieves the maximum
+     *            allowed number of action status messages from history;
+     * 
+     *            actionHistoryMessageCount equal to zero: does not retrieve any
+     *            message;
+     * 
+     *            actionHistoryMessageCount greater than zero: retrieves the
+     *            specified number of messages, limited by maximum allowed number.
+     * 
      * @return the response
      */
     @GetMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", produces = {
@@ -173,8 +166,6 @@ public interface DdiRootControllerRestApi {
      *            of the target that matches to controller id
      * @param actionId
      *            of the action we have feedback for
-     * @param request
-     *            the HTTP request injected by spring
      *
      * @return the response
      */
@@ -194,8 +185,6 @@ public interface DdiRootControllerRestApi {
      *            as body
      * @param controllerId
      *            to provide data for
-     * @param request
-     *            the HTTP request injected by spring
      *
      * @return status of the request
      */
@@ -213,8 +202,6 @@ public interface DdiRootControllerRestApi {
      *            ID of the calling target
      * @param actionId
      *            of the action
-     * @param request
-     *            the HTTP request injected by spring
      *
      * @return the {@link DdiCancel} response
      */
@@ -228,20 +215,17 @@ public interface DdiRootControllerRestApi {
      * RequestMethod.POST method receiving the {@link DdiActionFeedback} from
      * the target.
      *
-     * @param tenant
-     *            of the client
      * @param feedback
      *            the {@link DdiActionFeedback} from the target.
+     * @param tenant
+     *            of the client
      * @param controllerId
      *            the ID of the calling target
      * @param actionId
      *            of the action we have feedback for
-     * @param request
-     *            the HTTP request injected by spring
      *
      * @return the {@link DdiActionFeedback} response
      */
-
     @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
             + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
                     DdiRestConstants.MEDIA_TYPE_CBOR })
@@ -250,15 +234,34 @@ public interface DdiRootControllerRestApi {
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
-
     /**
-     * Resource for installed software module.
+     * Resource for installed software module to retrieve the last successfully
+     * finished action.
      *
      * @param tenant
      *            of the request
      * @param controllerId
      *            of the target
-     * @return the response
+     * @param actionId
+     *            of the {@link DdiDeploymentBase} that matches to installed action.
+     * @param actionHistoryMessageCount
+     *            specifies the number of messages to be returned from action
+     *            history. Regardless of the passed value, in order to restrict
+     *            resource utilization by controllers, maximum number of messages
+     *            that are retrieved from database is limited by
+     *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
+     * 
+     *            actionHistoryMessageCount less than zero: retrieves the maximum
+     *            allowed number of action status messages from history;
+     * 
+     *            actionHistoryMessageCount equal to zero: does not retrieve any
+     *            message;
+     * 
+     *            actionHistoryMessageCount greater than zero: retrieves the
+     *            specified number of messages, limited by maximum allowed number.
+     * 
+     * @return the {@link DdiDeploymentBase}. The response is of same format as for
+     *         the /deploymentBase resource.
      */
     @GetMapping(value = "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
