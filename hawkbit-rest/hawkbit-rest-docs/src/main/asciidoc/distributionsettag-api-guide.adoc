@@ -26,7 +26,7 @@ include::{snippets}/distributionsettag/get-distribution-set-tags/curl-request.ad
 
 ==== Request URL
 
-A `GET` request is used to access the distribution set tags
+A `GET` request is used to access the distribution set tags.
 
 include::{snippets}/distributionsettag/get-distribution-set-tags/http-request.adoc[]
 
@@ -76,7 +76,7 @@ include::{snippets}/distributionsettag/get-distribution-set-tag/curl-request.ado
 
 ==== Request URL
 
-A `GET` request is used to access the distribution set tag
+A `GET` request is used to access the distribution set tag.
 
 include::{snippets}/distributionsettag/get-distribution-set-tag/http-request.adoc[]
 
@@ -152,6 +152,7 @@ include::../errors/409.adoc[]
 include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
+
 
 == PUT /rest/v1/distributionsettags/{distributionsetTagId}
 
@@ -247,7 +248,7 @@ include::../errors/429.adoc[]
 |===
 
 
-== GET /rest/v1/distributionsettags/{distributionsetTagId}/distributionsets
+== GET /rest/v1/distributionsettags/{distributionsetTagId}/assigned
 
 === Implementation Notes
 
@@ -292,13 +293,14 @@ include::../errors/429.adoc[]
 |===
 
 
-== POST /rest/v1/distributionsettags/{distributionsetTagId}/distributionsets/toggleTagAssignment
+== POST /rest/v1/distributionsettags/{distributionsetTagId}/assigned/toggleTagAssignment
 
 === Implementation Notes
 
-Handles the POST request of toogle distribution assignment. The request body must always be a list of controller ids.
+Handles the POST request of toggle distribution assignment.
+The request body must always be a list of distribution set ids.
 
-=== Toogle distribution assignment
+=== Toggle distribution assignment
 
 ==== CURL
 
@@ -337,7 +339,8 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 
-== POST /rest/v1/distributionsettags/{distributionsetTagId}/distributionsets
+
+== POST /rest/v1/distributionsettags/{distributionsetTagId}/assigned
 
 === Implementation Notes
 
@@ -382,11 +385,12 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 
-== DELETE /rest/v1/distributionsettags/{distributionsetTagId}/distributionsets/{distributionsetId}
+
+== DELETE /rest/v1/distributionsettags/{distributionsetTagId}/assigned/{distributionsetId}
 
 === Implementation Notes
 
-Handles the DELETE request of unassign the given distribution. 
+Handles the DELETE request of unassign the given distribution.
 
 === Unassign a distribution
 
@@ -421,6 +425,7 @@ include::../errors/405.adoc[]
 include::../errors/406.adoc[]
 include::../errors/429.adoc[]
 |===
+
 
 == Additional content
 
