@@ -134,12 +134,13 @@ public final class DataConversionHelper {
             }
         }
 
-        if(installedAction != null && !installedAction.isActive()) {
-            result.add(WebMvcLinkBuilder
-                    .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                            .getControllerInstalledAction(tenantAware.getCurrentTenant(),
-                                    target.getControllerId(), installedAction.getId(), null))
-                    .withRel(DdiRestConstants.INSTALLED_BASE_ACTION));
+        if (installedAction != null && !installedAction.isActive()) {
+            result.add(
+                    WebMvcLinkBuilder
+                            .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
+                                    .getControllerInstalledAction(tenantAware.getCurrentTenant(),
+                                            target.getControllerId(), installedAction.getId(), null))
+                            .withRel(DdiRestConstants.INSTALLED_BASE_ACTION));
         }
 
         if (target.isRequestControllerAttributes()) {

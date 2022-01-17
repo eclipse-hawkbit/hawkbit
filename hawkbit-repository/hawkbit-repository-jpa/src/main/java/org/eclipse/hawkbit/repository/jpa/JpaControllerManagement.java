@@ -1075,6 +1075,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
                 new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
     }
+
     // for testing
     void setTargetRepository(final TargetRepository targetRepositorySpy) {
         this.targetRepository = targetRepositorySpy;
