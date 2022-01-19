@@ -509,9 +509,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
 
             LOG.debug("Found an installed UpdateAction for target {}. returning deployment: {}", controllerId, base);
-            controllerManagement.addInformationalActionStatus(
-                    entityFactory.actionStatus().create(action.getId()).status(action.getStatus())
-                            .message(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target retrieved installed action"));
             return new ResponseEntity<>(base, HttpStatus.OK);
         }
 
