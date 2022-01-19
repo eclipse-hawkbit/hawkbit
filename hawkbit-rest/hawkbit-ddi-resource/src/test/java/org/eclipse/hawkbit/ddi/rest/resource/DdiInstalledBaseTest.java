@@ -252,7 +252,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         // Action is still finished after calling installedBase
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
                 .findActionStatusByAction(PageRequest.of(0, 100, Sort.Direction.DESC, "id"), actionId);
-        assertThat(actionStatusMessages).hasSize(4);
+        assertThat(actionStatusMessages).hasSize(2);
         final ActionStatus actionStatusMessage = actionStatusMessages.iterator().next();
         assertThat(actionStatusMessage.getStatus()).isEqualTo(Action.Status.FINISHED);
     }
