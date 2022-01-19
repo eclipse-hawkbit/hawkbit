@@ -77,7 +77,7 @@ public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumenta
                 .andDo(this.document.document(getResponseFieldTargetTag(true,
                         fieldWithPath("size").type(JsonFieldType.NUMBER).description(ApiModelPropertiesGeneric.SIZE),
                         fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
-                        fieldWithPath("content").description(MgmtApiModelProperties.TARGET_LIST))));
+                        fieldWithPath("content").description(MgmtApiModelProperties.TARGET_TAG_LIST))));
     }
 
     @Test
@@ -169,7 +169,7 @@ public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumenta
                                 fieldWithPath("size").type(JsonFieldType.NUMBER)
                                         .description(ApiModelPropertiesGeneric.SIZE),
                                 fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
-                                fieldWithPath("content").description(MgmtApiModelProperties.TARGET_LIST))));
+                                fieldWithPath("content").description(MgmtApiModelProperties.TARGET_TAG_LIST))));
     }
 
     @Test

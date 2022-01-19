@@ -320,7 +320,7 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</header>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</header>
                   <validHeaders>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
@@ -329,6 +329,7 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_19.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_20.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_21.txt</validHeader>
+                     <validHeader>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_22.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_18.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_MICROSOFT_20.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_DEVOLO_19.txt</validHeader>
