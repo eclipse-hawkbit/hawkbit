@@ -503,9 +503,9 @@ public interface ControllerManagement {
     /**
      * Finds an {@link Action} based on the target that it's assigned to
      *
-     * @param targetId
+     * @param controllerId
      *            of the target the action is assigned to
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Optional<Action> getInstalledActionByTarget(final long targetId);
+    Optional<Action> getInstalledActionByTarget(@NotEmpty String controllerId);
 }

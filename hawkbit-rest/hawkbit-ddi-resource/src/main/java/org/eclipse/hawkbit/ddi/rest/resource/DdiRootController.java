@@ -130,8 +130,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -151,7 +150,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
         final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
-        final Action installedAction = controllerManagement.getInstalledActionByTarget(target.getId()).orElse(null);
+        final Action installedAction = controllerManagement.getInstalledActionByTarget(controllerId).orElse(null);
 
         checkAndCancelExpiredAction(activeAction);
 
@@ -170,8 +169,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         final ResponseEntity<InputStream> result;
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
@@ -241,8 +239,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -277,14 +274,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         checkAndCancelExpiredAction(action);
 
@@ -333,14 +325,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
@@ -445,14 +432,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", controllerId);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         if (action.isCancelingOrCanceled()) {
             final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
@@ -476,14 +458,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         controllerManagement
                 .addCancelActionStatus(generateActionCancelStatus(feedback, target, actionId, entityFactory));
@@ -496,14 +473,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerInstalledAction({})", controllerId);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         if (!action.isActive() && !action.isCancelingOrCanceled()) {
             final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
@@ -592,9 +564,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return status;
     }
 
+    private Target findTargetWithExceptionIfNotFound(final String controllerId) {
+        return controllerManagement.getByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
     private Action findActionWithExceptionIfNotFound(final Long actionId) {
         return controllerManagement.findActionWithDetails(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+    }
+
+    private void verifyActionAssignedToTarget(final Target target, final Action action) {
+        if (!action.getTarget().getId().equals(target.getId())) {
+            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
+            throw new EntityNotFoundException(Action.class, action.getId());
+        }
     }
 
     /**

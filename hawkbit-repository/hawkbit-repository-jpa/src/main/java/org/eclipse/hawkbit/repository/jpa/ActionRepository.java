@@ -199,8 +199,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return action if there is one with assigned target and assigned
      *         {@link DistributionSet}.
      */
-    @Query("Select a from JpaAction a join a.distributionSet ds where a.target.id = :target and ds.id = :ds order by a.id desc")
-    List<Action> findActionByTargetAndDistributionSet(@Param("target") long targetId, @Param("ds") Long dsId);
+    Optional<Action> findFirstByTargetIdAndDistributionSetId(@Param("target") long targetId, @Param("ds") Long dsId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

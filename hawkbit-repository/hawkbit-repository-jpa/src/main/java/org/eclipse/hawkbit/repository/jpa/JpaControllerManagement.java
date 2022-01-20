@@ -1057,15 +1057,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public Optional<Action> getInstalledActionByTarget(final long targetId) {
-        final JpaTarget jpaTarget = targetRepository.findOne(TargetSpecifications.hasId(targetId))
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, targetId));
+    public Optional<Action> getInstalledActionByTarget(final String controllerId) {
+        final JpaTarget jpaTarget = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
         if (null != installedDistributionSet) {
-            final List<Action> action = actionRepository.findActionByTargetAndDistributionSet(targetId,
+            return actionRepository.findFirstByTargetIdAndDistributionSetId(jpaTarget.getId(),
                     installedDistributionSet.getId());
-            return Optional.ofNullable(action.get(0));
         } else {
             return Optional.empty();
         }

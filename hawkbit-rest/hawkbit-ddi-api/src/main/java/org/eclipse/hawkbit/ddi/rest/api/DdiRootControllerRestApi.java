@@ -235,7 +235,7 @@ public interface DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
-     * Resource for installed software module to retrieve the last successfully
+     * Resource for installed distribution set to retrieve the last successfully
      * finished action.
      *
      * @param tenant
