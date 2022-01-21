@@ -477,14 +477,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Action action = findActionWithExceptionIfNotFound(actionId);
         verifyActionAssignedToTarget(target, action);
 
-        if (!action.isActive() && !action.isCancelingOrCanceled()) {
-            final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
-
-            LOG.debug("Found an installed UpdateAction for target {}. returning deployment: {}", controllerId, base);
-            return new ResponseEntity<>(base, HttpStatus.OK);
+        if (action.isActive() || action.isCancelingOrCanceled()) {
+            return ResponseEntity.notFound().build();
         }
 
-        return ResponseEntity.notFound().build();
+        final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
+
+        LOG.debug("Found an installed UpdateAction for target {}. returning deployment: {}", controllerId, base);
+        return new ResponseEntity<>(base, HttpStatus.OK);
+
     }
 
     private DdiDeploymentBase generateDdiDeploymentBase(Target target, Action action,

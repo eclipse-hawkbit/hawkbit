@@ -310,15 +310,15 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Resource to receive information of the latest installation.
-Can be used to re-retrieve artifacts of the last finished action, for example in case a re-installation is necessary.
-The response will be of the same format as the deploymentBase operation, providing the latest action that has been finished successfully.
+Resource to receive information of the previous installation.
+Can be used to re-retrieve artifacts of the already finished action, for example in case a re-installation is necessary.
+The response will be of the same format as the deploymentBase operation, providing the previous action that has been finished successfully.
 As the action is already finished, no further feedback is expected.
 
 Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
 Host, port and path are not guaranteed to be similar to the provided examples below but will be defined at runtime.
 
-=== Latest installed action
+=== Previously installed action
 
 ==== Curl
 

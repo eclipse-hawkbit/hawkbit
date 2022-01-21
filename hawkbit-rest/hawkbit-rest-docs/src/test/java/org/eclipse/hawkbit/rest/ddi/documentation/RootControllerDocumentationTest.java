@@ -456,7 +456,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("Resource to receive information of the latest installation. The response will be of same format as "
+    @Description("Resource to receive information of the previous installation. The response will be of same format as "
             + "the deploymentBase operation.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getControllerInstalledBaseAction() throws Exception {

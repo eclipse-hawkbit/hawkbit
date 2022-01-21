@@ -154,6 +154,10 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(jsonPath("$._links.installedBase.href",
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId2.toString()))))
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
+
+        // older installed action is still accessible, although not part of controller base
+        getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
+                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
     }
 
     @Test

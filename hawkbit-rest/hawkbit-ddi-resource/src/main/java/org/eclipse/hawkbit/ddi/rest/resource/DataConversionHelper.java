@@ -108,8 +108,8 @@ public final class DataConversionHelper {
 
     }
 
-    static DdiControllerBase fromTarget(final Target target, final Action installedAction, final Action activeAction,
-            final String defaultControllerPollTime, final TenantAware tenantAware) {
+    public static DdiControllerBase fromTarget(final Target target, final Action installedAction,
+            final Action activeAction, final String defaultControllerPollTime, final TenantAware tenantAware) {
         final DdiControllerBase result = new DdiControllerBase(
                 new DdiConfig(new DdiPolling(defaultControllerPollTime)));
 
