@@ -130,8 +130,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -149,14 +148,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(controllerId, IpUtil
                 .getClientIpFromRequest(requestResponseContextHolder.getHttpServletRequest(), securityProperties));
-        final Action action = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
+        final Action activeAction = controllerManagement.findActiveActionWithHighestWeight(controllerId).orElse(null);
 
-        checkAndCancelExpiredAction(action);
+        final Action installedAction = controllerManagement.getInstalledActionByTarget(controllerId).orElse(null);
+
+        checkAndCancelExpiredAction(activeAction);
 
         return new ResponseEntity<>(
-                DataConversionHelper.fromTarget(target, action,
-                        action == null ? controllerManagement.getPollingTime()
-                                : controllerManagement.getPollingTimeForAction(action.getId()),
+                DataConversionHelper.fromTarget(target, installedAction, activeAction,
+                        activeAction == null ? controllerManagement.getPollingTime()
+                                : controllerManagement.getPollingTimeForAction(activeAction.getId()),
                         tenantAware),
                 HttpStatus.OK);
     }
@@ -168,8 +169,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         final ResponseEntity<InputStream> result;
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
@@ -239,8 +239,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
 
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -275,38 +274,15 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         checkAndCancelExpiredAction(action);
 
         if (!action.isCancelingOrCanceled()) {
 
-            final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
-                    systemManagement,
-                    new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
-                    controllerManagement);
-
-            final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
-                    actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
-                            : actionHistoryMessageCount);
-
-            final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
-                    : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
-
-            final HandlingType downloadType = calculateDownloadType(action);
-            final HandlingType updateType = calculateUpdateType(action, downloadType);
-
-            final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
-
-            final DdiDeploymentBase base = new DdiDeploymentBase(Long.toString(action.getId()),
-                    new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
+            final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
 
             LOG.debug("Found an active UpdateAction for target {}. returning deployment: {}", controllerId, base);
 
@@ -349,14 +325,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
@@ -461,14 +432,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", controllerId);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         if (action.isCancelingOrCanceled()) {
             final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
@@ -492,18 +458,56 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
-        final Target target = controllerManagement.getByControllerId(controllerId)
-                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
-
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
         final Action action = findActionWithExceptionIfNotFound(actionId);
-        if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            return ResponseEntity.notFound().build();
-        }
+        verifyActionAssignedToTarget(target, action);
 
         controllerManagement
                 .addCancelActionStatus(generateActionCancelStatus(feedback, target, actionId, entityFactory));
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(@PathVariable("tenant") final String tenant,
+            @PathVariable("controllerId") final String controllerId, @PathVariable("actionId") final Long actionId,
+            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
+        LOG.debug("getControllerInstalledAction({})", controllerId);
+
+        final Target target = findTargetWithExceptionIfNotFound(controllerId);
+        final Action action = findActionWithExceptionIfNotFound(actionId);
+        verifyActionAssignedToTarget(target, action);
+
+        if (action.isActive() || action.isCancelingOrCanceled()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        final DdiDeploymentBase base = generateDdiDeploymentBase(target, action, actionHistoryMessageCount);
+
+        LOG.debug("Found an installed UpdateAction for target {}. returning deployment: {}", controllerId, base);
+        return new ResponseEntity<>(base, HttpStatus.OK);
+
+    }
+
+    private DdiDeploymentBase generateDdiDeploymentBase(Target target, Action action,
+            Integer actionHistoryMessageCount) {
+        final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
+                systemManagement, new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
+                controllerManagement);
+
+        final List<String> actionHistoryMsgs = controllerManagement.getActionHistoryMessages(action.getId(),
+                actionHistoryMessageCount == null ? Integer.parseInt(DdiRestConstants.NO_ACTION_HISTORY)
+                        : actionHistoryMessageCount);
+
+        final DdiActionHistory actionHistory = actionHistoryMsgs.isEmpty() ? null
+                : new DdiActionHistory(action.getStatus().name(), actionHistoryMsgs);
+
+        final HandlingType downloadType = calculateDownloadType(action);
+        final HandlingType updateType = calculateUpdateType(action, downloadType);
+
+        final DdiMaintenanceWindowStatus maintenanceWindow = calculateMaintenanceWindow(action);
+
+        return new DdiDeploymentBase(Long.toString(action.getId()),
+                new DdiDeployment(downloadType, updateType, chunks, maintenanceWindow), actionHistory);
     }
 
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
@@ -561,9 +565,21 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return status;
     }
 
+    private Target findTargetWithExceptionIfNotFound(final String controllerId) {
+        return controllerManagement.getByControllerId(controllerId)
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+    }
+
     private Action findActionWithExceptionIfNotFound(final Long actionId) {
         return controllerManagement.findActionWithDetails(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+    }
+
+    private void verifyActionAssignedToTarget(final Target target, final Action action) {
+        if (!action.getTarget().getId().equals(target.getId())) {
+            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
+            throw new EntityNotFoundException(Action.class, action.getId());
+        }
     }
 
     /**

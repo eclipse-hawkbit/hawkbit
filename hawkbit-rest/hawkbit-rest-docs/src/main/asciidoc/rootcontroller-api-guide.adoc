@@ -15,7 +15,13 @@ toc::[]
 
 === Implementation notes
 
-This base resource can be regularly polled by the controller on the provisioning target or device in order to retrieve actions that need to be executed. Those are provided as a list of links to give more detailed information about the action. Links are only available for initial configuration or open actions, respectively. The resource supports Etag based modification checks in order to save traffic. Note: deployments have to be confirmed in order to move on to the next action. Cancellations have to be confirmed or rejected.
+This base resource can be regularly polled by the controller on the provisioning target or device in order to retrieve actions that need to be executed.
+Those are provided as a list of links to give more detailed information about the action.
+Links are only available for initial configuration, open actions, or the latest installed action, respectively.
+The resource supports Etag based modification checks in order to save traffic.
+
+Note: deployments have to be confirmed in order to move on to the next action.
+Cancellations have to be confirmed or rejected.
 
 === Controller base poll resource
 
@@ -69,7 +75,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-The Hawkbit server might cancel an operation, e.g. an unfinished update has a sucessor. It is up to the provisiong target to decide to accept the cancelation or reject it.
+The Hawkbit server might cancel an operation, e.g. an unfinished update has a successor. It is up to the provisioning target to decide to accept the cancelation or reject it.
 
 === Cancel an action
 
@@ -107,7 +113,6 @@ include::../errors/405.adoc[]
 include::../errors/406.adoc[]
 include::../errors/429.adoc[]
 |===
-
 
 
 == POST /{tenant}/controller/v1/{controllerid}/cancelAction/{actionId}/feedback
@@ -151,11 +156,12 @@ include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
 
+
 == PUT /{tenant}/controller/v1/{controllerid}/configData
 
 === Implementation notes
 
-The usual behaviour is that when a new device resgisters at the server it is requested to provide the meta information that will allow the server to identify the device on a hardware level (e.g. hardware revision, mac address, serial number etc.).
+The usual behaviour is that when a new device registers at the server it is requested to provide the meta information that will allow the server to identify the device on a hardware level (e.g. hardware revision, mac address, serial number etc.).
 
 === Response to a requested metadata pull from the provisioning target device.
 
@@ -258,8 +264,6 @@ include::../errors/429.adoc[]
 |===
 
 
-
-
 == POST /{tenant}/controller/v1/{controllerid}/deploymentBase/{actionId}/feedback
 
 
@@ -301,6 +305,64 @@ include::../errors/409.adoc[]
 include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===
+
+== GET /{tenant}/controller/v1/{controllerid}/installedBase/{actionId}
+
+=== Implementation notes
+
+Resource to receive information of the previous installation.
+Can be used to re-retrieve artifacts of the already finished action, for example in case a re-installation is necessary.
+The response will be of the same format as the deploymentBase operation, providing the previous action that has been finished successfully.
+As the action is already finished, no further feedback is expected.
+
+Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
+Host, port and path are not guaranteed to be similar to the provided examples below but will be defined at runtime.
+
+=== Previously installed action
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/request-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/response-fields.adoc[]
+
+==== Response example
+
+The response body includes the detailed operation for the already finished action in the same format as for the deploymentBase operation.
+
+In this case the (optional) query for the last 10 messages, previously provided by the device, are included.
+
+include::{snippets}/rootcontroller/get-controller-installed-base-action/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
 ////
 == GET /{tenant}/controller/v1/{controllerid}/softwaremodules
 
@@ -350,7 +412,7 @@ include::../errors/429.adoc[]
 
 === Implementation notes
 
-Returns all artifacts whichs is assigned to the software module
+Returns all artifacts that are assigned to the software module
 
 === Returns artifacts of given software module
 
