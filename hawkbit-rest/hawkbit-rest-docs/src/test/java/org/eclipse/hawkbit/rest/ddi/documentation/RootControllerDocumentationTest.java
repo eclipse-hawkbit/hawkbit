@@ -50,7 +50,7 @@ import io.qameta.allure.Story;
  * Documentation generation for Direct Device Integration API.
  *
  */
-@Feature("Documentation Verfication - Direct Device Integration API")
+@Feature("Documentation Verification - Direct Device Integration API")
 @Story("Root Resource")
 public class RootControllerDocumentationTest extends AbstractApiRestDocumentation {
     private static final String CONTROLLER_ID = "CONTROLLER_ID";
@@ -67,17 +67,18 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
     @Test
     @Description("This base resource can be regularly polled by the controller on the provisioning target or device "
-            + "in order to retrieve actions that need to be executed. In this case including a config pull request and a deployment. The resource supports Etag based modification "
-            + "checks in order to save traffic.")
+            + "in order to retrieve actions that need to be executed. In this case including a config pull request and a deployment. "
+            + "The resource supports Etag based modification checks in order to save traffic.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getControllerBaseWithOpenDeplyoment() throws Exception {
-        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        final Action actionZero = prepareFinishedUpdate(CONTROLLER_ID, "zero", false);
+        final String controllerId = actionZero.getTarget().getControllerId();
 
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        assignDistributionSet(set.getId(), target.getControllerId());
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assignDistributionSet(set.getId(), controllerId);
 
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
-                tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
+                tenantAware.getCurrentTenant(), controllerId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -88,6 +89,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("config.polling.sleep").description(DdiApiModelProperties.TARGET_SLEEP),
                                 fieldWithPath("_links").description(DdiApiModelProperties.TARGET_OPEN_ACTIONS),
                                 fieldWithPath("_links.deploymentBase").description(DdiApiModelProperties.DEPLOYMENT),
+                                fieldWithPath("_links.installedBase").description(DdiApiModelProperties.INSTALLED),
                                 fieldWithPath("_links.configData")
                                         .description(DdiApiModelProperties.TARGET_CONFIG_DATA))));
     }
@@ -98,15 +100,17 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
             + "Note: as with deployments the cancel action has to be confirmed or rejected in order to move on to the next action.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getControllerBaseWithOpenDeploymentCancellation() throws Exception {
+        final Action actionZero = prepareFinishedUpdate(CONTROLLER_ID, "zero", false);
+        final String controllerId = actionZero.getTarget().getControllerId();
+
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final DistributionSet setTwo = testdataFactory.createDistributionSet("two");
 
-        final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
-        assignDistributionSet(set.getId(), target.getControllerId());
-        assignDistributionSet(setTwo.getId(), target.getControllerId());
+        assignDistributionSet(set.getId(), controllerId);
+        assignDistributionSet(setTwo.getId(), controllerId);
 
         mockMvc.perform(get(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
-                tenantAware.getCurrentTenant(), target.getControllerId()).accept(MediaTypes.HAL_JSON_VALUE))
+                tenantAware.getCurrentTenant(), controllerId).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -116,7 +120,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("config.polling").description(DdiApiModelProperties.TARGET_POLL_TIME),
                                 fieldWithPath("config.polling.sleep").description(DdiApiModelProperties.TARGET_SLEEP),
                                 fieldWithPath("_links").description(DdiApiModelProperties.TARGET_OPEN_ACTIONS),
-                                fieldWithPath("_links.cancelAction").description(DdiApiModelProperties.DEPLOYMENT),
+                                fieldWithPath("_links.cancelAction").description(DdiApiModelProperties.CANCEL),
+                                fieldWithPath("_links.installedBase").description(DdiApiModelProperties.INSTALLED),
                                 fieldWithPath("_links.configData")
                                         .description(DdiApiModelProperties.TARGET_CONFIG_DATA))));
     }
@@ -129,7 +134,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         set.getModules().forEach(module -> {
-            final byte random[] = RandomStringUtils.random(5).getBytes();
+            final byte[] random = RandomStringUtils.random(5).getBytes();
 
             artifactManagement.create(
                     new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0));
@@ -163,7 +168,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("It is up to the device to decided how much intermediate feedback is "
             + "provided. However, the action will be kept open until the controller on the device reports a "
-            + "finished (either successfull or error) or rejects the oprtioan, e.g. the canceled actions have been started already.")
+            + "finished (either successful or error) or rejects the operation, e.g. the canceled actions have been started already.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void postCancelActionFeedback() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -201,7 +206,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("The usual behaviour is that when a new device resgisters at the server it is "
+    @Description("The usual behaviour is that when a new device registers at the server it is "
             + "requested to provide the meta information that will allow the server to identify the device on a "
             + "hardware level (e.g. hardware revision, mac address, serial number etc.).")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
@@ -236,7 +241,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
         set.getModules().forEach(module -> {
-            final byte random[] = RandomStringUtils.random(5).getBytes();
+            final byte[] random = RandomStringUtils.random(5).getBytes();
 
             artifactManagement.create(
                     new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0));
@@ -368,7 +373,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Feedback channel. It is up to the device to decided how much intermediate feedback is "
             + "provided. However, the action will be kept open until the controller on the device reports a "
-            + "finished (either successfull or error).")
+            + "finished (either successful or error).")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void postBasedeploymentActionFeedback() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("one");
@@ -408,15 +413,15 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     }
 
     @Test
-    @Description("Returns all artifacts whichs is assigned to the software module."
-            + "Can be usesfull for the target to double check that its current state matches with the targeted state.")
+    @Description("Returns all artifacts that are assigned to the software module."
+            + "Can be useful for the target to double check that its current state matches with the targeted state.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getSoftwareModulesArtifacts() throws Exception {
         final DistributionSet set = testdataFactory.createDistributionSet("");
 
         final SoftwareModule module = (SoftwareModule) set.getModules().toArray()[0];
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
         artifactManagement
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binaryFile", false, 0));
 
@@ -448,6 +453,105 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(DdiApiModelProperties.ARTIFACT_HTTP_DOWNLOAD_LINK_BY_CONTROLLER),
                                 fieldWithPath("[]_links.md5sum-http")
                                         .description(DdiApiModelProperties.ARTIFACT_HTTP_HASHES_MD5SUM_LINK))));
+    }
+
+    @Test
+    @Description("Resource to receive information of the previous installation. The response will be of same format as "
+            + "the deploymentBase operation.")
+    @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
+    public void getControllerInstalledBaseAction() throws Exception {
+        final DistributionSet set = testdataFactory.createDistributionSet("zero");
+
+        set.getModules().forEach(module -> {
+            final byte[] random = RandomStringUtils.random(5).getBytes();
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "binary.tgz", false, 0));
+            artifactManagement.create(
+                    new ArtifactUpload(new ByteArrayInputStream(random), module.getId(), "file.signature", false, 0));
+        });
+
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(set.getModules().iterator().next().getId())
+                        .key("aMetadataKey").value("Metadata value as defined in software module").targetVisible(true));
+
+        final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
+        final Long actionId = getFirstAssignedActionId(assignDistributionSetWithMaintenanceWindow(set.getId(),
+                target.getControllerId(), getTestSchedule(-5), getTestDuration(10), getTestTimeZone()));
+
+        controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).message("Started download").status(Status.DOWNLOAD));
+        controllerManagement.addInformationalActionStatus(entityFactory.actionStatus().create(actionId)
+                .message("Download failed. ErrorCode #5876745. Retry").status(Status.WARNING));
+        controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).message("Download done").status(Status.DOWNLOADED));
+        controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).message("Write firmware").status(Status.RUNNING));
+        controllerManagement.addInformationalActionStatus(
+                entityFactory.actionStatus().create(actionId).message("Reboot").status(Status.RUNNING));
+        controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(actionId).message("Installed").status(Status.FINISHED));
+
+        mockMvc.perform(get(
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION
+                        + "/{actionId}?actionHistory=10",
+                tenantAware.getCurrentTenant(), target.getControllerId(), actionId).accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
+                                parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
+                                parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID)),
+                        requestParameters(
+                                parameterWithName("actionHistory").description(DdiApiModelProperties.ACTION_HISTORY)),
+                        responseFields(fieldWithPath("id").description(DdiApiModelProperties.ACTION_ID),
+                                fieldWithPath("deployment").description(DdiApiModelProperties.DEPLOYMENT),
+                                fieldWithPath("deployment.download")
+                                        .description(DdiApiModelProperties.HANDLING_DOWNLOAD).type("enum")
+                                        .attributes(key("value").value("['skip', 'attempt', 'forced']")),
+                                fieldWithPath("deployment.update").description(DdiApiModelProperties.HANDLING_UPDATE)
+                                        .type("enum").attributes(key("value").value("['skip', 'attempt', 'forced']")),
+                                fieldWithPath("deployment.maintenanceWindow")
+                                        .description(DdiApiModelProperties.MAINTENANCE_WINDOW).type("enum")
+                                        .attributes(key("value").value("['available', 'unavailable']")),
+                                fieldWithPath("deployment.chunks").description(DdiApiModelProperties.CHUNK),
+                                fieldWithPath("deployment.chunks[].metadata")
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA).optional(),
+                                fieldWithPath("deployment.chunks[].metadata[].key")
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_KEY).optional(),
+                                fieldWithPath("deployment.chunks[].metadata[].value")
+                                        .description(DdiApiModelProperties.CHUNK_META_DATA_VALUE).optional(),
+                                fieldWithPath("deployment.chunks[].part").description(DdiApiModelProperties.CHUNK_TYPE),
+                                fieldWithPath("deployment.chunks[].name").description(DdiApiModelProperties.CHUNK_NAME),
+                                fieldWithPath("deployment.chunks[].version")
+                                        .description(DdiApiModelProperties.CHUNK_VERSION),
+                                fieldWithPath("deployment.chunks[].artifacts")
+                                        .description(DdiApiModelProperties.ARTIFACTS),
+                                fieldWithPath("deployment.chunks[].artifacts[].filename")
+                                        .description(DdiApiModelProperties.ARTIFACTS),
+                                fieldWithPath("deployment.chunks[].artifacts[].hashes")
+                                        .description(DdiApiModelProperties.ARTIFACTS),
+                                fieldWithPath("deployment.chunks[].artifacts[].hashes.sha1")
+                                        .description(DdiApiModelProperties.ARTIFACT_HASHES_SHA1),
+                                fieldWithPath("deployment.chunks[].artifacts[].hashes.md5")
+                                        .description(DdiApiModelProperties.ARTIFACT_HASHES_MD5),
+                                fieldWithPath("deployment.chunks[].artifacts[].hashes.sha256")
+                                        .description(DdiApiModelProperties.ARTIFACT_HASHES_SHA256),
+                                fieldWithPath("deployment.chunks[].artifacts[].size")
+                                        .description(DdiApiModelProperties.ARTIFACT_SIZE),
+                                fieldWithPath("deployment.chunks[].artifacts[]._links.download")
+                                        .description(DdiApiModelProperties.ARTIFACT_HTTPS_DOWNLOAD_LINK_BY_CONTROLLER),
+                                fieldWithPath("deployment.chunks[].artifacts[]._links.md5sum")
+                                        .description(DdiApiModelProperties.ARTIFACT_HTTPS_HASHES_MD5SUM_LINK),
+                                fieldWithPath("deployment.chunks[].artifacts[]._links.download-http")
+                                        .description(DdiApiModelProperties.ARTIFACT_HTTP_DOWNLOAD_LINK_BY_CONTROLLER),
+                                fieldWithPath("deployment.chunks[].artifacts[]._links.md5sum-http")
+                                        .description(DdiApiModelProperties.ARTIFACT_HTTP_HASHES_MD5SUM_LINK),
+                                fieldWithPath("actionHistory").description(DdiApiModelProperties.ACTION_HISTORY_RESP),
+                                fieldWithPath("actionHistory.status")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_STATUS),
+                                fieldWithPath("actionHistory.messages")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_MESSAGES))));
+
     }
 
 }

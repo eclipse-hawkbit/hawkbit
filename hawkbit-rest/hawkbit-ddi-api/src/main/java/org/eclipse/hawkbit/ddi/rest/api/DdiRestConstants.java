@@ -24,6 +24,11 @@ public final class DdiRestConstants {
     public static final String DEPLOYMENT_BASE_ACTION = "deploymentBase";
 
     /**
+     * Installed action resources.
+     */
+    public static final String INSTALLED_BASE_ACTION = "installedBase";
+
+    /**
      * Cancel action resources.
      */
     public static final String CANCEL_ACTION = "cancelAction";

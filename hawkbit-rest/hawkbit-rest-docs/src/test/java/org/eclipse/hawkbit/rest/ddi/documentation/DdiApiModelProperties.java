@@ -92,7 +92,9 @@ final class DdiApiModelProperties {
 
     static final String DEPLOYMENT = "Detailed deployment operation";
 
-    static final String CANCEL = "Detailed cancel operation of a deployment.";
+    static final String CANCEL = "Detailed cancel operation of a deployment";
+
+    static final String INSTALLED = "Detailed operation of last successfully finished action";
 
     static final String HANDLING_DOWNLOAD = "handling for the download part of the provisioning process ('skip': do not download yet, 'attempt': server asks to download, 'forced': server requests immediate download)";
 

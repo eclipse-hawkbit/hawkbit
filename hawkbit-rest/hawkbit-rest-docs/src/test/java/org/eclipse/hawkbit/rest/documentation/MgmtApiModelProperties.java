@@ -65,6 +65,7 @@ public final class MgmtApiModelProperties {
     public static final String DS_ASSIGNED_TARGETS = "Targets that have this distribution set assigned.";
     public static final String DS_INSTALLED_TARGETS = "Targets that have this distribution set installed.";
     public static final String DS_LIST = "List of distribution sets.";
+    public static final String DS_TAG_LIST = "List of distribution set tags";
     public static final String DS_NEW_ASSIGNED_TARGETS = "Targets that now have this distribution set assigned.";
     public static final String DS_ALREADY_ASSIGNED_TARGETS = "Targets that had this distribution set already assigned (in \"offline\" case this includes targets that have arbitrary updates running)";
     public static final String DS_TOTAL_ASSIGNED_TARGETS = "Overall assigned as part of this request.";
@@ -126,6 +127,8 @@ public final class MgmtApiModelProperties {
     public static final String TARGET_ATTRIBUTES = "Target attributes.";
 
     public static final String TARGET_LIST = "List of provisioning targets.";
+
+    public static final String TARGET_TAG_LIST = "List of target tags";
 
     public static final String TARGET_TYPE_LIST = "List of target types";
 

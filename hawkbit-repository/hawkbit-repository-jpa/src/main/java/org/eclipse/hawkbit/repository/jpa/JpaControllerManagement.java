@@ -1056,6 +1056,20 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return actionRepository.findByExternalRef(externalRef);
     }
 
+    @Override
+    public Optional<Action> getInstalledActionByTarget(final String controllerId) {
+        final JpaTarget jpaTarget = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
+                .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
+
+        final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
+        if (null != installedDistributionSet) {
+            return actionRepository.findFirstByTargetIdAndDistributionSetId(jpaTarget.getId(),
+                    installedDistributionSet.getId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
                 new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));

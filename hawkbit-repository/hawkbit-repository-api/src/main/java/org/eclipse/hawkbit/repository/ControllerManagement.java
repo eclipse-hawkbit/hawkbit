@@ -21,11 +21,11 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
-import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -499,4 +499,13 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     void deleteExistingTarget(@NotEmpty String controllerId);
+
+    /**
+     * Finds an {@link Action} based on the target that it's assigned to
+     *
+     * @param controllerId
+     *            of the target the action is assigned to
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    Optional<Action> getInstalledActionByTarget(@NotEmpty String controllerId);
 }
