@@ -39,7 +39,9 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Repository")
 @Story("Concurrent Distribution Set invalidation")
-@TestPropertySource(properties = "hawkbit.server.repository.dsInvalidationLockTimeout=1")
+@TestPropertySource(properties = { "hawkbit.server.repository.dsInvalidationLockTimeout=1",
+        "hawkbit.server.security.dos.maxRolloutGroupsPerRollout=10",
+        "hawkbit.server.security.dos.maxTargetsPerRolloutGroup=50" })
 public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegrationTest {
 
     @Test
@@ -55,7 +57,8 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
                 .errorAction(RolloutGroupErrorAction.PAUSE, null).build();
         final Rollout rollout = rolloutManagement.create(entityFactory.rollout().create()
                 .name("verifyInvalidateDistributionSetWithLargeRolloutThrowsException").description("desc")
-                .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED), quotaManagement.getMaxRolloutGroupsPerRollout(), conditions);
+                        .targetFilterQuery("name==*").set(distributionSet).actionType(ActionType.FORCED),
+                quotaManagement.getMaxRolloutGroupsPerRollout(), conditions);
         final String tenant = tenantAware.getCurrentTenant();
 
         // run in new Thread so that the invalidation can be executed in

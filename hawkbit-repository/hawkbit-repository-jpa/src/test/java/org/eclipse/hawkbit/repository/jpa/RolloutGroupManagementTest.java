@@ -48,8 +48,10 @@ public class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
-            @Expect(type = RolloutUpdatedEvent.class, count = 1), @Expect(type = TargetCreatedEvent.class, count = 5),
+            @Expect(type = RolloutUpdatedEvent.class, count = 1), 
+            @Expect(type = TargetCreatedEvent.class, count = 125),
             @Expect(type = RolloutCreatedEvent.class, count = 1) })
+    
     public void entityQueriesReferringToNotExistingEntitiesThrowsException() {
         testdataFactory.createRollout("xxx");
 
