@@ -155,7 +155,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Autowired
     private TenantAware tenantAware;
 
-    JpaControllerManagement(final ScheduledExecutorService executorService,
+    public JpaControllerManagement(final ScheduledExecutorService executorService,
             final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
         super(actionRepository, repositoryProperties);
 
@@ -392,7 +392,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .orElseGet(() -> createTarget(controllerId, address, name));
     }
 
-    private Target createTarget(final String controllerId, final URI address, String name) {
+    private Target createTarget(final String controllerId, final URI address, final String name) {
 
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))
@@ -509,17 +509,21 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
         return toUpdate;
     }
+
     private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name) {
         return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
                 || isNameChanged(toUpdate.getName(), name) || isStatusUnknown(toUpdate.getUpdateStatus());
     }
-    private boolean isAddressChanged(final URI addressToUpdate, final URI address) {
+
+    private static boolean isAddressChanged(final URI addressToUpdate, final URI address) {
         return addressToUpdate == null || !addressToUpdate.equals(address);
     }
-    private boolean isNameChanged(final String nameToUpdate, final String name) {
+
+    private static boolean isNameChanged(final String nameToUpdate, final String name) {
         return StringUtils.hasText(name) && !nameToUpdate.equals(name);
     }
-    private boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
+
+    private static boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
         return TargetUpdateStatus.UNKNOWN == statusToUpdate;
     }
 
