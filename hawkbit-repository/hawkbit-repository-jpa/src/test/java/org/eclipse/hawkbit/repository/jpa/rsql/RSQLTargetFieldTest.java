@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.assertj.core.util.Maps;
-import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetTypeFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -64,8 +63,6 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         target2 = targetManagement
                 .create(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
         attributes.put("revision", "1.2");
-
-        Awaitility.await().until(() -> System.currentTimeMillis() > target2.getCreatedAt() + 1000);
 
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes, null);
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target2.getControllerId(), LOCALHOST);
@@ -162,7 +159,8 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by attribute")
     void testFilterByAttribute() {
-        createTargetWithTestAttributes();
+        controllerManagement.updateControllerAttributes(testdataFactory.createTarget().getControllerId(),
+                Maps.newHashMap("test.dot", "value.dot"), null);
 
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision!=1.1", 1);
@@ -240,7 +238,8 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter target by metadata")
     void testFilterByMetadata() {
-        createTargetWithTestMetadata();
+        createTargetMetadata(testdataFactory.createTarget().getControllerId(),
+                entityFactory.generateTargetMetadata("key.dot", "value.dot"));
 
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==*v*", 2);
@@ -327,17 +326,5 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     private void assertRSQLQueryThrowsException(final String rsqlParam) {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, TargetFields.class));
-    }
-
-    private void createTargetWithTestMetadata() {
-        final Target target = testdataFactory.createTarget();
-        createTargetMetadata(target.getControllerId(),
-                entityFactory.generateTargetMetadata("key.dot", "value.dot"));
-    }
-
-    private void createTargetWithTestAttributes() {
-        final Target target = testdataFactory.createTarget();
-        controllerManagement.updateControllerAttributes(target.getControllerId(),
-                Maps.newHashMap("test.dot", "value.dot"), null);
     }
 }

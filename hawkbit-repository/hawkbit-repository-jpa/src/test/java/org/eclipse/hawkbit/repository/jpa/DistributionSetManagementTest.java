@@ -28,7 +28,6 @@ import javax.validation.ConstraintViolationException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Condition;
-import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -83,7 +82,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     public static final String TAG1_NAME = "Tag1";
 
     @Test
-    @Description("Verifies that management get access react as specfied on calls for non existing entities by means "
+    @Description("Verifies that management get access react as specified on calls for non existing entities by means "
             + "of Optional not present.")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
@@ -437,7 +436,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Ensures that updates concerning the internal software structure of a DS are not possible if the DS is already assigned.")
-    void updateDistributionSetForbiddedWithIllegalUpdate() {
+    void updateDistributionSetForbiddenWithIllegalUpdate() {
         // prepare data
         final Target target = testdataFactory.createTarget();
 
@@ -606,12 +605,10 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet changedLockRevisionDS = getOrThrow(distributionSetManagement.get(ds.getId()));
         assertThat(changedLockRevisionDS.getOptLockRevision()).isEqualTo(2);
 
-        Awaitility.await().until(() -> System.currentTimeMillis() > changedLockRevisionDS.getCreatedAt() + 1000);
-
         // update the DS metadata
         final JpaDistributionSetMetadata updated = (JpaDistributionSetMetadata) distributionSetManagement
                 .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey, knownUpdateValue));
-        // we are updating the sw meta data so also modifying the base software
+        // we are updating the sw metadata so also modifying the base software
         // module so opt lock revision must be three
         final DistributionSet reloadedDS = getOrThrow(distributionSetManagement.get(ds.getId()));
         assertThat(reloadedDS.getOptLockRevision()).isEqualTo(3);

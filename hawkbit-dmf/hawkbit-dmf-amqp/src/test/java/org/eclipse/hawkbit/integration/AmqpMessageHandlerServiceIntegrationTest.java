@@ -81,7 +81,9 @@ import io.qameta.allure.Story;
 @Story("Amqp Message Handler Service")
 class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegrationTest {
     private static final String TARGET_PREFIX = "Dmf_hand_";
-    public static final String DMF_HAND_REGISTER_TARGET_ID = "Dmf_hand_registerTargets_1";
+    public static final String DMF_REGISTER_TEST_CONTROLLER_ID = "Dmf_hand_registerTargets_1";
+    public static final String DMF_ATTR_TEST_CONTROLLER_ID = "Dmf_hand_updateAttributes";
+    public static final String UPDATE_ATTR_TEST_CONTROLLER_ID = "ControllerAttributeTestTarget";
 
     @Autowired
     private AmqpProperties amqpProperties;
@@ -665,11 +667,11 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
         // assemble the expected attributes
         final Map<String, String> expectedAttributes = targetManagement
-                .getControllerAttributes("Dmf_hand_updateAttributes");
+                .getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID);
         expectedAttributes.remove("k1");
         expectedAttributes.remove("k3");
 
-        // send a update message with update mode
+        // send an update message with update mode
         final Map<String, String> removeAttributes = new HashMap<>();
         removeAttributes.put("k1", "foo");
         removeAttributes.put("k3", "bar");
@@ -680,16 +682,16 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         sendUpdateAttributeMessage(remove);
 
         // validate
-        assertUpdateAttributes("Dmf_hand_updateAttributes", expectedAttributes);
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
     }
 
     @Step
     private void updateAttributesWithUpdateModeMerge() {
         // get the current attributes
         final Map<String, String> attributes = new HashMap<>(
-                targetManagement.getControllerAttributes("Dmf_hand_updateAttributes"));
+                targetManagement.getControllerAttributes(DMF_ATTR_TEST_CONTROLLER_ID));
 
-        // send a update message with update mode MERGE
+        // send an update message with update mode MERGE
         final Map<String, String> mergeAttributes = new HashMap<>();
         mergeAttributes.put("k1", "v1_modified_again");
         mergeAttributes.put("k4", "v4");
@@ -703,12 +705,12 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final Map<String, String> expectedAttributes = new HashMap<>();
         expectedAttributes.putAll(attributes);
         expectedAttributes.putAll(mergeAttributes);
-        assertUpdateAttributes("Dmf_hand_updateAttributes", expectedAttributes);
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
     }
 
     @Step
     private void updateAttributesWithUpdateModeReplace() {
-        // send a update message with update mode REPLACE
+        // send an update message with update mode REPLACE
         final Map<String, String> expectedAttributes = new HashMap<>();
         expectedAttributes.put("k1", "v1_modified");
         expectedAttributes.put("k2", "v2");
@@ -720,12 +722,12 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         sendUpdateAttributeMessage(replace);
 
         // validate
-        assertUpdateAttributes("Dmf_hand_updateAttributes", expectedAttributes);
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
     }
 
     @Step
     private void updateAttributesWithoutUpdateMode() {
-        // send a update message which does not specify an update mode
+        // send an update message which does not specify an update mode
         final Map<String, String> expectedAttributes = new HashMap<>();
         expectedAttributes.put("k0", "v0");
         expectedAttributes.put("k1", "v1");
@@ -735,7 +737,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         sendUpdateAttributeMessage(defaultUpdate);
 
         // validate
-        assertUpdateAttributes("Dmf_hand_updateAttributes", expectedAttributes);
+        assertUpdateAttributes(DMF_ATTR_TEST_CONTROLLER_ID, expectedAttributes);
     }
 
     @Test
@@ -769,12 +771,12 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetUpdatedEvent.class), @Expect(type = TargetPollEvent.class, count = 1) })
     void updateAttributesWithWrongBody() {
         // setup
-        final String target = "ControllerAttributeTestTarget";
-        registerAndAssertTargetWithExistingTenant(target);
+        registerAndAssertTargetWithExistingTenant(UPDATE_ATTR_TEST_CONTROLLER_ID);
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put("test1", "testA");
         controllerAttribute.getAttributes().put("test2", "testB");
-        final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody(target);
+        final Message createUpdateAttributesMessageWrongBody = createUpdateAttributesMessageWrongBody(
+                UPDATE_ATTR_TEST_CONTROLLER_ID);
 
         // test
         getDmfClient().send(createUpdateAttributesMessageWrongBody);
@@ -786,7 +788,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     @Test
     @Description("Verifies that sending an UPDATE_ATTRIBUTES message with invalid attributes is handled correctly.")
     void updateAttributesWithInvalidValues() {
-        registerAndAssertTargetWithExistingTenant("ControllerAttributeTestTarget");
+        registerAndAssertTargetWithExistingTenant(UPDATE_ATTR_TEST_CONTROLLER_ID);
 
         sendUpdateAttributesMessageWithGivenAttributes(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_VALID);
         sendUpdateAttributesMessageWithGivenAttributes(TargetTestData.ATTRIBUTE_KEY_TOO_LONG, TargetTestData.ATTRIBUTE_VALUE_TOO_LONG);
@@ -889,7 +891,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
 
     @Step
     private void verifyAssignedDsAndInstalledDs(final Long assignedDsId, final Long installedDsId) {
-        final Optional<Target> target = controllerManagement.getByControllerId(DMF_HAND_REGISTER_TARGET_ID);
+        final Optional<Target> target = controllerManagement.getByControllerId(DMF_REGISTER_TEST_CONTROLLER_ID);
         assertThat(target).isPresent();
 
         // verify the DS was assigned to the Target
@@ -909,7 +911,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     private void sendUpdateAttributesMessageWithGivenAttributes(final String key, final String value) {
         final DmfAttributeUpdate controllerAttribute = new DmfAttributeUpdate();
         controllerAttribute.getAttributes().put(key, value);
-        final Message message = createUpdateAttributesMessage("ControllerAttributeTestTarget", TENANT_EXIST,
+        final Message message = createUpdateAttributesMessage(UPDATE_ATTR_TEST_CONTROLLER_ID, TENANT_EXIST,
                 controllerAttribute);
         getDmfClient().send(message);
     }
@@ -959,7 +961,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     private void sendUpdateAttributeMessage(final DmfAttributeUpdate attributeUpdate) {
-        final Message updateMessage = createUpdateAttributesMessage("Dmf_hand_updateAttributes",
+        final Message updateMessage = createUpdateAttributesMessage(DMF_ATTR_TEST_CONTROLLER_ID,
                 AbstractAmqpServiceIntegrationTest.TENANT_EXIST, attributeUpdate);
         getDmfClient().send(updateMessage);
     }

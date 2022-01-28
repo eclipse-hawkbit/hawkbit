@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2022 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials

@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -275,8 +274,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
     @Description("Ensures that a tag cannot be created if one exists already with that name (ecpects EntityAlreadyExistsException).")
     void failedDuplicateTargetTagNameException() {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
-        assertThrows(EntityAlreadyExistsException.class,
-                () -> targetTagManagement.create(entityFactory.tag().create().name("A")));
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> targetTagManagement.create(entityFactory.tag().create().name("A")));
     }
 
     @Test
@@ -285,8 +284,8 @@ class TargetTagManagementTest extends AbstractJpaIntegrationTest {
         targetTagManagement.create(entityFactory.tag().create().name("A"));
         final TargetTag tag = targetTagManagement.create(entityFactory.tag().create().name("B"));
 
-        assertThrows(EntityAlreadyExistsException.class,
-                () -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A")));
+        assertThatExceptionOfType(EntityAlreadyExistsException.class)
+                .isThrownBy(() -> targetTagManagement.update(entityFactory.tag().update(tag.getId()).name("A")));
     }
 
     private List<JpaTargetTag> createTargetsWithTags() {
