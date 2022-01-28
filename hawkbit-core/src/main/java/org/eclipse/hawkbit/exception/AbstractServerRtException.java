@@ -23,7 +23,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param error
      *            detail
      */
-    public AbstractServerRtException(final SpServerError error) {
+    protected AbstractServerRtException(final SpServerError error) {
         super(error.getMessage());
         this.error = error;
     }
@@ -36,7 +36,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param error
      *            detail
      */
-    public AbstractServerRtException(final String message, final SpServerError error) {
+    protected AbstractServerRtException(final String message, final SpServerError error) {
         super(message);
         this.error = error;
     }
@@ -51,7 +51,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param cause
      *            of the exception
      */
-    public AbstractServerRtException(final String message, final SpServerError error, final Throwable cause) {
+    protected AbstractServerRtException(final String message, final SpServerError error, final Throwable cause) {
         super(message, cause);
         this.error = error;
     }
@@ -64,7 +64,7 @@ public abstract class AbstractServerRtException extends RuntimeException {
      * @param cause
      *            of the exception
      */
-    public AbstractServerRtException(final SpServerError error, final Throwable cause) {
+    protected AbstractServerRtException(final SpServerError error, final Throwable cause) {
         super(error.getMessage(), cause);
         this.error = error;
     }

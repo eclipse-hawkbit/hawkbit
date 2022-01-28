@@ -77,7 +77,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Direct Device Integration API")
 @Story("Root Poll Resource")
-public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
+class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     private static final String TARGET_COMPLETED_INSTALLATION_MSG = "Target completed installation.";
     private static final String TARGET_PROCEEDING_INSTALLATION_MSG = "Target proceeding installation.";
@@ -87,7 +87,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensure that the root poll resource is available as CBOR")
-    public void rootPollResourceCbor() throws Exception {
+    void rootPollResourceCbor() throws Exception {
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711)
                 .accept(DdiRestConstants.MEDIA_TYPE_CBOR)).andDo(MockMvcResultPrinter.print())
                 .andExpect(content().contentType(DdiRestConstants.MEDIA_TYPE_CBOR)).andExpect(status().isOk());
@@ -95,7 +95,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that the API returns JSON when no Accept header is specified by the client.")
-    public void apiReturnsJSONByDefault() throws Exception {
+    void apiReturnsJSONByDefault() throws Exception {
         final MvcResult result = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), 4711))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON)).andReturn();
@@ -113,7 +113,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = DistributionSetTypeCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleTypeCreatedEvent.class, count = 2) })
-    public void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
+    void targetCannotBeRegisteredIfTenantDoesNotExistsButWhenExists() throws Exception {
 
         mvc.perform(get("/default-tenant/", tenantAware.getCurrentTenant())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
@@ -137,14 +137,13 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             SpPermission.CREATE_TARGET }, allSpPermissions = false)
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void targetPollDoesNotModifyAuditData() throws Exception {
+    void targetPollDoesNotModifyAuditData() throws Exception {
         // create target first with "knownPrincipal" user and audit data
         final String knownTargetControllerId = "target1";
         final String knownCreatedBy = "knownPrincipal";
         testdataFactory.createTarget(knownTargetControllerId);
         final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId).get();
         assertThat(findTargetByControllerID.getCreatedBy()).isEqualTo(knownCreatedBy);
-        assertThat(findTargetByControllerID.getCreatedAt()).isNotNull();
 
         // make a poll, audit information should not be changed, run as
         // controller principal!
@@ -165,7 +164,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Ensures that server returns a not found response in case of empty controller ID.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
-    public void rootRsWithoutId() throws Exception {
+    void rootRsWithoutId() throws Exception {
         mvc.perform(get("/controller/v1/")).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
@@ -173,7 +172,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that the system creates a new target in plug and play manner, i.e. target is authenticated but does not exist yet.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void rootRsPlugAndPlay() throws Exception {
+    void rootRsPlugAndPlay() throws Exception {
 
         final long current = System.currentTimeMillis();
         String controllerId = "4711";
@@ -204,7 +203,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
-    public void pollWithModifiedGlobalPollingTime() throws Exception {
+    void pollWithModifiedGlobalPollingTime() throws Exception {
         WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
             tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.POLLING_TIME_INTERVAL,
                     "00:02:00");
@@ -230,7 +229,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
-    public void rootRsNotModified() throws Exception {
+    void rootRsNotModified() throws Exception {
         String controllerId = "4711";
         final String etag = mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -308,7 +307,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             + "UNKNOWN to REGISTERED when the target polls for the first time.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1) })
-    public void rootRsPrecommissioned() throws Exception {
+    void rootRsPrecommissioned() throws Exception {
         String controllerId = "4711";
         testdataFactory.createTarget(controllerId);
 
@@ -334,7 +333,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that the source IP address of the polling target is correctly stored in repository")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void rootRsPlugAndPlayIpAddress() throws Exception {
+    void rootRsPlugAndPlayIpAddress() throws Exception {
         // test
         final String knownControllerId1 = "0815";
         final long create = System.currentTimeMillis();
@@ -361,7 +360,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that the source IP address of the polling target is not stored in repository if disabled")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
-    public void rootRsIpAddressNotStoredIfDisabled() throws Exception {
+    void rootRsIpAddressNotStoredIfDisabled() throws Exception {
         securityProperties.getClients().setTrackRemoteIp(false);
 
         // test
@@ -384,7 +383,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
+    void tryToFinishAnUpdateProcessAfterItHasBeenFinished() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -409,7 +408,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 6), @Expect(type = TargetPollEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1) })
-    public void attributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
+    void attributeUpdateRequestSendingAfterSuccessfulDeployment() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("1");
         final Target savedTarget = testdataFactory.createTarget("922");
         final Map<String, String> attributes = Collections.singletonMap("AttributeKey", "AttributeValue");
@@ -487,7 +486,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void testActionHistoryCount() throws Exception {
+    void testActionHistoryCount() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -524,7 +523,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void testActionHistoryZeroInput() throws Exception {
+    void testActionHistoryZeroInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -561,7 +560,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    public void testActionHistoryNegativeInput() throws Exception {
+    void testActionHistoryNegativeInput() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("911");
         savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
@@ -591,7 +590,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test the polling time based on different maintenance window start and end time.")
-    public void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
+    void sleepTimeResponseForDifferentMaintenanceWindowParameters() throws Exception {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
         WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("tenantadmin", HAS_AUTH_TENANT_CONFIGURATION), () -> {
@@ -638,7 +637,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download and update values before maintenance window start time.")
-    public void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
+    void downloadAndUpdateStatusBeforeMaintenanceWindowStartTime() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
@@ -658,7 +657,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Test download and update values after maintenance window start time.")
-    public void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
+    void downloadAndUpdateStatusDuringMaintenanceWindow() throws Exception {
         Target savedTarget = testdataFactory.createTarget("1911");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         savedTarget = getFirstAssignedTarget(assignDistributionSetWithMaintenanceWindow(ds.getId(),
@@ -678,7 +677,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Assign multiple DS in multi-assignment mode. The earliest active Action is exposed to the controller.")
-    public void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
+    void earliestActionIsExposedToControllerInMultiAssignMode() throws Exception {
         enableMultiAssignments();
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds1 = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
@@ -695,7 +694,7 @@ public class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("The system should not create a new target because of a too long controller id.")
-    public void rootRsWithInvalidControllerId() throws Exception {
+    void rootRsWithInvalidControllerId() throws Exception {
         final String invalidControllerId = RandomStringUtils.randomAlphabetic(Target.CONTROLLER_ID_MAX_SIZE + 1);
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), invalidControllerId))
                 .andExpect(status().isBadRequest());

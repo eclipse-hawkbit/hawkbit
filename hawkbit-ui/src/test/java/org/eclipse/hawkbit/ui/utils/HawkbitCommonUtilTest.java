@@ -46,11 +46,11 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale currentLocale2 = HawkbitCommonUtil.getCurrentLocale();
         // THEN
-        assertThat(Locale.GERMAN).isEqualTo(currentLocale2);
+        assertThat(currentLocale2).isEqualTo(Locale.GERMAN);
     }
 
     @Test
-    @Description("If a default locale is set in the environment, then it should take perceedence over requested browser locale")
+    @Description("If a default locale is set in the environment, then it should take precedence over requested browser locale")
     public void getLocaleToBeUsedShouldReturnDefaultLocalIfSet() {
         final UiProperties.Localization localizationProperties = Mockito.mock(UiProperties.Localization.class);
 
@@ -59,7 +59,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale localeToBeUsed = HawkbitCommonUtil.getLocaleToBeUsed(localizationProperties, Locale.CHINESE);
         // THEN
-        assertThat(Locale.GERMAN).isEqualTo(localeToBeUsed);
+        assertThat(localeToBeUsed).isEqualTo(Locale.GERMAN);
     }
 
     @Test
@@ -74,7 +74,7 @@ public class HawkbitCommonUtilTest {
         // WHEN
         final Locale localeToBeUsed = HawkbitCommonUtil.getLocaleToBeUsed(localizationProperties, Locale.GERMAN);
         // THEN
-        assertThat(Locale.GERMAN).isEqualTo(localeToBeUsed);
+        assertThat(localeToBeUsed).isEqualTo(Locale.GERMAN);
     }
 
 }

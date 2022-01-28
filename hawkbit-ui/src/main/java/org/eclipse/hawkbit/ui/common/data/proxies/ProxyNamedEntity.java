@@ -32,7 +32,7 @@ public abstract class ProxyNamedEntity extends ProxyIdentifiableEntity implement
     /**
      * Constructor
      */
-    public ProxyNamedEntity() {
+    protected ProxyNamedEntity() {
     }
 
     /**
@@ -41,7 +41,7 @@ public abstract class ProxyNamedEntity extends ProxyIdentifiableEntity implement
      * @param id
      *          Id of named entity
      */
-    public ProxyNamedEntity(final Long id) {
+    protected ProxyNamedEntity(final Long id) {
         super(id);
     }
 

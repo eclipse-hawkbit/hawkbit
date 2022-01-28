@@ -29,7 +29,7 @@ public abstract class AbstractUpdateEntityWindowController<T, E, R> extends Abst
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractUpdateEntityWindowController(final CommonUiDependencies uiDependencies) {
+    protected AbstractUpdateEntityWindowController(final CommonUiDependencies uiDependencies) {
         super(uiDependencies);
     }
 

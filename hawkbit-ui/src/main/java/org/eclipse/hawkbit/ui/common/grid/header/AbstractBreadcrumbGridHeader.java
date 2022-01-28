@@ -46,7 +46,7 @@ public abstract class AbstractBreadcrumbGridHeader extends AbstractGridHeader {
      * @param eventBus
      *            UIEventBus
      */
-    public AbstractBreadcrumbGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected AbstractBreadcrumbGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(i18n, permChecker, eventBus);
 

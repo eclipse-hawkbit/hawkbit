@@ -151,7 +151,7 @@ public final class FileStreamingUtil {
             LOG.debug("range header for filename ({}) is: {}", filename, range);
 
             // Range header matches"bytes=n-n,n-n,n-n..."
-            if (!range.matches("^bytes=\\d*-\\d*(,\\d*-\\d*)*$")) {
+            if (!range.matches("^bytes=\\d*-\\d*(,\\d*-\\d*)*+$")) {
                 response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes */" + length);
                 LOG.debug("range header for filename ({}) is not satisfiable: ", filename);
                 return new ResponseEntity<>(HttpStatus.REQUESTED_RANGE_NOT_SATISFIABLE);

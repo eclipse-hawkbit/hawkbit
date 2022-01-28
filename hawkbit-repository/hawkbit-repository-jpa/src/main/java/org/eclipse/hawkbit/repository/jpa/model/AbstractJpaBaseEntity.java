@@ -55,34 +55,34 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     /**
      * Default constructor needed for JPA entities.
      */
-    public AbstractJpaBaseEntity() {
+    protected AbstractJpaBaseEntity() {
         // Default constructor needed for JPA entities.
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_at", insertable = true, updatable = false, nullable = false)
+    @Column(name = "created_at", updatable = false, nullable = false)
     public long getCreatedAt() {
         return createdAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "created_by", insertable = true, updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
+    @Column(name = "created_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     public String getCreatedBy() {
         return createdBy;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_at", insertable = true, updatable = true, nullable = false)
+    @Column(name = "last_modified_at", nullable = false)
     public long getLastModifiedAt() {
         return lastModifiedAt;
     }
 
     @Override
     @Access(AccessType.PROPERTY)
-    @Column(name = "last_modified_by", insertable = true, updatable = true, nullable = false, length = USERNAME_FIELD_LENGTH)
+    @Column(name = "last_modified_by", nullable = false, length = USERNAME_FIELD_LENGTH)
     public String getLastModifiedBy() {
         return lastModifiedBy;
     }

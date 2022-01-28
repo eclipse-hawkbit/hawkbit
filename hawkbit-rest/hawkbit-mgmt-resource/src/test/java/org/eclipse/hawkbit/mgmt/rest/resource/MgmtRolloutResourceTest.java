@@ -25,8 +25,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.Callable;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -43,7 +46,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.eclipse.hawkbit.rest.util.SuccessCondition;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -91,7 +93,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Testing that creating rollout with not exisiting distribution set returns not found")
+    @Description("Testing that creating rollout with not existing distribution set returns not found")
     public void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
@@ -110,8 +112,9 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
                 .andReturn();
     }
 
+    @Test
     @Description("Ensures that the repository refuses to create rollout without a defined target filter set.")
-    public void missingTargetFilterQueryInRollout() throws Exception {
+    void missingTargetFilterQueryInRollout() throws Exception {
 
         final String targetFilterQuery = null;
 
@@ -805,7 +808,9 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         rolloutManagement.handleRollouts();
 
         // check if running
-        assertThat(doWithTimeout(() -> getRollout(rollout.getId()), this::success, 60_000, 100)).isNotNull();
+        Awaitility.await().pollInterval(Duration.ONE_HUNDRED_MILLISECONDS).atMost(Duration.ONE_MINUTE).with()
+                .until(() -> rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new).getStatus()
+                        .equals(RolloutStatus.RUNNING));
     }
 
     @Test
@@ -818,11 +823,10 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
 
-        // delete rollout
         mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
-        assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETING);
+        assertStatusIs(rollout, RolloutStatus.DELETING);
     }
 
     @Test
@@ -832,7 +836,13 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
-        assertThat(getRollout(rollout.getId()).getStatus()).isEqualTo(RolloutStatus.DELETED);
+
+        assertStatusIs(rollout, RolloutStatus.DELETED);
+    }
+
+    private void assertStatusIs(final Rollout rollout, RolloutStatus expected) {
+        final Optional<Rollout> updatedRollout = rolloutManagement.get(rollout.getId());
+        assertThat(updatedRollout).get().extracting(Rollout::getStatus).isEqualTo(expected);
     }
 
     @Test
@@ -917,7 +927,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("A rollout create request containing a weight is only accepted when weight is valide and multi assignment is on.")
+    @Description("A rollout create request containing a weight is only accepted when weight is valid and multi assignment is on.")
     public void weightValidation() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -944,43 +954,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
-    }
-
-    protected <T> T doWithTimeout(final Callable<T> callable, final SuccessCondition<T> successCondition,
-            final long timeout, final long pollInterval) throws Exception // NOPMD
-    {
-
-        if (pollInterval < 0) {
-            throw new IllegalArgumentException("pollInterval must non negative");
-        }
-
-        long duration = 0;
-        Exception exception = null;
-        T returnValue = null;
-        while (untilTimeoutReached(timeout, duration)) {
-            try {
-                returnValue = callable.call();
-                // clear exception
-                exception = null;
-            } catch (final Exception ex) {
-                exception = ex;
-            }
-            Thread.sleep(pollInterval);
-            duration += pollInterval > 0 ? pollInterval : 1;
-            if (exception == null && successCondition.success(returnValue)) {
-                return returnValue;
-            } else {
-                returnValue = null;
-            }
-        }
-        if (exception != null) {
-            throw exception;
-        }
-        return returnValue;
-    }
-
-    protected boolean untilTimeoutReached(final long timeout, final long duration) {
-        return duration <= timeout || timeout < 0;
     }
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
@@ -1026,15 +999,6 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
 
-        return rolloutManagement.get(rollout.getId()).get();
+        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
-
-    protected boolean success(final Rollout result) {
-        return result != null && result.getStatus() == RolloutStatus.RUNNING;
-    }
-
-    public Rollout getRollout(final Long rolloutId) throws Exception {
-        return rolloutManagement.get(rolloutId).get();
-    }
-
 }

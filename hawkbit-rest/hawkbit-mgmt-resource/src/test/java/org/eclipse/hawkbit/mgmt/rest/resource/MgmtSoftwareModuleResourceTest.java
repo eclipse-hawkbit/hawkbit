@@ -28,12 +28,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -82,7 +86,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @BeforeEach
     public void assertPreparationOfRepo() {
-        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").hasSize(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").isEmpty();
     }
 
     @Test
@@ -97,7 +101,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType)
+        final SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType)
                 .name(knownSWName).version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
@@ -105,9 +109,9 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String body = new JSONObject().put("vendor", updateVendor).put("description", updateDescription)
                 .put("name", "nameShouldNotBeChanged").toString();
 
-        // ensures that we are not to fast so that last modified is not set
-        // correctly
-        Thread.sleep(1);
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await().atMost(Duration.ONE_HUNDRED_MILLISECONDS).pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -118,11 +122,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.description", equalTo(updateDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownSWName))).andReturn();
 
-        sm = softwareModuleManagement.get(sm.getId()).get();
-        assertThat(sm.getName()).isEqualTo(knownSWName);
-        assertThat(sm.getVendor()).isEqualTo(updateVendor);
-        assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
-        assertThat(sm.getDescription()).isEqualTo(updateDescription);
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
+        assertThat(updatedSm.getName()).isEqualTo(knownSWName);
+        assertThat(updatedSm.getVendor()).isEqualTo(updateVendor);
+        assertThat(updatedSm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(updatedSm.getDescription()).isEqualTo(updateDescription);
 
     }
 
@@ -133,16 +137,16 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
 
-        SoftwareModule sm = softwareModuleManagement
+        final SoftwareModule sm = softwareModuleManagement
                 .create(entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
 
-        assertThat(sm.isDeleted()).as("Created software module should not be deleted").isEqualTo(false);
+        assertThat(sm.isDeleted()).as("Created software module should not be deleted").isFalse();
 
         final String body = new JSONObject().put("deleted", true).toString();
 
-        // ensures that we are not to fast so that last modified is not set
-        // correctly
-        Thread.sleep(1);
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await().atMost(Duration.ONE_HUNDRED_MILLISECONDS).pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -151,10 +155,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(sm.getLastModifiedAt())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        sm = softwareModuleManagement.get(sm.getId()).get();
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
         assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
         assertThat(sm.getLastModifiedAt()).isEqualTo(sm.getLastModifiedAt());
-        assertThat(sm.isDeleted()).isEqualTo(false);
+        assertThat(sm.isDeleted()).isFalse();
 
     }
 
@@ -187,12 +191,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .as("Link contains no self url")
-                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat(JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("response contains no download url ").isEqualTo(
-                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
+        assertSoftwareModuleSelfRef(mvcResult, sm);
+        assertThat((JsonPath) JsonPath.compile("$._links.download.href")
+                .read(mvcResult.getResponse().getContentAsString())).as("response contains no download url ")
+                        .hasToString("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId
+                                + "/download");
 
         assertArtifact(sm, random);
     }
@@ -263,8 +266,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
     public void emptyUploadArtifact() throws Exception {
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
+        assertThat(artifactManagement.count()).isZero();
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -302,7 +305,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
     public void uploadArtifactWithCustomName() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
 
         // create test file
         final byte random[] = randomBytes(5 * 1024);
@@ -326,7 +329,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
     public void uploadArtifactWithHashCheck() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
 
         // create test file
         final byte random[] = randomBytes(5 * 1024);
@@ -895,15 +898,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final SoftwareModule appCreated = softwareModuleManagement
                 .getByNameAndVersionAndType("name3", "version3", appType.getId()).get();
 
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("Response contains invalid self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
-
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("Response contains links self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
+        assertSoftwareModuleSelfRef(mvcResult, osCreated);
+        assertSoftwareModuleSelfRef(mvcResult, appCreated);
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
         assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName())
@@ -914,6 +910,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
         assertThat(softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName())
                 .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
+    }
+
+    private void assertSoftwareModuleSelfRef(final MvcResult mvcResult, final SoftwareModule softwareModule)
+            throws UnsupportedEncodingException {
+        assertThat(
+                (JsonPath) JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()))
+                .as("Response contains links self href")
+                .hasToString("http://localhost/rest/v1/softwaremodules/" + softwareModule.getId());
     }
 
     @Test
@@ -936,7 +940,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After delete no softwarmodule should be available")
                 .isEmpty();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
     }
 
     @Test
@@ -1020,18 +1024,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
-                .andExpect(jsonPath("[0]targetVisible", equalTo(false)))
-                .andExpect(jsonPath("[1]key", equalTo(knownKey2))).andExpect(jsonPath("[1]value", equalTo(knownValue2)))
-                .andExpect(jsonPath("[1]targetVisible", equalTo(true)));
+                .andExpect(jsonPath("[0].key", equalTo(knownKey1)))
+                .andExpect(jsonPath("[0].value", equalTo(knownValue1)))
+                .andExpect(jsonPath("[0].targetVisible", equalTo(false)))
+                .andExpect(jsonPath("[1].key", equalTo(knownKey2)))
+                .andExpect(jsonPath("[1].value", equalTo(knownValue2)))
+                .andExpect(jsonPath("[1].targetVisible", equalTo(true)));
 
-        final SoftwareModuleMetadata metaKey1 = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(sm.getId(), knownKey1).get();
-        final SoftwareModuleMetadata metaKey2 = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(sm.getId(), knownKey2).get();
-
-        assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
-        assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
+        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey1))
+                .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue1);
+        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey2))
+                .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue2);
 
         // verify quota enforcement
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();

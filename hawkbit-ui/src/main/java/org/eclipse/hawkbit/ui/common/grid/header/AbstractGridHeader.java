@@ -46,7 +46,7 @@ public abstract class AbstractGridHeader extends VerticalLayout {
      * @param eventBus
      *            UIEventBus
      */
-    public AbstractGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected AbstractGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         this.i18n = i18n;
         this.permChecker = permChecker;

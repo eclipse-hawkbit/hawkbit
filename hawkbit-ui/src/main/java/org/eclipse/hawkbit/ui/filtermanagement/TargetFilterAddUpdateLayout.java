@@ -74,7 +74,7 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
      * @param rsqlValidationOracle
      *            RsqlValidationOracle
      */
-    public TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected TargetFilterAddUpdateLayout(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UiProperties uiProperties, final TargetFilterDetailsLayoutUiState uiState, final UIEventBus eventBus,
             final RsqlValidationOracle rsqlValidationOracle) {
         super();
@@ -140,7 +140,8 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
         autoCompleteComponent.addValidationListener((valid, message) -> searchButton.setEnabled(valid));
         autoCompleteComponent.addTextfieldChangedListener(this::onFilterQueryTextfieldChanged);
         autoCompleteComponent
-                .addShortcutListener(new ShortcutListener("List Filtered Targets", ShortcutAction.KeyCode.ENTER, null) {
+                .addShortcutListener(
+                        new ShortcutListener("List Filtered Targets", ShortcutAction.KeyCode.ENTER, (int[]) null) {
                     private static final long serialVersionUID = 1L;
 
                     @Override
@@ -198,13 +199,6 @@ public class TargetFilterAddUpdateLayout extends AbstractEntityWindowLayout<Prox
 
             saveCallback.saveOrUpdate();
         });
-    }
-
-    /**
-     * Disable search button
-     */
-    public void disableSearchButton() {
-        searchButton.setEnabled(false);
     }
 
     /**

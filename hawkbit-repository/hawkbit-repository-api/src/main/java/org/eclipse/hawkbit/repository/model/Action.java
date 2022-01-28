@@ -156,12 +156,15 @@ public interface Action extends TenantAwareBaseEntity {
     }
 
     /**
+     * Check if action type is either forced or time-forced <i>and</i> force-time is
+     * exceeded.
+     *
      * @return {@code true} if either the {@link #getActionType()} is
-     *         {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but
-     *         then if the {@link #getForcedTime()} has been exceeded otherwise
-     *         always {@code false}
+     *         {@link ActionType#FORCED} or {@link ActionType#TIMEFORCED} but then
+     *         if the {@link #getForcedTime()} has been exceeded otherwise always
+     *         {@code false}
      */
-    default boolean isForce() {
+    default boolean isForcedOrTimeForced() {
         switch (getActionType()) {
         case FORCED:
             return true;

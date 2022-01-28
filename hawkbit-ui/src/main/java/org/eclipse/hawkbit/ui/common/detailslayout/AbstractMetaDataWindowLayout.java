@@ -56,7 +56,7 @@ public abstract class AbstractMetaDataWindowLayout<F> extends HorizontalLayout {
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractMetaDataWindowLayout(final CommonUiDependencies uiDependencies) {
+    protected AbstractMetaDataWindowLayout(final CommonUiDependencies uiDependencies) {
         this.uiDependencies = uiDependencies;
         this.i18n = uiDependencies.getI18n();
         this.eventBus = uiDependencies.getEventBus();
