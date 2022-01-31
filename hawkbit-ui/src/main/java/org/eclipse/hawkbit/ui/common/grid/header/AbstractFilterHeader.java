@@ -47,7 +47,7 @@ public abstract class AbstractFilterHeader extends AbstractGridHeader {
      * @param eventBus
      *            UIEventBus
      */
-    public AbstractFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected AbstractFilterHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(i18n, permChecker, eventBus);
 

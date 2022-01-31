@@ -91,18 +91,18 @@ public class FileTransferHandlerStreamVariable extends AbstractFileTransferHandl
             return ByteStreams.nullOutputStream();
         }
 
-        // we return the outputstream so we cannot close it here
+        // we return the output stream - we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
-        PipedInputStream inputStream = null;
+        final PipedInputStream inputStream;
         try {
             inputStream = new PipedInputStream(outputStream);
             publishUploadProgressEvent(fileUploadId, 0, fileSize);
             startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.warn("Creating piped Stream failed {}.", e);
+            LOG.warn("Creating piped Stream failed {}.", e.getMessage());
             tryToCloseIOStream(outputStream);
-            tryToCloseIOStream(inputStream);
+            // input stream is not created in case of and IOException here
             interruptUploadDueToUploadFailed();
             publishUploadFailedAndFinishedEvent(fileUploadId);
             return ByteStreams.nullOutputStream();

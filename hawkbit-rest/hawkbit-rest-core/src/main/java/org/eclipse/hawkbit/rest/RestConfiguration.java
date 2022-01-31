@@ -74,9 +74,9 @@ public class RestConfiguration {
      *         filter in the filter chain
      */
     @Bean
-    FilterRegistrationBean eTagFilter() {
+    FilterRegistrationBean<ExcludePathAwareShallowETagFilter> eTagFilter() {
 
-        final FilterRegistrationBean filterRegBean = new FilterRegistrationBean();
+        final FilterRegistrationBean<ExcludePathAwareShallowETagFilter> filterRegBean = new FilterRegistrationBean<>();
         // Exclude the URLs for downloading artifacts, so no eTag is generated
         // in the ShallowEtagHeaderFilter, just using the SH1 hash of the
         // artifact itself as 'ETag', because otherwise the file will be copied

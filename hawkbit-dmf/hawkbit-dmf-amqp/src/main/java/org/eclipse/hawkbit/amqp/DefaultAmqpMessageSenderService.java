@@ -56,7 +56,7 @@ public class DefaultAmqpMessageSenderService extends BaseAmqpService implements 
             LOGGER.debug("Sending message to exchange {} with correlationId {}", exchange, correlationId);
         }
 
-        getRabbitTemplate().send(exchange, null, message, new CorrelationData(correlationId));
+        getRabbitTemplate().send(exchange, "", message, new CorrelationData(correlationId));
     }
 
     protected static boolean isCorrelationIdEmpty(final Message message) {

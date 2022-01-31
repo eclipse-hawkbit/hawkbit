@@ -20,7 +20,6 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.time.DurationFormatUtils;
-import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Maps;
@@ -99,10 +98,10 @@ public final class SPDateTimeUtil {
      *
      * @param lastQueryDate
      *          Last query date
-     * @return String formatted date
+     * @return String formatted date or {@code null} when the provided {@code lastQueryDate} was {@code null}
      */
     public static String getFormattedDate(final Long lastQueryDate) {
-        return formatDate(lastQueryDate, null);
+        return getFormattedDate(lastQueryDate, SPUIDefinitions.LAST_QUERY_DATE_FORMAT);
     }
 
     /**
@@ -112,67 +111,15 @@ public final class SPDateTimeUtil {
      *          Last query date
      * @param datePattern
      *            pattern how to format the date (cp. {@code SimpleDateFormat})
-     * @return String formatted date
+     * @return String formatted date or {@code null} when the provided {@code lastQueryDate} was {@code null}
      */
     public static String getFormattedDate(final Long lastQueryDate, final String datePattern) {
-        return formatDate(lastQueryDate, null, datePattern);
-    }
-
-    /**
-     * Get formatted date 'created at' by entity.
-     *
-     * @param baseEntity
-     *            the entity
-     * @return String formatted date
-     */
-    public static String formatCreatedAt(final ProxyNamedEntity baseEntity) {
-        if (baseEntity == null) {
-            return "";
-        }
-        return formatDate(baseEntity.getCreatedAt(), "");
-    }
-
-    /**
-     * Get formatted date 'last modified at' by entity.
-     *
-     * @param baseEntity
-     *            the entity
-     * @return String formatted date
-     */
-    public static String formatLastModifiedAt(final ProxyNamedEntity baseEntity) {
-        if (baseEntity == null) {
-            return "";
-        }
-        return formatDate(baseEntity.getLastModifiedAt(), "");
-    }
-
-    /**
-     * Get formatted date 'last modified at' by entity.
-     *
-     * @param baseEntity
-     *            the entity
-     * @param datePattern
-     *            pattern how to format the date (cp. {@code SimpleDateFormat})
-     * @return String formatted date
-     */
-    public static String formatLastModifiedAt(final ProxyNamedEntity baseEntity, final String datePattern) {
-        if (baseEntity == null) {
-            return "";
-        }
-        return formatDate(baseEntity.getLastModifiedAt(), "", datePattern);
-    }
-
-    private static String formatDate(final Long lastQueryDate, final String defaultString, final String datePattern) {
         if (lastQueryDate != null) {
             final SimpleDateFormat format = new SimpleDateFormat(datePattern);
             format.setTimeZone(getBrowserTimeZone());
             return format.format(new Date(lastQueryDate));
         }
-        return defaultString;
-    }
-
-    private static String formatDate(final Long lastQueryDate, final String defaultString) {
-        return formatDate(lastQueryDate, defaultString, SPUIDefinitions.LAST_QUERY_DATE_FORMAT);
+        return null;
     }
 
     /**
@@ -226,10 +173,10 @@ public final class SPDateTimeUtil {
      * Get time zone of the browser client to be used as default.
      */
     public static String getClientTimeZoneOffsetId() {
-        return getCurentZonedDateTime().getOffset().getId().replaceAll("Z", "+00:00");
+        return getCurrentZonedDateTime().getOffset().getId().replace("Z", "+00:00");
     }
 
-    private static ZonedDateTime getCurentZonedDateTime() {
+    private static ZonedDateTime getCurrentZonedDateTime() {
         return ZonedDateTime.now(getBrowserTimeZoneId());
     }
 
@@ -243,7 +190,7 @@ public final class SPDateTimeUtil {
      * @return Two weeks from current date and time in epoc milliseconds
      */
     public static Long twoWeeksFromNowEpochMilli() {
-        return getCurentZonedDateTime().plusWeeks(2).toInstant().toEpochMilli();
+        return getCurrentZonedDateTime().plusWeeks(2).toInstant().toEpochMilli();
     }
 
     /**
@@ -252,7 +199,7 @@ public final class SPDateTimeUtil {
      * @return Half an hour from current date and time in epoc milliseconds
      */
     public static Long halfAnHourFromNowEpochMilli() {
-        return getCurentZonedDateTime().plusMinutes(30).toInstant().toEpochMilli();
+        return getCurrentZonedDateTime().plusMinutes(30).toInstant().toEpochMilli();
     }
 
     /**

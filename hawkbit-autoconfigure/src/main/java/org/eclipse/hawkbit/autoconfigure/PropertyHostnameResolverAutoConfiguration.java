@@ -22,8 +22,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-import com.google.common.base.Throwables;
-
 /**
  * Auto configuration for {@link HostnameResolver} and
  * {@link ArtifactUrlHandler} based on a properties.
@@ -46,7 +44,7 @@ public class PropertyHostnameResolverAutoConfiguration {
             try {
                 return new URL(serverProperties.getUrl());
             } catch (final MalformedURLException e) {
-                throw Throwables.propagate(e);
+                throw new IllegalArgumentException("URL not valid: " + serverProperties.getUrl(), e);
             }
         };
     }

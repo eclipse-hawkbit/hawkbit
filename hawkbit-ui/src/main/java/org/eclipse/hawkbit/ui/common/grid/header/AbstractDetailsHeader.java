@@ -45,7 +45,7 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
      * @param uiNotification
      *            UINotification
      */
-    public AbstractDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected AbstractDetailsHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus, final UINotification uiNotification) {
         super(i18n, permChecker, eventBus);
 
@@ -67,7 +67,7 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
         addHeaderSupports(Arrays.asList(editDetailsHeaderSupport, metaDataDetailsHeaderSupport));
     }
 
-    // can be overriden in child classes for entity-specific permission
+    // can be overridden in child classes for entity-specific permission
     protected boolean hasEditPermission() {
         return permChecker.hasUpdateRepositoryPermission();
     }
@@ -76,7 +76,7 @@ public abstract class AbstractDetailsHeader<T> extends AbstractMasterAwareGridHe
         return true;
     }
 
-    // can be overriden in child classes for entity-specific permission
+    // can be overridden in child classes for entity-specific permission
     protected boolean hasMetadataReadPermission() {
         return permChecker.hasReadRepositoryPermission();
     }

@@ -29,7 +29,7 @@ public abstract class AbstractAddEntityWindowController<T, E, R> extends Abstrac
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractAddEntityWindowController(final CommonUiDependencies uiDependencies) {
+    protected AbstractAddEntityWindowController(final CommonUiDependencies uiDependencies) {
         super(uiDependencies);
     }
 

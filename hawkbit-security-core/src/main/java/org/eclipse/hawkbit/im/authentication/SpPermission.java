@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.im.authentication;
 
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -22,16 +21,14 @@ import org.springframework.security.core.GrantedAuthority;
 /**
  * <p>
  * Software provisioning permissions that are technically available as
- * {@link GrantedAuthority} based on the authenticated users identity context.
+ * {@linkplain GrantedAuthority} based on the authenticated users identity
+ * context.
  * </p>
  *
  * <p>
- * The Permissions cover CRUD for two data areas:
- *
- * XX_Target_CRUD which covers the following entities: {@link Target} entities
- * including metadata, {@link TargetTag}s, {@link TargetRegistrationRule}s
- * XX_Repository CRUD which covers: {@link DistributionSet}s,
- * {@link SoftwareModule}s, DS Tags
+ * The permissions cover CRUD operations for various areas within eclipse
+ * hawkBit, like targets, software-artifacts, distribution sets, config-options
+ * etc.
  * </p>
  */
 public final class SpPermission {
@@ -39,69 +36,50 @@ public final class SpPermission {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpPermission.class);
 
     /**
-     * Permission to read the targets from the
-     * {@link ProvisioningTargetRepository} including their meta information,
-     * {@link ProvisioningTargetFilter}s and target changing entities (
-     * {@link DistributionSetApplier} and {@link TargetRegistrationRule}). That
-     * corresponds in REST API to GET.
+     * Permission to read the targets (list and filter).
      */
     public static final String READ_TARGET = "READ_TARGET";
 
     /**
-     * Permission to read the target security token. The security token is
-     * security concerned and should be protected. So the combination
-     * {@link #READ_TARGET} and {@link #READ_TARGET_SEC_TOKEN} is necessary to
-     * able to read the security token of an target.
+     * Permission to read the target security token. The security token is security
+     * concerned and should be protected. So the combination
+     * {@linkplain #READ_TARGET} and {@code READ_TARGET_SEC_TOKEN} is necessary to
+     * be able to read the security token of a target.
      */
     public static final String READ_TARGET_SEC_TOKEN = "READ_TARGET_SECURITY_TOKEN";
 
     /**
-     * Permission to change/edit/update targets in the
-     * {@link ProvisioningTargetRepository} including their meta information and
-     * or/relations or {@link DistributionSet} assignment,
-     * {@link ProvisioningTargetFilter}s and target changing entities (
-     * {@link DistributionSetApplier} and {@link TargetRegistrationRule}). That
-     * corresponds in REST API to POST.
+     * Permission to change/edit/update targets and to assign updates.
      */
     public static final String UPDATE_TARGET = "UPDATE_TARGET";
 
     /**
-     * Permission to add new targets to the {@link ProvisioningTargetRepository}
-     * including their meta information and or/relations or
-     * {@link DistributionSet} assignment.That corresponds in REST API to PUT.
+     * Permission to add new targets including their meta information.
      */
     public static final String CREATE_TARGET = "CREATE_TARGET";
 
     /**
-     * Permission to delete targets in the {@link ProvisioningTargetRepository},
-     * {@link ProvisioningTargetFilter}s and target changing entities (
-     * {@link DistributionSetApplier} and {@link TargetRegistrationRule}). That
-     * corresponds in REST API to DELETE.
+     * Permission to delete targets.
      */
     public static final String DELETE_TARGET = "DELETE_TARGET";
 
     /**
-     * Permission to read {@link DistributionSet}s and/or {@link OsPackage}s.
-     * That corresponds in REST API to GET.
+     * Permission to read distributions and artifacts.
      */
     public static final String READ_REPOSITORY = "READ_REPOSITORY";
 
     /**
-     * Permission to edit/update {@link DistributionSet}s including their
-     * {@link OsPackage} assignment and/or {@link OsPackage}s. That corresponds
-     * in REST API to POST.
+     * Permission to edit/update distributions and artifacts.
      */
     public static final String UPDATE_REPOSITORY = "UPDATE_REPOSITORY";
 
     /**
-     * Permission to add {@link DistributionSet}s and/or {@link OsPackage}s to
-     * the repository. That corresponds in REST API to PUT.
+     * Permission to add distributions and artifacts.
      */
     public static final String CREATE_REPOSITORY = "CREATE_REPOSITORY";
 
     /**
-     * Permission to delete {@link DistributionSet}s and/or {@link OsPackage}s
-     * from the repository. That corresponds in REST API to DELETE.
+     * Permission to delete distributions and artifacts.
      */
     public static final String DELETE_REPOSITORY = "DELETE_REPOSITORY";
 
@@ -112,7 +90,7 @@ public final class SpPermission {
     public static final String SYSTEM_ADMIN = "SYSTEM_ADMIN";
 
     /**
-     * Permission to download repository artifact of an software module.
+     * Permission to download repository artifacts of a software module.
      */
     public static final String DOWNLOAD_REPOSITORY_ARTIFACT = "DOWNLOAD_REPOSITORY_ARTIFACT";
 
@@ -157,9 +135,6 @@ public final class SpPermission {
 
     /**
      * Return all permission.
-     *
-     * @param exclusionRoles
-     *            roles which will excluded
      * @return all permissions
      */
     public static List<String> getAllAuthorities() {
@@ -167,7 +142,6 @@ public final class SpPermission {
         final Field[] declaredFields = SpPermission.class.getDeclaredFields();
         for (final Field field : declaredFields) {
             if (Modifier.isPublic(field.getModifiers()) && Modifier.isStatic(field.getModifiers())) {
-                field.setAccessible(true);
                 try {
                     final String role = (String) field.get(null);
                     allPermissions.add(role);
@@ -219,8 +193,8 @@ public final class SpPermission {
         public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
 
         /**
-         * The role which contains in the spring security context in case an
-         * controller is authenticated but only as anonymous.
+         * The role which contained in the spring security context in case that a
+         * controller is authenticated, but only as 'anonymous'.
          */
         public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
 
@@ -359,7 +333,7 @@ public final class SpPermission {
 
         /**
          * Spring security eval hasAnyRole expression to check if the spring
-         * context contains the anoynmous role or the controller specific role
+         * context contains the anonymous role or the controller specific role
          * {@link SpringEvalExpressions#CONTROLLER_ROLE}.
          */
         public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.rest.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.List;
 
@@ -42,24 +42,21 @@ public class SortUtilityTest {
     @Description("Ascending sorting based on name.")
     public void parseSortParam1() {
         final List<Order> parse = SortUtility.parse(TargetFields.class, SORT_PARAM_1);
-        assertThat(1).as("Count of parsing parameter").isEqualTo(parse.size());
+        assertThat(parse).as("Count of parsing parameter").hasSize(1);
     }
 
     @Test
     @Description("Ascending sorting based on name and descending sorting based on description.")
     public void parseSortParam2() {
         final List<Order> parse = SortUtility.parse(TargetFields.class, SORT_PARAM_2);
-        assertThat(2).as("Count of parsing parameter").isEqualTo(parse.size());
+        assertThat(parse).as("Count of parsing parameter").hasSize(2);
     }
 
     @Test
     @Description("Sorting with wrong syntax leads to SortParameterSyntaxErrorException.")
     public void parseWrongSyntaxParam() {
-        try {
-            SortUtility.parse(TargetFields.class, SYNTAX_FAILURE_SORT_PARAM);
-            fail("SortParameterSyntaxErrorException expected because of wrong syntax");
-        } catch (final SortParameterSyntaxErrorException e) {
-        }
+        assertThrows(SortParameterSyntaxErrorException.class,
+                () -> SortUtility.parse(TargetFields.class, SYNTAX_FAILURE_SORT_PARAM));
     }
 
     @Test
@@ -72,22 +69,14 @@ public class SortUtilityTest {
     @Test
     @Description("Sorting with unknown direction order leads to SortParameterUnsupportedDirectionException.")
     public void parseWrongDirectionParam() {
-        try {
-            SortUtility.parse(TargetFields.class, WRONG_DIRECTION_PARAM);
-            fail("SortParameterUnsupportedDirectionException expected because of unknown direction order");
-        } catch (final SortParameterUnsupportedDirectionException e) {
-        }
-
+        assertThrows(SortParameterUnsupportedDirectionException.class,
+                () -> SortUtility.parse(TargetFields.class, WRONG_DIRECTION_PARAM));
     }
 
     @Test
     @Description("Sorting with unknown field leads to SortParameterUnsupportedFieldException.")
     public void parseWrongFieldParam() {
-        try {
-            SortUtility.parse(TargetFields.class, WRONG_FIELD_PARAM);
-            fail("SortParameterUnsupportedFieldException expected because of unknown field");
-        } catch (final SortParameterUnsupportedFieldException e) {
-        }
-
+        assertThrows(SortParameterUnsupportedFieldException.class,
+                () -> SortUtility.parse(TargetFields.class, WRONG_FIELD_PARAM));
     }
 }

@@ -153,9 +153,9 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final Message replyMessage = replyToListener.getDeleteMessages().get(target);
         assertAllTargetsCount(0);
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
-        assertThat(headers.get(MessageHeaderKey.THING_ID)).isEqualTo(target);
-        assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
-        assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.THING_DELETED.toString());
+        assertThat(headers).containsEntry(MessageHeaderKey.THING_ID, target)
+                .containsEntry(MessageHeaderKey.TENANT, TENANT_EXIST)
+                .containsEntry(MessageHeaderKey.TYPE, MessageType.THING_DELETED.toString());
     }
 
     protected void assertRequestAttributesUpdateMessage(final String target) {
@@ -173,9 +173,9 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
 
-        assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
+        assertThat(headers).containsEntry(MessageHeaderKey.TENANT, TENANT_EXIST);
         assertThat(correlationId).isEqualTo(replyMessage.getMessageProperties().getCorrelationId());
-        assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.PING_RESPONSE.toString());
+        assertThat(headers).containsEntry(MessageHeaderKey.TYPE, MessageType.PING_RESPONSE.toString());
         assertThat(Long.valueOf(new String(replyMessage.getBody(), StandardCharsets.UTF_8)))
                 .isLessThanOrEqualTo(System.currentTimeMillis());
 
@@ -212,20 +212,15 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         assertAssignmentMessage(dsModules, controllerId, EventTopic.DOWNLOAD);
     }
 
-    protected void createAndSendThingCreated(final String controllerId, final String tenant) {
-        createAndSendThingCreated(controllerId, null, null, tenant);
+    protected void createAndSendThingCreated(final String controllerId) {
+        createAndSendThingCreated(controllerId, null, null);
     }
 
     protected void createAndSendThingCreated(final String controllerId, final String name,
-            final Map<String, String> attributes, final String tenant) {
-        final Message message = createTargetMessage(controllerId, name, attributes, tenant);
+            final Map<String, String> attributes) {
+        final Message message = createTargetMessage(controllerId, name, attributes,
+                AbstractAmqpServiceIntegrationTest.TENANT_EXIST);
         getDmfClient().send(message);
-    }
-
-    protected Message createAndSendPingMessage(final String correlationId, final String tenant) {
-        final Message message = createPingMessage(correlationId, tenant);
-        getDmfClient().send(message);
-        return message;
     }
 
     protected void verifyReplyToListener() {
@@ -254,10 +249,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         final Message replyMessage = replyToListener.getLatestEventMessage(eventTopic);
         assertAllTargetsCount(1);
         final Map<String, Object> headers = replyMessage.getMessageProperties().getHeaders();
-        assertThat(headers.get(MessageHeaderKey.TOPIC)).isEqualTo(eventTopic.toString());
-        assertThat(headers.get(MessageHeaderKey.THING_ID)).isEqualTo(controllerId);
-        assertThat(headers.get(MessageHeaderKey.TENANT)).isEqualTo(TENANT_EXIST);
-        assertThat(headers.get(MessageHeaderKey.TYPE)).isEqualTo(MessageType.EVENT.toString());
+
+        assertThat(headers).containsEntry(MessageHeaderKey.TOPIC, eventTopic.toString())
+                .containsEntry(MessageHeaderKey.THING_ID, controllerId)
+                .containsEntry(MessageHeaderKey.TENANT, TENANT_EXIST)
+                .containsEntry(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         return replyMessage;
     }
 
@@ -290,7 +286,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
             final int existingTargetsAfterCreation, final TargetUpdateStatus expectedTargetStatus,
             final String createdBy, final Map<String, String> attributes,
             final Callable<Optional<Target>> fetchTarget) {
-        createAndSendThingCreated(controllerId, name, attributes, TENANT_EXIST);
+        createAndSendThingCreated(controllerId, name, attributes);
         final Target registeredTarget = waitUntilIsPresent(fetchTarget::call);
         assertAllTargetsCount(existingTargetsAfterCreation);
         assertThat(registeredTarget).isNotNull();
@@ -372,14 +368,15 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
             final DmfActionStatus status) {
         final DmfActionUpdateStatus dmfActionUpdateStatus = new DmfActionUpdateStatus(actionId, status);
 
-        final Message eventMessage = createUpdateActionEventMessage(TENANT_EXIST, dmfActionUpdateStatus);
+        final Message eventMessage = createUpdateActionEventMessage(dmfActionUpdateStatus);
         eventMessage.getMessageProperties().getHeaders().put(MessageHeaderKey.THING_ID, target);
 
         getDmfClient().send(eventMessage);
     }
 
-    protected Message createUpdateActionEventMessage(final String tenant, final Object payload) {
-        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+    protected Message createUpdateActionEventMessage(final Object payload) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(
+                AbstractAmqpServiceIntegrationTest.TENANT_EXIST);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.toString());
         messageProperties.setCorrelationId(CORRELATION_ID);
@@ -404,8 +401,9 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     }
 
-    protected Message createUpdateAttributesMessageWrongBody(final String target, final String tenant) {
-        final MessageProperties messageProperties = createMessagePropertiesWithTenant(tenant);
+    protected Message createUpdateAttributesMessageWrongBody(final String target) {
+        final MessageProperties messageProperties = createMessagePropertiesWithTenant(
+                AbstractAmqpServiceIntegrationTest.TENANT_EXIST);
         messageProperties.getHeaders().put(MessageHeaderKey.THING_ID, target);
         messageProperties.getHeaders().put(MessageHeaderKey.TYPE, MessageType.EVENT.toString());
         messageProperties.getHeaders().put(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ATTRIBUTES.toString());
@@ -423,17 +421,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
                 final Map<String, String> controllerAttributes = WithSpringAuthorityRule
                         .runAsPrivileged(() -> targetManagement.getControllerAttributes(controllerId));
                 assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
-                attributes.forEach((k, v) -> assertKeyValueInMap(k, v, controllerAttributes));
+                assertThat(controllerAttributes).containsAllEntriesOf(attributes);
             } catch (final Exception e) {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    private void assertKeyValueInMap(final String key, final String value,
-            final Map<String, String> controllerAttributes) {
-        assertThat(controllerAttributes.containsKey(key)).isTrue();
-        assertThat(controllerAttributes.get(key)).isEqualTo(value);
     }
 
     @Override

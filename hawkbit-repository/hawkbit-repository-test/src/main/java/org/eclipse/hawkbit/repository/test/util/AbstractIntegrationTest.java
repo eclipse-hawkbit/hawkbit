@@ -17,11 +17,10 @@ import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Random;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
@@ -59,7 +58,6 @@ import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.RepositoryModelConstants;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.matcher.EventVerifier;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -103,7 +101,7 @@ import org.springframework.test.context.TestPropertySource;
 // Cleaning repository will fire "delete" events. We won't count them to the
 // test execution. So, the order execution between EventVerifier and Cleanup is
 // important!
-@TestExecutionListeners(inheritListeners = true, listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
+@TestExecutionListeners(listeners = { EventVerifier.class, CleanupTestExecutionListener.class,
         MySqlTestDatabase.class, MsSqlTestDatabase.class,
         PostgreSqlTestDatabase.class }, mergeMode = MergeMode.MERGE_WITH_DEFAULTS)
 @TestPropertySource(properties = "spring.main.allow-bean-definition-overriding=true")
@@ -302,7 +300,7 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
-        return assignDistributionSet(pset, Arrays.asList(target));
+        return assignDistributionSet(pset, Collections.singletonList(target));
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsId, final String targetId,
@@ -322,16 +320,16 @@ public abstract class AbstractIntegrationTest {
         return distributionSetManagement.createMetaData(dsId, md);
     }
 
-    protected TargetMetadata createTargetMetadata(final String controllerId, final MetaData md) {
-        return createTargetMetadata(controllerId, Collections.singletonList(md)).get(0);
+    protected void createTargetMetadata(final String controllerId, final MetaData md) {
+        createTargetMetadata(controllerId, Collections.singletonList(md));
     }
 
-    protected List<TargetMetadata> createTargetMetadata(final String controllerId, final List<MetaData> md) {
-        return targetManagement.createMetaData(controllerId, md);
+    private void createTargetMetadata(final String controllerId, final List<MetaData> md) {
+        targetManagement.createMetaData(controllerId, md);
     }
 
     protected Long getOsModule(final DistributionSet ds) {
-        return ds.findFirstModuleByType(osType).get().getId();
+        return ds.findFirstModuleByType(osType).orElseThrow(NoSuchElementException::new).getId();
     }
 
     protected Action prepareFinishedUpdate() {
@@ -386,7 +384,7 @@ public abstract class AbstractIntegrationTest {
 
     }
 
-    private static String artifactDirectory = createTempDir();
+    private static final String ARTIFACT_DIRECTORY = createTempDir();
 
     private static String createTempDir() {
         try {
@@ -398,9 +396,9 @@ public abstract class AbstractIntegrationTest {
 
     @AfterEach
     public void cleanUp() {
-        if (new File(artifactDirectory).exists()) {
+        if (new File(ARTIFACT_DIRECTORY).exists()) {
             try {
-                FileUtils.cleanDirectory(new File(artifactDirectory));
+                FileUtils.cleanDirectory(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
                 LOG.warn("Cannot cleanup file-directory", e);
             }
@@ -409,14 +407,14 @@ public abstract class AbstractIntegrationTest {
 
     @BeforeAll
     public static void beforeClass() {
-        System.setProperty("org.eclipse.hawkbit.repository.file.path", artifactDirectory);
+        System.setProperty("org.eclipse.hawkbit.repository.file.path", ARTIFACT_DIRECTORY);
     }
 
     @AfterAll
     public static void afterClass() {
-        if (new File(artifactDirectory).exists()) {
+        if (new File(ARTIFACT_DIRECTORY).exists()) {
             try {
-                FileUtils.deleteDirectory(new File(artifactDirectory));
+                FileUtils.deleteDirectory(new File(ARTIFACT_DIRECTORY));
             } catch (final IOException | IllegalArgumentException e) {
                 LOG.warn("Cannot delete file-directory", e);
             }
@@ -447,20 +445,6 @@ public abstract class AbstractIntegrationTest {
     protected static String getTestTimeZone() {
         final ZonedDateTime currentTime = ZonedDateTime.now();
         return currentTime.getOffset().getId().replace("Z", "+00:00");
-    }
-
-    protected static String generateRandomStringWithLength(final int length) {
-        final StringBuilder randomStringBuilder = new StringBuilder(length);
-        final Random rand = new Random();
-        final int lowercaseACode = 97;
-        final int lowercaseZCode = 122;
-
-        for (int i = 0; i < length; i++) {
-            final char randomCharacter = (char) (rand.nextInt(lowercaseZCode - lowercaseACode + 1) + lowercaseACode);
-            randomStringBuilder.append(randomCharacter);
-        }
-
-        return randomStringBuilder.toString();
     }
 
     protected static Action getFirstAssignedAction(

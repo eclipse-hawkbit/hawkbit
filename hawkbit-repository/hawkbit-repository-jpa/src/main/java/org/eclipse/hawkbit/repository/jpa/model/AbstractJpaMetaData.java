@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.util.Objects;
+
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Id;
@@ -36,12 +38,12 @@ public abstract class AbstractJpaMetaData implements MetaData {
     @Basic
     private String value;
 
-    public AbstractJpaMetaData(final String key, final String value) {
+    protected AbstractJpaMetaData(final String key, final String value) {
         this.key = key;
         this.value = value;
     }
 
-    public AbstractJpaMetaData() {
+    protected AbstractJpaMetaData() {
         // Default constructor needed for JPA entities
     }
 
@@ -64,41 +66,17 @@ public abstract class AbstractJpaMetaData implements MetaData {
     }
 
     @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((key == null) ? 0 : key.hashCode());
-        result = prime * result + ((value == null) ? 0 : value.hashCode());
-        return result;
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        final AbstractJpaMetaData that = (AbstractJpaMetaData) o;
+        return Objects.equals(key, that.key) && Objects.equals(value, that.value);
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (!(this.getClass().isInstance(obj))) {
-            return false;
-        }
-        final AbstractJpaMetaData other = (AbstractJpaMetaData) obj;
-        if (key == null) {
-            if (other.key != null) {
-                return false;
-            }
-        } else if (!key.equals(other.key)) {
-            return false;
-        }
-        if (value == null) {
-            if (other.value != null) {
-                return false;
-            }
-        } else if (!value.equals(other.value)) {
-            return false;
-        }
-        return true;
+    public int hashCode() {
+        return Objects.hash(key, value);
     }
-
 }

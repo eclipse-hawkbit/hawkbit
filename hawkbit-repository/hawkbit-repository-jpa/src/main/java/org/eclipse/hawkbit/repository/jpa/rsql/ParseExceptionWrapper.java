@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
-import com.google.common.base.Throwables;
+import org.springframework.util.ReflectionUtils;
 
 import cz.jirutka.rsql.parser.ParseException;
 
@@ -24,13 +24,7 @@ import cz.jirutka.rsql.parser.ParseException;
  */
 public class ParseExceptionWrapper {
 
-    private static final String FIELD_EXPECTED_TOKEN_SEQ = "expectedTokenSequences";
-    private static final String FIELD_CURRENT_TOKEN = "currentToken";
-
     private final ParseException parseException;
-    private final Class<? extends ParseException> parseExceptionClass;
-    private Field expectedTokenSequenceField;
-    private Field currentTokenField;
 
     /**
      * Constructor.
@@ -41,33 +35,24 @@ public class ParseExceptionWrapper {
      */
     public ParseExceptionWrapper(final ParseException parseException) {
         this.parseException = parseException;
-        parseExceptionClass = parseException.getClass();
-
-        try {
-            expectedTokenSequenceField = getAccessibleField(parseExceptionClass, FIELD_EXPECTED_TOKEN_SEQ);
-        } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
-            expectedTokenSequenceField = null;
-        }
-
-        try {
-            currentTokenField = getAccessibleField(parseExceptionClass, FIELD_CURRENT_TOKEN);
-        } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
-            currentTokenField = null;
-        }
     }
 
     public int[][] getExpectedTokenSequence() {
-        if (expectedTokenSequenceField == null) {
-            return new int[0][0];
-        }
-        return (int[][]) getValue(expectedTokenSequenceField, parseException);
+        return (parseException.expectedTokenSequences != null) // unclear if this can happen
+                ? parseException.expectedTokenSequences
+                : new int[0][0];
     }
 
+    /**
+     * Get the current token
+     * 
+     * @return the current token or {@code null} if there is non.
+     */
     public TokenWrapper getCurrentToken() {
-        if (currentTokenField == null) {
-            return null;
-        }
-        return new TokenWrapper(getValue(currentTokenField, parseException));
+        return (parseException.currentToken != null) // unclear if this can happen
+                ? new TokenWrapper(parseException.currentToken)
+                : null;
+
     }
 
     @Override
@@ -76,19 +61,6 @@ public class ParseExceptionWrapper {
                 + ", getCurrentToken()=" + getCurrentToken() + "]";
     }
 
-    private static Field getAccessibleField(final Class<?> clazz, final String field) throws NoSuchFieldException {
-        final Field declaredField = clazz.getDeclaredField(field);
-        declaredField.setAccessible(true);
-        return declaredField;
-    }
-
-    private static Object getValue(final Field field, final Object instance) {
-        try {
-            return field.get(instance);
-        } catch (IllegalArgumentException | IllegalAccessException e) {
-            throw Throwables.propagate(e);
-        }
-    }
 
     /**
      * A {@link TokenWrapper} which wraps the
@@ -115,37 +87,37 @@ public class ParseExceptionWrapper {
             this.tokenInstance = tokenField;
 
             try {
-                nextTokenField = getAccessibleField(tokenField.getClass(), FIELD_NEXT);
+                nextTokenField = getAccessibleField(FIELD_NEXT);
             } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
                 nextTokenField = null;
             }
             try {
-                kindTokenField = getAccessibleField(tokenField.getClass(), FIELD_KIND);
+                kindTokenField = getAccessibleField(FIELD_KIND);
             } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
                 kindTokenField = null;
             }
 
             try {
-                imageTokenField = getAccessibleField(tokenField.getClass(), FIELD_IMAGE);
+                imageTokenField = getAccessibleField(FIELD_IMAGE);
             } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
                 imageTokenField = null;
             }
 
             try {
-                beginColumnTokenField = getAccessibleField(tokenField.getClass(), FIELD_BEGIN_COL);
+                beginColumnTokenField = getAccessibleField(FIELD_BEGIN_COL);
             } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
                 beginColumnTokenField = null;
             }
 
             try {
-                endColumnTokenField = getAccessibleField(tokenField.getClass(), FIELD_END_COL);
+                endColumnTokenField = getAccessibleField(FIELD_END_COL);
             } catch (@SuppressWarnings("squid:S1166") final NoSuchFieldException e) {
                 endColumnTokenField = null;
             }
         }
 
         public TokenWrapper getNext() {
-            final Object nextToken = getValue(nextTokenField, tokenInstance);
+            final Object nextToken = getValue(nextTokenField);
             return nextToken != null ? new TokenWrapper(nextToken) : null;
 
         }
@@ -154,28 +126,42 @@ public class ParseExceptionWrapper {
             if (kindTokenField == null) {
                 return 0;
             }
-            return (int) getValue(kindTokenField, tokenInstance);
+            return (int) getValue(kindTokenField);
         }
 
         public String getImage() {
             if (imageTokenField == null) {
                 return null;
             }
-            return (String) getValue(imageTokenField, tokenInstance);
+            return (String) getValue(imageTokenField);
         }
 
         public int getBeginColumn() {
             if (beginColumnTokenField == null) {
                 return 0;
             }
-            return (int) getValue(beginColumnTokenField, tokenInstance);
+            return (int) getValue(beginColumnTokenField);
         }
 
         public int getEndColumn() {
             if (endColumnTokenField == null) {
                 return 0;
             }
-            return (int) getValue(endColumnTokenField, tokenInstance);
+            return (int) getValue(endColumnTokenField);
+        }
+
+        private Field getAccessibleField(final String field) throws NoSuchFieldException {
+            final Field declaredField = tokenInstance.getClass().getDeclaredField(field);
+            ReflectionUtils.makeAccessible(declaredField);
+            return declaredField;
+        }
+
+        private Object getValue(final Field field) {
+            try {
+                return field.get(tokenInstance);
+            } catch (IllegalArgumentException | IllegalAccessException e) {
+                throw new IllegalFieldAccessExeption(e);
+            }
         }
 
         @Override
@@ -185,4 +171,11 @@ public class ParseExceptionWrapper {
                     + ", getEndColumn()=" + getEndColumn() + "]";
         }
     }
+
+    static class IllegalFieldAccessExeption extends RuntimeException {
+        public IllegalFieldAccessExeption(Throwable e) {
+            super(e);
+        }
+    }
 }
+

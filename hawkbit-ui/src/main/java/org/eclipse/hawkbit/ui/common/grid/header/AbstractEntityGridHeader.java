@@ -68,7 +68,8 @@ public abstract class AbstractEntityGridHeader extends AbstractGridHeader {
      * @param view
      *            EventView
      */
-    public AbstractEntityGridHeader(final CommonUiDependencies uiDependencies, final HidableLayoutUiState filterLayoutUiState,
+    protected AbstractEntityGridHeader(final CommonUiDependencies uiDependencies,
+            final HidableLayoutUiState filterLayoutUiState,
             final GridLayoutUiState gridLayoutUiState, final EventLayout filterLayout, final EventView view) {
         super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 

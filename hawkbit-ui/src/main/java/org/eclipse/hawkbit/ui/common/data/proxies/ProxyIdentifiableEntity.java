@@ -8,8 +8,10 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
-import org.eclipse.hawkbit.repository.Identifiable;
 import java.io.Serializable;
+import java.util.Objects;
+
+import org.eclipse.hawkbit.repository.Identifiable;
 
 /**
  * Proxy entity representing the {@link Identifiable} entity, fetched from
@@ -23,7 +25,7 @@ public abstract class ProxyIdentifiableEntity implements Serializable {
     /**
      * Constructor to initialize the id with null
      */
-    public ProxyIdentifiableEntity() {
+    protected ProxyIdentifiableEntity() {
         this.id = null;
     }
 
@@ -32,7 +34,7 @@ public abstract class ProxyIdentifiableEntity implements Serializable {
      * @param id
      *          Id of entity
      */
-    public ProxyIdentifiableEntity(final Long id) {
+    protected ProxyIdentifiableEntity(final Long id) {
         this.id = id;
     }
 
@@ -64,25 +66,13 @@ public abstract class ProxyIdentifiableEntity implements Serializable {
     }
 
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object o) {
+        if (this == o)
             return true;
-        }
-        if (obj == null) {
+        if (o == null || getClass() != o.getClass())
             return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final ProxyIdentifiableEntity other = (ProxyIdentifiableEntity) obj;
-        if (id == null) {
-            if (other.id != null) {
-                return false;
-            }
-        } else if (!id.equals(other.id)) {
-            return false;
-        }
-        return true;
+        final ProxyIdentifiableEntity that = (ProxyIdentifiableEntity) o;
+        return Objects.equals(id, that.id);
     }
 
     @Override

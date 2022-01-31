@@ -42,7 +42,7 @@ import io.qameta.allure.Story;
 @ActiveProfiles({ "test" })
 @Feature("Component Tests - REST Security")
 @Story("Denial of Service protection filter")
-public class DosFilterTest extends AbstractDDiApiIntegrationTest {
+class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
@@ -52,14 +52,14 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that clients that are on the blacklist are forbidded ")
-    public void blackListedClientIsForbidden() throws Exception {
+    void blackListedClientIsForbidden() throws Exception {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                 .header(HttpHeaders.X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 ")).andExpect(status().isForbidden());
     }
 
     @Test
     @Description("Ensures that a READ DoS attempt is blocked ")
-    public void getFloddingAttackThatisPrevented() throws Exception {
+    void getFloddingAttackThatisPrevented() throws Exception {
 
         MvcResult result = null;
 
@@ -79,7 +79,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv4 address) is on a whitelist")
-    public void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
+    void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                     .header(HttpHeaders.X_FORWARDED_FOR, "127.0.0.1")).andExpect(status().isOk());
@@ -88,7 +88,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that an assumed READ DoS attempt is not blocked as the client (with IPv6 address) is on a whitelist")
-    public void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
+    void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                     .header(HttpHeaders.X_FORWARDED_FOR, "0:0:0:0:0:0:0:1")).andExpect(status().isOk());
@@ -97,7 +97,8 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a relatively high number of READ requests is allowed if it is below the DoS detection threshold")
-    public void acceptableGetLoad() throws Exception {
+    @SuppressWarnings("squid:S2925") // No idea how to get rid of the Thread.sleep here
+    void acceptableGetLoad() throws Exception {
 
         for (int x = 0; x < 3; x++) {
             // sleep for one second
@@ -111,7 +112,7 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a WRITE DoS attempt is blocked ")
-    public void putPostFloddingAttackThatisPrevented() throws Exception {
+    void putPostFloddingAttackThatisPrevented() throws Exception {
         final Long actionId = prepareDeploymentBase();
         final String feedback = JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding");
 
@@ -135,7 +136,8 @@ public class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a relatively high number of WRITE requests is allowed if it is below the DoS detection threshold")
-    public void acceptablePutPostLoad() throws Exception {
+    @SuppressWarnings("squid:S2925") // No idea how to get rid of the Thread.sleep here
+    void acceptablePutPostLoad() throws Exception {
         final Long actionId = prepareDeploymentBase();
         final String feedback = JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding");
 

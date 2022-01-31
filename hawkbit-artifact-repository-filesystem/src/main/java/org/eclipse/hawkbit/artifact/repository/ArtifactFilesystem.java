@@ -13,12 +13,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.Objects;
+
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
-import org.springframework.util.Assert;
-
-import com.google.common.base.Throwables;
 
 /**
  * {@link AbstractDbArtifact} implementation which dynamically creates a
@@ -28,11 +28,11 @@ public class ArtifactFilesystem extends AbstractDbArtifact {
 
     private final File file;
 
-    public ArtifactFilesystem(final File file, final String artifactId, final DbArtifactHash hashes, final Long size,
+    public ArtifactFilesystem(@NotNull final File file, @NotNull final String artifactId,
+            @NotNull final DbArtifactHash hashes, final Long size,
             final String contentType) {
         super(artifactId, hashes, size, contentType);
-        Assert.notNull(file, "File cannot be null");
-        this.file = file;
+        this.file = Objects.requireNonNull(file, "Artifact file may not be null");
     }
 
     @Override
@@ -43,7 +43,7 @@ public class ArtifactFilesystem extends AbstractDbArtifact {
         try {
             return new BufferedInputStream(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
-            throw Throwables.propagate(e);
+            throw new ArtifactFileNotFoundException(e);
         }
     }
 }

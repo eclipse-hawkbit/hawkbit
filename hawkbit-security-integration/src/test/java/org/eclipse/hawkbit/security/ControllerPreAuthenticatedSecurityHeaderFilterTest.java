@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -23,11 +22,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @Feature("Unit Tests - Security")
 @Story("Issuer hash based authentication")
@@ -57,8 +56,6 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     @Mock
     private TenantConfigurationManagement tenantConfigurationManagementMock;
     @Mock
-    private DmfTenantSecurityToken tenantSecurityTokenMock;
-    @Mock
     private UserAuthoritiesResolver authoritiesResolver;
 
     @BeforeEach
@@ -74,7 +71,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         final DmfTenantSecurityToken securityToken = prepareSecurityToken(SINGLE_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
+                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
                         .thenReturn(CONFIG_VALUE_SINGLE_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNotNull();
     }
@@ -84,7 +81,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     public void testIssuerHashBasedAuthenticationWithMultipleKnownHashes() {
         // use multiple known hashes
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
+                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SINGLE_HASH))).isNotNull();
         assertThat(underTest.getPreAuthenticatedPrincipal(prepareSecurityToken(SECOND_HASH))).isNotNull();
@@ -97,7 +94,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         final DmfTenantSecurityToken securityToken = prepareSecurityToken(UNKNOWN_HASH);
         // use single known hash
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
+                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
         assertThat(underTest.getPreAuthenticatedPrincipal(securityToken)).isNull();
     }
@@ -112,7 +109,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         final HeaderAuthentication expected2 = new HeaderAuthentication(CA_COMMON_NAME_VALUE, SECOND_HASH);
 
         when(tenantConfigurationManagementMock.getConfigurationValue(
-                eq(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME), eq(String.class)))
+                TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_AUTHORITY_NAME, String.class))
                         .thenReturn(CONFIG_VALUE_MULTI_HASH);
 
         final Collection<HeaderAuthentication> credentials1 = (Collection<HeaderAuthentication>) underTest
@@ -123,8 +120,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
         final Object principal1 = underTest.getPreAuthenticatedPrincipal(securityToken1);
         final Object principal2 = underTest.getPreAuthenticatedPrincipal(securityToken2);
 
-        assertThat(credentials1.contains(expected1)).isTrue();
-        assertThat(credentials2.contains(expected2)).isTrue();
+        assertThat(credentials1).contains(expected1);
+        assertThat(credentials2).contains(expected2);
 
         assertThat(expected1).as("hash1 expected in principal!").isEqualTo(principal1);
         assertThat(expected2).as("hash2 expected in principal!").isEqualTo(principal2);
