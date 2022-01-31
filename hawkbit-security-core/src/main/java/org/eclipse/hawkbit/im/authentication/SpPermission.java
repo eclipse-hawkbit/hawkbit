@@ -26,7 +26,7 @@ import org.springframework.security.core.GrantedAuthority;
  * </p>
  *
  * <p>
- * The permissions cover CRUD operations for various areas within eclispe
+ * The permissions cover CRUD operations for various areas within eclipse
  * hawkBit, like targets, software-artifacts, distribution sets, config-options
  * etc.
  * </p>
@@ -36,7 +36,7 @@ public final class SpPermission {
     private static final Logger LOGGER = LoggerFactory.getLogger(SpPermission.class);
 
     /**
-     * Permission to read the targets (list & filter).
+     * Permission to read the targets (list and filter).
      */
     public static final String READ_TARGET = "READ_TARGET";
 
@@ -44,12 +44,12 @@ public final class SpPermission {
      * Permission to read the target security token. The security token is security
      * concerned and should be protected. So the combination
      * {@linkplain #READ_TARGET} and {@code READ_TARGET_SEC_TOKEN} is necessary to
-     * be able to read the security token of an target.
+     * be able to read the security token of a target.
      */
     public static final String READ_TARGET_SEC_TOKEN = "READ_TARGET_SECURITY_TOKEN";
 
     /**
-     * Permission to change/edit/update targets and assing updates.
+     * Permission to change/edit/update targets and to assign updates.
      */
     public static final String UPDATE_TARGET = "UPDATE_TARGET";
 
@@ -193,8 +193,8 @@ public final class SpPermission {
         public static final String CONTROLLER_ROLE = "ROLE_CONTROLLER";
 
         /**
-         * The role which contains in the spring security context in case an
-         * controller is authenticated but only as anonymous.
+         * The role which contained in the spring security context in case that a
+         * controller is authenticated, but only as 'anonymous'.
          */
         public static final String CONTROLLER_ROLE_ANONYMOUS = "ROLE_CONTROLLER_ANONYMOUS";
 
@@ -333,7 +333,7 @@ public final class SpPermission {
 
         /**
          * Spring security eval hasAnyRole expression to check if the spring
-         * context contains the anoynmous role or the controller specific role
+         * context contains the anonymous role or the controller specific role
          * {@link SpringEvalExpressions#CONTROLLER_ROLE}.
          */
         public static final String IS_CONTROLLER = "hasAnyRole('" + CONTROLLER_ROLE_ANONYMOUS + "', '" + CONTROLLER_ROLE

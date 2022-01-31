@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -62,21 +63,21 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Management API")
 @Story("Rollout Resource")
-public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";
 
-    @Autowired
-    private RolloutManagement rolloutManagement;
+    @Autowired private RolloutManagement rolloutManagement;
 
-    @Autowired
-    private RolloutGroupManagement rolloutGroupManagement;
+    @Autowired private RolloutGroupManagement rolloutGroupManagement;
 
     @Test
     @Description("Testing that creating rollout with wrong body returns bad request")
-    public void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
-        mvc.perform(post("/rest/v1/rollouts").content("invalid body").contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+    void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
+        mvc.perform(post("/rest/v1/rollouts").content("invalid body")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
     }
@@ -84,30 +85,38 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
     @Test
     @Description("Testing that creating rollout with insufficient permission returns forbidden")
     @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
-    public void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
+    void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        mvc.perform(post("/rest/v1/rollouts")
-                .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().is(403)).andReturn();
+        mvc.perform(post("/rest/v1/rollouts").content(
+                                JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().is(403))
+                .andReturn();
     }
 
     @Test
     @Description("Testing that creating rollout with not existing distribution set returns not found")
-    public void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
+    void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound()).andReturn();
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
     @Description("Testing that creating rollout with not valid formed target filter query returns bad request")
-    public void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
+    void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        mvc.perform(post("/rest/v1/rollouts")
-                .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name=test", null))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+        mvc.perform(post("/rest/v1/rollouts").content(
+                                JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name=test", null))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")))
                 .andReturn();
     }
@@ -130,7 +139,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout can be created")
-    public void createRollout() throws Exception {
+    void createRollout() throws Exception {
         testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -139,17 +148,18 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Verifies that rollout cannot be created if too many rollout groups are specified.")
-    public void createRolloutWithTooManyRolloutGroups() throws Exception {
+    void createRolloutWithTooManyRolloutGroups() throws Exception {
 
         final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
         testdataFactory.createTargets(20, "target", "rollout");
 
-        mvc.perform(post("/rest/v1/rollouts")
-                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
-                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
-                        new RolloutGroupConditionBuilder().withDefaults().build()))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+        mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
+                                testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                                new RolloutGroupConditionBuilder().withDefaults().build()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -157,17 +167,18 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Verifies that rollout cannot be created if the 'max targets per rollout group' quota would be violated for one of the groups.")
-    public void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
+    void createRolloutFailsIfRolloutGroupQuotaIsViolated() throws Exception {
 
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
         testdataFactory.createTargets(maxTargets + 1, "target", "rollout");
 
-        mvc.perform(post("/rest/v1/rollouts")
-                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", 1,
-                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
-                        new RolloutGroupConditionBuilder().withDefaults().build()))
-                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
+        mvc.perform(post("/rest/v1/rollouts").content(
+                                JsonBuilder.rollout("rollout1", "rollout1Desc", 1, testdataFactory.createDistributionSet("ds").getId(),
+                                        "id==target*", new RolloutGroupConditionBuilder().withDefaults().build()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -175,7 +186,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout can be created with groups")
-    public void createRolloutWithGroupDefinitions() throws Exception {
+    void createRolloutWithGroupDefinitions() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
         final int amountTargets = 10;
@@ -202,17 +213,23 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithTooLowPercentage() throws Exception {
+    void createRolloutWithTooLowPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(
-                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
-                        .build(),
-                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
-                        .build());
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(entityFactory.rolloutGroup()
+                .create()
+                .name("Group1")
+                .description("Group1desc")
+                .targetPercentage(0F)
+                .build(), entityFactory.rolloutGroup()
+                .create()
+                .name("Group2")
+                .description("Group2desc")
+                .targetPercentage(100F)
+                .build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -227,17 +244,23 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that no rollout with groups that have illegal percentages can be created")
-    public void createRolloutWithTooHighPercentage() throws Exception {
+    void createRolloutWithTooHighPercentage() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro2");
 
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(
-                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
-                        .build(),
-                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)
-                        .build());
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(entityFactory.rolloutGroup()
+                .create()
+                .name("Group1")
+                .description("Group1desc")
+                .targetPercentage(1F)
+                .build(), entityFactory.rolloutGroup()
+                .create()
+                .name("Group2")
+                .description("Group2desc")
+                .targetPercentage(101F)
+                .build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -252,24 +275,29 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing the empty list is returned if no rollout exists")
-    public void noRolloutReturnsEmptyList() throws Exception {
-        mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.content", hasSize(0))).andExpect(jsonPath("$.total", equalTo(0)));
+    void noRolloutReturnsEmptyList() throws Exception {
+        mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(0)))
+                .andExpect(jsonPath("$.total", equalTo(0)));
     }
 
     @Test
     @Description("Retrieves single rollout from management API including extra data that is delivered only for single rollout access.")
-    public void retrieveSingleRollout() throws Exception {
+    void retrieveSingleRollout() throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
-                4, new RolloutGroupConditionBuilder().withDefaults()
-                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+        final Rollout rollout = rolloutManagement.create(entityFactory.rollout()
+                .create()
+                .name("rollout1")
+                .set(dsA.getId())
+                .targetFilterQuery("controllerId==rollout*"), 4, new RolloutGroupConditionBuilder().withDefaults()
+                .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100")
+                .build());
 
         retrieveAndVerifyRolloutInCreating(dsA, rollout);
         retrieveAndVerifyRolloutInReady(rollout);
@@ -365,7 +393,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout paged list contains rollouts")
-    public void rolloutPagedListContainsAllRollouts() throws Exception {
+    void rolloutPagedListContainsAllRollouts() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -406,7 +434,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout paged list is limited by the query param limit")
-    public void rolloutPagedListIsLimitedToQueryParam() throws Exception {
+    void rolloutPagedListIsLimitedToQueryParam() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -426,7 +454,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout paged list is limited by the query param limit")
-    public void retrieveRolloutGroupsForSpecificRollout() throws Exception {
+    void retrieveRolloutGroupsForSpecificRollout() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -449,7 +477,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that starting the rollout switches the state to starting and then to running")
-    public void startingRolloutSwitchesIntoRunningState() throws Exception {
+    void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -482,7 +510,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that pausing the rollout switches the state to paused")
-    public void pausingRolloutSwitchesIntoPausedState() throws Exception {
+    void pausingRolloutSwitchesIntoPausedState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -512,7 +540,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that resuming the rollout switches the state to running")
-    public void resumingRolloutSwitchesIntoRunningState() throws Exception {
+    void resumingRolloutSwitchesIntoRunningState() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -546,7 +574,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that an already started rollout cannot be started again and returns bad request")
-    public void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
+    void startingAlreadyStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -570,7 +598,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that resuming a rollout which is not started leads to bad request")
-    public void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
+    void resumingNotStartedRolloutReturnsBadRequest() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -587,7 +615,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that starting rollout the first rollout group is in running state")
-    public void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
+    void startingRolloutFirstRolloutGroupIsInRunningState() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -615,17 +643,18 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that a single rollout group can be retrieved")
-    public void retrieveSingleRolloutGroup() throws Exception {
+    void retrieveSingleRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
-                        .targetFilterQuery("controllerId==rollout*"),
-                4, new RolloutGroupConditionBuilder().withDefaults()
+        final Rollout rollout = rolloutManagement.create(entityFactory.rollout()
+                .create()
+                .name("rollout1")
+                .set(dsA.getId())
+                .targetFilterQuery("controllerId==rollout*"), 4, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         final RolloutGroup firstGroup = rolloutGroupManagement
@@ -714,7 +743,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that the targets of rollout group can be retrieved")
-    public void retrieveTargetsFromRolloutGroup() throws Exception {
+    void retrieveTargetsFromRolloutGroup() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -723,8 +752,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+        final RolloutGroup firstGroup = rolloutGroupManagement.findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"),
+                rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -737,7 +766,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that the targets of rollout group can be retrieved with rsql query param")
-    public void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
+    void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -746,8 +775,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutGroupManagement
-                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
+        final RolloutGroup firstGroup = rolloutGroupManagement.findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"),
+                rollout.getId()).getContent().get(0);
 
         final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, firstGroup.getId())
                 .getContent().get(0).getControllerId();
@@ -763,7 +792,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that the targets of rollout group can be retrieved after the rollout has been started")
-    public void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
+    void retrieveTargetsFromRolloutGroupAfterRolloutIsStarted() throws Exception {
         // setup
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -791,7 +820,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Start the rollout in async mode")
-    public void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
+    void startingRolloutSwitchesIntoRunningStateAsync() throws Exception {
 
         final int amountTargets = 1000;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -801,21 +830,31 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
         // starting rollout
-        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
         rolloutManagement.handleRollouts();
 
         // check if running
-        Awaitility.await().pollInterval(Duration.ONE_HUNDRED_MILLISECONDS).atMost(Duration.ONE_MINUTE).with()
-                .until(() -> rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new).getStatus()
+        awaitRunningState(rollout.getId());
+    }
+
+    private void awaitRunningState(final Long rolloutId) {
+        Awaitility.await()
+                .atMost(Duration.ONE_MINUTE)
+                .pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+                .with()
+                .until(() -> WithSpringAuthorityRule.runAsPrivileged(
+                                () -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
+                        .getStatus()
                         .equals(RolloutStatus.RUNNING));
     }
 
     @Test
     @Description("Deletion of a rollout")
-    public void deleteRollout() throws Exception {
+    void deleteRollout() throws Exception {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "rolloutDelete", "rolloutDelete");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -823,7 +862,8 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
 
-        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertStatusIs(rollout, RolloutStatus.DELETING);
@@ -831,11 +871,13 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Soft deletion of a rollout: soft deletion appears when already running rollout is being deleted")
-    public void deleteRunningRollout() throws Exception {
+    void deleteRunningRollout() throws Exception {
         final Rollout rollout = testdataFactory.createSoftDeletedRollout("softDeletedRollout");
 
-        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertStatusIs(rollout, RolloutStatus.DELETED);
     }
@@ -847,7 +889,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rollout paged list with rsql parameter")
-    public void getRolloutWithRSQLParam() throws Exception {
+    void getRolloutWithRSQLParam() throws Exception {
 
         final int amountTargetsRollout1 = 25;
         final int amountTargetsRollout2 = 25;
@@ -885,7 +927,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Testing that rolloutgroup paged list with rsql parameter")
-    public void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
+    void retrieveRolloutGroupsForSpecificRolloutWithRSQLParam() throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -919,7 +961,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Verifies that a DOWNLOAD_ONLY rollout is possible")
-    public void createDownloadOnlyRollout() throws Exception {
+    void createDownloadOnlyRollout() throws Exception {
         testdataFactory.createTargets(20, "target", "rollout");
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -928,7 +970,7 @@ public class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("A rollout create request containing a weight is only accepted when weight is valid and multi assignment is on.")
-    public void weightValidation() throws Exception {
+    void weightValidation() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final int weight = 66;
