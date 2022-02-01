@@ -46,7 +46,7 @@ public class UserPrincipal extends User {
      */
     public UserPrincipal(final String username, final String firstname, final String lastname, final String loginname,
             final String email, final String tenant) {
-        this(username, "***", lastname, firstname, loginname, email, tenant, Collections.emptyList());
+        this(username, "***", firstname, lastname, loginname, email, tenant, Collections.emptyList());
     }
 
     /**

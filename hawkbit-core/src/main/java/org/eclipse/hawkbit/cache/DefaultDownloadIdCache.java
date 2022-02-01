@@ -8,7 +8,8 @@
  */
 package org.eclipse.hawkbit.cache;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Objects;
+
 import org.springframework.cache.Cache;
 import org.springframework.cache.Cache.ValueWrapper;
 import org.springframework.cache.CacheManager;
@@ -27,7 +28,6 @@ public class DefaultDownloadIdCache implements DownloadIdCache {
      * @param cacheManager
      *            the underlying cache-manager to store the download-ids
      */
-    @Autowired
     public DefaultDownloadIdCache(final CacheManager cacheManager) {
         this.cacheManager = cacheManager;
     }
@@ -49,9 +49,9 @@ public class DefaultDownloadIdCache implements DownloadIdCache {
     }
 
     private Cache getCache() {
-        if (cacheManager instanceof TenancyCacheManager) {
-            return ((TenancyCacheManager) cacheManager).getDirectCache(DOWNLOAD_ID_CACHE);
-        }
-        return cacheManager.getCache(DOWNLOAD_ID_CACHE);
+        final Cache cache = (cacheManager instanceof TenancyCacheManager)
+                ? ((TenancyCacheManager) cacheManager).getDirectCache(DOWNLOAD_ID_CACHE)
+                : cacheManager.getCache(DOWNLOAD_ID_CACHE);
+        return Objects.requireNonNull(cache, "Cache(s) returned by cache-manager must not be null!");
     }
 }

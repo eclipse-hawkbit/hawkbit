@@ -116,7 +116,7 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     private static List<SuggestToken> getNextTokens(final ParseException parseException) {
         final List<SuggestToken> listTokens = new ArrayList<>();
         final ParseExceptionWrapper parseExceptionWrapper = new ParseExceptionWrapper(parseException);
-        final int[][] expectedTokenSequence = parseExceptionWrapper.getExpectedTokenSequence();
+        final int[][] expectedTokenSequence = parseException.expectedTokenSequences;
         final TokenWrapper currentToken = parseExceptionWrapper.getCurrentToken();
         if (currentToken == null) {
             return Collections.emptyList();
@@ -243,8 +243,8 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         }
         builder = builder.replace('\r', ' ');
         builder = builder.replace('\n', ' ');
-        builder = builder.replaceAll(">", " ");
-        builder = builder.replaceAll("<", " ");
+        builder = builder.replace(">", " ");
+        builder = builder.replace("<", " ");
 
         return builder;
     }

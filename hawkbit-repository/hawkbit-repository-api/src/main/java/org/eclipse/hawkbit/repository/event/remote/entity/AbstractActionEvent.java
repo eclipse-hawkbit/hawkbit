@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.util.Objects;
+
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
@@ -16,15 +18,18 @@ import org.eclipse.hawkbit.repository.model.Action;
 public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
     private static final long serialVersionUID = 1L;
 
-    private Long targetId;
-    private Long rolloutId;
-    private Long rolloutGroupId;
+    private final Long targetId;
+    private final Long rolloutId;
+    private final Long rolloutGroupId;
 
     /**
      * Default constructor.
      */
-    public AbstractActionEvent() {
+    protected AbstractActionEvent() {
         // for serialization libs like jackson
+        this.targetId = null;
+        this.rolloutId = null;
+        this.rolloutGroupId = null;
     }
 
     /**
@@ -41,7 +46,7 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
      * @param applicationId
      *            the origin application id
      */
-    public AbstractActionEvent(final Action action, final Long targetId, final Long rolloutId,
+    protected AbstractActionEvent(final Action action, final Long targetId, final Long rolloutId,
             final Long rolloutGroupId, final String applicationId) {
         super(action, applicationId);
         this.targetId = targetId;
@@ -61,4 +66,21 @@ public abstract class AbstractActionEvent extends RemoteEntityEvent<Action> {
         return rolloutGroupId;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+        final AbstractActionEvent that = (AbstractActionEvent) o;
+        return Objects.equals(targetId, that.targetId) && Objects.equals(rolloutId, that.rolloutId)
+                && Objects.equals(rolloutGroupId, that.rolloutGroupId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), targetId, rolloutId, rolloutGroupId);
+    }
 }

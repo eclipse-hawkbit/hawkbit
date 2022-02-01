@@ -96,7 +96,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @Column(name = "controller_id", length = Target.CONTROLLER_ID_MAX_SIZE, updatable = false, nullable = false)
     @Size(min = 1, max = Target.CONTROLLER_ID_MAX_SIZE)
     @NotNull
-    @Pattern(regexp = "[.\\S]*", message = "has whitespaces which are not allowed")
+    @Pattern(regexp = "[\\S]*", message = "has whitespaces which are not allowed")
     private String controllerId;
 
     @CascadeOnDelete
@@ -243,34 +243,28 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         if (rolloutTargetGroup == null) {
             return Collections.emptyList();
         }
-
         return Collections.unmodifiableList(rolloutTargetGroup);
     }
 
     /**
      * @param tag
-     *          tag
-     * @return boolean true or false
+     *            to be added
      */
-    public boolean addTag(final TargetTag tag) {
+    public void addTag(final TargetTag tag) {
         if (tags == null) {
             tags = new HashSet<>();
         }
-
-        return tags.add(tag);
+        tags.add(tag);
     }
 
     /**
      * @param tag
-     *          tag
-     * @return boolean true or false
+     *            the tag to be removed from the target
      */
-    public boolean removeTag(final TargetTag tag) {
-        if (tags == null) {
-            return false;
+    public void removeTag(final TargetTag tag) {
+        if (tags != null) {
+            tags.remove(tag);
         }
-
-        return tags.remove(tag);
     }
 
     /**
@@ -303,14 +297,12 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     /**
      * @param action
      *          Action
-     * @return boolean true or false
      */
-    public boolean addAction(final Action action) {
+    public void addAction(final Action action) {
         if (actions == null) {
             actions = new ArrayList<>();
         }
-
-        return actions.add((JpaAction) action);
+        actions.add((JpaAction) action);
     }
 
     /**

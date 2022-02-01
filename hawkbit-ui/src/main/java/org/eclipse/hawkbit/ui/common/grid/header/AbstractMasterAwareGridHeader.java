@@ -43,7 +43,7 @@ public abstract class AbstractMasterAwareGridHeader<T> extends AbstractGridHeade
      * @param eventBus
      *            UIEventBus
      */
-    public AbstractMasterAwareGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
+    protected AbstractMasterAwareGridHeader(final VaadinMessageSource i18n, final SpPermissionChecker permChecker,
             final UIEventBus eventBus) {
         super(i18n, permChecker, eventBus);
 

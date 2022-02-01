@@ -95,7 +95,7 @@ public class DeploymentAssignmentWindowController {
     }
 
     /**
-     * Save the given distribution sets to targets assignments
+     * Save the given distribution sets to target assignments
      *
      * @param proxyTargets
      *            to assign the given distribution sets to
@@ -140,7 +140,7 @@ public class DeploymentAssignmentWindowController {
                     EntityModifiedEventType.ENTITY_UPDATED, ProxyTarget.class, assignedTargetIds));
         } catch (final MultiAssignmentIsNotEnabledException e) {
             notification.displayValidationError(i18n.getMessage("message.target.ds.multiassign.error"));
-            LOG.error("UI allowed multiassignment although it is not enabled: {}", e);
+            LOG.error("UI allowed multi-assignment although it is not enabled", e);
         }
     }
 

@@ -8,14 +8,14 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
-import org.eclipse.hawkbit.repository.Identifiable;
-import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Target;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Target;
 
 /**
  * Generic deployment event for the Multi-Assignments feature. The event payload
@@ -33,7 +33,7 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
     /**
      * Default constructor.
      */
-    public MultiActionEvent() {
+    protected MultiActionEvent() {
         // for serialization libs like jackson
     }
 
@@ -47,7 +47,7 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
      * @param actions
      *            the actions involved
      */
-    public MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
+    protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
         super(applicationId, tenant, applicationId);
         this.controllerIds.addAll(getControllerIdsFromActions(actions));
         this.actionIds.addAll(getIdsFromActions(actions));

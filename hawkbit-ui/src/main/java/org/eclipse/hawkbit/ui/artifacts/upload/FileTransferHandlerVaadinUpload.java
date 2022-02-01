@@ -54,7 +54,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
     private final transient SoftwareModuleManagement softwareModuleManagement;
     private final long maxSize;
 
-    private volatile FileUploadId fileUploadId;
+    private FileUploadId fileUploadId;
 
     FileTransferHandlerVaadinUpload(final long maxSize, final SoftwareModuleManagement softwareManagement,
             final ArtifactManagement artifactManagement, final VaadinMessageSource i18n, final Lock uploadLock) {
@@ -62,6 +62,11 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
 
         this.maxSize = maxSize;
         this.softwareModuleManagement = softwareManagement;
+    }
+
+    private synchronized FileUploadId setFileUploadId(final String fileName, final SoftwareModule softwareModule) {
+        this.fileUploadId = new FileUploadId(fileName, softwareModule);
+        return fileUploadId;
     }
 
     /**
@@ -75,8 +80,7 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         resetState();
 
         final SoftwareModule softwareModule = getSelectedSoftwareModule();
-
-        this.fileUploadId = new FileUploadId(event.getFilename(), softwareModule);
+        final FileUploadId fupId = setFileUploadId(event.getFilename(), softwareModule);
 
         if (getUploadState().isFileInUploadState(this.fileUploadId)) {
             // actual interrupt will happen a bit late so setting the below
@@ -84,15 +88,14 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
             interruptUploadDueToDuplicateFile();
             event.getUpload().interruptUpload();
         } else {
-            publishUploadStarted(fileUploadId);
+            publishUploadStarted(fupId);
 
             if (RegexCharacterCollection.stringContainsCharacter(event.getFilename(), ILLEGAL_FILENAME_CHARACTERS)) {
-                LOG.debug("Filename contains illegal characters {} for upload {}", fileUploadId.getFilename(),
-                        fileUploadId);
+                LOG.debug("Filename contains illegal characters {} for upload {}", fupId.getFilename(), fupId);
                 interruptUploadDueToIllegalFilename();
                 event.getUpload().interruptUpload();
-            } else if (isFileAlreadyContainedInSoftwareModule(fileUploadId, softwareModule)) {
-                LOG.debug("File {} already contained in Software Module {}", fileUploadId.getFilename(),
+            } else if (isFileAlreadyContainedInSoftwareModule(fupId, softwareModule)) {
+                LOG.debug("File {} already contained in Software Module {}", fupId.getFilename(),
                         softwareModule);
                 interruptUploadDueToDuplicateFile();
                 event.getUpload().interruptUpload();
@@ -115,7 +118,6 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
      */
     @Override
     public OutputStream receiveUpload(final String fileName, final String mimeType) {
-
         if (isUploadInterrupted()) {
             return ByteStreams.nullOutputStream();
         }
@@ -123,15 +125,14 @@ public class FileTransferHandlerVaadinUpload extends AbstractFileTransferHandler
         // we return the outputstream so we cannot close it here
         @SuppressWarnings("squid:S2095")
         final PipedOutputStream outputStream = new PipedOutputStream();
-        PipedInputStream inputStream = null;
         try {
-            inputStream = new PipedInputStream(outputStream);
+            PipedInputStream inputStream = new PipedInputStream(outputStream);
             publishUploadProgressEvent(fileUploadId, 0, 0);
             startTransferToRepositoryThread(inputStream, fileUploadId, mimeType);
         } catch (final IOException e) {
-            LOG.warn("Creating piped Stream failed {}.", e);
+            LOG.warn("Creating piped Stream failed!", e);
             tryToCloseIOStream(outputStream);
-            tryToCloseIOStream(inputStream);
+            // input stream is not created in case of an IOException
             interruptUploadDueToUploadFailed();
             publishUploadFailedAndFinishedEvent(fileUploadId);
             return ByteStreams.nullOutputStream();

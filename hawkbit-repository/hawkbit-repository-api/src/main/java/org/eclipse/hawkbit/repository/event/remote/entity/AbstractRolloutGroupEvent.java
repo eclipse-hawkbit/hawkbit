@@ -8,26 +8,28 @@
  */
 package org.eclipse.hawkbit.repository.event.remote.entity;
 
+import java.util.Objects;
+
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * TenantAwareEvent definition which is been published in case a rollout group
- * has been created for a specific rollout or updated.
- *
+ * Event which is published in case a {@linkplain RolloutGroup} is created or
+ * updated
  */
 public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<RolloutGroup> {
     private static final long serialVersionUID = 1L;
 
-    private Long rolloutId;
+    private final Long rolloutId;
 
     /**
      * Default constructor.
      */
-    public AbstractRolloutGroupEvent() {
+    protected AbstractRolloutGroupEvent() {
         // for serialization libs like jackson
+        this.rolloutId = null;
     }
 
-    public AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId,
+    protected AbstractRolloutGroupEvent(final RolloutGroup rolloutGroup, final Long rolloutId,
             final String applicationId) {
         super(rolloutGroup, applicationId);
         this.rolloutId = rolloutId;
@@ -37,4 +39,20 @@ public abstract class AbstractRolloutGroupEvent extends RemoteEntityEvent<Rollou
         return rolloutId;
     }
 
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        if (!super.equals(o))
+            return false;
+        final AbstractRolloutGroupEvent that = (AbstractRolloutGroupEvent) o;
+        return Objects.equals(rolloutId, that.rolloutId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), rolloutId);
+    }
 }

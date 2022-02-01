@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -98,25 +99,23 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
     protected void deleteTempFile(final String tempFile) {
         final File file = new File(tempFile);
-
-        if (file.exists() && !file.delete()) {
-            LOG.error("Could not delete temp file {}", file);
+        try {
+            Files.deleteIfExists(file.toPath());
+        } catch (IOException e) {
+            LOG.error("Could not delete temp file {} ({})", file, e.getMessage());
         }
     }
 
     protected String storeTempFile(final InputStream content) throws IOException {
         final File file = createTempFile();
-
         try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
             ByteStreams.copy(content, outputstream);
             outputstream.flush();
         }
-
         return file.getPath();
     }
 
     private static File createTempFile() {
-
         try {
             return File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX);
         } catch (final IOException e) {
@@ -160,5 +159,4 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     protected static String sanitizeTenant(final String tenant) {
         return tenant.trim().toUpperCase();
     }
-
 }

@@ -19,7 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An pre-authenticated processing filter which extracts the principal from a
+ * A pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
  * {@link DmfTenantSecurityToken}.
  *
@@ -44,9 +44,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     // X-Ssl-Issuer-Dn-1: CN=Bosch-CA-DE,CN=PKI,DC=Bosch,DC=com
     // X-Ssl-Issuer-Hash-1: ae:11:f5:6a:0a:e8:74:50:81:0e:0c:37:ec:c5:22:fc
     private final String caCommonNameHeader;
-    // the X-Ssl-Issuer-Hash basic header header which contains the x509
-    // fingerprint hash, this
-    // header exists multiple in the request for all trusted chain.
+    // the X-Ssl-Issuer-Hash basic header: Contains the x509 fingerprint hash, this
+    // header exists multiple times in the request for all trusted chains.
     private final String sslIssuerHashBasicHeader;
 
     /**
@@ -76,18 +75,18 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
         // retrieve the common name header and the authority name header from
         // the http request and combine them together
-        final String commonNameValue = secruityToken.getHeader(caCommonNameHeader);
-        final String knownSslIssuerConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
+        final String commonNameValue = securityToken.getHeader(caCommonNameHeader);
+        final String knownSslIssuerConfigurationValue = tenantAware.runAsTenant(securityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
-        final String sslIssuerHashValue = getIssuerHashHeader(secruityToken, knownSslIssuerConfigurationValue);
+        final String sslIssuerHashValue = getIssuerHashHeader(securityToken, knownSslIssuerConfigurationValue);
         if (commonNameValue != null && LOGGER.isTraceEnabled()) {
             LOGGER.trace("Found commonNameHeader {}={}, using as credentials", caCommonNameHeader, commonNameValue);
         }
         if (sslIssuerHashValue != null && LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Found sslIssuerHash ****, using as credentials for tenant {}", secruityToken.getTenant());
+            LOGGER.trace("Found sslIssuerHash ****, using as credentials for tenant {}", securityToken.getTenant());
         }
 
         if (commonNameValue != null && sslIssuerHashValue != null) {
@@ -97,37 +96,36 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     @Override
-    public Object getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
-        final String authorityNameConfigurationValue = tenantAware.runAsTenant(secruityToken.getTenant(),
+    public Object getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+        final String authorityNameConfigurationValue = tenantAware.runAsTenant(securityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
-        String controllerId = secruityToken.getControllerId();
+
         // in case of legacy download artifact, the controller ID is not in the
         // URL path, so then we just use the common name header
-        if (controllerId == null || "anonymous".equals(controllerId)) {
-            controllerId = secruityToken.getHeader(caCommonNameHeader);
-        }
+        final String controllerId = //
+                (securityToken.getControllerId() == null || "anonymous".equals(securityToken.getControllerId()) //
+                        ? securityToken.getHeader(caCommonNameHeader)
+                        : securityToken.getControllerId());
 
         final List<String> knownHashes = splitMultiHashBySemicolon(authorityNameConfigurationValue);
-
-        final String cntlId = controllerId;
-        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(cntlId, hashItem))
+        return knownHashes.stream().map(hashItem -> new HeaderAuthentication(controllerId, hashItem))
                 .collect(Collectors.toSet());
     }
 
     /**
      * Iterates over the {@link #sslIssuerHashBasicHeader} basic header
-     * {@code X-Ssl-Issuer-Hash-%d} and try to finds the same hash as known.
-     * It's ok if we find the the hash in any the trusted CA chain to accept
-     * this request for this tenant.
+     * {@code X-Ssl-Issuer-Hash-%d} and try to find the same hash as known. It's ok
+     * if we find the hash in any the trusted CA chain to accept this request for
+     * this tenant.
      */
-    private String getIssuerHashHeader(final DmfTenantSecurityToken secruityToken, final String knownIssuerHashes) {
+    private String getIssuerHashHeader(final DmfTenantSecurityToken securityToken, final String knownIssuerHashes) {
         // there may be several knownIssuerHashes configured for the tenant
         final List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);
 
         // iterate over the headers until we get a null header.
         int iHeader = 1;
         String foundHash;
-        while ((foundHash = secruityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
+        while ((foundHash = securityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
             if (knownHashes.contains(foundHash.toLowerCase())) {
                 if (LOGGER.isTraceEnabled()) {
                     LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
@@ -137,8 +135,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
             iHeader++;
         }
         LOG_SECURITY_AUTH.debug(
-                "Certifacte request but no matching hash found in headers {} for common name {} in request",
-                sslIssuerHashBasicHeader, secruityToken.getHeader(caCommonNameHeader));
+                "Certificate request but no matching hash found in headers {} for common name {} in request",
+                sslIssuerHashBasicHeader, securityToken.getHeader(caCommonNameHeader));
         return null;
     }
 
@@ -156,6 +154,6 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
     }
 
     private static List<String> splitMultiHashBySemicolon(final String knownIssuerHashes) {
-        return Arrays.stream(knownIssuerHashes.split(";|,")).map(String::toLowerCase).collect(Collectors.toList());
+        return Arrays.stream(knownIssuerHashes.split("[;,]")).map(String::toLowerCase).collect(Collectors.toList());
     }
 }

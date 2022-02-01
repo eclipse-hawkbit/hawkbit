@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ public class ActionTest {
 
     @Test
     @Description("Ensures that timeforced moded switch from soft to forces after defined timeframe.")
-    public void timeforcedHitNewHasCodeIsGenerated() throws InterruptedException {
+    public void timeforcedHitNewHasCodeIsGenerated() {
 
         // current time + 1 seconds
         final long sleepTime = 1000;
@@ -32,10 +34,10 @@ public class ActionTest {
         final JpaAction timeforcedAction = new JpaAction();
         timeforcedAction.setActionType(ActionType.TIMEFORCED);
         timeforcedAction.setForcedTime(timeForceTimeAt);
-        assertThat(timeforcedAction.isForce()).isFalse();
+        assertThat(timeforcedAction.isForcedOrTimeForced()).isFalse();
 
         // wait until timeforce time is hit
-        Thread.sleep(sleepTime + 100);
-        assertThat(timeforcedAction.isForce()).isTrue();
+        Awaitility.await().atMost(Duration.TWO_SECONDS).pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+                .until(timeforcedAction::isForcedOrTimeForced);
     }
 }

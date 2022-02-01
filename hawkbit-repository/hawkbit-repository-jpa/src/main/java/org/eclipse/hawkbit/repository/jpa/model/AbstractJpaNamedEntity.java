@@ -32,14 +32,14 @@ public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseE
     @NotNull
     private String name;
 
-    @Column(name = "description", nullable = true, length = NamedEntity.DESCRIPTION_MAX_SIZE)
+    @Column(name = "description", length = NamedEntity.DESCRIPTION_MAX_SIZE)
     @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
     private String description;
 
     /**
      * Default constructor.
      */
-    public AbstractJpaNamedEntity() {
+    protected AbstractJpaNamedEntity() {
         // Default constructor needed for JPA entities
     }
 

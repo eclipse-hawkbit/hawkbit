@@ -8,7 +8,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.configuration;
 
+import java.util.Objects;
+
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.transaction.Transaction;
 
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -37,8 +40,10 @@ public class MultiTenantJpaTransactionManager extends JpaTransactionManager {
 
         final String currentTenant = tenantAware.getCurrentTenant();
         if (currentTenant != null) {
-            final EntityManagerHolder emHolder = (EntityManagerHolder) TransactionSynchronizationManager
-                    .getResource(getEntityManagerFactory());
+            final EntityManagerFactory emFactory = Objects.requireNonNull(getEntityManagerFactory());
+            final EntityManagerHolder emHolder = Objects.requireNonNull(
+                    (EntityManagerHolder) TransactionSynchronizationManager.getResource(emFactory),
+                    "No EntityManagerHolder provided by TransactionSynchronizationManager");
             final EntityManager em = emHolder.getEntityManager();
             em.setProperty(PersistenceUnitProperties.MULTITENANT_PROPERTY_DEFAULT, currentTenant.toUpperCase());
         }

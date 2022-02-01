@@ -181,7 +181,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private Path<Object> getFieldPath(final A enumField, final String finalProperty) {
         return (Path<Object>) getFieldPath(root, enumField.getSubAttributes(finalProperty), enumField.isMap(),
                 this::getJoinFieldPath).orElseThrow(
-                        () -> createRSQLParameterUnsupportedException("RSQL field path cannot be empty", null));
+                        () -> new RSQLParameterUnsupportedFieldException("RSQL field path cannot be empty", null));
     }
 
     @SuppressWarnings("unchecked")
@@ -279,7 +279,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private Object convertFieldConverterValue(final ComparisonNode node, final A fieldName, final String value) {
         final Object convertedValue = ((FieldValueConverter) fieldName).convertValue(fieldName, value);
         if (convertedValue == null) {
-            throw createRSQLParameterUnsupportedException(
+            throw new RSQLParameterUnsupportedFieldException(
                     "field {" + node.getSelector() + "} must be one of the following values {"
                             + Arrays.toString(((FieldValueConverter) fieldName).possibleValues(fieldName)) + "}",
                     null);

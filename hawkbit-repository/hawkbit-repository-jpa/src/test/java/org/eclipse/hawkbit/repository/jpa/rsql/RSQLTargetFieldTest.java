@@ -36,7 +36,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("RSQL filter target")
-public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
+class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     private Target target;
     private Target target2;
@@ -47,7 +47,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     private static final String AND = ";";
 
     @BeforeEach
-    public void setupBeforeTest() throws InterruptedException {
+    void setupBeforeTest() {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("AssignedDs");
 
@@ -63,7 +63,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         target2 = targetManagement
                 .create(entityFactory.target().create().controllerId("targetId1234").description("targetId1234"));
         attributes.put("revision", "1.2");
-        Thread.sleep(1);
+
         target2 = controllerManagement.updateControllerAttributes(target2.getControllerId(), attributes, null);
         target2 = controllerManagement.findOrRegisterTargetIfItDoesNotExist(target2.getControllerId(), LOCALHOST);
         createTargetMetadata(target2.getControllerId(), entityFactory.generateTargetMetadata("metaKey", "value"));
@@ -97,7 +97,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by (controller) id")
-    public void testFilterByParameterId() {
+    void testFilterByParameterId() {
         assertRSQLQuery(TargetFields.ID.name() + "==targetId123", 1);
         assertRSQLQuery(TargetFields.ID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.ID.name() + "==noExist*", 0);
@@ -108,7 +108,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by name")
-    public void testFilterByParameterName() {
+    void testFilterByParameterName() {
         assertRSQLQuery(TargetFields.NAME.name() + "==targetName123", 1);
         assertRSQLQuery(TargetFields.NAME.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.NAME.name() + "==noExist*", 0);
@@ -119,7 +119,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by description")
-    public void testFilterByParameterDescription() {
+    void testFilterByParameterDescription() {
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==''", 3);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "!=''", 2);
         assertRSQLQuery(TargetFields.DESCRIPTION.name() + "==targetDesc123", 1);
@@ -132,7 +132,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by controller id")
-    public void testFilterByParameterControllerId() {
+    void testFilterByParameterControllerId() {
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==targetId123", 1);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==target*", 5);
         assertRSQLQuery(TargetFields.CONTROLLERID.name() + "==noExist*", 0);
@@ -143,7 +143,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by status")
-    public void testFilterByParameterUpdateStatus() {
+    void testFilterByParameterUpdateStatus() {
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "==pending", 1);
         assertRSQLQuery(TargetFields.UPDATESTATUS.name() + "!=pending", 4);
         try {
@@ -158,8 +158,9 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by attribute")
-    public void testFilterByAttribute() {
-        createTargetWithAttributes("test.dot", "value.dot");
+    void testFilterByAttribute() {
+        controllerManagement.updateControllerAttributes(testdataFactory.createTarget().getControllerId(),
+                Maps.newHashMap("test.dot", "value.dot"), null);
 
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision==1.1", 1);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".revision!=1.1", 1);
@@ -174,17 +175,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".key*==value.dot", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + ".*==value.dot", 0);
         assertRSQLQuery(TargetFields.ATTRIBUTE.name() + "..==value.dot", 0);
-        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + ".==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "*==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + ".==value.dot");
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "*==value.dot");
+        assertRSQLQueryThrowsException(TargetFields.ATTRIBUTE.name() + "==value.dot");
     }
 
     @Test
     @Description("Test filter target by assigned ds name")
-    public void testFilterByAssignedDsName() {
+    void testFilterByAssignedDsName() {
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name==AssignedDs", 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name==A*", 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".name==noExist*", 0);
@@ -194,7 +192,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by assigned ds version")
-    public void testFilterByAssignedDsVersion() {
+    void testFilterByAssignedDsVersion() {
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==" + TestdataFactory.DEFAULT_VERSION, 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==*1*", 1);
         assertRSQLQuery(TargetFields.ASSIGNEDDS.name() + ".version==noExist*", 0);
@@ -206,7 +204,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by tag name")
-    public void testFilterByTag() {
+    void testFilterByTag() {
         assertRSQLQuery(TargetFields.TAG.name() + "==Tag1", 2);
         assertRSQLQuery(TargetFields.TAG.name() + "!=Tag1", 3);
         assertRSQLQuery(TargetFields.TAG.name() + "==T*", 4);
@@ -226,7 +224,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by lastTargetQuery")
-    public void testFilterByLastTargetQuery() throws InterruptedException {
+    void testFilterByLastTargetQuery() {
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "==" + target.getLastTargetQuery(), 1);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "!=" + target.getLastTargetQuery(), 4);
         assertRSQLQuery(TargetFields.LASTCONTROLLERREQUESTAT.name() + "=lt=" + target.getLastTargetQuery(), 0);
@@ -239,8 +237,9 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter target by metadata")
-    public void testFilterByMetadata() {
-        createTargetWithMetadata("key.dot", "value.dot");
+    void testFilterByMetadata() {
+        createTargetMetadata(testdataFactory.createTarget().getControllerId(),
+                entityFactory.generateTargetMetadata("key.dot", "value.dot"));
 
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==metaValue", 1);
         assertRSQLQuery(TargetFields.METADATA.name() + ".metaKey==*v*", 2);
@@ -258,17 +257,14 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(TargetFields.METADATA.name() + ".key*==value.dot", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + ".*==value.dot", 0);
         assertRSQLQuery(TargetFields.METADATA.name() + "..==value.dot", 0);
-        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + ".==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "*==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
-        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "==value.dot",
-                RSQLParameterUnsupportedFieldException.class);
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + ".==value.dot");
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "*==value.dot");
+        assertRSQLQueryThrowsException(TargetFields.METADATA.name() + "==value.dot");
     }
 
     @Test
     @Description("Test filter based on more complex RSQL queries")
-    public void testFilterByComplexQueries() {
+    void testFilterByComplexQueries() {
         assertRSQLQuery(
                 TargetFields.NAME.name() + "!=targetName123" + AND + TargetFields.METADATA.name() + ".metaKey!=value",
                 0);
@@ -278,7 +274,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Testing allowed RSQL keys based on TargetFields definition")
-    public void rsqlValidTargetFields() {
+    void rsqlValidTargetFields() {
         final String rsql1 = "ID == '0123' and NAME == abcd and DESCRIPTION == absd"
                 + " and CREATEDAT =lt= 0123 and LASTMODIFIEDAT =gt= 0123"
                 + " and CONTROLLERID == 0123 and UPDATESTATUS == PENDING"
@@ -308,7 +304,7 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter by target type")
-    public void shouldFilterTargetsByTypeIdNameAndDescription() {
+    void shouldFilterTargetsByTypeIdNameAndDescription() {
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==" + targetType1.getName(), 1);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==*1", 1);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "!=" + targetType2.getName(), 4);
@@ -327,23 +323,8 @@ public class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assertThat(countTargetsAll).isEqualTo(expectedTargets);
     }
 
-    private <T extends Throwable> void assertRSQLQueryThrowsException(final String rsqlParam,
-            final Class<T> expectedException) {
-        assertThatExceptionOfType(expectedException)
+    private void assertRSQLQueryThrowsException(final String rsqlParam) {
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> RSQLUtility.validateRsqlFor(rsqlParam, TargetFields.class));
-    }
-
-    private Target createTargetWithMetadata(final String metadataKeyName, final String metadataValue) {
-        final Target target = testdataFactory.createTarget();
-        createTargetMetadata(target.getControllerId(),
-                entityFactory.generateTargetMetadata(metadataKeyName, metadataValue));
-        return target;
-    }
-
-    private Target createTargetWithAttributes(final String attributeName, final String attributeValue) {
-        final Target target = testdataFactory.createTarget();
-        controllerManagement.updateControllerAttributes(target.getControllerId(),
-                Maps.newHashMap(attributeName, attributeValue), null);
-        return target;
     }
 }
