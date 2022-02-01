@@ -125,7 +125,7 @@ public final class MgmtRestConstants {
      * @deprecated {@link #TARGET_TAG_TARGETS_REQUEST_MAPPING} is preferred as
      *             this resource on GET supports paging
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     public static final String DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
 
     /**
@@ -150,7 +150,7 @@ public final class MgmtRestConstants {
      * @deprecated {@link #DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING}
      *             is preferred as this resource on GET supports paging
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     public static final String DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
 
     /**

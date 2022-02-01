@@ -158,7 +158,7 @@ public interface MgmtDistributionSetTagRestApi {
      *             instead as this variant does not include paging and as result
      *             returns only a limited list of distributionsets
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @GetMapping(value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
@@ -197,7 +197,7 @@ public interface MgmtDistributionSetTagRestApi {
      * @deprecated please use
      *             {@link MgmtDistributionSetTagRestApi#toggleTagAssignment}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @PostMapping(value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING
             + "/toggleTagAssignment")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignmentUnpaged(
@@ -234,7 +234,7 @@ public interface MgmtDistributionSetTagRestApi {
      * @deprecated please use
      *             {@link MgmtDistributionSetTagRestApi#assignDistributionSets}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @PostMapping(value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -270,7 +270,7 @@ public interface MgmtDistributionSetTagRestApi {
      * @deprecated please use
      *             {@link MgmtDistributionSetTagRestApi#unassignDistributionSet}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @DeleteMapping(value = MgmtRestConstants.DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING
             + "/{distributionsetId}")
     ResponseEntity<Void> unassignDistributionSetUnpaged(@PathVariable("distributionsetTagId") Long distributionsetTagId,

@@ -126,7 +126,7 @@ public interface MgmtTargetTagRestApi {
      *             instead as this variant does not include paging and as result
      *             returns only a limited list of targets
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @GetMapping(value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") Long targetTagId);
@@ -189,7 +189,7 @@ public interface MgmtTargetTagRestApi {
      * @return the list of assigned targets and unassigned targets.
      * @deprecated please use {@link MgmtTargetTagRestApi#toggleTagAssignment}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @PostMapping(value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING
             + "/toggleTagAssignment", consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
@@ -226,7 +226,7 @@ public interface MgmtTargetTagRestApi {
      * 
      * @deprecated please use {@link MgmtTargetTagRestApi#assignTargets}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @PostMapping(value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -257,7 +257,7 @@ public interface MgmtTargetTagRestApi {
      * 
      * @deprecated please use {@link MgmtTargetTagRestApi#unassignTarget}
      */
-    @Deprecated
+    @Deprecated(since = "0.2.0M4", forRemoval = true)
     @DeleteMapping(value = MgmtRestConstants.DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING + "/{controllerId}")
     ResponseEntity<Void> unassignTargetUnpaged(@PathVariable("targetTagId") Long targetTagId,
             @PathVariable("controllerId") String controllerId);
