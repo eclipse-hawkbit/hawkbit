@@ -45,7 +45,7 @@ public class ParseExceptionWrapper {
 
     /**
      * Get the current token
-     * 
+     *
      * @return the current token or {@code null} if there is non.
      */
     public TokenWrapper getCurrentToken() {

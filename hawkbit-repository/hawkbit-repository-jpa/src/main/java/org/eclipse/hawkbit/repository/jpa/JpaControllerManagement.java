@@ -743,7 +743,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             throw new InvalidTargetAttributeException();
         }
 
-        final JpaTarget target = (JpaTarget) targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
+        final JpaTarget target = targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         // get the modifiable attribute map
