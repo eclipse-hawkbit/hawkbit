@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -131,14 +130,6 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     }
 
     @Override
-    public ResponseEntity<List<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId) {
-
-        return ResponseEntity.ok(MgmtTargetMapper.toResponse(targetManagement
-                .findByTag(PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT), targetTagId)
-                .getContent()));
-    }
-
-    @Override
     public ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -158,7 +149,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
         }
 
-        final Long countTargetsAll = findTargetsAll.getTotalElements();
+        final long countTargetsAll = findTargetsAll.getTotalElements();
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
@@ -207,24 +198,4 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         return assignedTargetRequestBodies.stream().map(MgmtAssignedTargetRequestBody::getControllerId)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignmentUnpaged(
-            @PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        return toggleTagAssignment(targetTagId, assignedTargetRequestBodies);
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtTarget>> assignTargetsUnpaged(@PathVariable("targetTagId") final Long targetTagId,
-            @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        return assignTargets(targetTagId, assignedTargetRequestBodies);
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignTargetUnpaged(@PathVariable("targetTagId") final Long targetTagId,
-            @PathVariable("controllerId") final String controllerId) {
-        return unassignTarget(targetTagId, controllerId);
-    }
-
 }

@@ -8,6 +8,15 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
@@ -34,15 +43,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import javax.validation.ConstraintViolationException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 /**
  * Management service for {@link Target}s.
  *
@@ -65,16 +65,11 @@ public interface TargetManagement {
     List<Target> assignTag(@NotEmpty Collection<String> controllerIds, long tagId);
 
     /**
-     * Counts number of targets with given
-     * {@link Target#getAssignedDistributionSet()}.
+     * Counts number of targets with the given distribution set assigned.
      *
-     * @param distId
-     *            to search for
-     *
+     * @param distId to search for
      * @return number of found {@link Target}s.
-     * 
-     * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -88,7 +83,7 @@ public interface TargetManagement {
      *            Set to <code>null</code> in case this is not required.
      * @param overdueState
      *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_itvl + overdue_itvl).
+     *            during the configured intervals: poll_interval + overdue_interval).
      *            Set to <code>null</code> in case this is not required.
      * @param searchText
      *            to find targets having the text anywhere in name or
@@ -99,7 +94,7 @@ public interface TargetManagement {
      *            installed or assigned. Set to <code>null</code> in case this
      *            is not required.
      * @param tagNames
-     *            to find targets which are having any one in this tag names.
+     *            to find targets which are having any of this tag names.
      *            Set <code>null</code> in case this is not required.
      * @param selectTargetWithNoTag
      *            flag to select targets with no tag assigned
@@ -111,7 +106,7 @@ public interface TargetManagement {
      *
      * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)} should be used instead.
      */
-    @Deprecated
+    @Deprecated(since = "2021-10-27", forRemoval = true)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
             Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
@@ -132,28 +127,22 @@ public interface TargetManagement {
     long countByFilters(@NotNull final FilterParams filterParams);
 
     /**
-     * Counts number of targets with given with given distribution set Id
+     * Get the count of targets with the given distribution set id.
      *
-     * @param distId
-     *            to search for
+     * @param distId to search for
      * @return number of found {@link Target}s.
-     *
-     * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByInstalledDistributionSet(long distId);
 
     /**
-     * Checks if there is already a {@link Target} that has the given distribution set Id assigned or installed.
+     * Checks if there is already a {@link Target} that has the given distribution set id assigned or installed.
      *
-     * @param distId
-     *            to search for
+     * @param distId to search for
      * @return <code>true</code> if a {@link Target} exists.
-     *
-     * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
@@ -222,8 +211,8 @@ public interface TargetManagement {
     Target create(@NotNull @Valid TargetCreate create);
 
     /**
-     * creates multiple {@link Target}s. If some of the given {@link Target}s
-     * already exists in the DB a {@link EntityAlreadyExistsException} is
+     * creates multiple {@link Target}s. If the given {@link Target}s
+     * already exists in the DB an {@link EntityAlreadyExistsException} is
      * thrown. {@link Target}s contain all objects of the parameter targets,
      * including duplicates.
      *
@@ -544,15 +533,13 @@ public interface TargetManagement {
     /**
      * method retrieves all {@link Target}s from the repo in the following
      * order:
-     * <p>
-     * 1) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getTarget()} {@link Target#getInstalledDistributionSet()}
-     * <p>
-     * 2) {@link Target}s which have the given {@link DistributionSet} as
-     * {@link Target#getAssignedDistributionSet()}
-     * <p>
-     * 3) {@link Target}s which have no connection to the given
-     * {@link DistributionSet}.
+     * <p><ol>
+     *     <li>{@link Target}s which have the given {@link DistributionSet} as
+     *      installed distribution set</li>
+     *      <li><{@link Target}s which have the given {@link DistributionSet} as
+     *      assigned distribution set/li>
+     *      <li>{@link Target}s which have no connection to the given {@link DistributionSet}</li>
+     * </ol>
      *
      * @param pageable
      *            the page request to page the result set
@@ -563,7 +550,7 @@ public interface TargetManagement {
      *            non-null value; filters are AND-gated
      * @return a paged result {@link Page} of the {@link Target}s in a defined
      *         order.
-     * 
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -610,19 +597,15 @@ public interface TargetManagement {
     Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
-     * Toggles {@link TargetTag} assignment to given {@link Target}s by means
+     * Toggles {@linkplain TargetTag} assignment to given {@linkplain Target}s by means
      * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. Only if all of theme have the tag already assigned
+     * yet assigned, they will be. Only if all {@linkplain Target}s have the tag already assigned
      * they will be removed instead.
      *
-     * @param controllerIds
-     *            to toggle for
-     * @param tagName
-     *            to toggle
-     * @return TagAssigmentResult with all meta data of the assignment outcome.
-     * 
-     * @throws EntityNotFoundException
-     *             if tag with given name does not exist
+     * @param controllerIds to toggle for
+     * @param tagName       to toggle
+     * @return TagAssigmentResult with all metadata of the assignment outcome.
+     * @throws EntityNotFoundException if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
@@ -638,7 +621,7 @@ public interface TargetManagement {
      *            to set the type to
      * @param typeId
      *            to assign targets to
-     * @return {@link TargetTypeAssignmentResult} with all meta data of the
+     * @return {@link TargetTypeAssignmentResult} with all metadata of the
      *         assignment outcome.
      *
      * @throws EntityNotFoundException
@@ -653,7 +636,7 @@ public interface TargetManagement {
      *
      * @param controllerIds
      *            to remove the type from
-     * @return {@link TargetTypeAssignmentResult} with all meta data of the
+     * @return {@link TargetTypeAssignmentResult} with all metadata of the
      *         assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
@@ -805,15 +788,15 @@ public interface TargetManagement {
      *            for
      * @param metadata
      *            the meta data entries to create or update
-     * @return the updated or created target meta data entries
-     * 
+     * @return the updated or created target metadata entries
+     *
      * @throws EntityNotFoundException
      *             if given target does not exist
-     * 
+     *
      * @throws EntityAlreadyExistsException
-     *             in case one of the meta data entry already exists for the
+     *             in case one of the metadata entry already exists for the
      *             specific key
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link MetaData} entries is exceeded
      *             for the addressed {@link Target}
@@ -825,10 +808,10 @@ public interface TargetManagement {
      * Deletes a target meta data entry.
      *
      * @param controllerId
-     *            where meta data has to be deleted
+     *            where metadata has to be deleted
      * @param key
      *            of the meta data element
-     * 
+     *
      * @throws EntityNotFoundException
      *             if given target does not exist
      */
@@ -841,10 +824,10 @@ public interface TargetManagement {
      * @param pageable
      *            the page request to page the result
      * @param controllerId
-     *            the controller id to retrieve the meta data from
+     *            the controller id to retrieve the metadata from
      *
      * @return a paged result of all meta data entries for a given target id
-     * 
+     *
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
@@ -852,17 +835,17 @@ public interface TargetManagement {
     Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
-     * Finds all meta data by the given target id and query.
-     * 
+     * Finds all metadata by the given target id and query.
+     *
      * @param pageable
      *            the page request to page the result
      * @param controllerId
-     *            the controller id to retrieve the meta data from
+     *            the controller id to retrieve the metadata from
      * @param rsqlParam
      *            rsql query string
      *
      * @return a paged result of all meta data entries for a given target id
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
@@ -896,14 +879,14 @@ public interface TargetManagement {
      * Updates a target meta data value if corresponding entry exists.
      *
      * @param controllerId
-     *            {@link Target} controller id of the meta data entry to be
+     *            {@link Target} controller id of the metadata entry to be
      *            updated
      * @param metadata
      *            meta data entry to be updated
      * @return the updated meta data entry
-     * 
+     *
      * @throws EntityNotFoundException
-     *             in case the meta data entry does not exists and cannot be
+     *             in case the metadata entry does not exist and cannot be
      *             updated
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)

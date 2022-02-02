@@ -42,7 +42,7 @@ public class DdiActionFeedback {
      * This ID is always given by the actionId path variable.
      * Will be removed in future versions.
      */
-    @Deprecated
+    @Deprecated(since = "2021-06-11", forRemoval = true)
     private final Long id;
     private final String time;
 
