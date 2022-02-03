@@ -453,20 +453,6 @@ public class JpaTargetManagement implements TargetManagement {
         return findByCriteriaAPI(pageable, specList);
     }
 
-    /**
-     * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)}
-     *             should be used instead.
-     */
-    @Override
-    @Deprecated(since = "2021-10-27", forRemoval = true)
-    @SuppressWarnings({ "squid:S5738", "removal" }) // Can only be removed, if removed from interface
-    public long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
-                               Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
-            String... tagNames) {
-        return countByFilters(new FilterParams(status, overdueState, searchText, installedOrAssignedDistributionSetId,
-                selectTargetWithNoTag, tagNames));
-    }
-
     @Override
     public long countByFilters(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
@@ -622,8 +608,8 @@ public class JpaTargetManagement implements TargetManagement {
                 .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())), null);
     }
 
-    private List<JpaTarget> findTargetsByInSpecification(Collection<String> controllerIds,
-            Specification<JpaTarget> specification) {
+    private List<JpaTarget> findTargetsByInSpecification(final Collection<String> controllerIds,
+            final Specification<JpaTarget> specification) {
         return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids).and(specification)))
                 .flatMap(List::stream).collect(Collectors.toList());
@@ -699,7 +685,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findByFilterOrderByLinkedDistributionSet(final Pageable pageable,
             final long orderByDistributionId, final FilterParams filterParams) {
-        Specification<JpaTarget> orderedFilterSpec = combineFiltersAndDsOrder(orderByDistributionId, filterParams);
+        final Specification<JpaTarget> orderedFilterSpec = combineFiltersAndDsOrder(orderByDistributionId,
+                filterParams);
         // remove default sort from pageable to not overwrite sorted spec
         final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
                 pageable.getPageSize(), Sort.unsorted());
@@ -719,7 +706,7 @@ public class JpaTargetManagement implements TargetManagement {
     private Specification<JpaTarget> combineFiltersAndDsOrder(final long orderByDistributionId,
             final FilterParams filterParams) {
         Specification<JpaTarget> orderedFilterSpec = orderedByLinkedDistributionSet(orderByDistributionId);
-        for (Specification<JpaTarget> spec : buildSpecificationList(filterParams)) {
+        for (final Specification<JpaTarget> spec : buildSpecificationList(filterParams)) {
             orderedFilterSpec = orderedFilterSpec.and(spec);
         }
         return orderedFilterSpec;

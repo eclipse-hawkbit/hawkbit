@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 import javax.validation.ConstraintViolationException;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
@@ -74,42 +75,6 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByAssignedDistributionSet(long distId);
-
-    /**
-     * Count {@link Target}s for all the given filter parameters.
-     *
-     * @param status
-     *            find targets having one of these {@link TargetUpdateStatus}s.
-     *            Set to <code>null</code> in case this is not required.
-     * @param overdueState
-     *            find targets that are overdue (targets that did not respond
-     *            during the configured intervals: poll_interval + overdue_interval).
-     *            Set to <code>null</code> in case this is not required.
-     * @param searchText
-     *            to find targets having the text anywhere in name or
-     *            description. Set <code>null</code> in case this is not
-     *            required.
-     * @param installedOrAssignedDistributionSetId
-     *            to find targets having the {@link DistributionSet} as
-     *            installed or assigned. Set to <code>null</code> in case this
-     *            is not required.
-     * @param tagNames
-     *            to find targets which are having any of this tag names.
-     *            Set <code>null</code> in case this is not required.
-     * @param selectTargetWithNoTag
-     *            flag to select targets with no tag assigned
-     *
-     * @return the found number of {@link Target}s
-     *
-     * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
-     *
-     * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)} should be used instead.
-     */
-    @Deprecated(since = "2021-10-27", forRemoval = true)
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
-            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
 
     /**
      * Count {@link Target}s for all the given filter parameters.
