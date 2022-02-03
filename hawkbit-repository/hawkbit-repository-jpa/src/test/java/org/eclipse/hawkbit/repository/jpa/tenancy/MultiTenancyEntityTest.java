@@ -19,9 +19,11 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
@@ -37,6 +39,7 @@ import io.qameta.allure.Story;
  */
 @Feature("Component Tests - Repository")
 @Story("Multi Tenancy")
+@ExtendWith(DisposableSqlTestDatabaseExtension.class)
 public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
 
     @Test
