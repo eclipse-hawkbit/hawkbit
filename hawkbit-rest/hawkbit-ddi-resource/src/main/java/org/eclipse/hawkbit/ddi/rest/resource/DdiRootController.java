@@ -225,7 +225,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
-        return null == module || !module.getArtifactByFilename(fileName).isPresent();
+        return null == module || module.getArtifactByFilename(fileName).isEmpty();
     }
 
     @Override
@@ -327,7 +327,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
-                    action.getId(), feedback.getId());
+                    action.getId(), feedback.getStatus());
             return new ResponseEntity<>(HttpStatus.GONE);
         }
 

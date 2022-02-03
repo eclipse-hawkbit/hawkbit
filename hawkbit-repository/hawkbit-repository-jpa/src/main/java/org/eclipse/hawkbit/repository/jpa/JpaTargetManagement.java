@@ -10,7 +10,6 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import static org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications.orderedByLinkedDistributionSet;
 
-import com.google.common.collect.Lists;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,11 +20,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.MapJoin;
 import javax.persistence.criteria.Root;
+
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -85,6 +86,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
+
+import com.google.common.collect.Lists;
 
 /**
  * JPA implementation of {@link TargetManagement}.
@@ -187,10 +190,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget updatedTarget = touch(target);
 
-        final List<TargetMetadata> createdMetadata = Collections.unmodifiableList(md.stream()
+        final List<TargetMetadata> createdMetadata = md.stream()
                 .map(meta -> targetMetadataRepository
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toUnmodifiableList());
 
         // TargetUpdatedEvent is not sent within the touch() method due to the
         // "lastModifiedAt" field being ignored in JpaTarget
@@ -241,12 +244,12 @@ public class JpaTargetManagement implements TargetManagement {
         // touch it to update the lock revision because we are modifying the
         // target indirectly
         final JpaTarget target = touch(controllerId);
-        final JpaTargetMetadata matadata = targetMetadataRepository.save(updatedMetadata);
-        // target update event is set to ignore "lastModifiedAt" field so it is
+        final JpaTargetMetadata metadata = targetMetadataRepository.save(updatedMetadata);
+        // target update event is set to ignore "lastModifiedAt" field, so it is
         // not send automatically within the touch() method
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
-        return matadata;
+        return metadata;
     }
 
     @Override
@@ -259,7 +262,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget target = touch(controllerId);
         targetMetadataRepository.deleteById(metadata.getId());
-        // target update event is set to ignore "lastModifiedAt" field so it is
+        // target update event is set to ignore "lastModifiedAt" field, so it is
         // not send automatically within the touch() method
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
@@ -272,7 +275,7 @@ public class JpaTargetManagement implements TargetManagement {
         return convertMdPage(
                 targetMetadataRepository
                         .findAll(
-                                (Specification<JpaTargetMetadata>) (root, query, cb) -> cb
+                                (root, query, cb) -> cb
                                         .equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId),
                                 pageable),
                 pageable);
@@ -291,7 +294,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Specification<JpaTargetMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 TargetMetadataFields.class, virtualPropertyReplacer, database);
 
-        return convertMdPage(targetMetadataRepository.findAll((Specification<JpaTargetMetadata>) (root, query, cb) -> cb
+        return convertMdPage(targetMetadataRepository.findAll((root, query, cb) -> cb
                 .and(cb.equal(root.get(JpaTargetMetadata_.target).get(JpaTarget_.id), targetId),
                         spec.toPredicate(root, query, cb)),
                 pageable), pageable);
@@ -399,8 +402,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         return convertPage(
                 targetRepository
-                        .findAll((Specification<JpaTarget>) (root, query,
-                                cb) -> cb.and(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId())
+                        .findAll((root, query, cb) -> cb.and(TargetSpecifications
+                                .hasAssignedDistributionSet(validDistSet.getId())
                                         .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
                                 pageReq),
                 pageReq);
@@ -431,8 +434,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         return convertPage(
                 targetRepository
-                        .findAll((Specification<JpaTarget>) (root, query,
-                                cb) -> cb.and(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId())
+                        .findAll((root, query, cb) -> cb.and(TargetSpecifications
+                                .hasInstalledDistributionSet(validDistSet.getId())
                                         .toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
                                 pageable),
                 pageable);
@@ -450,7 +453,13 @@ public class JpaTargetManagement implements TargetManagement {
         return findByCriteriaAPI(pageable, specList);
     }
 
+    /**
+     * @deprecated this method {@link TargetManagement#countByFilters(FilterParams)}
+     *             should be used instead.
+     */
     @Override
+    @Deprecated(since = "2021-10-27", forRemoval = true)
+    @SuppressWarnings({ "squid:S5738", "removal" }) // Can only be removed, if removed from interface
     public long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
                                Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag,
             String... tagNames) {
@@ -639,8 +648,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         allTargets.forEach(target -> target.addTag(tag));
 
-        final List<Target> result = Collections
-                .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
+        final List<Target> result = allTargets.stream().map(targetRepository::save)
+                .collect(Collectors.toUnmodifiableList());
 
         // No reason to save the tag
         entityManager.detach(tag);
@@ -842,7 +851,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Specification<JpaTarget> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class,
                 virtualPropertyReplacer, database);
 
-        return convertPage(targetRepository.findAll((Specification<JpaTarget>) (root, query, cb) -> cb.and(
+        return convertPage(targetRepository.findAll((root, query, cb) -> cb.and(
                 TargetSpecifications.hasTag(tagId).toPredicate(root, query, cb), spec.toPredicate(root, query, cb)),
                 pageable), pageable);
     }

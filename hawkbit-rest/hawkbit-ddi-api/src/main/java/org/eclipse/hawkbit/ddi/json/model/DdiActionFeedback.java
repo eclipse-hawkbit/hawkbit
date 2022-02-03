@@ -37,13 +37,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
-    /**
-     * @deprecated
-     * This ID is always given by the actionId path variable.
-     * Will be removed in future versions.
-     */
-    @Deprecated(since = "2021-06-11", forRemoval = true)
-    private final Long id;
+
     private final String time;
 
     @NotNull
@@ -53,23 +47,35 @@ public class DdiActionFeedback {
     /**
      * Constructor.
      *
-     * @param id
+     * @param ignoredId
      *            of the actions the feedback is for
      * @param time
      *            of the feedback
      * @param status
      *            is the feedback itself
+     * @deprecated The ID is always given by the actionId path variable. Not
+     *             required in message.
      */
     @JsonCreator
-    public DdiActionFeedback(@JsonProperty("id") final Long id, @JsonProperty("time") final String time,
-            @JsonProperty("status") final DdiStatus status) {
-        this.id = id;
-        this.time = time;
-        this.status = status;
+    @Deprecated(since = "2021-06-11")
+    @SuppressWarnings("squid:S1133") // must stay for backwards compatibility
+    public DdiActionFeedback(@JsonProperty(value = "id") final Long ignoredId,
+            @JsonProperty(value = "time", required = true) final String time,
+            @JsonProperty(value = "status", required = true) final DdiStatus status) {
+        this(time, status);
     }
 
-    public Long getId() {
-        return id;
+    /**
+     * Constructs an action-feedback
+     * 
+     * @param time
+     *            time of feedback
+     * @param status
+     *            status to be appended to the action
+     */
+    public DdiActionFeedback(@JsonProperty("time") final String time, @JsonProperty("status") final DdiStatus status) {
+        this.time = time;
+        this.status = status;
     }
 
     public String getTime() {
@@ -82,7 +88,7 @@ public class DdiActionFeedback {
 
     @Override
     public String toString() {
-        return "ActionFeedback [id=" + id + ", time=" + time + ", status=" + status + "]";
+        return "ActionFeedback [time=" + time + ", status=" + status + "]";
     }
 
 }
