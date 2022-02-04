@@ -212,7 +212,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                 .orElseThrow(() -> new SoftwareModuleNotAssignedToTargetException(module, target.getControllerId()));
         final String range = request.getHeader("Range");
 
-        String message;
+        final String message;
         if (range != null) {
             message = RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target downloads range " + range + " of: "
                     + request.getRequestURI();
@@ -225,7 +225,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static boolean checkModule(final String fileName, final SoftwareModule module) {
-        return null == module || module.getArtifactByFilename(fileName).isEmpty();
+        return null == module || !module.getArtifactByFilename(fileName).isPresent();
     }
 
     @Override
@@ -346,7 +346,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        Status status;
+        final Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
             LOG.debug("Controller confirmed cancel (actionId: {}, controllerId: {}) as we got {} report.", actionId,
@@ -391,7 +391,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionId,
             final List<String> messages) {
-        Status status;
+        final Status status;
         LOG.debug("Controller reported intermediate status (actionId: {}, controllerId: {}) as we got {} report.",
                 actionId, controllerId, feedback.getStatus().getExecution());
         status = Status.RUNNING;
@@ -401,7 +401,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private Status handleClosedCase(final DdiActionFeedback feedback, final String controllerId, final Long actionId,
             final List<String> messages) {
-        Status status;
+        final Status status;
         LOG.debug("Controller reported closed (actionId: {}, controllerId: {}) as we got {} report.", actionId,
                 controllerId, feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
@@ -482,8 +482,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     }
 
-    private DdiDeploymentBase generateDdiDeploymentBase(Target target, Action action,
-            Integer actionHistoryMessageCount) {
+    private DdiDeploymentBase generateDdiDeploymentBase(final Target target, final Action action,
+            final Integer actionHistoryMessageCount) {
         final List<DdiChunk> chunks = DataConversionHelper.createChunks(target, action, artifactUrlHandler,
                 systemManagement, new ServletServerHttpRequest(requestResponseContextHolder.getHttpServletRequest()),
                 controllerManagement);
@@ -508,7 +508,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             final Long actionId, final EntityFactory entityFactory) {
 
         final List<String> messages = new ArrayList<>();
-        Status status;
+        final Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
             status = handleCaseCancelCanceled(feedback, target, actionId, messages);
@@ -536,7 +536,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static Status handleCancelClosedCase(final DdiActionFeedback feedback, final List<String> messages) {
-        Status status;
+        final Status status;
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
             addMessageIfEmpty("Target was not able to complete cancellation", messages);
@@ -549,7 +549,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static Status handleCaseCancelCanceled(final DdiActionFeedback feedback, final Target target,
             final Long actionId, final List<String> messages) {
-        Status status;
+        final Status status;
         LOG.error(
                 "Target reported cancel for a cancel which is not supported by the server (actionId: {}, controllerId: {}) as we got {} report.",
                 actionId, target.getControllerId(), feedback.getStatus().getExecution());
@@ -570,7 +570,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
         return verifyActionBelongsToTarget(action, target);
     }
 
-    private Action verifyActionBelongsToTarget(Action action, Target target) {
+    private Action verifyActionBelongsToTarget(final Action action, final Target target) {
         if (!action.getTarget().getId().equals(target.getId())) {
             LOG.debug(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
             throw new EntityNotFoundException(
