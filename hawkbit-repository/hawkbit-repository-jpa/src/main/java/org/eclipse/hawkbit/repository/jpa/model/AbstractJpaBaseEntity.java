@@ -16,7 +16,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
@@ -44,13 +43,9 @@ public abstract class AbstractJpaBaseEntity implements BaseEntity {
     @Column(name = "id")
     private Long id;
 
-    @Transient
     private String createdBy;
-    @Transient
     private String lastModifiedBy;
-    @Transient
     private long createdAt;
-    @Transient
     private long lastModifiedAt;
 
     @Version
