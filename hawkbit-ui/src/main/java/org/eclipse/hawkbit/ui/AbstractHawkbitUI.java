@@ -226,14 +226,19 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
     private class ManagementViewProvider implements ViewProvider {
         private static final long serialVersionUID = 1L;
 
+        private static final String DEFAULT_PARAMETER_SEPARATOR = "/";
+
         @Override
         public String getViewName(final String viewAndParameters) {
-            return viewProvider.getViewName(getStartView(viewAndParameters));
+            final int paramsDelimeterIndex = viewAndParameters.indexOf(DEFAULT_PARAMETER_SEPARATOR);
+            final String viewName = paramsDelimeterIndex != -1 ? viewAndParameters.substring(0, paramsDelimeterIndex)
+                    : viewAndParameters;
+            return viewProvider.getViewName(getStartView(viewName));
         }
 
         @Override
         public View getView(final String viewName) {
-            return viewProvider.getView(getStartView(viewName));
+            return viewProvider.getView(viewName);
         }
 
         private String getStartView(final String viewName) {

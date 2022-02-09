@@ -8,12 +8,19 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
+import org.springframework.util.StringUtils;
 
 import com.vaadin.navigator.View;
 import com.vaadin.navigator.ViewBeforeLeaveEvent;
@@ -26,6 +33,10 @@ import com.vaadin.ui.VerticalLayout;
  */
 public abstract class AbstractEventListenersAwareView extends VerticalLayout implements View, ViewNameAware {
     private static final long serialVersionUID = 1L;
+
+    // directly taken from Vaadin Navigator for consistency
+    private static final String DEFAULT_STATE_PARAMETER_SEPARATOR = "&";
+    private static final String DEFAULT_STATE_PARAMETER_KEY_VALUE_SEPARATOR = "=";
 
     private final transient List<EventListenersAwareLayout> eventAwareLayouts = new ArrayList<>();
     private boolean initial;
@@ -70,11 +81,28 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
 
         if (initial) {
             restoreState();
+
+            final String viewParams = event.getParameters();
+            if (StringUtils.hasText(viewParams)) {
+                handleStateParams(parseStateParameters(viewParams));
+            }
+
             initial = false;
             return;
         }
 
         updateLayoutsOnViewEnter();
+    }
+
+    private static Map<String, String> parseStateParameters(final String urlParams) {
+        return Arrays.stream(urlParams.split(DEFAULT_STATE_PARAMETER_SEPARATOR)).map(paramPair -> {
+            final String[] keyValue = paramPair.split(DEFAULT_STATE_PARAMETER_KEY_VALUE_SEPARATOR);
+            if (keyValue.length == 2) {
+                return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
+            }
+            return null;
+        }).filter(Objects::nonNull)
+                .collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
     }
 
     /**
@@ -94,8 +122,17 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
     }
 
     /**
-     * Called on on view enter for added event aware layouts to update their
-     * state.
+     * Handles state url parameters of added event aware layouts.
+     * 
+     * @param stateParams
+     *            map of view state url parameters
+     */
+    protected void handleStateParams(final Map<String, String> stateParams) {
+        eventAwareLayouts.forEach(layout -> layout.handleParameters(stateParams));
+    }
+
+    /**
+     * Called on view enter for added event aware layouts to update their state.
      * 
      */
     protected void updateLayoutsOnViewEnter() {

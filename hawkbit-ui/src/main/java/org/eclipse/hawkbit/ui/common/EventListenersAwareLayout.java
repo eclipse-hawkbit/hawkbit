@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.common;
 
+import java.util.Map;
+
 /**
  * Interface for event aware event listeners
  *
@@ -24,6 +26,15 @@ public interface EventListenersAwareLayout {
      * Update components on view enter
      */
     default void onViewEnter() {
+    }
+
+    /**
+     * Set components state based on url parameters
+     * 
+     * @param stateParameters
+     *            map of state url parameters
+     */
+    default void handleParameters(final Map<String, String> stateParameters) {
     }
 
     /**
