@@ -252,10 +252,10 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
     @Override
     public void handleParameters(final Map<String, String> stateParameters) {
         if (stateParameters.containsKey(TARGET_STATE_PARAM)) {
-            targetGrid.mapControllerIdToProxyEntity(stateParameters.get(TARGET_STATE_PARAM)).ifPresent(t -> {
-                targetGridHeader.updateSearch(t.getControllerId());
-                targetGrid.getSelectionSupport().select(t);
-            });
+            final String stateTargetParam = stateParameters.get(TARGET_STATE_PARAM);
+            targetGridHeader.updateSearch(stateTargetParam);
+            targetGrid.mapControllerIdToProxyEntity(stateTargetParam)
+                    .ifPresent(t -> targetGrid.getSelectionSupport().select(t));
         }
     }
 
