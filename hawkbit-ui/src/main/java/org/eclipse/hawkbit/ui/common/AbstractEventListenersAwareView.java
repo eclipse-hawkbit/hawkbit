@@ -81,17 +81,14 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
 
         if (initial) {
             restoreState();
-
-            final String viewParams = event.getParameters();
-            if (StringUtils.hasText(viewParams)) {
-                handleStateParams(parseStateParameters(viewParams));
-            }
-
             initial = false;
-            return;
+        } else {
+            updateLayoutsOnViewEnter();
         }
 
-        updateLayoutsOnViewEnter();
+        if (StringUtils.hasText(event.getParameters())) {
+            handleStateParams(parseStateParameters(event.getParameters()));
+        }
     }
 
     private static Map<String, String> parseStateParameters(final String urlParams) {
