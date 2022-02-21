@@ -118,6 +118,20 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
     }
 
+    protected ResultActions postCancelFeedback(final String controllerId, final Long actionId, final String content,
+            final ResultMatcher statusMatcher) throws Exception {
+        return postCancelFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(),
+                statusMatcher);
+    }
+
+    protected ResultActions postCancelFeedback(final MediaType mediaType, final String controllerId,
+            final Long actionId, final byte[] content, final ResultMatcher statusMatcher) throws Exception {
+        return mvc
+                .perform(post(CANCEL_FEEDBACK, tenantAware.getCurrentTenant(), controllerId, actionId).content(content)
+                        .contentType(mediaType).accept(mediaType))
+                .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher);
+    }
+
     protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher,
             final String... values) throws Exception {
         return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType))

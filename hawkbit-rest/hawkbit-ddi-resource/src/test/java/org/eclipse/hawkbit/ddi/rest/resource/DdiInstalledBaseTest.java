@@ -161,6 +161,107 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
+    @Description("Test several deployments to a controller. Checks that cancelled action is not represented as installedBase.")
+    public void deploymentActionsCancelledNotInInstalledBase() throws Exception {
+        // Prepare test data
+        final Target target = createTargetAndAssertNoActiveActions();
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
+        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+                getOsModule(ds1), "test1", ARTIFACT_SIZE);
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+                getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
+
+        // assign ds1, action1 - and provide cancel feedback
+        final Long actionId1 = getFirstAssignedActionId(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
+        deploymentManagement.cancelAction(actionId1);
+        postCancelFeedback(target.getControllerId(), actionId1,
+                JsonBuilder.cancelActionFeedback(actionId1.toString(), "closed", "Canceled"), status().isOk());
+
+        // assign ds1, action2 - and provide cancel feedback
+        final Long actionId2 = getFirstAssignedActionId(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.FORCED));
+        deploymentManagement.cancelAction(actionId2);
+        postCancelFeedback(target.getControllerId(), actionId2,
+                JsonBuilder.cancelActionFeedback(actionId2.toString(), "closed", "Canceled"), status().isOk());
+
+        // assign ds1, action 3 - and provide success feedback
+        final Long actionId3 = getFirstAssignedActionId(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
+        postDeploymentFeedback(target.getControllerId(), actionId3,
+                JsonBuilder.deploymentActionFeedback(actionId3.toString(), "closed", "success", "Closed"),
+                status().isOk());
+
+        // Test: latest succeeded action is returned in installedBase
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(), CONTROLLER_ID)
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.installedBase.href",
+                        startsWith(installedBaseLink(CONTROLLER_ID, actionId3.toString()))))
+                .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
+
+        getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
+                actionId3, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+
+        // cancelled action are not accessible
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
+                actionId1.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
+                actionId2.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @Description("Test several deployments to a controller. Checks that cancelled action do not override installedBase.")
+    public void deploymentActionsCancelledNotOverrideInInstalledBase() throws Exception {
+        // Prepare test data
+        final Target target = createTargetAndAssertNoActiveActions();
+
+        final DistributionSet ds1 = testdataFactory.createDistributionSet("1", true);
+        final Artifact artifact1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+                getOsModule(ds1), "test1", ARTIFACT_SIZE);
+        final Artifact artifactSignature1 = testdataFactory.createArtifact(RandomUtils.nextBytes(ARTIFACT_SIZE),
+                getOsModule(ds1), "test1.signature", ARTIFACT_SIZE);
+
+        final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
+
+        // assign ds1, action1 - and provide success feedback
+        final Long actionId1 = getFirstAssignedActionId(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
+        postDeploymentFeedback(target.getControllerId(), actionId1,
+                JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed", "success", "Success"),
+                status().isOk());
+
+        // assign ds2, action2 - assign ds1, action 3 - and cancel both
+        final Long actionId2 = getFirstAssignedActionId(
+                assignDistributionSet(ds2.getId(), target.getControllerId(), Action.ActionType.FORCED));
+        final Long actionId3 = getFirstAssignedActionId(
+                assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
+        deploymentManagement.cancelAction(actionId2);
+        postCancelFeedback(target.getControllerId(), actionId2,
+                JsonBuilder.cancelActionFeedback(actionId2.toString(), "closed", "Canceled"), status().isOk());
+        deploymentManagement.cancelAction(actionId3);
+        postCancelFeedback(target.getControllerId(), actionId3,
+                JsonBuilder.cancelActionFeedback(actionId3.toString(), "closed", "Canceled"), status().isOk());
+
+        // Test: the succeeded action is returned in installedBase instead of the latest
+        // cancelled action
+        performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(), CONTROLLER_ID)
+                .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                .andExpect(jsonPath("$._links.installedBase.href",
+                        startsWith(installedBaseLink(CONTROLLER_ID, actionId1.toString()))))
+                .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
+
+        getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
+                actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
+
+        // cancelled action are not accessible
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
+                actionId2.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+        mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), target.getControllerId(),
+                actionId3.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+    }
+
+    @Test
     @Description("Test open deployment to a controller. Checks that installedBase returns 404 for a pending action.")
     public void installedBaseReturns404ForPendingAction() throws Exception {
         // Prepare test data
