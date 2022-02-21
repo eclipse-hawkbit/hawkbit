@@ -250,7 +250,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
     }
 
     @Override
-    public void handleParameters(final Map<String, String> stateParameters) {
+    public void handleStateParameters(final Map<String, String> stateParameters) {
         if (stateParameters.containsKey(TARGET_STATE_PARAM)) {
             final String stateTargetParam = stateParameters.get(TARGET_STATE_PARAM);
             targetGridHeader.updateSearch(stateTargetParam);

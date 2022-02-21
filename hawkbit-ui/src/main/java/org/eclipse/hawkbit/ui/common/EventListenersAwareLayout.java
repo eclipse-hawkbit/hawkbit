@@ -34,7 +34,7 @@ public interface EventListenersAwareLayout {
      * @param stateParameters
      *            map of state url parameters
      */
-    default void handleParameters(final Map<String, String> stateParameters) {
+    default void handleStateParameters(final Map<String, String> stateParameters) {
     }
 
     /**

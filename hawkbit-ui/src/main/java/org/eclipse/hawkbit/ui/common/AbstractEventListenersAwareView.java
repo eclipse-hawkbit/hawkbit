@@ -93,7 +93,7 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
 
     private static Map<String, String> parseStateParameters(final String urlParams) {
         return Arrays.stream(urlParams.split(DEFAULT_STATE_PARAMETER_SEPARATOR)).map(paramPair -> {
-            final String[] keyValue = paramPair.split(DEFAULT_STATE_PARAMETER_KEY_VALUE_SEPARATOR);
+            final String[] keyValue = paramPair.split(DEFAULT_STATE_PARAMETER_KEY_VALUE_SEPARATOR, 2);
             if (keyValue.length == 2) {
                 return new AbstractMap.SimpleEntry<>(keyValue[0], keyValue[1]);
             }
@@ -125,7 +125,7 @@ public abstract class AbstractEventListenersAwareView extends VerticalLayout imp
      *            map of view state url parameters
      */
     protected void handleStateParams(final Map<String, String> stateParams) {
-        eventAwareLayouts.forEach(layout -> layout.handleParameters(stateParams));
+        eventAwareLayouts.forEach(layout -> layout.handleStateParameters(stateParams));
     }
 
     /**
