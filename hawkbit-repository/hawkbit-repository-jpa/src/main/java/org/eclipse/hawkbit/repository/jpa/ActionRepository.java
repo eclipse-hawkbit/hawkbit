@@ -199,7 +199,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
      * @return action if there is one with assigned target and assigned
      *         {@link DistributionSet}.
      */
-    Optional<Action> findFirstByTargetIdAndDistributionSetId(@Param("target") long targetId, @Param("ds") Long dsId);
+    Optional<Action> findFirstByTargetIdAndDistributionSetIdOrderByIdDesc(@Param("target") long targetId,
+            @Param("ds") Long dsId);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

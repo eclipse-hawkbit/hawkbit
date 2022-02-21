@@ -19,6 +19,7 @@ import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -1067,7 +1068,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
         if (null != installedDistributionSet) {
-            return actionRepository.findFirstByTargetIdAndDistributionSetId(jpaTarget.getId(),
+            return actionRepository.findFirstByTargetIdAndDistributionSetIdOrderByIdDesc(jpaTarget.getId(),
                     installedDistributionSet.getId());
         } else {
             return Optional.empty();
