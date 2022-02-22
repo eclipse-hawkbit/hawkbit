@@ -1067,8 +1067,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         final JpaDistributionSet installedDistributionSet = jpaTarget.getInstalledDistributionSet();
         if (null != installedDistributionSet) {
-            return actionRepository.findFirstByTargetIdAndDistributionSetId(jpaTarget.getId(),
-                    installedDistributionSet.getId());
+            return actionRepository.findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(jpaTarget.getId(),
+                    installedDistributionSet.getId(), FINISHED);
         } else {
             return Optional.empty();
         }
