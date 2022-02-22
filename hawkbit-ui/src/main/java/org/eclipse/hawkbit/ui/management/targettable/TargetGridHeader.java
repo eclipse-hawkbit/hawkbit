@@ -242,13 +242,24 @@ public class TargetGridHeader extends AbstractEntityGridHeader {
     }
 
     /**
+     * Update search programmatically.
+     * 
+     * @param searchQuery
+     *            search query
+     */
+    public void updateSearch(final String searchQuery) {
+        getSearchHeaderSupport().setAndTriggerSearch(searchQuery);
+    }
+
+    /**
      * Enable search icon in the search header
      */
     public void enableSearchIcon() {
         getSearchHeaderSupport().enableSearch();
     }
+
     /**
-     * Disable search icon in the search header
+     * Disable search icon in the search header.
      */
     public void disabledSearchIcon() {
         getSearchHeaderSupport().disableSearch();

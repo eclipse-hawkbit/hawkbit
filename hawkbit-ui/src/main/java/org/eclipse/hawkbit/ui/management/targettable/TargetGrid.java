@@ -197,10 +197,22 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
      * @param entityId
      *            Entity id
      *
-     * @return Target
+     * @return ProxyTarget
      */
     public Optional<ProxyTarget> mapIdToProxyEntity(final long entityId) {
         return targetManagement.get(entityId).map(targetToProxyTargetMapper::map);
+    }
+
+    /**
+     * Map target controller id to proxy target entity
+     *
+     * @param controllerId
+     *            controller id
+     *
+     * @return ProxyTarget
+     */
+    public Optional<ProxyTarget> mapControllerIdToProxyEntity(final String controllerId) {
+        return targetManagement.getByControllerID(controllerId).map(targetToProxyTargetMapper::map);
     }
 
     private Long getSelectedEntityIdFromUiState() {
@@ -290,7 +302,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
     /**
      * Update filter on filter tab selection
      */
-    public void resetAllFilters(){
+    public void resetAllFilters() {
         getFilter().ifPresent(filter -> {
             filter.setDistributionId(null);
             filter.setNoTagClicked(false);
