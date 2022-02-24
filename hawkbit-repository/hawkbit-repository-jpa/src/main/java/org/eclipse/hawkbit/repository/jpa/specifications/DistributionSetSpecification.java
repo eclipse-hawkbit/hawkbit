@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Path;
@@ -273,6 +274,33 @@ public final class DistributionSetSpecification {
             final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
                     JoinType.LEFT);
             return cb.equal(tags.get(JpaDistributionSetTag_.id), tagId);
+        };
+    }
+
+    /**
+     * Can be added to specification chain to order result by provided target
+     *
+     * Order: 1. Distribution set installed on target, 2. Distribution set(s)
+     * assigned to target, 3. Based on distribution set id
+     *
+     * NOTE: Other specs, pagables and sort objects may alter the queries
+     * orderBy entry too, possibly invalidating the applied order, keep in mind
+     * when using this
+     *
+     * @param linkedControllerId
+     *            controller id to get installed/assigned DS for
+     * @return specification that applies order by target, may be overwritten
+     */
+    public static Specification<JpaDistributionSet> orderedByLinkedTarget(final String linkedControllerId) {
+        return (dsRoot, query, cb) -> {
+            final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
+
+            final Expression<Object> assignedInstalledCase = cb.selectCase()
+                    .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet), dsRoot), 1)
+                    .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet), dsRoot), 2).otherwise(3);
+            query.orderBy(cb.asc(assignedInstalledCase), cb.asc(dsRoot.get(JpaDistributionSet_.id)));
+
+            return cb.equal(targetRoot.get(JpaTarget_.controllerId), linkedControllerId);
         };
     }
 

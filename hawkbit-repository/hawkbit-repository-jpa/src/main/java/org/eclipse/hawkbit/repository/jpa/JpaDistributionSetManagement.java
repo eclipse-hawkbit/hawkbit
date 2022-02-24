@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -17,12 +16,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.DistributionSetMetadataFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
@@ -50,7 +51,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -65,6 +65,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
@@ -148,7 +149,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Optional<DistributionSet> getWithDetails(final long distid) {
         return distributionSetRepository.findOne(DistributionSetSpecification.byId(distid))
-                .map(d -> (DistributionSet) d);
+                .map(DistributionSet.class::cast);
     }
 
     @Override
@@ -337,11 +338,18 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public Page<DistributionSet> findByDistributionSetFilter(final Pageable pageable,
+    public Slice<DistributionSet> findByDistributionSetFilter(final Pageable pageable,
             final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        return convertDsPage(findByCriteriaAPI(pageable, specList), pageable);
+        return convertDsPage(findByCriteriaAPIWithoutCount(pageable, specList), pageable);
+    }
+
+    @Override
+    public long countByDistributionSetFilter(@NotNull final DistributionSetFilter distributionSetFilter) {
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+        return countByCriteriaAPI(specList);
     }
 
     private static Page<DistributionSet> convertDsPage(final Page<JpaDistributionSet> findAll,
@@ -354,84 +362,41 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
-    /**
-     *
-     * @param distributionSetFilter
-     *            had details of filters to be applied
-     * @return a single DistributionSet which is either installed or assigned to
-     *         a specific target or {@code null}.
-     */
-    private Optional<JpaDistributionSet> findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
-            final DistributionSetFilter distributionSetFilter) {
+    @Override
+    public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
+        return convertDsPage(findByCriteriaAPIWithoutCount(pageReq, buildSpecsByComplete(complete)), pageReq);
+    }
+
+    private List<Specification<JpaDistributionSet>> buildSpecsByComplete(final Boolean complete) {
+        return complete != null
+                ? Arrays.asList(DistributionSetSpecification.isDeleted(false),
+                        DistributionSetSpecification.isCompleted(complete))
+                : Collections.singletonList(DistributionSetSpecification.isDeleted(false));
+    }
+
+    @Override
+    public long countByCompleted(final Boolean complete) {
+        return countByCriteriaAPI(buildSpecsByComplete(complete));
+    }
+
+    @Override
+    public Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(final Pageable pageable,
+            final DistributionSetFilter distributionSetFilter, final String assignedOrInstalled) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        if (CollectionUtils.isEmpty(specList)) {
-            return Optional.empty();
-        }
-        return distributionSetRepository.findOne(SpecificationsBuilder.combineWithAnd(specList));
-    }
+        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled));
 
-    @Override
-    public Page<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
-
-        List<Specification<JpaDistributionSet>> specList;
-        if (complete != null) {
-            specList = Arrays.asList(DistributionSetSpecification.isDeleted(false),
-                    DistributionSetSpecification.isCompleted(complete));
-        } else {
-            specList = Collections.singletonList(DistributionSetSpecification.isDeleted(false));
-        }
-
-        return convertDsPage(findByCriteriaAPI(pageReq, specList), pageReq);
-    }
-
-    @Override
-    public Page<DistributionSet> findByFilterAndAssignedInstalledDsOrderedByLinkTarget(final Pageable pageable,
-            final DistributionSetFilterBuilder distributionSetFilterBuilder, final String assignedOrInstalled) {
-
-        final DistributionSetFilter filterWithInstalledTargets = distributionSetFilterBuilder
-                .setInstalledTargetId(assignedOrInstalled).setAssignedTargetId(null).build();
-        final Optional<JpaDistributionSet> installedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
-                filterWithInstalledTargets);
-
-        final DistributionSetFilter filterWithAssignedTargets = distributionSetFilterBuilder.setInstalledTargetId(null)
-                .setAssignedTargetId(assignedOrInstalled).build();
-        final Optional<JpaDistributionSet> assignedDS = findDistributionSetsByFiltersAndInstalledOrAssignedTarget(
-                filterWithAssignedTargets);
-
-        final DistributionSetFilter dsFilterWithNoTargetLinked = distributionSetFilterBuilder.setInstalledTargetId(null)
-                .setAssignedTargetId(null).build();
-        // first fine the distribution sets filtered by the given filter
-        // parameters
-        final Page<DistributionSet> findDistributionSetsByFilters = findByDistributionSetFilter(pageable,
-                dsFilterWithNoTargetLinked);
-
-        final List<DistributionSet> resultSet = new ArrayList<>(findDistributionSetsByFilters.getContent());
-        int orderIndex = 0;
-        if (installedDS.isPresent()) {
-            final boolean remove = resultSet.remove(installedDS.get());
-            if (!remove) {
-                resultSet.remove(resultSet.size() - 1);
-            }
-            resultSet.add(orderIndex, installedDS.get());
-            orderIndex++;
-        }
-        if (assignedDS.isPresent() && !assignedDS.equals(installedDS)) {
-            final boolean remove = resultSet.remove(assignedDS.get());
-            if (!remove) {
-                resultSet.remove(resultSet.size() - 1);
-            }
-            resultSet.add(orderIndex, assignedDS.get());
-        }
-
-        return new PageImpl<>(resultSet, pageable, findDistributionSetsByFilters.getTotalElements());
+        // remove default sort from pageable to not overwrite sorted spec
+        final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
+                pageable.getPageSize(), Sort.unsorted());
+        return convertDsPage(findByCriteriaAPIWithoutCount(unsortedPage, specList), unsortedPage);
     }
 
     @Override
     public Optional<DistributionSet> getByNameAndVersion(final String distributionName, final String version) {
         final Specification<JpaDistributionSet> spec = DistributionSetSpecification
                 .equalsNameAndVersionIgnoreCase(distributionName, version);
-        return distributionSetRepository.findOne(spec).map(d -> (DistributionSet) d);
+        return distributionSetRepository.findOne(spec).map(DistributionSet.class::cast);
 
     }
 
@@ -536,11 +501,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final long distributionSetId) {
         throwExceptionIfDistributionSetDoesNotExist(distributionSetId);
 
-        return convertMdPage(distributionSetMetadataRepository
-                .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.equal(
-                        root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id),
-                        distributionSetId), pageable),
-                pageable);
+        return convertMdPage(distributionSetMetadataRepository.findAll((root, query, cb) -> cb.equal(
+                root.get(JpaDistributionSetMetadata_.distributionSet).get(JpaDistributionSet_.id), distributionSetId),
+                pageable), pageable);
     }
 
     @Override
@@ -554,7 +517,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         return convertMdPage(
                 distributionSetMetadataRepository
-                        .findAll((Specification<JpaDistributionSetMetadata>) (root, query, cb) -> cb.and(
+                        .findAll((root, query, cb) -> cb.and(
                                 cb.equal(root.get(JpaDistributionSetMetadata_.distributionSet)
                                         .get(JpaDistributionSet_.id), distributionSetId),
                                 spec.toPredicate(root, query, cb)), pageable),
@@ -571,7 +534,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         throwExceptionIfDistributionSetDoesNotExist(setId);
 
         return distributionSetMetadataRepository.findById(new DsMetadataCompositeKey(setId, key))
-                .map(dmd -> (DistributionSetMetadata) dmd);
+                .map(DistributionSetMetadata.class::cast);
     }
 
     @Override
@@ -673,6 +636,25 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     /**
+     * executes findAllWithoutCount with the given {@link DistributionSet}
+     * {@link Specification}s.
+     *
+     * @param pageable
+     *            paging parameter
+     * @param specList
+     *            list of @link {@link Specification}
+     * @return the slice with the found {@link DistributionSet}s
+     */
+    private Slice<JpaDistributionSet> findByCriteriaAPIWithoutCount(final Pageable pageable,
+            final List<Specification<JpaDistributionSet>> specList) {
+        if (CollectionUtils.isEmpty(specList)) {
+            return distributionSetRepository.findAllWithoutCount(pageable);
+        }
+
+        return distributionSetRepository.findAllWithoutCount(SpecificationsBuilder.combineWithAnd(specList), pageable);
+    }
+
+    /**
      * executes findAll with the given {@link DistributionSet}
      * {@link Specification}s.
      *
@@ -680,16 +662,31 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
      *            paging parameter
      * @param specList
      *            list of @link {@link Specification}
-     * @return the page with the found {@link DistributionSet}
+     * @return the page with the found {@link DistributionSet}s
      */
     private Page<JpaDistributionSet> findByCriteriaAPI(final Pageable pageable,
             final List<Specification<JpaDistributionSet>> specList) {
-
         if (CollectionUtils.isEmpty(specList)) {
             return distributionSetRepository.findAll(pageable);
         }
 
         return distributionSetRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
+    }
+
+    /**
+     * Executes count with the given {@link DistributionSet}
+     * {@link Specification}s.
+     *
+     * @param specList
+     *            list of @link {@link Specification}
+     * @return count of found {@link DistributionSet}s
+     */
+    private long countByCriteriaAPI(final List<Specification<JpaDistributionSet>> specList) {
+        if (CollectionUtils.isEmpty(specList)) {
+            return distributionSetRepository.count();
+        }
+
+        return distributionSetRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     private void checkAndThrowIfDistributionSetMetadataAlreadyExists(final DsMetadataCompositeKey metadataId) {

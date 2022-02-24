@@ -126,8 +126,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have the request
-     * controller attributes flag set
+     * {@link Specification} for retrieving {@link Target}s that have the
+     * request controller attributes flag set
      *
      * @return the {@link Target} {@link Specification}
      */
@@ -154,8 +154,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "equal to any given
-     * {@link TargetUpdateStatus}".
+     * {@link Specification} for retrieving {@link Target}s by "equal to any
+     * given {@link TargetUpdateStatus}".
      *
      * @param updateStatus
      *            to be filtered on
@@ -180,8 +180,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "not equal to given
-     * {@link TargetUpdateStatus}".
+     * {@link Specification} for retrieving {@link Target}s by "not equal to
+     * given {@link TargetUpdateStatus}".
      *
      * @param updateStatus
      *            to be filtered on
@@ -194,14 +194,15 @@ public final class TargetSpecifications {
 
     /**
      * {@link Specification} for retrieving {@link Target}s that are overdue. A
-     * target is overdue if it did not respond during the configured intervals:<br>
+     * target is overdue if it did not respond during the configured
+     * intervals:<br>
      * <em>poll_itvl + overdue_itvl</em>
      *
      * @param overdueTimestamp
      *            the calculated timestamp to compare with the last respond of a
      *            target (lastTargetQuery).<br>
-     *            The <code>overdueTimestamp</code> has to be calculated with the
-     *            following expression:<br>
+     *            The <code>overdueTimestamp</code> has to be calculated with
+     *            the following expression:<br>
      *            <em>overdueTimestamp = nowTimestamp - poll_itvl -
      *            overdue_itvl</em>
      *
@@ -210,23 +211,6 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
         return (targetRoot, query, cb) -> cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery),
                 overdueTimestamp);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
-     * like name or like description".
-     *
-     * @param searchText
-     *            to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> likeIdOrNameOrDescription(final String searchText) {
-        return (targetRoot, query, cb) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
-                    cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower),
-                    cb.like(cb.lower(targetRoot.get(JpaTarget_.description)), searchTextToLower));
-        };
     }
 
     /**
@@ -248,19 +232,24 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like controllerId or
-     * like name or like description or like attribute value".
+     * {@link Specification} for retrieving {@link Target}s by "like
+     * controllerId or like name".
      *
      * @param searchText
      *            to be filtered on
      * @return the {@link Target} {@link Specification}
      */
-    public static Specification<JpaTarget> likeIdOrNameOrDescriptionOrAttributeValue(final String searchText) {
-        return Specification.where(likeIdOrNameOrDescription(searchText)).or(likeAttributeValue(searchText));
+    public static Specification<JpaTarget> likeControllerIdOrName(final String searchText) {
+        return (targetRoot, query, cb) -> {
+            final String searchTextToLower = searchText.toLowerCase();
+            return cb.or(cb.like(cb.lower(targetRoot.get(JpaTarget_.controllerId)), searchTextToLower),
+                    cb.like(cb.lower(targetRoot.get(JpaTarget_.name)), searchTextToLower));
+        };
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like controllerId".
+     * {@link Specification} for retrieving {@link Target}s by "like
+     * controllerId".
      *
      * @param distributionId
      *            to be filtered on
@@ -271,8 +260,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * Finds all targets by given {@link Target#getControllerId()}s and which are
-     * not yet assigned to given {@link DistributionSet}.
+     * Finds all targets by given {@link Target#getControllerId()}s and which
+     * are not yet assigned to given {@link DistributionSet}.
      *
      * @param tIDs
      *            to search for.
@@ -305,8 +294,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "has no tag names"or
-     * "has at least on of the given tag names".
+     * {@link Specification} for retrieving {@link Target}s by "has no tag
+     * names"or "has at least on of the given tag names".
      *
      * @param tagNames
      *            to be filtered on
@@ -348,8 +337,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned distribution
-     * set.
+     * {@link Specification} for retrieving {@link Target}s by assigned
+     * distribution set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -380,10 +369,10 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that are compatible with
-     * given {@link DistributionSetType}. Compatibility is evaluated by checking the
-     * {@link TargetType} of a target. Targets that don't have a {@link TargetType}
-     * are compatible with all {@link DistributionSetType}
+     * {@link Specification} for retrieving {@link Target}s that are compatible
+     * with given {@link DistributionSetType}. Compatibility is evaluated by
+     * checking the {@link TargetType} of a target. Targets that don't have a
+     * {@link TargetType} are compatible with all {@link DistributionSetType}
      *
      * @param distributionSetTypeId
      *            the ID of the distribution set type which must be compatible
@@ -399,15 +388,16 @@ public final class TargetSpecifications {
         };
     }
 
-    private static Predicate getTargetTypeIsNullPredicate(Root<JpaTarget> targetRoot) {
+    private static Predicate getTargetTypeIsNullPredicate(final Root<JpaTarget> targetRoot) {
         return targetRoot.get(JpaTarget_.targetType).isNull();
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that are NOT compatible
-     * with given {@link DistributionSetType}. Compatibility is evaluated by
-     * checking the {@link TargetType} of a target. Targets that don't have a
-     * {@link TargetType} are compatible with all {@link DistributionSetType}
+     * {@link Specification} for retrieving {@link Target}s that are NOT
+     * compatible with given {@link DistributionSetType}. Compatibility is
+     * evaluated by checking the {@link TargetType} of a target. Targets that
+     * don't have a {@link TargetType} are compatible with all
+     * {@link DistributionSetType}
      *
      * @param distributionSetTypeId
      *            the ID of the distribution set type which must be incompatible
@@ -456,8 +446,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that are in an action
-     * for a given {@link RolloutGroup}
+     * {@link Specification} for retrieving {@link Target}s that are in an
+     * action for a given {@link RolloutGroup}
      *
      * @param group
      *            the {@link RolloutGroup}
@@ -490,8 +480,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that have no Action of
-     * the {@link RolloutGroup}.
+     * {@link Specification} for retrieving {@link Target}s that have no Action
+     * of the {@link RolloutGroup}.
      *
      * @param group
      *            the {@link RolloutGroup}
@@ -512,8 +502,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by assigned distribution
-     * set.
+     * {@link Specification} for retrieving {@link Target}s by assigned
+     * distribution set.
      *
      * @param distributionSetId
      *            the ID of the distribution set which must be assigned
@@ -553,7 +543,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by target type id is equal to null
+     * {@link Specification} for retrieving {@link Target}s by target type id is
+     * equal to null
      *
      * @return the {@link Target} {@link Specification}
      */
@@ -562,8 +553,8 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s that don't have target
-     * type assigned
+     * {@link Specification} for retrieving {@link Target}s that don't have
+     * target type assigned
      *
      * @param typeId
      *            the id of the target type
@@ -576,15 +567,15 @@ public final class TargetSpecifications {
     }
 
     /**
-     * Can be added to specification chain to order result by provided distribution
-     * set
+     * Can be added to specification chain to order result by provided
+     * distribution set
      *
-     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3. Based on
-     * target id
+     * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3.
+     * Based on target id
      *
-     * NOTE: Other specs, pagables and sort objects may alter the queries orderBy
-     * entry too, possibly invalidating the applied order, keep in mind when using
-     * this
+     * NOTE: Other specs, pagables and sort objects may alter the queries
+     * orderBy entry too, possibly invalidating the applied order, keep in mind
+     * when using this
      *
      * @param distributionSetIdForOrder
      *            distribution set to consider

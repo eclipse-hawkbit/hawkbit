@@ -10,12 +10,13 @@ package org.eclipse.hawkbit.ui.common.data.providers;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.ui.common.data.filters.DsManagementFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.util.StringUtils;
 
 /**
@@ -46,28 +47,34 @@ public class DistributionSetManagementStateDataProvider
     }
 
     @Override
-    protected Page<DistributionSet> loadBackendEntities(final PageRequest pageRequest,
+    protected Slice<DistributionSet> loadBackendEntities(final PageRequest pageRequest,
             final DsManagementFilterParams filter) {
         if (filter == null) {
             return distributionSetManagement.findByCompleted(pageRequest, true);
         }
 
         final String pinnedControllerId = filter.getPinnedTargetControllerId();
-        final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false)
-                .setIsComplete(true).setSearchText(filter.getSearchText()).setSelectDSWithNoTag(filter.isNoTagClicked())
-                .setTagNames(filter.getDistributionSetTags());
-
         if (!StringUtils.isEmpty(pinnedControllerId)) {
-            return distributionSetManagement.findByFilterAndAssignedInstalledDsOrderedByLinkTarget(pageRequest, builder,
-                    pinnedControllerId);
+            return distributionSetManagement.findByDistributionSetFilterOrderByLinkedTarget(pageRequest,
+                    buildDsFilter(filter), pinnedControllerId);
         }
 
-        return distributionSetManagement.findByDistributionSetFilter(pageRequest, builder.build());
+        return distributionSetManagement.findByDistributionSetFilter(pageRequest, buildDsFilter(filter));
+    }
+
+    private DistributionSetFilter buildDsFilter(final DsManagementFilterParams filter) {
+        return new DistributionSetFilterBuilder().setIsDeleted(false).setIsComplete(true)
+                .setSearchText(filter.getSearchText()).setSelectDSWithNoTag(filter.isNoTagClicked())
+                .setTagNames(filter.getDistributionSetTags()).build();
     }
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final DsManagementFilterParams filter) {
-        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
+        if (filter == null) {
+            return distributionSetManagement.countByCompleted(true);
+        }
+
+        return distributionSetManagement.countByDistributionSetFilter(buildDsFilter(filter));
     }
 
 }

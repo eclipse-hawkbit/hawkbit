@@ -10,11 +10,12 @@ package org.eclipse.hawkbit.ui.common.data.providers;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -47,19 +48,22 @@ public class DistributionSetStatelessDataProvider
     }
 
     @Override
-    protected Page<DistributionSet> loadBackendEntities(final PageRequest pageRequest, final String filter) {
-        final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false)
-                .setIsComplete(true).setIsValid(true);
+    protected Slice<DistributionSet> loadBackendEntities(final PageRequest pageRequest, final String filter) {
+        return distributionSetManagement.findByDistributionSetFilter(pageRequest, buildDsFilter(filter));
+    }
 
+    private DistributionSetFilter buildDsFilter(final String filter) {
+        final DistributionSetFilterBuilder dsFilterBuilder = new DistributionSetFilterBuilder().setIsDeleted(false)
+                .setIsComplete(true).setIsValid(true);
         if (!StringUtils.isEmpty(filter)) {
-            builder.setFilterString(filter);
+            dsFilterBuilder.setFilterString(filter);
         }
 
-        return distributionSetManagement.findByDistributionSetFilter(pageRequest, builder.build());
+        return dsFilterBuilder.build();
     }
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final String filter) {
-        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
+        return distributionSetManagement.countByDistributionSetFilter(buildDsFilter(filter));
     }
 }

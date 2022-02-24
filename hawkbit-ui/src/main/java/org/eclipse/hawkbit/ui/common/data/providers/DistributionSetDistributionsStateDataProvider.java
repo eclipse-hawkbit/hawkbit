@@ -16,8 +16,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.ui.common.data.filters.DsDistributionsFilterParams;
 import org.eclipse.hawkbit.ui.common.data.mappers.DistributionSetToProxyDistributionMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 /**
  * Data provider for {@link DistributionSet}, which dynamically loads a batch of
@@ -52,10 +52,11 @@ public class DistributionSetDistributionsStateDataProvider
     }
 
     @Override
-    protected Page<DistributionSet> loadBackendEntities(final PageRequest pageRequest,
+    protected Slice<DistributionSet> loadBackendEntities(final PageRequest pageRequest,
             final DsDistributionsFilterParams filter) {
         final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false);
 
+        // TODO: do something with type
         if (filter != null) {
             final DistributionSetType type = filter.getDsTypeId() == null ? null
                     : distributionSetTypeManagement.get(filter.getDsTypeId()).orElse(null);
@@ -68,6 +69,15 @@ public class DistributionSetDistributionsStateDataProvider
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final DsDistributionsFilterParams filter) {
-        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
+        final DistributionSetFilterBuilder builder = new DistributionSetFilterBuilder().setIsDeleted(false);
+
+        if (filter != null) {
+            final DistributionSetType type = filter.getDsTypeId() == null ? null
+                    : distributionSetTypeManagement.get(filter.getDsTypeId()).orElse(null);
+
+            builder.setSearchText(filter.getSearchText()).setSelectDSWithNoTag(false).setType(type);
+        }
+
+        return distributionSetManagement.countByDistributionSetFilter(builder.build());
     }
 }

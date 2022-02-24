@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
@@ -645,13 +646,12 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
 
-        final DistributionSetFilterBuilder distributionSetFilterBuilder = new DistributionSetFilterBuilder()
-                .setIsDeleted(false).setIsComplete(true).setSelectDSWithNoTag(Boolean.FALSE);
+        final DistributionSetFilter distributionSetFilter = new DistributionSetFilterBuilder().setIsDeleted(false)
+                .setIsComplete(true).setSelectDSWithNoTag(Boolean.FALSE).build();
 
         // target first only has an assigned DS-three so check order correct
         final List<DistributionSet> tFirstPin = distributionSetManagement
-                .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(PAGE, distributionSetFilterBuilder,
-                        tFirst.getControllerId())
+                .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tFirst.getControllerId())
                 .getContent();
         assertThat(tFirstPin.get(0)).isEqualTo(dsThree);
         assertThat(tFirstPin).hasSize(10);
@@ -659,8 +659,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // target second has installed DS-2 and assigned DS-4 so check order
         // correct
         final List<DistributionSet> tSecondPin = distributionSetManagement
-                .findByFilterAndAssignedInstalledDsOrderedByLinkTarget(PAGE, distributionSetFilterBuilder,
-                        tSecond.getControllerId())
+                .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tSecond.getControllerId())
                 .getContent();
         assertThat(tSecondPin.get(0)).isEqualTo(dsSecond);
         assertThat(tSecondPin.get(1)).isEqualTo(dsFour);
@@ -982,7 +981,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         distributionSetManagement.delete(ds1.getId());
         // not assigned so not marked as deleted but fully deleted
         assertThat(distributionSetRepository.findAll()).hasSize(1);
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(1);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(1);
     }
 
     @Test
@@ -1055,7 +1054,7 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
-        assertThat(distributionSetManagement.findByCompleted(PAGE, true).getTotalElements()).isEqualTo(2);
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(2);
     }
 
     @Test
