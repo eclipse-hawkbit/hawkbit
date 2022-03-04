@@ -115,7 +115,7 @@ public class SwModulesToDistributionSetAssignmentSupport
             return false;
         }
 
-        if (!ds.getIsValid()) {
+        if (Boolean.FALSE.equals(ds.getIsValid())) {
             /* Distribution is invalidated */
             addSpecificValidationErrorMessage(
                     i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_DISTRIBUTIONSET_INVALID, ds.getNameVersion()));
@@ -145,8 +145,8 @@ public class SwModulesToDistributionSetAssignmentSupport
     private boolean checkDuplicateSmToDsAssignment(final ProxySoftwareModule sm, final ProxyDistributionSet ds,
             final Collection<Long> smIdsAlreadyAssignedToDs) {
         if (!CollectionUtils.isEmpty(smIdsAlreadyAssignedToDs) && smIdsAlreadyAssignedToDs.contains(sm.getId())) {
-            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.already.assigned", sm.getNameAndVersion(),
-                    ds.getNameVersion()));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.already.assigned",
+                    sm.getNameAndVersion(), ds.getNameVersion()));
             return false;
         }
 
@@ -158,8 +158,8 @@ public class SwModulesToDistributionSetAssignmentSupport
         if (!dsType.containsModuleType(sm.getTypeInfo().getId())) {
             final String smTypeName = smTypeManagement.get(sm.getTypeInfo().getId()).map(SoftwareModuleType::getName)
                     .orElse("");
-            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.type.notallowed", sm.getNameAndVersion(),
-                    ds.getNameVersion(), smTypeName));
+            addSpecificValidationErrorMessage(i18n.getMessage("message.software.dist.type.notallowed",
+                    sm.getNameAndVersion(), ds.getNameVersion(), smTypeName));
             return false;
         }
 

@@ -762,11 +762,11 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     private void validateType(final DistributionSetType newType, final DistributionSet dsNewType,
             final int standardDsTypeSize) {
 
-        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(newType),
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setTypeId(newType.getId()),
                 Arrays.asList(dsNewType));
 
         assertThatFilterHasSizeAndDoesNotContainDistributionSet(
-                getDistributionSetFilterBuilder().setType(standardDsType), standardDsTypeSize, dsNewType);
+                getDistributionSetFilterBuilder().setTypeId(standardDsType.getId()), standardDsTypeSize, dsNewType);
     }
 
     @Step
@@ -864,16 +864,16 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             final DistributionSet dsDeleted, final DistributionSetType newType, final DistributionSet dsNewType) {
 
         assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsDeleted(Boolean.FALSE)
-                .setIsComplete(Boolean.TRUE).setType(standardDsType), deletedAndCompletedAndStandardType);
+                .setIsComplete(Boolean.TRUE).setTypeId(standardDsType.getId()), deletedAndCompletedAndStandardType);
 
         assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setType(standardDsType).setIsDeleted(Boolean.TRUE), Arrays.asList(dsDeleted));
+                .setTypeId(standardDsType.getId()).setIsDeleted(Boolean.TRUE), Arrays.asList(dsDeleted));
 
         assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setIsDeleted(Boolean.TRUE)
-                .setIsComplete(Boolean.FALSE).setType(standardDsType));
+                .setIsComplete(Boolean.FALSE).setTypeId(standardDsType.getId()));
 
         assertThatFilterContainsOnlyGivenDistributionSets(
-                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(newType),
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setTypeId(newType.getId()),
                 Arrays.asList(dsNewType));
     }
 
@@ -883,15 +883,16 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             final String text) {
 
         assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setType(standardDsType).setSearchText(text), completedAndStandardTypeAndSearchText);
+                .setTypeId(standardDsType.getId()).setSearchText(text), completedAndStandardTypeAndSearchText);
 
         assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setIsDeleted(Boolean.TRUE).setType(standardDsType).setSearchText(text));
+                .setIsDeleted(Boolean.TRUE).setTypeId(standardDsType.getId()).setSearchText(text));
 
-        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(standardDsType)
-                .setSearchText(text).setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE));
+        assertThatFilterDoesNotContainAnyDistributionSet(
+                getDistributionSetFilterBuilder().setTypeId(standardDsType.getId()).setSearchText(text)
+                        .setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE));
 
-        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(newType)
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setTypeId(newType.getId())
                 .setSearchText(text).setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE));
     }
 
@@ -905,22 +906,24 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
                 completedAndNotDeletedStandardTypeAndFilterString);
         completedAndStandardTypeAndFilterString.add(dsDeleted);
         assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setType(standardDsType).setFilterString(filterString), completedAndStandardTypeAndFilterString);
+                .setTypeId(standardDsType.getId()).setFilterString(filterString),
+                completedAndStandardTypeAndFilterString);
 
         assertThatFilterContainsOnlyGivenDistributionSets(
                 getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE)
-                        .setType(standardDsType).setFilterString(filterString),
+                        .setTypeId(standardDsType.getId()).setFilterString(filterString),
                 completedAndNotDeletedStandardTypeAndFilterString);
 
         assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE)
-                .setIsDeleted(Boolean.TRUE).setType(standardDsType).setFilterString(filterString),
+                .setIsDeleted(Boolean.TRUE).setTypeId(standardDsType.getId()).setFilterString(filterString),
                 Arrays.asList(dsDeleted));
 
-        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(standardDsType)
-                .setFilterString(filterString).setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE),
+        assertThatFilterContainsOnlyGivenDistributionSets(
+                getDistributionSetFilterBuilder().setTypeId(standardDsType.getId()).setFilterString(filterString)
+                        .setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE),
                 Arrays.asList(dsInComplete));
 
-        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setType(newType)
+        assertThatFilterContainsOnlyGivenDistributionSets(getDistributionSetFilterBuilder().setTypeId(newType.getId())
                 .setFilterString(filterString).setIsComplete(Boolean.TRUE).setIsDeleted(Boolean.FALSE),
                 Arrays.asList(dsNewType));
     }
@@ -931,13 +934,13 @@ public class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
             final String text) {
 
         assertThatFilterContainsOnlyGivenDistributionSets(
-                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setType(standardDsType)
+                getDistributionSetFilterBuilder().setIsComplete(Boolean.TRUE).setTypeId(standardDsType.getId())
                         .setSearchText(text).setTagNames(Arrays.asList(dsTagA.getName())),
                 completedAndStandartTypeAndSearchTextAndTagA);
 
-        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder().setType(standardDsType)
-                .setSearchText(text).setTagNames(Arrays.asList(dsTagA.getName())).setIsComplete(Boolean.FALSE)
-                .setIsDeleted(Boolean.FALSE));
+        assertThatFilterDoesNotContainAnyDistributionSet(getDistributionSetFilterBuilder()
+                .setTypeId(standardDsType.getId()).setSearchText(text).setTagNames(Arrays.asList(dsTagA.getName()))
+                .setIsComplete(Boolean.FALSE).setIsDeleted(Boolean.FALSE));
     }
 
     private DistributionSetFilterBuilder getDistributionSetFilterBuilder() {

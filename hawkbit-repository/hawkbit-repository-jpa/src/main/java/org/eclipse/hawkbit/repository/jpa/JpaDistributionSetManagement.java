@@ -574,8 +574,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             specList.add(spec);
         }
 
-        if (distributionSetFilter.getType() != null) {
-            spec = DistributionSetSpecification.byType(distributionSetFilter.getType());
+        if (distributionSetFilter.getTypeId() != null) {
+            spec = DistributionSetSpecification.byType(distributionSetFilter.getTypeId());
             specList.add(spec);
         }
 

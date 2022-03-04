@@ -24,12 +24,11 @@ import javax.persistence.criteria.SetJoin;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.util.CollectionUtils;
 
@@ -53,7 +52,7 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> isDeleted(final Boolean isDeleted) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSet_.deleted), isDeleted);
+        return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.deleted), isDeleted);
 
     }
 
@@ -67,7 +66,7 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> isCompleted(final Boolean isCompleted) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSet_.complete), isCompleted);
+        return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.complete), isCompleted);
 
     }
 
@@ -81,7 +80,7 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> isValid(final Boolean isValid) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSet_.valid), isValid);
+        return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.valid), isValid);
 
     }
 
@@ -94,10 +93,10 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> byId(final Long distid) {
-        return (targetRoot, query, cb) -> {
-            final Predicate predicate = cb.equal(targetRoot.<Long> get(JpaDistributionSet_.id), distid);
-            targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
+        return (dsRoot, query, cb) -> {
+            final Predicate predicate = cb.equal(dsRoot.<Long> get(JpaDistributionSet_.id), distid);
+            dsRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
+            dsRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
             query.distinct(true);
 
             return predicate;
@@ -113,11 +112,11 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> byIds(final Collection<Long> distids) {
-        return (targetRoot, query, cb) -> {
-            final Predicate predicate = targetRoot.<Long> get(JpaDistributionSet_.id).in(distids);
-            targetRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
-            targetRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
+        return (dsRoot, query, cb) -> {
+            final Predicate predicate = dsRoot.<Long> get(JpaDistributionSet_.id).in(distids);
+            dsRoot.fetch(JpaDistributionSet_.modules, JoinType.LEFT);
+            dsRoot.fetch(JpaDistributionSet_.tags, JoinType.LEFT);
+            dsRoot.fetch(JpaDistributionSet_.type, JoinType.LEFT);
             query.distinct(true);
             return predicate;
         };
@@ -132,10 +131,10 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> likeNameOrDescriptionOrVersion(final String subString) {
-        return (targetRoot, query, cb) -> cb.or(
-                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.name)), subString.toLowerCase()),
-                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.version)), subString.toLowerCase()),
-                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.description)), subString.toLowerCase()));
+        return (dsRoot, query, cb) -> cb.or(
+                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.name)), subString.toLowerCase()),
+                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.version)), subString.toLowerCase()),
+                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.description)), subString.toLowerCase()));
     }
 
     /**
@@ -149,9 +148,9 @@ public final class DistributionSetSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> likeNameAndVersion(final String name, final String version) {
-        return (targetRoot, query, cb) -> cb.and(
-                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.name)), name.toLowerCase()),
-                cb.like(cb.lower(targetRoot.<String> get(JpaDistributionSet_.version)), version.toLowerCase()));
+        return (dsRoot, query, cb) -> cb.and(
+                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.name)), name.toLowerCase()),
+                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.version)), version.toLowerCase()));
     }
 
     /**
@@ -166,16 +165,16 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> hasTags(final Collection<String> tagNames,
             final Boolean selectDSWithNoTag) {
-        return (targetRoot, query, cb) -> {
-            final Predicate predicate = getHasTagsPredicate(targetRoot, cb, selectDSWithNoTag, tagNames);
+        return (dsRoot, query, cb) -> {
+            final Predicate predicate = getHasTagsPredicate(dsRoot, cb, selectDSWithNoTag, tagNames);
             query.distinct(true);
             return predicate;
         };
     }
 
-    private static Predicate getHasTagsPredicate(final Root<JpaDistributionSet> targetRoot, final CriteriaBuilder cb,
+    private static Predicate getHasTagsPredicate(final Root<JpaDistributionSet> dsRoot, final CriteriaBuilder cb,
             final Boolean selectDSWithNoTag, final Collection<String> tagNames) {
-        final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
+        final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = dsRoot.join(JpaDistributionSet_.tags,
                 JoinType.LEFT);
         final Path<String> exp = tags.get(JpaDistributionSetTag_.name);
 
@@ -211,9 +210,9 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> equalsNameAndVersionIgnoreCase(final String name,
             final String version) {
-        return (targetRoot, query, cb) -> cb.and(
-                cb.equal(cb.lower(targetRoot.<String> get(JpaDistributionSet_.name)), name.toLowerCase()),
-                cb.equal(cb.lower(targetRoot.<String> get(JpaDistributionSet_.version)), version.toLowerCase()));
+        return (dsRoot, query, cb) -> cb.and(
+                cb.equal(cb.lower(dsRoot.<String> get(JpaDistributionSet_.name)), name.toLowerCase()),
+                cb.equal(cb.lower(dsRoot.<String> get(JpaDistributionSet_.version)), version.toLowerCase()));
 
     }
 
@@ -221,13 +220,13 @@ public final class DistributionSetSpecification {
      * {@link Specification} for retrieving {@link DistributionSet} with given
      * {@link DistributionSet#getType()}.
      *
-     * @param type
-     *            to search
+     * @param typeId
+     *            id of distribution set type to search
      * @return the {@link DistributionSet} {@link Specification}
      */
-    public static Specification<JpaDistributionSet> byType(final DistributionSetType type) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<JpaDistributionSetType> get(JpaDistributionSet_.type),
-                type);
+    public static Specification<JpaDistributionSet> byType(final Long typeId) {
+        return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id),
+                typeId);
 
     }
 
@@ -270,8 +269,8 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> hasTag(final Long tagId) {
 
-        return (targetRoot, query, cb) -> {
-            final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = targetRoot.join(JpaDistributionSet_.tags,
+        return (dsRoot, query, cb) -> {
+            final SetJoin<JpaDistributionSet, JpaDistributionSetTag> tags = dsRoot.join(JpaDistributionSet_.tags,
                     JoinType.LEFT);
             return cb.equal(tags.get(JpaDistributionSetTag_.id), tagId);
         };
