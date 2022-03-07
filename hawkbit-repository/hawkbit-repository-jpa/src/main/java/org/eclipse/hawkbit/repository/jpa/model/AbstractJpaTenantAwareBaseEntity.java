@@ -40,7 +40,7 @@ public abstract class AbstractJpaTenantAwareBaseEntity extends AbstractJpaBaseEn
     /**
      * Default constructor needed for JPA entities.
      */
-    public AbstractJpaTenantAwareBaseEntity() {
+    protected AbstractJpaTenantAwareBaseEntity() {
         // Default constructor needed for JPA entities.
     }
 

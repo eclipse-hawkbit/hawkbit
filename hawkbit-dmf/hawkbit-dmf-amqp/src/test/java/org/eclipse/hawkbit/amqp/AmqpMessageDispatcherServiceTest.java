@@ -68,7 +68,7 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Device Management Federation API")
 @Story("AmqpMessage Dispatcher Service Test")
 @SpringBootTest(classes = { RepositoryApplicationConfiguration.class })
-public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
+class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     private static final String TENANT = "default";
     private static final Long TENANT_ID = 4711L;
@@ -127,7 +127,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that download and install event with 3 software modules and no artifacts works")
-    public void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
+    void testSendDownloadRequestWithSoftwareModulesAndNoArtifacts() {
         final DistributionSet createDistributionSet = testdataFactory
                 .createDistributionSet(UUID.randomUUID().toString());
         testdataFactory.addSoftwareModuleMetadata(createDistributionSet);
@@ -154,17 +154,19 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {
                     continue;
                 }
-                assertThat(softwareModule.getModuleType()).isEqualTo(softwareModule2.getType().getKey()).as(
-                        "Software module type in event should be the same as the softwaremodule in the distribution set");
-                assertThat(softwareModule.getModuleVersion()).isEqualTo(softwareModule2.getVersion()).as(
-                        "Software module version in event should be the same as the softwaremodule in the distribution set");
+                assertThat(softwareModule.getModuleType())
+                        .as("Software module type in event should be the same as the softwaremodule in the distribution set")
+                        .isEqualTo(softwareModule2.getType().getKey());
+                assertThat(softwareModule.getModuleVersion())
+                        .as("Software module version in event should be the same as the softwaremodule in the distribution set")
+                        .isEqualTo(softwareModule2.getVersion());
             }
         }
     }
 
     @Test
     @Description("Verifies that download and install event with software modules and artifacts works")
-    public void testSendDownloadRequest() {
+    void testSendDownloadRequest() {
         DistributionSet dsA = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
         SoftwareModule module = dsA.getModules().iterator().next();
         final List<AbstractDbArtifact> receivedList = new ArrayList<>();
@@ -186,15 +188,18 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = assertDownloadAndInstallMessage(sendMessage,
                 action.getId());
 
-        assertThat(downloadAndUpdateRequest.getSoftwareModules()).hasSize(3)
-                .as("DownloadAndUpdateRequest event should contains 3 software modules");
+        assertThat(downloadAndUpdateRequest.getSoftwareModules())
+                .as("DownloadAndUpdateRequest event should contains 3 software modules")
+                .hasSize(3);
         assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN);
 
         for (final DmfSoftwareModule softwareModule : downloadAndUpdateRequest.getSoftwareModules()) {
             if (!softwareModule.getModuleId().equals(module.getId())) {
                 continue;
             }
-            assertThat(softwareModule.getArtifacts().size()).isEqualTo(module.getArtifacts().size()).isGreaterThan(0);
+            assertThat(softwareModule.getArtifacts().size())
+                    .isEqualTo(module.getArtifacts().size())
+                    .isNotZero();
 
             module.getArtifacts().forEach(dbArtifact -> {
                 final Optional<org.eclipse.hawkbit.dmf.json.model.DmfArtifact> found = softwareModule.getArtifacts()
@@ -211,7 +216,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that sending update controller attributes event works.")
-    public void sendUpdateAttributesRequest() {
+    void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
         final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
                 1L, CONTROLLER_ID, amqpUri, Target.class.getName(), serviceMatcher.getServiceId());
@@ -224,7 +229,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that send cancel event works")
-    public void testSendCancelRequest() {
+    void testSendCancelRequest() {
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
                 testTarget, 1L, serviceMatcher.getServiceId());
         amqpMessageDispatcherService
@@ -237,7 +242,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that sending a delete message when receiving a delete event works.")
-    public void sendDeleteRequest() {
+    void sendDeleteRequest() {
 
         // setup
         final String amqpUri = "amqp://anyhost";
@@ -254,7 +259,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that a delete message is not send if the address is not an amqp address.")
-    public void sendDeleteRequestWithNoAmqpAddress() {
+    void sendDeleteRequestWithNoAmqpAddress() {
 
         // setup
         final String noAmqpUri = "http://anyhost";
@@ -270,7 +275,7 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
 
     @Test
     @Description("Verifies that a delete message is not send if the address is null.")
-    public void sendDeleteRequestWithNullAddress() {
+    void sendDeleteRequestWithNullAddress() {
 
         // setup
         final String noAmqpUri = null;
@@ -287,19 +292,22 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     private void assertCancelMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
         final DmfActionRequest actionId = convertMessage(sendMessage, DmfActionRequest.class);
-        assertThat(actionId.getActionId()).isEqualTo(Long.valueOf(1)).as("Action ID should be 1");
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
-                .isEqualTo(EventTopic.CANCEL_DOWNLOAD).as("The topc in the message should be a CANCEL_DOWNLOAD value");
+        assertThat(actionId.getActionId())
+                .as("Action ID should be 1")
+                .isOne();
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .as("The topc in the message should be a CANCEL_DOWNLOAD value")
+                .containsEntry(MessageHeaderKey.TOPIC, EventTopic.CANCEL_DOWNLOAD);
     }
 
     private void assertDeleteMessage(final Message sendMessage) {
-
         assertThat(sendMessage).isNotNull();
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(CONTROLLER_ID);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TENANT)).isEqualTo(TENANT);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE))
-                .isEqualTo(MessageType.THING_DELETED);
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .containsEntry(MessageHeaderKey.THING_ID, CONTROLLER_ID);
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .containsEntry(MessageHeaderKey.TENANT, TENANT);
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .containsEntry(MessageHeaderKey.TYPE,MessageType.THING_DELETED);
     }
 
     private DmfDownloadAndUpdateRequest assertDownloadAndInstallMessage(final Message sendMessage, final Long action) {
@@ -307,32 +315,35 @@ public class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = convertMessage(sendMessage,
                 DmfDownloadAndUpdateRequest.class);
         assertThat(downloadAndUpdateRequest.getActionId()).isEqualTo(action);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
-                .isEqualTo(EventTopic.DOWNLOAD_AND_INSTALL)
-                .as("The topic of the event should contain DOWNLOAD_AND_INSTALL");
-        assertThat(downloadAndUpdateRequest.getTargetSecurityToken()).isEqualTo(TEST_TOKEN)
-                .as("Security token of target");
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .as("The topic of the event should contain DOWNLOAD_AND_INSTALL")
+                .containsEntry(MessageHeaderKey.TOPIC,EventTopic.DOWNLOAD_AND_INSTALL);
+        assertThat(downloadAndUpdateRequest.getTargetSecurityToken())
+                .as("Security token of target")
+                .isEqualTo(TEST_TOKEN);
 
         return downloadAndUpdateRequest;
     }
 
     private void assertUpdateAttributesMessage(final Message sendMessage) {
         assertEventMessage(sendMessage);
-
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TOPIC))
-                .isEqualTo(EventTopic.REQUEST_ATTRIBUTES_UPDATE)
-                .as("The topic of the event should contain REQUEST_ATTRIBUTES_UPDATE");
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .as("The topic of the event should contain REQUEST_ATTRIBUTES_UPDATE")
+                .containsEntry(MessageHeaderKey.TOPIC, EventTopic.REQUEST_ATTRIBUTES_UPDATE);
     }
 
     private void assertEventMessage(final Message sendMessage) {
-        assertThat(sendMessage).isNotNull().as("The message should not be null");
+        assertThat(sendMessage).as("The message should not be null").isNotNull();
 
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.THING_ID))
-                .isEqualTo(CONTROLLER_ID).as("The value of the message header THING_ID should be " + CONTROLLER_ID);
-        assertThat(sendMessage.getMessageProperties().getHeaders().get(MessageHeaderKey.TYPE))
-                .isEqualTo(MessageType.EVENT).as("The value of the message header TYPE should be EVENT");
-        assertThat(sendMessage.getMessageProperties().getContentType()).isEqualTo(MessageProperties.CONTENT_TYPE_JSON)
-                .as("The content type message should be " + MessageProperties.CONTENT_TYPE_JSON);
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .as("The value of the message header THING_ID should be " + CONTROLLER_ID)
+                .containsEntry(MessageHeaderKey.THING_ID, CONTROLLER_ID);
+        assertThat(sendMessage.getMessageProperties().getHeaders())
+                .as("The value of the message header TYPE should be EVENT")
+                .containsEntry(MessageHeaderKey.TYPE,MessageType.EVENT);
+        assertThat(sendMessage.getMessageProperties().getContentType())
+                .as("The content type message should be " + MessageProperties.CONTENT_TYPE_JSON)
+                .isEqualTo(MessageProperties.CONTENT_TYPE_JSON);
     }
 
     protected Message createArgumentCapture(final URI uri) {

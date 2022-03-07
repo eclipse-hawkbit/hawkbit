@@ -190,16 +190,19 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction, Long>,
     List<Action> findActionByTargetAndSoftwareModule(@Param("target") String targetId, @Param("module") Long moduleId);
 
     /**
-     * Retrieves latest {@link Action} for given target and {@link DistributionSet}.
+     * Retrieves the latest finished {@link Action} for given target and {@link DistributionSet}.
      *
      * @param targetId
-     *            to search for
+     *            the action belongs to
      * @param dsId
-     *            to search for
+     *            of the ds that is assigned to the target
+     * @param status
+     *            of the action
      * @return action if there is one with assigned target and assigned
      *         {@link DistributionSet}.
      */
-    Optional<Action> findFirstByTargetIdAndDistributionSetId(@Param("target") long targetId, @Param("ds") Long dsId);
+    Optional<Action> findFirstByTargetIdAndDistributionSetIdAndStatusOrderByIdDesc(@Param("target") long targetId,
+            @Param("ds") Long dsId, @Param("status") Action.Status status);
 
     /**
      * Retrieves all {@link Action}s which are referring the given

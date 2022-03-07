@@ -45,7 +45,6 @@
                <phase>process-classes</phase>
                   <configuration>
                      <!-- if you don't specify any modules, the plugin will find them -->
-                     <!-- <modules> <module>com.vaadin.demo.mobilemail.gwt.ColorPickerWidgetSet</module> </modules> -->
                   </configuration>
                   <goals>
                      <goal>resources</goal>

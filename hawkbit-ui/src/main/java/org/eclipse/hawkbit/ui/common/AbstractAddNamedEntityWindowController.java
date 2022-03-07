@@ -30,7 +30,7 @@ public abstract class AbstractAddNamedEntityWindowController<T, E extends ProxyN
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractAddNamedEntityWindowController(final CommonUiDependencies uiDependencies) {
+    protected AbstractAddNamedEntityWindowController(final CommonUiDependencies uiDependencies) {
         super(uiDependencies);
     }
 

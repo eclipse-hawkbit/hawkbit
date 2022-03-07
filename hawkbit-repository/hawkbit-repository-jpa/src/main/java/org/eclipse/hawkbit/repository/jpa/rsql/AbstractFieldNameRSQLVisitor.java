@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.slf4j.Logger;
@@ -25,7 +27,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
     private final Class<A> fieldNameProvider;
 
-    public AbstractFieldNameRSQLVisitor(final Class<A> fieldNameProvider) {
+    protected AbstractFieldNameRSQLVisitor(final Class<A> fieldNameProvider) {
         this.fieldNameProvider = fieldNameProvider;
     }
 
@@ -51,7 +53,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
         // sub entity need minimum 1 dot
         if (!propertyEnum.getSubEntityAttributes().isEmpty() && graph.length < 2) {
-            throw createRSQLParameterUnsupportedException(node);
+            throw createRSQLParameterUnsupportedException(node, null);
         }
 
         final StringBuilder fieldNameBuilder = new StringBuilder(propertyEnum.getFieldName());
@@ -67,7 +69,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
             }
 
             if (!propertyEnum.containsSubEntityAttribute(propertyField)) {
-                throw createRSQLParameterUnsupportedException(node);
+                throw createRSQLParameterUnsupportedException(node, null);
             }
         }
 
@@ -93,30 +95,21 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
         }
     }
 
+    /**
+     * @param node
+     *            current processing node
+     * @param rootException
+     *            in case there is a cause otherwise {@code null}
+     * @return Exception with prepared message extracted from the comparison node.
+     */
     protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(
-            final ComparisonNode node) {
-        return createRSQLParameterUnsupportedException(node, new Exception());
-    }
-
-    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final ComparisonNode node,
+            @NotNull final ComparisonNode node,
             final Exception rootException) {
-        return createRSQLParameterUnsupportedException(String.format(
+        return new RSQLParameterUnsupportedFieldException(String.format(
                 "The given search parameter field {%s} does not exist, must be one of the following fields %s",
                 node.getSelector(), getExpectedFieldList()), rootException);
     }
 
-    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final String message) {
-        return createRSQLParameterUnsupportedException(message, null);
-    }
-
-    protected RSQLParameterUnsupportedFieldException createRSQLParameterUnsupportedException(final String message,
-            final Exception rootException) {
-        return new RSQLParameterUnsupportedFieldException(message, rootException);
-    }
-
-    // Exception squid:S2095 - see
-    // https://jira.sonarsource.com/browse/SONARJAVA-1478
-    @SuppressWarnings({ "squid:S2095" })
     private List<String> getExpectedFieldList() {
         final List<String> expectedFieldList = Arrays.stream(fieldNameProvider.getEnumConstants())
                 .filter(enumField -> enumField.getSubEntityAttributes().isEmpty()).map(enumField -> {

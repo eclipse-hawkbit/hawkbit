@@ -278,11 +278,11 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     private static boolean isSoftDeleted(final DescriptorEvent event) {
         final ObjectChangeSet changeSet = ((UpdateObjectQuery) event.getQuery()).getObjectChangeSet();
         final List<DirectToFieldChangeRecord> changes = changeSet.getChanges().stream()
-                .filter(record -> record instanceof DirectToFieldChangeRecord)
-                .map(record -> (DirectToFieldChangeRecord) record).collect(Collectors.toList());
+                .filter(DirectToFieldChangeRecord.class::isInstance).map(DirectToFieldChangeRecord.class::cast)
+                .collect(Collectors.toList());
 
-        return changes.stream().filter(record -> DELETED_PROPERTY.equals(record.getAttribute())
-                && Boolean.parseBoolean(record.getNewValue().toString())).count() > 0;
+        return changes.stream().anyMatch(changeRecord -> DELETED_PROPERTY.equals(changeRecord.getAttribute())
+                && Boolean.parseBoolean(changeRecord.getNewValue().toString()));
     }
 
     @Override

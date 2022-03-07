@@ -33,7 +33,7 @@ public abstract class AbstractAssignmentResult<T extends BaseEntity> {
      * @param unassignedEntity
      *            {@link List} of unassigned entity.
      */
-    public AbstractAssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
+    protected AbstractAssignmentResult(final int alreadyAssigned, final List<? extends T> assignedEntity,
             final List<? extends T> unassignedEntity) {
         this.alreadyAssigned = alreadyAssigned;
         this.assignedEntity = assignedEntity;

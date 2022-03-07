@@ -163,7 +163,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
         // cancelation message is returned upon polling
-        createAndSendThingCreated(controllerId, TENANT_EXIST);
+        createAndSendThingCreated(controllerId);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CANCEL_DOWNLOAD);
         assertCancelActionMessage(getFirstAssignedActionId(assignmentResult), controllerId);
 
@@ -176,7 +176,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
 
         // latest action is returned upon polling
-        createAndSendThingCreated(controllerId, TENANT_EXIST);
+        createAndSendThingCreated(controllerId);
         waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
         assertDownloadAndInstallMessage(distributionSet2.getModules(), controllerId);
     }
@@ -478,7 +478,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
         final Long actionId = registerTargetAndCancelActionId(controllerId);
 
-        createAndSendThingCreated(controllerId, TENANT_EXIST);
+        createAndSendThingCreated(controllerId);
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
         assertCancelActionMessage(actionId, controllerId);
     }

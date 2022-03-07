@@ -18,7 +18,7 @@ import com.vaadin.server.Sizeable.Unit;
 import com.vaadin.ui.Window;
 
 /**
- * Abstract builder for Meta data window
+ * Abstract builder for metadata window
  *
  * @param <F>
  *            Generic type
@@ -31,7 +31,7 @@ public abstract class AbstractMetaDataWindowBuilder<F> extends AbstractEntityWin
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      */
-    public AbstractMetaDataWindowBuilder(final CommonUiDependencies uiDependencies) {
+    protected AbstractMetaDataWindowBuilder(final CommonUiDependencies uiDependencies) {
         super(uiDependencies);
     }
 

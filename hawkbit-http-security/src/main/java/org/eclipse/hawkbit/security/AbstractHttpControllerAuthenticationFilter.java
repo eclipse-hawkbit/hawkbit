@@ -36,11 +36,7 @@ import org.springframework.util.AntPathMatcher;
 /**
  * An abstraction for all controller based security to parse the e.g. the tenant
  * name from the URL and the controller ID from the URL to do security checks
- * based on these information.
- * 
- *
- *
- *
+ * based on this information.
  */
 public abstract class AbstractHttpControllerAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
@@ -77,8 +73,9 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      * @param systemSecurityContext
      *            the system secruity context
      */
-    public AbstractHttpControllerAuthenticationFilter(final TenantConfigurationManagement tenantConfigurationManagement,
-            final TenantAware tenantAware, final SystemSecurityContext systemSecurityContext) {
+    protected AbstractHttpControllerAuthenticationFilter(
+            final TenantConfigurationManagement tenantConfigurationManagement, final TenantAware tenantAware,
+            final SystemSecurityContext systemSecurityContext) {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.tenantAware = tenantAware;
         this.systemSecurityContext = systemSecurityContext;
@@ -127,7 +124,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      * 
      * @param request
      *            the Http request to extract the path variables.
-     * @return the extracted {@link PathVariables} or {@code null} if the
+     * @return the extracted {@link DmfTenantSecurityToken} or {@code null} if the
      *         request does not match the pattern and no variables could be
      *         extracted
      */

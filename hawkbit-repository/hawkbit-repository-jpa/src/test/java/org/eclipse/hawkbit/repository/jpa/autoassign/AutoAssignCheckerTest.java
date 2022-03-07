@@ -118,7 +118,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
                 .ds(setA.getId()));
 
         final String targetDsAIdPref = "targ";
-        final List<Target> targets = testdataFactory.createTargets(100, targetDsAIdPref,
+        final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
                 targetDsAIdPref.concat(" description"));
         final int targetsCount = targets.size();
 
@@ -138,12 +138,12 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         // Count the number of targets that will be assigned with setA
         assertThat(targetManagement.countByRsqlAndNonDSAndCompatible(setA.getId(), targetFilterQuery.getQuery()))
-                .isEqualTo(90);
+                .isEqualTo(15);
 
         // Run the check
         autoAssignChecker.check();
 
-        verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(5, 100), targetsCount);
+        verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(5, 25), targetsCount);
 
         // first 5 should keep their dsB, because they already had the dsA once
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);

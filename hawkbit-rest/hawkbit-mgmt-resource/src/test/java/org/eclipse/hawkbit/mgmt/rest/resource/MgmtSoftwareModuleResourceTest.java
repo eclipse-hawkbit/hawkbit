@@ -31,9 +31,12 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.awaitility.Awaitility;
+import org.awaitility.Duration;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -72,23 +75,22 @@ import io.qameta.allure.Story;
 
 /**
  * Tests for {@link MgmtSoftwareModuleResource} {@link RestController}.
- *
  */
 @Feature("Component Tests - Management API")
 @Story("Software Module Resource")
 @TestPropertySource(properties = { "hawkbit.server.security.dos.maxArtifactSize=100000",
         "hawkbit.server.security.dos.maxArtifactStorage=500000" })
-public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
+class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTest {
 
     @BeforeEach
     public void assertPreparationOfRepo() {
-        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").hasSize(0);
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("no softwaremodule should be founded").isEmpty();
     }
 
     @Test
     @Description("Tests the update of software module metadata. It is verfied that only the selected fields for the update are really updated and the modification values are filled (i.e. updated by and at).")
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
-    public void updateSoftwareModuleOnlyDescriptionAndVendorNameUntouched() throws Exception {
+    void updateSoftwareModuleOnlyDescriptionAndVendorNameUntouched() throws Exception {
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
         final String knownSWDescription = "description1";
@@ -97,101 +99,122 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final String updateVendor = "newVendor1";
         final String updateDescription = "newDescription1";
 
-        SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule().create().type(osType)
-                .name(knownSWName).version(knownSWVersion).description(knownSWDescription).vendor(knownSWVendor));
+        final SoftwareModule sm = softwareModuleManagement.create(entityFactory.softwareModule()
+                .create()
+                .type(osType)
+                .name(knownSWName)
+                .version(knownSWVersion)
+                .description(knownSWDescription)
+                .vendor(knownSWVendor));
 
         assertThat(sm.getName()).as("Wrong name of the software module").isEqualTo(knownSWName);
 
-        final String body = new JSONObject().put("vendor", updateVendor).put("description", updateDescription)
-                .put("name", "nameShouldNotBeChanged").toString();
+        final String body = new JSONObject().put("vendor", updateVendor)
+                .put("description", updateDescription)
+                .put("name", "nameShouldNotBeChanged")
+                .toString();
 
-        // ensures that we are not to fast so that last modified is not set
-        // correctly
-        Thread.sleep(1);
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await()
+                .atMost(Duration.ONE_HUNDRED_MILLISECONDS)
+                .pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
                 .andExpect(jsonPath("$.vendor", equalTo(updateVendor)))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
                 .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(sm.getLastModifiedAt()))))
                 .andExpect(jsonPath("$.description", equalTo(updateDescription)))
-                .andExpect(jsonPath("$.name", equalTo(knownSWName))).andReturn();
+                .andExpect(jsonPath("$.name", equalTo(knownSWName)))
+                .andReturn();
 
-        sm = softwareModuleManagement.get(sm.getId()).get();
-        assertThat(sm.getName()).isEqualTo(knownSWName);
-        assertThat(sm.getVendor()).isEqualTo(updateVendor);
-        assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
-        assertThat(sm.getDescription()).isEqualTo(updateDescription);
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
+        assertThat(updatedSm.getName()).isEqualTo(knownSWName);
+        assertThat(updatedSm.getVendor()).isEqualTo(updateVendor);
+        assertThat(updatedSm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(updatedSm.getDescription()).isEqualTo(updateDescription);
 
     }
 
     @Test
     @Description("Tests the update of the deletion flag. It is verfied that the software module can't be marked as deleted through update operation.")
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
-    public void updateSoftwareModuleDeletedFlag() throws Exception {
+    void updateSoftwareModuleDeletedFlag() throws Exception {
         final String knownSWName = "name1";
         final String knownSWVersion = "version1";
 
-        SoftwareModule sm = softwareModuleManagement
-                .create(entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
+        final SoftwareModule sm = softwareModuleManagement.create(
+                entityFactory.softwareModule().create().type(osType).name(knownSWName).version(knownSWVersion));
 
-        assertThat(sm.isDeleted()).as("Created software module should not be deleted").isEqualTo(false);
+        assertThat(sm.isDeleted()).as("Created software module should not be deleted").isFalse();
 
         final String body = new JSONObject().put("deleted", true).toString();
 
-        // ensures that we are not to fast so that last modified is not set
-        // correctly
-        Thread.sleep(1);
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await()
+                .atMost(Duration.ONE_HUNDRED_MILLISECONDS)
+                .pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
         mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(sm.getLastModifiedAt())))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
-        sm = softwareModuleManagement.get(sm.getId()).get();
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
         assertThat(sm.getLastModifiedBy()).isEqualTo("smUpdateTester");
         assertThat(sm.getLastModifiedAt()).isEqualTo(sm.getLastModifiedAt());
-        assertThat(sm.isDeleted()).isEqualTo(false);
+        assertThat(sm.isDeleted()).isFalse();
 
     }
 
     @Test
     @Description("Tests the upload of an artifact binary. The upload is executed and the content checked in the repository for completeness.")
-    public void uploadArtifact() throws Exception {
+    void uploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         // create test file
-        final byte random[] = randomBytes(5 * 1024);
+        final byte[] random = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final String sha256sum = HashGeneratorUtils.generateSHA256(random);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
-        final MvcResult mvcResult = mvc
-                .perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+        final MvcResult mvcResult = mvc.perform(
+                        multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                                .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(sha256sum)))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
-                .andExpect(jsonPath("$.providedFilename", equalTo("origFilename"))).andReturn();
+                .andExpect(jsonPath("$.providedFilename", equalTo("origFilename")))
+                .andReturn();
 
         // check rest of response compared to DB
-        final MgmtArtifact artResult = ResourceUtility
-                .convertArtifactResponse(mvcResult.getResponse().getContentAsString());
+        final MgmtArtifact artResult = ResourceUtility.convertArtifactResponse(
+                mvcResult.getResponse().getContentAsString());
         final Long artId = softwareModuleManagement.get(sm.getId()).get().getArtifacts().get(0).getId();
         assertThat(artResult.getArtifactId()).as("Wrong artifact id").isEqualTo(artId);
-        assertThat(JsonPath.compile("$._links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                .as("Link contains no self url")
+        assertThat(JsonPath.compile("$._links.self.href")
+                .read(mvcResult.getResponse().getContentAsString())
+                .toString()).as("Link contains no self url")
                 .isEqualTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId);
-        assertThat(JsonPath.compile("$._links.download.href").read(mvcResult.getResponse().getContentAsString())
-                .toString()).as("response contains no download url ").isEqualTo(
+        assertThat(JsonPath.compile("$._links.download.href")
+                .read(mvcResult.getResponse().getContentAsString())
+                .toString()).as("response contains no download url ")
+                .isEqualTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artId + "/download");
 
         assertArtifact(sm, random);
@@ -199,7 +222,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies that artifacts which exceed the configured maximum size cannot be uploaded.")
-    public void uploadArtifactFailsIfTooLarge() throws Exception {
+    void uploadArtifactFailsIfTooLarge() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota", false);
         final long maxSize = quotaManagement.getMaxArtifactSize();
 
@@ -210,7 +233,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // try to upload
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(FileSizeQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_FILE_SIZE_QUOTA_EXCEEDED.getKey())));
@@ -218,7 +241,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies that artifact with invalid filename cannot be uploaded to prevent cross site scripting.")
-    public void uploadArtifactFailsIfFilenameInvalide() throws Exception {
+    void uploadArtifactFailsIfFilenameInvalide() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModule("quota", "quota", false);
         final String illegalFilename = "<img src=ernw onerror=alert(1)>.xml";
 
@@ -226,7 +249,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final MockMultipartFile file = new MockMultipartFile("file", illegalFilename, null, randomBytes);
 
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message", containsString("Invalid characters in string")));
     }
@@ -261,33 +285,34 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
-    public void emptyUploadArtifact() throws Exception {
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(0);
-        assertThat(artifactManagement.count()).isEqualTo(0);
+    @Description("Verifies that the system does not accept empty artifact uploads. Expected response: BAD REQUEST")
+    void emptyUploadArtifact() throws Exception {
+        assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
+        assertThat(artifactManagement.count()).isZero();
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, new byte[0]);
 
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @Description("Verfies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
-    public void duplicateUploadArtifact() throws Exception {
+    @Description("Verifies that the system does not accept identical artifacts uploads for the same software module. Expected response: CONFLICT")
+    void duplicateUploadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = randomBytes(5 * 1024);
+        final byte[] random = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final String sha256sum = HashGeneratorUtils.generateSHA256(random);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
         mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.hashes.md5", equalTo(md5sum)))
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(sha1sum)))
@@ -299,20 +324,23 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("verfies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
-    public void uploadArtifactWithCustomName() throws Exception {
+    @Description("verifies that option to upload artifacts with a custom defined by metadata, i.e. not the file name of the binary itself.")
+    void uploadArtifactWithCustomName() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
 
         // create test file
-        final byte random[] = randomBytes(5 * 1024);
+        final byte[] random = randomBytes(5 * 1024);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         // upload
-        mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file).param("filename",
-                "customFilename")).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+        mvc.perform(multipart("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).file(file)
+                        .param("filename", "customFilename"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andExpect(jsonPath("$.providedFilename", equalTo("customFilename"))).andExpect(status().isCreated());
+                .andExpect(jsonPath("$.providedFilename", equalTo("customFilename")))
+                .andExpect(status().isCreated());
 
         // check result in db...
         // repo
@@ -323,13 +351,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
-    public void uploadArtifactWithHashCheck() throws Exception {
+    @Description("Verifies that the system refuses upload of an artifact where the provided hash sums do not match. Expected result: BAD REQUEST")
+    void uploadArtifactWithHashCheck() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
 
         // create test file
-        final byte random[] = randomBytes(5 * 1024);
+        final byte[] random = randomBytes(5 * 1024);
         final String md5sum = HashGeneratorUtils.generateMD5(random);
         final String sha1sum = HashGeneratorUtils.generateSHA1(random);
         final String sha256sum = HashGeneratorUtils.generateSHA256(random);
@@ -379,13 +407,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies that only a limited number of artifacts can be uploaded for one software module.")
-    public void uploadArtifactsUntilQuotaExceeded() throws Exception {
+    void uploadArtifactsUntilQuotaExceeded() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
         final long maxArtifacts = quotaManagement.getMaxArtifactsPerSoftwareModule();
 
         for (int i = 0; i < maxArtifacts; ++i) {
             // create test file
-            final byte random[] = randomBytes(5 * 1024);
+            final byte[] random = randomBytes(5 * 1024);
             final String md5sum = HashGeneratorUtils.generateMD5(random);
             final String sha1sum = HashGeneratorUtils.generateSHA1(random);
             final String sha256sum = HashGeneratorUtils.generateSHA256(random);
@@ -403,7 +431,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         }
 
         // upload one more file to cause the quota to be exceeded
-        final byte random[] = randomBytes(5 * 1024);
+        final byte[] random = randomBytes(5 * 1024);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
@@ -417,7 +445,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies that artifacts can only be added as long as the artifact storage quota is not exceeded.")
-    public void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
+    void uploadArtifactsUntilStorageQuotaExceeded() throws Exception {
 
         final long storageLimit = quotaManagement.getMaxArtifactStorage();
 
@@ -427,7 +455,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         for (int i = 0; i < numArtifacts; ++i) {
             // create test file
-            final byte random[] = randomBytes(artifactSize);
+            final byte[] random = randomBytes(artifactSize);
             final String md5sum = HashGeneratorUtils.generateMD5(random);
             final String sha1sum = HashGeneratorUtils.generateSHA1(random);
             final String sha256sum = HashGeneratorUtils.generateSHA256(random);
@@ -446,7 +474,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         }
 
         // upload one more file to cause the quota to be exceeded
-        final byte random[] = randomBytes(artifactSize);
+        final byte[] random = randomBytes(artifactSize);
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename_final", null, random);
 
         // upload
@@ -461,16 +489,16 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Tests binary download of an artifact including verfication that the downloaded binary is consistent and that the etag header is as expected identical to the SHA1 hash of the file.")
-    public void downloadArtifact() throws Exception {
+    void downloadArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = randomBytes(artifactSize);
+        final byte[] random = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
-        final Artifact artifact2 = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         downloadAndVerify(sm, random, artifact);
         downloadAndVerify(sm, random, artifact2);
@@ -492,19 +520,21 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and download links.")
-    public void getArtifact() throws Exception {
+    void getArtifact() throws Exception {
         // prepare data for test
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         // perform test
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()).accept(
+                        MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
@@ -521,16 +551,18 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies the listing of an artifact that belongs to a soft deleted software module.")
-    public void getArtifactSoftDeleted() throws Exception {
+    void getArtifactSoftDeleted() throws Exception {
         // prepare data for test
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs("softDeleted");
         final Artifact artifact = testdataFactory.createArtifacts(sm.getId()).get(0);
-        testdataFactory.createDistributionSet(Arrays.asList(sm));
+        testdataFactory.createDistributionSet(Collections.singletonList(sm));
         softwareModuleManagement.delete(sm.getId());
 
         // perform test
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()).accept(
+                        MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
                 .andExpect(jsonPath("$.size", equalTo((int) artifact.getSize())))
@@ -546,19 +578,20 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
-    public void getArtifacts() throws Exception {
+    void getArtifacts() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = randomBytes(artifactSize);
+        final byte[] random = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
-        final Artifact artifact2 = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.[0].id", equalTo(artifact.getId().intValue())))
                 .andExpect(jsonPath("$.[0].size", equalTo(random.length)))
@@ -579,11 +612,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
-    public void invalidRequestsOnArtifactResource() throws Exception {
+    @Description("Verifies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
+    void invalidRequestsOnArtifactResource() throws Exception {
 
         final int artifactSize = 5 * 1024;
-        final byte random[] = randomBytes(artifactSize);
+        final byte[] random = randomBytes(artifactSize);
         final MockMultipartFile file = new MockMultipartFile("file", "orig", null, random);
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -626,26 +659,29 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
-    public void invalidRequestsOnSoftwaremodulesResource() throws Exception {
+    @Description("Verifies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
+    void invalidRequestsOnSoftwaremodulesResource() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final List<SoftwareModule> modules = Arrays.asList(sm);
 
         // SM does not exist
-        mvc.perform(get("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get("/rest/v1/softwaremodules/12345678"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
-        mvc.perform(delete("/rest/v1/softwaremodules/12345678")).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremodules/12345678"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
 
         // bad request - no content
         mvc.perform(post("/rest/v1/softwaremodules").contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
 
         // bad request - bad content
         mvc.perform(post("/rest/v1/softwaremodules").content("sdfjsdlkjfskdjf".getBytes())
-                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                        .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest());
 
         mvc.perform(post("/rest/v1/softwaremodules")
@@ -683,10 +719,11 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Test of modules retrieval without any parameters. Will return all modules in the system as defined by standard page size.")
-    public void getSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
+    void getSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
         final int modules = 5;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(modules)))
@@ -695,13 +732,14 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Test of modules retrieval with paging limit parameter. Will return all modules in the system as defined by given page size.")
-    public void detSoftwareModulesWithPagingLimitRequestParameter() throws Exception {
+    void detSoftwareModulesWithPagingLimitRequestParameter() throws Exception {
         final int modules = 5;
         final int limitSize = 1;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING).param(
+                        MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(limitSize)))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(limitSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(limitSize)));
@@ -709,15 +747,16 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Test of modules retrieval with paging limit offset parameters. Will return all modules in the system as defined by given page size starting from given offset.")
-    public void getSoftwareModulesWithPagingLimitAndOffsetRequestParameter() throws Exception {
+    void getSoftwareModulesWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int modules = 5;
         final int offsetParam = 2;
         final int expectedSize = modules - offsetParam;
         createSoftwareModulesAlphabetical(modules);
-        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
-                .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(modules)))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING).param(
+                                MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, String.valueOf(offsetParam))
+                        .param(MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, String.valueOf(modules)))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(modules)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(expectedSize)))
                 .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(expectedSize)));
@@ -726,12 +765,13 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Test retrieval of all software modules the user has access to.")
-    public void getSoftwareModules() throws Exception {
+    void getSoftwareModules() throws Exception {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
         final SoftwareModule app = testdataFactory.createSoftwareModuleApp();
 
         mvc.perform(get("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].name", contains(os.getName())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os.getId() + ")].version", contains(os.getVersion())))
@@ -759,7 +799,7 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Test the various filter parameters, e.g. filter by name or type of the module.")
-    public void getSoftwareModulesWithFilterParameters() throws Exception {
+    void getSoftwareModulesWithFilterParameters() throws Exception {
         final SoftwareModule os1 = testdataFactory.createSoftwareModuleOs("1");
         final SoftwareModule app1 = testdataFactory.createSoftwareModuleApp("1");
         testdataFactory.createSoftwareModuleOs("2");
@@ -769,7 +809,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // only by name, only one exists per name
         mvc.perform(get("/rest/v1/softwaremodules?q=name==" + os1.getName()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].name", contains(os1.getName())))
                 .andExpect(jsonPath("$.content.[?(@.id==" + os1.getId() + ")].version", contains(os1.getVersion())))
@@ -816,29 +857,32 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies that the system answers as defined in case of a wrong filter parameter syntax. Expected result: BAD REQUEST with error description.")
-    public void getSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
+    @Description("Verifies that the system answers as defined in case of a wrong filter parameter syntax. Expected result: BAD REQUEST with error description.")
+    void getSoftwareModulesWithSyntaxErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongFIQLSyntax").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")));
     }
 
     @Test
-    @Description("Verfies that the system answers as defined in case of a non existing field used in filter. Expected result: BAD REQUEST with error description.")
-    public void getSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
+    @Description("Verifies that the system answers as defined in case of a non existing field used in filter. Expected result: BAD REQUEST with error description.")
+    void getSoftwareModulesWithUnknownFieldErrorFilterParameter() throws Exception {
         mvc.perform(get("/rest/v1/softwaremodules?q=wrongField==abc").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.rest.param.rsqlInvalidField")));
     }
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Tests GET request on /rest/v1/softwaremodules/{smId}.")
-    public void getSoftwareModule() throws Exception {
+    void getSoftwareModule() throws Exception {
         final SoftwareModule os = testdataFactory.createSoftwareModuleOs();
 
         mvc.perform(get("/rest/v1/softwaremodules/{smId}", os.getId()).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.name", equalTo(os.getName())))
                 .andExpect(jsonPath("$.version", equalTo(os.getVersion())))
@@ -861,26 +905,41 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
-    @Description("Verfies that the create request actually results in the creation of the modules in the repository.")
-    public void createSoftwareModules() throws Exception {
-        final SoftwareModule os = entityFactory.softwareModule().create().name("name1").type(osType).version("version1")
-                .vendor("vendor1").description("description1").build();
-        final SoftwareModule ah = entityFactory.softwareModule().create().name("name3").type(appType)
-                .version("version3").vendor("vendor3").description("description3").build();
+    @Description("Verifies that the create request actually results in the creation of the modules in the repository.")
+    void createSoftwareModules() throws Exception {
+        final SoftwareModule os = entityFactory.softwareModule()
+                .create()
+                .name("name1")
+                .type(osType)
+                .version("version1")
+                .vendor("vendor1")
+                .description("description1")
+                .build();
+        final SoftwareModule ah = entityFactory.softwareModule()
+                .create()
+                .name("name3")
+                .type(appType)
+                .version("version3")
+                .vendor("vendor3")
+                .description("description3")
+                .build();
 
         final List<SoftwareModule> modules = Arrays.asList(os, ah);
 
         final long current = System.currentTimeMillis();
 
-        final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/softwaremodules/").accept(MediaType.APPLICATION_JSON_VALUE)
-                        .content(JsonBuilder.softwareModules(modules)).contentType(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
+        final MvcResult mvcResult = mvc.perform(
+                        post("/rest/v1/softwaremodules/").accept(MediaType.APPLICATION_JSON_VALUE)
+                                .content(JsonBuilder.softwareModules(modules))
+                                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("[0].name", equalTo("name1")))
                 .andExpect(jsonPath("[0].version", equalTo("version1")))
                 .andExpect(jsonPath("[0].description", equalTo("description1")))
-                .andExpect(jsonPath("[0].vendor", equalTo("vendor1"))).andExpect(jsonPath("[0].type", equalTo("os")))
+                .andExpect(jsonPath("[0].vendor", equalTo("vendor1")))
+                .andExpect(jsonPath("[0].type", equalTo("os")))
                 .andExpect(jsonPath("[0].createdBy", equalTo("uploadTester")))
                 .andExpect(jsonPath("[1].name", equalTo("name3")))
                 .andExpect(jsonPath("[1].version", equalTo("version3")))
@@ -888,60 +947,62 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .andExpect(jsonPath("[1].vendor", equalTo("vendor3")))
                 .andExpect(jsonPath("[1].type", equalTo("application")))
                 .andExpect(jsonPath("[1].createdBy", equalTo("uploadTester")))
-                .andExpect(jsonPath("[1].createdAt", not(equalTo(0)))).andReturn();
+                .andExpect(jsonPath("[1].createdAt", not(equalTo(0))))
+                .andReturn();
 
-        final SoftwareModule osCreated = softwareModuleManagement
-                .getByNameAndVersionAndType("name1", "version1", osType.getId()).get();
-        final SoftwareModule appCreated = softwareModuleManagement
-                .getByNameAndVersionAndType("name3", "version3", appType.getId()).get();
+        final SoftwareModule osCreated = softwareModuleManagement.getByNameAndVersionAndType("name1", "version1",
+                osType.getId()).get();
+        final SoftwareModule appCreated = softwareModuleManagement.getByNameAndVersionAndType("name3", "version3",
+                appType.getId()).get();
 
-        assertThat(
-                JsonPath.compile("[0]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("Response contains invalid self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
+        assertThat(JsonPath.compile("[0]._links.self.href")
+                .read(mvcResult.getResponse().getContentAsString())
+                .toString()).as("Response contains invalid self href")
+                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + osCreated.getId());
 
-        assertThat(
-                JsonPath.compile("[1]_links.self.href").read(mvcResult.getResponse().getContentAsString()).toString())
-                        .as("Response contains links self href")
-                        .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
+        assertThat(JsonPath.compile("[1]._links.self.href")
+                .read(mvcResult.getResponse().getContentAsString())
+                .toString()).as("Response contains links self href")
+                .isEqualTo("http://localhost/rest/v1/softwaremodules/" + appCreated.getId());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Wrong softwaremodule size").hasSize(2);
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(os.getName());
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedBy())
-                .as("Softwaremoudle created by is wrong").isEqualTo("uploadTester");
-        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedAt())
-                .as("Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
-        assertThat(softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName())
-                .as("Softwaremoudle name is wrong").isEqualTo(ah.getName());
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getName()).as(
+                "Softwaremoudle name is wrong").isEqualTo(os.getName());
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedBy()).as(
+                "Softwaremoudle created by is wrong").isEqualTo("uploadTester");
+        assertThat(softwareModuleManagement.findByType(PAGE, osType.getId()).getContent().get(0).getCreatedAt()).as(
+                "Softwaremoudle created at is wrong").isGreaterThanOrEqualTo(current);
+        assertThat(softwareModuleManagement.findByType(PAGE, appType.getId()).getContent().get(0).getName()).as(
+                "Softwaremoudle name is wrong").isEqualTo(ah.getName());
     }
 
     @Test
     @Description("Verifies successfull deletion of software modules that are not in use, i.e. assigned to a DS.")
-    public void deleteUnassignedSoftwareModule() throws Exception {
+    void deleteUnassignedSoftwareModule() throws Exception {
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
-        artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("Softwaremoudle size is wrong").hasSize(1);
         assertThat(artifactManagement.count()).isEqualTo(1);
 
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId())).andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}", sm.getId()))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After delete no softwarmodule should be available")
                 .isEmpty();
-        assertThat(artifactManagement.count()).isEqualTo(0);
+        assertThat(artifactManagement.count()).isZero();
     }
 
     @Test
     @Description("Verifies successfull deletion of a software module that is in use, i.e. assigned to a DS which should result in movinf the module to the archive.")
-    public void deleteAssignedSoftwareModule() throws Exception {
+    void deleteAssignedSoftwareModule() throws Exception {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("a");
 
         final int artifactSize = 5 * 1024;
@@ -969,8 +1030,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Tests the deletion of an artifact including verfication that the artifact is actually erased in the repository and removed from the software module.")
-    public void deleteArtifact() throws Exception {
+    @Description("Tests the deletion of an artifact including verification that the artifact is actually erased in the repository and removed from the software module.")
+    void deleteArtifact() throws Exception {
         // Create 1 SM
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -978,10 +1039,10 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
 
         // Create 2 artifacts
-        final Artifact artifact = artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
-        artifactManagement
-                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
 
         // check repo before delete
         assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
@@ -991,7 +1052,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
         // delete
         mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         // check that only one artifact is still alive and still assigned
         assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted").hasSize(1);
@@ -1002,8 +1064,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies the successful creation of metadata and the enforcement of the meta data quota.")
-    public void createMetadata() throws Exception {
+    @Description("Verifies the successful creation of metadata and the enforcement of the meta data quota.")
+    void createMetadata() throws Exception {
 
         final String knownKey1 = "knownKey1";
         final String knownValue1 = "knownValue1";
@@ -1020,18 +1082,17 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 .contentType(MediaType.APPLICATION_JSON).content(metaData1.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("[0]key", equalTo(knownKey1))).andExpect(jsonPath("[0]value", equalTo(knownValue1)))
-                .andExpect(jsonPath("[0]targetVisible", equalTo(false)))
-                .andExpect(jsonPath("[1]key", equalTo(knownKey2))).andExpect(jsonPath("[1]value", equalTo(knownValue2)))
-                .andExpect(jsonPath("[1]targetVisible", equalTo(true)));
+                .andExpect(jsonPath("[0].key", equalTo(knownKey1)))
+                .andExpect(jsonPath("[0].value", equalTo(knownValue1)))
+                .andExpect(jsonPath("[0].targetVisible", equalTo(false)))
+                .andExpect(jsonPath("[1].key", equalTo(knownKey2)))
+                .andExpect(jsonPath("[1].value", equalTo(knownValue2)))
+                .andExpect(jsonPath("[1].targetVisible", equalTo(true)));
 
-        final SoftwareModuleMetadata metaKey1 = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(sm.getId(), knownKey1).get();
-        final SoftwareModuleMetadata metaKey2 = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(sm.getId(), knownKey2).get();
-
-        assertThat(metaKey1.getValue()).as("Metadata key is wrong").isEqualTo(knownValue1);
-        assertThat(metaKey2.getValue()).as("Metadata key is wrong").isEqualTo(knownValue2);
+        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey1))
+                .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue1);
+        assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey2))
+                .as("Metadata key is wrong").get().extracting(SoftwareModuleMetadata::getValue).isEqualTo(knownValue2);
 
         // verify quota enforcement
         final int maxMetaData = quotaManagement.getMaxMetaDataEntriesPerSoftwareModule();
@@ -1054,8 +1115,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
     }
 
     @Test
-    @Description("Verfies the successfull update of metadata based on given key.")
-    public void updateMetadata() throws Exception {
+    @Description("Verifies the successful update of metadata based on given key.")
+    void updateMetadata() throws Exception {
         // prepare and create metadata for update
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1065,24 +1126,27 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
         softwareModuleManagement.createMetaData(
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
-        final JSONObject jsonObject = new JSONObject().put("key", knownKey).put("value", updateValue)
+        final JSONObject jsonObject = new JSONObject().put("key", knownKey)
+                .put("value", updateValue)
                 .put("targetVisible", true);
 
-        mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey)
-                .accept(MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON)
-                .content(jsonObject.toString())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+        mvc.perform(put("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey).accept(
+                        MediaType.APPLICATION_JSON).contentType(MediaType.APPLICATION_JSON).content(jsonObject.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(updateValue)));
+                .andExpect(jsonPath("key", equalTo(knownKey)))
+                .andExpect(jsonPath("value", equalTo(updateValue)));
 
-        final SoftwareModuleMetadata assertDS = softwareModuleManagement
-                .getMetaDataBySoftwareModuleId(sm.getId(), knownKey).get();
+        final SoftwareModuleMetadata assertDS = softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(),
+                knownKey).get();
         assertThat(assertDS.getValue()).as("Metadata is wrong").isEqualTo(updateValue);
         assertThat(assertDS.isTargetVisible()).as("target visible is wrong").isTrue();
     }
 
     @Test
-    @Description("Verfies the successfull deletion of metadata entry.")
-    public void deleteMetadata() throws Exception {
+    @Description("Verifies the successful deletion of metadata entry.")
+    void deleteMetadata() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1092,14 +1156,15 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/{key}", sm.getId(), knownKey))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
 
         assertThat(softwareModuleManagement.getMetaDataBySoftwareModuleId(sm.getId(), knownKey)).isNotPresent();
     }
 
     @Test
-    @Description("Ensures that module metadta deletion request to API on an entity that does not exist results in NOT_FOUND.")
-    public void deleteModuleMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
+    @Description("Ensures that module metadata deletion request to API on an entity that does not exist results in NOT_FOUND.")
+    void deleteModuleMetadataThatDoesNotExistLeadsToNotFound() throws Exception {
         // prepare and create metadata for deletion
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1109,7 +1174,8 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
                 entityFactory.softwareModuleMetadata().create(sm.getId()).key(knownKey).value(knownValue));
 
         mvc.perform(delete("/rest/v1/softwaremodules/{swId}/metadata/XXX", sm.getId(), knownKey))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
 
         mvc.perform(delete("/rest/v1/softwaremodules/1234/metadata/{key}", knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
@@ -1119,22 +1185,25 @@ public class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegra
 
     @Test
     @Description("Ensures that module deletion request to API on an entity that does not exist results in NOT_FOUND.")
-    public void deleteSoftwareModuleThatDoesNotExistLeadsToNotFound() throws Exception {
-        mvc.perform(delete("/rest/v1/softwaremodules/1234")).andDo(MockMvcResultPrinter.print())
+    void deleteSoftwareModuleThatDoesNotExistLeadsToNotFound() throws Exception {
+        mvc.perform(delete("/rest/v1/softwaremodules/1234"))
+                .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @Description("Verfies the successfull search of a metadata entry based on value.")
-    public void searchSoftwareModuleMetadataRsql() throws Exception {
+    @Description("Verifies the successful search of a metadata entry based on value.")
+    void searchSoftwareModuleMetadataRsql() throws Exception {
         final int totalMetadata = 10;
         final String knownKeyPrefix = "knownKey";
         final String knownValuePrefix = "knownValue";
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         for (int index = 0; index < totalMetadata; index++) {
-            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(sm.getId())
-                    .key(knownKeyPrefix + index).value(knownValuePrefix + index));
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata()
+                    .create(sm.getId())
+                    .key(knownKeyPrefix + index)
+                    .value(knownValuePrefix + index));
         }
 
         final String rsqlSearchValue1 = "value==knownValue1";

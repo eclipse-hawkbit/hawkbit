@@ -262,12 +262,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test verifies that an assignment with automatic cancelation works correctly even if the update is split into multiple partitions on the database.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
-            @Expect(type = TargetUpdatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 20),
+            @Expect(type = TargetUpdatedEvent.class, count = 40),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
-            @Expect(type = ActionCreatedEvent.class, count = 2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10)),
-            @Expect(type = CancelTargetAssignmentEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
-            @Expect(type = ActionUpdatedEvent.class, count = Constants.MAX_ENTRIES_IN_STATEMENT + 10),
+            @Expect(type = ActionCreatedEvent.class, count = 40),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 20),
+            @Expect(type = ActionUpdatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
     void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
@@ -278,14 +278,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet cancelDs2 = testdataFactory.createDistributionSet("Canceled DS", "1.2",
                 Collections.emptyList());
 
-        final List<Target> targets = testdataFactory.createTargets(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
+        final List<Target> targets = testdataFactory.createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
 
         assertThat(deploymentManagement.countActionsAll()).isZero();
 
         assignDistributionSet(cancelDs, targets).getAssignedEntity();
-        assertThat(deploymentManagement.countActionsAll()).isEqualTo(Constants.MAX_ENTRIES_IN_STATEMENT + 10);
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(quotaManagement.getMaxTargetsPerAutoAssignment());
         assignDistributionSet(cancelDs2, targets).getAssignedEntity();
-        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2 * (Constants.MAX_ENTRIES_IN_STATEMENT + 10));
+        assertThat(deploymentManagement.countActionsAll()).isEqualTo(2L * quotaManagement.getMaxTargetsPerAutoAssignment());
     }
 
     @Test
@@ -1393,7 +1393,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 Collections.singletonList(ds.getType()));
 
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < quotaManagement.getMaxTargetDistributionSetAssignmentsPerManualAssignment(); i++) {
             final Target target = testdataFactory.createTarget("test-target-" + i, "test-target-" + i,
                     targetType.getId());
             final DeploymentRequest deployment = DeploymentManagement

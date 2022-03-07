@@ -19,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
@@ -32,7 +31,7 @@ import io.qameta.allure.Story;
 @Feature("Unit Tests - Cache")
 @Story("Download ID Cache")
 @ExtendWith(MockitoExtension.class)
-public class DefaultDownloadIdCacheTest {
+class DefaultDownloadIdCacheTest {
 
     @Mock
     private CacheManager cacheManagerMock;
@@ -61,7 +60,7 @@ public class DefaultDownloadIdCacheTest {
 
     @Test
     @Description("Verifies that putting key and value is delegated to the CacheManager implementation")
-    public void putKeyAndValueIsDelegatedToCacheManager() {
+    void putKeyAndValueIsDelegatedToCacheManager() {
         final DownloadArtifactCache value = new DownloadArtifactCache(DownloadType.BY_SHA1, knownKey);
 
         underTest.put(knownKey, value);
@@ -74,7 +73,7 @@ public class DefaultDownloadIdCacheTest {
 
     @Test
     @Description("Verifies that evicting a key is delegated to the CacheManager implementation")
-    public void evictKeyIsDelegatedToCacheManager() {
+    void evictKeyIsDelegatedToCacheManager() {
 
         underTest.evict(knownKey);
 
@@ -85,7 +84,7 @@ public class DefaultDownloadIdCacheTest {
 
     @Test
     @Description("Verifies that retrieving a value for a specific key is delegated to the CacheManager implementation")
-    public void getValueReturnsTheAssociatedValueForKey() {
+    void getValueReturnsTheAssociatedValueForKey() {
         final String knownKey = "12345";
         final DownloadArtifactCache knownValue = new DownloadArtifactCache(DownloadType.BY_SHA1, knownKey);
 
@@ -98,7 +97,7 @@ public class DefaultDownloadIdCacheTest {
 
     @Test
     @Description("Verifies that retrieving a null value for a specific key is delegated to the CacheManager implementation")
-    public void getValueReturnsNullIfNoKeyIsAssociated() {
+    void getValueReturnsNullIfNoKeyIsAssociated() {
 
         when(cacheMock.get(knownKey)).thenReturn(new SimpleValueWrapper(null));
 
@@ -109,7 +108,7 @@ public class DefaultDownloadIdCacheTest {
 
     @Test
     @Description("Verifies that TenancyCacheManager is using direct cache because download-ids are global unique and don't need to run as tenant aware")
-    public void tenancyCacheManagerIsUsingDirectCache() {
+    void tenancyCacheManagerIsUsingDirectCache() {
 
         when(tenancyCacheManagerMock.getDirectCache(DefaultDownloadIdCache.DOWNLOAD_ID_CACHE)).thenReturn(cacheMock);
         underTest = new DefaultDownloadIdCache(tenancyCacheManagerMock);

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -130,7 +131,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("softwareModuleId") final Long softwareModuleId) {
         LOG.debug("getSoftwareModulesArtifacts({})", controllerId);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
+        final Target target = findTarget(controllerId);
 
         final SoftwareModule softwareModule = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -169,20 +170,16 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("fileName") final String fileName) {
         final ResponseEntity<InputStream> result;
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
+        final Target target = findTarget(controllerId);
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
 
         if (checkModule(fileName, module)) {
-            LOG.warn("Softare module with id {} could not be found.", softwareModuleId);
+            LOG.warn("Software module with id {} could not be found.", softwareModuleId);
             result = ResponseEntity.notFound().build();
         } else {
-
-            // Exception squid:S3655 - Optional access is checked in checkModule
-            // subroutine
-            @SuppressWarnings("squid:S3655")
-            final Artifact artifact = module.getArtifactByFilename(fileName).get();
-
+            // Artifact presence is ensured in 'checkModule'
+            final Artifact artifact = module.getArtifactByFilename(fileName).orElseThrow(NoSuchElementException::new);
             final DbArtifact file = artifactManagement
                     .loadArtifactBinary(artifact.getSha1Hash(), module.getId(), module.isEncrypted())
                     .orElseThrow(() -> new ArtifactBinaryNotFoundException(artifact.getSha1Hash()));
@@ -239,7 +236,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("fileName") final String fileName) {
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
+        final Target target = findTarget(controllerId);
 
         final SoftwareModule module = controllerManagement.getSoftwareModule(softwareModuleId)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
@@ -274,9 +271,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        verifyActionAssignedToTarget(target, action);
+        final Target target = findTarget(controllerId);
+        final Action action = findActionForTarget(actionId, target);
 
         checkAndCancelExpiredAction(action);
 
@@ -296,7 +292,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static HandlingType calculateDownloadType(final Action action) {
-        if (action.isDownloadOnly() || action.isForce()) {
+        if (action.isDownloadOnly() || action.isForcedOrTimeForced()) {
             return HandlingType.FORCED;
         }
         return HandlingType.ATTEMPT;
@@ -325,9 +321,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        verifyActionAssignedToTarget(target, action);
+        final Target target = findTarget(controllerId);
+        final Action action = findActionForTarget(actionId, target);
+
 
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
@@ -342,7 +338,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
-            final Long actionid) {
+            final Long actionId) {
 
         final List<String> messages = new ArrayList<>();
 
@@ -353,38 +349,38 @@ public class DdiRootController implements DdiRootControllerRestApi {
         Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
-            LOG.debug("Controller confirmed cancel (actionid: {}, controllerId: {}) as we got {} report.", actionid,
+            LOG.debug("Controller confirmed cancel (actionId: {}, controllerId: {}) as we got {} report.", actionId,
                     controllerId, feedback.getStatus().getExecution());
             status = Status.CANCELED;
-            addMessageIfEmpty("Target confirmed cancelation.", messages);
+            addMessageIfEmpty("Target confirmed cancellation.", messages);
             break;
         case REJECTED:
-            LOG.info("Controller reported internal error (actionid: {}, controllerId: {}) as we got {} report.",
-                    actionid, controllerId, feedback.getStatus().getExecution());
+            LOG.info("Controller reported internal error (actionId: {}, controllerId: {}) as we got {} report.",
+                    actionId, controllerId, feedback.getStatus().getExecution());
             status = Status.WARNING;
             addMessageIfEmpty("Target REJECTED update", messages);
             break;
         case CLOSED:
-            status = handleClosedCase(feedback, controllerId, actionid, messages);
+            status = handleClosedCase(feedback, controllerId, actionId, messages);
             break;
         case DOWNLOAD:
             LOG.debug("Controller confirmed status of download (actionId: {}, controllerId: {}) as we got {} report.",
-                    actionid, controllerId, feedback.getStatus().getExecution());
+                    actionId, controllerId, feedback.getStatus().getExecution());
             status = Status.DOWNLOAD;
             addMessageIfEmpty("Target confirmed download start", messages);
             break;
         case DOWNLOADED:
-            LOG.debug("Controller confirmed download (actionId: {}, controllerId: {}) as we got {} report.", actionid,
+            LOG.debug("Controller confirmed download (actionId: {}, controllerId: {}) as we got {} report.", actionId,
                     controllerId, feedback.getStatus().getExecution());
             status = Status.DOWNLOADED;
             addMessageIfEmpty("Target confirmed download finished", messages);
             break;
         default:
-            status = handleDefaultCase(feedback, controllerId, actionid, messages);
+            status = handleDefaultCase(feedback, controllerId, actionId, messages);
             break;
         }
 
-        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
+        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
     }
 
     private static void addMessageIfEmpty(final String text, final List<String> messages) {
@@ -393,20 +389,20 @@ public class DdiRootController implements DdiRootControllerRestApi {
         }
     }
 
-    private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
+    private Status handleDefaultCase(final DdiActionFeedback feedback, final String controllerId, final Long actionId,
             final List<String> messages) {
         Status status;
-        LOG.debug("Controller reported intermediate status (actionid: {}, controllerId: {}) as we got {} report.",
-                actionid, controllerId, feedback.getStatus().getExecution());
+        LOG.debug("Controller reported intermediate status (actionId: {}, controllerId: {}) as we got {} report.",
+                actionId, controllerId, feedback.getStatus().getExecution());
         status = Status.RUNNING;
         addMessageIfEmpty("Target reported " + feedback.getStatus().getExecution(), messages);
         return status;
     }
 
-    private Status handleClosedCase(final DdiActionFeedback feedback, final String controllerId, final Long actionid,
+    private Status handleClosedCase(final DdiActionFeedback feedback, final String controllerId, final Long actionId,
             final List<String> messages) {
         Status status;
-        LOG.debug("Controller reported closed (actionid: {}, controllerId: {}) as we got {} report.", actionid,
+        LOG.debug("Controller reported closed (actionId: {}, controllerId: {}) as we got {} report.", actionId,
                 controllerId, feedback.getStatus().getExecution());
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
@@ -432,9 +428,9 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("getControllerCancelAction({})", controllerId);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        verifyActionAssignedToTarget(target, action);
+        final Target target = findTarget(controllerId);
+        final Action action = findActionForTarget(actionId, target);
+
 
         if (action.isCancelingOrCanceled()) {
             final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
@@ -443,7 +439,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             LOG.debug("Found an active CancelAction for target {}. returning cancel: {}", controllerId, cancel);
 
             controllerManagement.registerRetrieved(action.getId(), RepositoryConstants.SERVER_MESSAGE_PREFIX
-                    + "Target retrieved cancel action and should start now the cancelation.");
+                    + "Target retrieved cancel action and should start now the cancellation.");
 
             return new ResponseEntity<>(cancel, HttpStatus.OK);
         }
@@ -458,12 +454,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") @NotEmpty final Long actionId) {
         LOG.debug("provideCancelActionFeedback for target [{}]: {}", controllerId, feedback);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        verifyActionAssignedToTarget(target, action);
+        final Target target = findTarget(controllerId);
+        final Action action = findActionForTarget(actionId, target);
 
         controllerManagement
-                .addCancelActionStatus(generateActionCancelStatus(feedback, target, actionId, entityFactory));
+                .addCancelActionStatus(generateActionCancelStatus(feedback, target, action.getId(), entityFactory));
         return ResponseEntity.ok().build();
     }
 
@@ -473,9 +468,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
         LOG.debug("getControllerInstalledAction({})", controllerId);
 
-        final Target target = findTargetWithExceptionIfNotFound(controllerId);
-        final Action action = findActionWithExceptionIfNotFound(actionId);
-        verifyActionAssignedToTarget(target, action);
+        final Target target = findTarget(controllerId);
+        final Action action = findActionForTarget(actionId, target);
 
         if (action.isActive() || action.isCancelingOrCanceled()) {
             return ResponseEntity.notFound().build();
@@ -511,19 +505,19 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
-            final Long actionid, final EntityFactory entityFactory) {
+            final Long actionId, final EntityFactory entityFactory) {
 
         final List<String> messages = new ArrayList<>();
         Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
-            status = handleCaseCancelCanceled(feedback, target, actionid, messages);
+            status = handleCaseCancelCanceled(feedback, target, actionId, messages);
             break;
         case REJECTED:
-            LOG.info("Target rejected the cancelation request (actionid: {}, controllerId: {}).", actionid,
+            LOG.info("Target rejected the cancellation request (actionId: {}, controllerId: {}).", actionId,
                     target.getControllerId());
             status = Status.CANCEL_REJECTED;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected the cancelation request.");
+            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected the cancellation request.");
             break;
         case CLOSED:
             status = handleCancelClosedCase(feedback, messages);
@@ -537,7 +531,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return entityFactory.actionStatus().create(actionid).status(status).messages(messages);
+        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
 
     }
 
@@ -545,41 +539,44 @@ public class DdiRootController implements DdiRootControllerRestApi {
         Status status;
         if (feedback.getStatus().getResult().getFinished() == FinalResult.FAILURE) {
             status = Status.ERROR;
-            addMessageIfEmpty("Target was not able to complete cancelation", messages);
+            addMessageIfEmpty("Target was not able to complete cancellation", messages);
         } else {
             status = Status.CANCELED;
-            addMessageIfEmpty("Cancelation confirmed", messages);
+            addMessageIfEmpty("Cancellation confirmed", messages);
         }
         return status;
     }
 
     private static Status handleCaseCancelCanceled(final DdiActionFeedback feedback, final Target target,
-            final Long actionid, final List<String> messages) {
+            final Long actionId, final List<String> messages) {
         Status status;
         LOG.error(
-                "Target reported cancel for a cancel which is not supported by the server (actionid: {}, controllerId: {}) as we got {} report.",
-                actionid, target.getControllerId(), feedback.getStatus().getExecution());
+                "Target reported cancel for a cancel which is not supported by the server (actionId: {}, controllerId: {}) as we got {} report.",
+                actionId, target.getControllerId(), feedback.getStatus().getExecution());
         status = Status.WARNING;
         messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX
                 + "Target reported cancel for a cancel which is not supported by the server.");
         return status;
     }
 
-    private Target findTargetWithExceptionIfNotFound(final String controllerId) {
+    private Target findTarget(final String controllerId) {
         return controllerManagement.getByControllerId(controllerId)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
 
-    private Action findActionWithExceptionIfNotFound(final Long actionId) {
-        return controllerManagement.findActionWithDetails(actionId)
+    private Action findActionForTarget(final Long actionId, final Target target) {
+        final Action action = controllerManagement.findActionWithDetails(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+        return verifyActionBelongsToTarget(action, target);
     }
 
-    private void verifyActionAssignedToTarget(final Target target, final Action action) {
+    private Action verifyActionBelongsToTarget(Action action, Target target) {
         if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
-            throw new EntityNotFoundException(Action.class, action.getId());
+            LOG.debug(GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET, action.getId(), target.getId());
+            throw new EntityNotFoundException(
+                    "Not a valid action (" + action.getId() + ") for target: " + target.getControllerId(), null);
         }
+        return action;
     }
 
     /**
@@ -594,7 +591,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             try {
                 controllerManagement.cancelAction(action.getId());
             } catch (final CancelActionNotAllowedException e) {
-                LOG.info("Cancel action not allowed exception :{}", e);
+                LOG.info("Cancel action not allowed: {}", e.getMessage());
             }
         }
     }
