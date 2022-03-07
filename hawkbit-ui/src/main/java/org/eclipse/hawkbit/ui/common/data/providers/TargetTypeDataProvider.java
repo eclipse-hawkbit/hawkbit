@@ -35,26 +35,32 @@ public class TargetTypeDataProvider<T extends ProxyIdentifiableEntity>
      * Constructor
      *
      * @param targetTypeManagement
-     *          TargetTypeManagement
+     *            TargetTypeManagement
      * @param mapper
-     *          Mapper
+     *            Mapper
      */
-    public TargetTypeDataProvider(final TargetTypeManagement targetTypeManagement, IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
+    public TargetTypeDataProvider(final TargetTypeManagement targetTypeManagement,
+            final IdentifiableEntityToProxyIdentifiableEntityMapper<T, TargetType> mapper) {
         super(mapper, Sort.by(Direction.ASC, "name"));
         this.targetTypeManagement = targetTypeManagement;
 
     }
 
     @Override
-    protected Page<TargetType> loadBackendEntities(PageRequest pageRequest, String filter) {
-        if (!StringUtils.isEmpty(filter)){
-            return targetTypeManagement.findByName(pageRequest, filter);
+    protected Page<TargetType> loadBackendEntities(final PageRequest pageRequest, final String filter) {
+        if (StringUtils.isEmpty(filter)) {
+            return targetTypeManagement.findAll(pageRequest);
         }
-        return targetTypeManagement.findAll(pageRequest);
+
+        return targetTypeManagement.findByName(pageRequest, filter);
     }
 
     @Override
-    protected long sizeInBackEnd(PageRequest pageRequest, String filter) {
-        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
+    protected long sizeInBackEnd(final PageRequest pageRequest, final String filter) {
+        if (StringUtils.isEmpty(filter)) {
+            return targetTypeManagement.count();
+        }
+
+        return targetTypeManagement.countByName(filter);
     }
 }

@@ -245,6 +245,22 @@ public interface DistributionSetManagement
     Page<DistributionSetMetadata> findMetaDataByDistributionSetId(@NotNull Pageable pageable, long setId);
 
     /**
+     * Counts all meta data by the given distribution set id.
+     *
+     * @param pageable
+     *            the page request to page the result
+     * @param setId
+     *            the distribution set id to retrieve the meta data count from
+     *
+     * @return count of ds metadata
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataByDistributionSetId(long setId);
+
+    /**
      * Finds all meta data by the given distribution set id.
      *
      * @param pageable

@@ -507,6 +507,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
+    public long countMetaDataByDistributionSetId(final long setId) {
+        throwExceptionIfDistributionSetDoesNotExist(setId);
+
+        return distributionSetMetadataRepository.countByDistributionSetId(setId);
+    }
+
+    @Override
     public Page<DistributionSetMetadata> findMetaDataByDistributionSetIdAndRsql(final Pageable pageable,
             final long distributionSetId, final String rsqlParam) {
 

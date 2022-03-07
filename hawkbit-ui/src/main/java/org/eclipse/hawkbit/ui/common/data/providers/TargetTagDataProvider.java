@@ -49,7 +49,7 @@ public class TargetTagDataProvider extends AbstractProxyDataProvider<ProxyTag, T
 
     @Override
     protected long sizeInBackEnd(final PageRequest pageRequest, final Void filter) {
-        return loadBackendEntities(PageRequest.of(0, 1), filter).getTotalElements();
+        return tagManagementService.count();
     }
 
 }

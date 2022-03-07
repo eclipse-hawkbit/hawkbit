@@ -634,9 +634,16 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         throwExceptionIfSoftwareModuleDoesNotExist(swId);
 
         return convertMdPage(softwareModuleMetadataRepository.findAll(
-                (Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb
+                (root, query, cb) -> cb
                         .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), swId),
                 pageable), pageable);
+    }
+
+    @Override
+    public long countMetaDataBySoftwareModuleId(final long moduleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
+        return softwareModuleMetadataRepository.countBySoftwareModuleId(moduleId);
     }
 
     @Override

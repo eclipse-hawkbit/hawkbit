@@ -273,7 +273,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
 
         if (target.getTargetType() != null) {
-            // we assume that list of assigned DS is less than MAX_ENTRIES_IN_STATEMENT
+            // we assume that list of assigned DS is less than
+            // MAX_ENTRIES_IN_STATEMENT
             final Set<DistributionSetType> incompatibleDistSetTypes = distributionSetManagement.get(distSetIds).stream()
                     .map(DistributionSet::getType).collect(Collectors.toSet());
             incompatibleDistSetTypes.removeAll(target.getTargetType().getCompatibleDistributionSetTypes());
@@ -309,8 +310,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s by their
-     * IDs with a specific {@link ActionType} and {@code forcetime}.
+     * method assigns the {@link DistributionSet} to all {@link Target}s by
+     * their IDs with a specific {@link ActionType} and {@code forcetime}.
      *
      *
      * In case the update was executed offline (i.e. not managed by hawkBit) the
@@ -318,8 +319,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * A. it ignores targets completely that are in
      * {@link TargetUpdateStatus#PENDING}.<br/>
      * B. it created completed actions.<br/>
-     * C. sets both installed and assigned DS on the target and switches the status
-     * to {@link TargetUpdateStatus#IN_SYNC} <br/>
+     * C. sets both installed and assigned DS on the target and switches the
+     * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
      * @param initiatedBy
@@ -404,9 +405,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * split tIDs length into max entries in-statement because many database have
-     * constraint of max entries in in-statements e.g. Oracle with maximum 1000
-     * elements, so we need to split the entries here and execute multiple
+     * split tIDs length into max entries in-statement because many database
+     * have constraint of max entries in in-statements e.g. Oracle with maximum
+     * 1000 elements, so we need to split the entries here and execute multiple
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
@@ -776,23 +777,27 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
+        verifyActionExists(actionId);
+
+        return actionStatusRepository.findByActionId(pageReq, actionId);
+    }
+
+    private void verifyActionExists(final long actionId) {
         if (!actionRepository.existsById(actionId)) {
             throw new EntityNotFoundException(Action.class, actionId);
         }
+    }
 
-        return actionStatusRepository.findByActionId(pageReq, actionId);
+    @Override
+    public long countActionStatusByAction(final long actionId) {
+        verifyActionExists(actionId);
+
+        return actionStatusRepository.countByActionId(actionId);
     }
 
     @Override
     public Page<String> findMessagesByActionStatusId(final Pageable pageable, final long actionStatusId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-
-        final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
-        final Root<JpaActionStatus> countMsgQueryFrom = countMsgQuery.distinct(true).from(JpaActionStatus.class);
-        final ListJoin<JpaActionStatus, String> cJoin = countMsgQueryFrom.joinList("messages", JoinType.LEFT);
-        countMsgQuery.select(cb.count(cJoin))
-                .where(cb.equal(countMsgQueryFrom.get(JpaActionStatus_.id), actionStatusId));
-        final Long totalCount = entityManager.createQuery(countMsgQuery).getSingleResult();
 
         final CriteriaQuery<String> msgQuery = cb.createQuery(String.class);
         final Root<JpaActionStatus> as = msgQuery.from(JpaActionStatus.class);
@@ -803,7 +808,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<String> result = new ArrayList<>(entityManager.createQuery(selMsgQuery)
                 .setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize()).getResultList());
 
-        return new PageImpl<>(result, pageable, totalCount);
+        return new PageImpl<>(result, pageable, result.size());
+    }
+
+    @Override
+    public long countMessagesByActionStatusId(final long actionStatusId) {
+        final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+
+        final CriteriaQuery<Long> countMsgQuery = cb.createQuery(Long.class);
+        final Root<JpaActionStatus> countMsgQueryFrom = countMsgQuery.distinct(true).from(JpaActionStatus.class);
+        final ListJoin<JpaActionStatus, String> cJoin = countMsgQueryFrom.joinList("messages", JoinType.LEFT);
+        countMsgQuery.select(cb.count(cJoin))
+                .where(cb.equal(countMsgQueryFrom.get(JpaActionStatus_.id), actionStatusId));
+
+        return entityManager.createQuery(countMsgQuery).getSingleResult();
     }
 
     @Override
@@ -866,10 +884,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return 0;
         }
         /*
-         * We use a native query here because Spring JPA does not support to specify a
-         * LIMIT clause on a DELETE statement. However, for this specific use case
-         * (action cleanup), we must specify a row limit to reduce the overall load on
-         * the database.
+         * We use a native query here because Spring JPA does not support to
+         * specify a LIMIT clause on a DELETE statement. However, for this
+         * specific use case (action cleanup), we must specify a row limit to
+         * reduce the overall load on the database.
          */
 
         final int statusCount = status.size();

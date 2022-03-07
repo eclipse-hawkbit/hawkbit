@@ -51,6 +51,6 @@ public class DsMetaDataDataProvider extends AbstractMetaDataDataProvider<Distrib
             return 0L;
         }
 
-        return loadBackendEntities(PageRequest.of(0, 1), dsId).getTotalElements();
+        return distributionSetManagement.countMetaDataByDistributionSetId(dsId);
     }
 }
