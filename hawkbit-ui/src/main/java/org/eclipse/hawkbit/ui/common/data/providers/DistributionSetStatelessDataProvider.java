@@ -56,7 +56,7 @@ public class DistributionSetStatelessDataProvider
         final DistributionSetFilterBuilder dsFilterBuilder = new DistributionSetFilterBuilder().setIsDeleted(false)
                 .setIsComplete(true).setIsValid(true);
         if (!StringUtils.isEmpty(filter)) {
-            dsFilterBuilder.setFilterString(filter);
+            dsFilterBuilder.setSearchText(filter);
         }
 
         return dsFilterBuilder.build();

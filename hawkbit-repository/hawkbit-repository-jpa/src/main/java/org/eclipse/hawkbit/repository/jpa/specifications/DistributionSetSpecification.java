@@ -124,21 +124,6 @@ public final class DistributionSetSpecification {
 
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by "like
-     * name or like description or like version".
-     *
-     * @param subString
-     *            to be filtered on
-     * @return the {@link DistributionSet} {@link Specification}
-     */
-    public static Specification<JpaDistributionSet> likeNameOrDescriptionOrVersion(final String subString) {
-        return (dsRoot, query, cb) -> cb.or(
-                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.name)), subString.toLowerCase()),
-                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.version)), subString.toLowerCase()),
-                cb.like(cb.lower(dsRoot.<String> get(JpaDistributionSet_.description)), subString.toLowerCase()));
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by "like
      * name and like version".
      *
      * @param name

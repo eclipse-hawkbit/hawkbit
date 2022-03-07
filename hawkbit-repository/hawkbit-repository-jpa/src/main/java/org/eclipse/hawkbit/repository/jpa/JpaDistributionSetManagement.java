@@ -587,13 +587,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         if (!StringUtils.isEmpty(distributionSetFilter.getSearchText())) {
-            spec = DistributionSetSpecification.likeNameOrDescriptionOrVersion(distributionSetFilter.getSearchText());
-            specList.add(spec);
-        }
-
-        if (!StringUtils.isEmpty(distributionSetFilter.getFilterString())) {
-            final String[] dsFilterNameAndVersionEntries = getDsFilterNameAndVersionEntries(
-                    distributionSetFilter.getFilterString().trim());
+            final String[] dsFilterNameAndVersionEntries = getFilterNameAndVersionEntries(
+                    distributionSetFilter.getSearchText().trim());
             spec = DistributionSetSpecification.likeNameAndVersion(dsFilterNameAndVersionEntries[0],
                     dsFilterNameAndVersionEntries[1]);
             specList.add(spec);
@@ -618,14 +613,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     // the format of filter string is 'name:version'. 'name' and 'version'
     // fields follow the starts_with semantic, that changes to equal for 'name'
     // field when the semicolon is present
-    private static String[] getDsFilterNameAndVersionEntries(final String filterString) {
+    private static String[] getFilterNameAndVersionEntries(final String filterString) {
         final int semicolonIndex = filterString.indexOf(':');
 
-        final String dsFilterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
+        final String filterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
                 : (filterString + "%");
-        final String dsFilterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
+        final String filterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
 
-        return new String[] { !StringUtils.isEmpty(dsFilterName) ? dsFilterName : "%", dsFilterVersion };
+        return new String[] { !StringUtils.isEmpty(filterName) ? filterName : "%", filterVersion };
     }
 
     private void assertDistributionSetIsNotAssignedToTargets(final Long distributionSet) {

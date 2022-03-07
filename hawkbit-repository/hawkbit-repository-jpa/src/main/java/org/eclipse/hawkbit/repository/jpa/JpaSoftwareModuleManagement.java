@@ -325,8 +325,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         specList.add(spec);
 
         if (!StringUtils.isEmpty(searchText)) {
-            spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
-            specList.add(spec);
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
 
         if (null != typeId) {
@@ -346,6 +345,25 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         specList.add(spec);
 
         return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
+    }
+
+    private Specification<JpaSoftwareModule> buildSmSearchQuerySpec(final String searchText) {
+        final String[] smFilterNameAndVersionEntries = getFilterNameAndVersionEntries(searchText.trim());
+        return SoftwareModuleSpecification.likeNameAndVersion(smFilterNameAndVersionEntries[0],
+                smFilterNameAndVersionEntries[1]);
+    }
+
+    // the format of filter string is 'name:version'. 'name' and 'version'
+    // fields follow the starts_with semantic, that changes to equal for 'name'
+    // field when the semicolon is present
+    private static String[] getFilterNameAndVersionEntries(final String filterString) {
+        final int semicolonIndex = filterString.indexOf(':');
+
+        final String filterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
+                : (filterString + "%");
+        final String filterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
+
+        return new String[] { !StringUtils.isEmpty(filterName) ? filterName : "%", filterVersion };
     }
 
     @Override
@@ -392,8 +410,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText, final Long typeId) {
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(3);
         if (!StringUtils.isEmpty(searchText)) {
-            specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
+
         if (typeId != null) {
             throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
@@ -420,8 +439,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         specList.add(spec);
 
         if (!StringUtils.isEmpty(searchText)) {
-            spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
-            specList.add(spec);
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
 
         if (null != typeId) {

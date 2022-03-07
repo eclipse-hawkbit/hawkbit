@@ -81,9 +81,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule module = testdataFactory.createSoftwareModuleApp();
 
         verifyThrownExceptionBy(
-                () -> softwareModuleManagement
-                        .create(Collections
-                                .singletonList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
+                () -> softwareModuleManagement.create(Collections
+                        .singletonList(entityFactory.softwareModule().create().name("xxx").type(NOT_EXIST_ID))),
                 "SoftwareModuleType");
         verifyThrownExceptionBy(
                 () -> softwareModuleManagement
@@ -195,21 +194,20 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, "poky", osType.getId()).getContent()).hasSize(1);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, "poky", osType.getId()).getContent().get(0))
                 .isEqualTo(os);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle%", runtimeType.getId()).getContent())
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle", runtimeType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle%", runtimeType.getId()).getContent().get(0))
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle", runtimeType.getId()).getContent().get(0))
                 .isEqualTo(jvm);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "1.0.1", appType.getId()).getContent()).hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "1.0.1", appType.getId()).getContent().get(0))
-                .isEqualTo(ah);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "1.0%", appType.getId()).getContent()).hasSize(2);
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0.1", appType.getId()).getContent()).hasSize(1)
+                .first().isEqualTo(ah);
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(2);
 
         // no we search with on entity marked as deleted
         softwareModuleManagement.delete(
                 softwareModuleRepository.findByAssignedToAndType(PAGE, ds, appType).getContent().get(0).getId());
 
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "1.0%", appType.getId()).getContent()).hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "1.0%", appType.getId()).getContent().get(0))
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(1);
+        assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent().get(0))
                 .isEqualTo(ah);
     }
 
@@ -694,7 +692,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         // add some meta data entries
         final SoftwareModule module3 = testdataFactory.createSoftwareModuleApp("m3");
-        final int firstHalf = Math.round(((float) maxMetaData) / 2.f);
+        final int firstHalf = Math.round((maxMetaData) / 2.f);
         for (int i = 0; i < firstHalf; ++i) {
             softwareModuleManagement.createMetaData(
                     entityFactory.softwareModuleMetadata().create(module3.getId()).key("k" + i).value("v" + i));

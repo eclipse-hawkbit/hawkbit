@@ -37,16 +37,18 @@ public final class SoftwareModuleSpecification {
 
     /**
      * {@link Specification} for retrieving {@link SoftwareModule}s by "like
-     * name or like version".
-     * 
-     * @param subString
+     * name and like version".
+     *
+     * @param name
+     *            to be filtered on
+     * @param version
      *            to be filtered on
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<JpaSoftwareModule> likeNameOrVersion(final String subString) {
-        return (targetRoot, query, cb) -> cb.or(
-                cb.like(cb.lower(targetRoot.<String> get(JpaSoftwareModule_.name)), subString.toLowerCase()),
-                cb.like(cb.lower(targetRoot.<String> get(JpaSoftwareModule_.version)), subString.toLowerCase()));
+    public static Specification<JpaSoftwareModule> likeNameAndVersion(final String name, final String version) {
+        return (smRoot, query, cb) -> cb.and(
+                cb.like(cb.lower(smRoot.<String> get(JpaSoftwareModule_.name)), name.toLowerCase()),
+                cb.like(cb.lower(smRoot.<String> get(JpaSoftwareModule_.version)), version.toLowerCase()));
     }
 
     /**
