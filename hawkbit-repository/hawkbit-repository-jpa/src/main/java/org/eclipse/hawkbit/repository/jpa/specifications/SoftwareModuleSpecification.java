@@ -60,8 +60,22 @@ public final class SoftwareModuleSpecification {
      * @return the {@link SoftwareModule} {@link Specification}
      */
     public static Specification<JpaSoftwareModule> equalType(final Long type) {
-        return (targetRoot, query, cb) -> cb.equal(
-                targetRoot.<JpaSoftwareModuleType> get(JpaSoftwareModule_.type).get(JpaSoftwareModuleType_.id), type);
+        return (smRoot, query, cb) -> cb.equal(
+                smRoot.<JpaSoftwareModuleType> get(JpaSoftwareModule_.type).get(JpaSoftwareModuleType_.id), type);
+    }
+
+    /**
+     * {@link Specification} for fetching {@link SoftwareModule}s type.
+     * 
+     * @return the {@link SoftwareModule} {@link Specification}
+     */
+    public static Specification<JpaSoftwareModule> fetchType() {
+        return (smRoot, query, cb) -> {
+            if (!query.getResultType().isAssignableFrom(Long.class)) {
+                smRoot.fetch(JpaSoftwareModule_.type);
+            }
+            return cb.conjunction();
+        };
     }
 
 }

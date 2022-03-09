@@ -276,20 +276,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Slice<SoftwareModule> findAll(final Pageable pageable) {
-
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(2);
-
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
-
-        spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaSoftwareModule_.type);
-            }
-            return cb.conjunction();
-        };
-
-        specList.add(spec);
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
+        specList.add(SoftwareModuleSpecification.fetchType());
 
         return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
     }
@@ -318,11 +307,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Slice<SoftwareModule> findByTextAndType(final Pageable pageable, final String searchText,
             final Long typeId) {
-
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(4);
-
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
         if (!StringUtils.isEmpty(searchText)) {
             specList.add(buildSmSearchQuerySpec(searchText));
@@ -330,19 +316,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         if (null != typeId) {
             throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
-
-            spec = SoftwareModuleSpecification.equalType(typeId);
-            specList.add(spec);
+            specList.add(SoftwareModuleSpecification.equalType(typeId));
         }
 
-        spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaSoftwareModule_.type);
-            }
-            return cb.conjunction();
-        };
-
-        specList.add(spec);
+        specList.add(SoftwareModuleSpecification.fetchType());
 
         return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
     }

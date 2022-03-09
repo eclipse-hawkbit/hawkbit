@@ -171,24 +171,36 @@ public class JpaRolloutManagement implements RolloutManagement {
                 RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
 
-        return JpaRolloutHelper.convertPage(findByCriteriaAPI(pageable, specList), pageable);
+        return JpaRolloutHelper.convertPage(findAllWithCountBySpec(pageable, specList), pageable);
     }
 
     /**
      * Executes findAll with the given {@link Rollout} {@link Specification}s.
      */
-    private Page<JpaRollout> findByCriteriaAPI(final Pageable pageable,
+    private Page<JpaRollout> findAllWithCountBySpec(final Pageable pageable,
             final List<Specification<JpaRollout>> specList) {
         if (CollectionUtils.isEmpty(specList)) {
             return rolloutRepository.findAll(pageable);
         }
+        return rolloutRepository.findAll(
+                specList.size() == 1 ? specList.get(0) : SpecificationsBuilder.combineWithAnd(specList), pageable);
+    }
 
-        return rolloutRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
+    /**
+     * Executes findAll with the given {@link Rollout} {@link Specification}s.
+     */
+    private Slice<JpaRollout> findAllWithoutCountBySpec(final Pageable pageable,
+            final List<Specification<JpaRollout>> specList) {
+        if (CollectionUtils.isEmpty(specList)) {
+            return rolloutRepository.findAllWithoutCount(pageable);
+        }
+        return rolloutRepository.findAllWithoutCount(
+                specList.size() == 1 ? specList.get(0) : SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
     @Override
     public Optional<Rollout> get(final long rolloutId) {
-        return rolloutRepository.findById(rolloutId).map(r -> (Rollout) r);
+        return rolloutRepository.findById(rolloutId).map(Rollout.class::cast);
     }
 
     @Override
@@ -456,7 +468,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public long countByFilters(final String searchText) {
-        return rolloutRepository.count(JpaRolloutHelper.likeNameOrDescription(searchText, false));
+        return rolloutRepository.count(JpaRolloutHelper.likeName(searchText, false));
     }
 
     @Override
@@ -467,8 +479,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Slice<Rollout> findByFiltersWithDetailedStatus(final Pageable pageable, final String searchText,
             final boolean deleted) {
-        final Slice<JpaRollout> findAll = findByCriteriaAPI(pageable,
-                Arrays.asList(JpaRolloutHelper.likeNameOrDescription(searchText, deleted)));
+        final Slice<JpaRollout> findAll = findAllWithoutCountBySpec(pageable,
+                Arrays.asList(JpaRolloutHelper.likeName(searchText, deleted)));
         setRolloutStatusDetails(findAll);
         return JpaRolloutHelper.convertPage(findAll, pageable);
     }
@@ -521,10 +533,10 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public Page<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
-        final Page<JpaRollout> rollouts;
+    public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
+        final Slice<JpaRollout> rollouts;
         final Specification<JpaRollout> spec = RolloutSpecification.isDeletedWithDistributionSet(deleted);
-        rollouts = rolloutRepository.findAll(spec, pageable);
+        rollouts = rolloutRepository.findAllWithoutCount(spec, pageable);
         setRolloutStatusDetails(rollouts);
         return JpaRolloutHelper.convertPage(rollouts, pageable);
     }
