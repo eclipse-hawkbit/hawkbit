@@ -162,7 +162,6 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
         ds.setId(dsInfo.getId());
         ds.setName(dsInfo.getName());
         ds.setVersion(dsInfo.getVersion());
-        ds.setTypeInfo(new ProxyTypeInfo(dsInfo.getDsTypeId(), null));
         ds.setNameVersion(dsInfo.getNameVersion());
         ds.setIsValid(dsInfo.isValid());
 
@@ -170,12 +169,12 @@ public class ProxyDistributionSet extends ProxyNamedEntity implements VersionAwa
     }
 
     /**
-     * Gets the Id, name, version, dsTypeId and invalidation state of distribution
-     * set
+     * Gets the Id, name, version, dsTypeId and invalidation state of
+     * distribution set
      *
      * @return proxy of Id, name, version, dsTypeId and invalidation state
      */
     public ProxyDistributionSetInfo getInfo() {
-        return new ProxyDistributionSetInfo(getId(), getName(), getVersion(), getTypeInfo().getId(), getIsValid());
+        return new ProxyDistributionSetInfo(getId(), getName(), getVersion(), getIsValid());
     }
 }

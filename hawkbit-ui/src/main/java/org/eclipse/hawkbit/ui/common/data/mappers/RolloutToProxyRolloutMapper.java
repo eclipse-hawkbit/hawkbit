@@ -26,8 +26,7 @@ public class RolloutToProxyRolloutMapper extends AbstractNamedEntityToProxyNamed
         mapNamedEntityAttributes(rollout, proxyRollout);
 
         final DistributionSet ds = rollout.getDistributionSet();
-        proxyRollout.setDsInfo(new ProxyDistributionSetInfo(ds.getId(), ds.getName(), ds.getVersion(),
-                ds.getType().getId(), ds.isValid()));
+        proxyRollout.setDsInfo(new ProxyDistributionSetInfo(ds.getId(), ds.getName(), ds.getVersion(), ds.isValid()));
         proxyRollout
                 .setNumberOfGroups(rollout.getRolloutGroupsCreated() > 0 ? rollout.getRolloutGroupsCreated() : null);
         proxyRollout.setForcedTime(rollout.getForcedTime() > 0 ? rollout.getForcedTime() : null);
