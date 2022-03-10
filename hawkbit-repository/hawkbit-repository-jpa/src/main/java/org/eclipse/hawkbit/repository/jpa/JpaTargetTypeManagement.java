@@ -35,9 +35,8 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Slice;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -132,21 +131,21 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
-    public Page<TargetType> findAll(final Pageable pageable) {
-        return convertPage(targetTypeRepository.findAll(pageable), pageable);
+    public Slice<TargetType> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable, null);
     }
 
     @Override
     public Page<TargetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaTargetType> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTypeFields.class,
-                virtualPropertyReplacer, database);
-
-        return convertPage(targetTypeRepository.findAll(spec, pageable), pageable);
+        return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, pageable,
+                Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTypeFields.class,
+                        virtualPropertyReplacer, database)));
     }
 
     @Override
-    public Page<TargetType> findByName(final Pageable pageable, final String name) {
-        return convertPage(targetTypeRepository.findAll(TargetTypeSpecification.likeName(name), pageable), pageable);
+    public Slice<TargetType> findByName(final Pageable pageable, final String name) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable,
+                Collections.singletonList(TargetTypeSpecification.likeName(name)));
     }
 
     @Override
@@ -263,9 +262,4 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxDistributionSetTypesPerTargetType(),
                 DistributionSetType.class, TargetType.class, targetTypeRepository::countDsSetTypesById);
     }
-
-    private static Page<TargetType> convertPage(final Page<JpaTargetType> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
 }

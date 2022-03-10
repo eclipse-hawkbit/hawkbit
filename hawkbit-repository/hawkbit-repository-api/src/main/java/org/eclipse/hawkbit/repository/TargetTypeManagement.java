@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -81,7 +82,7 @@ public interface TargetTypeManagement {
      * @return TargetType page
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findAll(@NotNull Pageable pageable);
+    Slice<TargetType> findAll(@NotNull Pageable pageable);
 
     /**
      * @param pageable
@@ -103,7 +104,7 @@ public interface TargetTypeManagement {
      * @return the page of found {@link TargetType}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByName(@NotNull Pageable pageable, String name);
+    Slice<TargetType> findByName(@NotNull Pageable pageable, String name);
 
     /**
      * @param id

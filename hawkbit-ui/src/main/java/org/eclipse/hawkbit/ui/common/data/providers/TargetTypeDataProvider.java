@@ -12,8 +12,8 @@ import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.data.mappers.IdentifiableEntityToProxyIdentifiableEntityMapper;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.util.StringUtils;
@@ -47,7 +47,7 @@ public class TargetTypeDataProvider<T extends ProxyIdentifiableEntity>
     }
 
     @Override
-    protected Page<TargetType> loadBackendEntities(final PageRequest pageRequest, final String filter) {
+    protected Slice<TargetType> loadBackendEntities(final PageRequest pageRequest, final String filter) {
         if (StringUtils.isEmpty(filter)) {
             return targetTypeManagement.findAll(pageRequest);
         }

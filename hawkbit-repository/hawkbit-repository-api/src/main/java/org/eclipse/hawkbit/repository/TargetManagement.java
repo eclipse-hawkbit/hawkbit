@@ -855,6 +855,20 @@ public interface TargetManagement {
     Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
+     * Counts all meta data by the given target id.
+     * 
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
+     *
+     * @return count of all meta data entries for a given target id
+     * 
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataByControllerId(@NotEmpty String controllerId);
+
+    /**
      * Finds all meta data by the given target id and query.
      * 
      * @param pageable

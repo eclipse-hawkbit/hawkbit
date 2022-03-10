@@ -517,7 +517,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void assertSoftwareModuleExists(final Long moduleId) {
-        touch(moduleId);
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository, (JpaSoftwareModule) get(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
     }
 
     /**
@@ -550,36 +551,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         update.getValue().ifPresent(metadata::setValue);
         update.isTargetVisible().ifPresent(metadata::setTargetVisible);
 
-        touch(metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
+                (JpaSoftwareModule) metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
-    }
-
-    /**
-     * Method to get the latest module based on ID after the metadata changes
-     * for that module.
-     *
-     * @param latestModule
-     *            module to touch
-     */
-    private JpaSoftwareModule touch(final SoftwareModule latestModule) {
-        // merge base distribution set so optLockRevision gets updated and audit
-        // log written because modifying metadata is modifying the base
-        // distribution set itself for auditing purposes.
-        final JpaSoftwareModule result = entityManager.merge((JpaSoftwareModule) latestModule);
-        result.setLastModifiedAt(0L);
-
-        return result;
-    }
-
-    /**
-     * Method to get the latest module based on ID after the metadata changes
-     * for that module.
-     *
-     * @param moduleId
-     *            of the module to touch
-     */
-    private JpaSoftwareModule touch(final Long moduleId) {
-        return touch(get(moduleId).orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
     }
 
     @Override
@@ -590,7 +564,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(moduleId,
                 key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
 
-        touch(metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
+                (JpaSoftwareModule) metadata.getSoftwareModule());
         softwareModuleMetadataRepository.deleteById(metadata.getId());
     }
 

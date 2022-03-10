@@ -418,7 +418,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         assertMetaDataQuota(dsId, md.size());
 
-        final JpaDistributionSet set = touch(dsId);
+        final JpaDistributionSet set = JpaManagementHelper.touch(entityManager, distributionSetRepository,
+                (JpaDistributionSet) getValid(dsId));
 
         return Collections.unmodifiableList(md.stream()
                 .map(meta -> distributionSetMetadataRepository
@@ -450,7 +451,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         toUpdate.setValue(md.getValue());
         // touch it to update the lock revision because we are modifying the
         // DS indirectly
-        touch(dsId);
+        JpaManagementHelper.touch(entityManager, distributionSetRepository, (JpaDistributionSet) getValid(dsId));
         return distributionSetMetadataRepository.save(toUpdate);
     }
 
@@ -463,37 +464,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                 distributionSetId, key).orElseThrow(
                         () -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
 
-        touch(metadata.getDistributionSet());
+        JpaManagementHelper.touch(entityManager, distributionSetRepository,
+                (JpaDistributionSet) metadata.getDistributionSet());
         distributionSetMetadataRepository.deleteById(metadata.getId());
-    }
-
-    /**
-     * Method to get the latest distribution set based on DS ID after the
-     * metadata changes for that distribution set.
-     *
-     * @param ds
-     *            is the DS to touch
-     */
-    private JpaDistributionSet touch(final DistributionSet ds) {
-
-        // merge base distribution set so optLockRevision gets updated and audit
-        // log written because modifying metadata is modifying the base
-        // distribution set itself for auditing purposes.
-        final JpaDistributionSet result = entityManager.merge((JpaDistributionSet) ds);
-        result.setLastModifiedAt(0L);
-
-        return distributionSetRepository.save(result);
-    }
-
-    /**
-     * Method to get the latest distribution set based on DS ID after the
-     * metadata changes for that distribution set.
-     *
-     * @param distId
-     *            of the DS to touch
-     */
-    private JpaDistributionSet touch(final Long distId) {
-        return touch(getValid(distId));
     }
 
     @Override

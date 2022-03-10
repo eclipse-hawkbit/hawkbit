@@ -29,10 +29,8 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -60,8 +58,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository,
-            final Database database) {
+            final SoftwareModuleRepository softwareModuleRepository, final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -87,18 +84,16 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     @Override
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
-
-        final Specification<JpaSoftwareModuleType> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
-                virtualPropertyReplacer, database);
-
-        return convertPage(softwareModuleTypeRepository.findAll(spec, pageable), pageable);
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
+                Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
+                        virtualPropertyReplacer, database)));
     }
 
     @Override
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
-        return convertPage(softwareModuleTypeRepository.findAllWithoutCount(
-                (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaSoftwareModuleType_.deleted), false),
-                pageable), pageable);
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository, pageable,
+                Collections.singletonList(
+                        (smTypeRoot, query, cb) -> cb.equal(smTypeRoot.get(JpaSoftwareModuleType_.deleted), false)));
     }
 
     @Override
@@ -149,16 +144,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleType> create(final Collection<SoftwareModuleTypeCreate> creates) {
         return creates.stream().map(this::create).collect(Collectors.toList());
-    }
-
-    private static Page<SoftwareModuleType> convertPage(final Page<JpaSoftwareModuleType> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    private static Slice<SoftwareModuleType> convertPage(final Slice<JpaSoftwareModuleType> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
     }
 
     @Override
