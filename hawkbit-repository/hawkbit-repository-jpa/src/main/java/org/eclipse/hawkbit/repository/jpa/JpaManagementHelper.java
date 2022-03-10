@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * A collection of static helper methods for the management classes
@@ -79,6 +80,19 @@ public final class JpaManagementHelper {
         result.setLastModifiedAt(0L);
 
         return repository.save(result);
+    }
+
+    // the format of filter string is 'name:version'. 'name' and 'version'
+    // fields follow the starts_with semantic, that changes to equal for 'name'
+    // field when the semicolon is present
+    public static String[] getFilterNameAndVersionEntries(final String filterString) {
+        final int semicolonIndex = filterString.indexOf(':');
+
+        final String filterName = semicolonIndex != -1 ? filterString.substring(0, semicolonIndex)
+                : (filterString + "%");
+        final String filterVersion = semicolonIndex != -1 ? (filterString.substring(semicolonIndex + 1) + "%") : "%";
+
+        return new String[] { !StringUtils.isEmpty(filterName) ? filterName : "%", filterVersion };
     }
 
 }
