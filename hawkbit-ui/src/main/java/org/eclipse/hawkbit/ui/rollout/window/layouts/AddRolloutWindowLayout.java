@@ -11,10 +11,15 @@ package org.eclipse.hawkbit.ui.rollout.window.layouts;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.validation.constraints.NotNull;
+
+import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow.GroupDefinitionMode;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AdvancedGroupsLayout;
 import org.eclipse.hawkbit.ui.rollout.window.components.RolloutFormLayout;
@@ -34,6 +39,7 @@ import com.vaadin.ui.TabSheet;
 public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
 
     private final TargetManagement targetManagement;
+    private final DistributionSetManagement dsManagement;
 
     private final RolloutFormLayout rolloutFormLayout;
     private final SimpleGroupsLayout simpleGroupsLayout;
@@ -57,6 +63,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         super(dependencies);
 
         this.targetManagement = dependencies.getTargetManagement();
+        this.dsManagement = dependencies.getDistributionSetManagement();
 
         this.rolloutFormLayout = rolloutComponentBuilder.createRolloutFormLayout();
         this.simpleGroupsLayout = rolloutComponentBuilder.createSimpleGroupsLayout();
@@ -90,8 +97,8 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         advancedGroupsLayout.setAdvancedGroupDefinitionsChangedListener(this::onAdvancedGroupsChanged);
     }
 
-    private void onFilterQueryChange(final String filterQuery) {
-        this.filterQuery = filterQuery;
+    private void onFilterQueryChange(final ProxyTargetFilterQuery targetFilterQuery) {
+        filterQuery = targetFilterQuery != null ? targetFilterQuery.getQuery() : null;
         updateTotalTargets();
 
         if (isAdvancedGroupsTabSelected()) {
@@ -99,8 +106,8 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         }
     }
 
-    private void onDistSetTypeChange(final Long dsTypeId) {
-        this.dsTypeId = dsTypeId;
+    private void onDistSetTypeChange(final ProxyDistributionSet ds) {
+        dsTypeId = ds != null ? getDsTypeId(ds) : null;
         updateTotalTargets();
 
         if (isAdvancedGroupsTabSelected()) {
@@ -108,8 +115,16 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
         }
     }
 
+    private Long getDsTypeId(final @NotNull ProxyDistributionSet ds) {
+        if (ds.getTypeInfo() != null) {
+            return ds.getTypeInfo().getId();
+        }
+
+        return dsManagement.get(ds.getId()).map(dist -> dist.getType().getId()).orElse(null);
+    }
+
     private void updateTotalTargets() {
-        this.totalTargets = getTotalTargets(filterQuery, dsTypeId);
+        totalTargets = getTotalTargets(filterQuery, dsTypeId);
         rolloutFormLayout.setTotalTargets(totalTargets);
         visualGroupDefinitionLayout.setTotalTargets(totalTargets);
         if (isSimpleGroupsTabSelected()) {
