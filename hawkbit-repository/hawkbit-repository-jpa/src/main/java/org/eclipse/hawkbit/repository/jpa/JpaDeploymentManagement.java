@@ -12,6 +12,7 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -580,10 +581,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 return 0L;
             }
 
-            final List<Action> targetAssignments = rolloutGroupActions.getContent().stream()
-                    .map(action -> (JpaAction) action).map(this::closeActionIfSetWasAlreadyAssigned)
-                    .filter(Objects::nonNull).map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst)
-                    .filter(Objects::nonNull).collect(Collectors.toList());
+            final List<Action> targetAssignments = rolloutGroupActions.getContent().stream().map(JpaAction.class::cast)
+                    .map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
+                    .map(this::startScheduledActionIfNoCancelationHasToBeHandledFirst).filter(Objects::nonNull)
+                    .collect(Collectors.toList());
 
             if (!targetAssignments.isEmpty()) {
                 onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, targetAssignments);
@@ -697,20 +698,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final Pageable pageable) {
         throwExceptionIfTargetDoesNotExist(controllerId);
 
-        final Specification<JpaAction> byTargetSpec = createSpecificationFor(controllerId, rsqlParam);
-        final Page<JpaAction> actions = actionRepository.findAll(byTargetSpec, pageable);
-        return convertAcPage(actions, pageable);
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                byControllerIdSpec(controllerId));
+
+        return JpaManagementHelper.findAllWithCountBySpec(actionRepository, pageable, specList);
     }
 
-    private Specification<JpaAction> createSpecificationFor(final String controllerId, final String rsqlParam) {
-        final Specification<JpaAction> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class,
-                virtualPropertyReplacer, database);
-        return (root, query, cb) -> cb.and(spec.toPredicate(root, query, cb),
-                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId));
-    }
-
-    private static Page<Action> convertAcPage(final Page<JpaAction> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+    private Specification<JpaAction> byControllerIdSpec(final String controllerId) {
+        return (root, query, cb) -> cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId);
     }
 
     @Override
@@ -745,7 +741,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public long countActionsByTarget(final String rsqlParam, final String controllerId) {
         throwExceptionIfTargetDoesNotExist(controllerId);
-        return actionRepository.count(createSpecificationFor(controllerId, rsqlParam));
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
+                byControllerIdSpec(controllerId));
+
+        return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
@@ -826,11 +826,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
-        return convertAcSPage(actionStatusRepository.findAll(pageable), pageable);
-    }
-
-    private static Page<ActionStatus> convertAcSPage(final Page<JpaActionStatus> findAll, final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, pageable, null);
     }
 
     @Override
@@ -862,7 +858,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Slice<Action> findActionsAll(final Pageable pageable) {
-        return convertAcPage(actionRepository.findAll(pageable), pageable);
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
     }
 
     @Override
