@@ -54,11 +54,11 @@ public final class TimestampCalculator {
                 () -> getTenantConfigurationManagement().getConfigurationValue(key, String.class).getValue());
     }
 
-    public static TenantConfigurationManagement getTenantConfigurationManagement() {
-        return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement();
+    private static SystemSecurityContext getSystemSecurityContext() {
+        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
     }
 
-    public static SystemSecurityContext getSystemSecurityContext() {
-        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
+    private static TenantConfigurationManagement getTenantConfigurationManagement() {
+        return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement();
     }
 }
