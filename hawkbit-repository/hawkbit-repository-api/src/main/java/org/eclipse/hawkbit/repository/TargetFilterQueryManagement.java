@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -96,7 +97,7 @@ public interface TargetFilterQueryManagement {
      * @return the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findAll(@NotNull Pageable pageable);
+    Slice<TargetFilterQuery> findAll(@NotNull Pageable pageable);
 
     /**
      * Counts all {@link TargetFilterQuery}s.
@@ -128,7 +129,17 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findByName(@NotNull Pageable pageable, @NotNull String name);
+    Slice<TargetFilterQuery> findByName(@NotNull Pageable pageable, @NotNull String name);
+
+    /**
+     * Counts all {@link TargetFilterQuery}s which match the given name filter.
+     *
+     * @param name
+     *            name filter
+     * @return count of found {@link TargetFilterQuery}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByName(@NotNull String name);
 
     /**
      * Retrieves all {@link TargetFilterQuery} which match the given RSQL
@@ -153,7 +164,23 @@ public interface TargetFilterQueryManagement {
      * @return the page with the found {@link TargetFilterQuery}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findByQuery(@NotNull Pageable pageable, @NotNull String query);
+    Slice<TargetFilterQuery> findByQuery(@NotNull Pageable pageable, @NotNull String query);
+
+    /**
+     * Retrieves all {@link TargetFilterQuery}s which match the given
+     * auto-assign distribution set ID.
+     *
+     * @param pageable
+     *            pagination parameter
+     * @param setId
+     *            the auto assign distribution set
+     * @return the page with the found {@link TargetFilterQuery}s
+     *
+     * @throws EntityNotFoundException
+     *             if DS with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(@NotNull Pageable pageable, long setId);
 
     /**
      * Retrieves all {@link TargetFilterQuery}s which match the given
@@ -181,7 +208,7 @@ public interface TargetFilterQueryManagement {
      * @param pageable
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
+    Slice<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);
 
     /**
      * Finds the {@link TargetFilterQuery} by id.

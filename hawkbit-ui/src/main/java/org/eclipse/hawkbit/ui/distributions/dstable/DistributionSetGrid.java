@@ -82,8 +82,7 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
         }
 
         setFilterSupport(new FilterSupport<>(
-                new DistributionSetDistributionsStateDataProvider(dsManagement, dsTypeManagement,
-                        dsToProxyDistributionMapper),
+                new DistributionSetDistributionsStateDataProvider(dsManagement, dsToProxyDistributionMapper),
                 DsDistributionsFilterParams::new, getSelectionSupport()::deselectAll));
         initFilterMappings();
         getFilterSupport().setFilter(new DsDistributionsFilterParams());
@@ -105,10 +104,10 @@ public class DistributionSetGrid extends AbstractDsGrid<DsDistributionsFilterPar
 
     private static String getRowStyle(final ProxyDistributionSet ds) {
         final StringBuilder style = new StringBuilder();
-        if (!ds.getIsComplete()) {
+        if (Boolean.FALSE.equals(ds.getIsComplete())) {
             style.append(SPUIDefinitions.INCOMPLETE_DISTRIBUTION);
         }
-        if (!ds.getIsValid()) {
+        if (Boolean.FALSE.equals(ds.getIsValid())) {
             style.append(" ");
             style.append(SPUIDefinitions.INVALID_DISTRIBUTION);
         }

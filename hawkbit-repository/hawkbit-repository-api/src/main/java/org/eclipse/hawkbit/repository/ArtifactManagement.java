@@ -161,6 +161,19 @@ public interface ArtifactManagement {
     Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long swId);
 
     /**
+     * Count local artifacts for a base software module.
+     *
+     * @param swId
+     *            software module id
+     * @return count by software module
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countBySoftwareModule(long swId);
+
+    /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.
      *
      * @param sha1Hash

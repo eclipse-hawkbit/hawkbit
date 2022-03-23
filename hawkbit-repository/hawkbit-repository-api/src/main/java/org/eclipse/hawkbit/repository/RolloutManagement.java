@@ -181,8 +181,8 @@ public interface RolloutManagement {
             RolloutGroupConditions conditions);
 
     /**
-     * Calculates how many targets are addressed by each rollout group and returns
-     * the validation information.
+     * Calculates how many targets are addressed by each rollout group and
+     * returns the validation information.
      *
      * @param groups
      *            a list of rollout groups
@@ -226,7 +226,7 @@ public interface RolloutManagement {
      *         statuses
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    Page<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
+    Slice<Rollout> findAllWithDetailedStatus(@NotNull Pageable pageable, boolean deleted);
 
     /**
      * Retrieves all rollouts found by the given specification.

@@ -8,20 +8,22 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 
 /**
  * Management service for {@link TargetType}s.
@@ -44,8 +46,16 @@ public interface TargetTypeManagement {
     long count();
 
     /**
+     * @param name
+     *            as {@link TargetType#getName()}
+     * @return total count by name
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByName(String name);
+
+    /**
      * @param create
-     *          TargetTypeCreate
+     *            TargetTypeCreate
      * @return targetType
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
@@ -53,31 +63,32 @@ public interface TargetTypeManagement {
 
     /**
      * @param creates
-     *          List of TargetTypeCreate
+     *            List of TargetTypeCreate
      * @return List of targetType
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_CREATE_TARGET)
     List<TargetType> create(@NotEmpty @Valid Collection<TargetTypeCreate> creates);
 
     /**
-     * @param id targetTypeId
+     * @param id
+     *            targetTypeId
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
     void delete(@NotNull Long id);
 
     /**
      * @param pageable
-     *          Page
+     *            Page
      * @return TargetType page
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findAll(@NotNull Pageable pageable);
+    Slice<TargetType> findAll(@NotNull Pageable pageable);
 
     /**
      * @param pageable
-     *          Page
+     *            Page
      * @param rsqlParam
-     *          query param
+     *            query param
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -93,11 +104,11 @@ public interface TargetTypeManagement {
      * @return the page of found {@link TargetType}
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<TargetType> findByName(@NotNull Pageable pageable, String name);
+    Slice<TargetType> findByName(@NotNull Pageable pageable, String name);
 
     /**
      * @param id
-     *          Target type ID
+     *            Target type ID
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -105,7 +116,7 @@ public interface TargetTypeManagement {
 
     /**
      * @param targetId
-     *          Target ID
+     *            Target ID
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -113,7 +124,7 @@ public interface TargetTypeManagement {
 
     /**
      * @param targetIds
-     *          List of Target ID
+     *            List of Target ID
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -121,7 +132,7 @@ public interface TargetTypeManagement {
 
     /**
      * @param controllerId
-     *          Target controller ID
+     *            Target controller ID
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -129,25 +140,23 @@ public interface TargetTypeManagement {
 
     /**
      * @param controllerIds
-     *          List of Target controller ID
+     *            List of Target controller ID
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<TargetType> findByTargetControllerIds(Collection<String> controllerIds);
 
-
     /**
      * @param ids
-     *          List of Target type ID
+     *            List of Target type ID
      * @return Target type list
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<TargetType> get(@NotEmpty Collection<Long> ids);
 
-
     /**
      * @param update
-     *          TargetTypeUpdate
+     *            TargetTypeUpdate
      * @return Target Type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
@@ -155,20 +164,20 @@ public interface TargetTypeManagement {
 
     /**
      * @param targetTypeId
-     *          Target type ID
+     *            Target type ID
      * @param distributionSetTypeIds
-     *          Distribution set ID
+     *            Distribution set ID
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     TargetType assignCompatibleDistributionSetTypes(long targetTypeId,
-                                                    @NotEmpty Collection<Long> distributionSetTypeIds);
+            @NotEmpty Collection<Long> distributionSetTypeIds);
 
     /**
      * @param targetTypeId
-     *          Target type ID
+     *            Target type ID
      * @param distributionSetTypeIds
-     *          Distribution set ID
+     *            Distribution set ID
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)

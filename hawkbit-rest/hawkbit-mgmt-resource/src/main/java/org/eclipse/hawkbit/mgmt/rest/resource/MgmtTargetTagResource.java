@@ -150,18 +150,15 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        Page<Target> findTargetsAll;
+        final Page<Target> findTargetsAll;
         if (rsqlParam == null) {
             findTargetsAll = targetManagement.findByTag(pageable, targetTagId);
-
         } else {
             findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
         }
 
-        final Long countTargetsAll = findTargetsAll.getTotalElements();
-
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
+        return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
     }
 
     @Override

@@ -221,6 +221,20 @@ public interface SoftwareModuleManagement
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long moduleId);
 
     /**
+     * Counts all meta data by the given software module id.
+     * 
+     * @param moduleId
+     *            the software module id to retrieve the meta data count from
+     *
+     * @return count of all meta data entries for a given software module id
+     * 
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataBySoftwareModuleId(long moduleId);
+
+    /**
      * Finds all meta data by the given software module id where
      * {@link SoftwareModuleMetadata#isTargetVisible()}.
      * 

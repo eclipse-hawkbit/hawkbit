@@ -25,8 +25,8 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.AddRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -94,9 +94,9 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
     }
 
     private void setTargetFilterId(final ProxyRolloutWindow proxyRolloutWindow) {
-        final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
+        final Slice<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
                 proxyRolloutWindow.getTargetFilterQuery());
-        if (filterQueries.getTotalElements() > 0) {
+        if (filterQueries.getNumberOfElements() > 0) {
             final TargetFilterQuery tfq = filterQueries.getContent().get(0);
             proxyRolloutWindow
                     .setTargetFilterInfo(new ProxyTargetFilterQueryInfo(tfq.getId(), tfq.getName(), tfq.getQuery()));

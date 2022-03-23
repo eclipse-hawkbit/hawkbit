@@ -12,7 +12,6 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import org.eclipse.hawkbit.ui.common.data.providers.DistributionSetManagementStateDataProvider;
-import org.springframework.util.StringUtils;
 
 import com.google.common.base.MoreObjects;
 
@@ -65,7 +64,7 @@ public class DsFilterParams implements Serializable {
      *            String
      */
     public void setSearchText(final String searchText) {
-        this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
+        this.searchText = searchText;
     }
 
     @Override

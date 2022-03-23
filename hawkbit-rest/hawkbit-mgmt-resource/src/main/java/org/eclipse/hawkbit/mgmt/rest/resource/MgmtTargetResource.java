@@ -106,12 +106,11 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Target> findTargetsAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<Target> findTargetPage = this.targetManagement.findByRsql(pageable, rsqlParam);
-            countTargetsAll = findTargetPage.getTotalElements();
-            findTargetsAll = findTargetPage;
+            findTargetsAll = targetManagement.findByRsql(pageable, rsqlParam);
+            countTargetsAll = targetManagement.countByRsql(rsqlParam);
         } else {
-            findTargetsAll = this.targetManagement.findAll(pageable);
-            countTargetsAll = this.targetManagement.count();
+            findTargetsAll = targetManagement.findAll(pageable);
+            countTargetsAll = targetManagement.count();
         }
 
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
@@ -165,7 +164,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId, @RequestBody final MgmtId targetTypeId) {
+    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId,
+            @RequestBody final MgmtId targetTypeId) {
         this.targetManagement.assignType(targetId, targetTypeId.getId());
         return ResponseEntity.ok().build();
     }
@@ -304,8 +304,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
                     .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
+            return ResponseEntity.ok(MgmtDistributionSetMapper
+                    .toResponse(deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
         findTargetWithExceptionIfNotFound(targetId);
 

@@ -59,6 +59,6 @@ public class TargetFilterQueryDataProvider
             return targetFilterQueryManagement.count();
         }
 
-        return targetFilterQueryManagement.findByName(PageRequest.of(0, 1), filter).getTotalElements();
+        return targetFilterQueryManagement.countByName(filter);
     }
 }

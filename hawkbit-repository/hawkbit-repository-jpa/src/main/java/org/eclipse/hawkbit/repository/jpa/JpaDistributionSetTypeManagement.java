@@ -35,17 +35,14 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -227,17 +224,18 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return convertPage(
-                findByCriteriaAPI(pageable,
-                        Arrays.asList(RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class,
-                                virtualPropertyReplacer, database), DistributionSetTypeSpecification.isDeleted(false))),
-                pageable);
+        return JpaManagementHelper
+                .findAllWithCountBySpec(distributionSetTypeRepository, pageable,
+                        Arrays.asList(
+                                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class,
+                                        virtualPropertyReplacer, database),
+                                DistributionSetTypeSpecification.isDeleted(false)));
     }
 
     @Override
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
-        return convertPage(distributionSetTypeRepository
-                .findAllWithoutCount(DistributionSetTypeSpecification.isDeleted(false), pageable), pageable);
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, pageable,
+                Collections.singletonList(DistributionSetTypeSpecification.isDeleted(false)));
     }
 
     @Override
@@ -280,14 +278,13 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         if (distributionSetRepository.countByTypeId(typeId) > 0) {
             toDelete.setDeleted(true);
             distributionSetTypeRepository.save(toDelete);
-        }
-        else {
+        } else {
             distributionSetTypeRepository.deleteById(typeId);
         }
     }
 
-    private void unassignDsTypeFromTargetTypes(long typeId) {
-        List<JpaTargetType> targetTypesByDsType = targetTypeRepository.findByDsType(typeId);
+    private void unassignDsTypeFromTargetTypes(final long typeId) {
+        final List<JpaTargetType> targetTypesByDsType = targetTypeRepository.findByDsType(typeId);
         targetTypesByDsType.forEach(targetType -> {
             targetType.removeDistributionSetType(typeId);
             targetTypeRepository.save(targetType);
@@ -316,26 +313,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             throw new EntityReadOnlyException(String.format(
                     "distribution set type %s is already assigned to distribution sets and cannot be changed", type));
         }
-    }
-
-    private static Page<DistributionSetType> convertPage(final Page<JpaDistributionSetType> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    private static Slice<DistributionSetType> convertPage(final Slice<JpaDistributionSetType> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
-    }
-
-    private Page<JpaDistributionSetType> findByCriteriaAPI(final Pageable pageable,
-            final List<Specification<JpaDistributionSetType>> specList) {
-
-        if (CollectionUtils.isEmpty(specList)) {
-            return distributionSetTypeRepository.findAll(pageable);
-        }
-
-        return distributionSetTypeRepository.findAll(SpecificationsBuilder.combineWithAnd(specList), pageable);
     }
 
     @Override
