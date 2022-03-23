@@ -79,7 +79,6 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
@@ -97,6 +96,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;

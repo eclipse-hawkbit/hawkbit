@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
