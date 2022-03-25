@@ -6,7 +6,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.model.helper;
+package org.eclipse.hawkbit.repository.model.helper;
 
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
