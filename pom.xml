@@ -131,7 +131,7 @@
       <java.version>1.8</java.version>
       <!-- Developer preview: java.version = 11 -->
 
-      <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
+      <spring.boot.version>2.5.12</spring.boot.version>
       <spring-framework.version>5.2.20.RELEASE</spring-framework.version>
       <spring.cloud.version>Hoxton.SR7</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
