@@ -76,7 +76,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             }
             final PreAuthorize annotation = method.getAnnotation(PreAuthorize.class);
             assertThat(annotation).as("The public method " + method.getName() + " in class " + clazz.getName()
-                    + " is not annoated with @PreAuthorize, security leak?").isNotNull();
+                    + " is not annotated with @PreAuthorize, security leak?").isNotNull();
         }
     }
 

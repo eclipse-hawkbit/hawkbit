@@ -43,7 +43,7 @@ public class ActionChangedEvent extends RemoteIdEvent implements EntityUpdatedEv
      */
     public ActionChangedEvent(final String tenant, final Long targetId, final Long entityId) {
         // application id is not needed, because we compose the event ourselves
-        super(entityId, tenant, Action.class.getName(), null);
+        super(entityId, tenant, Action.class, null);
 
         this.targetId = targetId;
     }
