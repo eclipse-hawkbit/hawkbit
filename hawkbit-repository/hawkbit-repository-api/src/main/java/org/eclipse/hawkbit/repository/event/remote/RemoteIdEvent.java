@@ -9,7 +9,8 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.util.ObjectUtils;
+
+import java.util.Arrays;
 
 /**
  * An base definition class for an event which contains an id.
@@ -22,7 +23,7 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
     private Long entityId;
 
     private String entityClass;
-    
+
     private String interfaceClass;
 
     /**
@@ -49,13 +50,14 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
         super(entityId, tenant, applicationId);
         this.entityClass = entityClass.getName();
         this.interfaceClass = entityClass.isInterface() ? entityClass.getName()
-                : getFirstInterfaceEntity(entityClass).getName();
+                : getInterfaceEntity(entityClass).getName();
         this.entityId = entityId;
     }
 
-    private static Class<?> getFirstInterfaceEntity(final Class<? extends TenantAwareBaseEntity> baseEntity) {
+    private static Class<?> getInterfaceEntity(final Class<? extends TenantAwareBaseEntity> baseEntity) {
         final Class<?>[] interfaces = baseEntity.getInterfaces();
-        return ObjectUtils.isEmpty(interfaces) ? baseEntity : interfaces[0];
+        return Arrays.stream(interfaces).filter(TenantAwareBaseEntity.class::isAssignableFrom).findFirst()
+                .orElse(baseEntity);
     }
 
     /**
