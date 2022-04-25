@@ -151,6 +151,6 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     @Override
     public void fireDeleteEvent(DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(
-                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

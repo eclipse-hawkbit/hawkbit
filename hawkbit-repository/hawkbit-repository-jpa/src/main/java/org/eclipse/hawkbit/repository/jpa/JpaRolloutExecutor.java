@@ -354,7 +354,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), eventPublisherHolder.getApplicationId()))));
+                        JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {

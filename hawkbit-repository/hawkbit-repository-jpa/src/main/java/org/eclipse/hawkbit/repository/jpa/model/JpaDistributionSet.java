@@ -341,14 +341,14 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
                 new DistributionSetUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId(), complete));
 
         if (isSoftDeleted(descriptorEvent)) {
-            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass().getName(),
+            publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
                     EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
-        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass().getName(),
+        publishEventWithEventPublisher(new DistributionSetDeletedEvent(getTenant(), getId(), getClass(),
                 EventPublisherHolder.getInstance().getApplicationId()));
     }
 

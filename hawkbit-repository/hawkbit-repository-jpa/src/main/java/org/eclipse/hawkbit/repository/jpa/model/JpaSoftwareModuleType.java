@@ -159,6 +159,6 @@ public class JpaSoftwareModuleType extends AbstractJpaNamedEntity implements Sof
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleTypeDeletedEvent(
-                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

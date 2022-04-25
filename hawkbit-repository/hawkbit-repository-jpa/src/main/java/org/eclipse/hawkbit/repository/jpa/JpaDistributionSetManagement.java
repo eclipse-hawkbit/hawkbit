@@ -273,7 +273,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         afterCommit.afterCommit(() -> distributionSetIDs.forEach(dsId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId,
-                        JpaDistributionSet.class.getName(), eventPublisherHolder.getApplicationId()))));
+                        JpaDistributionSet.class, eventPublisherHolder.getApplicationId()))));
     }
 
     @Override

@@ -682,7 +682,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
                         target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                        JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()));
+                        JpaTarget.class, eventPublisherHolder.getApplicationId()));
     }
 
     private void handleErrorOnAction(final JpaAction mergedAction, final JpaTarget mergedTarget) {

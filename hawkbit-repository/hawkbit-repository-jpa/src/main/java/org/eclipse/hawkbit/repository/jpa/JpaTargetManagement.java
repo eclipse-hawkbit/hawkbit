@@ -352,7 +352,7 @@ public class JpaTargetManagement implements TargetManagement {
                         .publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(),
                                 target.getControllerId(),
                                 Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
-                                JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()))));
+                                JpaTarget.class, eventPublisherHolder.getApplicationId()))));
     }
 
     @Override
@@ -836,7 +836,7 @@ public class JpaTargetManagement implements TargetManagement {
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
                         target.getControllerId(), target.getAddress() != null ? target.getAddress().toString() : null,
-                        JpaTarget.class.getName(), eventPublisherHolder.getApplicationId()));
+                        JpaTarget.class, eventPublisherHolder.getApplicationId()));
     }
 
     @Override

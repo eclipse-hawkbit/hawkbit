@@ -219,7 +219,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     void sendUpdateAttributesRequest() {
         final String amqpUri = "amqp://anyhost";
         final TargetAttributesRequestedEvent targetAttributesRequestedEvent = new TargetAttributesRequestedEvent(TENANT,
-                1L, CONTROLLER_ID, amqpUri, Target.class.getName(), serviceMatcher.getServiceId());
+                1L, CONTROLLER_ID, amqpUri, Target.class, serviceMatcher.getServiceId());
 
         amqpMessageDispatcherService.targetTriggerUpdateAttributes(targetAttributesRequestedEvent);
 
@@ -247,7 +247,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String amqpUri = "amqp://anyhost";
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, amqpUri,
-                Target.class.getName(), serviceMatcher.getServiceId());
+                Target.class, serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -264,7 +264,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String noAmqpUri = "http://anyhost";
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                Target.class.getName(), serviceMatcher.getServiceId());
+                Target.class, serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
@@ -280,7 +280,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
         // setup
         final String noAmqpUri = null;
         final TargetDeletedEvent targetDeletedEvent = new TargetDeletedEvent(TENANT, 1L, CONTROLLER_ID, noAmqpUri,
-                Target.class.getName(), serviceMatcher.getServiceId());
+                Target.class, serviceMatcher.getServiceId());
 
         // test
         amqpMessageDispatcherService.targetDelete(targetDeletedEvent);
