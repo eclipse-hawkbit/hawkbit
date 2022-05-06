@@ -9,6 +9,9 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -21,12 +24,15 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.provider.Query;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
 
 /**
  * Count message label which display current filter details and details on
@@ -42,6 +48,9 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
     private int totalCount;
     private int filteredCount;
 
+    private final ExecutorService countExecutor;
+    private Future<?> currentCountCalculation;
+
     /**
      * Constructor
      * 
@@ -54,6 +63,7 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         this.targetManagement = targetManagement;
         this.gridFilterSupport = gridFilterSupport;
         this.targetCountLabel = new Label();
+        this.countExecutor = Executors.newSingleThreadExecutor();
 
         init();
     }
@@ -66,12 +76,8 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         targetCountLabel.setDescription(null);
     }
 
-    public void updateTotalCount() {
-        totalCount = fetchTotalCount();
-        updateCountLabel();
-    }
-
-    private int fetchTotalCount() {
+    private int fetchTotalCount() throws InterruptedException {
+        Thread.sleep(10000);
         return gridFilterSupport.getOriginalDataProvider().size(new Query<>());
     }
 
@@ -88,12 +94,26 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
     }
 
     public void updateTotalAndFilteredCount() {
-        totalCount = fetchTotalCount();
-        if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
-            filteredCount = fetchFilteredCount();
+        targetCountLabel.setCaption("Calculating...");
+        final UI ui = UI.getCurrent();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        if (currentCountCalculation != null && !currentCountCalculation.isCancelled()) {
+            currentCountCalculation.cancel(true);
         }
-
-        updateCountLabel();
+        currentCountCalculation = countExecutor.submit(() -> {
+            try {
+                System.out.println("Task started for " + Thread.currentThread().getId());
+                SecurityContextHolder.setContext(securityContext);
+                totalCount = fetchTotalCount();
+                if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
+                    filteredCount = fetchFilteredCount();
+                }
+                ui.access(() -> updateCountLabel());
+            } catch (final Exception ex) {
+                System.out.println(
+                        "Error occured for " + Thread.currentThread().getId() + " with reason " + ex.getMessage());
+            }
+        });
     }
 
     private void updateCountLabel() {
@@ -134,7 +154,8 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         appendSearchMsg(filterMessageBuilder, targetFilterParams.getSearchText());
         appendDsMsg(filterMessageBuilder, targetFilterParams.getDistributionId());
         appendCustomFilterQueryMsg(filterMessageBuilder, targetFilterParams.getTargetFilterQueryId());
-        appendTargetTypeFilterMsg(filterMessageBuilder, targetFilterParams.isNoTargetTypeClicked(), targetFilterParams.getTargetTypeId());
+        appendTargetTypeFilterMsg(filterMessageBuilder, targetFilterParams.isNoTargetTypeClicked(),
+                targetFilterParams.getTargetTypeId());
 
         String filterMessage = filterMessageBuilder.toString().trim();
         if (filterMessage.endsWith(",")) {
@@ -187,7 +208,8 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
         }
     }
 
-    private void appendTargetTypeFilterMsg(final StringBuilder filterMessageBuilder, boolean noTargetTypeClicked, final Long targetTypeId) {
+    private void appendTargetTypeFilterMsg(final StringBuilder filterMessageBuilder, final boolean noTargetTypeClicked,
+            final Long targetTypeId) {
         if (targetTypeId != null || noTargetTypeClicked) {
             appendFilterMsg(filterMessageBuilder, i18n.getMessage("label.filter.target.type"));
         }
