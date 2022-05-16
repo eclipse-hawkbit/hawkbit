@@ -63,7 +63,6 @@ public class AutoAssignScheduler {
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void autoAssignScheduler() {
-        LOGGER.debug("auto assign schedule checker has been triggered.");
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.
         systemSecurityContext.runAsSystem(this::executeAutoAssign);
@@ -83,9 +82,11 @@ public class AutoAssignScheduler {
         }
 
         try {
+            LOGGER.debug("Auto assign scheduled execution has aquired lock and started for each tenant.");
             systemManagement.forEachTenant(tenant -> autoAssignExecutor.check());
         } finally {
             lock.unlock();
+            LOGGER.debug("Auto assign scheduled execution has released lock and finished.");
         }
 
         return null;
