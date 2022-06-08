@@ -8,15 +8,13 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
+import org.springframework.util.AntPathMatcher;
 
 /**
  * Extracts download or upload id from the request URI secruity token and set
@@ -27,10 +25,10 @@ import org.springframework.security.web.authentication.preauth.AbstractPreAuthen
  */
 public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
-    public static final String REQUEST_ID_REGEX_PATTERN = ".*\\/downloadId\\/.*";
     private static final Logger LOG = LoggerFactory.getLogger(HttpDownloadAuthenticationFilter.class);
 
-    private final Pattern pattern;
+    private static final AntPathMatcher MATCHER = new AntPathMatcher();
+
     private final DownloadIdCache downloadIdCache;
 
     /**
@@ -41,13 +39,10 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
      */
     public HttpDownloadAuthenticationFilter(final DownloadIdCache downloadIdCache) {
         this.downloadIdCache = downloadIdCache;
-        this.pattern = Pattern.compile(REQUEST_ID_REGEX_PATTERN);
-
     }
 
     private Object getDownloadByUri(final String requestURI) {
-        final Matcher matcher = pattern.matcher(requestURI);
-        if (!matcher.matches()) {
+        if (!MATCHER.match("**/downloadId/**",requestURI)) {
             return null;
         }
         LOG.debug("retrieving id from URI request {}", requestURI);
