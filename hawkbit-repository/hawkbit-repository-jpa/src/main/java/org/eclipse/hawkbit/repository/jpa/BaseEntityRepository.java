@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
@@ -27,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  *            of the entity type
  */
 @NoRepositoryBean
-@Transactional(readOnly = true)
+@Transactional
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I>, NoCountSliceRepository<T> {
 
@@ -40,4 +41,16 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      */
     Optional<T> findById(I id);
 
+    /**
+     * Overrides
+     * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
+     * to return a list of created entities instead of an instance of
+     * {@link Iterable}
+     *
+     * @param entities
+     *            to persist in the database
+     * @return the created entities
+     */
+    @Override
+    <S extends T> List<S> saveAll(Iterable<S> entities);
 }

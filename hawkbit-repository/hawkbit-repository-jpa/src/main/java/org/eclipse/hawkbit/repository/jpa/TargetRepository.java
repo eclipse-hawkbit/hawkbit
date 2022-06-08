@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
