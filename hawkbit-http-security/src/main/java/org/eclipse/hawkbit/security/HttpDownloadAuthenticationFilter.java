@@ -42,7 +42,7 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
     }
 
     private Object getDownloadByUri(final String requestURI) {
-        if (!MATCHER.match("**/downloadId/**",requestURI)) {
+        if (!MATCHER.match("/**/downloadId/**",requestURI)) {
             return null;
         }
         LOG.debug("retrieving id from URI request {}", requestURI);

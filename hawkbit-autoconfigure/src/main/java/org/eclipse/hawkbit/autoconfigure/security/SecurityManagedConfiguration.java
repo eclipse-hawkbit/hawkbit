@@ -455,7 +455,7 @@ public class SecurityManagedConfiguration {
             http.csrf().disable();
             http.anonymous().disable();
 
-            http.antMatcher("**/controller/**")
+            http.antMatcher("/**/downloadId/**")
                     .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
             http.authorizeRequests().anyRequest().authenticated().and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
