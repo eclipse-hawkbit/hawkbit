@@ -748,10 +748,9 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> create(final Collection<TargetCreate> targets) {
-        final List<JpaTarget> targetList = targets.stream()
-                .map(JpaTargetCreate.class::cast).map(JpaTargetCreate::build)
+        final List<JpaTarget> targetList = targets.stream().map(JpaTargetCreate.class::cast).map(JpaTargetCreate::build)
                 .collect(Collectors.toList());
-        return new ArrayList<>(targetRepository.saveAll(targetList));
+        return Collections.unmodifiableList(targetRepository.saveAll(targetList));
     }
 
     @Override

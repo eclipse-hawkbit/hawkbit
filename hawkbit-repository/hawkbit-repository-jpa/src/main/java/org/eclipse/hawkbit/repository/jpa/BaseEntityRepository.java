@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
  *            of the entity type
  */
 @NoRepositoryBean
-@Transactional
+@Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
         extends PagingAndSortingRepository<T, I>, NoCountSliceRepository<T> {
 
@@ -52,5 +52,6 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      * @return the created entities
      */
     @Override
+    @Transactional
     <S extends T> List<S> saveAll(Iterable<S> entities);
 }
