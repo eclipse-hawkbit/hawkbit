@@ -694,10 +694,8 @@ public class SecurityManagedConfiguration {
             // https://vaadin.com/forum#!/thread/3200565.
             HttpSecurity httpSec;
             if (enableOidc) {
-                //httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/(UI|oauth2).*$");
                 httpSec = http.requestMatchers().antMatchers("/**/UI/**", "/**/oauth2/**").and();
             } else {
-                //httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/UI.*$");
                 httpSec = http.antMatcher("/**/UI/**");
             }
             // disable as CSRF is handled by Vaadin
