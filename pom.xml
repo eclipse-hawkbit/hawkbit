@@ -184,6 +184,7 @@
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <awaitility.version>3.1.2</awaitility.version>
       <io-protostuff.version>1.5.6</io-protostuff.version>
+      <springdoc.version>1.6.14</springdoc.version>
 
       <!-- SONATYPE-2021-1175 -->
       <logback.version>1.2.9</logback.version>

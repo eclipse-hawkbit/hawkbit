@@ -49,5 +49,24 @@
          <artifactId>allure-junit5</artifactId>
          <scope>test</scope>
       </dependency>
+
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-ui</artifactId>
+         <version>${springdoc.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-webmvc-core</artifactId>
+         <version>${springdoc.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-security</artifactId>
+         <version>${springdoc.version}</version>
+      </dependency>
+
    </dependencies>
 </project>
