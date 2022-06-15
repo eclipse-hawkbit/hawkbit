@@ -801,6 +801,24 @@ public interface TargetManagement {
     boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
+     * Verify if a device matches a specific target filter query, do not have a
+     * specific DS already assigned and is compatible with it.
+     *
+     * @param controllerId
+     *            of the {@link org.eclipse.hawkbit.repository.model.Target} to
+     *            check
+     * @param distributionSetId
+     *            of the
+     *            {@link org.eclipse.hawkbit.repository.model.DistributionSet} to
+     *            consider
+     * @param targetFilterQuery
+     *            to execute
+     * @return true if it matches
+     */
+    boolean isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(@NotNull String controllerId, long distributionSetId,
+            @NotNull String targetFilterQuery);
+
+    /**
      * Creates a list of target meta data entries.
      *
      * @param controllerId

@@ -12,7 +12,6 @@ package org.eclipse.hawkbit.repository.autoassign;
  * An interface declaration which contains the check for the auto assignment
  * logic.
  */
-@FunctionalInterface
 public interface AutoAssignExecutor {
 
     /**
@@ -20,6 +19,14 @@ public interface AutoAssignExecutor {
      * triggers the check and assignment to targets that don't have the design DS
      * yet
      */
-    void check();
+    void checkForCurrentTenant();
+
+    /**
+     * Method performs an auto assign check for a specific device only
+     *
+     * @param controllerId
+     *            of the device to check
+     */
+    void checkForDevice(String controllerId);
 
 }

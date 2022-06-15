@@ -78,7 +78,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                     .updateAutoAssign(targetFilterQuery.getId()).ds(secondDistributionSet.getId()));
             // Run the check
-            autoAssignChecker.check();
+            autoAssignChecker.checkForCurrentTenant();
 
             // verify that manually created action is canceled and action
             // created from AutoAssign is running
@@ -141,7 +141,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(15);
 
         // Run the check
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         verifyThatTargetsHaveDistributionSetAssignment(setA, targets.subList(5, 25), targetsCount);
 
@@ -151,6 +151,31 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatCreatedActionsAreInitiatedByCurrentUser(targetFilterQuery, setA, targets);
     }
 
+    @Test
+    @Description("Test auto assignment of a DS for a specific device")
+    void checkAutoAssignmentForDevice() {
+
+        final DistributionSet toAssignDs = testdataFactory.createDistributionSet("toAssignDs");
+
+        // target filter query that matches all targets
+        targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(toAssignDs.getId()));
+
+        final String targetDsAIdPref = "targ";
+        final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
+        final int targetsCount = targets.size();
+
+        // Run the check
+        autoAssignChecker.checkForDevice(targets.get(0).getControllerId());
+
+        verifyThatTargetsHaveDistributionSetAssignment(toAssignDs, targets.subList(0, 1), targetsCount);
+
+        verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1,25));
+    }
     @Test
     @Description("Test auto assignment of an incomplete DS to filtered targets, that causes failures")
     void checkAutoAssignWithFailures() {
@@ -190,7 +215,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         // first 5 targets of the fail group should still have setB
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
@@ -208,7 +233,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
      */
     @Step
     private void verifyThatTargetsHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets,
-            final int count) {
+                                                                final int count) {
         final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
 
         final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
@@ -218,6 +243,20 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
             if (targetIds.contains(target.getId())) {
                 assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get())
                         .as("assigned DS").isEqualTo(set);
+            }
+        }
+
+    }
+
+    @Step
+    private void verifyThatTargetsNotHaveDistributionSetAssignment(final DistributionSet set, final List<Target> targets) {
+        final List<Long> targetIds = targets.stream().map(Target::getId).collect(Collectors.toList());
+
+        final Slice<Target> targetsAll = targetManagement.findAll(PAGE);
+
+        for (final Target target : targetsAll) {
+            if (targetIds.contains(target.getId())) {
+                assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).isEmpty();
             }
         }
 
@@ -252,7 +291,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
 
         final int targetsCount = targetsA.size() + targetsB.size() + targetsC.size();
 
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsA, targetsCount);
         verifyThatTargetsHaveDistributionSetAssignment(distributionSet, targetsB, targetsCount);
@@ -297,7 +336,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("a").query("name==*")
                 .autoAssignDistributionSet(ds).autoAssignWeight(weight));
         testdataFactory.createTargets(amountOfTargets);
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
@@ -314,7 +353,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
         enableMultiAssignments();
 
         testdataFactory.createTargets(amountOfTargets);
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
@@ -363,7 +402,7 @@ class AutoAssignCheckerTest extends AbstractJpaIntegrationTest {
                 testFilter.getQuery());
         assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
 
-        autoAssignChecker.check();
+        autoAssignChecker.checkForCurrentTenant();
 
         final List<Action> actions = deploymentManagement.findActionsAll(Pageable.unpaged()).getContent();
         assertThat(actions).hasSize(compatibleTargets.size());
