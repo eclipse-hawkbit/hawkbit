@@ -45,7 +45,8 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      * Overrides
      * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
      * to return a list of created entities instead of an instance of
-     * {@link Iterable}
+     * {@link Iterable} to be able to work with it directly in further code
+     * processing instead of converting the {@link Iterable}.
      *
      * @param entities
      *            to persist in the database
