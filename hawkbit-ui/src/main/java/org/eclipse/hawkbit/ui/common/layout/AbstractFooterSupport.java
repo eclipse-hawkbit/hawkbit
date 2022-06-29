@@ -41,6 +41,7 @@ public abstract class AbstractFooterSupport {
 
     private final ExecutorService countExecutor;
     private Future<?> currentCountCalculation;
+    private Future<?> currentCountDetailsCalculation;
 
     protected AbstractFooterSupport(final VaadinMessageSource i18n, final UINotification notification) {
         this.i18n = i18n;
@@ -60,7 +61,10 @@ public abstract class AbstractFooterSupport {
         countLabel.setId(UIComponentIdProvider.COUNT_LABEL);
         countLabel.addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
 
-        countLabel.addDetachListener(e -> abortCurrentCountCalculation());
+        countLabel.addDetachListener(e -> {
+            abortCurrentCountCalculation();
+            abortCurrentDetailsCountCalculation();
+        });
     }
 
     /**
@@ -88,13 +92,17 @@ public abstract class AbstractFooterSupport {
      *            callback to update count label in UI
      */
     protected void updateCountAsynchronously(final Runnable countValueUpdater, final Runnable countUiUpdater) {
-        final UI ui = UI.getCurrent();
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-
         abortCurrentCountCalculation();
         countLabel.setCaption(i18n.getMessage("label.calculating"));
 
-        currentCountCalculation = countExecutor.submit(() -> {
+        currentCountCalculation = submitAsynchronousCountUpdate(countValueUpdater, countUiUpdater);
+    }
+
+    private Future<?> submitAsynchronousCountUpdate(final Runnable countValueUpdater, final Runnable countUiUpdater) {
+        final UI ui = UI.getCurrent();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+
+        return countExecutor.submit(() -> {
             try {
                 LOG.trace("Started calculating count asynchronously");
                 SecurityContextHolder.setContext(securityContext);
@@ -110,10 +118,34 @@ public abstract class AbstractFooterSupport {
         });
     }
 
+    /**
+     * Calculates count details asynchronously and updated the details count
+     * label.
+     *
+     * @param countDetailsValueUpdater
+     *            callback to update details count value
+     * @param countDetailsUiUpdater
+     *            callback to update details count label in UI
+     */
+    protected void updateCountDetailsAsynchronously(final Runnable countDetailsValueUpdater,
+            final Runnable countDetailsUiUpdater) {
+        abortCurrentDetailsCountCalculation();
+        countLabel.setValue(i18n.getMessage("label.calculating"));
+
+        currentCountDetailsCalculation = submitAsynchronousCountUpdate(countDetailsValueUpdater, countDetailsUiUpdater);
+    }
+
     private void abortCurrentCountCalculation() {
         if (currentCountCalculation != null && !currentCountCalculation.isCancelled()) {
             currentCountCalculation.cancel(true);
             currentCountCalculation = null;
+        }
+    }
+
+    private void abortCurrentDetailsCountCalculation() {
+        if (currentCountDetailsCalculation != null && !currentCountDetailsCalculation.isCancelled()) {
+            currentCountDetailsCalculation.cancel(true);
+            currentCountDetailsCalculation = null;
         }
     }
 

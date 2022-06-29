@@ -199,9 +199,7 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
             return;
         }
 
-        // TODO: think if it is alright to abort target count calculation here
-        // (what if we pin during the main count calculation is still ongoing?)
-        updateCountAsynchronously(() -> fetchPinningCounts(pinnedDsId), this::updatePinningCountLabel);
+        updateCountDetailsAsynchronously(() -> fetchPinningCounts(pinnedDsId), this::updatePinningCountLabel);
     }
 
     private void fetchPinningCounts(final Long pinnedDsId) {
