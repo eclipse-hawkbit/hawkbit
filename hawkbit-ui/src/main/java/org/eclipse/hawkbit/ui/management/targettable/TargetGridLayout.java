@@ -141,8 +141,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
                 deploymentManagement, targetMetaDataWindowBuilder);
 
-        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(), targetManagement,
-                targetGrid.getFilterSupport());
+        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(),
+                uiDependencies.getUiNotification(), targetManagement, targetGrid.getFilterSupport());
 
         final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_LIST,
                 EventView.DEPLOYMENT);

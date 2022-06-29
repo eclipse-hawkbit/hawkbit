@@ -175,6 +175,8 @@ public final class UIMessageIdProvider {
 
     public static final String MESSAGE_ERROR_DECRYPTION_FAILED = "message.decryption.failed";
 
+    public static final String MESSAGE_ERROR_COUNT_FAILED = "message.count.failed";
+
     public static final String CRON_VALIDATION_ERROR = "message.maintenancewindow.schedule.validation.error";
 
     public static final String TOOLTIP_OVERDUE = "tooltip.overdue";

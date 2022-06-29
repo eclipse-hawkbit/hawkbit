@@ -9,9 +9,6 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.Collection;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -21,35 +18,27 @@ import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.common.layout.AbstractFooterSupport;
 import org.eclipse.hawkbit.ui.common.layout.CountAwareComponent;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.provider.Query;
 import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
 
 /**
  * Count message label which display current filter details and details on
  * pinning.
  */
 public class TargetCountMessageLabel extends AbstractFooterSupport implements CountAwareComponent {
-    private final VaadinMessageSource i18n;
     private final TargetManagement targetManagement;
     private final FilterSupport<ProxyTarget, TargetManagementFilterParams> gridFilterSupport;
-
-    private final Label targetCountLabel;
 
     private int totalCount;
     private int filteredCount;
 
-    private final ExecutorService countExecutor;
-    private Future<?> currentCountCalculation;
+    private long targetsWithAssignedDsCount;
+    private long targetsWithInstalledDsCount;
 
     /**
      * Constructor
@@ -57,63 +46,47 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
      * @param i18n
      *            I18N
      */
-    public TargetCountMessageLabel(final VaadinMessageSource i18n, final TargetManagement targetManagement,
+    public TargetCountMessageLabel(final VaadinMessageSource i18n, final UINotification notification,
+            final TargetManagement targetManagement,
             final FilterSupport<ProxyTarget, TargetManagementFilterParams> gridFilterSupport) {
-        this.i18n = i18n;
+        super(i18n, notification);
+
         this.targetManagement = targetManagement;
         this.gridFilterSupport = gridFilterSupport;
-        this.targetCountLabel = new Label();
-        this.countExecutor = Executors.newSingleThreadExecutor();
-
-        init();
     }
 
-    private void init() {
-        targetCountLabel.setId(UIComponentIdProvider.COUNT_LABEL);
-        targetCountLabel.addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
-        targetCountLabel.setContentMode(ContentMode.HTML);
-        targetCountLabel.setIcon(null);
-        targetCountLabel.setDescription(null);
-    }
+    @Override
+    protected void init() {
+        super.init();
 
-    private int fetchTotalCount() throws InterruptedException {
-        Thread.sleep(10000);
-        return gridFilterSupport.getOriginalDataProvider().size(new Query<>());
-    }
-
-    public void updateFilteredCount() {
-        if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
-            filteredCount = fetchFilteredCount();
-        }
-
-        updateCountLabel();
-    }
-
-    private int fetchFilteredCount() {
-        return gridFilterSupport.getFilterDataProvider().size(new Query<>());
+        countLabel.setContentMode(ContentMode.HTML);
+        countLabel.setIcon(null);
+        countLabel.setDescription(null);
     }
 
     public void updateTotalAndFilteredCount() {
-        targetCountLabel.setCaption("Calculating...");
-        final UI ui = UI.getCurrent();
-        final SecurityContext securityContext = SecurityContextHolder.getContext();
-        if (currentCountCalculation != null && !currentCountCalculation.isCancelled()) {
-            currentCountCalculation.cancel(true);
+        updateCountAsynchronously(this::fetchTotalAndFilteredCount, this::updateCountLabel);
+    }
+
+    private void fetchTotalAndFilteredCount() {
+        fetchTotalCount();
+        fetchFilteredCount();
+    }
+
+    private void fetchTotalCount() {
+        totalCount = gridFilterSupport.getOriginalDataProvider().size(new Query<>());
+    }
+
+    private void fetchFilteredCount() {
+        if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
+            filteredCount = gridFilterSupport.getFilterDataProvider().size(new Query<>());
+        } else {
+            filteredCount = 0;
         }
-        currentCountCalculation = countExecutor.submit(() -> {
-            try {
-                System.out.println("Task started for " + Thread.currentThread().getId());
-                SecurityContextHolder.setContext(securityContext);
-                totalCount = fetchTotalCount();
-                if (gridFilterSupport.getFilter().isAnyFilterSelected()) {
-                    filteredCount = fetchFilteredCount();
-                }
-                ui.access(() -> updateCountLabel());
-            } catch (final Exception ex) {
-                System.out.println(
-                        "Error occured for " + Thread.currentThread().getId() + " with reason " + ex.getMessage());
-            }
-        });
+    }
+
+    public void updateFilteredCount() {
+        updateCountAsynchronously(this::fetchFilteredCount, this::updateCountLabel);
     }
 
     private void updateCountLabel() {
@@ -124,7 +97,7 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
             appendFilteredTargetsMessage(countMessageBuilder, targetFilterParams);
         }
 
-        targetCountLabel.setCaption(countMessageBuilder.toString());
+        countLabel.setCaption(countMessageBuilder.toString());
     }
 
     private StringBuilder getTotalTargetsMessage() {
@@ -222,27 +195,30 @@ public class TargetCountMessageLabel extends AbstractFooterSupport implements Co
     public void updatePinningDetails() {
         final Long pinnedDsId = gridFilterSupport.getFilter().getPinnedDistId();
         if (pinnedDsId == null) {
-            targetCountLabel.setValue("");
+            countLabel.setValue("");
             return;
         }
 
-        final Long targetsWithAssigedDsCount = targetManagement.countByAssignedDistributionSet(pinnedDsId);
-        final Long targetsWithInstalledDsCount = targetManagement.countByInstalledDistributionSet(pinnedDsId);
+        // TODO: think if it is alright to abort target count calculation here
+        // (what if we pin during the main count calculation is still ongoing?)
+        updateCountAsynchronously(() -> fetchPinningCounts(pinnedDsId), this::updatePinningCountLabel);
+    }
 
+    private void fetchPinningCounts(final Long pinnedDsId) {
+        targetsWithAssignedDsCount = targetManagement.countByAssignedDistributionSet(pinnedDsId);
+        targetsWithInstalledDsCount = targetManagement.countByInstalledDistributionSet(pinnedDsId);
+    }
+
+    private void updatePinningCountLabel() {
         final StringBuilder message = new StringBuilder(i18n.getMessage("label.target.count"));
         message.append(" : ");
         message.append("<span class=\"assigned-count-message\">");
-        message.append(i18n.getMessage("label.assigned.count", targetsWithAssigedDsCount));
+        message.append(i18n.getMessage("label.assigned.count", targetsWithAssignedDsCount));
         message.append("</span>, <span class=\"installed-count-message\"> ");
         message.append(i18n.getMessage("label.installed.count", targetsWithInstalledDsCount));
         message.append("</span>");
 
-        targetCountLabel.setValue(message.toString());
-    }
-
-    @Override
-    protected Label getFooterMessageLabel() {
-        return targetCountLabel;
+        countLabel.setValue(message.toString());
     }
 
     @Override
