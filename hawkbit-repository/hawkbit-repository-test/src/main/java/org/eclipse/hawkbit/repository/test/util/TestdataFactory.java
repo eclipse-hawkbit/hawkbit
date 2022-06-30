@@ -987,11 +987,14 @@ public class TestdataFactory {
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
             final String descriptionPrefix) {
 
-        return targetManagement.create(IntStream.range(0, numberOfTargets)
+        final List<Target> targets = targetManagement.create(IntStream.range(0, numberOfTargets)
                 .mapToObj(i -> entityFactory.target().create()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i))
                 .collect(Collectors.toList()));
+        // init new instance of array list since the TargetManagement#create will
+        // provide a unmodifiable list
+        return new ArrayList<>(targets);
     }
 
     /**

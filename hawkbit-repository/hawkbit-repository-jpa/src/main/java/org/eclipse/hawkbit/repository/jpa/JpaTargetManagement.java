@@ -750,7 +750,7 @@ public class JpaTargetManagement implements TargetManagement {
     public List<Target> create(final Collection<TargetCreate> targets) {
         final List<JpaTarget> targetList = targets.stream().map(JpaTargetCreate.class::cast).map(JpaTargetCreate::build)
                 .collect(Collectors.toList());
-        return new ArrayList<>(targetRepository.saveAll(targetList));
+        return Collections.unmodifiableList(targetRepository.saveAll(targetList));
     }
 
     @Override
