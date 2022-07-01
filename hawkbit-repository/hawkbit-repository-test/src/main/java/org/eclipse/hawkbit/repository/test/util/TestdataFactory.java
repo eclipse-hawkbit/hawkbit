@@ -880,7 +880,7 @@ public class TestdataFactory {
             targets.add(entityFactory.target().create().controllerId(DEFAULT_CONTROLLER_ID + i));
         }
 
-        return targetManagement.create(targets);
+        return createTargets(targets);
     }
 
     /**
@@ -904,7 +904,7 @@ public class TestdataFactory {
                     .targetType(targetType.getId()));
         }
 
-        return targetManagement.create(targets);
+        return createTargets(targets);
     }
 
     /**
@@ -922,7 +922,7 @@ public class TestdataFactory {
             targets.add(entityFactory.target().create().controllerId(targetId));
         }
 
-        return targetManagement.create(targets);
+        return createTargets(targets);
     }
 
     /**
@@ -987,11 +987,19 @@ public class TestdataFactory {
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
             final String descriptionPrefix) {
 
-        return targetManagement.create(IntStream.range(0, numberOfTargets)
+        final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
                 .mapToObj(i -> entityFactory.target().create()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        return createTargets(targets);
+    }
+
+    private List<Target> createTargets(final Collection<TargetCreate> targetCreates) {
+        // init new instance of array list since the TargetManagement#create will
+        // provide a unmodifiable list
+        final List<Target> createdTargets = targetManagement.create(targetCreates);
+        return new ArrayList<>(createdTargets);
     }
 
     /**
@@ -1010,11 +1018,12 @@ public class TestdataFactory {
     public List<Target> createTargets(final int numberOfTargets, final String controllerIdPrefix,
             final String descriptionPrefix, final Long lastTargetQuery) {
 
-        return targetManagement.create(IntStream.range(0, numberOfTargets)
+        final List<TargetCreate> targets = IntStream.range(0, numberOfTargets)
                 .mapToObj(i -> entityFactory.target().create()
                         .controllerId(String.format("%s-%05d", controllerIdPrefix, i))
                         .description(descriptionPrefix + i).lastTargetQuery(lastTargetQuery))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toList());
+        return createTargets(targets);
     }
 
     /**

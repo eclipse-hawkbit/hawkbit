@@ -148,7 +148,7 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
 
             final Predicate predicate = targetRoot.get(JpaTarget_.controllerId).in(controllerIDs);
-            targetRoot.fetch(JpaTarget_.assignedDistributionSet);
+            targetRoot.fetch(JpaTarget_.assignedDistributionSet, JoinType.LEFT);
             return predicate;
         };
     }
