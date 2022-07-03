@@ -22,7 +22,7 @@ public enum SpServerError {
     /**
     *
     */
-    SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists",
+    SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreadyExists",
             "The given entity already exists in database"),
 
     /**
