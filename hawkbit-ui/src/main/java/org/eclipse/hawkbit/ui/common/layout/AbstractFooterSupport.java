@@ -87,9 +87,9 @@ public abstract class AbstractFooterSupport {
      * Calculates count asynchronously and updated the count label.
      *
      * @param countValueUpdater
-     *            callback to update count value
+     *                          callback to update count value
      * @param countUiUpdater
-     *            callback to update count label in UI
+     *                          callback to update count label in UI
      */
     protected void updateCountAsynchronously(final Runnable countValueUpdater, final Runnable countUiUpdater) {
         abortCurrentCountCalculation();
@@ -111,7 +111,7 @@ public abstract class AbstractFooterSupport {
                 LOG.trace("Finished calculating count asynchronously, updating UI");
                 ui.access(countUiUpdater);
             } catch (final Exception ex) {
-                LOG.error("Error ocured during asynchronous count calculation", ex);
+                LOG.error("Error occurred during asynchronous count calculation", ex);
                 ui.access(() -> notification
                         .displayValidationError(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_COUNT_FAILED)));
             }
@@ -123,9 +123,9 @@ public abstract class AbstractFooterSupport {
      * label.
      *
      * @param countDetailsValueUpdater
-     *            callback to update details count value
+     *                                 callback to update details count value
      * @param countDetailsUiUpdater
-     *            callback to update details count label in UI
+     *                                 callback to update details count label in UI
      */
     protected void updateCountDetailsAsynchronously(final Runnable countDetailsValueUpdater,
             final Runnable countDetailsUiUpdater) {
