@@ -1256,6 +1256,83 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         validateFoundTargetsByRsql(rsqlOrControllerIdNotEqualFilter, controllerId1, controllerId2);
     }
 
+    @Test
+    @Description("Target matches filter.")
+    void matchesFilter() {
+        final Target target = createTargetWithMetadata("target1", 2);
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final String filter = "metadata.key1==target1-value1";
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds.getId(), filter)).isTrue();
+    }
+
+    @Test
+    @Description("Target does not matches filter.")
+    void matchesFilterWrongFilter() {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final String filter = "metadata.key==not_existing";
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds.getId(), filter)).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter but DS already assigned.")
+    void matchesFilterDsAssigned() {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet ds1 = testdataFactory.createDistributionSet();
+        final DistributionSet ds2 = testdataFactory.createDistributionSet();
+        assignDistributionSet(ds1, target);
+        assignDistributionSet(ds2, target);
+        final String filter = "name==*";
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds1.getId(), filter)).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter for DS with wrong type.")
+    void matchesFilterWrongType() {
+        final TargetType type = testdataFactory.createTargetType("type", Collections.emptyList());
+        final Target target = testdataFactory.createTarget("target", "target", type.getId());
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds.getId(), "name==*")).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter that is invalid.")
+    void matchesFilterInvalidFilter() {
+        final Target target = testdataFactory.createTarget();
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds.getId(), "invalid_syntax")).isFalse();
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                ds.getId(), "invalid_field==1")).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter for not existing target.")
+    void matchesFilterTargetNotExists() {
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible("notExisting", ds.getId(),
+                "name==*")).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter for not existing DS.")
+    void matchesFilterDsNotExists() {
+        final Target target = testdataFactory.createTarget();
+
+        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+                123, "name==*")).isFalse();
+    }
+
     private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {
         final Slice<Target> foundTargetsByMetadataAndControllerId = targetManagement.findByRsql(PAGE, rsqlFilter);
         final long foundTargetsByMetadataAndControllerIdCount = targetManagement.countByRsql(rsqlFilter);
