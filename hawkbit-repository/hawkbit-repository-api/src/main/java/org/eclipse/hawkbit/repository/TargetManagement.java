@@ -809,12 +809,13 @@ public interface TargetManagement {
      *            check
      * @param distributionSetId
      *            of the
-     *            {@link org.eclipse.hawkbit.repository.model.DistributionSet} to
-     *            consider
+     *            {@link org.eclipse.hawkbit.repository.model.DistributionSet}
+     *            to consider
      * @param targetFilterQuery
      *            to execute
      * @return true if it matches
      */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     boolean isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(@NotNull String controllerId, long distributionSetId,
             @NotNull String targetFilterQuery);
 
