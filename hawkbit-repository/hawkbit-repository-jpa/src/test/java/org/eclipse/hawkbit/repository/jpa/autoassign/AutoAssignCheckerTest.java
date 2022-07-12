@@ -68,8 +68,8 @@ class AutoAssignCheckerTest {
     @Description("Single device check triggers update for matching auto assignment filter.")
     void checkForDevice() {
         mockRunningAsNonSystem();
-        final String target = getString();
-        final long ds = getLong();
+        final String target = getRandomString();
+        final long ds = getRandomLong();
         final TargetFilterQuery matching = mockFilterQuery(ds);
         final TargetFilterQuery notMatching = mockFilterQuery(ds);
         when(targetFilterQueryManagement.findWithAutoAssignDS(any()))
@@ -98,22 +98,22 @@ class AutoAssignCheckerTest {
         final DistributionSet ds = mock(DistributionSet.class);
         when(ds.getId()).thenReturn(dsId);
         final TargetFilterQuery filter = mock(TargetFilterQuery.class);
-        when(filter.getId()).thenReturn(getLong());
-        when(filter.getQuery()).thenReturn(getString());
-        lenient().when(filter.getAutoAssignInitiatedBy()).thenReturn(getString());
+        when(filter.getId()).thenReturn(getRandomLong());
+        when(filter.getQuery()).thenReturn(getRandomString());
+        lenient().when(filter.getAutoAssignInitiatedBy()).thenReturn(getRandomString());
         when(filter.getAutoAssignDistributionSet()).thenReturn(ds);
         return filter;
     }
 
     private void mockRunningAsNonSystem() {
-        when(tenantAware.getCurrentUsername()).thenReturn(getString());
+        when(tenantAware.getCurrentUsername()).thenReturn(getRandomString());
     }
 
-    private static long getLong() {
+    private static long getRandomLong() {
         return ThreadLocalRandom.current().nextLong();
     }
 
-    private static String getString() {
+    private static String getRandomString() {
         return UUID.randomUUID().toString();
     }
 
