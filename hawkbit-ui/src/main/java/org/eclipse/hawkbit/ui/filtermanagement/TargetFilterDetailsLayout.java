@@ -62,7 +62,8 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
                 uiProperties, rsqlValidationOracle, uiState);
         this.targetFilterTargetGrid = new TargetFilterTargetGrid(uiDependencies, targetFilterStateDataSupplier,
                 uiState);
-        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n());
+        this.targetFilterCountMessageLabel = new TargetFilterCountMessageLabel(uiDependencies.getI18n(),
+                uiDependencies.getUiNotification());
 
         initGridDataUpdatedListener();
 
@@ -81,7 +82,7 @@ public class TargetFilterDetailsLayout extends AbstractGridComponentLayout {
 
     private void initGridDataUpdatedListener() {
         targetFilterTargetGrid.addDataChangedListener(event -> targetFilterCountMessageLabel
-                .updateTotalFilteredTargetsCount(targetFilterTargetGrid.getDataSize()));
+                .updateTotalFilteredTargetsCount(targetFilterTargetGrid::getDataSize));
     }
 
     @Override

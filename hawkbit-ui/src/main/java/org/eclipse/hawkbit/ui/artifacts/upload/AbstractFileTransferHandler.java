@@ -36,7 +36,6 @@ import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload.EntityModifiedEventType;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.utils.SpringContextHolder;
-import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +68,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
 
     private final VaadinMessageSource i18n;
 
-    protected final UINotification uiNotification;
-
     private final transient Lock uploadLock;
 
     protected static final RegexCharacterCollection ILLEGAL_FILENAME_CHARACTERS = new RegexCharacterCollection(
@@ -82,7 +79,6 @@ public abstract class AbstractFileTransferHandler implements Serializable {
         this.i18n = i18n;
         this.eventBus = SpringContextHolder.getInstance().getBean(EventBus.UIEventBus.class);
         this.artifactUploadState = SpringContextHolder.getInstance().getBean(ArtifactUploadState.class);
-        this.uiNotification = SpringContextHolder.getInstance().getBean(UINotification.class);
         this.uploadLock = uploadLock;
     }
 
