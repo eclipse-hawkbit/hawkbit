@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -851,6 +853,25 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public boolean existsByControllerId(final String controllerId) {
         return targetRepository.exists(TargetSpecifications.hasControllerId(controllerId));
+    }
+
+    @Override
+    public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatible(final String controllerId,
+            final long distributionSetId, final String targetFilterQuery) {
+        RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class);
+        final DistributionSet ds = distributionSetManagement.get(distributionSetId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
+        final Long distSetTypeId = ds.getType().getId();
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
+                        database),
+                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
+                TargetSpecifications.hasControllerId(controllerId));
+
+        final Specification<JpaTarget> combinedSpecification = Objects
+                .requireNonNull(SpecificationsBuilder.combineWithAnd(specList));
+        return targetRepository.exists(combinedSpecification);
     }
 
     @Override

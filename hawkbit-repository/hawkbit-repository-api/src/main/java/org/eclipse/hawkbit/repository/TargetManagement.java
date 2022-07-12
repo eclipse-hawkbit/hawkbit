@@ -801,6 +801,25 @@ public interface TargetManagement {
     boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
+     * Verify if a target matches a specific target filter query, does not have
+     * a specific DS already assigned and is compatible with it.
+     *
+     * @param controllerId
+     *            of the {@link org.eclipse.hawkbit.repository.model.Target} to
+     *            check
+     * @param distributionSetId
+     *            of the
+     *            {@link org.eclipse.hawkbit.repository.model.DistributionSet}
+     *            to consider
+     * @param targetFilterQuery
+     *            to execute
+     * @return true if it matches
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatible(@NotNull String controllerId, long distributionSetId,
+            @NotNull String targetFilterQuery);
+
+    /**
      * Creates a list of target meta data entries.
      *
      * @param controllerId
