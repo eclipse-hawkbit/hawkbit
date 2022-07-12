@@ -83,7 +83,7 @@ public class AutoAssignScheduler {
 
         try {
             LOGGER.debug("Auto assign scheduled execution has aquired lock and started for each tenant.");
-            systemManagement.forEachTenant(tenant -> autoAssignExecutor.checkForCurrentTenant());
+            systemManagement.forEachTenant(tenant -> autoAssignExecutor.checkAllTargets());
         } finally {
             lock.unlock();
             LOGGER.debug("Auto assign scheduled execution has released lock and finished.");

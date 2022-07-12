@@ -80,7 +80,7 @@ class AutoAssignCheckerTest {
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds,
                 notMatching.getQuery())).thenReturn(false);
 
-        sut.checkForDevice(target);
+        sut.checkSingleTarget(target);
 
         verify(deploymentManagement).assignDistributionSets(eq(matching.getAutoAssignInitiatedBy()),
                 Mockito.argThat(deployReqMatcher(target, ds)), any());

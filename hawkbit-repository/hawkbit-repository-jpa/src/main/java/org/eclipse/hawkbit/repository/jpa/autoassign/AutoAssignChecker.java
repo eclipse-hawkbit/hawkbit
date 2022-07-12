@@ -65,14 +65,14 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void checkForCurrentTenant() {
+    public void checkAllTargets() {
         LOGGER.debug("Auto assign check call for tenant {} started", getTenantAware().getCurrentTenant());
         forEachFilterWithAutoAssignDS(this::checkByTargetFilterQueryAndAssignDS);
         LOGGER.debug("Auto assign check call for tenant {} finished", getTenantAware().getCurrentTenant());
     }
 
     @Override
-    public void checkForDevice(String controllerId) {
+    public void checkSingleTarget(String controllerId) {
         LOGGER.debug("Auto assign check call for tenant {} and device {} started", getTenantAware().getCurrentTenant(),
                 controllerId);
         forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));

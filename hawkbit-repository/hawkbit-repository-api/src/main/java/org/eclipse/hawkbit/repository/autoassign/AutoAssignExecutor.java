@@ -19,7 +19,7 @@ public interface AutoAssignExecutor {
      * triggers the check and assignment to targets that don't have the design DS
      * yet
      */
-    void checkForCurrentTenant();
+    void checkAllTargets();
 
     /**
      * Method performs an auto assign check for a specific device only
@@ -27,6 +27,6 @@ public interface AutoAssignExecutor {
      * @param controllerId
      *            of the device to check
      */
-    void checkForDevice(String controllerId);
+    void checkSingleTarget(String controllerId);
 
 }
