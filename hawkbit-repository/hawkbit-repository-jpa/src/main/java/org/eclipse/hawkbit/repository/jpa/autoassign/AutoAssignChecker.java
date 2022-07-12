@@ -119,7 +119,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} for device {} started",
                 getTenantAware().getCurrentTenant(), targetFilterQuery.getId(), controllerId);
         try {
-            final boolean controllerIdMatches = targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(
+            final boolean controllerIdMatches = targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(
                     controllerId, targetFilterQuery.getAutoAssignDistributionSet().getId(),
                     targetFilterQuery.getQuery());
 

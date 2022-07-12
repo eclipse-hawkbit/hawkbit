@@ -42,8 +42,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
-import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -858,33 +856,22 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public boolean isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(final String controllerId,
+    public boolean isTargetMatchingQueryAndDSNotAssignedAndCompatible(final String controllerId,
             final long distributionSetId, final String targetFilterQuery) {
-        if (!isTargetFilterQueryValid(targetFilterQuery)) {
-            return false;
-        }
-        return distributionSetManagement.get(distributionSetId).map(ds -> {
-            final Long distSetTypeId = ds.getType().getId();
-            final List<Specification<JpaTarget>> specList = Arrays.asList(
-                    RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
-                            database),
-                    TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
-                    TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
-                    TargetSpecifications.hasControllerId(controllerId));
+        RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class);
+        final DistributionSet ds = distributionSetManagement.get(distributionSetId)
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, distributionSetId));
+        final Long distSetTypeId = ds.getType().getId();
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
+                        database),
+                TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
+                TargetSpecifications.hasControllerId(controllerId));
 
-            final Specification<JpaTarget> combinedSpecification = Objects
-                    .requireNonNull(SpecificationsBuilder.combineWithAnd(specList));
-            return targetRepository.exists(combinedSpecification);
-        }).orElse(false);
-    }
-
-    private static boolean isTargetFilterQueryValid(final String targetFilterQuery) {
-        try {
-            RSQLUtility.validateRsqlFor(targetFilterQuery, TargetFields.class);
-            return true;
-        } catch (final RSQLParameterUnsupportedFieldException | RSQLParameterSyntaxException e) {
-            return false;
-        }
+        final Specification<JpaTarget> combinedSpecification = Objects
+                .requireNonNull(SpecificationsBuilder.combineWithAnd(specList));
+        return targetRepository.exists(combinedSpecification);
     }
 
     @Override

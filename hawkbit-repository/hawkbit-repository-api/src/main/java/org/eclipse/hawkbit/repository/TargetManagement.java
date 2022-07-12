@@ -801,8 +801,8 @@ public interface TargetManagement {
     boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
-     * Verify if a device matches a specific target filter query, do not have a
-     * specific DS already assigned and is compatible with it.
+     * Verify if a target matches a specific target filter query, does not have
+     * a specific DS already assigned and is compatible with it.
      *
      * @param controllerId
      *            of the {@link org.eclipse.hawkbit.repository.model.Target} to
@@ -815,8 +815,8 @@ public interface TargetManagement {
      *            to execute
      * @return true if it matches
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    boolean isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(@NotNull String controllerId, long distributionSetId,
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatible(@NotNull String controllerId, long distributionSetId,
             @NotNull String targetFilterQuery);
 
     /**

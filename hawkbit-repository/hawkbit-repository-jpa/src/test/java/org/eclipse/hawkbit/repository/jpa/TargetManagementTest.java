@@ -48,6 +48,8 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
+import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
@@ -1263,7 +1265,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final String filter = "metadata.key1==target1-value1";
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
                 ds.getId(), filter)).isTrue();
     }
 
@@ -1274,7 +1276,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final String filter = "metadata.key==not_existing";
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
                 ds.getId(), filter)).isFalse();
     }
 
@@ -1288,7 +1290,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds2, target);
         final String filter = "name==*";
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
                 ds1.getId(), filter)).isFalse();
     }
 
@@ -1299,20 +1301,20 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget("target", "target", type.getId());
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
                 ds.getId(), "name==*")).isFalse();
     }
 
     @Test
     @Description("Target matches filter that is invalid.")
     void matchesFilterInvalidFilter() {
-        final Target target = testdataFactory.createTarget();
-        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final String target = testdataFactory.createTarget().getControllerId();
+        final Long ds = testdataFactory.createDistributionSet().getId();
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
-                ds.getId(), "invalid_syntax")).isFalse();
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
-                ds.getId(), "invalid_field==1")).isFalse();
+        assertThatExceptionOfType(RSQLParameterSyntaxException.class).isThrownBy(() -> targetManagement
+                .isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, "invalid_syntax"));
+        assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class).isThrownBy(() -> targetManagement
+                .isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, "invalid_field==1"));
     }
 
     @Test
@@ -1320,17 +1322,17 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     void matchesFilterTargetNotExists() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible("notExisting", ds.getId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible("notExisting", ds.getId(),
                 "name==*")).isFalse();
     }
 
     @Test
     @Description("Target matches filter for not existing DS.")
     void matchesFilterDsNotExists() {
-        final Target target = testdataFactory.createTarget();
+        final String target = testdataFactory.createTarget().getControllerId();
 
-        assertThat(targetManagement.isDeviceMatchingTargetFilterQueryAndNonDSAndCompatible(target.getControllerId(),
-                123, "name==*")).isFalse();
+        assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(
+                () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, 123, "name==*"));
     }
 
     private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {
