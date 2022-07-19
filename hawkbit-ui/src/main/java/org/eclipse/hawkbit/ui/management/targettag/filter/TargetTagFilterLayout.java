@@ -20,9 +20,9 @@ import org.eclipse.hawkbit.ui.common.filterlayout.AbstractFilterLayout;
 import org.eclipse.hawkbit.ui.common.layout.listener.GenericEventListener;
 import org.eclipse.hawkbit.ui.management.ManagementUIState;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
+import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 
 import com.vaadin.ui.ComponentContainer;
-import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 
 /**
  * Target Tag filter layout.
@@ -52,10 +52,10 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
      *            TargetTagFilterLayoutUiState
      */
     public TargetTagFilterLayout(final CommonUiDependencies uiDependencies, final ManagementUIState managementUIState,
-                                 final TargetFilterQueryManagement targetFilterQueryManagement,
-                                 final TargetTypeManagement targetTypeManagement,
-                                 final TargetTagManagement targetTagManagement, final TargetManagement targetManagement,
-                                 final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState, final DistributionSetTypeManagement distributionSetTypeManagement) {
+            final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
+            final TargetManagement targetManagement, final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+            final DistributionSetTypeManagement distributionSetTypeManagement) {
         final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(uiDependencies,
                 targetTagManagement);
 
@@ -65,7 +65,8 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
         this.targetTagFilterHeader = new TargetTagFilterHeader(uiDependencies, targetTagFilterLayoutUiState,
                 targetTagWindowBuilder, targetTypeWindowBuilder);
         this.multipleTargetFilter = new MultipleTargetFilter(uiDependencies, targetFilterQueryManagement,
-                targetTagManagement, targetManagement, targetTagFilterLayoutUiState, targetTagWindowBuilder, targetTypeWindowBuilder, targetTypeManagement);
+                targetTagManagement, targetManagement, targetTagFilterLayoutUiState, targetTagWindowBuilder,
+                targetTypeWindowBuilder, targetTypeManagement);
 
         this.filterTabChangedListener = new GenericEventListener<>(uiDependencies.getEventBus(),
                 EventTopics.TARGET_FILTER_TAB_CHANGED, this::onTargetFilterTabChanged);
@@ -112,5 +113,15 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
     public void unsubscribeListeners() {
         filterTabChangedListener.unsubscribe();
         multipleTargetFilter.unsubscribeListeners();
+    }
+
+    public void maximize() {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void minimize() {
+        // TODO Auto-generated method stub
+
     }
 }
