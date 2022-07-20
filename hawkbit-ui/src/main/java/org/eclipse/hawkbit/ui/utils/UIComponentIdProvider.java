@@ -780,9 +780,14 @@ public final class UIComponentIdProvider {
     public static final String TARGET_ATTRIBUTES_UPDATE = "target.attributes.update";
 
     /**
-     * Id of maximize/minimize icon of table - Software module table.
+     * Id of maximize/minimize icon of table - Target table.
      */
     public static final String TARGET_MAX_MIN_TABLE_ICON = "target.max.min.table.icon";
+
+    /**
+     * Id of maximize/minimize icon of table - Custom filter table.
+     */
+    public static final String CUSTOM_FILTER_MAX_MIN_TABLE_ICON = "custom.filter.max.min.table.icon";
 
     /**
      * Id of Assignment type in Software Module Details.

@@ -60,8 +60,8 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
         this.targetTypeWindowBuilder = targetTypeWindowBuilder;
         this.eventBus = uiDependencies.getEventBus();
 
-        this.resizeHeaderSupport = new ResizeHeaderSupport(i18n, getMaxMinIconId(), this::maximizeTable,
-                this::minimizeTable, this::onLoadIsTableMaximized);
+        this.resizeHeaderSupport = new ResizeHeaderSupport(i18n, UIComponentIdProvider.CUSTOM_FILTER_MAX_MIN_TABLE_ICON,
+                this::maximizeTable, this::minimizeTable, this::onLoadIsTableMaximized);
         addHeaderSupport(resizeHeaderSupport);
 
         buildHeader();
@@ -110,10 +110,6 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Override
     protected void updateHiddenUiState() {
         targetTagFilterLayoutUiState.setHidden(true);
-    }
-
-    private String getMaxMinIconId() {
-        return "bubu";
     }
 
     protected void maximizeTable() {

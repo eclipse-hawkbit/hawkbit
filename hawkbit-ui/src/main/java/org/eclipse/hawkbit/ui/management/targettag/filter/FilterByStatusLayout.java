@@ -168,7 +168,7 @@ public class FilterByStatusLayout extends VerticalLayout {
         targetFilterStatusLabel.addStyleName("target-status-filters-title");
 
         addComponent(targetFilterStatusLabel);
-        setComponentAlignment(targetFilterStatusLabel, Alignment.MIDDLE_CENTER);
+        setComponentAlignment(targetFilterStatusLabel, Alignment.MIDDLE_LEFT);
 
         final HorizontalLayout fiterByStatusLayout = buildFilterByStatusLayout();
 

@@ -338,11 +338,10 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         actionHistoryLayout.setVisible(false);
 
         clearAllWidgetsRatios();
-        targetTagFilterLayout.setWidthFull();
+        targetTagFilterLayout.maximize();
         mainLayout.setExpandRatio(targetTagFilterLayout, 1F);
         mainLayout.setExpandRatio(targetGridLayout, 0.5F);
 
-        targetTagFilterLayout.maximize();
     }
 
     private void clearAllWidgetsRatios() {
@@ -376,14 +375,13 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         }
         actionHistoryLayout.setVisible(true);
 
-        targetTagFilterLayout.setWidth(SPUIDefinitions.FILTER_BY_TYPE_WIDTH, Unit.PIXELS);
+        targetTagFilterLayout.minimize();
         if (distributionGridLayout != null && distributionTagLayout != null) {
             adaptAllWidgetsRatios();
         } else {
             adaptTargetWidgetsRatios();
         }
 
-        targetTagFilterLayout.minimize();
     }
 
     private void maximizeDsGridLayout() {

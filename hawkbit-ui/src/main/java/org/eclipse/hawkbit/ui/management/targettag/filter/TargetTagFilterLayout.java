@@ -23,6 +23,7 @@ import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 
 import com.vaadin.ui.ComponentContainer;
+import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 
 /**
  * Target Tag filter layout.
@@ -116,12 +117,10 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
     }
 
     public void maximize() {
-        // TODO Auto-generated method stub
-
+        setWidthFull();
     }
 
     public void minimize() {
-        // TODO Auto-generated method stub
-
+        setWidth(SPUIDefinitions.FILTER_BY_TYPE_WIDTH, Unit.PIXELS);
     }
 }
