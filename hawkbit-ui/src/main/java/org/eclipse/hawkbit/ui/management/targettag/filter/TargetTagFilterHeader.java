@@ -36,7 +36,6 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
 
-    private final transient UIEventBus eventBus;
     private final transient ResizeHeaderSupport resizeHeaderSupport;
 
     /**
@@ -45,11 +44,14 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
      * @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param targetTagFilterLayoutUiState
-     *            TargetTagFilterLayoutUiState
+     *            {@link TargetTagFilterLayoutUiState}
      * @param targetTagWindowBuilder
+     *            {@link TargetTagWindowBuilder}
      * @param targetTypeWindowBuilder
+     *            {@link TargetTypeWindowBuilder}
      */
-    public TargetTagFilterHeader(final CommonUiDependencies uiDependencies,
+    public TargetTagFilterHeader(
+            final CommonUiDependencies uiDependencies,
             final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
             final TargetTagWindowBuilder targetTagWindowBuilder,
             final TargetTypeWindowBuilder targetTypeWindowBuilder) {
@@ -58,7 +60,6 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
         this.targetTagWindowBuilder = targetTagWindowBuilder;
         this.targetTypeWindowBuilder = targetTypeWindowBuilder;
-        this.eventBus = uiDependencies.getEventBus();
 
         this.resizeHeaderSupport = new ResizeHeaderSupport(i18n, UIComponentIdProvider.CUSTOM_FILTER_MAX_MIN_TABLE_ICON,
                 this::maximizeTable, this::minimizeTable, this::onLoadIsTableMaximized);
