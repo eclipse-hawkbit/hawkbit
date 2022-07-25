@@ -320,6 +320,9 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (distributionTagLayout != null) {
             hideDsTagLayout();
         }
+        if (targetTagFilterLayout != null) {
+            hideTargetTagLayout();
+        }
         actionHistoryLayout.setVisible(false);
 
         clearAllWidgetsRatios();
@@ -338,10 +341,10 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         actionHistoryLayout.setVisible(false);
 
         clearAllWidgetsRatios();
-        targetTagFilterLayout.maximize();
         mainLayout.setExpandRatio(targetTagFilterLayout, 1F);
         mainLayout.setExpandRatio(targetGridLayout, 0.5F);
 
+        targetTagFilterLayout.maximize();
     }
 
     private void clearAllWidgetsRatios() {
@@ -355,14 +358,18 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (distributionTagLayout != null && !managementUIState.getDistributionTagLayoutUiState().isHidden()) {
             showDsTagLayout();
         }
+        if (targetTagFilterLayout != null && !managementUIState.getTargetTagFilterLayoutUiState().isHidden()) {
+            showTargetTagLayout();
+            targetTagFilterLayout.minimize();
+        }
+
         actionHistoryLayout.setVisible(true);
 
-        if (distributionGridLayout != null && distributionTagLayout != null) {
+        if (distributionGridLayout != null && distributionTagLayout != null && targetTagFilterLayout != null) {
             adaptAllWidgetsRatios();
         } else {
             adaptTargetWidgetsRatios();
         }
-
         targetGridLayout.minimize();
     }
 
@@ -375,13 +382,13 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         }
         actionHistoryLayout.setVisible(true);
 
-        targetTagFilterLayout.minimize();
         if (distributionGridLayout != null && distributionTagLayout != null) {
             adaptAllWidgetsRatios();
         } else {
             adaptTargetWidgetsRatios();
         }
 
+        targetTagFilterLayout.minimize();
     }
 
     private void maximizeDsGridLayout() {
