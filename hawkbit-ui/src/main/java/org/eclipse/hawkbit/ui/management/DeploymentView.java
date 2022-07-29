@@ -352,34 +352,25 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
     }
 
     private void minimizeTargetGridLayout() {
-        if (distributionGridLayout != null) {
-            distributionGridLayout.setVisible(true);
-        }
-        if (distributionTagLayout != null && !managementUIState.getDistributionTagLayoutUiState().isHidden()) {
-            showDsTagLayout();
-        }
+        showNonTargetSpecificWidgetsAdaptingRatios();
+
         if (targetTagFilterLayout != null && !managementUIState.getTargetTagFilterLayoutUiState().isHidden()) {
             showTargetTagLayout();
             targetTagFilterLayout.minimize();
         }
 
-        actionHistoryLayout.setVisible(true);
-
-        if (distributionGridLayout != null && distributionTagLayout != null && targetTagFilterLayout != null) {
-            adaptAllWidgetsRatios();
-        } else {
-            adaptTargetWidgetsRatios();
-        }
         targetGridLayout.minimize();
     }
 
-    private void minimizeCustomFilterLayout() {
+    private void showNonTargetSpecificWidgetsAdaptingRatios() {
         if (distributionGridLayout != null) {
             distributionGridLayout.setVisible(true);
         }
+
         if (distributionTagLayout != null && !managementUIState.getDistributionTagLayoutUiState().isHidden()) {
             showDsTagLayout();
         }
+
         actionHistoryLayout.setVisible(true);
 
         if (distributionGridLayout != null && distributionTagLayout != null) {
@@ -387,6 +378,11 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         } else {
             adaptTargetWidgetsRatios();
         }
+
+    }
+
+    private void minimizeCustomFilterLayout() {
+        showNonTargetSpecificWidgetsAdaptingRatios();
 
         targetTagFilterLayout.minimize();
     }
