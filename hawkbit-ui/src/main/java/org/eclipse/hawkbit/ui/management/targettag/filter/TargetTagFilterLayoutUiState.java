@@ -26,12 +26,13 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
     private boolean isOverdueFilterClicked;
     private boolean isCustomFilterTabSelected;
     private boolean isTargetTypeFilterTabSelected;
+    private boolean isMaximized;
 
     public Long getClickedTargetTypeFilterId() {
         return clickedTargetTypeFilterId;
     }
 
-    public void setClickedTargetTypeFilterId(Long clickedTargetTypeFilterId) {
+    public void setClickedTargetTypeFilterId(final Long clickedTargetTypeFilterId) {
         this.clickedTargetTypeFilterId = clickedTargetTypeFilterId;
     }
 
@@ -109,8 +110,16 @@ public class TargetTagFilterLayoutUiState extends TagFilterLayoutUiState {
         return isTargetTypeFilterTabSelected;
     }
 
-    public void setTargetTypeFilterTabSelected(boolean targetTypeFilterTabSelected) {
+    public void setTargetTypeFilterTabSelected(final boolean targetTypeFilterTabSelected) {
         isTargetTypeFilterTabSelected = targetTypeFilterTabSelected;
+    }
+
+    public void setMaximized(final boolean maximized) {
+        isMaximized = maximized;
+    }
+
+    public boolean isMaximized() {
+        return isMaximized;
     }
 
 }
