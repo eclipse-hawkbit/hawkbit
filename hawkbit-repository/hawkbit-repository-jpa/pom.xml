@@ -21,7 +21,6 @@
    
    <properties>
       <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
-      <classgraph.version>4.8.90</classgraph.version>
       <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
    </properties>
    
@@ -129,21 +128,6 @@
                   <groupId>org.eclipse.persistence</groupId>
                   <artifactId>org.eclipse.persistence.jpa</artifactId>
                   <version>${eclipselink.version}</version>
-               </dependency>
-               <dependency>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-core</artifactId>
-                  <version>2.3.0</version>
-               </dependency>
-               <dependency>
-                  <groupId>com.sun.xml.bind</groupId>
-                  <artifactId>jaxb-impl</artifactId>
-                  <version>2.3.0</version>
-               </dependency>
-               <dependency>
-                  <groupId>io.github.classgraph</groupId>
-                  <artifactId>classgraph</artifactId>
-                  <version>${classgraph.version}</version>
                </dependency>
             </dependencies>
          </plugin>
