@@ -455,7 +455,7 @@ public class SecurityManagedConfiguration {
             http.csrf().disable();
             http.anonymous().disable();
 
-            http.regexMatcher(HttpDownloadAuthenticationFilter.REQUEST_ID_REGEX_PATTERN)
+            http.antMatcher("/**/downloadId/**")
                     .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
             http.authorizeRequests().anyRequest().authenticated().and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
@@ -521,7 +521,8 @@ public class SecurityManagedConfiguration {
         @Override
         protected void configure(final HttpSecurity http) throws Exception {
 
-            HttpSecurity httpSec = http.regexMatcher("\\/rest.*|\\/system/admin.*").csrf().disable();
+            HttpSecurity httpSec = http.requestMatchers().antMatchers("/rest/**", "/system/admin/**").and().csrf()
+                    .disable();
 
             if (securityProperties.getCors().isEnabled()) {
                 httpSec = httpSec.cors().and();
@@ -693,9 +694,9 @@ public class SecurityManagedConfiguration {
             // https://vaadin.com/forum#!/thread/3200565.
             HttpSecurity httpSec;
             if (enableOidc) {
-                httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/(UI|oauth2).*$");
+                httpSec = http.requestMatchers().antMatchers("/**/UI/**", "/**/oauth2/**").and();
             } else {
-                httpSec = http.regexMatcher("(?!.*HEARTBEAT)^.*\\/UI.*$");
+                httpSec = http.antMatcher("/**/UI/**");
             }
             // disable as CSRF is handled by Vaadin
             httpSec.csrf().disable();

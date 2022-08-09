@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.common.data.mappers.TargetFilterQueryToProxyTarget
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -44,12 +45,12 @@ public class TargetFilterQueryDetailsDataProvider
     }
 
     @Override
-    protected Page<TargetFilterQuery> loadBackendEntities(final PageRequest pageRequest, final Long dsId) {
+    protected Slice<TargetFilterQuery> loadBackendEntities(final PageRequest pageRequest, final Long dsId) {
         if (dsId == null) {
             return Page.empty(pageRequest);
         }
 
-        return targetFilterQueryManagement.findByAutoAssignDSAndRsql(pageRequest, dsId, null);
+        return targetFilterQueryManagement.findByAutoAssignDistributionSetId(pageRequest, dsId);
     }
 
     @Override
@@ -58,6 +59,6 @@ public class TargetFilterQueryDetailsDataProvider
             return 0L;
         }
 
-        return loadBackendEntities(PageRequest.of(0, 1), dsId).getTotalElements();
+        return targetFilterQueryManagement.countByAutoAssignDistributionSetId(dsId);
     }
 }

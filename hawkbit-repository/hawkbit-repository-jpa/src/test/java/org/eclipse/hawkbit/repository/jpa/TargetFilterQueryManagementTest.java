@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -417,24 +418,31 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
         final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
                 .findByAutoAssignDSAndRsql(PageRequest.of(0, 500), distributionSet.getId(), rsql);
 
+        assertThat(tfqList.getTotalElements()).isEqualTo(expectedFilterQueries.length);
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
     }
 
-    private void verifyExpectedFilterQueriesInList(final Page<TargetFilterQuery> tfqList,
+    private void verifyExpectedFilterQueriesInList(final Slice<TargetFilterQuery> tfqList,
             final TargetFilterQuery... expectedFilterQueries) {
-        assertThat(expectedFilterQueries.length).as("Target filter query count")
-                .isEqualTo((int) tfqList.getTotalElements());
-
         assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactly(
                 Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 
     @Step
     private void verifyFindForAllWithAutoAssignDs(final TargetFilterQuery... expectedFilterQueries) {
-        final Page<TargetFilterQuery> tfqList = targetFilterQueryManagement
+        final Slice<TargetFilterQuery> tfqList = targetFilterQueryManagement
                 .findWithAutoAssignDS(PageRequest.of(0, 500));
 
+        assertThat(tfqList.getNumberOfElements()).isEqualTo(expectedFilterQueries.length);
         verifyExpectedFilterQueriesInList(tfqList, expectedFilterQueries);
+    }
+
+    private void verifyExpectedFilterQueriesInList(final Page<TargetFilterQuery> tfqList,
+            final TargetFilterQuery... expectedFilterQueries) {
+        assertThat(expectedFilterQueries).as("Target filter query count").hasSize((int) tfqList.getTotalElements());
+
+        assertThat(tfqList.map(TargetFilterQuery::getId)).containsExactly(
+                Arrays.stream(expectedFilterQueries).map(TargetFilterQuery::getId).toArray(Long[]::new));
     }
 
     @Test

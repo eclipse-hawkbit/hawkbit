@@ -331,7 +331,7 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all the {@link ActionStatus} entries of the given
-     * {@link Action} and {@link Target}.
+     * {@link Action}.
      *
      * @param pageReq
      *            pagination parameter
@@ -346,6 +346,19 @@ public interface DeploymentManagement {
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, long actionId);
 
     /**
+     * Counts all the {@link ActionStatus} entries of the given {@link Action}.
+     *
+     * @param actionId
+     *            to be filtered on
+     * @return count of {@link ActionStatus} entries
+     *
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActionStatusByAction(long actionId);
+
+    /**
      * Retrieves all messages for an {@link ActionStatus}.
      *
      *
@@ -357,6 +370,19 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, long actionStatusId);
+
+    /**
+     * Counts all messages for an {@link ActionStatus}.
+     *
+     *
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param actionStatusId
+     *            the id of {@link ActionStatus} to count the messages from
+     * @return count of messages by a specific {@link ActionStatus} id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countMessagesByActionStatusId(long actionStatusId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes

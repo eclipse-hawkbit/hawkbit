@@ -175,6 +175,6 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetFilterQueryDeletedEvent(
-                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -83,15 +84,15 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
-        final Page<Rollout> findModulesAll;
+        final Page<Rollout> findRolloutsAll;
         if (rsqlParam != null) {
-            findModulesAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
+            findRolloutsAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
         } else {
-            findModulesAll = this.rolloutManagement.findAll(pageable, false);
+            findRolloutsAll = this.rolloutManagement.findAll(pageable, false);
         }
 
-        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findModulesAll.getContent());
-        return ResponseEntity.ok(new PagedList<>(rest, findModulesAll.getTotalElements()));
+        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findRolloutsAll.getContent());
+        return ResponseEntity.ok(new PagedList<>(rest, findRolloutsAll.getTotalElements()));
     }
 
     @Override
@@ -114,16 +115,15 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             throw new RSQLParameterSyntaxException("Cannot create a Rollout with an empty target query filter!");
         }
         targetFilterQueryManagement.verifyTargetFilterQuerySyntax(targetFilterQuery);
-        final DistributionSet distributionSet = distributionSetManagement.getValidAndComplete(
-                rolloutRequestBody.getDistributionSetId());
+        final DistributionSet distributionSet = distributionSetManagement
+                .getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
 
         final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
 
         Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
-            final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups()
-                    .stream()
+            final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
                     .map(mgmtRolloutGroup -> MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup))
                     .collect(Collectors.toList());
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);

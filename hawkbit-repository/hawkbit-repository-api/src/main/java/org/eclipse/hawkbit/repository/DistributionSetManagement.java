@@ -29,7 +29,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
-import org.eclipse.hawkbit.repository.model.DistributionSetFilter.DistributionSetFilterBuilder;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
@@ -39,6 +38,7 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 /**
@@ -245,6 +245,22 @@ public interface DistributionSetManagement
     Page<DistributionSetMetadata> findMetaDataByDistributionSetId(@NotNull Pageable pageable, long setId);
 
     /**
+     * Counts all meta data by the given distribution set id.
+     *
+     * @param pageable
+     *            the page request to page the result
+     * @param setId
+     *            the distribution set id to retrieve the meta data count from
+     *
+     * @return count of ds metadata
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataByDistributionSetId(long setId);
+
+    /**
      * Finds all meta data by the given distribution set id.
      *
      * @param pageable
@@ -272,7 +288,7 @@ public interface DistributionSetManagement
             @NotNull String rsqlParam);
 
     /**
-     * Finds all {@link DistributionSet}s.
+     * Finds all {@link DistributionSet}s based on completeness.
      *
      * @param pageable
      *            the pagination parameter
@@ -284,7 +300,33 @@ public interface DistributionSetManagement
      * @return all found {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByCompleted(@NotNull Pageable pageable, Boolean complete);
+    Slice<DistributionSet> findByCompleted(@NotNull Pageable pageable, Boolean complete);
+
+    /**
+     * Counts all {@link DistributionSet}s based on completeness.
+     *
+     * @param complete
+     *            to <code>true</code> for counting only completed distribution
+     *            sets or <code>false</code> for only incomplete ones nor
+     *            <code>null</code> to count both.
+     *
+     * @return count of all found {@link DistributionSet}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countByCompleted(Boolean complete);
+
+    /**
+     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
+     *
+     * @param pageable
+     *            page parameter
+     * @param distributionSetFilter
+     *            has details of filters to be applied.
+     * @return the page of found {@link DistributionSet}
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Slice<DistributionSet> findByDistributionSetFilter(@NotNull Pageable pageable,
+            @NotNull DistributionSetFilter distributionSetFilter);
 
     /**
      * Method retrieves all {@link DistributionSet}s from the repository in the
@@ -301,29 +343,27 @@ public interface DistributionSetManagement
      *
      * @param pageable
      *            the page request to page the result set *
-     * @param distributionSetFilterBuilder
-     *            has details of filters to be applied
+     * @param distributionSetFilter
+     *            has details of filters to be applied.
      * @param assignedOrInstalled
      *            the id of the Target to be ordered by
      *
      * @return {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByFilterAndAssignedInstalledDsOrderedByLinkTarget(@NotNull Pageable pageable,
-            @NotNull DistributionSetFilterBuilder distributionSetFilterBuilder, @NotEmpty String assignedOrInstalled);
+    Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(@NotNull Pageable pageable,
+            @NotNull DistributionSetFilter distributionSetFilter, @NotEmpty String assignedOrInstalled);
 
     /**
-     * Retrieves {@link DistributionSet}s by filtering on the given parameters.
+     * Counts all {@link DistributionSet}s in repository based on given filter.
      *
-     * @param pageable
-     *            page parameter
      * @param distributionSetFilter
      *            has details of filters to be applied.
-     * @return the page of found {@link DistributionSet}
+     *
+     * @return count of {@link DistributionSet}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSet> findByDistributionSetFilter(@NotNull Pageable pageable,
-            @NotNull DistributionSetFilter distributionSetFilter);
+    long countByDistributionSetFilter(@NotNull DistributionSetFilter distributionSetFilter);
 
     /**
      * Retrieves {@link DistributionSet}s by filtering on the given parameters.

@@ -8,17 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.management;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.Page.BrowserWindowResizeEvent;
-import com.vaadin.server.Page.BrowserWindowResizeListener;
-import com.vaadin.spring.annotation.SpringView;
-import com.vaadin.spring.annotation.UIScope;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Layout;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
+
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -57,6 +51,14 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.vaadin.spring.events.EventBus.UIEventBus;
+
+import com.vaadin.server.Page;
+import com.vaadin.server.Page.BrowserWindowResizeEvent;
+import com.vaadin.server.Page.BrowserWindowResizeListener;
+import com.vaadin.spring.annotation.SpringView;
+import com.vaadin.spring.annotation.UIScope;
+import com.vaadin.ui.HorizontalLayout;
+import com.vaadin.ui.Layout;
 
 /**
  * Target status and deployment management view
@@ -108,9 +110,9 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
                     targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
                     managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
 
-            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement, deploymentManagement,
-                    uiProperties, targetTagManagement, distributionSetManagement, uiExecutor, configManagement,
-                    targetManagementStateDataSupplier, systemSecurityContext,
+            this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement,
+                    deploymentManagement, uiProperties, targetTagManagement, distributionSetManagement, uiExecutor,
+                    configManagement, targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
                     managementUIState.getDistributionGridLayoutUiState());
@@ -153,6 +155,8 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
                     new EventViewAware(EventView.DEPLOYMENT), layoutVisibilityHandlers);
 
             final Map<EventLayout, ResizeHandler> layoutResizeHandlers = new EnumMap<>(EventLayout.class);
+            layoutResizeHandlers.put(EventLayout.TARGET_TAG_FILTER,
+                    new ResizeHandler(this::maximizeCustomFilterLayout, this::minimizeCustomFilterLayout));
             layoutResizeHandlers.put(EventLayout.TARGET_LIST,
                     new ResizeHandler(this::maximizeTargetGridLayout, this::minimizeTargetGridLayout));
             layoutResizeHandlers.put(EventLayout.DS_LIST,
@@ -272,6 +276,10 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             showTargetTagLayout();
         }
 
+        if (managementUIState.getTargetTagFilterLayoutUiState().isMaximized()) {
+            maximizeCustomFilterLayout();
+        }
+
         if (managementUIState.getTargetGridLayoutUiState().isMaximized()) {
             maximizeTargetGridLayout();
         }
@@ -312,6 +320,9 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (distributionTagLayout != null) {
             hideDsTagLayout();
         }
+        if (targetTagFilterLayout != null) {
+            hideTargetTagLayout();
+        }
         actionHistoryLayout.setVisible(false);
 
         clearAllWidgetsRatios();
@@ -320,17 +331,46 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         targetGridLayout.maximize();
     }
 
+    private void maximizeCustomFilterLayout() {
+        if (distributionGridLayout != null) {
+            distributionGridLayout.setVisible(false);
+        }
+        if (distributionTagLayout != null) {
+            hideDsTagLayout();
+        }
+        actionHistoryLayout.setVisible(false);
+
+        clearAllWidgetsRatios();
+        mainLayout.setExpandRatio(targetTagFilterLayout, 1F);
+        mainLayout.setExpandRatio(targetGridLayout, 0.5F);
+
+        targetTagFilterLayout.maximize();
+    }
+
     private void clearAllWidgetsRatios() {
         mainLayout.iterator().forEachRemaining(layout -> mainLayout.setExpandRatio(layout, 0F));
     }
 
     private void minimizeTargetGridLayout() {
+        showNonTargetSpecificWidgetsAdaptingRatios();
+
+        if (targetTagFilterLayout != null && !managementUIState.getTargetTagFilterLayoutUiState().isHidden()) {
+            showTargetTagLayout();
+            targetTagFilterLayout.minimize();
+        }
+
+        targetGridLayout.minimize();
+    }
+
+    private void showNonTargetSpecificWidgetsAdaptingRatios() {
         if (distributionGridLayout != null) {
             distributionGridLayout.setVisible(true);
         }
+
         if (distributionTagLayout != null && !managementUIState.getDistributionTagLayoutUiState().isHidden()) {
             showDsTagLayout();
         }
+
         actionHistoryLayout.setVisible(true);
 
         if (distributionGridLayout != null && distributionTagLayout != null) {
@@ -339,7 +379,12 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             adaptTargetWidgetsRatios();
         }
 
-        targetGridLayout.minimize();
+    }
+
+    private void minimizeCustomFilterLayout() {
+        showNonTargetSpecificWidgetsAdaptingRatios();
+
+        targetTagFilterLayout.minimize();
     }
 
     private void maximizeDsGridLayout() {

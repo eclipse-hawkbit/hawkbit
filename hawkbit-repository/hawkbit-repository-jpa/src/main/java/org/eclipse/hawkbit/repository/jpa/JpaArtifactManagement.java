@@ -220,6 +220,13 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
     }
 
+    @Override
+    public long countBySoftwareModule(final long swId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+
+        return localArtifactRepository.countBySoftwareModuleId(swId);
+    }
+
     private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
         if (!softwareModuleRepository.existsById(swId)) {
             throw new EntityNotFoundException(SoftwareModule.class, swId);

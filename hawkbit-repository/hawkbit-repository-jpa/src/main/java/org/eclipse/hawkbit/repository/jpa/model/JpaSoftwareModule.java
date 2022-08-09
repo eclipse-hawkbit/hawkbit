@@ -251,7 +251,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
         if (isSoftDeleted(descriptorEvent)) {
             EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(
-                    getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                    getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
@@ -268,7 +268,7 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new SoftwareModuleDeletedEvent(getTenant(),
-                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
 }

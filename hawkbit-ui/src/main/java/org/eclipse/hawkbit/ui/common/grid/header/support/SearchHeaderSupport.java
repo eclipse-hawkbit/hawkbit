@@ -54,7 +54,7 @@ public class SearchHeaderSupport implements HeaderSupport {
      * @param searchResetIconId
      *            Value supplier for search box
      * @param searchStateSupplier
-     *          Search state supplier
+     *            Search state supplier
      * @param searchByCallback
      *            Callback for search event
      */
@@ -70,8 +70,6 @@ public class SearchHeaderSupport implements HeaderSupport {
 
         this.searchField = createSearchField();
         this.searchResetIcon = createSearchResetIcon();
-
-        this.isSearchInputActive = false;
     }
 
     private TextField createSearchField() {
@@ -108,7 +106,6 @@ public class SearchHeaderSupport implements HeaderSupport {
             // Clicked on search icon
             openSearchTextField();
         }
-        isSearchInputActive = !isSearchInputActive;
     }
 
     private void openSearchTextField() {
@@ -118,6 +115,8 @@ public class SearchHeaderSupport implements HeaderSupport {
 
         searchField.setVisible(true);
         searchField.focus();
+
+        isSearchInputActive = true;
     }
 
     private void closeSearchTextField() {
@@ -129,6 +128,22 @@ public class SearchHeaderSupport implements HeaderSupport {
         searchField.setVisible(false);
 
         searchByCallback.accept(null);
+
+        isSearchInputActive = false;
+    }
+
+    /**
+     * Update the search and trigger the callback to refresh the grid.
+     * 
+     * @param searchQuery
+     *            search query
+     */
+    public void setAndTriggerSearch(final String searchQuery) {
+        if (!StringUtils.isEmpty(searchQuery)) {
+            openSearchTextField();
+            searchField.setValue(searchQuery);
+            searchByCallback.accept(searchQuery);
+        }
     }
 
     @Override
@@ -138,7 +153,6 @@ public class SearchHeaderSupport implements HeaderSupport {
         if (!StringUtils.isEmpty(onLoadSearchBoxValue)) {
             openSearchTextField();
             searchField.setValue(onLoadSearchBoxValue);
-            isSearchInputActive = true;
         }
     }
 
@@ -162,7 +176,6 @@ public class SearchHeaderSupport implements HeaderSupport {
     public void resetSearch() {
         if (isSearchInputActive) {
             closeSearchTextField();
-            isSearchInputActive = false;
         }
     }
 

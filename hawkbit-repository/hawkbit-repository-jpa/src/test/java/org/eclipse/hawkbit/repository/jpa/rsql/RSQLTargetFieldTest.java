@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Slice;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -88,8 +88,10 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
 
         assignDistributionSet(ds.getId(), target.getControllerId());
 
-        targetType1 = targetTypeManagement.create(entityFactory.targetType().create().name("Type1").description("Desc. Type1"));
-        targetType2 = targetTypeManagement.create(entityFactory.targetType().create().name("Type2").description("Desc. Type2"));
+        targetType1 = targetTypeManagement
+                .create(entityFactory.targetType().create().name("Type1").description("Desc. Type1"));
+        targetType2 = targetTypeManagement
+                .create(entityFactory.targetType().create().name("Type2").description("Desc. Type2"));
 
         targetManagement.assignType(target.getControllerId(), targetType1.getId());
         targetManagement.assignType(target2.getControllerId(), targetType2.getId());
@@ -317,10 +319,10 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertRSQLQuery(final String rsqlParam, final long expectedTargets) {
-        final Page<Target> findTargetPage = targetManagement.findByRsql(PAGE, rsqlParam);
-        final long countTargetsAll = findTargetPage.getTotalElements();
+        final Slice<Target> findTargetPage = targetManagement.findByRsql(PAGE, rsqlParam);
+        final long countTargetsAll = targetManagement.countByRsql(rsqlParam);
         assertThat(findTargetPage).isNotNull();
-        assertThat(countTargetsAll).isEqualTo(expectedTargets);
+        assertThat(findTargetPage.getNumberOfElements()).isEqualTo(countTargetsAll).isEqualTo(expectedTargets);
     }
 
     private void assertRSQLQueryThrowsException(final String rsqlParam) {

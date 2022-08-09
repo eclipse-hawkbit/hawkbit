@@ -260,6 +260,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new DistributionSetTypeDeletedEvent(
-                getTenant(), getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

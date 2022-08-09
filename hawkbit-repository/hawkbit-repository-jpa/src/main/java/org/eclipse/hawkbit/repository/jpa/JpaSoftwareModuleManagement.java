@@ -58,7 +58,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
 import org.eclipse.hawkbit.repository.jpa.model.SwMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.AssignedSoftwareModule;
@@ -70,7 +69,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -183,7 +181,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         specList.add(SoftwareModuleSpecification.equalType(typeId));
         specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
-        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
     }
 
     private void throwExceptionIfSoftwareModuleTypeDoesNotExist(final Long typeId) {
@@ -192,23 +190,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         }
     }
 
-    private static Slice<SoftwareModule> convertSmPage(final Slice<JpaSoftwareModule> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, 0);
-    }
-
-    private static Page<SoftwareModule> convertSmPage(final Page<JpaSoftwareModule> findAll, final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
-    private static Page<SoftwareModuleMetadata> convertSmMdPage(final Page<JpaSoftwareModuleMetadata> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
-    }
-
     @Override
     public Optional<SoftwareModule> get(final long id) {
-        return softwareModuleRepository.findById(id).map(sm -> (SoftwareModule) sm);
+        return softwareModuleRepository.findById(id).map(SoftwareModule.class::cast);
     }
 
     @Override
@@ -222,15 +206,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private boolean isUnassigned(final Long moduleId) {
         return distributionSetRepository.countByModulesId(moduleId) <= 0;
-    }
-
-    private Slice<JpaSoftwareModule> findByCriteriaAPI(final Pageable pageable,
-            final List<Specification<JpaSoftwareModule>> specList) {
-        return softwareModuleRepository.findAllWithoutCount(SpecificationsBuilder.combineWithAnd(specList), pageable);
-    }
-
-    private Long countSwModuleByCriteriaAPI(final List<Specification<JpaSoftwareModule>> specList) {
-        return softwareModuleRepository.count(SpecificationsBuilder.combineWithAnd(specList));
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
@@ -276,29 +251,18 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Slice<SoftwareModule> findAll(final Pageable pageable) {
-
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(2);
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
+        specList.add(SoftwareModuleSpecification.fetchType());
 
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
-
-        spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaSoftwareModule_.type);
-            }
-            return cb.conjunction();
-        };
-
-        specList.add(spec);
-
-        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
     }
 
     @Override
     public long count() {
         final Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
 
-        return countSwModuleByCriteriaAPI(Arrays.asList(spec));
+        return JpaManagementHelper.countBySpec(softwareModuleRepository, Collections.singletonList(spec));
     }
 
     @Override
@@ -306,7 +270,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
                 SoftwareModuleFields.class, virtualPropertyReplacer, database);
 
-        return convertSmPage(softwareModuleRepository.findAll(spec, pageable), pageable);
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable,
+                Collections.singletonList(spec));
     }
 
     @Override
@@ -318,34 +283,28 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Slice<SoftwareModule> findByTextAndType(final Pageable pageable, final String searchText,
             final Long typeId) {
-
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(4);
-
-        Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
-        specList.add(spec);
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
         if (!StringUtils.isEmpty(searchText)) {
-            spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
-            specList.add(spec);
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
 
         if (null != typeId) {
             throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
-
-            spec = SoftwareModuleSpecification.equalType(typeId);
-            specList.add(spec);
+            specList.add(SoftwareModuleSpecification.equalType(typeId));
         }
 
-        spec = (root, query, cb) -> {
-            if (!query.getResultType().isAssignableFrom(Long.class)) {
-                root.fetch(JpaSoftwareModule_.type);
-            }
-            return cb.conjunction();
-        };
+        specList.add(SoftwareModuleSpecification.fetchType());
 
-        specList.add(spec);
+        return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleRepository, pageable, specList);
+    }
 
-        return convertSmPage(findByCriteriaAPI(pageable, specList), pageable);
+    private Specification<JpaSoftwareModule> buildSmSearchQuerySpec(final String searchText) {
+        final String[] smFilterNameAndVersionEntries = JpaManagementHelper
+                .getFilterNameAndVersionEntries(searchText.trim());
+        return SoftwareModuleSpecification.likeNameAndVersion(smFilterNameAndVersionEntries[0],
+                smFilterNameAndVersionEntries[1]);
     }
 
     @Override
@@ -392,8 +351,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private List<Specification<JpaSoftwareModule>> buildSpecificationList(final String searchText, final Long typeId) {
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(3);
         if (!StringUtils.isEmpty(searchText)) {
-            specList.add(SoftwareModuleSpecification.likeNameOrVersion(searchText));
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
+
         if (typeId != null) {
             throwExceptionIfSoftwareModuleTypeDoesNotExist(typeId);
 
@@ -413,15 +373,13 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public long countByTextAndType(final String searchText, final Long typeId) {
-
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
 
         Specification<JpaSoftwareModule> spec = SoftwareModuleSpecification.isDeletedFalse();
         specList.add(spec);
 
         if (!StringUtils.isEmpty(searchText)) {
-            spec = SoftwareModuleSpecification.likeNameOrVersion(searchText);
-            specList.add(spec);
+            specList.add(buildSmSearchQuerySpec(searchText));
         }
 
         if (null != typeId) {
@@ -431,7 +389,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             specList.add(spec);
         }
 
-        return countSwModuleByCriteriaAPI(specList);
+        return JpaManagementHelper.countBySpec(softwareModuleRepository, specList);
     }
 
     @Override
@@ -506,7 +464,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private static Stream<JpaSoftwareModuleMetadataCreate> createJpaMetadataCreateStream(
             final Collection<SoftwareModuleMetadataCreate> create) {
-        return create.stream().map(c -> (JpaSoftwareModuleMetadataCreate) c);
+        return create.stream().map(JpaSoftwareModuleMetadataCreate.class::cast);
     }
 
     private SoftwareModuleMetadata saveMetadata(final JpaSoftwareModuleMetadataCreate create) {
@@ -522,7 +480,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void assertSoftwareModuleExists(final Long moduleId) {
-        touch(moduleId);
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository, (JpaSoftwareModule) get(moduleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
     }
 
     /**
@@ -555,36 +514,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         update.getValue().ifPresent(metadata::setValue);
         update.isTargetVisible().ifPresent(metadata::setTargetVisible);
 
-        touch(metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
+                (JpaSoftwareModule) metadata.getSoftwareModule());
         return softwareModuleMetadataRepository.save(metadata);
-    }
-
-    /**
-     * Method to get the latest module based on ID after the metadata changes
-     * for that module.
-     *
-     * @param latestModule
-     *            module to touch
-     */
-    private JpaSoftwareModule touch(final SoftwareModule latestModule) {
-        // merge base distribution set so optLockRevision gets updated and audit
-        // log written because modifying metadata is modifying the base
-        // distribution set itself for auditing purposes.
-        final JpaSoftwareModule result = entityManager.merge((JpaSoftwareModule) latestModule);
-        result.setLastModifiedAt(0L);
-
-        return result;
-    }
-
-    /**
-     * Method to get the latest module based on ID after the metadata changes
-     * for that module.
-     *
-     * @param moduleId
-     *            of the module to touch
-     */
-    private JpaSoftwareModule touch(final Long moduleId) {
-        return touch(get(moduleId).orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
     }
 
     @Override
@@ -595,7 +527,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final JpaSoftwareModuleMetadata metadata = (JpaSoftwareModuleMetadata) getMetaDataBySoftwareModuleId(moduleId,
                 key).orElseThrow(() -> new EntityNotFoundException(SoftwareModuleMetadata.class, moduleId, key));
 
-        touch(metadata.getSoftwareModule());
+        JpaManagementHelper.touch(entityManager, softwareModuleRepository,
+                (JpaSoftwareModule) metadata.getSoftwareModule());
         softwareModuleMetadataRepository.deleteById(metadata.getId());
     }
 
@@ -608,35 +541,32 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Override
     public Page<SoftwareModuleMetadata> findMetaDataByRsql(final Pageable pageable, final long softwareModuleId,
             final String rsqlParam) {
-
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        final Specification<JpaSoftwareModuleMetadata> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
-                SoftwareModuleMetadataFields.class, virtualPropertyReplacer, database);
-        return convertSmMdPage(
-                softwareModuleMetadataRepository
-                        .findAll(
-                                (root, query, cb) -> cb.and(
-                                        cb.equal(root.get(JpaSoftwareModuleMetadata_.softwareModule)
-                                                .get(JpaSoftwareModule_.id), softwareModuleId),
-                                        spec.toPredicate(root, query, cb)),
-                                pageable),
-                pageable);
+        final List<Specification<JpaSoftwareModuleMetadata>> specList = Arrays
+                .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleMetadataFields.class,
+                        virtualPropertyReplacer, database), bySmIdSpec(softwareModuleId));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable, specList);
     }
 
-    private static Page<SoftwareModuleMetadata> convertMdPage(final Page<JpaSoftwareModuleMetadata> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(Collections.unmodifiableList(findAll.getContent()), pageable, findAll.getTotalElements());
+    private static Specification<JpaSoftwareModuleMetadata> bySmIdSpec(final long smId) {
+        return (root, query, cb) -> cb
+                .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), smId);
     }
 
     @Override
     public Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(final Pageable pageable, final long swId) {
         throwExceptionIfSoftwareModuleDoesNotExist(swId);
 
-        return convertMdPage(softwareModuleMetadataRepository.findAll(
-                (Specification<JpaSoftwareModuleMetadata>) (root, query, cb) -> cb
-                        .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), swId),
-                pageable), pageable);
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable,
+                Collections.singletonList(bySmIdSpec(swId)));
+    }
+
+    @Override
+    public long countMetaDataBySoftwareModuleId(final long moduleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
+
+        return softwareModuleMetadataRepository.countBySoftwareModuleId(moduleId);
     }
 
     @Override
@@ -644,7 +574,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
         return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(moduleId, key))
-                .map(smmd -> (SoftwareModuleMetadata) smmd);
+                .map(SoftwareModuleMetadata.class::cast);
     }
 
     private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
@@ -669,7 +599,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final long moduleId) {
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
-        return convertMdPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
+        return JpaManagementHelper.convertPage(softwareModuleMetadataRepository.findBySoftwareModuleIdAndTargetVisible(
                 PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), moduleId, true), pageable);
     }
 

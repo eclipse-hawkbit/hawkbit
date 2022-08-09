@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyP
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetTypeRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
-import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -48,7 +47,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     private final TargetTypeManagement targetTypeManagement;
     private final EntityFactory entityFactory;
 
-    public MgmtTargetTypeResource(TargetTypeManagement targetTypeManagement, final EntityFactory entityFactory) {
+    public MgmtTargetTypeResource(final TargetTypeManagement targetTypeManagement, final EntityFactory entityFactory) {
         this.targetTypeManagement = targetTypeManagement;
         this.entityFactory = entityFactory;
     }
@@ -65,14 +64,15 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
         final Sort sorting = PagingUtility.sanitizeTargetTypeSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
-        final Page<TargetType> findTargetTypesAll;
+        final Slice<TargetType> findTargetTypesAll;
         long countTargetTypesAll;
         if (rsqlParam != null) {
-            findTargetTypesAll= targetTypeManagement.findByRsql(pageable, rsqlParam);
+            findTargetTypesAll = targetTypeManagement.findByRsql(pageable, rsqlParam);
+            countTargetTypesAll = ((Page<TargetType>) findTargetTypesAll).getTotalElements();
         } else {
             findTargetTypesAll = targetTypeManagement.findAll(pageable);
+            countTargetTypesAll = targetTypeManagement.count();
         }
-        countTargetTypesAll = findTargetTypesAll.getTotalElements();
 
         final List<MgmtTargetType> rest = MgmtTargetTypeMapper.toListResponse(findTargetTypesAll.getContent());
         return ResponseEntity.ok(new PagedList<>(rest, countTargetTypesAll));
@@ -135,8 +135,8 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
     public ResponseEntity<Void> addCompatibleDistributionSets(@PathVariable("targetTypeId") final Long targetTypeId,
             @RequestBody final List<MgmtDistributionSetTypeAssignment> distributionSetTypeIds) {
 
-        targetTypeManagement.assignCompatibleDistributionSetTypes(targetTypeId,
-                distributionSetTypeIds.stream().map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
+        targetTypeManagement.assignCompatibleDistributionSetTypes(targetTypeId, distributionSetTypeIds.stream()
+                .map(MgmtDistributionSetTypeAssignment::getId).collect(Collectors.toList()));
         return ResponseEntity.ok().build();
     }
 

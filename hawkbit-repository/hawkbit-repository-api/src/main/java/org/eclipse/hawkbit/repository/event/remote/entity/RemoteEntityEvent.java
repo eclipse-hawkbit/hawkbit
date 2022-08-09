@@ -49,7 +49,7 @@ public class RemoteEntityEvent<E extends TenantAwareBaseEntity> extends RemoteId
      *            the origin application id
      */
     protected RemoteEntityEvent(final E baseEntity, final String applicationId) {
-        super(baseEntity.getId(), baseEntity.getTenant(), baseEntity.getClass().getName(), applicationId);
+        super(baseEntity.getId(), baseEntity.getTenant(), baseEntity.getClass(), applicationId);
         this.entity = baseEntity;
     }
 

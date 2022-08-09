@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -56,6 +57,8 @@ import org.eclipse.hawkbit.ui.management.targettag.filter.TargetTagFilterLayoutU
  */
 public class TargetGridLayout extends AbstractGridComponentLayout {
     private static final long serialVersionUID = 1L;
+
+    private static final String TARGET_STATE_PARAM = "target";
 
     private final TargetGridHeader targetGridHeader;
     private final TargetGrid targetGrid;
@@ -107,23 +110,23 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            DistributionGridLayoutUiState
      */
     public TargetGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-                            final TargetTypeManagement targetTypeManagement,
-                            final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
-                            final TargetTagManagement targetTagManagement, final DistributionSetManagement distributionSetManagement,
-                            final Executor uiExecutor, final TenantConfigurationManagement configManagement,
-                            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
-                            final SystemSecurityContext systemSecurityContext,
-                            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-                            final TargetGridLayoutUiState targetGridLayoutUiState,
-                            final TargetBulkUploadUiState targetBulkUploadUiState,
-                            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
-        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement, targetTypeManagement,
-                EventView.DEPLOYMENT);
+            final TargetTypeManagement targetTypeManagement, final DeploymentManagement deploymentManagement,
+            final UiProperties uiProperties, final TargetTagManagement targetTagManagement,
+            final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
+            final TenantConfigurationManagement configManagement,
+            final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
+            final SystemSecurityContext systemSecurityContext,
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+            final TargetGridLayoutUiState targetGridLayoutUiState,
+            final TargetBulkUploadUiState targetBulkUploadUiState,
+            final DistributionGridLayoutUiState distributionGridLayoutUiState) {
+        final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
+                targetTypeManagement, EventView.DEPLOYMENT);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
         final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,
-                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTypeManagement, targetTagManagement,
-                distributionSetManagement, targetBulkUploadUiState);
+                uiProperties, uiExecutor, targetManagement, deploymentManagement, targetTypeManagement,
+                targetTagManagement, distributionSetManagement, targetBulkUploadUiState);
 
         this.targetGridHeader = new TargetGridHeader(uiDependencies, targetWindowBuilder, bulkUploadWindowBuilder,
                 targetTagFilterLayoutUiState, targetGridLayoutUiState, targetBulkUploadUiState);
@@ -138,8 +141,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         this.targetDetails = new TargetDetails(uiDependencies, targetTagManagement, targetManagement,
                 deploymentManagement, targetMetaDataWindowBuilder);
 
-        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(), targetManagement,
-                targetGrid.getFilterSupport());
+        this.countMessageLabel = new TargetCountMessageLabel(uiDependencies.getI18n(),
+                uiDependencies.getUiNotification(), targetManagement, targetGrid.getFilterSupport());
 
         final EventLayoutViewAware layoutViewAware = new EventLayoutViewAware(EventLayout.TARGET_LIST,
                 EventView.DEPLOYMENT);
@@ -211,10 +214,10 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         if (isCustomFilterTabSelected) {
             targetGridHeader.disabledSearchIcon();
         }
-        if(isTargetTypeFilterTabSelected){
+        if (isTargetTypeFilterTabSelected) {
             targetGridHeader.enableSearchIcon();
         }
-        if (isSimpleTypeFilterTabSelected){
+        if (isSimpleTypeFilterTabSelected) {
             targetGridHeader.enableSearchIcon();
         }
 
@@ -244,6 +247,16 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         targetGrid.restoreState();
         countMessageLabel.updateTotalAndFilteredCount();
         countMessageLabel.updatePinningDetails();
+    }
+
+    @Override
+    public void handleStateParameters(final Map<String, String> stateParameters) {
+        if (stateParameters.containsKey(TARGET_STATE_PARAM)) {
+            final String stateTargetParam = stateParameters.get(TARGET_STATE_PARAM);
+            targetGridHeader.updateSearch(stateTargetParam);
+            targetGrid.mapControllerIdToProxyEntity(stateTargetParam)
+                    .ifPresent(t -> targetGrid.getSelectionSupport().select(t));
+        }
     }
 
     @Override

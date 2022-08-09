@@ -37,6 +37,6 @@ public class RolloutChangedEvent extends RemoteIdEvent implements EntityUpdatedE
      */
     public RolloutChangedEvent(final String tenant, final Long entityId) {
         // application id is not needed, because we compose the event ourselves
-        super(entityId, tenant, Rollout.class.getName(), null);
+        super(entityId, tenant, Rollout.class, null);
     }
 }

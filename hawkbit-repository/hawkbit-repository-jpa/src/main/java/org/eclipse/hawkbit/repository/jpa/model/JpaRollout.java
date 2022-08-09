@@ -271,7 +271,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
         if (isSoftDeleted(descriptorEvent)) {
             EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                    getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                    getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
         }
     }
 
@@ -288,7 +288,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Override
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new RolloutDeletedEvent(getTenant(),
-                getId(), getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override

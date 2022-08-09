@@ -79,6 +79,44 @@ public interface TargetManagement {
     /**
      * Count {@link Target}s for all the given filter parameters.
      *
+     * @param status
+     *            find targets having one of these {@link TargetUpdateStatus}s.
+     *            Set to <code>null</code> in case this is not required.
+     * @param overdueState
+     *            find targets that are overdue (targets that did not respond
+     *            during the configured intervals: poll_itvl + overdue_itvl).
+     *            Set to <code>null</code> in case this is not required.
+     * @param searchText
+     *            to find targets having the text anywhere in name or
+     *            description. Set <code>null</code> in case this is not
+     *            required.
+     * @param installedOrAssignedDistributionSetId
+     *            to find targets having the {@link DistributionSet} as
+     *            installed or assigned. Set to <code>null</code> in case this
+     *            is not required.
+     * @param tagNames
+     *            to find targets which are having any one in this tag names.
+     *            Set <code>null</code> in case this is not required.
+     * @param selectTargetWithNoTag
+     *            flag to select targets with no tag assigned
+     *
+     * @return the found number of {@link Target}s
+     *
+     * @throws EntityNotFoundException
+     *             if distribution set with given ID does not exist
+     *
+     * @deprecated this method
+     *             {@link TargetManagement#countByFilters(FilterParams)} should
+     *             be used instead.
+     */
+    @Deprecated
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
+            Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
+
+    /**
+     * Count {@link Target}s for all the given filter parameters.
+     *
      * @param filterParams
      *            the filters to apply; only filters are enabled that have
      *            non-null value; filters are AND-gated
@@ -103,7 +141,8 @@ public interface TargetManagement {
     long countByInstalledDistributionSet(long distId);
 
     /**
-     * Checks if there is already a {@link Target} that has the given distribution set id assigned or installed.
+     * Checks if there is already a {@link Target} that has the given
+     * distribution set Id assigned or installed.
      *
      * @param distId to search for
      * @return <code>true</code> if a {@link Target} exists.
@@ -124,8 +163,8 @@ public interface TargetManagement {
     long countByRsql(@NotEmpty String rsqlParam);
 
     /**
-     * Count all targets for given {@link TargetFilterQuery} and that are compatible
-     * with the passed {@link DistributionSetType}.
+     * Count all targets for given {@link TargetFilterQuery} and that are
+     * compatible with the passed {@link DistributionSetType}.
      *
      * @param rsqlParam
      *            filter definition in RSQL syntax
@@ -144,7 +183,7 @@ public interface TargetManagement {
      *            {@link TargetFilterQuery#getId()}
      * @return the found number of {@link Target}s
      *
-     * @throws  EntityNotFoundException
+     * @throws EntityNotFoundException
      *             if {@link TargetFilterQuery} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -219,9 +258,9 @@ public interface TargetManagement {
     void deleteByControllerID(@NotEmpty String controllerID);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
-     * that don't have the specified distribution set in their action history and
-     * are compatible with the passed {@link DistributionSetType}.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery}
+     * and that don't have the specified distribution set in their action
+     * history and are compatible with the passed {@link DistributionSetType}.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -235,13 +274,13 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNonDSAndCompatible(@NotNull Pageable pageRequest, long distributionSetId,
+    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatible(@NotNull Pageable pageRequest, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
-     * that don't have the specified distribution set in their action history and
-     * are compatible with the passed {@link DistributionSetType}.
+     * Counts all targets for all the given parameter {@link TargetFilterQuery}
+     * and that don't have the specified distribution set in their action
+     * history and are compatible with the passed {@link DistributionSetType}.
      *
      * @param distributionSetId
      *            id of the {@link DistributionSet}
@@ -256,9 +295,9 @@ public interface TargetManagement {
     long countByRsqlAndNonDSAndCompatible(long distributionSetId, @NotNull String rsqlParam);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
-     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
-     * with the passed {@link DistributionSetType}.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -267,27 +306,27 @@ public interface TargetManagement {
      * @param rsqlParam
      *            filter definition in RSQL syntax
      * @param distributionSetType
-     *            type of the {@link DistributionSet} the targets must be compatible
-     *            with
+     *            type of the {@link DistributionSet} the targets must be
+     *            compatible with
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
+    Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
             @NotNull DistributionSetType distributionSetType);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
-     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
-     * with the passed {@link DistributionSetType}.
+     * Counts all targets for all the given parameter {@link TargetFilterQuery}
+     * and that are not assigned to one of the {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
      *
      * @param groups
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
      * @param distributionSetType
-     *            type of the {@link DistributionSet} the targets must be compatible
-     *            with
+     *            type of the {@link DistributionSet} the targets must be
+     *            compatible with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -308,7 +347,7 @@ public interface TargetManagement {
      *             if rollout group with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, long group);
+    Slice<Target> findByInRolloutGroupWithoutAction(@NotNull Pageable pageRequest, long group);
 
     /**
      * retrieves {@link Target}s by the assigned {@link DistributionSet}.
@@ -472,7 +511,7 @@ public interface TargetManagement {
      *             if the RSQL syntax is wrong
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
+    Slice<Target> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
 
     /**
      * Retrieves all target based on {@link TargetFilterQuery}.
@@ -564,8 +603,8 @@ public interface TargetManagement {
     /**
      * Toggles {@linkplain TargetTag} assignment to given {@linkplain Target}s by means
      * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. Only if all {@linkplain Target}s have the tag already assigned
-     * they will be removed instead.
+     * yet assigned, they will be. Only if all of theme have the tag already
+     * assigned they will be removed instead.
      *
      * @param controllerIds to toggle for
      * @param tagName       to toggle
@@ -575,12 +614,11 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);
 
-
     /**
      * Initiates {@link TargetType} assignment to given {@link Target}s. If some
-     * targets in the list have the {@link TargetType} not yet assigned, they will
-     * get assigned. If all targets are already of that type, there will be no
-     * un-assignment.
+     * targets in the list have the {@link TargetType} not yet assigned, they
+     * will get assigned. If all targets are already of that type, there will be
+     * no un-assignment.
      *
      * @param controllerIds
      *            to set the type to
@@ -596,8 +634,8 @@ public interface TargetManagement {
     TargetTypeAssignmentResult assignType(@NotEmpty Collection<String> controllerIds, @NotNull Long typeId);
 
     /**
-     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The type
-     * of the targets will be set to {@code null}
+     * Initiates {@link TargetType} un-assignment to given {@link Target}s. The
+     * type of the targets will be set to {@code null}
      *
      * @param controllerIds
      *            to remove the type from
@@ -746,6 +784,25 @@ public interface TargetManagement {
     boolean existsByControllerId(@NotEmpty String controllerId);
 
     /**
+     * Verify if a target matches a specific target filter query, does not have
+     * a specific DS already assigned and is compatible with it.
+     *
+     * @param controllerId
+     *            of the {@link org.eclipse.hawkbit.repository.model.Target} to
+     *            check
+     * @param distributionSetId
+     *            of the
+     *            {@link org.eclipse.hawkbit.repository.model.DistributionSet}
+     *            to consider
+     * @param targetFilterQuery
+     *            to execute
+     * @return true if it matches
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
+    boolean isTargetMatchingQueryAndDSNotAssignedAndCompatible(@NotNull String controllerId, long distributionSetId,
+            @NotNull String targetFilterQuery);
+
+    /**
      * Creates a list of target meta data entries.
      *
      * @param controllerId
@@ -798,6 +855,20 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<TargetMetadata> findMetaDataByControllerId(@NotNull Pageable pageable, @NotEmpty String controllerId);
+
+    /**
+     * Counts all meta data by the given target id.
+     *
+     * @param controllerId
+     *            the controller id to retrieve the meta data from
+     *
+     * @return count of all meta data entries for a given target id
+     *
+     * @throws EntityNotFoundException
+     *             if target with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataByControllerId(@NotEmpty String controllerId);
 
     /**
      * Finds all metadata by the given target id and query.

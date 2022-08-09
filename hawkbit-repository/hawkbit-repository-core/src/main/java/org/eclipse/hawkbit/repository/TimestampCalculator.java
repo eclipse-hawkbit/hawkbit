@@ -11,7 +11,9 @@ package org.eclipse.hawkbit.repository;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.DurationHelper;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 
@@ -48,10 +50,15 @@ public final class TimestampCalculator {
     }
 
     private static String getRawStringForKey(final String key) {
-        return getTenantConfigurationManagement().getConfigurationValue(key, String.class).getValue();
+        return getSystemSecurityContext().runAsSystem(
+                () -> getTenantConfigurationManagement().getConfigurationValue(key, String.class).getValue());
     }
 
-    public static TenantConfigurationManagement getTenantConfigurationManagement() {
+    private static SystemSecurityContext getSystemSecurityContext() {
+        return SystemSecurityContextHolder.getInstance().getSystemSecurityContext();
+    }
+
+    private static TenantConfigurationManagement getTenantConfigurationManagement() {
         return TenantConfigurationManagementHolder.getInstance().getTenantConfigurationManagement();
     }
 }

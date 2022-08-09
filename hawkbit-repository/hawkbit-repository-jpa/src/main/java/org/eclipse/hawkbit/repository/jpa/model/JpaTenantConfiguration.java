@@ -101,6 +101,6 @@ public class JpaTenantConfiguration extends AbstractJpaTenantAwareBaseEntity
     public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher()
                 .publishEvent(new TenantConfigurationDeletedEvent(getTenant(), getId(), getKey(), getValue(),
-                        getClass().getName(), EventPublisherHolder.getInstance().getApplicationId()));
+                        getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
 }

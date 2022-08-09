@@ -8,10 +8,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+
+import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -32,7 +33,6 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
-import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
@@ -47,14 +47,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
@@ -137,8 +136,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     @Override
-    public Page<TargetFilterQuery> findAll(final Pageable pageable) {
-        return convertPage(targetFilterQueryRepository.findAll(pageable), pageable);
+    public Slice<TargetFilterQuery> findAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable, null);
     }
 
     @Override
@@ -151,70 +150,73 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         return targetFilterQueryRepository.countByAutoAssignDistributionSetId(autoAssignDistributionSetId);
     }
 
-    private static Page<TargetFilterQuery> convertPage(final Page<JpaTargetFilterQuery> findAll,
-            final Pageable pageable) {
-        return new PageImpl<>(new ArrayList<>(findAll.getContent()), pageable, findAll.getTotalElements());
+    @Override
+    public Slice<TargetFilterQuery> findByName(final Pageable pageable, final String name) {
+        if (StringUtils.isEmpty(name)) {
+            return findAll(pageable);
+        }
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
+                Collections.singletonList(TargetFilterQuerySpecification.likeName(name)));
     }
 
     @Override
-    public Page<TargetFilterQuery> findByName(final Pageable pageable, final String name) {
-        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
-        if (!StringUtils.isEmpty(name)) {
-            specList = Collections.singletonList(TargetFilterQuerySpecification.likeName(name));
+    public long countByName(final String name) {
+        if (StringUtils.isEmpty(name)) {
+            return count();
         }
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+
+        return JpaManagementHelper.countBySpec(targetFilterQueryRepository,
+                Collections.singletonList(TargetFilterQuerySpecification.likeName(name)));
     }
 
     @Override
     public Page<TargetFilterQuery> findByRsql(final Pageable pageable, final String rsqlFilter) {
-        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
-        if (!StringUtils.isEmpty(rsqlFilter)) {
-            specList = Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
-                    TargetFilterQueryFields.class, virtualPropertyReplacer, database));
-        }
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+        final List<Specification<JpaTargetFilterQuery>> specList = !StringUtils.isEmpty(rsqlFilter)
+                ? Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
+                        TargetFilterQueryFields.class, virtualPropertyReplacer, database))
+                : Collections.emptyList();
+
+        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, pageable, specList);
     }
 
     @Override
-    public Page<TargetFilterQuery> findByQuery(final Pageable pageable, final String query) {
-        List<Specification<JpaTargetFilterQuery>> specList = Collections.emptyList();
-        if (!StringUtils.isEmpty(query)) {
-            specList = Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query));
-        }
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+    public Slice<TargetFilterQuery> findByQuery(final Pageable pageable, final String query) {
+        final List<Specification<JpaTargetFilterQuery>> specList = !StringUtils.isEmpty(query)
+                ? Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query))
+                : Collections.emptyList();
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable, specList);
+    }
+
+    @Override
+    public Slice<TargetFilterQuery> findByAutoAssignDistributionSetId(@NotNull final Pageable pageable,
+            final long setId) {
+        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
+
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
+                Collections.singletonList(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet)));
     }
 
     @Override
     public Page<TargetFilterQuery> findByAutoAssignDSAndRsql(final Pageable pageable, final long setId,
             final String rsqlFilter) {
-        final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
-
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
+        final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
-
         if (!StringUtils.isEmpty(rsqlFilter)) {
             specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,
                     virtualPropertyReplacer, database));
         }
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
+
+        return JpaManagementHelper.findAllWithCountBySpec(targetFilterQueryRepository, pageable, specList);
     }
 
     @Override
-    public Page<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
-        final List<Specification<JpaTargetFilterQuery>> specList = Collections
-                .singletonList(TargetFilterQuerySpecification.withAutoAssignDS());
-        return convertPage(findTargetFilterQueryByCriteriaAPI(pageable, specList), pageable);
-    }
-
-    private Page<JpaTargetFilterQuery> findTargetFilterQueryByCriteriaAPI(final Pageable pageable,
-            final List<Specification<JpaTargetFilterQuery>> specList) {
-        if (CollectionUtils.isEmpty(specList)) {
-            return targetFilterQueryRepository.findAll(pageable);
-        }
-
-        final Specification<JpaTargetFilterQuery> specs = SpecificationsBuilder.combineWithAnd(specList);
-        return targetFilterQueryRepository.findAll(specs, pageable);
+    public Slice<TargetFilterQuery> findWithAutoAssignDS(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetFilterQueryRepository, pageable,
+                Collections.singletonList(TargetFilterQuerySpecification.withAutoAssignDS()));
     }
 
     @Override

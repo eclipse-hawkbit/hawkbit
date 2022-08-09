@@ -17,8 +17,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAdvancedRolloutGroup;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQueryInfo;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.util.StringUtils;
 
 /**
@@ -55,9 +55,9 @@ public class RolloutGroupToAdvancedDefinitionMapper {
         final String groupTargetFilterQuery = rolloutGroup.getTargetFilterQuery();
         if (!StringUtils.isEmpty(groupTargetFilterQuery)) {
             advancedGroupRow.setTargetFilterQuery(groupTargetFilterQuery);
-            final Page<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
+            final Slice<TargetFilterQuery> filterQueries = targetFilterQueryManagement.findByQuery(PageRequest.of(0, 1),
                     groupTargetFilterQuery);
-            if (filterQueries.getTotalElements() == 1) {
+            if (filterQueries.getNumberOfElements() == 1) {
                 final TargetFilterQuery tfq = filterQueries.getContent().get(0);
                 advancedGroupRow.setTargetFilterQueryInfo(
                         new ProxyTargetFilterQueryInfo(tfq.getId(), tfq.getName(), tfq.getQuery()));
