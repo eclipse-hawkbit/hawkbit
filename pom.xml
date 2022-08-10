@@ -129,6 +129,7 @@
    <properties>
 
       <java.version>11</java.version>
+      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
       <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
       <spring-framework.version>5.2.20.RELEASE</spring-framework.version>
@@ -416,9 +417,7 @@
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>
-                     ${jacoco.agent.ut.arg}
-                  </argLine>
+                  <argLine>-Dfile.encoding=${project.build.sourceEncoding} ${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
@@ -441,7 +440,7 @@
                <configuration>
                   <reuseForks>false</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
+                  <argLine>-Xmx1024m -Dfile.encoding=${project.build.sourceEncoding} ${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
