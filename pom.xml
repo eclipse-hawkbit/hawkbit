@@ -129,7 +129,6 @@
    <properties>
 
       <java.version>11</java.version>
-      <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
       <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
       <spring-framework.version>5.2.20.RELEASE</spring-framework.version>
@@ -157,9 +156,18 @@
       <vaadin.gwt-user.version>2.8.2</vaadin.gwt-user.version>
       <!-- Vaadin versions - END -->
 
+      <!-- ************************ -->
+      <!-- Maven Plugins -->
+      <!-- ************************ -->
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
       <maven.site.plugin.version>3.9.0</maven.site.plugin.version>
+      <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.0.0-M7</maven.failsafe.plugin.version>
+      <!-- ************************ -->
+      <!-- Maven Surefire settings -->
+      <!-- ************************ -->
+      <surefire.forkcount>1</surefire.forkcount>
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.1.6</cron-utils.version>
@@ -200,13 +208,7 @@
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
          ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
       </sonar.coverage.jacoco.xmlReportPaths>
-
       <!-- Sonar - END -->
-
-      <!-- ************************ -->
-      <!-- Maven Surefire settings -->
-      <!-- ************************ -->
-      <surefire.forkcount>1</surefire.forkcount>
    </properties>
 
    <build>
@@ -406,6 +408,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
+               <version>${maven.surefire.plugin.version}</version>
                <configuration>
                   <systemPropertyVariables>
                      <!-- Set output directory according to allure-framework recommendation -->
@@ -417,7 +420,7 @@
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>-Dfile.encoding=${project.build.sourceEncoding} ${jacoco.agent.ut.arg}</argLine>
+                  <argLine>${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
@@ -437,10 +440,11 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-failsafe-plugin</artifactId>
+               <version>${maven.failsafe.plugin.version}</version>
                <configuration>
                   <reuseForks>false</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>-Xmx1024m -Dfile.encoding=${project.build.sourceEncoding} ${jacoco.agent.ut.arg}</argLine>
+                  <argLine>-Xmx1024m ${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
