@@ -34,6 +34,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.StyleGenerator;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.components.grid.HeaderRow;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -134,9 +135,16 @@ public final class GridComponentBuilder {
      *            column ID
      * @return the created column
      */
-    public static Column<ProxyTarget, String> addControllerIdColumn(final Grid<ProxyTarget> grid,
+    public static Column<ProxyTarget, Button> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, ProxyTarget::getControllerId, "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
+        return addComponentColumn(grid, GridComponentBuilder::buildControllerIdLink).setId(columnId)
+                .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
+                .setMinimumWidth(DEFAULT_MIN_WIDTH);
+    }
+
+    private static Button buildControllerIdLink(final ProxyTarget target) {
+        return buildLink(target, "controllerId.link", target.getControllerId(), true, clickEvent -> UI.getCurrent()
+                .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
 
     /**
@@ -173,8 +181,10 @@ public final class GridComponentBuilder {
         final List<Column<E, String>> columns = new ArrayList<>();
         columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, DEFAULT_MIN_WIDTH));
         columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
+        columns.add(
+                addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
+        columns.add(
+                addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
         return columns;
     }
 
