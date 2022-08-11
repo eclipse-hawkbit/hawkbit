@@ -474,12 +474,12 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
 
         DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
                 new DdiResult(DdiResult.FinalResult.valueOf(finished.toUpperCase()), new DdiProgress(2, 5)), Lists.list(message));
-        DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(action.getId(), "20190809T121314", ddiStatus);
-        System.out.println(new ObjectMapper().writeValueAsString(ddiActionFeedback));
+        DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, ddiStatus);
+        System.out.println("Jackson: " + new ObjectMapper().writeValueAsString(ddiActionFeedback));
 
         final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
                 message);
-        System.out.println(feedback);
+        System.out.println("JsonBuilder: " + feedback);
         return mvc.perform(
                 post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                         .content(feedback).contentType(MediaType.APPLICATION_JSON_UTF8));
