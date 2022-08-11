@@ -95,7 +95,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
     }
 
-    private <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
+    protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
 
         createConditionFactory()
                 .until(() -> WithSpringAuthorityRule.runAsPrivileged(() -> callable.call().isPresent()));

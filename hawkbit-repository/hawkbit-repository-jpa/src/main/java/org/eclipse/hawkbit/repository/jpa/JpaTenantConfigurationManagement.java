@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
@@ -177,9 +178,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
      * Asserts that the requested configuration value change is allowed. Throws
      * a {@link TenantConfigurationValueChangeNotAllowedException} otherwise.
      * 
-     * @param configurationKeyName
+     * @param key
      *            The configuration key.
-     * @param tenantConfiguration
+     * @param valueChange
      *            The configuration to be validated.
      * 
      * @throws TenantConfigurationValueChangeNotAllowedException
@@ -188,6 +189,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     private void assertValueChangeIsAllowed(final String key, final JpaTenantConfiguration valueChange) {
         assertMultiAssignmentsValueChange(key, valueChange);
         assertAutoCloseValueChange(key, valueChange);
+        assertBatchAssignmentValueChange(key, valueChange);
     }
 
     @SuppressWarnings("squid:S1172")
@@ -201,9 +203,26 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         }
     }
 
-    private static void assertMultiAssignmentsValueChange(final String key, final JpaTenantConfiguration valueChange) {
+    private void assertMultiAssignmentsValueChange(final String key, final JpaTenantConfiguration valueChange) {
         if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && !Boolean.parseBoolean(valueChange.getValue())) {
             LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", key);
+            throw new TenantConfigurationValueChangeNotAllowedException();
+        }
+        if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue()) &&
+                Boolean.parseBoolean(tenantConfigurationRepository.findByKey(BATCH_ASSIGNMENTS_ENABLED)
+                .getValue())) {
+            LOG.debug("The Multi-Assignments '{}' feature cannot be enabled as it contradicts with " +
+                    "The Batch-Assignments feature, which is already enabled .", key);
+            throw new TenantConfigurationValueChangeNotAllowedException();
+        }
+    }
+
+    private void assertBatchAssignmentValueChange(final String key, final JpaTenantConfiguration valueChange) {
+        if (BATCH_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())
+                && Boolean.parseBoolean(tenantConfigurationRepository.findByKey(MULTI_ASSIGNMENTS_ENABLED)
+                .getValue())) {
+            LOG.debug("The Batch-Assignments '{}' feature cannot be enabled as it contradicts with " +
+                    "The Multi-Assignments feature, which is already enabled .", key);
             throw new TenantConfigurationValueChangeNotAllowedException();
         }
     }

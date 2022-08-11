@@ -9,9 +9,12 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
 import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
 import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.FORCED;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -25,14 +28,18 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import org.assertj.core.api.HamcrestCondition;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -64,6 +71,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
+import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -603,4 +611,70 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
     }
 
+    @Test
+    @Description("Verify payload of batch assignment download and install message.")
+    public void assertBatchAssignmentsDownloadAndInstall() {
+        assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD_AND_INSTALL);
+    }
+
+    @Test
+    @Description("Verify payload of batch assignments download only message.")
+    public void assertBatchAssignmentsDownloadOnly() {
+        assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD);
+    }
+
+    protected void assertBatchAssignmentsMessagePayload(final EventTopic topic) {
+        enableBatchAssignments();
+
+        final List<String> targets = Arrays.asList("batchCtrlID1", "batchCtrlID2", "batchCtrlID3");
+        for (int i = 0; i < targets.size(); i++) {
+            registerAndAssertTargetWithExistingTenant(targets.get(i), i+1);
+        }
+
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(ds);
+
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(ds.getId(), targets,
+                topic == BATCH_DOWNLOAD?DOWNLOAD_ONLY:FORCED);
+
+        waitUntilEventMessagesAreDispatchedToTarget(topic);
+
+        final Message message = replyToListener.getLatestEventMessage(topic);
+        final Map<String, Object> headers = message.getMessageProperties().getHeaders();
+        assertThat(headers).containsEntry("type", EVENT.toString());
+        assertThat(headers).containsEntry("topic",topic.toString());
+
+        final DmfBatchDownloadAndUpdateRequest batchRequest = (DmfBatchDownloadAndUpdateRequest) getDmfClient()
+                .getMessageConverter().fromMessage(message);
+
+        assertThat(batchRequest).isExactlyInstanceOf(DmfBatchDownloadAndUpdateRequest.class);
+        assertDmfBatchDownloadAndUpdateRequest(batchRequest, ds.getModules(), targets);
+    }
+
+    protected void assertDmfBatchDownloadAndUpdateRequest(final DmfBatchDownloadAndUpdateRequest request,
+                                                     final Set<SoftwareModule> softwareModules,
+                                                     final List<String> controllerIds) {
+        assertThat(softwareModules)
+                .is(new HamcrestCondition<>(SoftwareModuleJsonMatcher.containsExactly(request.getSoftwareModules())));
+        request.getSoftwareModules().forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
+                new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
+
+
+        List<Object> tokens = controllerIds.stream().map(controllerId -> {
+            final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+            assertThat(target).isPresent();
+            return target.get().getSecurityToken();
+        }).collect(Collectors.toList());
+
+
+        List<Target> requestTargets = request.getTargets().stream().map(
+                dmfTarget -> waitUntilIsPresent(() -> targetManagement.getByControllerID(dmfTarget.getControllerId()))
+        ).collect(Collectors.toList());
+
+        assertThat(requestTargets).hasSameSizeAs(controllerIds);
+        requestTargets.forEach(requestTarget -> {
+                    assertThat(requestTarget).isNotNull();
+                    assertThat(tokens.contains(requestTarget.getSecurityToken()));
+                });
+    }
 }

@@ -46,6 +46,16 @@ public enum EventTopic {
     /**
      * Topic to send multiple actions to the device.
      */
-    MULTI_ACTION
+    MULTI_ACTION,
+
+    /**
+     * Topic when sending a download only action to multiple devices.
+     */
+    BATCH_DOWNLOAD,
+
+    /**
+     * Topic when sending a download and install action to multiple devices.
+     */
+    BATCH_DOWNLOAD_AND_INSTALL
 
 }
