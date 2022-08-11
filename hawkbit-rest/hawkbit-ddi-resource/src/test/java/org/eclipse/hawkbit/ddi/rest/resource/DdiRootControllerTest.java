@@ -463,7 +463,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             finished = "none";
         }
         if (message == null) {
-            message = RandomStringUtils.randomAlphanumeric(1000);
+            message = "blablub";//RandomStringUtils.randomAlphanumeric(1000);
         }
         final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
                 message);
