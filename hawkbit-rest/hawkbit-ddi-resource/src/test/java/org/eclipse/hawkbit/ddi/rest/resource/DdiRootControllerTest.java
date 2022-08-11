@@ -32,7 +32,13 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -465,8 +471,15 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         if (message == null) {
             message = RandomStringUtils.randomAlphanumeric(1000);
         }
+
+        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
+                new DdiResult(DdiResult.FinalResult.valueOf(finished.toUpperCase()), new DdiProgress(2, 5)), Lists.list(message));
+        DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(action.getId(), "20190809T121314", ddiStatus);
+        System.out.println(new ObjectMapper().writeValueAsString(ddiActionFeedback));
+
         final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
                 message);
+        System.out.println(feedback);
         return mvc.perform(
                 post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                         .content(feedback).contentType(MediaType.APPLICATION_JSON_UTF8));
