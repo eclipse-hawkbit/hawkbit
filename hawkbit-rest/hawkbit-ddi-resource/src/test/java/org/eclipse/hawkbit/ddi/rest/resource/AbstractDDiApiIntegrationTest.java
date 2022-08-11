@@ -106,7 +106,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions postDeploymentFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postDeploymentFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(),
+        return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
                 statusMatcher);
     }
 
@@ -120,7 +120,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions postCancelFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postCancelFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(),
+        return postCancelFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
                 statusMatcher);
     }
 
