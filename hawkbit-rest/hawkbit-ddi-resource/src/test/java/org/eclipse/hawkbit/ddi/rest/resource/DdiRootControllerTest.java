@@ -480,6 +480,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
                 message);
         System.out.println("JsonBuilder: " + feedback);
+        System.out.println("Jackson with JsonBuilder Input: " + new ObjectMapper().writeValueAsString(feedback));
         return mvc.perform(
                 post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                         .content(feedback).contentType(MediaType.APPLICATION_JSON_UTF8));
