@@ -472,18 +472,11 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
             message = RandomStringUtils.randomAlphanumeric(1000);
         }
 
-        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
-                new DdiResult(DdiResult.FinalResult.valueOf(finished.toUpperCase()), new DdiProgress(2, 5)), Lists.list(message));
-        DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(null, ddiStatus);
-        System.out.println("Jackson: " + new ObjectMapper().writeValueAsString(ddiActionFeedback));
-
-        final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), execution, finished,
-                message);
-        System.out.println("JsonBuilder: " + feedback);
-        System.out.println("Jackson with JsonBuilder Input: " + new ObjectMapper().writeValueAsString(feedback));
+        DdiActionFeedback feedback = getDdiActionFeedback(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
+                DdiResult.FinalResult.valueOf(finished.toUpperCase()), message);
         return mvc.perform(
                 post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
-                        .content(feedback).contentType(MediaType.APPLICATION_JSON_UTF8));
+                        .content(objectMapper.writeValueAsString(feedback)).contentType(MediaType.APPLICATION_JSON));
     }
 
     private ResultActions sendDeploymentActionFeedback(final Target target, final Action action, final String execution,

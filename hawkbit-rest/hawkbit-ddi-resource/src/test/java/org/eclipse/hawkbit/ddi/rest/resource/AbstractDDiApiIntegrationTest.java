@@ -19,6 +19,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.assertj.core.util.Lists;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -59,6 +66,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
 
     protected static final int ARTIFACT_SIZE = 5 * 1024;
+    protected static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Convert JSON to a CBOR equivalent.
@@ -232,6 +240,18 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
             return "forced";
         }
         return "attempt";
+    }
+
+    protected DdiActionFeedback getDdiActionFeedback(DdiStatus.ExecutionStatus executionStatus,
+                                                     DdiResult.FinalResult finalResult) {
+        return getDdiActionFeedback(executionStatus, finalResult, RandomStringUtils.randomAlphanumeric(1000));
+    }
+
+    protected DdiActionFeedback getDdiActionFeedback(DdiStatus.ExecutionStatus executionStatus,
+                                                     DdiResult.FinalResult finalResult, String message) {
+        DdiStatus ddiStatus = new DdiStatus(executionStatus,
+                new DdiResult(finalResult, new DdiProgress(2, 5)), Lists.list(message));
+        return new DdiActionFeedback(null, ddiStatus);
     }
 
 }

@@ -681,8 +681,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds.getId(), "1080");
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
-        postDeploymentFeedback("1080", action.getId(),
-                JsonBuilder.deploymentActionInProgressFeedback("AAAA"), status().isBadRequest());
+        final String invalidFeedback = "{\"id\":\"AAAA\",\"status\":{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\",\"progress\":{\"cnt\":2,\"of\":5}},\"details\":\"details\"]}}";
+        postDeploymentFeedback("1080", action.getId(), invalidFeedback, status().isBadRequest());
     }
 
     @Test

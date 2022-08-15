@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -385,7 +387,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds.getId(), target.getControllerId(), actionType));
 
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "success", "Closed"),
+                objectMapper.writeValueAsString(getDdiActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS, "Closed")),
                 status().isOk());
 
         // Run test
@@ -461,10 +463,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding"), status().isOk());
+                objectMapper.writeValueAsString(getDdiActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE)), status().isOk());
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "failure", "Installation failed"),
-                status().isOk());
+                objectMapper.writeValueAsString(getDdiActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, "Installation failed")), status().isOk());
 
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
