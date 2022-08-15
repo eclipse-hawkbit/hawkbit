@@ -22,9 +22,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -177,11 +182,14 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Some feedback"));
+
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
                         + "/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId()).content(
-                        JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed", "Some feedback"))
+                        objectMapper.writeValueAsString(new DdiActionFeedback(cancelAction.getId(), null, ddiStatus)))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -381,11 +389,14 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
 
-        mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
-                + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
-                target.getControllerId(), actionId)
-                        .content(
-                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feedback message"))
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Feedback message"));
+
+        mockMvc.perform(post(
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
+                        + "/{actionId}/feedback",
+                tenantAware.getCurrentTenant(), target.getControllerId(), actionId)
+                        .content(objectMapper.writeValueAsString(new DdiActionFeedback(actionId, null, ddiStatus)))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
