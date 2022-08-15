@@ -46,6 +46,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -184,12 +185,13 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
                 new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Some feedback"));
+        final DdiActionFeedback feedback = new DdiActionFeedback("20220815T121314", ddiStatus);
 
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
                         + "/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId()).content(
-                        objectMapper.writeValueAsString(new DdiActionFeedback(cancelAction.getId(), null, ddiStatus)))
+                        objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -198,7 +200,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID_CANCELED)),
                         requestFields(
                                 optionalRequestFieldWithPath("id")
-                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID)
+                                        .type(JsonFieldType.NUMBER),
+                                optionalRequestFieldWithPath("time")
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
@@ -391,12 +396,15 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
                 new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Feedback message"));
+        final DdiActionFeedback feedback = new DdiActionFeedback("20220815T121314", ddiStatus);
+
+        System.out.println(objectMapper.writeValueAsString(feedback));
 
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
                         + "/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), actionId)
-                        .content(objectMapper.writeValueAsString(new DdiActionFeedback(actionId, null, ddiStatus)))
+                        .content(objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -406,7 +414,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
                         requestFields(
                                 optionalRequestFieldWithPath("id")
-                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID)
+                                        .type(JsonFieldType.NUMBER),
+                                optionalRequestFieldWithPath("time")
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
