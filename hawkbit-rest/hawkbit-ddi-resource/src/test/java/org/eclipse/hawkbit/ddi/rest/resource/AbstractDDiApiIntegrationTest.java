@@ -18,10 +18,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.assertj.core.util.Lists;
 import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
@@ -246,97 +246,84 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected String getJsonRejectedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonRejectedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonDownloadDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonDownloadedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonCanceledCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonCanceledDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonScheduledCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonScheduledDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonResumedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonResumedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonProceedingCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonProceedingDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonClosedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonClosedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE,
-                RandomStringUtils.randomAlphanumeric(1000));
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult) throws JsonProcessingException {
-        return getJsonActionFeedback(executionStatus, finalResult, RandomStringUtils.randomAlphanumeric(1000));
-    }
-
-    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
-            final DdiResult.FinalResult finalResult, final String message) throws JsonProcessingException {
-        final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)),
-                Lists.list(message));
-        return objectMapper.writeValueAsString(new DdiActionFeedback(null, ddiStatus));
+        return getJsonActionFeedback(executionStatus, finalResult,
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
     protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult, final List<String> messages) throws JsonProcessingException {
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)),
                 messages);
-        return objectMapper.writeValueAsString(new DdiActionFeedback(null, ddiStatus));
-    }
-
-    protected String getJsonActionFeedback(final Long id, final DdiStatus.ExecutionStatus executionStatus,
-            final DdiResult.FinalResult finalResult, final String message) throws JsonProcessingException {
-        final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)),
-                Lists.list(message));
-        return objectMapper.writeValueAsString(new DdiActionFeedback(id, null, ddiStatus));
+        return objectMapper.writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
     }
 }

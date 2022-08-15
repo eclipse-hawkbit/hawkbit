@@ -550,7 +550,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent().get(0);
 
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(),
-                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE, "Error message"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE,
+                        Collections.singletonList("Error message")),
                 status().isOk());
 
         findTargetAndAssertUpdateStatus(Optional.empty(), TargetUpdateStatus.ERROR, 0, Optional.empty());
@@ -644,8 +645,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // action exists but is not assigned to this target
-        postDeploymentFeedback("4713", updateAction.getId(), getJsonActionFeedback(updateAction.getId(),
-                DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE, ""), status().isNotFound());
+        postDeploymentFeedback("4713", updateAction.getId(), getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING,
+                DdiResult.FinalResult.NONE, Collections.singletonList("")), status().isNotFound());
 
         // not allowed methods
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(),
@@ -697,7 +698,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null,
                 Collections.singletonList("test"));
         final String missingResultInFeedback = objectMapper
-                .writeValueAsString(new DdiActionFeedback(action.getId(), null, ddiStatus));
+                .writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
         postDeploymentFeedback("1080", action.getId(), missingResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
                 .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
@@ -722,7 +723,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, new DdiResult(null, null),
                 Collections.singletonList("test"));
         final String missingFinishedResultInFeedback = objectMapper
-                .writeValueAsString(new DdiActionFeedback(action.getId(), "20140511T121314", ddiStatus));
+                .writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
 
         postDeploymentFeedback("1080", action.getId(), missingFinishedResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))

@@ -469,7 +469,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         }
 
         final String feedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.valueOf(execution.toUpperCase()),
-                DdiResult.FinalResult.valueOf(finished.toUpperCase()), message);
+                DdiResult.FinalResult.valueOf(finished.toUpperCase()), Collections.singletonList(message));
         return mvc.perform(
                 post(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(), target.getControllerId(), action.getId())
                         .content(feedback).contentType(MediaType.APPLICATION_JSON));
