@@ -109,7 +109,7 @@ public interface TargetManagement {
      *             {@link TargetManagement#countByFilters(FilterParams)} should
      *             be used instead.
      */
-    @Deprecated
+    @Deprecated(since = "0.3.0M8")
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByFilters(Collection<TargetUpdateStatus> status, Boolean overdueState, String searchText,
             Long installedOrAssignedDistributionSetId, Boolean selectTargetWithNoTag, String... tagNames);
