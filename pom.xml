@@ -161,9 +161,10 @@
       <!-- ************************ -->
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
-      <maven.site.plugin.version>3.9.0</maven.site.plugin.version>
+      <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
       <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
       <maven.failsafe.plugin.version>3.0.0-M7</maven.failsafe.plugin.version>
+      <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
       <!-- ************************ -->
       <!-- Maven Surefire settings -->
       <!-- ************************ -->
@@ -229,6 +230,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
+            <version>${maven.enforcer.plugin.version}</version>
             <executions>
                <execution>
                   <!-- Make sure that only non-snapshot versions are used
