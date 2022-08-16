@@ -420,14 +420,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final String... tagNames) {
-        return countByFilters(new FilterParams(status, overdueState, searchText, installedOrAssignedDistributionSetId,
-                selectTargetWithNoTag, tagNames));
-    }
-
-    @Override
     public long countByFilters(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
         return JpaManagementHelper.countBySpec(targetRepository, specList);
