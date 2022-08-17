@@ -208,12 +208,13 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             LOG.debug("The Multi-Assignments '{}' feature cannot be disabled.", key);
             throw new TenantConfigurationValueChangeNotAllowedException();
         }
-        if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue()) &&
-                Boolean.parseBoolean(tenantConfigurationRepository.findByKey(BATCH_ASSIGNMENTS_ENABLED)
-                .getValue())) {
-            LOG.debug("The Multi-Assignments '{}' feature cannot be enabled as it contradicts with " +
-                    "The Batch-Assignments feature, which is already enabled .", key);
-            throw new TenantConfigurationValueChangeNotAllowedException();
+        if (MULTI_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())) {
+            JpaTenantConfiguration batchConfig = tenantConfigurationRepository.findByKey(BATCH_ASSIGNMENTS_ENABLED);
+            if (batchConfig!=null && Boolean.parseBoolean(batchConfig.getValue())) {
+                LOG.debug("The Multi-Assignments '{}' feature cannot be enabled as it contradicts with " +
+                        "The Batch-Assignments feature, which is already enabled .", key);
+                throw new TenantConfigurationValueChangeNotAllowedException();
+            }
         }
     }
 
