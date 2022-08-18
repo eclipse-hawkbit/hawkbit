@@ -219,12 +219,13 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     private void assertBatchAssignmentValueChange(final String key, final JpaTenantConfiguration valueChange) {
-        if (BATCH_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())
-                && Boolean.parseBoolean(tenantConfigurationRepository.findByKey(MULTI_ASSIGNMENTS_ENABLED)
-                .getValue())) {
-            LOG.debug("The Batch-Assignments '{}' feature cannot be enabled as it contradicts with " +
-                    "The Multi-Assignments feature, which is already enabled .", key);
-            throw new TenantConfigurationValueChangeNotAllowedException();
+        if (BATCH_ASSIGNMENTS_ENABLED.equals(key) && Boolean.parseBoolean(valueChange.getValue())) {
+            JpaTenantConfiguration multiConfig = tenantConfigurationRepository.findByKey(MULTI_ASSIGNMENTS_ENABLED);
+            if (multiConfig != null && Boolean.parseBoolean(multiConfig.getValue())) {
+                LOG.debug("The Batch-Assignments '{}' feature cannot be enabled as it contradicts with " +
+                        "The Multi-Assignments feature, which is already enabled .", key);
+                throw new TenantConfigurationValueChangeNotAllowedException();
+            }
         }
     }
 
