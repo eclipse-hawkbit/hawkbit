@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -17,7 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -144,19 +146,22 @@ public abstract class AbstractDsAssignmentStrategy {
                 .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetNotRequiredMigrationStep(
                         targetsIds, Action.Status.CANCELING);
 
-        return activeActions.stream().map(action -> {
+        final List<Long> targetIds = activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
-                    RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
+                  RepositoryConstants.SERVER_MESSAGE_PREFIX + "cancel obsolete action due to new update"));
             actionRepository.save(action);
-
-            cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
 
             return action.getTarget().getId();
         }).collect(Collectors.toList());
 
+        if (!activeActions.isEmpty()) {
+            cancelAssignDistributionSetEvent(Collections.unmodifiableList(activeActions));
+        }
+
+        return targetIds;
     }
 
     /**
@@ -196,9 +201,19 @@ public abstract class AbstractDsAssignmentStrategy {
      * @param actionId
      *            the action id of the assignment
      */
-    void cancelAssignDistributionSetEvent(final Target target, final Long actionId) {
+    void cancelAssignDistributionSetEvent(final Action action) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
+              new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
+    }
+
+    void cancelAssignDistributionSetEvent(final List<Action> actions) {
+        if (actions.isEmpty()) {
+            return;
+        }
+        final String tenant = actions.get(0).getTenant();
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(tenant,
+                      actions, eventPublisherHolder.getApplicationId())));
     }
 
     JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,

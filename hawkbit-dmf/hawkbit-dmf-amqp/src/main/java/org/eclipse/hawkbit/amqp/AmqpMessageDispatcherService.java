@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -46,7 +45,7 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -304,16 +303,15 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final Optional<Target> eventEntity = cancelEvent.getEntity();
-        if (eventEntity.isPresent()) {
-            final Target target = eventEntity.get();
-            sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), cancelEvent.getActionId(),
-                    target.getAddress());
-        } else {
-            LOG.warn(
-                    "Cannot process the received CancelTargetAssignmentEvent with action ID {} because the referenced target with ID {} does no longer exist.",
-                    cancelEvent.getActionId(), cancelEvent.getEntityId());
-        }
+        final List<Target> eventTargets = targetManagement.getByControllerID(cancelEvent.getActions().keySet());
+
+        eventTargets.forEach(target -> {
+            cancelEvent.getActionPropertiesForController(target.getControllerId()).map(ActionProperties::getId)
+                    .ifPresent(actionId -> {
+                        sendCancelMessageToTarget(cancelEvent.getTenant(), target.getControllerId(), actionId,
+                                target.getAddress());
+                    });
+        });
     }
 
     /**

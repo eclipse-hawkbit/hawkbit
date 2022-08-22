@@ -146,7 +146,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         if (isMultiAssignmentsEnabled()) {
             sendMultiActionCancelEvent(action);
         } else {
-            cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
+            cancelAssignDistributionSetEvent(action);
         }
     }
 

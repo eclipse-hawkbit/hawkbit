@@ -44,7 +44,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;

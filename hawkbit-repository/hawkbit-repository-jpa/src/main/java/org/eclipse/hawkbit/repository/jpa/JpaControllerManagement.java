@@ -50,7 +50,7 @@ import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -1041,7 +1041,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELING, System.currentTimeMillis(),
                     "manual cancelation requested"));
             final Action saveAction = actionRepository.save(action);
-            cancelAssignDistributionSetEvent((JpaTarget) action.getTarget(), action.getId());
+            cancelAssignDistributionSetEvent(action);
 
             return saveAction;
         } else {
@@ -1074,9 +1074,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
     }
 
-    private void cancelAssignDistributionSetEvent(final JpaTarget target, final Long actionId) {
+    private void cancelAssignDistributionSetEvent(final Action action) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new CancelTargetAssignmentEvent(target, actionId, eventPublisherHolder.getApplicationId())));
+                new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
     }
 
     // for testing
