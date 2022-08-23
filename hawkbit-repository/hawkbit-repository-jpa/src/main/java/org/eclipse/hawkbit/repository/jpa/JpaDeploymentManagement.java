@@ -580,13 +580,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             if (rolloutGroupActions.getContent().isEmpty()) {
                 return 0L;
             }
-
-            final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
-                    .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
-                    .collect(Collectors.toList());
-
-            final List<Action> newTargetAssignments = startScheduledActionsIfNoCancelationHasToBeHandledFirst(
-                    pendingTargetAssignments);
+            
+            final List<Action> newTargetAssignments = handleTargetAssignments(rolloutGroupActions);
 
             if (!newTargetAssignments.isEmpty()) {
                 onlineDsAssignmentStrategy.sendDeploymentEvents(distributionSetId, newTargetAssignments);
@@ -594,6 +589,18 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
             return rolloutGroupActions.getTotalElements();
         });
+    }
+    
+    private List<Action> handleTargetAssignments(final Page<Action> rolloutGroupActions) {
+        // Close actions already assigned and collect pending assignments
+        final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
+                .map(JpaAction.class::cast).map(this::closeActionIfSetWasAlreadyAssigned).filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (pendingTargetAssignments.isEmpty()) {
+            return new ArrayList<>(pendingTargetAssignments);
+        }
+        // check if old actions needs to be canceled first
+        return startScheduledActionsAndHandleOpenCancellationFirst(pendingTargetAssignments);
     }
 
     private Page<Action> findActionsByRolloutAndRolloutGroupParent(final Long rolloutId,
@@ -632,33 +639,23 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return action;
     }
 
-    private List<Action> startScheduledActionsIfNoCancelationHasToBeHandledFirst(final List<JpaAction> actions) {
-        // check if we need to override running update actions
-        final List<Long> overrideObsoleteUpdateActions;
-
-        if (isMultiAssignmentsEnabled()) {
-            overrideObsoleteUpdateActions = Collections.emptyList();
-        } else {
-            final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId)
-                    .collect(Collectors.toList());
-            if (isActionsAutocloseEnabled()) {
-                overrideObsoleteUpdateActions = Collections.emptyList();
-                onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetIds);
-            } else {
-                overrideObsoleteUpdateActions = onlineDsAssignmentStrategy.overrideObsoleteUpdateActions(targetIds);
-            }
+    private List<Action> startScheduledActionsAndHandleOpenCancellationFirst(final List<JpaAction> actions) {
+        if (!isMultiAssignmentsEnabled()) {
+            closeOrCancelOpenDeviceActions(actions);
         }
-
         final List<JpaAction> savedActions = activateActions(actions);
-
         setAssignmentOnTargets(savedActions);
+        return new ArrayList<>(savedActions);
+    }
 
-        // in case we canceled an action before for this target, then don't fire
-        // assignment event //TODO WHY?
-        return savedActions.stream()
-                .filter(savedAction -> overrideObsoleteUpdateActions.contains(savedAction.getTarget().getId()))
-                .collect(Collectors.toList());// TODO WHY? WHO IS SENDING THE ASSIGNMENT EVENT INSTEAD
-        // return new ArrayList<>(savedActions);
+    private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions){
+        final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId)
+              .collect(Collectors.toList());
+        if (isActionsAutocloseEnabled()) {
+            onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetIds);
+        } else {
+            onlineDsAssignmentStrategy.overrideObsoleteUpdateActions(targetIds);
+        }
     }
 
     private List<JpaAction> activateActions(final List<JpaAction> actions){
