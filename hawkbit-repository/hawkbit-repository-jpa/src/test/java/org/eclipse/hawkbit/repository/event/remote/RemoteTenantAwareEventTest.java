@@ -109,8 +109,8 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final Action action = actionRepository.save(generateAction);
 
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(
-              action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId(),
-              action.isMaintenanceWindowAvailable());
+                action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId(),
+                action.isMaintenanceWindowAvailable());
 
         final TargetAssignDistributionSetEvent remoteEventProtoStuff = createProtoStuffEvent(assignmentEvent);
         assertTargetAssignDistributionSetEvent(action, remoteEventProtoStuff);
