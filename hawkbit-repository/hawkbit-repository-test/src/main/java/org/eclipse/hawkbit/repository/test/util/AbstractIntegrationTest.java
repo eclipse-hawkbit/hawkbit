@@ -469,4 +469,8 @@ public abstract class AbstractIntegrationTest {
     protected void enableBatchAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
     }
+
+    protected void disableBatchAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
+    }
 }

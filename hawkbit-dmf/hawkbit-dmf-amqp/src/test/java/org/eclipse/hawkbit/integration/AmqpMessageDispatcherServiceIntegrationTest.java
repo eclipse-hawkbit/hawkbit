@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD;
 import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
 import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
@@ -60,6 +61,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -74,6 +76,8 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
@@ -658,8 +662,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet ds = testdataFactory.createDistributionSet();
         testdataFactory.addSoftwareModuleMetadata(ds);
 
-        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(ds.getId(), targets,
-                topic == BATCH_DOWNLOAD?DOWNLOAD_ONLY:FORCED);
+        assignDistributionSet(ds.getId(), targets, topic == BATCH_DOWNLOAD?DOWNLOAD_ONLY:FORCED);
 
         waitUntilEventMessagesAreDispatchedToTarget(topic);
 

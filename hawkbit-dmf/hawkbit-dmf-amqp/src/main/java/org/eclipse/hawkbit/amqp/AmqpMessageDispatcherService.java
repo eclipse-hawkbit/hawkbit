@@ -523,18 +523,22 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest();
         batchRequest.setTimestamp(System.currentTimeMillis());
-        batchRequest.setTargets(dmfTargets);
+        dmfTargets.forEach(batchRequest::addTarget);
 
+        //due to the fact that all targets in a batch use the same set of software modules we don't generate
+        // target-specific urls
+        Target firstTarget = targets.get(0);
         if (modules != null) {
             modules.entrySet().forEach(entry ->
-                    batchRequest.addSoftwareModule(convertToAmqpSoftwareModule(targets.get(0), entry)));
+                    batchRequest.addSoftwareModule(convertToAmqpSoftwareModule(firstTarget, entry)));
         }
 
-        Optional<ActionProperties> first = actions.values().stream().findFirst();
-
+        // we use only the first action when constructing message as Tenant and action type are the same
+        // since all actions have the same trigger
+        final ActionProperties firstAction = actions.values().iterator().next();
         final Message message = getMessageConverter().toMessage(batchRequest,
-                    createMessagePropertiesBatch(first.get().getTenant(), getBatchEventTopicForAction(first.get())));
-            amqpSenderService.sendMessage(message, targets.get(0).getAddress());
+                    createMessagePropertiesBatch(firstAction.getTenant(), getBatchEventTopicForAction(firstAction)));
+            amqpSenderService.sendMessage(message, firstTarget.getAddress());
     }
 
     protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
