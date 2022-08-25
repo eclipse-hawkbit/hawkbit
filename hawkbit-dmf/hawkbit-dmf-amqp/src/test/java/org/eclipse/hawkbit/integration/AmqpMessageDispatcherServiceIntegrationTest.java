@@ -623,7 +623,31 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD);
     }
 
-    protected void assertBatchAssignmentsMessagePayload(final EventTopic topic) {
+    @Test
+    @Description("Verify that batch and multi-assignments can't be activated at the same time.")
+    void assertBatchAndMultiAssignmentsNotCompatible() {
+        enableBatchAssignments();
+        assertThatExceptionOfType(TenantConfigurationValueChangeNotAllowedException.class)
+                .isThrownBy(() -> enableMultiAssignments());
+        disableBatchAssignments();
+
+        enableMultiAssignments();
+        assertThatExceptionOfType(TenantConfigurationValueChangeNotAllowedException.class)
+                .isThrownBy(() -> enableBatchAssignments());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = { "BATCH_DOWNLOAD_AND_INSTALL", "BATCH_DOWNLOAD" })
+    @Description("Verify payload of batch assignments.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 3),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void assertBatchAssignmentsMessagePayload(final EventTopic topic) {
         enableBatchAssignments();
 
         final List<String> targets = Arrays.asList("batchCtrlID1", "batchCtrlID2", "batchCtrlID3");
