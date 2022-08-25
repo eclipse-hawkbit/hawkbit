@@ -65,10 +65,25 @@ public class DmfBatchDownloadAndUpdateRequest {
     }
 
     public List<DmfTarget> getTargets() {
-        return targets;
+        if (targets == null) {
+            return Collections.emptyList();
+        }
+
+        return Collections.unmodifiableList(targets);
     }
 
-    public void setTargets(final List<DmfTarget> targets) {
-        this.targets = targets;
+
+    /**
+     * Add a Target.
+     *
+     * @param target
+     *            the target
+     */
+    public void addTarget(final DmfTarget target) {
+        if (targets == null) {
+            targets = new ArrayList<>();
+        }
+
+        targets.add(target);
     }
 }
