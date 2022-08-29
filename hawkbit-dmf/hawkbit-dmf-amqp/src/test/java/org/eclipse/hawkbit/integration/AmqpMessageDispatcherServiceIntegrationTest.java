@@ -29,18 +29,16 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
-import org.assertj.core.api.HamcrestCondition;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
-import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
-import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
+import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -73,7 +71,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -681,11 +678,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
     protected void assertDmfBatchDownloadAndUpdateRequest(final DmfBatchDownloadAndUpdateRequest request,
                                                      final Set<SoftwareModule> softwareModules,
                                                      final List<String> controllerIds) {
-        assertThat(softwareModules)
-                .is(new HamcrestCondition<>(SoftwareModuleJsonMatcher.containsExactly(request.getSoftwareModules())));
-        request.getSoftwareModules().forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
-                new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
-
+        assertSoftwareModules(softwareModules, request.getSoftwareModules());
 
         List<Object> tokens = controllerIds.stream().map(controllerId -> {
             final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
@@ -694,14 +687,12 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         }).collect(Collectors.toList());
 
 
-        List<Target> requestTargets = request.getTargets().stream().map(
-                dmfTarget -> waitUntilIsPresent(() -> targetManagement.getByControllerID(dmfTarget.getControllerId()))
-        ).collect(Collectors.toList());
+        List<DmfTarget> requestTargets = request.getTargets();
 
         assertThat(requestTargets).hasSameSizeAs(controllerIds);
         requestTargets.forEach(requestTarget -> {
                     assertThat(requestTarget).isNotNull();
-                    assertThat(tokens.contains(requestTarget.getSecurityToken()));
+                    assertThat(tokens.contains(requestTarget.getTargetSecurityToken()));
                 });
     }
 }

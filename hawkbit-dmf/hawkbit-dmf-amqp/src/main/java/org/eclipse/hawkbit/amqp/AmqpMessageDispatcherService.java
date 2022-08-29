@@ -523,7 +523,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
         final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest();
         batchRequest.setTimestamp(System.currentTimeMillis());
-        dmfTargets.forEach(batchRequest::addTarget);
+        batchRequest.addTargets(dmfTargets);
 
         //due to the fact that all targets in a batch use the same set of software modules we don't generate
         // target-specific urls

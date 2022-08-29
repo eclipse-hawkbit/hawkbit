@@ -86,4 +86,17 @@ public class DmfBatchDownloadAndUpdateRequest {
 
         targets.add(target);
     }
+
+    /**
+     * Add multiple Targets.
+     *
+     * @param targets
+     *            the target
+     */
+    public void addTargets(final List<DmfTarget> targets) {
+        if (this.targets == null) {
+            this.targets = new ArrayList<>();
+        }
+        this.targets.addAll(targets);
+    }
 }
