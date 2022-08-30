@@ -147,6 +147,11 @@ public class TenantConfigurationProperties {
          */
         public static final String MULTI_ASSIGNMENTS_ENABLED = "multi.assignments.enabled";
 
+        /**
+         * Switch to enable/disable the batch-assignment feature.
+         */
+        public static final String BATCH_ASSIGNMENTS_ENABLED = "batch.assignments.enabled";
+
         private String keyName;
         private String defaultValue = "";
         private Class<?> dataType = String.class;

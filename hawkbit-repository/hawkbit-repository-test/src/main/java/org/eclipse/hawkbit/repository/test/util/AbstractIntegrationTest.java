@@ -465,4 +465,12 @@ public abstract class AbstractIntegrationTest {
     protected static Comparator<Target> controllerIdComparator() {
         return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
     }
+
+    protected void enableBatchAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
+    }
+
+    protected void disableBatchAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
+    }
 }
