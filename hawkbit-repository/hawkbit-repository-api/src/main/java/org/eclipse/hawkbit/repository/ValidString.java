@@ -16,9 +16,6 @@ import java.lang.annotation.Target;
 import javax.validation.Constraint;
 import javax.validation.Payload;
 
-import org.hibernate.validator.constraints.SafeHtml;
-import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
-
 /**
  * Constraint for strings submitted into the repository.
  *
@@ -27,7 +24,7 @@ import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR,
         ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
-@SafeHtml(whitelistType = WhiteListType.NONE)
+// @SafeHtml(whitelistType = WhiteListType.NONE)
 public @interface ValidString {
 
     String message() default "Invalid characters in string";
