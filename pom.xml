@@ -163,7 +163,7 @@
 
       <!-- Misc libraries versions - START -->      
       <cron-utils.version>9.1.6</cron-utils.version>
-      <jsoup.version>1.14.2</jsoup.version>
+      <jsoup.version>1.15.3</jsoup.version>
       <allure.version>2.13.6</allure.version>
       <eclipselink.version>2.7.9</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
