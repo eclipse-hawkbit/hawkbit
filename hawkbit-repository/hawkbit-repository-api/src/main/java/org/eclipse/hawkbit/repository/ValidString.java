@@ -20,11 +20,10 @@ import javax.validation.Payload;
  * Constraint for strings submitted into the repository.
  *
  */
-@Constraint(validatedBy = {})
+@Constraint(validatedBy = ValidStringValidator.class)
 @Target({ ElementType.METHOD, ElementType.FIELD, ElementType.ANNOTATION_TYPE, ElementType.CONSTRUCTOR,
         ElementType.PARAMETER, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
-// @SafeHtml(whitelistType = WhiteListType.NONE)
 public @interface ValidString {
 
     String message() default "Invalid characters in string";
