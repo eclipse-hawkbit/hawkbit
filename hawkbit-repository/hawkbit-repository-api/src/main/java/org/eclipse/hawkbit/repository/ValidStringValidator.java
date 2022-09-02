@@ -12,15 +12,33 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.parser.Parser;
+import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
 
 import com.cronutils.utils.StringUtils;
 
+/**
+ * Safe html constraint validator for strings submitted into the repository.
+ *
+ */
 public class ValidStringValidator implements ConstraintValidator<ValidString, String> {
+
+    private final Cleaner cleaner = new Cleaner(Safelist.none());
 
     @Override
     public boolean isValid(final String value, final ConstraintValidatorContext context) {
-        return StringUtils.isEmpty(value) || Jsoup.isValid(value, Safelist.none());
+        return StringUtils.isEmpty(value) || cleaner.isValid(stringToDocument(value));
+    }
+
+    private Document stringToDocument(final String value) {
+        final Document xmlFragment = Jsoup.parse(value, "", Parser.xmlParser());
+        final Document resultingDocument = Document.createShell("");
+
+        xmlFragment.childNodes().forEach(xmlNode -> resultingDocument.body().appendChild(xmlNode.clone()));
+
+        return resultingDocument;
     }
 
 }
