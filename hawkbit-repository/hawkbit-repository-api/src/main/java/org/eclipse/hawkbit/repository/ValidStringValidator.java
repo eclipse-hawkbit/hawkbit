@@ -32,7 +32,7 @@ public class ValidStringValidator implements ConstraintValidator<ValidString, St
         return StringUtils.isEmpty(value) || cleaner.isValid(stringToDocument(value));
     }
 
-    private Document stringToDocument(final String value) {
+    private static Document stringToDocument(final String value) {
         final Document xmlFragment = Jsoup.parse(value, "", Parser.xmlParser());
         final Document resultingDocument = Document.createShell("");
 
