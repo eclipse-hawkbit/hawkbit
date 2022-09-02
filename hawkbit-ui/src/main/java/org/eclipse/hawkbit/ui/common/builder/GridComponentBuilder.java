@@ -137,13 +137,13 @@ public final class GridComponentBuilder {
      */
     public static Column<ProxyTarget, Button> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addComponentColumn(grid, GridComponentBuilder::buildControllerIdLink).setId(columnId)
+        return addComponentColumn(grid, t -> GridComponentBuilder.buildControllerIdLink(t, columnId)).setId(columnId)
                 .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
                 .setMinimumWidth(DEFAULT_MIN_WIDTH);
     }
 
-    private static Button buildControllerIdLink(final ProxyTarget target) {
-        return buildLink(target, "controllerId.link", target.getControllerId(), true, clickEvent -> UI.getCurrent()
+    private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
+        return buildLink(target, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
                 .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
 
