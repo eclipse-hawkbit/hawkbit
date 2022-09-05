@@ -13,8 +13,7 @@ import java.io.InputStream;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.SafeHtml;
-import org.hibernate.validator.constraints.SafeHtml.WhiteListType;
+import org.eclipse.hawkbit.repository.ValidString;
 
 /**
  * Use to create a new artifact.
@@ -28,7 +27,7 @@ public class ArtifactUpload {
     private final long moduleId;
 
     @NotEmpty
-    @SafeHtml(whitelistType = WhiteListType.NONE, message = "Invalid characters in string")
+    @ValidString
     private final String filename;
 
     private final String providedMd5Sum;
