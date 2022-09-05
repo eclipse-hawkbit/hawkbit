@@ -10,6 +10,8 @@ package org.eclipse.hawkbit.ui.common.builder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
+import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -42,12 +44,15 @@ import com.vaadin.ui.themes.ValoTheme;
  * Builder class for grid components
  */
 public final class GridComponentBuilder {
+
     public static final double DEFAULT_MIN_WIDTH = 100D;
 
     public static final String CREATED_BY_ID = "createdBy";
     public static final String CREATED_DATE_ID = "createdDate";
     public static final String MODIFIED_BY_ID = "modifiedBy";
     public static final String MODIFIED_DATE_ID = "modifiedDate";
+
+    private static Encoder CONTROLLER_ID_ENCODER = Base64.getEncoder().withoutPadding();
 
     private GridComponentBuilder() {
     }
@@ -143,7 +148,8 @@ public final class GridComponentBuilder {
     }
 
     private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
-        return buildLink(target, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
+        final String idSuffix = CONTROLLER_ID_ENCODER.encodeToString(target.getControllerId().getBytes());
+        return buildLink(idSuffix, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
                 .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
 
@@ -455,4 +461,5 @@ public final class GridComponentBuilder {
 
         return actionButton;
     }
+
 }
