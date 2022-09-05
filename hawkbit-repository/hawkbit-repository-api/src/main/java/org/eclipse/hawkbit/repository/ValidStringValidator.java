@@ -16,6 +16,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.parser.Parser;
 import org.jsoup.safety.Cleaner;
 import org.jsoup.safety.Safelist;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cronutils.utils.StringUtils;
 
@@ -24,12 +26,22 @@ import com.cronutils.utils.StringUtils;
  *
  */
 public class ValidStringValidator implements ConstraintValidator<ValidString, String> {
+    private static final Logger LOG = LoggerFactory.getLogger(ValidStringValidator.class);
 
     private final Cleaner cleaner = new Cleaner(Safelist.none());
 
     @Override
     public boolean isValid(final String value, final ConstraintValidatorContext context) {
-        return StringUtils.isEmpty(value) || cleaner.isValid(stringToDocument(value));
+        return StringUtils.isEmpty(value) || isValidString(value);
+    }
+
+    private boolean isValidString(final String value) {
+        try {
+            return cleaner.isValid(stringToDocument(value));
+        } catch (final Exception ex) {
+            LOG.error(String.format("There was an exception during bean field value (%s) validation", value), ex);
+            return false;
+        }
     }
 
     private static Document stringToDocument(final String value) {
