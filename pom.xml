@@ -142,9 +142,7 @@
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <rabbitmq.http-client.version>3.5.0.RELEASE</rabbitmq.http-client.version>
-      <!-- Newer version contains new rule that we violate. Needs to be fixed first -->
-      <hibernate-validator.version>6.0.20.Final</hibernate-validator.version>
-       <!-- Spring boot version overrides - END -->
+      <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
       <vaadin.version>8.14.1</vaadin.version>
@@ -172,7 +170,7 @@
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.1.6</cron-utils.version>
-      <jsoup.version>1.14.2</jsoup.version>
+      <jsoup.version>1.15.3</jsoup.version>
       <allure.version>2.13.6</allure.version>
       <eclipselink.version>2.7.11</eclipselink.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>

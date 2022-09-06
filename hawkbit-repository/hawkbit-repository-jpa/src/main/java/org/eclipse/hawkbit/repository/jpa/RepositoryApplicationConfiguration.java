@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
+import javax.validation.Validation;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
@@ -107,6 +108,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.hibernate.validator.HibernateValidatorConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -385,7 +387,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
-        return new MethodValidationPostProcessor();
+        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+        processor.setValidator(Validation.byDefaultProvider().configure()
+                .addProperty(HibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
+                        "true")
+                .buildValidatorFactory().getValidator());
+        return processor;
     }
 
     /**
