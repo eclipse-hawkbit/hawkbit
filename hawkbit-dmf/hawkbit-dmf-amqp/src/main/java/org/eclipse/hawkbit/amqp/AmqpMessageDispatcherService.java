@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.amqp;
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -18,8 +19,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
+import com.google.common.collect.Iterables;
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -65,6 +69,8 @@ import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -79,6 +85,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
+    private static final int MAX_PROCESSING_SIZE = 1000;
+    
     private final ArtifactUrlHandler artifactUrlHandler;
     private final AmqpMessageSenderService amqpSenderService;
     private final SystemSecurityContext systemSecurityContext;
@@ -166,14 +174,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     }
 
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
-        return targetManagement.getByControllerID(controllerIds).stream().filter(target -> {
-            if (hasPendingCancellations(target.getControllerId())) {
-                LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
-                        target.getControllerId());
-                return false;
-            }
-            return true;
-        }).collect(Collectors.toList());
+        return partitionedParallelExecution(controllerIds, partition -> {
+            return targetManagement.getByControllerID(partition).stream().filter(target -> {
+                if (hasPendingCancellations(target.getControllerId())) {
+                    LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                            target.getControllerId());
+                    return false;
+                }
+                return true;
+            }).collect(Collectors.toList());
+        });
     }
 
     private void sendUpdateMessageToTarget(final TargetAssignDistributionSetEvent assignedEvent,
@@ -303,7 +313,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final List<Target> eventTargets = targetManagement.getByControllerID(cancelEvent.getActions().keySet());
+        final List<Target> eventTargets = partitionedParallelExecution(cancelEvent.getActions().keySet(),
+              targetManagement::getByControllerID);
 
         eventTargets.forEach(target -> {
             cancelEvent.getActionPropertiesForController(target.getControllerId()).map(ActionProperties::getId)
@@ -314,6 +325,33 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         });
     }
 
+    private static <T, R> List<R> partitionedParallelExecution(final Collection<T> controllerIds,
+            final Function<Collection<T>, List<R>> loadingFunction) {
+        // Ensure not exceeding the max value of MAX_PROCESSING_SIZE
+        if (controllerIds.size() > MAX_PROCESSING_SIZE) {
+            // Split the provided collection
+            final Iterable<List<T>> partitions = Iterables.partition(controllerIds, MAX_PROCESSING_SIZE);
+            // Preserve the security context because it gets lost when executing
+            // loading calls in new threads
+            final SecurityContext context = SecurityContextHolder.getContext();
+            // Handling remote request in parallel streams
+            return StreamSupport.stream(partitions.spliterator(), true) //
+                    .flatMap(partition -> withSecurityContext(() -> loadingFunction.apply(partition), context).stream())
+                    .collect(Collectors.toList());
+        }
+        return loadingFunction.apply(controllerIds);
+    }
+
+    private static <T> T withSecurityContext(final Supplier<T> callable, final SecurityContext securityContext) {
+        final SecurityContext oldContext = SecurityContextHolder.getContext();
+        try {
+            SecurityContextHolder.setContext(securityContext);
+            return callable.get();
+        } finally {
+            SecurityContextHolder.setContext(oldContext);
+        }
+    }
+    
     /**
      * Method to send a message to a RabbitMQ Exchange after a Target was
      * deleted.

@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -32,11 +31,15 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetWithActionType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -193,21 +196,19 @@ public abstract class AbstractDsAssignmentStrategy {
     }
 
     /**
-     * Sends the {@link CancelTargetAssignmentEvent} for a specific target to
+     * Sends the {@link CancelTargetAssignmentEvent} for a specific action to
      * the eventPublisher.
      *
-     * @param target
-     *            the Target which has been assigned to a distribution set
-     * @param actionId
-     *            the action id of the assignment
+     * @param action
+     *            the action of the assignment
      */
-    void cancelAssignDistributionSetEvent(final Action action) {
+    protected void cancelAssignDistributionSetEvent(final Action action) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
               new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
     }
 
-    void cancelAssignDistributionSetEvent(final List<Action> actions) {
-        if (actions.isEmpty()) {
+    private void cancelAssignDistributionSetEvent(final List<Action> actions) {
+        if (CollectionUtils.isEmpty(actions)) {
             return;
         }
         final String tenant = actions.get(0).getTenant();
@@ -216,7 +217,7 @@ public abstract class AbstractDsAssignmentStrategy {
                       actions, eventPublisherHolder.getApplicationId())));
     }
 
-    JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final Optional<JpaTarget> optTarget = targets.stream()
                 .filter(t -> t.getControllerId().equals(targetWithActionType.getControllerId())).findFirst();
@@ -242,18 +243,30 @@ public abstract class AbstractDsAssignmentStrategy {
         });
     }
 
-    JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus actionStatus = new JpaActionStatus();
         actionStatus.setAction(action);
         actionStatus.setOccurredAt(action.getCreatedAt());
 
-        if (actionMessage != null) {
+        if (StringUtils.hasText(actionMessage)) {
             actionStatus.addMessage(actionMessage);
+        } else {
+            actionStatus.addMessage(getActionMessage(action));
         }
 
         return actionStatus;
     }
 
+    private static String getActionMessage(final Action action) {
+        final RolloutGroup rolloutGroup = action.getRolloutGroup();
+        if (rolloutGroup != null) {
+            final Rollout rollout = rolloutGroup.getRollout();
+            return String.format("Initiated by Rollout Group '%s' [Rollout %s:%s]", rolloutGroup.getName(),
+                    rollout.getName(), rollout.getId());
+        }
+        return String.format("Assignment initiated by user '%s'", action.getInitiatedBy());
+    }
+    
     private void assertActionsPerTargetQuota(final Target target, final int requested) {
         final int quota = quotaManagement.getMaxActionsPerTarget();
         QuotaHelper.assertAssignmentQuota(target.getId(), requested, quota, Action.class, Target.class,

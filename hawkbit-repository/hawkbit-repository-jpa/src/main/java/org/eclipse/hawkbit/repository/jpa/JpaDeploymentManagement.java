@@ -72,6 +72,8 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -644,8 +646,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             closeOrCancelOpenDeviceActions(actions);
         }
         final List<JpaAction> savedActions = activateActions(actions);
+        setInitialActionStatus(savedActions);
         setAssignmentOnTargets(savedActions);
-        return new ArrayList<>(savedActions);
+        return Collections.unmodifiableList(savedActions);
     }
 
     private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions){
@@ -666,9 +669,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return actionRepository.saveAll(actions);
     }
 
-    private void setAssignmentOnTargets(final List<JpaAction> actions){
+    private void setAssignmentOnTargets(final List<JpaAction> actions) {
         final List<JpaTarget> assignedDsTargets = actions.stream().map(savedAction -> {
-            actionStatusRepository.save(onlineDsAssignmentStrategy.createActionStatus(savedAction, null));
             final JpaTarget mergedTarget = (JpaTarget) entityManager.merge(savedAction.getTarget());
             mergedTarget.setAssignedDistributionSet(savedAction.getDistributionSet());
             mergedTarget.setUpdateStatus(TargetUpdateStatus.PENDING);
@@ -676,6 +678,14 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }).collect(Collectors.toList());
 
         targetRepository.saveAll(assignedDsTargets);
+    }
+
+    private void setInitialActionStatus(final List<JpaAction> actions) {
+        final List<JpaActionStatus> statusList = new ArrayList<>();
+        for (final JpaAction action : actions) {
+            statusList.add(onlineDsAssignmentStrategy.createActionStatus(action, null));
+        }
+        actionStatusRepository.saveAll(statusList);
     }
 
     private void setSkipActionStatus(final JpaAction action) {
