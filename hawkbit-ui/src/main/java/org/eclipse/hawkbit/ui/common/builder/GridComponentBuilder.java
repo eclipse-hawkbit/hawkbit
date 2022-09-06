@@ -10,8 +10,6 @@ package org.eclipse.hawkbit.ui.common.builder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
+import org.eclipse.hawkbit.ui.utils.ControllerIdHtmlEncoder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -51,8 +50,6 @@ public final class GridComponentBuilder {
     public static final String CREATED_DATE_ID = "createdDate";
     public static final String MODIFIED_BY_ID = "modifiedBy";
     public static final String MODIFIED_DATE_ID = "modifiedDate";
-
-    private static Encoder CONTROLLER_ID_ENCODER = Base64.getEncoder().withoutPadding();
 
     private GridComponentBuilder() {
     }
@@ -148,7 +145,7 @@ public final class GridComponentBuilder {
     }
 
     private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
-        final String idSuffix = CONTROLLER_ID_ENCODER.encodeToString(target.getControllerId().getBytes());
+        final String idSuffix = ControllerIdHtmlEncoder.encode(target.getControllerId());
         return buildLink(idSuffix, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
                 .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
