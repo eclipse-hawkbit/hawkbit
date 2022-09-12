@@ -209,30 +209,35 @@ public abstract class JsonBuilder {
      * @throws JSONException
      */
     public static String deploymentActionFeedback(final String id, final String execution) throws JSONException {
-        return deploymentActionFeedback(id, execution, "none",
+        return deploymentActionFeedback(id, execution, "none", null,
                 Arrays.asList(RandomStringUtils.randomAlphanumeric(1000)));
 
     }
-
+    
     public static String deploymentActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", Arrays.asList(message));
-
+        return deploymentActionFeedback(id, execution, "none", null, Arrays.asList(message));
     }
 
     public static String deploymentActionFeedback(final String id, final String execution, final String finished,
             final String message) throws JSONException {
-        return deploymentActionFeedback(id, execution, finished, Arrays.asList(message));
+        return deploymentActionFeedback(id, execution, finished, null, message);
     }
 
     public static String deploymentActionFeedback(final String id, final String execution, final String finished,
-            final Collection<String> messages) throws JSONException {
+            final Integer code, final String message) throws JSONException {
+        return deploymentActionFeedback(id, execution, finished, code, Arrays.asList(message));
+    }
 
-        return new JSONObject().put("id", id).put("status", new JSONObject().put("execution", execution)
-                .put("result",
-                        new JSONObject().put("finished", finished).put("progress",
-                                new JSONObject().put("cnt", 2).put("of", 5)))
-                .put("details", new JSONArray(messages))).toString();
+    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
+            final Integer code, final Collection<String> messages) throws JSONException {
+        final JSONObject statusJson = new JSONObject().put("execution", execution).put("result",
+                new JSONObject().put("finished", finished).put("progress", new JSONObject().put("cnt", 2).put("of", 5)))
+                .put("details", new JSONArray(messages));
+        if (code != null) {
+            statusJson.put("code", code);
+        }
+        return new JSONObject().put("id", id).put("status", statusJson).toString();
     }
 
     /**
@@ -638,19 +643,26 @@ public abstract class JsonBuilder {
     }
 
     public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
-        return cancelActionFeedback(id, execution, RandomStringUtils.randomAlphanumeric(1000));
+        return cancelActionFeedback(id, execution, null, RandomStringUtils.randomAlphanumeric(1000));
 
     }
 
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return new JSONObject().put("id", id)
-                .put("status",
-                        new JSONObject().put("execution", execution)
-                                .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new JSONArray().put(message)))
-                .toString();
+        return cancelActionFeedback(id, execution, null, message);
+    }
 
+    public static String cancelActionFeedback(final String id, final String execution, final Integer code,
+            final String message) throws JSONException {
+        final JSONObject statusJson = new JSONObject().put("execution", execution)
+                .put("result", new JSONObject().put("finished", "success"))
+                .put("details", new JSONArray().put(message));
+
+        if (code != null) {
+            statusJson.put("code", code);
+        }
+
+        return new JSONObject().put("id", id).put("status", statusJson).toString();
     }
 
     public static JSONObject configData(final Map<String, String> attributes) throws JSONException {

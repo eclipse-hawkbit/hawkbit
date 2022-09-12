@@ -20,6 +20,8 @@ final class DdiApiModelProperties {
 
     static final String TARGET_EXEC_STATUS = "status of the action execution";
 
+    static final String TARGET_EXEC_STATUS_CODE = "optional individual status code";
+
     static final String TARGET_RESULT_VALUE = "result of the action execution";
 
     static final String TARGET_RESULT_DETAILS = "List of details message information";

@@ -180,11 +180,12 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
                         + "/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId()).content(
-                        JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed", "Some feedback"))
+                tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId())
+                        .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed", 200,
+                                "Some feedback"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andDo(this.document.document(
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document
+                        .document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID_CANCELED)),
@@ -192,6 +193,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("id")
                                         .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
+                                requestFieldWithPath("status.code")
+                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
@@ -384,8 +387,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
                 target.getControllerId(), actionId)
-                        .content(
-                                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "Feedback message"))
+                        .content(JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "none", 200,
+                                "Feedback message"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
@@ -397,6 +400,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("id")
                                         .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
+                                requestFieldWithPath("status.code")
+                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
