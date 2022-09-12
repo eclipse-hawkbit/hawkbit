@@ -116,7 +116,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             if (create.getAutoAssignDistributionSetId().isPresent()) {
                 WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                         .validate(create);
-                assertMaxTargetsQuota(query);
+                assertMaxTargetsQuota(query, create.getName().orElse(null));
             }
         });
 
@@ -243,7 +243,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // query is going to change
             if (targetFilterQuery.getAutoAssignDistributionSet() != null
                     && !query.equals(targetFilterQuery.getQuery())) {
-                assertMaxTargetsQuota(query);
+                assertMaxTargetsQuota(query, targetFilterQuery.getName());
             }
 
             // set the new query
@@ -269,7 +269,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // because the Target Filter Query REST API does not allow to
             // specify an
             // auto-assign distribution set when creating a target filter query
-            assertMaxTargetsQuota(targetFilterQuery.getQuery());
+            assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName());
             final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
@@ -315,9 +315,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         }
     }
 
-    private void assertMaxTargetsQuota(final String query) {
-        QuotaHelper.assertAssignmentQuota(targetManagement.countByRsql(query),
-                quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class);
+    private void assertMaxTargetsQuota(final String query, final String filterName) {
+        QuotaHelper.assertAssignmentQuota(filterName, targetManagement.countByRsql(query),
+                quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class, null);
     }
 
     @Override

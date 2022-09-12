@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.ui.error.extractors.EntityNotFoundErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.IncompatibleTargetTypeErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.InsufficientPermissionErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.InvalidDistributionSetErrorExtractor;
+import org.eclipse.hawkbit.ui.error.extractors.AssignmentQuotaExceededErrorExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UiErrorDetailsExtractor;
 import org.eclipse.hawkbit.ui.error.extractors.UploadErrorExtractor;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -193,6 +194,18 @@ public class MgmtUiConfiguration {
     @Bean
     UiErrorDetailsExtractor artifactEncryptionErrorExtractor(final VaadinMessageSource i18n) {
         return new ArtifactEncryptionErrorExtractor(i18n);
+    }
+
+    /**
+     * UI Assignment Quota exceeded Error details extractor bean.
+     *
+     * @param i18n
+     *            VaadinMessageSource
+     * @return UI Assignment Quota exceeded Error details extractor
+     */
+    @Bean
+    UiErrorDetailsExtractor assignmentQuotaExceededErrorExtractor(final VaadinMessageSource i18n) {
+        return new AssignmentQuotaExceededErrorExtractor(i18n);
     }
 
     /**
