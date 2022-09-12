@@ -46,6 +46,8 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -570,12 +572,48 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionPropertiesCaptor.capture(),
-                targetCaptor.capture(), any(Map.class));
+              targetCaptor.capture(), any(Map.class));
         final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
         assertThat(actionProperties).isNotNull();
         assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
         assertThat(targetCaptor.getValue().getControllerId()).as("event has wrong controller id").isEqualTo("target1");
         assertThat(actionProperties.getId()).as("event has wrong action id").isEqualTo(22L);
+    }
+
+    @Test
+    @Description("Test fee")
+    public void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
+
+        // Mock
+        final Action action = createActionWithTarget(22L, Status.FINISHED);
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
+        final ActionStatusBuilder builder = new JpaActionStatusBuilder();
+        when(entityFactoryMock.actionStatus()).thenReturn(builder);
+        // for the test the same action can be used
+        when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.of(action));
+
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
+
+        final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(23L, DmfActionStatus.RUNNING);
+        actionUpdateStatus.setSoftwareModuleId(Long.valueOf(2));
+        actionUpdateStatus.setCode(12);
+
+        final Message message = createMessage(actionUpdateStatus, messageProperties);
+
+        // test
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
+
+        final ArgumentCaptor<ActionStatusCreate> actionPropertiesCaptor = ArgumentCaptor
+                .forClass(ActionStatusCreate.class);
+
+        verify(controllerManagementMock, times(1)).addUpdateActionStatus(actionPropertiesCaptor.capture());
+
+        final JpaActionStatus jpaActionStatus = (JpaActionStatus) actionPropertiesCaptor.getValue().build();
+        assertThat(jpaActionStatus.getCode()).as("Action status for reported code is missing").contains(12);
+        assertThat(jpaActionStatus.getMessages()).as("Action status message for reported code is missing")
+                .contains("Device reported code: 12");
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {

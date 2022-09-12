@@ -340,11 +340,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
             final Long actionId) {
 
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+
         final List<String> messages = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {
             messages.addAll(feedback.getStatus().getDetails());
         }
+
+        feedback.getStatus().getCode().ifPresent(code -> {
+            actionStatusCreate.code(code);
+            messages.add("Device reported code: " + code);
+        });
 
         Status status;
         switch (feedback.getStatus().getExecution()) {
@@ -380,7 +387,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             break;
         }
 
-        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
+        return actionStatusCreate.status(status).messages(messages);
     }
 
     private static void addMessageIfEmpty(final String text, final List<String> messages) {
@@ -507,7 +514,10 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
             final Long actionId, final EntityFactory entityFactory) {
 
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+
         final List<String> messages = new ArrayList<>();
+
         Status status;
         switch (feedback.getStatus().getExecution()) {
         case CANCELED:
@@ -531,7 +541,12 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
+        feedback.getStatus().getCode().ifPresent(code -> {
+            actionStatusCreate.code(code);
+            messages.add("Device reported code: " + code);
+        });
+
+        return actionStatusCreate.status(status).messages(messages);
 
     }
 

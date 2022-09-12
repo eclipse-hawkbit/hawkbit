@@ -37,6 +37,8 @@ public interface ActionStatusCreate {
      */
     ActionStatusCreate occurredAt(long occurredAt);
 
+    ActionStatusCreate code(int code);
+
     /**
      * @param messages
      *            for {@link ActionStatus#getMessages()}

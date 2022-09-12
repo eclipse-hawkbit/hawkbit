@@ -105,6 +105,7 @@ public class BaseAmqpServiceTest {
 
     private DmfActionUpdateStatus createActionStatus() {
         final DmfActionUpdateStatus actionUpdateStatus = new DmfActionUpdateStatus(1L, DmfActionStatus.RUNNING);
+        actionUpdateStatus.setCode(2);
         actionUpdateStatus.setSoftwareModuleId(2L);
         actionUpdateStatus.addMessage("Message 1");
         actionUpdateStatus.addMessage("Message 2");

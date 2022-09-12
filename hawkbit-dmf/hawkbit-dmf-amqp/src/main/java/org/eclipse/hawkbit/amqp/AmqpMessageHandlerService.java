@@ -355,6 +355,11 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
                 .messages(messages);
 
+        actionUpdateStatus.getCode().ifPresent(code -> {
+            actionStatus.code(code);
+            actionStatus.message("Device reported code: " + code);
+        });
+
         final Action updatedAction = (Status.CANCELED == status)
                 ? controllerManagement.addCancelActionStatus(actionStatus)
                 : controllerManagement.addUpdateActionStatus(actionStatus);

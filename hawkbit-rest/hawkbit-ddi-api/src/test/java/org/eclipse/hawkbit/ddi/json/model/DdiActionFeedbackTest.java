@@ -39,7 +39,7 @@ public class DdiActionFeedbackTest {
         // Setup
         Long id = 123L;
         String time = "20190809T121314";
-        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, Lists.emptyList());
+        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Lists.emptyList());
         DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(id, time, ddiStatus);
 
         // Test

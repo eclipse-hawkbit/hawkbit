@@ -10,11 +10,14 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -33,6 +36,8 @@ public class DdiStatus {
     @Valid
     private final DdiResult result;
 
+    private final Integer code;
+
     private final List<String> details;
 
     /**
@@ -42,14 +47,18 @@ public class DdiStatus {
      *            status
      * @param result
      *            information
+     * @param code
+     *            as optional code (can be null)
      * @param details
      *            as optional addition
      */
     @JsonCreator
     public DdiStatus(@JsonProperty("execution") final ExecutionStatus execution,
-            @JsonProperty("result") final DdiResult result, @JsonProperty("details") final List<String> details) {
+            @JsonProperty("result") final DdiResult result, @JsonProperty("code") final Integer code,
+            @JsonProperty("details") final List<String> details) {
         this.execution = execution;
         this.result = result;
+        this.code = code;
         this.details = details;
     }
 
@@ -67,6 +76,11 @@ public class DdiStatus {
         }
 
         return Collections.unmodifiableList(details);
+    }
+
+    @JsonIgnore
+    public Optional<Integer> getCode() {
+        return Optional.ofNullable(code);
     }
 
     /**
@@ -129,7 +143,8 @@ public class DdiStatus {
 
     @Override
     public String toString() {
-        return "Status [execution=" + execution + ", result=" + result + ", details=" + details + "]";
+        return "Status [execution=" + execution + ", result=" + result + ", code="
+                + getCode().map(Objects::toString).orElse("n/a") + ", details=" + details + "]";
     }
 
 }
