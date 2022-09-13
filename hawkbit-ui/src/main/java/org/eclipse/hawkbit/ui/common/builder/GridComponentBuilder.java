@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -53,7 +53,7 @@ public final class GridComponentBuilder {
 
     /**
      * Create a {@link Button} with link optic
-     * 
+     *
      * @param idSuffix
      *            suffix to build the button ID
      * @param idPrefix
@@ -87,7 +87,7 @@ public final class GridComponentBuilder {
 
     /**
      * Create a {@link Button} with link optic
-     * 
+     *
      * @param entity
      *            to build the button ID
      * @param idPrefix
@@ -107,7 +107,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add name column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -141,7 +141,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add description column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -159,7 +159,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add "created by", "created at", "modified by" and "modified at" column
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -180,7 +180,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add version column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -206,13 +206,14 @@ public final class GridComponentBuilder {
         if (columnID != null) {
             col.setId(columnID);
         }
+        col.setSortable(false);
         return col;
 
     }
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -227,7 +228,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -249,7 +250,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -265,7 +266,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -288,7 +289,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add delete button column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -318,7 +319,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add an action button column to a grid
-     * 
+     *
      * @param <T>
      *            type of the entity displayed by the grid
      * @param grid
@@ -338,7 +339,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add an action button column to a grid
-     * 
+     *
      * @param <T>
      *            type of the entity displayed by the grid
      * @param grid
@@ -375,7 +376,7 @@ public final class GridComponentBuilder {
 
     /**
      * Join columns to form an action column
-     * 
+     *
      * @param i18n
      *            message source for internationalization
      * @param headerRow
@@ -390,7 +391,7 @@ public final class GridComponentBuilder {
 
     /**
      * Join columns to form an icon column
-     * 
+     *
      * @param headerRow
      *            header row
      * @param headerCaption
@@ -410,7 +411,7 @@ public final class GridComponentBuilder {
 
     /**
      * Create an action button (e.g. a delete button)
-     * 
+     *
      * @param i18n
      *            message source for internationalization
      * @param clickListener

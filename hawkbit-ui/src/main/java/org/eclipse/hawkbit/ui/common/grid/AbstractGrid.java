@@ -123,7 +123,6 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
         setId(getGridId());
         setColumnReorderingAllowed(false);
         addColumns();
-        disableColumnSorting();
         setFrozenColumnCount(-1);
 
         if (selectionSupport == null) {
