@@ -350,7 +350,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         feedback.getStatus().getCode().ifPresent(code -> {
             actionStatusCreate.code(code);
-            messages.add("Device reported code: " + code);
+            messages.add("Device reported status code: " + code);
         });
 
         Status status;
@@ -543,7 +543,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         feedback.getStatus().getCode().ifPresent(code -> {
             actionStatusCreate.code(code);
-            messages.add("Device reported code: " + code);
+            messages.add("Device reported status code: " + code);
         });
 
         return actionStatusCreate.status(status).messages(messages);

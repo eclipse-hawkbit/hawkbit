@@ -545,7 +545,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     @Test
-    @Description("Tests TODO")
+    @Description("Test next update is provided on finished action")
     public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
@@ -581,7 +581,7 @@ public class AmqpMessageHandlerServiceTest {
     }
 
     @Test
-    @Description("Test fee")
+    @Description("Test feedback code is persisted in messages when provided with DmfActionUpdateStatus")
     public void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
 
         // Mock
@@ -613,7 +613,7 @@ public class AmqpMessageHandlerServiceTest {
         final JpaActionStatus jpaActionStatus = (JpaActionStatus) actionPropertiesCaptor.getValue().build();
         assertThat(jpaActionStatus.getCode()).as("Action status for reported code is missing").contains(12);
         assertThat(jpaActionStatus.getMessages()).as("Action status message for reported code is missing")
-                .contains("Device reported code: 12");
+                .contains("Device reported status code: 12");
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {

@@ -59,8 +59,8 @@ public class DdiStatusTest {
     }
     
     private static Stream<Arguments> ddiStatusPossibilities(){
-        DdiProgress ddiProgress = new DdiProgress(30, 100);
-        DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
+        final DdiProgress ddiProgress = new DdiProgress(30, 100);
+        final DdiResult ddiResult = new DdiResult(NONE, ddiProgress);
         return Stream.of(
               Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.emptyList())),
               Arguments.of(ddiResult, new DdiStatus(PROCEEDING, ddiResult, null, Collections.singletonList("testMessage"))),
@@ -71,11 +71,11 @@ public class DdiStatusTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\","
+        final String serializedDdiStatus = "{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\","
               + "\"progress\":{\"cnt\":30,\"of\":100}},\"details\":[],\"unknownProperty\":\"test\"}";
 
         // Test
-        DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
+        final DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
 
         assertThat(ddiStatus.getExecution()).isEqualTo(PROCEEDING);
         assertThat(ddiStatus.getCode()).isEmpty();

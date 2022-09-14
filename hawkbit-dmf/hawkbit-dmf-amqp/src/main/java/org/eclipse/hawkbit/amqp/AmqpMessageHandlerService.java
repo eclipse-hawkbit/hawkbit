@@ -357,7 +357,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
 
         actionUpdateStatus.getCode().ifPresent(code -> {
             actionStatus.code(code);
-            actionStatus.message("Device reported code: " + code);
+            actionStatus.message("Device reported status code: " + code);
         });
 
         final Action updatedAction = (Status.CANCELED == status)
