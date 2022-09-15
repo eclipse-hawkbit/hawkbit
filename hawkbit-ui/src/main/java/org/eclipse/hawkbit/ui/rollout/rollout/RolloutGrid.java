@@ -263,8 +263,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addComponentColumn(this, this::buildRolloutLink).setId(ROLLOUT_LINK_ID)
+        final Column<ProxyRollout, Button> nameColumn = GridComponentBuilder
+                .addComponentColumn(this, this::buildRolloutLink).setId(ROLLOUT_LINK_ID)
                 .setCaption(i18n.getMessage("header.name")).setHidable(false).setExpandRatio(3);
+        GridComponentBuilder.setColumnSortable(nameColumn, "name");
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 

@@ -103,7 +103,7 @@ public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEnt
 
     @Override
     protected int sizeInBackEnd(final Query<T, F> query) {
-        final long size = sizeInBackEnd(convertToPageRequest(query, defaultSortOrder), query.getFilter().orElse(null));
+        final long size = sizeInBackEnd(convertToPageRequest(query, convertToSortCriteria(query.getSortOrders())), query.getFilter().orElse(null));
 
         try {
             return Math.toIntExact(size);

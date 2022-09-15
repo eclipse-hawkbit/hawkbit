@@ -128,8 +128,11 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addComponentColumn(this, this::buildFilterLink).setId(FILTER_NAME_ID)
+        final Column<ProxyTargetFilterQuery, Button> nameColumn = GridComponentBuilder
+                .addComponentColumn(this, this::buildFilterLink).setId(FILTER_NAME_ID)
                 .setCaption(i18n.getMessage("header.name"));
+        GridComponentBuilder.setColumnSortable(nameColumn, "name");
+
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 

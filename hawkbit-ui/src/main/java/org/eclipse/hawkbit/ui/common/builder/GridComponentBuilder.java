@@ -106,7 +106,8 @@ public final class GridComponentBuilder {
     }
 
     /**
-     * Add name column to grid
+     * Add name column to grid. The column is set to sortable which implies a
+     * JPA field "name" that is used for sorting.
      *
      * @param <E>
      *            entity type of the grid
@@ -120,11 +121,15 @@ public final class GridComponentBuilder {
      */
     public static <E extends ProxyNamedEntity> Column<E, String> addNameColumn(final Grid<E> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, E::getName, "header.name", columnId, DEFAULT_MIN_WIDTH);
+        final Column<E, String> nameColumn = addColumn(i18n, grid, E::getName, "header.name", columnId,
+                DEFAULT_MIN_WIDTH);
+        setColumnSortable(nameColumn, "name");
+        return nameColumn;
     }
 
     /**
-     * Add controllerId column to grid
+     * Add controllerId column to grid.  The column is set to sortable which implies a
+     * JPA field "controllerId" that is used for sorting.
      *
      * @param grid
      *            to add the column to
@@ -136,7 +141,10 @@ public final class GridComponentBuilder {
      */
     public static Column<ProxyTarget, String> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, ProxyTarget::getControllerId, "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
+        final Column<ProxyTarget, String> column = addColumn(i18n, grid, ProxyTarget::getControllerId,
+                "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
+        setColumnSortable(column, "controllerId");
+        return column;
     }
 
     /**
@@ -206,7 +214,6 @@ public final class GridComponentBuilder {
         if (columnID != null) {
             col.setId(columnID);
         }
-        col.setSortable(false);
         return col;
 
     }
@@ -241,10 +248,8 @@ public final class GridComponentBuilder {
      */
     public static <E, T> Column<E, T> addColumn(final Grid<E> grid, final ValueProvider<E, T> valueProvider,
             final StyleGenerator<E> styleGenerator) {
-        final Column<E, T> column = grid.addColumn(valueProvider).setMinimumWidthFromContent(false).setExpandRatio(1);
-        if (styleGenerator != null) {
-            column.setStyleGenerator(styleGenerator);
-        }
+        final Column<E, T> column = grid.addColumn(valueProvider);
+        commonColumnConfiguration(column, styleGenerator);
         return column;
     }
 
@@ -279,8 +284,17 @@ public final class GridComponentBuilder {
      */
     public static <E, T extends Component> Column<E, T> addComponentColumn(final Grid<E> grid,
             final ValueProvider<E, T> componentProvider, final StyleGenerator<E> styleGenerator) {
-        final Column<E, T> column = grid.addComponentColumn(componentProvider).setMinimumWidthFromContent(false)
-                .setExpandRatio(1);
+        final Column<E, T> column = grid.addComponentColumn(componentProvider);
+        commonColumnConfiguration(column, styleGenerator);
+        return column;
+    }
+
+    private static <E, T extends Component> Column<E, ?> commonColumnConfiguration(final Column<E, ?> column,
+            final StyleGenerator<E> styleGenerator) {
+        column.setMinimumWidthFromContent(false);
+        column.setExpandRatio(1);
+        column.setSortable(false);
+
         if (styleGenerator != null) {
             column.setStyleGenerator(styleGenerator);
         }
@@ -362,10 +376,25 @@ public final class GridComponentBuilder {
         final StyleGenerator<T> finalStyleGenerator = merge(Arrays.asList(styleGenerator, additionalStyleGenerator));
 
         final Column<T, V> column = grid.addComponentColumn(iconProvider).setId(columnId)
-                .setStyleGenerator(finalStyleGenerator).setWidth(60D).setResizable(false);
+                .setStyleGenerator(finalStyleGenerator).setWidth(60D).setResizable(false).setSortable(false);
         if (!StringUtils.isEmpty(caption)) {
             column.setCaption(caption);
         }
+        return column;
+    }
+
+    /**
+     * Makes the column sortable.
+     *
+     * @param column
+     *            the column to set sortable
+     * @param sortPropertyName
+     *            the jpa property name to sort by
+     * @return the provided column
+     */
+    public static Column<?, ?> setColumnSortable(final Column<?, ?> column,
+            final String sortPropertyName) {
+        column.setSortable(true).setSortProperty(sortPropertyName);
         return column;
     }
 
