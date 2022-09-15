@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -29,7 +30,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -265,7 +268,8 @@ public final class DistributionSetSpecification {
      * Can be added to specification chain to order result by provided target
      *
      * Order: 1. Distribution set installed on target, 2. Distribution set(s)
-     * assigned to target, 3. Based on distribution set id
+     * assigned to target, 3. Based on requested sorting or id if
+     * <code>null</code>.
      *
      * NOTE: Other specs, pagables and sort objects may alter the queries
      * orderBy entry too, possibly invalidating the applied order, keep in mind
@@ -273,16 +277,26 @@ public final class DistributionSetSpecification {
      *
      * @param linkedControllerId
      *            controller id to get installed/assigned DS for
+     * @param sort
      * @return specification that applies order by target, may be overwritten
      */
-    public static Specification<JpaDistributionSet> orderedByLinkedTarget(final String linkedControllerId) {
+    public static Specification<JpaDistributionSet> orderedByLinkedTarget(final String linkedControllerId,
+            final Sort sort) {
         return (dsRoot, query, cb) -> {
             final Root<JpaTarget> targetRoot = query.from(JpaTarget.class);
 
             final Expression<Object> assignedInstalledCase = cb.selectCase()
                     .when(cb.equal(targetRoot.get(JpaTarget_.installedDistributionSet), dsRoot), 1)
                     .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet), dsRoot), 2).otherwise(3);
-            query.orderBy(cb.asc(assignedInstalledCase), cb.asc(dsRoot.get(JpaDistributionSet_.id)));
+
+            final List<Order> orders = new ArrayList<>();
+            orders.add(cb.asc(assignedInstalledCase));
+            if (sort == null) {
+                orders.add(cb.asc(dsRoot.get(JpaDistributionSet_.id)));
+            } else {
+                orders.addAll(QueryUtils.toOrders(sort, dsRoot, cb));
+            }
+            query.orderBy(orders);
 
             return cb.equal(targetRoot.get(JpaTarget_.controllerId), linkedControllerId);
         };

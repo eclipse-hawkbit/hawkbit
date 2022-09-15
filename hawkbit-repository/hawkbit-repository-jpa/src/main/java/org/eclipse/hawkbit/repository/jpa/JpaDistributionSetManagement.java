@@ -374,13 +374,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Override
     public Slice<DistributionSet> findByDistributionSetFilterOrderByLinkedTarget(final Pageable pageable,
             final DistributionSetFilter distributionSetFilter, final String assignedOrInstalled) {
-        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
-                distributionSetFilter);
-        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled));
-
         // remove default sort from pageable to not overwrite sorted spec
         final OffsetBasedPageRequest unsortedPage = new OffsetBasedPageRequest(pageable.getOffset(),
                 pageable.getPageSize(), Sort.unsorted());
+
+        final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
+                distributionSetFilter);
+        specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled, pageable.getSort()));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, unsortedPage, specList);
     }

@@ -18,11 +18,9 @@ import java.util.stream.Collectors;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.From;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
-import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
@@ -53,7 +51,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.orm.jpa.vendor.Database;
@@ -264,18 +261,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final CriteriaQuery<Object[]> multiselect = query.multiselect(targetJoin, actionJoin.get(JpaAction_.status))
                 .where(cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id),
                         rolloutGroupId))
-                .orderBy(convertToOrders(pageRequest.getSort(), targetJoin, cb));
+                .orderBy(QueryUtils.toOrders(pageRequest.getSort(), targetJoin, cb));
         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
                 .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
                 .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1]))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
-    }
-
-    private List<Order> convertToOrders(final Sort sort, final From<?, ?> from,
-            final CriteriaBuilder cb) {
-        return QueryUtils.toOrders(sort, from, cb);
     }
 
     @Override

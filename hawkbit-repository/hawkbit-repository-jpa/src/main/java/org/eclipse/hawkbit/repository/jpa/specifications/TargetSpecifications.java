@@ -18,6 +18,7 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.MapJoin;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -47,7 +48,9 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 
 /**
  * Specifications class for {@link Target}s. The class provides Spring Data JPQL
@@ -571,7 +574,7 @@ public final class TargetSpecifications {
      * distribution set
      *
      * Order: 1. Targets with DS installed, 2. Targets with DS assigned, 3.
-     * Based on target id
+     * Based on requested sorting or id if <code>null</code>.
      *
      * NOTE: Other specs, pagables and sort objects may alter the queries
      * orderBy entry too, possibly invalidating the applied order, keep in mind
@@ -579,9 +582,12 @@ public final class TargetSpecifications {
      *
      * @param distributionSetIdForOrder
      *            distribution set to consider
+     * @param sort
+     *            the sorting requested
      * @return specification that applies order by ds, may be overwritten
      */
-    public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder) {
+    public static Specification<JpaTarget> orderedByLinkedDistributionSet(final long distributionSetIdForOrder,
+            final Sort sort) {
         return (targetRoot, query, cb) -> {
             // Enhance query with custom select based sort
             final Expression<Object> selectCase = cb.selectCase()
@@ -590,7 +596,14 @@ public final class TargetSpecifications {
                     .when(cb.equal(targetRoot.get(JpaTarget_.assignedDistributionSet).get(JpaDistributionSet_.id),
                             distributionSetIdForOrder), 2)
                     .otherwise(100);
-            query.orderBy(cb.asc(selectCase), cb.desc(targetRoot.get(JpaTarget_.id)));
+            final List<Order> orders = new ArrayList<>();
+            orders.add(cb.asc(selectCase));
+            if (sort == null) {
+                orders.add(cb.desc(targetRoot.get(JpaTarget_.id)));
+            } else {
+                orders.addAll(QueryUtils.toOrders(sort, targetRoot, cb));
+            }
+            query.orderBy(orders);
 
             // Spec only provides order, so no further filtering
             return query.getRestriction();

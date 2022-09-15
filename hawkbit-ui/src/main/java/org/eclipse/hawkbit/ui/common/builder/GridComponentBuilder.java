@@ -203,7 +203,10 @@ public final class GridComponentBuilder {
      */
     public static <E> Column<E, String> addVersionColumn(final Grid<E> grid, final VaadinMessageSource i18n,
             final ValueProvider<E, String> valueProvider, final String columnId) {
-        return addColumn(i18n, grid, valueProvider, "header.version", columnId, DEFAULT_MIN_WIDTH);
+        final Column<E, String> column = addColumn(i18n, grid, valueProvider, "header.version", columnId,
+                DEFAULT_MIN_WIDTH);
+        setColumnSortable(column, "version");
+        return column;
     }
 
     private static <E, T> Column<E, T> addColumn(final VaadinMessageSource i18n, final Grid<E> grid,
