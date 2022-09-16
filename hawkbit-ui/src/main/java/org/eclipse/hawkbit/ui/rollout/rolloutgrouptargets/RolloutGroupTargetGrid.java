@@ -24,6 +24,8 @@ import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
+import com.vaadin.ui.Label;
+
 /**
  * Grid component with targets of rollout group.
  */
@@ -73,8 +75,10 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setExpandRatio(2);
 
-        GridComponentBuilder.addIconColumn(this, actionStatusIconSupplier::getLabel, SPUILabelDefinitions.VAR_STATUS,
+        final Column<ProxyTarget, Label> statusColumn = GridComponentBuilder.addIconColumn(this,
+                actionStatusIconSupplier::getLabel, SPUILabelDefinitions.VAR_STATUS,
                 i18n.getMessage("header.status"));
+        GridComponentBuilder.setColumnSortable(statusColumn, "status");
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 

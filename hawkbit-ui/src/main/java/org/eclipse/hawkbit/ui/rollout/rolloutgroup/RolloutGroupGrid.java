@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import com.google.common.base.Predicates;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
@@ -112,15 +113,17 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
 
     @Override
     public void addColumns() {
-        Column<ProxyRolloutGroup, Button> nameColumn = GridComponentBuilder.addComponentColumn(this, this::buildRolloutGroupLink).setId(ROLLOUT_GROUP_LINK_ID)
+        final Column<ProxyRolloutGroup, Button> nameColumn = GridComponentBuilder.addComponentColumn(this, this::buildRolloutGroupLink).setId(ROLLOUT_GROUP_LINK_ID)
                 .setCaption(i18n.getMessage("header.name")).setHidable(false).setExpandRatio(3);
         GridComponentBuilder.setColumnSortable(nameColumn, "name");
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setHidable(true)
                 .setHidden(true);
 
-        GridComponentBuilder.addIconColumn(this, rolloutGroupStatusIconSupplier::getLabel,
+        final Column<ProxyRolloutGroup, Label> statusColumn = GridComponentBuilder
+                .addIconColumn(this, rolloutGroupStatusIconSupplier::getLabel,
                 SPUILabelDefinitions.VAR_STATUS, i18n.getMessage("header.status")).setHidable(true);
+        GridComponentBuilder.setColumnSortable(statusColumn, "status");
 
         addColumn(rolloutGroup -> DistributionBarHelper
                 .getDistributionBarAsHTMLString(rolloutGroup.getTotalTargetCountStatus().getStatusTotalCountMap()),

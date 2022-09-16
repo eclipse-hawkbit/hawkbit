@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -75,6 +76,8 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.Database;
@@ -162,7 +165,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
         return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable,
-                Collections.singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted)));
+                Collections
+                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
     }
 
     @Override
@@ -170,7 +174,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
-        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted));
+        specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));
 
         return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, specList);
     }
@@ -298,7 +302,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     /**
      * In case the given group is missing conditions or actions, they will be
      * set from the supplied default conditions.
-     * 
+     *
      * @param create
      *            group to check
      * @param conditions
@@ -481,7 +485,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public long count() {
-        return rolloutRepository.count(RolloutSpecification.isDeletedWithDistributionSet(false));
+        return rolloutRepository.count(
+                RolloutSpecification.isDeletedWithDistributionSet(false, Sort.by(Direction.DESC, JpaRollout_.ID)));
     }
 
     @Override
@@ -553,7 +558,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Override
     public Slice<Rollout> findAllWithDetailedStatus(final Pageable pageable, final boolean deleted) {
         final Slice<Rollout> rollouts = JpaManagementHelper.findAllWithoutCountBySpec(rolloutRepository, pageable,
-                Collections.singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted)));
+                Collections
+                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
         setRolloutStatusDetails(rollouts);
         return rollouts;
     }

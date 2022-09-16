@@ -61,6 +61,7 @@ import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.HtmlRenderer;
@@ -274,9 +275,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset"))
                 .setDescriptionGenerator(this::createDSTooltipText).setHidable(true).setExpandRatio(2);
 
-        GridComponentBuilder
+        final Column<ProxyRollout, Label> statusColumn = GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
                 .setHidable(true);
+        GridComponentBuilder.setColumnSortable(statusColumn, "status");
 
         GridComponentBuilder
                 .addIconColumn(this, actionTypeIconSupplier::getLabel, ACTION_TYPE_ID, i18n.getMessage("header.type"))
