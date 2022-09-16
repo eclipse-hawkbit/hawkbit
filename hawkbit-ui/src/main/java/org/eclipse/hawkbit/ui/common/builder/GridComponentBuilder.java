@@ -179,10 +179,24 @@ public final class GridComponentBuilder {
     public static <E extends ProxyNamedEntity> List<Column<E, String>> addCreatedAndModifiedColumns(final Grid<E> grid,
             final VaadinMessageSource i18n) {
         final List<Column<E, String>> columns = new ArrayList<>();
-        columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
+
+        final Column<E, String> createdByColumn = addColumn(i18n, grid, E::getCreatedBy, "header.createdBy",
+                CREATED_BY_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(createdByColumn, "createdBy");
+        columns.add(createdByColumn);
+
+        final Column<E, String> createdDate = addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(createdDate, "createdAt");
+        columns.add(createdDate);
+
+        final Column<E, String> modifiedBy = addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(modifiedBy, "lastModifiedBy");
+        columns.add(modifiedBy);
+
+        final Column<E, String> modifiedDate = addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(modifiedDate, "lastModifiedAt");
+        columns.add(modifiedDate);
+
         return columns;
     }
 
