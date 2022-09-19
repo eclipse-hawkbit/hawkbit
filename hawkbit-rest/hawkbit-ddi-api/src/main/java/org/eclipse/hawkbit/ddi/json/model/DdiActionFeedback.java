@@ -29,9 +29,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * </p>
  *
  * <p>
- * The answer header would look like: { "id": "51659181", "time":
- * "20140511T121314", "status": { "execution": "closed", "result": { "final":
- * "success", "progress": {} } "details": [], } }
+ * The answer header would look like: { "time": "20140511T121314", "status": {
+ * "execution": "closed", "result": { "final": "success", "progress": {} }
+ * "details": [], } }
  * </p>
  *
  */
@@ -45,27 +45,6 @@ public class DdiActionFeedback {
     private final DdiStatus status;
 
     /**
-     * Constructor.
-     *
-     * @param ignoredId
-     *            of the actions the feedback is for
-     * @param time
-     *            of the feedback
-     * @param status
-     *            is the feedback itself
-     * @deprecated The ID is always given by the actionId path variable. Not
-     *             required in message.
-     */
-    @JsonCreator
-    @Deprecated(since = "2021-06-11")
-    @SuppressWarnings("squid:S1133") // must stay for backwards compatibility
-    public DdiActionFeedback(@JsonProperty(value = "id") final Long ignoredId,
-            @JsonProperty(value = "time", required = true) final String time,
-            @JsonProperty(value = "status", required = true) final DdiStatus status) {
-        this(time, status);
-    }
-
-    /**
      * Constructs an action-feedback
      * 
      * @param time
@@ -73,7 +52,9 @@ public class DdiActionFeedback {
      * @param status
      *            status to be appended to the action
      */
-    public DdiActionFeedback(@JsonProperty("time") final String time, @JsonProperty("status") final DdiStatus status) {
+    @JsonCreator
+    public DdiActionFeedback(@JsonProperty(value = "time", required = true) final String time,
+            @JsonProperty(value = "status", required = true) final DdiStatus status) {
         this.time = time;
         this.status = status;
     }

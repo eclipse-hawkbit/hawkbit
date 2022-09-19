@@ -18,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,7 +69,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
 
     protected static final int ARTIFACT_SIZE = 5 * 1024;
-    protected static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Convert JSON to a CBOR equivalent.
@@ -246,72 +247,72 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected String getJsonRejectedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("rejected"));
     }
 
     protected String getJsonRejectedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("rejected"));
     }
 
     protected String getJsonDownloadDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("download"));
     }
 
     protected String getJsonDownloadedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("download"));
     }
 
     protected String getJsonCanceledCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("canceled"));
     }
 
     protected String getJsonCanceledDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("canceled"));
     }
 
     protected String getJsonScheduledCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("scheduled"));
     }
 
     protected String getJsonScheduledDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("scheduled"));
     }
 
     protected String getJsonResumedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("resumed"));
     }
 
     protected String getJsonResumedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("resumed"));
     }
 
     protected String getJsonProceedingCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("proceeding"));
     }
 
     protected String getJsonProceedingDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("proceeding"));
     }
 
     protected String getJsonClosedCancelActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("closed"));
     }
 
     protected String getJsonClosedDeploymentActionFeedback() throws JsonProcessingException {
         return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE,
-                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+                Collections.singletonList("closed"));
     }
 
     protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
@@ -320,10 +321,16 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
     }
 
+    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus, final DdiResult ddiResult,
+            final List<String> messages) throws JsonProcessingException {
+        final DdiStatus ddiStatus = new DdiStatus(executionStatus, ddiResult, messages);
+        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+    }
+
     protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
             final DdiResult.FinalResult finalResult, final List<String> messages) throws JsonProcessingException {
         final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)),
                 messages);
-        return objectMapper.writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
+        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
     }
 }

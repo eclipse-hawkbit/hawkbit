@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 /**
- * Test serializability of DDI api model 'DdiActionFeedback'
+ * Test serialization of DDI api model 'DdiActionFeedback'
  */
 @Feature("Unit Tests - Direct Device Integration API")
 @Story("Serialization of DDI api Models")
@@ -37,13 +38,13 @@ public class DdiActionFeedbackTest {
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String time = "20190809T121314";
-        DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, Lists.emptyList());
-        DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, ddiStatus);
+        final String time = Instant.now().toString();
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, Lists.emptyList());
+        final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, ddiStatus);
 
         // Test
-        String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
-        DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback,
+        final String serializedDdiActionFeedback = mapper.writeValueAsString(ddiActionFeedback);
+        final DdiActionFeedback deserializedDdiActionFeedback = mapper.readValue(serializedDdiActionFeedback,
                 DdiActionFeedback.class);
 
         assertThat(serializedDdiActionFeedback).contains(time);
@@ -52,33 +53,10 @@ public class DdiActionFeedbackTest {
     }
 
     @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
-        // Setup
-        String serializedDdiActionFeedback = "{\"id\":1, \"time\":\"20190809T121314\", \"status\":{\"execution\":\"closed\", \"result\":null, \"details\":[]}, \"unknownProperty\": \"test\"}";
-
-        // Test
-        DdiActionFeedback ddiActionFeedback = mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class);
-
-        assertThat(ddiActionFeedback.getTime()).matches("20190809T121314");
-    }
-
-    @Test
-    @Description("Verify the correct deserialization of a model with a additional unknown property")
-    public void shouldDeserializeObjectWithoutIdProperty() throws IOException {
-        // Setup
-        String serializedDdiActionFeedback = "{\"time\":\"20190809T121314\", \"status\":{\"execution\":\"closed\", \"result\":null, \"details\":[]}}";
-
-        // Test
-        DdiActionFeedback ddiActionFeedback = mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class);
-
-        assertThat(ddiActionFeedback.getTime()).matches("20190809T121314");
-    }
-    @Test
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiActionFeedback = "{\"id\": [1],\"time\":\"20190809T121314\",\"status\":{\"execution\":\"closed\",\"result\":null,\"details\":[]}}";
+        final String serializedDdiActionFeedback = "{\"time\":\"20190809T121314\",\"status\":{\"execution\": [closed],\"result\":null,\"details\":[]}}";
 
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
                 () -> mapper.readValue(serializedDdiActionFeedback, DdiActionFeedback.class));

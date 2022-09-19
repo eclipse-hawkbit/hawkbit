@@ -21,6 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,7 +186,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
                 new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Some feedback"));
-        final DdiActionFeedback feedback = new DdiActionFeedback("20220815T121314", ddiStatus);
+        final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
 
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
@@ -396,9 +397,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
                 new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Feedback message"));
-        final DdiActionFeedback feedback = new DdiActionFeedback("20220815T121314", ddiStatus);
-
-        System.out.println(objectMapper.writeValueAsString(feedback));
+        final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
 
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION

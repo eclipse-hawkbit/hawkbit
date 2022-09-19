@@ -564,15 +564,18 @@ public interface TargetManagement {
     Page<Target> findByRsqlAndTag(@NotNull Pageable pageable, @NotNull String rsqlParam, long tagId);
 
     /**
-     * Toggles {@linkplain TargetTag} assignment to given {@linkplain Target}s by means
-     * that if some (or all) of the targets in the list have the {@link Tag} not
-     * yet assigned, they will be. Only if all of theme have the tag already
-     * assigned they will be removed instead.
+     * Toggles {@link TargetTag} assignment to given {@link Target}s by means that
+     * if some (or all) of the targets in the list have the {@link Tag} not yet
+     * assigned, they will be. Only if all of them have the tag already assigned
+     * they will be removed instead.
      *
-     * @param controllerIds to toggle for
-     * @param tagName       to toggle
+     * @param controllerIds
+     *            to toggle for
+     * @param tagName
+     *            to toggle
      * @return TagAssigmentResult with all metadata of the assignment outcome.
-     * @throws EntityNotFoundException if tag with given name does not exist
+     * @throws EntityNotFoundException
+     *             if tag with given name does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     TargetTagAssignmentResult toggleTagAssignment(@NotEmpty Collection<String> controllerIds, @NotEmpty String tagName);

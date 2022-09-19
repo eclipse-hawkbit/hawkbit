@@ -21,8 +21,6 @@
    
    <properties>
       <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
-      <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
-      <jaxb-api.version>2.3.0</jaxb-api.version>
    </properties>
    
    <dependencies>
@@ -73,7 +71,6 @@
       <dependency>
          <groupId>javax.xml.bind</groupId>
          <artifactId>jaxb-api</artifactId>
-         <version>${jaxb-api.version}</version>
       </dependency>
       
       <!-- Test -->
@@ -101,7 +98,6 @@
          <plugin>
             <groupId>com.ethlo.persistence.tools</groupId>
             <artifactId>eclipselink-maven-plugin</artifactId>
-            <version>${eclipselink.maven.plugin.version}</version>
             <executions>
                <execution>
                   <id>modelgen</id>

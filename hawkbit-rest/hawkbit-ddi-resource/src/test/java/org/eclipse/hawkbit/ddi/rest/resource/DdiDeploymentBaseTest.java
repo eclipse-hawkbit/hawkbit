@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Condition;
-import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -695,10 +694,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
 
-        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null,
+        final String missingResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, (DdiResult) null,
                 Collections.singletonList("test"));
-        final String missingResultInFeedback = objectMapper
-                .writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
         postDeploymentFeedback("1080", action.getId(), missingResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
                 .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
@@ -719,11 +716,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
-
-        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, new DdiResult(null, null),
+        final String missingFinishedResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(null, null),
                 Collections.singletonList("test"));
-        final String missingFinishedResultInFeedback = objectMapper
-                .writeValueAsString(new DdiActionFeedback("20220815T121314", ddiStatus));
 
         postDeploymentFeedback("1080", action.getId(), missingFinishedResultInFeedback, status().isBadRequest())
                 .andExpect(jsonPath("$.*", hasSize(3)))
