@@ -65,7 +65,7 @@ public class BaseAmqpServiceTest {
     @Description("Tests invalid null message content")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 0) })
     public void convertMessageWithNullContent() {
-        final Message message = createMessage(null);
+        final Message message = createMessage("".getBytes());
         assertThatExceptionOfType(MessageConversionException.class)
                 .as("Expected MessageConversionException for invalid JSON")
                 .isThrownBy(() -> baseAmqpService.convertMessage(message, DmfActionUpdateStatus.class));

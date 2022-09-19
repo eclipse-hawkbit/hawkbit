@@ -32,6 +32,7 @@ public interface ArtifactEncryption {
      *
      * @return secrets key/value pairs
      * @throws ArtifactEncryptionFailedException
+     *             thrown in case of an error while generating secrets
      */
     Map<String, String> generateSecrets();
 
@@ -44,6 +45,7 @@ public interface ArtifactEncryption {
      *            artifact stream to encrypt
      * @return encrypted input stream
      * @throws ArtifactEncryptionFailedException
+     *             thrown in case of an error while encrypting the provided stream
      */
     InputStream encryptStream(final Map<String, String> secrets, final InputStream stream);
 
@@ -56,6 +58,7 @@ public interface ArtifactEncryption {
      *            artifact stream to decrypt
      * @return decrypted input stream
      * @throws ArtifactEncryptionFailedException
+     *             thrown in case of an error while decrypting the provided stream
      */
     InputStream decryptStream(final Map<String, String> secrets, final InputStream stream);
 

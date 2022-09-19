@@ -188,10 +188,10 @@ public class JpaTargetManagement implements TargetManagement {
 
         final JpaTarget updatedTarget = JpaManagementHelper.touch(entityManager, targetRepository, target);
 
-        final List<TargetMetadata> createdMetadata = Collections.unmodifiableList(md.stream()
+        final List<TargetMetadata> createdMetadata = md.stream()
                 .map(meta -> targetMetadataRepository
                         .save(new JpaTargetMetadata(meta.getKey(), meta.getValue(), updatedTarget)))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toUnmodifiableList());
 
         // TargetUpdatedEvent is not sent within the touch() method due to the
         // "lastModifiedAt" field being ignored in JpaTarget
@@ -228,12 +228,12 @@ public class JpaTargetManagement implements TargetManagement {
         // target indirectly
         final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
                 getByControllerIdAndThrowIfNotFound(controllerId));
-        final JpaTargetMetadata matadata = targetMetadataRepository.save(updatedMetadata);
+        final JpaTargetMetadata metadata = targetMetadataRepository.save(updatedMetadata);
         // target update event is set to ignore "lastModifiedAt" field so it is
         // not send automatically within the touch() method
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
-        return matadata;
+        return metadata;
     }
 
     @Override
@@ -247,7 +247,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
                 getByControllerIdAndThrowIfNotFound(controllerId));
         targetMetadataRepository.deleteById(metadata.getId());
-        // target update event is set to ignore "lastModifiedAt" field so it is
+        // target update event is set to ignore "lastModifiedAt" field, so it is
         // not send automatically within the touch() method
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetUpdatedEvent(target, eventPublisherHolder.getApplicationId()));
@@ -420,14 +420,6 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFilters(final Collection<TargetUpdateStatus> status, final Boolean overdueState,
-            final String searchText, final Long installedOrAssignedDistributionSetId,
-            final Boolean selectTargetWithNoTag, final String... tagNames) {
-        return countByFilters(new FilterParams(status, overdueState, searchText, installedOrAssignedDistributionSetId,
-                selectTargetWithNoTag, tagNames));
-    }
-
-    @Override
     public long countByFilters(final FilterParams filterParams) {
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
         return JpaManagementHelper.countBySpec(targetRepository, specList);
@@ -590,8 +582,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         allTargets.forEach(target -> target.addTag(tag));
 
-        final List<Target> result = Collections
-                .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList()));
+        final List<Target> result = allTargets.stream().map(targetRepository::save)
+                .collect(Collectors.toUnmodifiableList());
 
         // No reason to save the tag
         entityManager.detach(tag);

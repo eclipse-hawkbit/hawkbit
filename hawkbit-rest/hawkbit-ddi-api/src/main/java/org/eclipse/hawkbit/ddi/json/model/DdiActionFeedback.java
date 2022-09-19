@@ -29,21 +29,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * </p>
  *
  * <p>
- * The answer header would look like: { "id": "51659181", "time":
- * "20140511T121314", "status": { "execution": "closed", "result": { "final":
- * "success", "progress": {} } "details": [], } }
+ * The answer header would look like: { "time": "20140511T121314", "status": {
+ * "execution": "closed", "result": { "final": "success", "progress": {} }
+ * "details": [], } }
  * </p>
  *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActionFeedback {
-    /**
-     * @deprecated
-     * This ID is always given by the actionId path variable.
-     * Will be removed in future versions.
-     */
-    @Deprecated
-    private final Long id;
+
     private final String time;
 
     @NotNull
@@ -51,25 +45,18 @@ public class DdiActionFeedback {
     private final DdiStatus status;
 
     /**
-     * Constructor.
-     *
-     * @param id
-     *            of the actions the feedback is for
+     * Constructs an action-feedback
+     * 
      * @param time
-     *            of the feedback
+     *            time of feedback
      * @param status
-     *            is the feedback itself
+     *            status to be appended to the action
      */
     @JsonCreator
-    public DdiActionFeedback(@JsonProperty("id") final Long id, @JsonProperty("time") final String time,
-            @JsonProperty("status") final DdiStatus status) {
-        this.id = id;
+    public DdiActionFeedback(@JsonProperty(value = "time", required = true) final String time,
+            @JsonProperty(value = "status", required = true) final DdiStatus status) {
         this.time = time;
         this.status = status;
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getTime() {
@@ -82,7 +69,7 @@ public class DdiActionFeedback {
 
     @Override
     public String toString() {
-        return "ActionFeedback [id=" + id + ", time=" + time + ", status=" + status + "]";
+        return "ActionFeedback [time=" + time + ", status=" + status + "]";
     }
 
 }
