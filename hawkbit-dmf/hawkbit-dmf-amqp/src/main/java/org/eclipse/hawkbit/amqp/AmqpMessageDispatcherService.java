@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.amqp;
 
 import static org.eclipse.hawkbit.repository.RepositoryConstants.MAX_ACTION_COUNT;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED;
 
 import java.net.URI;
 import java.util.Collections;
@@ -32,16 +33,19 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
+import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -89,6 +93,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private final DistributionSetManagement distributionSetManagement;
     private final DeploymentManagement deploymentManagement;
     private final SoftwareModuleManagement softwareModuleManagement;
+    private final TenantConfigurationManagement tenantConfigurationManagement;
 
     /**
      * Constructor.
@@ -110,13 +115,17 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      *            cluster node
      * @param distributionSetManagement
      *            to retrieve modules
+     * @param tenantConfigurationManagement
+     *            to access tenant configuration
+     *
      */
     protected AmqpMessageDispatcherService(final RabbitTemplate rabbitTemplate,
-            final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
-            final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
-            final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
-            final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
+           final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
+           final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
+           final TargetManagement targetManagement, final ServiceMatcher serviceMatcher,
+           final DistributionSetManagement distributionSetManagement,
+           final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
+           final TenantConfigurationManagement tenantConfigurationManagement) {
         super(rabbitTemplate);
         this.artifactUrlHandler = artifactUrlHandler;
         this.amqpSenderService = amqpSenderService;
@@ -127,6 +136,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         this.distributionSetManagement = distributionSetManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.deploymentManagement = deploymentManagement;
+        this.tenantConfigurationManagement = tenantConfigurationManagement;
     }
 
     /**
@@ -182,8 +192,13 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         distributionSetManagement.get(assignedEvent.getDistributionSetId()).ifPresent(ds -> {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
-            targets.forEach(target -> sendUpdateMessageToTarget(
-                    assignedEvent.getActions().get(target.getControllerId()), target, softwareModules));
+
+            if (!targets.isEmpty() && isBatchAssignmentsEnabled()) {
+                sendUpdateMessageToTargets(assignedEvent.getActions(), targets, softwareModules);
+            } else {
+                targets.forEach(target -> sendUpdateMessageToTarget(
+                        assignedEvent.getActions().get(target.getControllerId()), target, softwareModules));
+            }
         });
     }
 
@@ -500,4 +515,59 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 PageRequest.of(0, RepositoryConstants.MAX_META_DATA_COUNT), module.getId()).getContent();
     }
 
+    private void sendUpdateMessageToTargets(final Map<String, ActionProperties> actions, final List<Target> targets,
+                                            final Map<SoftwareModule, List<SoftwareModuleMetadata>> modules) {
+
+        List<DmfTarget> dmfTargets = targets.stream().filter(target -> IpUtil.isAmqpUri(target.getAddress()))
+                .map(t -> convertToDmfTarget(t, actions.get(t.getControllerId()).getId())).collect(Collectors.toList());
+
+        final DmfBatchDownloadAndUpdateRequest batchRequest = new DmfBatchDownloadAndUpdateRequest();
+        batchRequest.setTimestamp(System.currentTimeMillis());
+        batchRequest.addTargets(dmfTargets);
+
+        //due to the fact that all targets in a batch use the same set of software modules we don't generate
+        // target-specific urls
+        Target firstTarget = targets.get(0);
+        if (modules != null) {
+            modules.entrySet().forEach(entry ->
+                    batchRequest.addSoftwareModule(convertToAmqpSoftwareModule(firstTarget, entry)));
+        }
+
+        // we use only the first action when constructing message as Tenant and action type are the same
+        // since all actions have the same trigger
+        final ActionProperties firstAction = actions.values().iterator().next();
+        final Message message = getMessageConverter().toMessage(batchRequest,
+                    createMessagePropertiesBatch(firstAction.getTenant(), getBatchEventTopicForAction(firstAction)));
+            amqpSenderService.sendMessage(message, firstTarget.getAddress());
+    }
+
+    protected DmfTarget convertToDmfTarget(final Target target, final Long actionId) {
+        DmfTarget dmfTarget = new DmfTarget();
+        dmfTarget.setActionId(actionId);
+        dmfTarget.setControllerId(target.getControllerId());
+        dmfTarget.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+        return dmfTarget;
+    }
+
+    private static MessageProperties createMessagePropertiesBatch(final String tenant, final EventTopic topic) {
+        final MessageProperties messageProperties = new MessageProperties();
+        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.CONTENT_TYPE, MessageProperties.CONTENT_TYPE_JSON);
+        messageProperties.setHeader(MessageHeaderKey.TENANT, tenant);
+
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, topic);
+        messageProperties.setHeader(MessageHeaderKey.TYPE, MessageType.EVENT);
+        return messageProperties;
+    }
+
+    public boolean isBatchAssignmentsEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+                .getConfigurationValue(BATCH_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    }
+
+    private static EventTopic getBatchEventTopicForAction(final ActionProperties action) {
+        return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
+                ? EventTopic.BATCH_DOWNLOAD
+                : EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
+    }
 }

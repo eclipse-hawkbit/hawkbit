@@ -103,8 +103,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vaadin.spring.http.HttpService;
 import org.vaadin.spring.security.annotation.EnableVaadinSharedSecurity;
 import org.vaadin.spring.security.config.VaadinSharedSecurityConfiguration;
@@ -455,8 +453,8 @@ public class SecurityManagedConfiguration {
             http.csrf().disable();
             http.anonymous().disable();
 
-            http.antMatcher("/**/downloadId/**")
-                    .addFilterBefore(downloadIdAuthenticationFilter, FilterSecurityInterceptor.class);
+            http.antMatcher("/**/downloadId/**").addFilterBefore(downloadIdAuthenticationFilter,
+                    FilterSecurityInterceptor.class);
             http.authorizeRequests().anyRequest().authenticated().and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         }
@@ -525,7 +523,7 @@ public class SecurityManagedConfiguration {
                     .disable();
 
             if (securityProperties.getCors().isEnabled()) {
-                httpSec = httpSec.cors().and();
+                httpSec = httpSec.cors().configurationSource(reuest -> corsConfiguration()).and();
             }
 
             if (securityProperties.isRequireSsl()) {
@@ -585,18 +583,15 @@ public class SecurityManagedConfiguration {
 
         @Bean
         @ConditionalOnProperty(prefix = "hawkbit.server.security.cors", name = "enabled", matchIfMissing = false)
-        CorsConfigurationSource corsConfigurationSource() {
-            final CorsConfiguration restCorsConfiguration = new CorsConfiguration();
+        CorsConfiguration corsConfiguration() {
+            final CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-            restCorsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
-            restCorsConfiguration.setAllowCredentials(true);
-            restCorsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
-            restCorsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
+            corsConfiguration.setAllowedOrigins(securityProperties.getCors().getAllowedOrigins());
+            corsConfiguration.setAllowCredentials(true);
+            corsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
+            corsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
 
-            final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/rest/**", restCorsConfiguration);
-
-            return source;
+            return corsConfiguration;
         }
     }
 

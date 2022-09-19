@@ -30,7 +30,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -140,15 +139,6 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
     }
 
     @Override
-    public ResponseEntity<List<MgmtDistributionSet>> getAssignedDistributionSets(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId) {
-        return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(distributionSetManagement
-                .findByTag(PageRequest.of(0, MgmtRestConstants.REQUEST_PARAMETER_PAGING_MAX_LIMIT),
-                        distributionsetTagId)
-                .getContent()));
-    }
-
-    @Override
     public ResponseEntity<PagedList<MgmtDistributionSet>> getAssignedDistributionSets(
             @PathVariable("distributionsetTagId") final Long distributionsetTagId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -204,7 +194,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         LOG.debug("Assign DistributionSet {} for ds tag {}", assignedDSRequestBodies.size(), distributionsetTagId);
         final List<DistributionSet> assignedDs = this.distributionSetManagement
                 .assignTag(findDistributionSetIds(assignedDSRequestBodies), distributionsetTagId);
-        LOG.debug("Assignd DistributionSet {}", assignedDs.size());
+        LOG.debug("Assigned DistributionSet {}", assignedDs.size());
         return ResponseEntity.ok(MgmtDistributionSetMapper.toResponseDistributionSets(assignedDs));
     }
 
@@ -227,26 +217,4 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
         return assignedDistributionSetRequestBodies.stream()
                 .map(MgmtAssignedDistributionSetRequestBody::getDistributionSetId).collect(Collectors.toList());
     }
-
-    @Override
-    public ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignmentUnpaged(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        return toggleTagAssignment(distributionsetTagId, assignedDSRequestBodies);
-    }
-
-    @Override
-    public ResponseEntity<List<MgmtDistributionSet>> assignDistributionSetsUnpaged(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @RequestBody final List<MgmtAssignedDistributionSetRequestBody> assignedDSRequestBodies) {
-        return assignDistributionSets(distributionsetTagId, assignedDSRequestBodies);
-    }
-
-    @Override
-    public ResponseEntity<Void> unassignDistributionSetUnpaged(
-            @PathVariable("distributionsetTagId") final Long distributionsetTagId,
-            @PathVariable("distributionsetId") final Long distributionsetId) {
-        return unassignDistributionSet(distributionsetTagId, distributionsetId);
-    }
-
 }
