@@ -549,15 +549,15 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, testType.getId())
                 .getContent()).as("Found modules with given module type and the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
-                        new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(unassigned, false));
+                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(unassigned, false));
 
         // without any filter
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, null)
                 .getContent()).as("Found modules with the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
-                        new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(four, true),
+                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(four, true),
                         new AssignedSoftwareModule(unassigned, false));
     }
 

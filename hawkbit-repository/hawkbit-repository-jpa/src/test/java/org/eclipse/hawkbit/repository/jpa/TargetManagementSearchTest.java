@@ -573,7 +573,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
                 new FilterParams(null, null, null, null, Boolean.FALSE));
 
-        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
+        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e1.getId(), e2.getId());
 
         assertThat(result.getNumberOfElements()).isEqualTo(9);
         final List<Target> expected = new ArrayList<>();
@@ -626,7 +626,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
                 new FilterParams(null, Boolean.TRUE, null, null, Boolean.FALSE));
 
-        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
+        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e1.getId(), e2.getId());
 
         assertThat(result.getNumberOfElements()).isEqualTo(9);
         final List<Target> expected = new ArrayList<>();
