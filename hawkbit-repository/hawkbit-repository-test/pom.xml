@@ -36,6 +36,11 @@
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-security-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
          <artifactId>hawkbit-artifact-repository-filesystem</artifactId>
          <version>${project.version}</version>
       </dependency>

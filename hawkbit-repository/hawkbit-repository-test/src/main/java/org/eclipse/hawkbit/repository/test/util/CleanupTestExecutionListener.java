@@ -24,10 +24,12 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
 
     @Override
     public void afterTestMethod(final TestContext testContext) throws Exception {
-
-        final ApplicationContext applicationContext = testContext.getApplicationContext();
-        new JpaTestRepositoryManagement(applicationContext.getBean(TenantAwareCacheManager.class),
-                applicationContext.getBean(SystemSecurityContext.class),
-                applicationContext.getBean(SystemManagement.class)).clearTestRepository();
+        WithSpringAuthorityRule.runAsPrivileged(() -> {
+            final ApplicationContext applicationContext = testContext.getApplicationContext();
+            new JpaTestRepositoryManagement(applicationContext.getBean(TenantAwareCacheManager.class),
+                    applicationContext.getBean(SystemSecurityContext.class),
+                    applicationContext.getBean(SystemManagement.class)).clearTestRepository();
+            return null;
+        });
     }
 }

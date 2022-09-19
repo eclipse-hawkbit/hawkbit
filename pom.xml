@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.3.7.RELEASE</version>
+      <version>2.3.12.RELEASE</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -128,12 +128,11 @@
 
    <properties>
 
-      <java.version>1.8</java.version>
-      <!-- Developer preview: java.version = 11 -->
+      <java.version>11</java.version>
 
-      <spring.boot.version>2.3.7.RELEASE</spring.boot.version>
-      <spring-framework.version>5.2.20.RELEASE</spring-framework.version>
-      <spring.cloud.version>Hoxton.SR7</spring.cloud.version>
+      <spring.boot.version>2.3.12.RELEASE</spring.boot.version>
+      <spring-framework.version>5.2.22.RELEASE</spring-framework.version>
+      <spring.cloud.version>Hoxton.SR12</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
@@ -155,15 +154,27 @@
       <vaadin.gwt-user.version>2.8.2</vaadin.gwt-user.version>
       <!-- Vaadin versions - END -->
 
+      <!-- ************************ -->
+      <!-- Maven Plugins -->
+      <!-- ************************ -->
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
-      <maven.site.plugin.version>3.9.0</maven.site.plugin.version>
+      <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
+      <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.0.0-M7</maven.failsafe.plugin.version>
+      <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
+      <!-- ************************ -->
+      <!-- Maven Surefire settings -->
+      <!-- ************************ -->
+      <surefire.forkcount>1</surefire.forkcount>
 
-      <!-- Misc libraries versions - START -->      
+      <!-- Misc libraries versions - START -->
       <cron-utils.version>9.1.6</cron-utils.version>
       <jsoup.version>1.15.3</jsoup.version>
       <allure.version>2.13.6</allure.version>
-      <eclipselink.version>2.7.9</eclipselink.version>
+      <eclipselink.version>2.7.11</eclipselink.version>
+      <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
+      <jaxb-api.version>2.3.0</jaxb-api.version>
       <gwtmockito.version>1.1.8</gwtmockito.version>
       <guava.version>30.1.1-jre</guava.version>
       <javax.el-api.version>2.2.4</javax.el-api.version>
@@ -198,13 +209,7 @@
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
          ${project.basedir}/../../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml
       </sonar.coverage.jacoco.xmlReportPaths>
-
       <!-- Sonar - END -->
-
-      <!-- ************************ -->
-      <!-- Maven Surefire settings -->
-      <!-- ************************ -->
-      <surefire.forkcount>1</surefire.forkcount>
    </properties>
 
    <build>
@@ -225,6 +230,7 @@
          <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-enforcer-plugin</artifactId>
+            <version>${maven.enforcer.plugin.version}</version>
             <executions>
                <execution>
                   <!-- Make sure that only non-snapshot versions are used
@@ -404,6 +410,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-surefire-plugin</artifactId>
+               <version>${maven.surefire.plugin.version}</version>
                <configuration>
                   <systemPropertyVariables>
                      <!-- Set output directory according to allure-framework recommendation -->
@@ -415,9 +422,7 @@
                   <useSystemClassLoader>false</useSystemClassLoader>
                   <reuseForks>true</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
-                  <argLine>
-                     ${jacoco.agent.ut.arg}
-                  </argLine>
+                  <argLine>${jacoco.agent.ut.arg}</argLine>
                   <properties>
                      <property>
                         <name>listener</name>
@@ -437,6 +442,7 @@
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-failsafe-plugin</artifactId>
+               <version>${maven.failsafe.plugin.version}</version>
                <configuration>
                   <reuseForks>false</reuseForks>
                   <forkCount>${surefire.forkcount}</forkCount>
@@ -476,6 +482,11 @@
                <groupId>org.bsc.maven</groupId>
                <artifactId>maven-processor-plugin</artifactId>
                <version>${maven.processor.plugin.version}</version>
+            </plugin>
+            <plugin>
+               <groupId>com.ethlo.persistence.tools</groupId>
+               <artifactId>eclipselink-maven-plugin</artifactId>
+               <version>${eclipselink.maven.plugin.version}</version>
             </plugin>
          </plugins>
       </pluginManagement>
@@ -653,9 +664,15 @@
                <exclusion>
                   <groupId>javax.validation</groupId>
                   <artifactId>validation-api</artifactId>
-               </exclusion>               
+               </exclusion>
             </exclusions>
-          </dependency>           
+         </dependency>
+         <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+            <version>${jaxb-api.version}</version>
+         </dependency>
+
          <!-- Spring -->
          <dependency>
             <groupId>org.springframework.cloud</groupId>

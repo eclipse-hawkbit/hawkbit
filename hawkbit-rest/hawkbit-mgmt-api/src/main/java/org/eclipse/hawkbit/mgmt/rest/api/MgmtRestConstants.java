@@ -121,15 +121,6 @@ public final class MgmtRestConstants {
 
     /**
      * The tag URL mapping rest resource.
-     * 
-     * @deprecated {@link #TARGET_TAG_TARGETS_REQUEST_MAPPING} is preferred as
-     *             this resource on GET supports paging
-     */
-    @Deprecated
-    public static final String DEPRECATAED_TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/targets";
-
-    /**
-     * The tag URL mapping rest resource.
      */
     public static final String TARGET_TAG_TARGETS_REQUEST_MAPPING = "/{targetTagId}/assigned";
 
@@ -143,15 +134,6 @@ public final class MgmtRestConstants {
      * The target URL mapping rest resource.
      */
     public static final String TARGET_FILTER_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/targetfilters";
-
-    /**
-     * The deprecated tag URL mapping rest resource.
-     * 
-     * @deprecated {@link #DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING}
-     *             is preferred as this resource on GET supports paging
-     */
-    @Deprecated
-    public static final String DEPRECATED_DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/distributionsets";
 
     /**
      * The tag URL mapping rest resource.

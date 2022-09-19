@@ -56,8 +56,10 @@ public interface TargetType extends NamedEntity {
     }
 
     /**
-     * Unassigns a distribution set type from target types
+     * Unassigns a {@link DistributionSetType} from {@link TargetType}
+     * 
      * @param dsTypeId
+     *            that will be removed from {@link TargetType}
      * @return the resulting target type
      */
     TargetType removeDistributionSetType(final Long dsTypeId);
