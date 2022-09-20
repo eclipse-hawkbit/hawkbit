@@ -185,7 +185,7 @@ public abstract class JsonBuilder {
         return builder.toString();
 
     }
-
+    
     /**
      * builds a json string for the feedback for the execution "proceeding".
      *
@@ -517,8 +517,8 @@ public abstract class JsonBuilder {
                 }
             });
 
-            final JSONObject json = new JSONObject().put("name", type.getName()).put("description", type.getDescription())
-                    .put("colour", type.getColour());
+            final JSONObject json = new JSONObject().put("name", type.getName())
+                    .put("description", type.getDescription()).put("colour", type.getColour());
 
             if (dsTypes.length() != 0) {
                 json.put("compatibledistributionsettypes", dsTypes);

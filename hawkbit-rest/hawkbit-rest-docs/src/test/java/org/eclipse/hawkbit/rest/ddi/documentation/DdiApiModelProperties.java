@@ -38,6 +38,8 @@ final class DdiApiModelProperties {
 
     static final String FEEDBACK_ACTION_ID = "(@deprecated) id of the action";
 
+    static final String FEEDBACK_ACTION_TIME = "timestamp of the action";
+
     static final String CANCEL_ACTION = "action that needs to be canceled";
 
     static final String ACTION_ID_CANCELED = "id of the action that needs to be canceled (typically identical to id field on the cancel action itself)";

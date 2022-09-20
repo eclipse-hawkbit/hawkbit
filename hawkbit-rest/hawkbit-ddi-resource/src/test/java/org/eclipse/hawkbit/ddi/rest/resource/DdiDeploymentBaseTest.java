@@ -27,6 +27,8 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Condition;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
@@ -45,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
@@ -81,8 +82,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // get deployment base
-        performGet(DEPLOYMENT_BASE,
-                MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
+        performGet(DEPLOYMENT_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
                 tenantAware.getCurrentTenant(), target.getControllerId(), action.getId().toString());
 
         final Long softwareModuleId = distributionSet.getModules().stream().findAny().get().getId();
@@ -92,8 +92,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 status().isOk(), tenantAware.getCurrentTenant(), target.getControllerId(),
                 String.valueOf(softwareModuleId));
 
-        final byte[] feedback = jsonToCbor(
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "proceeding"));
+        final byte[] feedback = jsonToCbor(getJsonProceedingDeploymentActionFeedback());
 
         postDeploymentFeedback(MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), target.getControllerId(),
                 action.getId(), feedback, status().isOk());
@@ -164,8 +163,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         // Run test
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                DEFAULT_CONTROLLER_ID)
-                        .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                         .andExpect(jsonPath("$._links.deploymentBase.href",
                                 startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -262,8 +260,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                DEFAULT_CONTROLLER_ID)
-                        .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                         .andExpect(jsonPath("$._links.deploymentBase.href",
                                 startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -274,9 +271,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds,
-                visibleMetadataOsKey, visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt",
-                "attempt", getOsModule(findDistributionSetByAction));
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaType.APPLICATION_JSON, ds, visibleMetadataOsKey,
+                visibleMetadataOsValue, artifact, artifactSignature, action.getId(), "attempt", "attempt",
+                getOsModule(findDistributionSetByAction));
 
         // Retrieved is reported
         final List<ActionStatus> actionStatusMessages = deploymentManagement
@@ -301,8 +298,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
-                ActionType.TIMEFORCED)
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                ActionType.TIMEFORCED).getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -321,8 +317,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                DEFAULT_CONTROLLER_ID)
-                        .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                         .andExpect(jsonPath("$._links.deploymentBase.href",
                                 startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -337,9 +332,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 artifactSignature, action.getId(),
                 findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
 
-        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact,
-                artifactSignature, action.getId(),
-                findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced", "forced");
+        getAndVerifyDeploymentBasePayload(DEFAULT_CONTROLLER_ID, MediaTypes.HAL_JSON, ds, artifact, artifactSignature,
+                action.getId(), findDistributionSetByAction.findFirstModuleByType(osType).get().getId(), "forced",
+                "forced");
 
         // Retrieved is reported
         final Iterable<ActionStatus> actionStatusMessages = deploymentManagement
@@ -368,8 +363,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = createTargetAndAssertNoActiveActions();
 
         final List<Target> saved = assignDistributionSet(ds.getId(), savedTarget.getControllerId(),
-                ActionType.DOWNLOAD_ONLY)
-                .getAssignedEntity().stream().map(Action::getTarget).collect(Collectors.toList());
+                ActionType.DOWNLOAD_ONLY).getAssignedEntity().stream().map(Action::getTarget)
+                        .collect(Collectors.toList());
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(1);
 
         final Action action = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
@@ -388,8 +383,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final long current = System.currentTimeMillis();
         performGet(CONTROLLER_BASE, MediaTypes.HAL_JSON, status().isOk(), tenantAware.getCurrentTenant(),
-                DEFAULT_CONTROLLER_ID)
-                        .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
+                DEFAULT_CONTROLLER_ID).andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
                         .andExpect(jsonPath("$._links.deploymentBase.href",
                                 startsWith(deploymentBaseLink(DEFAULT_CONTROLLER_ID, uaction.getId().toString()))));
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
@@ -472,7 +466,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
 
-        final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), "proceeding");
+        final String feedback = getJsonProceedingDeploymentActionFeedback();
         // assign distribution set creates an action status, so only 99 left
         for (int i = 0; i < 99; i++) {
             postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isOk());
@@ -497,7 +491,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
             messages.add(String.valueOf(i));
         }
 
-        final String feedback = JsonBuilder.deploymentActionFeedback(action.getId().toString(), "proceeding", "none",
+        final String feedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
                 null, messages);
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
     }
@@ -521,22 +515,22 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.findByUpdateStatus(PageRequest.of(0, 10), TargetUpdateStatus.UNKNOWN)).hasSize(2);
 
         // action1 done
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId1,
-                JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId1, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 2, Optional.of(ds1));
         assertStatusMessagesCount(4);
 
         // action2 done
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId2,
-                JsonBuilder.deploymentActionFeedback(actionId2.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId2, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.PENDING, 1, Optional.of(ds2));
         assertStatusMessagesCount(5);
 
         // action3 done
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId3,
-                JsonBuilder.deploymentActionFeedback(actionId3.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId3, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
 
         findTargetAndAssertUpdateStatus(Optional.of(ds3), TargetUpdateStatus.IN_SYNC, 0, Optional.of(ds3));
         assertStatusMessagesCount(6);
@@ -555,7 +549,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent().get(0);
 
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(),
-                JsonBuilder.deploymentActionFeedback(action.getId().toString(), "closed", "failure", "error message"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE,
+                        Collections.singletonList("Error message")),
                 status().isOk());
 
         findTargetAndAssertUpdateStatus(Optional.empty(), TargetUpdateStatus.ERROR, 0, Optional.empty());
@@ -568,8 +563,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 Collections.singletonList(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get()));
         final Action action2 = deploymentManagement.findActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID).getContent()
                 .get(0);
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action2.getId(),
-                JsonBuilder.deploymentActionFeedback(action2.getId().toString(), "closed", "SUCCESS"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action2.getId(), getJsonClosedCancelActionFeedback(),
+                status().isOk());
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.IN_SYNC, 0, Optional.of(ds));
         assertTargetCountByStatus(0, 0, 1);
         assertThat(deploymentManagement.findInActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID)).hasSize(2);
@@ -591,33 +586,33 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // Now valid Feedback
         for (int i = 0; i < 4; i++) {
-            postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                    JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding"), status().isOk());
+            postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonProceedingDeploymentActionFeedback(),
+                    status().isOk());
             assertActionStatusCount(i + 2, i);
 
         }
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "scheduled"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonScheduledDeploymentActionFeedback(),
+                status().isOk());
         assertActionStatusCount(6, 5);
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "resumed"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonResumedDeploymentActionFeedback(),
+                status().isOk());
         assertActionStatusCount(7, 6);
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "canceled"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonCanceledDeploymentActionFeedback(),
+                status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.PENDING, 1);
         assertActionStatusCount(8, 7, 0, 0, 1);
         assertTargetCountByStatus(1, 0, 0);
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "rejected"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonRejectedDeploymentActionFeedback(),
+                status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.PENDING, 1);
         assertActionStatusCount(9, 6, 1, 0, 1);
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, actionId, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
         assertStatusAndActiveActionsCount(TargetUpdateStatus.IN_SYNC, 0);
         assertActionStatusCount(10, 7, 1, 1, 1);
         assertTargetCountByStatus(0, 0, 1);
@@ -634,14 +629,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         // target does not exist
 
-        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, 1234L,
-                JsonBuilder.deploymentActionInProgressFeedback("1234"), status().isNotFound());
+        postDeploymentFeedback(DEFAULT_CONTROLLER_ID, 1234L, getJsonProceedingDeploymentActionFeedback(),
+                status().isNotFound());
 
         final Target savedTarget = testdataFactory.createTarget(DEFAULT_CONTROLLER_ID);
 
         // Action does not exist
-        postDeploymentFeedback("4713", 1234L, JsonBuilder.deploymentActionInProgressFeedback("1234"),
-                status().isNotFound());
+        postDeploymentFeedback("4713", 1234L, getJsonProceedingDeploymentActionFeedback(), status().isNotFound());
 
         assignDistributionSet(savedSet, Collections.singletonList(savedTarget)).getAssignedEntity().iterator().next();
         assignDistributionSet(savedSet2, Collections.singletonList(testdataFactory.createTarget("4713")));
@@ -650,8 +644,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         // action exists but is not assigned to this target
-        postDeploymentFeedback("4713", updateAction.getId(),
-                JsonBuilder.deploymentActionInProgressFeedback(updateAction.getId().toString()), status().isNotFound());
+        postDeploymentFeedback("4713", updateAction.getId(), getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING,
+                DdiResult.FinalResult.NONE, Collections.singletonList("")), status().isNotFound());
 
         // not allowed methods
         mvc.perform(MockMvcRequestBuilders.get(DEPLOYMENT_FEEDBACK, tenantAware.getCurrentTenant(),
@@ -668,11 +662,11 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that an invalid id in feedback body returns a bad request.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1)})
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void invalidIdInFeedbackReturnsBadRequest() throws Exception {
         final Target target = testdataFactory.createTarget("1080");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -680,17 +674,17 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds.getId(), "1080");
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
-        postDeploymentFeedback("1080", action.getId(),
-                JsonBuilder.deploymentActionInProgressFeedback("AAAA"), status().isBadRequest());
+        final String invalidFeedback = "{\"id\":\"AAAA\",\"status\":{\"execution\":\"proceeding\",\"result\":{\"finished\":\"none\",\"progress\":{\"cnt\":2,\"of\":5}},\"details\":\"details\"]}}";
+        postDeploymentFeedback("1080", action.getId(), invalidFeedback, status().isBadRequest());
     }
 
     @Test
     @Description("Ensures that a missing feedback result in feedback body returns a bad request.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1)})
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void missingResultAttributeInFeedbackReturnsBadRequest() throws Exception {
 
         final Target target = testdataFactory.createTarget("1080");
@@ -699,20 +693,21 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assignDistributionSet(ds.getId(), "1080");
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
-        final String missingResultInFeedback = JsonBuilder.missingResultInFeedback(action.getId().toString(), "closed",
-                "test");
-        postDeploymentFeedback("1080", action.getId(), missingResultInFeedback,
-                status().isBadRequest()).andExpect(jsonPath("$.*", hasSize(3))).andExpect(
-                        jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
+
+        final String missingResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, (DdiResult) null,
+                Collections.singletonList("test"));
+        postDeploymentFeedback("1080", action.getId(), missingResultInFeedback, status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     @Test
     @Description("Ensures that a missing finished result in feedback body returns a bad request.")
-    @ExpectEvents({@Expect(type = TargetCreatedEvent.class, count = 1),
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1)})
+            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 1) })
     public void missingFinishedAttributeInFeedbackReturnsBadRequest() throws Exception {
 
         final Target target = testdataFactory.createTarget("1080");
@@ -721,11 +716,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
         final Action action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).getContent()
                 .get(0);
-        final String missingFinishedResultInFeedback = JsonBuilder
-                .missingFinishedResultInFeedback(action.getId().toString(), "closed", "test");
-        postDeploymentFeedback("1080", action.getId(), missingFinishedResultInFeedback,
-                status().isBadRequest()).andExpect(jsonPath("$.*", hasSize(3))).andExpect(
-                        jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
+        final String missingFinishedResultInFeedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(null, null),
+                Collections.singletonList("test"));
+
+        postDeploymentFeedback("1080", action.getId(), missingFinishedResultInFeedback, status().isBadRequest())
+                .andExpect(jsonPath("$.*", hasSize(3)))
+                .andExpect(jsonPath("$.exceptionClass", equalTo(MessageNotReadableException.class.getCanonicalName())));
     }
 
     private void assertActionStatusCount(final int actionStatusCount, final int minActionStatusCountInPage) {

@@ -46,7 +46,7 @@ public class LazyControllerManagementTest extends AbstractJpaIntegrationTest {
 
         TimeUnit.MILLISECONDS.sleep(10);
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("AA", LOCALHOST);
-        TimeUnit.MILLISECONDS.sleep(repositoryProperties.getPollPersistenceFlushTime() + 1);
+        TimeUnit.MILLISECONDS.sleep(repositoryProperties.getPollPersistenceFlushTime() + 10);
 
         final Target updated = targetManagement.get(target.getId()).get();
 

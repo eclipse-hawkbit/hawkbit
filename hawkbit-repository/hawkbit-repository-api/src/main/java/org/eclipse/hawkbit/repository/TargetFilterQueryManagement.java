@@ -206,6 +206,7 @@ public interface TargetFilterQueryManagement {
      *
      * @return the page with the found {@link TargetFilterQuery}s
      * @param pageable
+     *            pagination information
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<TargetFilterQuery> findWithAutoAssignDS(@NotNull Pageable pageable);

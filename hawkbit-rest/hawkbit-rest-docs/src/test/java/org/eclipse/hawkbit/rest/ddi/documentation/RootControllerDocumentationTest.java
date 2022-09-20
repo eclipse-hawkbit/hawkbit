@@ -21,10 +21,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.ByteArrayInputStream;
+import java.time.Instant;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -41,6 +47,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -177,12 +184,15 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), null, List.of("Some feedback"));
+        final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
+
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
                         + "/{actionId}/feedback",
                 tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId())
-                        .content(JsonBuilder.cancelActionFeedback(cancelAction.getId().toString(), "closed", 200,
-                                "Some feedback"))
+                        .content(objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document
                         .document(
@@ -191,7 +201,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID_CANCELED)),
                         requestFields(
                                 optionalRequestFieldWithPath("id")
-                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID)
+                                        .type(JsonFieldType.NUMBER),
+                                optionalRequestFieldWithPath("time")
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.code")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
@@ -384,21 +397,25 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
 
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), 200, List.of("Feedback message"));
+        final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
+
         mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
                 + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
-                target.getControllerId(), actionId)
-                        .content(JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "none", 200,
-                                "Feedback message"))
+                target.getControllerId(), actionId).content(objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andDo(this.document.document(
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID)),
 
                         requestFields(
                                 optionalRequestFieldWithPath("id")
-                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID),
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_ID)
+                                        .type(JsonFieldType.NUMBER),
+                                optionalRequestFieldWithPath("time")
+                                        .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
                                 requestFieldWithPath("status.code")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
