@@ -311,6 +311,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
+    @SuppressWarnings("squid:S2583")
     public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
             final Pageable pageable, final long dsId, final String searchText, final Long smTypeId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -337,7 +338,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final Sort sort = pageable.getSort();
         final List<Order> orders = new ArrayList<>();
         orders.add(cb.desc(assignedCaseMax));
-        if (sort == null) {
+        if (sort == null || sort.isEmpty()) {
             orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.name)));
             orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.version)));
         } else {

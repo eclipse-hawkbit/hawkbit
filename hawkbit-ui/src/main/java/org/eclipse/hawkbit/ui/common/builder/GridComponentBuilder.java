@@ -48,6 +48,14 @@ public final class GridComponentBuilder {
     public static final String MODIFIED_BY_ID = "modifiedBy";
     public static final String MODIFIED_DATE_ID = "modifiedDate";
 
+    public static final String CREATED_BY_PROPERTY_NAME = "createdBy";
+    public static final String CREATED_AT_PROPERTY_NAME = "createdAt";
+    public static final String LAST_MODIFIED_BY_PROPERTY_NAME = "lastModifiedBy";
+    public static final String LAST_MODIFIED_AT_PROPERTY_NAME = "lastModifiedAt";
+    public static final String VERSION_PROPERTY_NAME = "version";
+    public static final String NAME_PROPERTY_NAME = "name";
+    public static final String CONTROLLER_ID_PROPERTY_NAME = "controllerId";
+
     private GridComponentBuilder() {
     }
 
@@ -123,7 +131,7 @@ public final class GridComponentBuilder {
             final VaadinMessageSource i18n, final String columnId) {
         final Column<E, String> nameColumn = addColumn(i18n, grid, E::getName, "header.name", columnId,
                 DEFAULT_MIN_WIDTH);
-        setColumnSortable(nameColumn, "name");
+        setColumnSortable(nameColumn, NAME_PROPERTY_NAME);
         return nameColumn;
     }
 
@@ -143,7 +151,7 @@ public final class GridComponentBuilder {
             final VaadinMessageSource i18n, final String columnId) {
         final Column<ProxyTarget, String> column = addColumn(i18n, grid, ProxyTarget::getControllerId,
                 "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
-        setColumnSortable(column, "controllerId");
+        setColumnSortable(column, CONTROLLER_ID_PROPERTY_NAME);
         return column;
     }
 
@@ -182,19 +190,19 @@ public final class GridComponentBuilder {
 
         final Column<E, String> createdByColumn = addColumn(i18n, grid, E::getCreatedBy, "header.createdBy",
                 CREATED_BY_ID, DEFAULT_MIN_WIDTH);
-        setColumnSortable(createdByColumn, "createdBy");
+        setColumnSortable(createdByColumn, CREATED_BY_PROPERTY_NAME);
         columns.add(createdByColumn);
 
         final Column<E, String> createdDate = addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH);
-        setColumnSortable(createdDate, "createdAt");
+        setColumnSortable(createdDate, CREATED_AT_PROPERTY_NAME);
         columns.add(createdDate);
 
         final Column<E, String> modifiedBy = addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH);
-        setColumnSortable(modifiedBy, "lastModifiedBy");
+        setColumnSortable(modifiedBy, LAST_MODIFIED_BY_PROPERTY_NAME);
         columns.add(modifiedBy);
 
         final Column<E, String> modifiedDate = addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH);
-        setColumnSortable(modifiedDate, "lastModifiedAt");
+        setColumnSortable(modifiedDate, LAST_MODIFIED_AT_PROPERTY_NAME);
         columns.add(modifiedDate);
 
         return columns;
@@ -219,7 +227,7 @@ public final class GridComponentBuilder {
             final ValueProvider<E, String> valueProvider, final String columnId) {
         final Column<E, String> column = addColumn(i18n, grid, valueProvider, "header.version", columnId,
                 DEFAULT_MIN_WIDTH);
-        setColumnSortable(column, "version");
+        setColumnSortable(column, VERSION_PROPERTY_NAME);
         return column;
     }
 
@@ -306,7 +314,7 @@ public final class GridComponentBuilder {
         return column;
     }
 
-    private static <E, T extends Component> Column<E, ?> commonColumnConfiguration(final Column<E, ?> column,
+    private static <E, T> Column<E, T> commonColumnConfiguration(final Column<E, T> column,
             final StyleGenerator<E> styleGenerator) {
         column.setMinimumWidthFromContent(false);
         column.setExpandRatio(1);
@@ -403,13 +411,17 @@ public final class GridComponentBuilder {
     /**
      * Makes the column sortable.
      *
+     * @param <T>
+     *            type of the entity displayed by the grid
+     * @param <V>
+     *            type of column value
      * @param column
      *            the column to set sortable
      * @param sortPropertyName
      *            the jpa property name to sort by
      * @return the provided column
      */
-    public static Column<?, ?> setColumnSortable(final Column<?, ?> column,
+    public static <T, V> Column<T, V> setColumnSortable(final Column<T, V> column,
             final String sortPropertyName) {
         column.setSortable(true).setSortProperty(sortPropertyName);
         return column;
