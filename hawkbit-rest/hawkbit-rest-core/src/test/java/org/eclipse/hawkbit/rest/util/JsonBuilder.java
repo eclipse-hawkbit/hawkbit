@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -186,60 +185,6 @@ public abstract class JsonBuilder {
 
     }
     
-    /**
-     * builds a json string for the feedback for the execution "proceeding".
-     *
-     * @param id
-     *            of the Action feedback refers to
-     * @return the built string
-     * @throws JSONException
-     */
-    public static String deploymentActionInProgressFeedback(final String id) throws JSONException {
-        return deploymentActionFeedback(id, "proceeding");
-    }
-
-    /**
-     * builds a certain json string for a action feedback.
-     *
-     * @param id
-     *            of the action the feedback refers to
-     * @param execution
-     *            see ExecutionStatus
-     * @return the build json string
-     * @throws JSONException
-     */
-    public static String deploymentActionFeedback(final String id, final String execution) throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", null,
-                Arrays.asList(RandomStringUtils.randomAlphanumeric(1000)));
-
-    }
-    
-    public static String deploymentActionFeedback(final String id, final String execution, final String message)
-            throws JSONException {
-        return deploymentActionFeedback(id, execution, "none", null, Arrays.asList(message));
-    }
-
-    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
-            final String message) throws JSONException {
-        return deploymentActionFeedback(id, execution, finished, null, message);
-    }
-
-    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
-            final Integer code, final String message) throws JSONException {
-        return deploymentActionFeedback(id, execution, finished, code, Arrays.asList(message));
-    }
-
-    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
-            final Integer code, final Collection<String> messages) throws JSONException {
-        final JSONObject statusJson = new JSONObject().put("execution", execution).put("result",
-                new JSONObject().put("finished", finished).put("progress", new JSONObject().put("cnt", 2).put("of", 5)))
-                .put("details", new JSONArray(messages));
-        if (code != null) {
-            statusJson.put("code", code);
-        }
-        return new JSONObject().put("id", id).put("status", statusJson).toString();
-    }
-
     /**
      * Build an invalid request body with missing result for feedback message.
      * 
