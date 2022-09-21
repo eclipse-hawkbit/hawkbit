@@ -9,7 +9,7 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
@@ -18,13 +18,11 @@
    </parent>
    <artifactId>hawkbit-repository-jpa</artifactId>
    <name>hawkBit :: Repository :: JPA Implementation</name>
-
+   
    <properties>
       <apt.source.dir>${project.build.directory}/generated-sources/apt/</apt.source.dir>
-      <classgraph.version>4.8.90</classgraph.version>
-      <eclipselink.maven.plugin.version>2.7.5.1</eclipselink.maven.plugin.version>
    </properties>
-
+   
    <dependencies>
       <!-- Hawkbit -->
       <dependency>
@@ -70,7 +68,11 @@
          <groupId>org.jsoup</groupId>
          <artifactId>jsoup</artifactId>
       </dependency>
-
+      <dependency>
+         <groupId>javax.xml.bind</groupId>
+         <artifactId>jaxb-api</artifactId>
+      </dependency>
+      
       <!-- Test -->
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
@@ -89,14 +91,13 @@
          <scope>test</scope>
       </dependency>
    </dependencies>
-
+   
    <build>
       <plugins>
          <!-- Static weaver for EclipseLink -->
          <plugin>
             <groupId>com.ethlo.persistence.tools</groupId>
             <artifactId>eclipselink-maven-plugin</artifactId>
-            <version>${eclipselink.maven.plugin.version}</version>
             <executions>
                <execution>
                   <id>modelgen</id>
@@ -117,24 +118,10 @@
             </configuration>
             <dependencies>
                <dependency>
-                  <!-- 
-                      Required for Java 11 since plugin version is build on
-                      EclipseLink 2.7.5 (which doesn't have latest fixes for Java 11) 
-                   -->
                   <groupId>org.eclipse.persistence</groupId>
                   <artifactId>org.eclipse.persistence.jpa</artifactId>
                   <version>${eclipselink.version}</version>
                </dependency>
-               <dependency>
-                  <!--  
-                        Required for Java 11 since plugin uses older version (4.8.21) 
-                        which suffer from NPE while weaving. We require at least 4.8.48
-                        see: https://github.com/ethlo/eclipselink-maven-plugin/issues/31 
-                  -->
-                  <groupId>io.github.classgraph</groupId>
-                  <artifactId>classgraph</artifactId>
-                  <version>${classgraph.version}</version>
-                </dependency>
             </dependencies>
          </plugin>
          <plugin>

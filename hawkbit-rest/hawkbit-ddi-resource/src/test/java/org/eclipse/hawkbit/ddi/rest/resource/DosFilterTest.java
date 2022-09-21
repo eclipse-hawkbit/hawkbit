@@ -19,7 +19,6 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.security.DosFilter;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
@@ -114,7 +113,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that a WRITE DoS attempt is blocked ")
     void putPostFloddingAttackThatisPrevented() throws Exception {
         final Long actionId = prepareDeploymentBase();
-        final String feedback = JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding");
+        final String feedback = getJsonProceedingDeploymentActionFeedback();
 
         MvcResult result = null;
         int requests = 0;
@@ -139,7 +138,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @SuppressWarnings("squid:S2925") // No idea how to get rid of the Thread.sleep here
     void acceptablePutPostLoad() throws Exception {
         final Long actionId = prepareDeploymentBase();
-        final String feedback = JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding");
+        final String feedback = getJsonProceedingDeploymentActionFeedback();
 
         for (int x = 0; x < 5; x++) {
             // sleep for one second

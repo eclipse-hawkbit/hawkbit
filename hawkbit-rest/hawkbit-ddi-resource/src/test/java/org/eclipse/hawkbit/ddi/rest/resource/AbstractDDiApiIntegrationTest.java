@@ -18,7 +18,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.eclipse.hawkbit.ddi.json.model.DdiActionFeedback;
+import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -38,6 +46,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
@@ -59,22 +69,23 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     protected static final String CANCEL_FEEDBACK = CANCEL_ACTION + "/feedback";
 
     protected static final int ARTIFACT_SIZE = 5 * 1024;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * Convert JSON to a CBOR equivalent.
-     * 
+     *
      * @param json
      *            JSON object to convert
      * @return Equivalent CBOR data
      * @throws IOException
      *             Invalid JSON input
      */
-    protected static byte[] jsonToCbor(String json) throws IOException {
-        JsonFactory jsonFactory = new JsonFactory();
-        JsonParser jsonParser = jsonFactory.createParser(json);
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        CBORFactory cborFactory = new CBORFactory();
-        CBORGenerator cborGenerator = cborFactory.createGenerator(out);
+    protected static byte[] jsonToCbor(final String json) throws IOException {
+        final JsonFactory jsonFactory = new JsonFactory();
+        final JsonParser jsonParser = jsonFactory.createParser(json);
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final CBORFactory cborFactory = new CBORFactory();
+        final CBORGenerator cborGenerator = cborFactory.createGenerator(out);
         while (jsonParser.nextToken() != null) {
             cborGenerator.copyCurrentEvent(jsonParser);
         }
@@ -84,19 +95,19 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     /**
      * Convert CBOR to JSON equivalent.
-     * 
+     *
      * @param input
      *            CBOR data to convert
      * @return Equivalent JSON string
      * @throws IOException
      *             Invalid CBOR input
      */
-    protected static String cborToJson(byte[] input) throws IOException {
-        CBORFactory cborFactory = new CBORFactory();
-        CBORParser cborParser = cborFactory.createParser(input);
-        JsonFactory jsonFactory = new JsonFactory();
-        StringWriter stringWriter = new StringWriter();
-        JsonGenerator jsonGenerator = jsonFactory.createGenerator(stringWriter);
+    protected static String cborToJson(final byte[] input) throws IOException {
+        final CBORFactory cborFactory = new CBORFactory();
+        final CBORParser cborParser = cborFactory.createParser(input);
+        final JsonFactory jsonFactory = new JsonFactory();
+        final StringWriter stringWriter = new StringWriter();
+        final JsonGenerator jsonGenerator = jsonFactory.createGenerator(stringWriter);
         while (cborParser.nextToken() != null) {
             jsonGenerator.copyCurrentEvent(cborParser);
         }
@@ -106,7 +117,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions postDeploymentFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postDeploymentFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(),
+        return postDeploymentFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
                 statusMatcher);
     }
 
@@ -120,7 +131,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions postCancelFeedback(final String controllerId, final Long actionId, final String content,
             final ResultMatcher statusMatcher) throws Exception {
-        return postCancelFeedback(MediaType.APPLICATION_JSON, controllerId, actionId, content.getBytes(),
+        return postCancelFeedback(MediaType.APPLICATION_JSON_UTF8, controllerId, actionId, content.getBytes(),
                 statusMatcher);
     }
 
@@ -164,7 +175,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 getDownloadAndUploadType(actionType), getDownloadAndUploadType(actionType));
     }
 
-    private ResultActions verifyBasePayload(ResultActions resultActions, final String controllerId,
+    private ResultActions verifyBasePayload(final ResultActions resultActions, final String controllerId,
             final DistributionSet ds, final Artifact artifact, final Artifact artifactSignature, final Long actionId,
             final Long osModuleId, final String downloadType, final String updateType) throws Exception {
         return resultActions.andExpect(jsonPath("$.id", equalTo(String.valueOf(actionId))))
@@ -234,4 +245,92 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
         return "attempt";
     }
 
+    protected String getJsonRejectedCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("rejected"));
+    }
+
+    protected String getJsonRejectedDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.REJECTED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("rejected"));
+    }
+
+    protected String getJsonDownloadDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOAD, DdiResult.FinalResult.NONE,
+                Collections.singletonList("download"));
+    }
+
+    protected String getJsonDownloadedDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.DOWNLOADED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("download"));
+    }
+
+    protected String getJsonCanceledCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("canceled"));
+    }
+
+    protected String getJsonCanceledDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CANCELED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("canceled"));
+    }
+
+    protected String getJsonScheduledCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("scheduled"));
+    }
+
+    protected String getJsonScheduledDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("scheduled"));
+    }
+
+    protected String getJsonResumedCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("resumed"));
+    }
+
+    protected String getJsonResumedDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.RESUMED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("resumed"));
+    }
+
+    protected String getJsonProceedingCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("proceeding"));
+    }
+
+    protected String getJsonProceedingDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
+                Collections.singletonList("proceeding"));
+    }
+
+    protected String getJsonClosedCancelActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                Collections.singletonList("closed"));
+    }
+
+    protected String getJsonClosedDeploymentActionFeedback() throws JsonProcessingException {
+        return getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.NONE,
+                Collections.singletonList("closed"));
+    }
+
+    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
+            final DdiResult.FinalResult finalResult) throws JsonProcessingException {
+        return getJsonActionFeedback(executionStatus, finalResult,
+                Collections.singletonList(RandomStringUtils.randomAlphanumeric(1000)));
+    }
+
+    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus, final DdiResult ddiResult,
+            final List<String> messages) throws JsonProcessingException {
+        final DdiStatus ddiStatus = new DdiStatus(executionStatus, ddiResult, messages);
+        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+    }
+
+    protected String getJsonActionFeedback(final DdiStatus.ExecutionStatus executionStatus,
+            final DdiResult.FinalResult finalResult, final List<String> messages) throws JsonProcessingException {
+        final DdiStatus ddiStatus = new DdiStatus(executionStatus, new DdiResult(finalResult, new DdiProgress(2, 5)),
+                messages);
+        return objectMapper.writeValueAsString(new DdiActionFeedback(Instant.now().toString(), ddiStatus));
+    }
 }
