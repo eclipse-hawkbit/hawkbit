@@ -17,7 +17,6 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -78,9 +77,8 @@ public class DdiStatus {
         return Collections.unmodifiableList(details);
     }
 
-    @JsonIgnore
-    public Optional<Integer> getCode() {
-        return Optional.ofNullable(code);
+    public Integer getCode() {
+        return code;
     }
 
     /**
@@ -144,7 +142,7 @@ public class DdiStatus {
     @Override
     public String toString() {
         return "Status [execution=" + execution + ", result=" + result + ", code="
-                + getCode().map(Objects::toString).orElse("n/a") + ", details=" + details + "]";
+                + code + ", details=" + details + "]";
     }
 
 }

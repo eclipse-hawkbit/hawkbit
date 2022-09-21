@@ -324,7 +324,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
 
-
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
                     action.getId(), feedback.getStatus());
@@ -348,10 +347,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        feedback.getStatus().getCode().ifPresent(code -> {
+        final Integer code = feedback.getStatus().getCode();
+        if (code != null) {
             actionStatusCreate.code(code);
             messages.add("Device reported status code: " + code);
-        });
+        }
 
         final Status status;
         switch (feedback.getStatus().getExecution()) {
@@ -437,7 +437,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
-
 
         if (action.isCancelingOrCanceled()) {
             final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
@@ -540,10 +539,11 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        feedback.getStatus().getCode().ifPresent(code -> {
+        final Integer code = feedback.getStatus().getCode();
+        if (code != null) {
             actionStatusCreate.code(code);
             messages.add("Device reported status code: " + code);
-        });
+        }
 
         return actionStatusCreate.status(status).messages(messages);
 

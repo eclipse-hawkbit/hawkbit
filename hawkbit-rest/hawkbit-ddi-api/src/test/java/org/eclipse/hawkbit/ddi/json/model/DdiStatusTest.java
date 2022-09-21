@@ -78,7 +78,7 @@ public class DdiStatusTest {
         final DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
 
         assertThat(ddiStatus.getExecution()).isEqualTo(PROCEEDING);
-        assertThat(ddiStatus.getCode()).isEmpty();
+        assertThat(ddiStatus.getCode()).isNull();
         assertThat(ddiStatus.getResult().getFinished()).isEqualTo(NONE);
         assertThat(ddiStatus.getResult().getProgress().getCnt()).isEqualTo(30);
         assertThat(ddiStatus.getResult().getProgress().getOf()).isEqualTo(100);
@@ -95,7 +95,7 @@ public class DdiStatusTest {
         DdiStatus ddiStatus = mapper.readValue(serializedDdiStatus, DdiStatus.class);
 
         assertThat(ddiStatus.getExecution()).isEqualTo(PROCEEDING);
-        assertThat(ddiStatus.getCode()).contains(12);
+        assertThat(ddiStatus.getCode()).isEqualTo(12);
         assertThat(ddiStatus.getResult().getFinished()).isEqualTo(NONE);
         assertThat(ddiStatus.getResult().getProgress().getCnt()).isEqualTo(30);
         assertThat(ddiStatus.getResult().getProgress().getOf()).isEqualTo(100);
