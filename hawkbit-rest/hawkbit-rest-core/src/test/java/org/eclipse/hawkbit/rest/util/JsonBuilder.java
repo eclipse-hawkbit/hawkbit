@@ -8,11 +8,13 @@
  */
 package org.eclipse.hawkbit.rest.util;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -182,6 +184,101 @@ public abstract class JsonBuilder {
 
         return builder.toString();
 
+    }
+    
+    /**
+     * builds a json string for the feedback for the execution "proceeding".
+     *
+     * @param id
+     *            of the Action feedback refers to
+     * @return the built string
+     * @throws JSONException
+     */
+    public static String deploymentActionInProgressFeedback(final String id) throws JSONException {
+        return deploymentActionFeedback(id, "proceeding");
+    }
+
+    /**
+     * builds a certain json string for a action feedback.
+     *
+     * @param id
+     *            of the action the feedback refers to
+     * @param execution
+     *            see ExecutionStatus
+     * @return the build json string
+     * @throws JSONException
+     */
+    public static String deploymentActionFeedback(final String id, final String execution) throws JSONException {
+        return deploymentActionFeedback(id, execution, "none", null,
+                Arrays.asList(RandomStringUtils.randomAlphanumeric(1000)));
+
+    }
+    
+    public static String deploymentActionFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        return deploymentActionFeedback(id, execution, "none", null, Arrays.asList(message));
+    }
+
+    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
+            final String message) throws JSONException {
+        return deploymentActionFeedback(id, execution, finished, null, message);
+    }
+
+    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
+            final Integer code, final String message) throws JSONException {
+        return deploymentActionFeedback(id, execution, finished, code, Arrays.asList(message));
+    }
+
+    public static String deploymentActionFeedback(final String id, final String execution, final String finished,
+            final Integer code, final Collection<String> messages) throws JSONException {
+        final JSONObject statusJson = new JSONObject().put("execution", execution).put("result",
+                new JSONObject().put("finished", finished).put("progress", new JSONObject().put("cnt", 2).put("of", 5)))
+                .put("details", new JSONArray(messages));
+        if (code != null) {
+            statusJson.put("code", code);
+        }
+        return new JSONObject().put("id", id).put("status", statusJson).toString();
+    }
+
+    /**
+     * Build an invalid request body with missing result for feedback message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status",
+                        new JSONObject().put("execution", execution).put("details", new JSONArray().put(message)))
+                .toString();
+    }
+
+    /**
+     * Build an invalid request body with missing finished result for feedback
+     * message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingFinishedResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status", new JSONObject().put("execution", execution).put("result", new JSONObject())
+                        .put("details", new JSONArray().put(message)))
+                .toString();
     }
 
     public static String distributionSetTypes(final List<DistributionSetType> types) throws JSONException {
@@ -545,15 +642,27 @@ public abstract class JsonBuilder {
         return json.toString();
     }
 
+    public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
+        return cancelActionFeedback(id, execution, null, RandomStringUtils.randomAlphanumeric(1000));
+
+    }
+
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return new JSONObject().put("id", id)
-                .put("status",
-                        new JSONObject().put("execution", execution)
-                                .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new JSONArray().put(message)))
-                .toString();
+        return cancelActionFeedback(id, execution, null, message);
+    }
 
+    public static String cancelActionFeedback(final String id, final String execution, final Integer code,
+            final String message) throws JSONException {
+        final JSONObject statusJson = new JSONObject().put("execution", execution)
+                .put("result", new JSONObject().put("finished", "success"))
+                .put("details", new JSONArray().put(message));
+
+        if (code != null) {
+            statusJson.put("code", code);
+        }
+
+        return new JSONObject().put("id", id).put("status", statusJson).toString();
     }
 
     public static JSONObject configData(final Map<String, String> attributes) throws JSONException {

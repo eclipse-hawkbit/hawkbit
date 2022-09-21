@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -38,5 +39,7 @@ public interface ActionStatus extends TenantAwareBaseEntity {
      *         different from the previous {@link ActionStatus#getStatus()}.
      */
     Status getStatus();
+
+    Optional<Integer> getCode();
 
 }

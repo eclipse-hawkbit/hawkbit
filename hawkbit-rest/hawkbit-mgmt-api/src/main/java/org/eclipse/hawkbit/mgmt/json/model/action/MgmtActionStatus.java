@@ -33,7 +33,10 @@ public class MgmtActionStatus {
     private List<String> messages;
 
     @JsonProperty
-    private Long reportedAt;
+    private Long reportedAt;    
+    
+    @JsonProperty
+    private Integer code;
 
     /**
      * @return the statusId
@@ -95,4 +98,18 @@ public class MgmtActionStatus {
         this.reportedAt = reportedAt;
     }
 
+    /**
+     * @return the code
+     */
+    public Integer getCode() {
+        return code;
+    }
+
+    /**
+     * @param code
+     *            the reported code to set
+     */
+    public void setCode(final Integer code) {
+        this.code = code;
+    }
 }

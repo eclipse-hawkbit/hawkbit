@@ -492,7 +492,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         }
 
         final String feedback = getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
-                messages);
+                null, messages);
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(), feedback, status().isForbidden());
     }
 

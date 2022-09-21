@@ -299,6 +299,7 @@ public final class MgmtTargetMapper {
         result.setReportedAt(actionStatus.getCreatedAt());
         result.setStatusId(actionStatus.getId());
         result.setType(actionStatus.getStatus().name().toLowerCase());
+        actionStatus.getCode().ifPresent(result::setCode);
 
         return result;
     }
