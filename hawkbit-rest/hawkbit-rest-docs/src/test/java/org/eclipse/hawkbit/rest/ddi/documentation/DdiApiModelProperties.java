@@ -131,7 +131,8 @@ final class DdiApiModelProperties {
 
     static final String ACTION_HISTORY_RESP_STATUS = "Status of the deployment based on previous feedback by the device.";
 
-    static final String ACTION_HISTORY_RESP_MESSAGES = "Messages are previously sent to the feedback channel in LIFO order by the device.";
+    static final String ACTION_HISTORY_RESP_MESSAGES = "Messages are previously sent to the feedback channel in LIFO order by the device. "
+            + "Note: The first status message is set by the system and describes the trigger of the deployment";
 
     static final String UPDATE_MODE = "Optional parameter to specify the update mode that should be applied when updating target attributes. "
             + "Valid values are 'merge', 'replace', and 'remove'. Defaults to 'merge'.";

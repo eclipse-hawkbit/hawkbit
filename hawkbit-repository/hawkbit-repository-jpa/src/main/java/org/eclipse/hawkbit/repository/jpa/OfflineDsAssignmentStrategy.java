@@ -51,7 +51,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
+    public void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
         targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
             sendTargetUpdatedEvent(target);
@@ -78,19 +78,19 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void closeActiveActions(final List<List<Long>> targetIds) {
+    public void closeActiveActions(final List<List<Long>> targetIds) {
         // Not supported by offline case
     }
 
     @Override
-    void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
             final String currentUser) {
         targetIds.forEach(tIds -> targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
                 TargetUpdateStatus.IN_SYNC, set, System.currentTimeMillis(), currentUser, tIds));
     }
 
     @Override
-    protected JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
         if (result != null) {
@@ -101,7 +101,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    protected JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
         result.setStatus(Status.FINISHED);
         result.addMessage(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Action reported as offline deployment");

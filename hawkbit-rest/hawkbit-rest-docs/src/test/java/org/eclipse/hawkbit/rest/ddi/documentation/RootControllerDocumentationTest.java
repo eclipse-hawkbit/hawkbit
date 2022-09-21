@@ -382,7 +382,11 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("deployment.chunks[].part").description(DdiApiModelProperties.CHUNK_TYPE),
                                 fieldWithPath("deployment.chunks[].name").description(DdiApiModelProperties.CHUNK_NAME),
                                 fieldWithPath("deployment.chunks[].version")
-                                        .description(DdiApiModelProperties.CHUNK_VERSION))));
+                                        .description(DdiApiModelProperties.CHUNK_VERSION),
+                                fieldWithPath("actionHistory.status")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_STATUS),
+                                fieldWithPath("actionHistory.messages")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_MESSAGES))));
 
     }
 

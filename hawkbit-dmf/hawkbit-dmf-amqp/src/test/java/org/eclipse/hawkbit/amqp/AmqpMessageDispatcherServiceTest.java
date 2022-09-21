@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.amqp;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -37,7 +38,7 @@ import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -230,12 +231,14 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
     @Test
     @Description("Verifies that send cancel event works")
     void testSendCancelRequest() {
+        final Action action = mock(Action.class);
+        when(action.getId()).thenReturn(1L);
+        when(action.getTarget()).thenReturn(testTarget);
         final CancelTargetAssignmentEvent cancelTargetAssignmentDistributionSetEvent = new CancelTargetAssignmentEvent(
-                testTarget, 1L, serviceMatcher.getServiceId());
+                action, serviceMatcher.getServiceId());
         amqpMessageDispatcherService
                 .targetCancelAssignmentToDistributionSet(cancelTargetAssignmentDistributionSetEvent);
-        final Message sendMessage = createArgumentCapture(
-                cancelTargetAssignmentDistributionSetEvent.getEntity().get().getAddress());
+        final Message sendMessage = createArgumentCapture(AMQP_URI);
         assertCancelMessage(sendMessage);
 
     }

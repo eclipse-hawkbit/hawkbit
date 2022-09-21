@@ -32,7 +32,7 @@ import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
@@ -265,7 +265,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 40),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = ActionCreatedEvent.class, count = 40),
-            @Expect(type = CancelTargetAssignmentEvent.class, count = 20),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
@@ -945,11 +945,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 3 * 4),
             @Expect(type = ActionCreatedEvent.class, count = 3 * 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4 * 2),
-            @Expect(type = CancelTargetAssignmentEvent.class, count = 4 * 2),
+            @Expect(type = CancelTargetAssignmentEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 3) })
-    void multipleDeployments() throws InterruptedException {
+    void multipleDeployments() {
         final String undeployedTargetPrefix = "undep-T";
         final int noOfUndeployedTargets = 5;
 
