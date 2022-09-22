@@ -311,7 +311,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    @SuppressWarnings("squid:S2583")
+    // In the interface org.springframework.data.domain.Pageable.getSort the
+    // return value is not guaranteed to be non-null, therefore a null check is
+    // necessary otherwise we rely on the implementation but this could change.
+    @SuppressWarnings({ "squid:S2583", "squid:S2589" })
     public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
             final Pageable pageable, final long dsId, final String searchText, final Long smTypeId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();

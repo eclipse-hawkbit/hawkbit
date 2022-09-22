@@ -76,6 +76,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private static final String ROLLOUT_LINK_ID = "rollout";
     private static final String DIST_NAME_VERSION_ID = "distNameVersion";
     private static final String STATUS_ID = "status";
+    private static final String STATUS_PROPERTY_NAME = "status";
     private static final String TOTAL_TARGETS_COUNT_STATUS_ID = "totalTargetsCountStatus";
     private static final String NUMBER_OF_GROUPS_ID = "numberOfGroups";
     private static final String TOTAL_TARGETS_ID = "totalTargets";
@@ -278,7 +279,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         final Column<ProxyRollout, Label> statusColumn = GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
                 .setHidable(true);
-        GridComponentBuilder.setColumnSortable(statusColumn, "status");
+        GridComponentBuilder.setColumnSortable(statusColumn, STATUS_PROPERTY_NAME);
 
         GridComponentBuilder
                 .addIconColumn(this, actionTypeIconSupplier::getLabel, ACTION_TYPE_ID, i18n.getMessage("header.type"))
