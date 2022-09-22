@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -182,6 +183,47 @@ public abstract class JsonBuilder {
 
         return builder.toString();
 
+    }
+    
+    /**
+     * Build an invalid request body with missing result for feedback message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status",
+                        new JSONObject().put("execution", execution).put("details", new JSONArray().put(message)))
+                .toString();
+    }
+
+    /**
+     * Build an invalid request body with missing finished result for feedback
+     * message.
+     * 
+     * @param id
+     *            id of the action
+     * @param execution
+     *            the execution
+     * @param message
+     *            the message
+     * @return a invalid request body
+     * @throws JSONException
+     */
+    public static String missingFinishedResultInFeedback(final String id, final String execution, final String message)
+            throws JSONException {
+        return new JSONObject().put("id", id).put("time", "20140511T121314")
+                .put("status", new JSONObject().put("execution", execution).put("result", new JSONObject())
+                        .put("details", new JSONArray().put(message)))
+                .toString();
     }
 
     public static String distributionSetTypes(final List<DistributionSetType> types) throws JSONException {
@@ -545,15 +587,27 @@ public abstract class JsonBuilder {
         return json.toString();
     }
 
+    public static String cancelActionFeedback(final String id, final String execution) throws JSONException {
+        return cancelActionFeedback(id, execution, null, RandomStringUtils.randomAlphanumeric(1000));
+
+    }
+
     public static String cancelActionFeedback(final String id, final String execution, final String message)
             throws JSONException {
-        return new JSONObject().put("id", id)
-                .put("status",
-                        new JSONObject().put("execution", execution)
-                                .put("result", new JSONObject().put("finished", "success"))
-                                .put("details", new JSONArray().put(message)))
-                .toString();
+        return cancelActionFeedback(id, execution, null, message);
+    }
 
+    public static String cancelActionFeedback(final String id, final String execution, final Integer code,
+            final String message) throws JSONException {
+        final JSONObject statusJson = new JSONObject().put("execution", execution)
+                .put("result", new JSONObject().put("finished", "success"))
+                .put("details", new JSONArray().put(message));
+
+        if (code != null) {
+            statusJson.put("code", code);
+        }
+
+        return new JSONObject().put("id", id).put("status", statusJson).toString();
     }
 
     public static JSONObject configData(final Map<String, String> attributes) throws JSONException {

@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,6 +32,9 @@ public class DmfActionUpdateStatus {
 
     @JsonProperty
     private Long softwareModuleId;
+
+    @JsonProperty
+    private Integer code;
 
     @JsonProperty
     private List<String> message;
@@ -54,6 +59,15 @@ public class DmfActionUpdateStatus {
 
     public DmfActionStatus getActionStatus() {
         return actionStatus;
+    }
+
+    @JsonIgnore
+    public Optional<Integer> getCode() {
+        return Optional.ofNullable(code);
+    }
+
+    public void setCode(final Integer code) {
+        this.code = code;
     }
 
     public List<String> getMessage() {

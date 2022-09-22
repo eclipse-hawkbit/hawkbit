@@ -39,7 +39,7 @@ public class DdiActionFeedbackTest {
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
         final String time = Instant.now().toString();
-        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, Lists.emptyList());
+        final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED, null, null, Lists.emptyList());
         final DdiActionFeedback ddiActionFeedback = new DdiActionFeedback(time, ddiStatus);
 
         // Test
