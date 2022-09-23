@@ -462,7 +462,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a specific action on a specific target. Required Permission: READ_TARGET.")
     public void getStatusFromAction() throws Exception {
-        final Action action = generateActionForTarget(targetId);
+        final Action action = generateActionForTarget(targetId, false);
+        provideCodeFeedback(action, 200);
 
         mockMvc.perform(
                 get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
@@ -481,7 +482,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(MgmtApiModelProperties.ACTION_STATUS_MESSAGES).type("String"),
                                 fieldWithPath("content[].reportedAt")
                                         .description(MgmtApiModelProperties.ACTION_STATUS_REPORTED_AT).type("String"),
-                                fieldWithPath("content[].type").description(MgmtApiModelProperties.ACTION_STATUS_TYPE)
+                                optionalRequestFieldWithPath("content[].code")
+                                        .description(MgmtApiModelProperties.ACTION_STATUS_CODE).type("Integer"),
+                                fieldWithPath(
+                                        "content[].type").description(MgmtApiModelProperties.ACTION_STATUS_TYPE)
                                         .attributes(key("value").value(
                                                 "['finished', 'error', 'warning', 'pending', 'running', 'canceled', 'retrieved', 'canceling']")))));
     }

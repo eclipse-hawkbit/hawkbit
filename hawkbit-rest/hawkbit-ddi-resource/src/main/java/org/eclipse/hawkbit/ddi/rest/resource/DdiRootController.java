@@ -324,7 +324,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
 
-
         if (!action.isActive()) {
             LOG.warn("Updating action {} with feedback {} not possible since action not active anymore.",
                     action.getId(), feedback.getStatus());
@@ -340,10 +339,18 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private ActionStatusCreate generateUpdateStatus(final DdiActionFeedback feedback, final String controllerId,
             final Long actionId) {
 
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+
         final List<String> messages = new ArrayList<>();
 
         if (!CollectionUtils.isEmpty(feedback.getStatus().getDetails())) {
             messages.addAll(feedback.getStatus().getDetails());
+        }
+
+        final Integer code = feedback.getStatus().getCode();
+        if (code != null) {
+            actionStatusCreate.code(code);
+            messages.add("Device reported status code: " + code);
         }
 
         final Status status;
@@ -380,7 +387,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             break;
         }
 
-        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
+        return actionStatusCreate.status(status).messages(messages);
     }
 
     private static void addMessageIfEmpty(final String text, final List<String> messages) {
@@ -430,7 +437,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
-
 
         if (action.isCancelingOrCanceled()) {
             final DdiCancel cancel = new DdiCancel(String.valueOf(action.getId()),
@@ -507,6 +513,8 @@ public class DdiRootController implements DdiRootControllerRestApi {
     private static ActionStatusCreate generateActionCancelStatus(final DdiActionFeedback feedback, final Target target,
             final Long actionId, final EntityFactory entityFactory) {
 
+        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
+
         final List<String> messages = new ArrayList<>();
         final Status status;
         switch (feedback.getStatus().getExecution()) {
@@ -531,7 +539,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
             messages.addAll(feedback.getStatus().getDetails());
         }
 
-        return entityFactory.actionStatus().create(actionId).status(status).messages(messages);
+        final Integer code = feedback.getStatus().getCode();
+        if (code != null) {
+            actionStatusCreate.code(code);
+            messages.add("Device reported status code: " + code);
+        }
+
+        return actionStatusCreate.status(status).messages(messages);
 
     }
 

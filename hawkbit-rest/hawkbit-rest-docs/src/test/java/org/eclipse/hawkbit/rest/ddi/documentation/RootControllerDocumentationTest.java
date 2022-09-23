@@ -185,17 +185,17 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
-                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Some feedback"));
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), null, List.of("Some feedback"));
         final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
 
         mockMvc.perform(post(
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
                         + "/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId()).content(
-                        objectMapper.writeValueAsString(feedback))
+                tenantAware.getCurrentTenant(), target.getControllerId(), cancelAction.getId())
+                        .content(objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andDo(this.document.document(
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document
+                        .document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID_CANCELED)),
@@ -206,6 +206,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("time")
                                         .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
+                                requestFieldWithPath("status.code")
+                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(
@@ -380,7 +382,11 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("deployment.chunks[].part").description(DdiApiModelProperties.CHUNK_TYPE),
                                 fieldWithPath("deployment.chunks[].name").description(DdiApiModelProperties.CHUNK_NAME),
                                 fieldWithPath("deployment.chunks[].version")
-                                        .description(DdiApiModelProperties.CHUNK_VERSION))));
+                                        .description(DdiApiModelProperties.CHUNK_VERSION),
+                                fieldWithPath("actionHistory.status")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_STATUS),
+                                fieldWithPath("actionHistory.messages")
+                                        .description(DdiApiModelProperties.ACTION_HISTORY_RESP_MESSAGES))));
 
     }
 
@@ -396,17 +402,14 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(set.getId(), target.getControllerId()));
 
         final DdiStatus ddiStatus = new DdiStatus(DdiStatus.ExecutionStatus.CLOSED,
-                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), List.of("Feedback message"));
+                new DdiResult(DdiResult.FinalResult.SUCCESS, new DdiProgress(2, 5)), 200, List.of("Feedback message"));
         final DdiActionFeedback feedback = new DdiActionFeedback(Instant.now().toString(), ddiStatus);
 
-        mockMvc.perform(post(
-                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION
-                        + "/{actionId}/feedback",
-                tenantAware.getCurrentTenant(), target.getControllerId(), actionId)
-                        .content(objectMapper.writeValueAsString(feedback))
+        mockMvc.perform(post(DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+                + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/feedback", tenantAware.getCurrentTenant(),
+                target.getControllerId(), actionId).content(objectMapper.writeValueAsString(feedback))
                         .contentType(MediaType.APPLICATION_JSON_UTF8).accept(MediaTypes.HAL_JSON_VALUE))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andDo(this.document.document(
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document.document(
                         pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
                                 parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID),
                                 parameterWithName("actionId").description(DdiApiModelProperties.ACTION_ID)),
@@ -418,6 +421,8 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("time")
                                         .description(DdiApiModelProperties.FEEDBACK_ACTION_TIME),
                                 requestFieldWithPath("status").description(DdiApiModelProperties.TARGET_STATUS),
+                                requestFieldWithPath("status.code")
+                                        .description(DdiApiModelProperties.TARGET_EXEC_STATUS_CODE),
                                 requestFieldWithPath("status.execution")
                                         .description(DdiApiModelProperties.TARGET_EXEC_STATUS).type("enum")
                                         .attributes(key("value").value(

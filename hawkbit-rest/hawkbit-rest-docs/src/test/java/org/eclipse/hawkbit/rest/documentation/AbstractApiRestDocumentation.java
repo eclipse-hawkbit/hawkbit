@@ -251,6 +251,11 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                 .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED));
     }
 
+    protected void provideCodeFeedback(final Action action, final int code) {
+        controllerManagement.addUpdateActionStatus(
+                entityFactory.actionStatus().create(action.getId()).code(code).status(Status.RUNNING));
+    }
+    
     protected Target createTargetByGivenNameWithAttributes(final String name, final DistributionSet distributionSet) {
         return createTargetByGivenNameWithAttributes(name, true, false, distributionSet);
     }

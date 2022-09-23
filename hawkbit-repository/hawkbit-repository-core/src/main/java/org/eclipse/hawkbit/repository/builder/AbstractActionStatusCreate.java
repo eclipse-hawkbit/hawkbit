@@ -25,8 +25,12 @@ import org.springframework.util.StringUtils;
  *            update or create builder interface
  */
 public abstract class AbstractActionStatusCreate<T> {
+
     protected Status status;
+
     protected Long occurredAt;
+
+    protected Integer code;
 
     protected List<@ValidString String> messages;
 
@@ -44,6 +48,12 @@ public abstract class AbstractActionStatusCreate<T> {
 
     public T occurredAt(final long occurredAt) {
         this.occurredAt = occurredAt;
+
+        return (T) this;
+    }
+
+    public T code(final int code) {
+        this.code = code;
 
         return (T) this;
     }
