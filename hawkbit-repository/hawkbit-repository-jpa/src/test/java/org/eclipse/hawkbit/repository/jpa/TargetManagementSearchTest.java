@@ -31,7 +31,10 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -586,7 +589,45 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
                 .containsExactly(expected.toArray(new Target[0]));
+    }
 
+    @Test
+    @Description("Tests the correct order of targets based on selected distribution set and sort parameter. The system expects to have an order based on installed, assigned DS.")
+    void targetSearchWithOrderByDistributionSetAndSortParam() {
+
+        final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
+        List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
+        List<Target> targInstalled = testdataFactory.createTargets(3, "installed", "first description");
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("a");
+
+        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = testdataFactory
+                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
+                .stream().map(Action::getTarget).collect(Collectors.toList());
+
+        final List<Target> targetsOrderedByDistAndName = targetManagement
+                .findByFilterOrderByLinkedDistributionSet(PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")),
+                        ds.getId(), new FilterParams(null, null, null, null, Boolean.FALSE))
+                .getContent();
+        assertThat(targetsOrderedByDistAndName).hasSize(9);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 0, targInstalled, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 1, targInstalled, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 2, targInstalled, 0);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 3, targAssigned, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 4, targAssigned, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 5, targAssigned, 0);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 6, notAssigned, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 7, notAssigned, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 8, notAssigned, 0);
+    }
+
+    private void assertThatTargetNameEquals(final List<Target> targets1, final int index1, final List<Target> targets2,
+            final int index2) {
+        assertThat(targets1.get(index1).getName()).isEqualTo(targets2.get(index2).getName());
     }
 
     @Test
