@@ -328,7 +328,7 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
                 Arrays.asList(addPinColumn(), addDeleteColumn()));
     }
 
-    private Column<ProxyTarget, String> addControllerIdColumn() {
+    private Column<ProxyTarget, Button> addControllerIdColumn() {
         return GridComponentBuilder.addControllerIdColumn(this, i18n, TARGET_CONTROLLER_ID);
     }
 

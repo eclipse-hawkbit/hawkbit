@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
+import org.eclipse.hawkbit.ui.utils.ControllerIdHtmlEncoder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -34,6 +35,7 @@ import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
 import com.vaadin.ui.Grid.Column;
 import com.vaadin.ui.StyleGenerator;
+import com.vaadin.ui.UI;
 import com.vaadin.ui.components.grid.HeaderRow;
 import com.vaadin.ui.themes.ValoTheme;
 
@@ -41,6 +43,7 @@ import com.vaadin.ui.themes.ValoTheme;
  * Builder class for grid components
  */
 public final class GridComponentBuilder {
+
     public static final double DEFAULT_MIN_WIDTH = 100D;
 
     public static final String CREATED_BY_ID = "createdBy";
@@ -134,9 +137,17 @@ public final class GridComponentBuilder {
      *            column ID
      * @return the created column
      */
-    public static Column<ProxyTarget, String> addControllerIdColumn(final Grid<ProxyTarget> grid,
+    public static Column<ProxyTarget, Button> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, ProxyTarget::getControllerId, "header.controllerId", columnId, DEFAULT_MIN_WIDTH);
+        return addComponentColumn(grid, t -> GridComponentBuilder.buildControllerIdLink(t, columnId)).setId(columnId)
+                .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
+                .setMinimumWidth(DEFAULT_MIN_WIDTH);
+    }
+
+    private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
+        final String idSuffix = ControllerIdHtmlEncoder.encode(target.getControllerId());
+        return buildLink(idSuffix, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
+                .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
 
     /**
@@ -173,8 +184,10 @@ public final class GridComponentBuilder {
         final List<Column<E, String>> columns = new ArrayList<>();
         columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, DEFAULT_MIN_WIDTH));
         columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
+        columns.add(
+                addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
+        columns.add(
+                addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
         return columns;
     }
 
@@ -445,4 +458,5 @@ public final class GridComponentBuilder {
 
         return actionButton;
     }
+
 }
