@@ -46,6 +46,8 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -543,6 +545,15 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 set.getId(), "%found%", testType.getId()).getContent())
                         .as("Found modules with given name, given module type and the assigned ones first")
                         .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                                new AssignedSoftwareModule(unassigned, false));
+
+        // with filter on name, version and module type, sorting defined by
+        // Pagerequest
+        assertThat(softwareModuleManagement.findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+                PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")), set.getId(), "%found%", testType.getId())
+                .getContent()).as(
+                        "Found modules with given name, given module type, the assigned ones first, ordered by name DESC")
+                        .containsExactly(new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(one, true),
                                 new AssignedSoftwareModule(unassigned, false));
 
         // with filter on module type only

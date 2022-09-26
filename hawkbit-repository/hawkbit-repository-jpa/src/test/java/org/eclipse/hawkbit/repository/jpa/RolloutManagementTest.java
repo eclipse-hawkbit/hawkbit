@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import javax.validation.ConstraintViolationException;
 import javax.validation.ValidationException;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
@@ -81,6 +82,7 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -1760,6 +1762,47 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(actionRepository.findByRolloutIdAndStatus(PAGE, deletedRollout.getId(), Status.RUNNING)
                 .getNumberOfElements()).isEqualTo(2);
     }
+
+    @Test
+    @Description("Verifies that returned result considers provided sort parameter.")
+    void findAllRolloutsConsidersSorting() {
+        final String randomString = RandomStringUtils.randomAlphanumeric(5);
+        final DistributionSet testDs = testdataFactory.createDistributionSet(randomString + "-testDs");
+        testdataFactory.createTargets(10, randomString + "-testTarget-");
+        final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        final String prefixRolloutRunning = randomString + "1";
+        final RolloutCreate rolloutRunningCreate = entityFactory.rollout().create()
+                .name(prefixRolloutRunning + "-testRollout").targetFilterQuery("name==" + randomString + "*")
+                .set(testDs);
+
+        Rollout rolloutRunning = rolloutManagement.create(rolloutRunningCreate, 1, conditions);
+        // Let the executor handle created Rollout
+        rolloutManagement.handleRollouts();
+        // start the rollout, so it has active running actions and a group which
+        // has been started
+        rolloutManagement.start(rolloutRunning.getId());
+        rolloutManagement.handleRollouts();
+        rolloutRunning = reloadRollout(rolloutRunning);
+
+        final String prefixRolloutReady = randomString + "2";
+        final RolloutCreate rolloutReadyCreate = entityFactory.rollout().create()
+                .name(prefixRolloutReady + "-testRollout").targetFilterQuery("name==" + randomString + "*")
+                .set(testDs);
+        Rollout rolloutReady = rolloutManagement.create(rolloutReadyCreate, 1, conditions);
+        // Let the executor handle created Rollout
+        rolloutManagement.handleRollouts();
+        rolloutReady = reloadRollout(rolloutReady);
+
+        final List<Rollout> rolloutsOrderedByStatus = rolloutManagement
+                .findAll(PageRequest.of(0, 500, Sort.by(Direction.ASC, "status")), false).getContent();
+        assertThat(rolloutsOrderedByStatus).containsSubsequence(List.of(rolloutReady, rolloutRunning));
+
+        final List<Rollout> rolloutsOrderedByName = rolloutManagement
+                .findAll(PageRequest.of(0, 500, Sort.by(Direction.ASC, "name")), false).getContent();
+        assertThat(rolloutsOrderedByName).containsSubsequence(List.of(rolloutRunning, rolloutReady));
+    }
+
 
     @Test
     @Description("Creating a rollout without weight value when multi assignment in enabled.")
