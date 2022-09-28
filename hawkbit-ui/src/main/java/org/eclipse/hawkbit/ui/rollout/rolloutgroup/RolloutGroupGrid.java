@@ -159,7 +159,7 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
         final boolean enableButton = RolloutGroupStatus.CREATING != rolloutGroup.getStatus()
                 && permissionChecker.hasRolloutTargetsReadPermission();
 
-        return GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link.", rolloutGroup.getName(), enableButton,
+        return GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link", rolloutGroup.getName(), enableButton,
                 clickEvent -> onClickOfRolloutGroupName(rolloutGroup));
     }
 

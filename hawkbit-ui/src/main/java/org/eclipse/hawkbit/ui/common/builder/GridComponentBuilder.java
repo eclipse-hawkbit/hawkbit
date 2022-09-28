@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
-import org.eclipse.hawkbit.ui.utils.ControllerIdHtmlEncoder;
+import org.eclipse.hawkbit.ui.utils.StringHtmlEncoder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -110,9 +110,10 @@ public final class GridComponentBuilder {
      *            execute on button click (null for none)
      * @return the button
      */
-    public static <E extends ProxyIdentifiableEntity> Button buildLink(final E entity, final String idPrefix,
+    public static <E extends ProxyNamedEntity> Button buildLink(final E entity, final String idPrefix,
             final String caption, final boolean enabled, final ClickListener clickListener) {
-        return buildLink(entity.getId().toString(), idPrefix, caption, enabled, clickListener);
+        final String idSuffix = StringHtmlEncoder.encode(entity.getName());
+        return buildLink(idSuffix, idPrefix, caption, enabled, clickListener);
     }
 
     /**
@@ -152,7 +153,7 @@ public final class GridComponentBuilder {
     public static Column<ProxyTarget, Button> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
         final Column<ProxyTarget, Button> column = addComponentColumn(grid,
-                t -> GridComponentBuilder.buildControllerIdLink(t, columnId)).setId(columnId)
+                t -> buildControllerIdLink(t, columnId)).setId(columnId)
                         .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
                         .setMinimumWidth(DEFAULT_MIN_WIDTH);
         setColumnSortable(column, CONTROLLER_ID_PROPERTY_NAME);
@@ -160,7 +161,7 @@ public final class GridComponentBuilder {
     }
 
     private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
-        final String idSuffix = ControllerIdHtmlEncoder.encode(target.getControllerId());
+        final String idSuffix = StringHtmlEncoder.encode(target.getControllerId());
         return buildLink(idSuffix, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
                 .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
