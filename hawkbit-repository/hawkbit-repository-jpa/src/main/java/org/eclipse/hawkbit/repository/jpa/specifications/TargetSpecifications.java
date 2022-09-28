@@ -598,7 +598,7 @@ public final class TargetSpecifications {
                     .otherwise(100);
             final List<Order> orders = new ArrayList<>();
             orders.add(cb.asc(selectCase));
-            if (sort == null) {
+            if (sort == null || sort.isEmpty()) {
                 orders.add(cb.desc(targetRoot.get(JpaTarget_.id)));
             } else {
                 orders.addAll(QueryUtils.toOrders(sort, targetRoot, cb));

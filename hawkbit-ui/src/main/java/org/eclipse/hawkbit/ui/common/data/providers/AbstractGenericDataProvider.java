@@ -79,7 +79,7 @@ public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEnt
     }
 
     private Order convertToOrderCriteria(final QuerySortOrder querySortOrder) {
-        Sort.Direction sortDirection;
+        final Sort.Direction sortDirection;
         switch (querySortOrder.getDirection()) {
         case ASCENDING:
             sortDirection = Sort.Direction.ASC;

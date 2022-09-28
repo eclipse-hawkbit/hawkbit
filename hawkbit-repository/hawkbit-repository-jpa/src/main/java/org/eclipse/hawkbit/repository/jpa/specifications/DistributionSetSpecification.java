@@ -291,7 +291,7 @@ public final class DistributionSetSpecification {
 
             final List<Order> orders = new ArrayList<>();
             orders.add(cb.asc(assignedInstalledCase));
-            if (sort == null) {
+            if (sort == null || sort.isEmpty()) {
                 orders.add(cb.asc(dsRoot.get(JpaDistributionSet_.id)));
             } else {
                 orders.addAll(QueryUtils.toOrders(sort, dsRoot, cb));

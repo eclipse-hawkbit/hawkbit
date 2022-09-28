@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -276,20 +275,20 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
             final Join<RolloutTargetGroup, JpaTarget> targetJoin,
             final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
-        final List<Order> orders = new ArrayList<>();
 
-        pageRequest.getSort().get().forEach(order -> {
+        return pageRequest.getSort().get().flatMap(order -> {
+            final List<Order> orders;
             final String property = order.getProperty();
             // we consider status as property from JpaAction ...
             if ("status".equals(property)) {
-                orders.addAll(QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb));
+                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb);
             }
             // ... and every other property from JpaTarget
             else {
-                orders.addAll(QueryUtils.toOrders(Sort.by(order.getDirection(), property), targetJoin, cb));
+                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), targetJoin, cb);
             }
-        });
-        return orders;
+            return orders.stream();
+        }).collect(Collectors.toList());
     }
 
     @Override
