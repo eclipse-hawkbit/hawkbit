@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -54,6 +55,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -143,7 +147,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // create Targets
         final String[] knownTargetIds = new String[] { "1", "2" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign DisSet to target and test assignment
         assignDistributionSet(disSet.getId(), knownTargetIds[0]);
         mvc.perform(
@@ -257,7 +261,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -378,7 +382,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(getTestSchedule(0), null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(getTestSchedule(0), null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -395,7 +399,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, getTestDuration(10), null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, getTestDuration(10), null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -413,7 +417,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = createTargetAndJsonArray(getTestSchedule(10), getTestDuration(10), getTestTimeZone(),
-                null, knownTargetIds);
+                null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -431,7 +435,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = createTargetAndJsonArray(getTestSchedule(-30), getTestDuration(5), getTestTimeZone(),
-                null, knownTargetIds);
+                null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -474,7 +478,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         final String[] knownTargetIds = new String[] { "1", "2", "3" };
-        final JSONArray assignTargetJson = createTargetAndJsonArray(null, null, null, "forced", knownTargetIds);
+        final JSONArray assignTargetJson = createTargetAndJsonArray(null, null, null, "forced", null, knownTargetIds);
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
         assignTargetJson.put(new JSONObject().put("id", "notexistingtarget").put("type", "forced"));
@@ -487,7 +491,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     private JSONArray createTargetAndJsonArray(final String schedule, final String duration, final String timezone,
-            final String type, final String... targetIds) throws Exception {
+            final String type, final Boolean confirmationRequired, final String... targetIds) throws Exception {
         final JSONArray result = new JSONArray();
         for (final String targetId : targetIds) {
             testdataFactory.createTarget(targetId);
@@ -501,7 +505,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
             if (schedule != null || duration != null || timezone != null) {
                 final JSONObject maintenanceJsonObject = new JSONObject();
-                targetJsonObject.put("maintenanceWindow", maintenanceJsonObject);
                 if (schedule != null) {
                     maintenanceJsonObject.put("schedule", schedule);
                 }
@@ -511,6 +514,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 if (timezone != null) {
                     maintenanceJsonObject.put("timezone", timezone);
                 }
+                targetJsonObject.put("maintenanceWindow", maintenanceJsonObject);
+            }
+            if (confirmationRequired != null) {
+                targetJsonObject.put("confirmationRequired", confirmationRequired);
             }
         }
         return result;
@@ -1263,7 +1270,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
@@ -1275,6 +1282,41 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @ParameterizedTest
+    @MethodSource("confirmationOptions")
+    @Description("Ensures that confirmation option is considered in assignment request.")
+    public void assignTargetsToDistributionSetWithConfirmationOptions(final boolean consentFlowActive,
+            final Boolean confirmationRequired) throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        if (consentFlowActive) {
+            enableUserConsentFlow();
+        }
+
+        // prepare targets
+        final String targetId = "1";
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, confirmationRequired, targetId);
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigned", equalTo(1))).andExpect(jsonPath("$.alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("$.total", equalTo(1)));
+
+        assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(1)
+                .allMatch(action -> {
+                    if (!consentFlowActive) {
+                        return !action.isWaitingConfirmation();
+                    }
+                    return confirmationRequired == null ? action.isWaitingConfirmation()
+                            : confirmationRequired == action.isWaitingConfirmation();
+                });
+    }
+
+    private static Stream<Arguments> confirmationOptions() {
+        return Stream.of(Arguments.of(true, true), Arguments.of(true, false), Arguments.of(false, true),
+                Arguments.of(false, false), Arguments.of(true, null), Arguments.of(false, null));
     }
 
     @Test

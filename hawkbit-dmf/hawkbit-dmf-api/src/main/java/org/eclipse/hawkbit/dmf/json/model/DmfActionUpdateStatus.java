@@ -34,10 +34,10 @@ public class DmfActionUpdateStatus {
     private Long softwareModuleId;
 
     @JsonProperty
-    private Integer code;
+    private List<String> message;
 
     @JsonProperty
-    private List<String> message;
+    private Integer code;
 
     public DmfActionUpdateStatus(@JsonProperty(value = "actionId", required = true) final Long actionId,
             @JsonProperty(value = "actionStatus", required = true) final DmfActionStatus actionStatus) {
@@ -97,6 +97,10 @@ public class DmfActionUpdateStatus {
         }
 
         return message.addAll(messages);
+    }
+
+    public void setCode(final int code) {
+        this.code = code;
     }
 
 }

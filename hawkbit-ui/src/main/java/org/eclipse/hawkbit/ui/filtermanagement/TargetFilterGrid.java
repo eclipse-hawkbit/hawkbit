@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
+import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.data.mappers.TargetFilterQueryToProxyTargetFilterMapper;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetFilterQueryDataProvider;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterGridLayoutUiSta
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.ValueProvider;
@@ -45,6 +47,8 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.TARGET_FILTER_TABLE_CONFIRMATION_LABEL_ID;
 
 /**
  * Concrete implementation of TargetFilter grid which is displayed on the
@@ -59,10 +63,12 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
     private final UINotification notification;
     private final TargetFilterGridLayoutUiState uiState;
     private final transient TargetFilterQueryManagement targetFilterQueryManagement;
+    private final transient TenantConfigHelper tenantConfigHelper;
 
     private final transient AutoAssignmentWindowBuilder autoAssignmentWindowBuilder;
 
     private final ActionTypeIconSupplier<ProxyTargetFilterQuery> actionTypeIconSupplier;
+    private final StatusIconBuilder.ConfirmationIconSupplier confirmationIconSupplier;
 
     private final transient DeleteSupport<ProxyTargetFilterQuery> targetFilterDeleteSupport;
 
@@ -77,16 +83,21 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
      *            TargetFilterQueryManagement
      * @param autoAssignmentWindowBuilder
      *            AutoAssignmentWindowBuilder
+     * @param tenantConfigHelper
+     *            TenantConfigHelper
      */
-    public TargetFilterGrid(final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState,
+    public TargetFilterGrid(
+            final CommonUiDependencies uiDependencies, final TargetFilterGridLayoutUiState uiState,
             final TargetFilterQueryManagement targetFilterQueryManagement,
-            final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder) {
+            final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder,
+            final TenantConfigHelper tenantConfigHelper) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.notification = uiDependencies.getUiNotification();
         this.uiState = uiState;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.autoAssignmentWindowBuilder = autoAssignmentWindowBuilder;
+        this.tenantConfigHelper = tenantConfigHelper;
 
         this.targetFilterDeleteSupport = new DeleteSupport<>(this, i18n, notification, "caption.filter.custom",
                 "caption.filter.custom.plur", ProxyTargetFilterQuery::getName, this::targetFiltersDeletionCallback,
@@ -97,7 +108,11 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
         initFilterMappings();
 
         actionTypeIconSupplier = new ActionTypeIconSupplier<>(i18n, ProxyTargetFilterQuery::getAutoAssignActionType,
-                UIComponentIdProvider.TARGET_FILTER_TABLE_TYPE_LABEL_ID);
+              UIComponentIdProvider.TARGET_FILTER_TABLE_TYPE_LABEL_ID);
+
+        confirmationIconSupplier = new StatusIconBuilder.ConfirmationIconSupplier(i18n, 
+              TARGET_FILTER_TABLE_CONFIRMATION_LABEL_ID);
+
         init();
     }
 
@@ -128,8 +143,11 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addComponentColumn(this, this::buildFilterLink).setId(FILTER_NAME_ID)
+        final Column<ProxyTargetFilterQuery, Button> nameColumn = GridComponentBuilder
+                .addComponentColumn(this, this::buildFilterLink).setId(FILTER_NAME_ID)
                 .setCaption(i18n.getMessage("header.name"));
+        GridComponentBuilder.setColumnSortable(nameColumn, "name");
+
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 
@@ -149,6 +167,11 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
 
             final Label icon = actionTypeIconSupplier.getLabel(filter);
             horizontalLayout.addComponent(icon);
+
+            if (tenantConfigHelper.isUserConsentEnabled()) {
+                final Label confirmationIcon = confirmationIconSupplier.getLabel(filter);
+                horizontalLayout.addComponent(confirmationIcon);
+            }
 
             final Button link = buildAutoAssignmentLink(filter);
             horizontalLayout.addComponent(link);

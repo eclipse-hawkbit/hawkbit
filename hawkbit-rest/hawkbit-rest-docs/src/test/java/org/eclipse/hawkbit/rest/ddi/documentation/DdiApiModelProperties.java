@@ -96,6 +96,8 @@ final class DdiApiModelProperties {
 
     static final String DEPLOYMENT = "Detailed deployment operation";
 
+    static final String CONFIRMATION = "Deployment confirmation operation";
+
     static final String CANCEL = "Detailed cancel operation of a deployment";
 
     static final String INSTALLED = "Detailed operation of last successfully finished action";
@@ -136,5 +138,30 @@ final class DdiApiModelProperties {
 
     static final String UPDATE_MODE = "Optional parameter to specify the update mode that should be applied when updating target attributes. "
             + "Valid values are 'merge', 'replace', and 'remove'. Defaults to 'merge'.";
+
+    static final String TARGET_CONFIRMATION_STATE = "action confirmation state";
+
+    static final String TARGET_CONFIRMATION_CODE = "optional individual status code";
+
+    static final String TARGET_CONFIRMATION_DETAILS = "List of detailed message information";
+
+    static final String TARGET_AUTO_CONFIRM = "id of the action";
+
+    static final String TARGET_AUTO_CONFIRM_STATE = "flag if auto confirm is active";
+
+    static final String TARGET_AUTO_CONFIRM_INITIATOR_RESPONSE = "(optional) initiator set on activation";
+
+    static final String TARGET_AUTO_CONFIRM_REMARK_RESPONSE = "(optional) remark set on activation";
+
+    static final String TARGET_AUTO_CONFIRM_ACTIVATED_AT = "timestamp of the activation";
+
+    static final String TARGET_AUTO_CONFIRM_REFERENCE_ACTIVATE_AUTO_CONFIRM = "reference link to activate auto confirm";
+
+    static final String TARGET_AUTO_CONFIRM_REFERENCE_DEACTIVATE_AUTO_CONFIRM = "reference link to deactivate auto confirm";
+
+    static final String TARGET_AUTO_CONFIRM_REFERENCE_CONFIRMATION_BASE_ACTION = "reference link in case an action with open confirmation is present";
+
+    static final String TARGET_AUTO_CONFIRM_ACTIVATE_INITIATOR = "individual value (e.g. username) stored as initiator and automatically used as confirmed user in future actions";
+    static final String TARGET_AUTO_CONFIRM_ACTIVATE_REMARK = "individual value to attach a remark which will be persisted when automatically confirming future actions";
 
 }

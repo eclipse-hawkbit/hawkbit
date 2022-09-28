@@ -38,14 +38,15 @@ public final class MgmtTargetFilterQueryMapper {
         // Utility class
     }
 
-    static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters) {
+    static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters,
+            final boolean userConsentFlowEnabled) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
-        return filters.stream().map(MgmtTargetFilterQueryMapper::toResponse).collect(Collectors.toList());
+        return filters.stream().map(filter -> toResponse(filter, userConsentFlowEnabled)).collect(Collectors.toList());
     }
 
-    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter) {
+    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean userConsentFlowEnabled) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
@@ -62,6 +63,9 @@ public final class MgmtTargetFilterQueryMapper {
             targetRest.setAutoAssignDistributionSet(distributionSet.getId());
             targetRest.setAutoAssignActionType(MgmtRestModelMapper.convertActionType(filter.getAutoAssignActionType()));
             filter.getAutoAssignWeight().ifPresent(targetRest::setAutoAssignWeight);
+            if (userConsentFlowEnabled) {
+                targetRest.setConfirmationRequired(filter.isConfirmationRequired());
+            }
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());

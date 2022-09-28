@@ -64,6 +64,14 @@ public interface RolloutGroupCreate {
     RolloutGroupCreate conditions(RolloutGroupConditions conditions);
 
     /**
+     * @param confirmationRequired
+     *            if confirmation is required for this rollout group (considered
+     *            with user consent flow active)
+     * @return updated builder instance
+     */
+    RolloutGroupCreate confirmationRequired(boolean confirmationRequired);
+
+    /**
      * @return peek on current state of {@link RolloutGroup} in the builder
      */
     RolloutGroup build();

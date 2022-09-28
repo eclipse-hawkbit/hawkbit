@@ -58,6 +58,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -65,6 +66,8 @@ import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
+
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONSENT_ENABLED;
 
 /**
  * Concrete implementation of Target grid which is displayed on the Deployment
@@ -153,7 +156,8 @@ public class TargetGrid extends AbstractGrid<ProxyTarget, TargetManagementFilter
         final Map<String, AssignmentSupport<?, ProxyTarget>> sourceTargetAssignmentStrategies = new HashMap<>();
 
         final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
-                uiDependencies, uiProperties, deploymentManagement);
+                uiDependencies, uiProperties, deploymentManagement,
+                TenantConfigHelper.usingContext(systemSecurityContext, configManagement));
         final DistributionSetsToTargetAssignmentSupport distributionsToTargetAssignment = new DistributionSetsToTargetAssignmentSupport(
                 uiDependencies, systemSecurityContext, configManagement, assignmentController);
         final TargetTagsToTargetAssignmentSupport targetTagsToTargetAssignment = new TargetTagsToTargetAssignmentSupport(

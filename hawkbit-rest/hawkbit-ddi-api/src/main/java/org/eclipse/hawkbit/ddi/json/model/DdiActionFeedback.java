@@ -53,7 +53,7 @@ public class DdiActionFeedback {
      *            status to be appended to the action
      */
     @JsonCreator
-    public DdiActionFeedback(@JsonProperty(value = "time", required = true) final String time,
+    public DdiActionFeedback(@JsonProperty(value = "time") final String time,
             @JsonProperty(value = "status", required = true) final DdiStatus status) {
         this.time = time;
         this.status = status;

@@ -23,6 +23,7 @@ import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.ComponentContainer;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Target add/update window layout.
@@ -32,27 +33,35 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
 
     private final Label descriptionLabel;
     private final CheckBox enableCheckBox;
+    private final CheckBox confirmationCheckBox;
     private final ActionTypeOptionGroupAutoAssignmentLayout actionTypeOptionGroupLayout;
     private final BoundComponent<ComboBox<ProxyDistributionSet>> autoAssignDsComboBox;
-
+    
+    private final TenantConfigHelper configHelper;
+    
     /**
      * Constructor for AbstractTagWindowLayout
      * 
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param dsManagement
-     *          DistributionSetManagement
+     *            DistributionSetManagement
+     * @param configHelper
+     *            TenantConfigHelper
      */
-    public AutoAssignmentWindowLayout(final VaadinMessageSource i18n, final DistributionSetManagement dsManagement) {
+    public AutoAssignmentWindowLayout(final VaadinMessageSource i18n, final DistributionSetManagement dsManagement,
+            final TenantConfigHelper configHelper) {
         super();
 
         this.autoAssignComponentBuilder = new AutoAssignmentWindowLayoutComponentBuilder(i18n);
 
         this.descriptionLabel = autoAssignComponentBuilder.createDescriptionLabel();
         this.enableCheckBox = autoAssignComponentBuilder.createEnableCheckbox(binder);
+        this.confirmationCheckBox = autoAssignComponentBuilder.createConfirmationCheckbox(binder);
         this.actionTypeOptionGroupLayout = autoAssignComponentBuilder.createActionTypeOptionGroupLayout(binder);
         this.autoAssignDsComboBox = autoAssignComponentBuilder.createDistributionSetCombo(binder,
                 new DistributionSetStatelessDataProvider(dsManagement, new DistributionSetToProxyDistributionMapper()));
+        this.configHelper = configHelper;
 
         addValueChangeListeners();
     }
@@ -67,7 +76,11 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
         autoAssignmentLayout.addComponent(enableCheckBox);
         autoAssignmentLayout.addComponent(actionTypeOptionGroupLayout);
         autoAssignmentLayout.addComponent(autoAssignDsComboBox.getComponent());
-
+        
+        if (configHelper.isUserConsentEnabled()) {
+            autoAssignmentLayout.addComponent(confirmationCheckBox);
+        }
+        
         return autoAssignmentLayout;
     }
 
@@ -85,5 +98,6 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
         actionTypeOptionGroupLayout.setVisible(autoAssignmentEnabled);
         autoAssignDsComboBox.getComponent().setVisible(autoAssignmentEnabled);
         autoAssignDsComboBox.setRequired(autoAssignmentEnabled);
+        confirmationCheckBox.setVisible(autoAssignmentEnabled);
     }
 }

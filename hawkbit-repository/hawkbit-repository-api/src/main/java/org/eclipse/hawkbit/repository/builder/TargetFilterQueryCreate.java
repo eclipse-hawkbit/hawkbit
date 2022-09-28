@@ -84,6 +84,17 @@ public interface TargetFilterQueryCreate {
     TargetFilterQueryCreate autoAssignWeight(Integer weight);
 
     /**
+     * Specify initial confirmation state of resulting {@link Action} in auto
+     * assignment
+     *
+     * @param confirmationRequired
+     *            if confirmation is required for configured auto assignment (considered
+     *            with user consent flow active)
+     * @return updated builder instance
+     */
+    TargetFilterQueryCreate confirmationRequired(boolean confirmationRequired);
+
+    /**
      * @return peek on current state of {@link TargetFilterQuery} in the builder
      */
     TargetFilterQuery build();

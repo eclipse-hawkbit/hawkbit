@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfConfirmRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
@@ -138,7 +139,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         registerAndAssertTargetWithExistingTenant(controllerId, 1, expectedStatus, CREATED_BY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, controllerId);
-        assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage, controllerId);
+        if (isUserConsentEnabled()) {
+            assertConfirmMessage(expectedSoftwareModulesInMessage, controllerId);
+        } else {
+            assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage, controllerId);
+        }
         return assignmentResult;
     }
 
@@ -452,4 +457,24 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         softwareModules.forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
                 new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
     }
+
+    protected void assertConfirmMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+
+        final Message replyMessage = assertReplyMessageHeader(EventTopic.CONFIRM, controllerId);
+        assertAllTargetsCount(1);
+
+        final DmfConfirmRequest confirmRequest = (DmfConfirmRequest) getDmfClient()
+                .getMessageConverter().fromMessage(replyMessage);
+
+        assertConfirmRequest(confirmRequest, dsModules, controllerId);
+    }
+
+    protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules,
+            final String controllerId) {
+        assertSoftwareModules(softwareModules, request.getSoftwareModules());
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
+        assertThat(updatedTarget).isNotNull();
+        assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
+    }
+
 }

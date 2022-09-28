@@ -177,6 +177,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Test
     @Description("Handles the POST request of creating a rollout. Required Permission: " + SpPermission.CREATE_ROLLOUT)
     public void createRollout() throws Exception {
+        enableUserConsentFlow();
 
         testdataFactory.createTargets(20, "targets-");
 
@@ -208,6 +209,9 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
                         optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ROLLOUT_TYPE)
                                 .attributes(key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),
+                        optionalRequestFieldWithPath("confirmationRequired")
+                                .description(MgmtApiModelProperties.ROLLOUT_CONFIRMATION_REQUIRED)
+                                .type(JsonFieldType.BOOLEAN.toString()),
                         requestFieldWithPath("distributionSetId").description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                         requestFieldWithPath("targetFilterQuery")
                                 .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
@@ -250,6 +254,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the POST request of creating a rollout with a groups definition. Required Permission: "
             + SpPermission.CREATE_ROLLOUT)
     public void createRolloutWithGroupsDefinition() throws Exception {
+        enableUserConsentFlow();
 
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "targets-", "rollout");
@@ -281,11 +286,11 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .successAction(RolloutGroupSuccessAction.NEXTGROUP, "")
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, "80")
                 .errorAction(RolloutGroupErrorAction.PAUSE, "").build();
-        mockMvc.perform(
-                post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.rollout(name, description, null, dsId, targetFilter,
-                                rolloutGroupConditions, rolloutGroups))
-                        .contentType(MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON_VALUE))
+        mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
+                .content(JsonBuilder.rolloutWithGroups(name, description, null, dsId, targetFilter,
+                        rolloutGroupConditions, rolloutGroups, null, null, true))
+                .contentType(
+                        MediaType.APPLICATION_JSON).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -298,6 +303,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                         .description(MgmtApiModelProperties.ROLLOUT_DS_ID),
                                 requestFieldWithPath("targetFilterQuery")
                                         .description(MgmtApiModelProperties.ROLLOUT_FILTER_QUERY),
+                                requestFieldWithPath("confirmationRequired")
+                                        .description(MgmtApiModelProperties.ROLLOUT_CONFIRMATION_REQUIRED),
                                 optionalRequestFieldWithPath("description")
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
                                 optionalRequestFieldWithPath("successCondition")
@@ -334,6 +341,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
                                 optionalRequestFieldWithPath("groups[].targetFilterQuery")
                                         .description(MgmtApiModelProperties.ROLLOUT_GROUP_FILTER_QUERY),
+                                optionalRequestFieldWithPath("groups[].confirmationRequired")
+                                        .description(MgmtApiModelProperties.ROLLOUT_GROUP_CONFIRMATION_REQUIRED),
                                 optionalRequestFieldWithPath("groups[].targetPercentage")
                                         .description(MgmtApiModelProperties.ROLLOUT_GROUP_TARGET_PERCENTAGE)
                                         .attributes(key("value").value("0..100")),
@@ -446,6 +455,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving the deploy groups of a rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRolloutDeployGroups() throws Exception {
+        enableUserConsentFlow();
+
         final Rollout rollout = createRolloutEntity();
 
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups", rollout.getId())
@@ -464,6 +475,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving a deploy group of a rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRolloutDeployGroup() throws Exception {
+        enableUserConsentFlow();
+
         final Rollout rollout = createRolloutEntity();
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent()
                 .get(0);
@@ -478,7 +491,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     }
 
     private Snippet getRolloutDeployGroupResponseFields(final boolean isArray, final boolean withDetails,
-            final FieldDescriptor... descriptors) throws JsonProcessingException {
+            final FieldDescriptor... descriptors) {
         final String arrayPrefix = getArrayPrefix(isArray);
         final List<FieldDescriptor> allFieldDescriptor = new ArrayList<>();
         allFieldDescriptor.addAll(Arrays.asList(descriptors));
@@ -512,6 +525,9 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "targetPercentage")
                 .description(MgmtApiModelProperties.ROLLOUT_GROUP_TARGET_PERCENTAGE));
+
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "confirmationRequired")
+                .description(MgmtApiModelProperties.ROLLOUT_GROUP_CONFIRMATION_REQUIRED));
 
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "successCondition")
                 .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION));
@@ -642,7 +658,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         if (isMultiAssignmentsEnabled()) {
             rolloutCreate.weight(400);
         }
-        final Rollout rollout = rolloutManagement.create(rolloutCreate, 5, new RolloutGroupConditionBuilder()
+        final Rollout rollout = rolloutManagement.create(rolloutCreate, 5, false, new RolloutGroupConditionBuilder()
                 .withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
         // Run here, because Scheduler is disabled during tests

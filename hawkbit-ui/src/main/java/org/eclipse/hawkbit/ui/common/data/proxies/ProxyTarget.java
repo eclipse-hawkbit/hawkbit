@@ -42,6 +42,8 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
 
     private ProxyTypeInfo typeInfo;
 
+    private transient ProxyTargetConfirmationOptions options = new ProxyTargetConfirmationOptions();
+
     /**
      * Gets the controllerId
      *
@@ -218,5 +220,24 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
     @Override
     public ProxyTypeInfo getTypeInfo() {
         return typeInfo;
+    }
+
+    /**
+     * Get the state of the current confirmation options
+     * 
+     * @return {@link ProxyTargetConfirmationOptions}
+     */
+    public ProxyTargetConfirmationOptions getTargetConfirmationOptions() {
+        return options;
+    }
+
+    /**
+     * Set the state of the current confirmation options
+     * 
+     * @param options
+     *            the {@link ProxyTargetConfirmationOptions}
+     */
+    public void setTargetConfirmationOptions(final ProxyTargetConfirmationOptions options) {
+        this.options = options;
     }
 }

@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.ui.rollout.window.components;
 
+import com.vaadin.ui.Alignment;
+import com.vaadin.ui.CheckBox;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
@@ -30,6 +32,8 @@ import com.vaadin.ui.GridLayout;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
+import static org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions.DIST_CHECKBOX_STYLE;
+
 /**
  * Advance group row component
  */
@@ -45,6 +49,8 @@ public class AdvancedGroupRow {
     private final TextField targetPercentage;
     private final TextField triggerThreshold;
     private final TextField errorThreshold;
+    private final CheckBox requireConfirmationToggle;
+    private final boolean isUserConsentEnabled;
 
     /**
      * Constructor for AdvancedGroupRow
@@ -55,9 +61,11 @@ public class AdvancedGroupRow {
      *          TargetFilterQueryDataProvider
      */
     public AdvancedGroupRow(final VaadinMessageSource i18n,
-            final TargetFilterQueryDataProvider targetFilterQueryDataProvider) {
+            final TargetFilterQueryDataProvider targetFilterQueryDataProvider,
+            final boolean isUserConsentEnabled) {
         this.i18n = i18n;
         this.targetFilterQueryDataProvider = targetFilterQueryDataProvider;
+        this.isUserConsentEnabled = isUserConsentEnabled;
 
         this.binder = new Binder<>();
 
@@ -66,6 +74,7 @@ public class AdvancedGroupRow {
         this.targetPercentage = createTargetPercentage();
         this.triggerThreshold = createTriggerThreshold();
         this.errorThreshold = createErrorThreshold();
+        this.requireConfirmationToggle = createConfirmationToggle();
     }
 
     private TextField createGroupName() {
@@ -121,14 +130,23 @@ public class AdvancedGroupRow {
 
     private TextField createErrorThreshold() {
         final TextField errorThresholdField = new TextFieldBuilder(32).prompt(i18n.getMessage("prompt.error.threshold"))
-                .buildTextComponent();
+              .buildTextComponent();
         errorThresholdField.setWidth(5, Unit.EM);
 
         binder.forField(errorThresholdField).asRequired(i18n.getMessage("prompt.error.threshold.required")).bind(
-                ProxyAdvancedRolloutGroup::getErrorThresholdPercentage,
-                ProxyAdvancedRolloutGroup::setErrorThresholdPercentage);
+              ProxyAdvancedRolloutGroup::getErrorThresholdPercentage,
+              ProxyAdvancedRolloutGroup::setErrorThresholdPercentage);
 
         return errorThresholdField;
+    }
+
+    public CheckBox createConfirmationToggle() {
+        final CheckBox checkBox = new CheckBox();
+        checkBox.setWidth(5, Unit.EM);
+        checkBox.setStyleName(DIST_CHECKBOX_STYLE);
+        binder.forField(checkBox).bind(ProxyAdvancedRolloutGroup::isConfirmationRequired, ProxyAdvancedRolloutGroup::setConfirmationRequired);
+        checkBox.setValue(true);
+        return checkBox;
     }
 
     /**
@@ -145,6 +163,10 @@ public class AdvancedGroupRow {
         layout.addComponent(targetPercentage, 2, index);
         layout.addComponent(triggerThreshold, 3, index);
         layout.addComponent(errorThreshold, 4, index);
+        if (isUserConsentEnabled) {
+            layout.addComponent(requireConfirmationToggle, 5, index);
+            layout.setComponentAlignment(requireConfirmationToggle, Alignment.MIDDLE_LEFT);
+        }
     }
 
     /**
@@ -159,6 +181,7 @@ public class AdvancedGroupRow {
         targetPercentage.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_PERC_ID + "." + index);
         triggerThreshold.setId(UIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID + "." + index);
         errorThreshold.setId(UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID + "." + index);
+        errorThreshold.setId(UIComponentIdProvider.ROLLOUT_CONFIRMATION_REQUIRED + "." + index);
     }
 
     /**

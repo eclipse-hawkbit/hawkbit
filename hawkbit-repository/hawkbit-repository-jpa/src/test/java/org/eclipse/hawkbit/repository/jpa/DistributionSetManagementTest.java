@@ -63,6 +63,8 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -627,7 +629,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         final Iterator<DistributionSet> dsIterator = buildDistributionSets.iterator();
         final Iterator<Target> tIterator = buildTargetFixtures.iterator();
-        dsIterator.next();
+        final DistributionSet dsFirst = dsIterator.next();
         final DistributionSet dsSecond = dsIterator.next();
         final DistributionSet dsThree = dsIterator.next();
         final DistributionSet dsFour = dsIterator.next();
@@ -650,17 +652,50 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final List<DistributionSet> tFirstPin = distributionSetManagement
                 .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tFirst.getControllerId())
                 .getContent();
-        assertThat(tFirstPin.get(0)).isEqualTo(dsThree);
         assertThat(tFirstPin).hasSize(10);
+        // assigned
+        assertThat(tFirstPin.get(0)).isEqualTo(dsThree);
+        // remaining id:ASC
+        assertThat(tFirstPin.get(1)).isEqualTo(dsFirst);
+        assertThat(tFirstPin.get(2)).isEqualTo(dsSecond);
+        assertThat(tFirstPin.get(3)).isEqualTo(dsFour);
 
         // target second has installed DS-2 and assigned DS-4 so check order
         // correct
         final List<DistributionSet> tSecondPin = distributionSetManagement
                 .findByDistributionSetFilterOrderByLinkedTarget(PAGE, distributionSetFilter, tSecond.getControllerId())
                 .getContent();
+        assertThat(tSecondPin).hasSize(10);
+        // installed
         assertThat(tSecondPin.get(0)).isEqualTo(dsSecond);
+        // assigned
         assertThat(tSecondPin.get(1)).isEqualTo(dsFour);
-        assertThat(tFirstPin).hasSize(10);
+        // remaining id:ASC
+        assertThat(tSecondPin.get(2)).isEqualTo(dsFirst);
+        assertThat(tSecondPin.get(3)).isEqualTo(dsThree);
+
+        // target second has installed DS-2 and assigned DS-4 so check order
+        // correct
+        final List<DistributionSet> tSecondPinOrderedByName = distributionSetManagement
+                .findByDistributionSetFilterOrderByLinkedTarget(
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "version")),
+                        distributionSetFilter, tSecond.getControllerId())
+                .getContent();
+        assertThat(tSecondPinOrderedByName).hasSize(10);
+        // installed
+        assertThat(tSecondPinOrderedByName.get(0)).isEqualTo(buildDistributionSets.get(1));
+        // assigned
+        assertThat(tSecondPinOrderedByName.get(1)).isEqualTo(buildDistributionSets.get(3));
+        // remaining version:DESC
+        assertThat(tSecondPinOrderedByName.get(2)).isEqualTo(buildDistributionSets.get(9));
+        assertThat(tSecondPinOrderedByName.get(3)).isEqualTo(buildDistributionSets.get(8));
+        assertThat(tSecondPinOrderedByName.get(4)).isEqualTo(buildDistributionSets.get(7));
+        assertThat(tSecondPinOrderedByName.get(5)).isEqualTo(buildDistributionSets.get(6));
+        assertThat(tSecondPinOrderedByName.get(6)).isEqualTo(buildDistributionSets.get(5));
+        assertThat(tSecondPinOrderedByName.get(7)).isEqualTo(buildDistributionSets.get(4));
+        assertThat(tSecondPinOrderedByName.get(8)).isEqualTo(buildDistributionSets.get(2));
+        assertThat(tSecondPinOrderedByName.get(9)).isEqualTo(buildDistributionSets.get(0));
+
     }
 
     @Test

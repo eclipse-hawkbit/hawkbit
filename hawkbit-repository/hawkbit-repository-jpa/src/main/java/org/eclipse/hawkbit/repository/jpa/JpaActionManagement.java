@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.RepositoryProperties;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.domain.PageRequest;
 
@@ -31,7 +33,7 @@ public class JpaActionManagement {
         this.actionRepository = actionRepository;
         this.repositoryProperties = repositoryProperties;
     }
-    
+
     protected List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId,
             final int maxActionCount) {
         if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
@@ -50,8 +52,21 @@ public class JpaActionManagement {
         return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
     }
 
+    protected List<JpaAction> findActiveActionsHavingStatus(final String controllerId, final Action.Status status) {
+        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
+            return Collections.emptyList();
+        }
+        return Collections
+                .unmodifiableList(actionRepository.findByTargetIdInAndIsActiveAndActionStatus(controllerId, status));
+    }
+
     protected int getWeightConsideringDefault(final Action action) {
         return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
+    }
+
+    protected JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
+        return actionRepository.findById(actionId)
+              .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
 }

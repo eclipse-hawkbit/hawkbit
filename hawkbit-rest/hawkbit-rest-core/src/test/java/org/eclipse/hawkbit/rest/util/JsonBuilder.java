@@ -17,6 +17,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -26,6 +27,9 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.springframework.util.CollectionUtils;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Builder class for building certain json strings.
@@ -478,26 +482,36 @@ public abstract class JsonBuilder {
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null,
-                null);
-    }
-
-    public static String rollout(final String name, final String description, final Integer groupSize,
-            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups, null,
-                null);
+                null, null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final String type) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type, null,
                 null);
+    }
+
+    public static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+            final List<RolloutGroup> groups) {
+        return rolloutWithGroups(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, groups,
+                null, null, null);
+    }
+
+    public static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
+            final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
+            final List<RolloutGroup> groups, final String type, final Integer weight,
+            final Boolean confirmationRequired) {
+        final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup)
+                .collect(Collectors.toList());
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions,
+                rolloutGroupsJson, type, weight, confirmationRequired);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<RolloutGroup> groups, final String type, final Integer weight) {
+            final List<String> groupJsonList, final String type, final Integer weight, final Boolean confirmationRequired) {
         final JSONObject json = new JSONObject();
 
         try {
@@ -513,6 +527,10 @@ public abstract class JsonBuilder {
 
             if (weight != null) {
                 json.put("weight", weight);
+            }
+
+            if (confirmationRequired != null) {
+                json.put("confirmationRequired", confirmationRequired);
             }
 
             if (conditions != null) {
@@ -539,44 +557,11 @@ public abstract class JsonBuilder {
                 errorAction.put("expression", conditions.getErrorActionExp());
             }
 
-            if (groups != null) {
+            if (!CollectionUtils.isEmpty(groupJsonList)) {
                 final JSONArray jsonGroups = new JSONArray();
-
-                for (final RolloutGroup group : groups) {
-                    final JSONObject jsonGroup = new JSONObject();
-                    jsonGroup.put("name", group.getName());
-                    jsonGroup.put("description", group.getDescription());
-                    jsonGroup.put("targetFilterQuery", group.getTargetFilterQuery());
-                    jsonGroup.put("targetPercentage", group.getTargetPercentage());
-
-                    if (group.getSuccessCondition() != null) {
-                        final JSONObject successCondition = new JSONObject();
-                        jsonGroup.put("successCondition", successCondition);
-                        successCondition.put("condition", group.getSuccessCondition().toString());
-                        successCondition.put("expression", group.getSuccessConditionExp());
-                    }
-                    if (group.getSuccessAction() != null) {
-                        final JSONObject successAction = new JSONObject();
-                        jsonGroup.put("successAction", successAction);
-                        successAction.put("action", group.getSuccessAction().toString());
-                        successAction.put("expression", group.getSuccessActionExp());
-                    }
-                    if (group.getErrorCondition() != null) {
-                        final JSONObject errorCondition = new JSONObject();
-                        jsonGroup.put("errorCondition", errorCondition);
-                        errorCondition.put("condition", group.getErrorCondition().toString());
-                        errorCondition.put("expression", group.getErrorConditionExp());
-                    }
-                    if (group.getErrorAction() != null) {
-                        final JSONObject errorAction = new JSONObject();
-                        jsonGroup.put("errorAction", errorAction);
-                        errorAction.put("action", group.getErrorAction().toString());
-                        errorAction.put("expression", group.getErrorActionExp());
-                    }
-
-                    jsonGroups.put(jsonGroup);
+                for (final String groupJson : groupJsonList) {
+                    jsonGroups.put(new JSONObject(groupJson));
                 }
-
                 json.put("groups", jsonGroups);
             }
 
@@ -585,6 +570,72 @@ public abstract class JsonBuilder {
         }
 
         return json.toString();
+    }
+
+    public static String rolloutGroup(final RolloutGroup rolloutGroup) {
+        final RolloutGroupConditions conditions = getConditions(rolloutGroup);
+        return rolloutGroup(rolloutGroup.getName(), rolloutGroup.getDescription(), rolloutGroup.getTargetFilterQuery(),
+                rolloutGroup.getTargetPercentage(), rolloutGroup.isConfirmationRequired(), conditions);
+
+    }
+
+    private static RolloutGroupConditions getConditions(final RolloutGroup rolloutGroup) {
+        return new RolloutGroupConditionBuilder()
+                .errorCondition(rolloutGroup.getErrorCondition(), rolloutGroup.getErrorConditionExp())
+                .errorAction(rolloutGroup.getErrorAction(), rolloutGroup.getErrorActionExp())
+                .successAction(rolloutGroup.getSuccessAction(), rolloutGroup.getSuccessActionExp())
+                .successCondition(rolloutGroup.getSuccessCondition(), rolloutGroup.getSuccessConditionExp()).build();
+    }
+    
+    public static String rolloutGroup(final String name, final String description, final String targetFilterQuery,
+            final Float targetPercentage, final Boolean confirmationRequired,
+            final RolloutGroupConditions rolloutGroupConditions) {
+        final JSONObject jsonGroup = new JSONObject();
+        try {
+            jsonGroup.put("name", name);
+            jsonGroup.put("description", description);
+            jsonGroup.put("targetFilterQuery", targetFilterQuery);
+            if (targetPercentage == null) {
+                jsonGroup.put("targetPercentage", 100F);
+            } else {
+                jsonGroup.put("targetPercentage", targetPercentage);
+            }
+
+            if (confirmationRequired != null) {
+                jsonGroup.put("confirmationRequired", confirmationRequired);
+            }
+
+            if (rolloutGroupConditions.getSuccessCondition() != null) {
+                final JSONObject successCondition = new JSONObject();
+                jsonGroup.put("successCondition", successCondition);
+                successCondition.put("condition", rolloutGroupConditions.getSuccessCondition().toString());
+                successCondition.put("expression", rolloutGroupConditions.getSuccessConditionExp());
+            }
+            if (rolloutGroupConditions.getSuccessAction() != null) {
+                final JSONObject successAction = new JSONObject();
+                jsonGroup.put("successAction", successAction);
+                successAction.put("action", rolloutGroupConditions.getSuccessAction().toString());
+                successAction.put("expression", rolloutGroupConditions.getSuccessActionExp());
+            }
+            if (rolloutGroupConditions.getErrorCondition() != null) {
+                final JSONObject errorCondition = new JSONObject();
+                jsonGroup.put("errorCondition", errorCondition);
+                errorCondition.put("condition", rolloutGroupConditions.getErrorCondition().toString());
+                errorCondition.put("expression", rolloutGroupConditions.getErrorConditionExp());
+            }
+            if (rolloutGroupConditions.getErrorAction() != null) {
+                final JSONObject errorAction = new JSONObject();
+                jsonGroup.put("errorAction", errorAction);
+                errorAction.put("action", rolloutGroupConditions.getErrorAction().toString());
+                errorAction.put("expression", rolloutGroupConditions.getErrorActionExp());
+            }
+
+        } catch (final JSONException e) {
+            e.printStackTrace();
+            fail("Cannot parse JSON for rollout group.");
+        }
+
+        return jsonGroup.toString();
     }
 
     public static String cancelActionFeedback(final String id, final String execution) throws JSONException {

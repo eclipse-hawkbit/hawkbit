@@ -43,6 +43,9 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
     @JsonProperty
     private Integer autoAssignWeight;
 
+    @JsonProperty
+    private Boolean confirmationRequired;
+
     public Long getFilterId() {
         return filterId;
     }
@@ -89,5 +92,13 @@ public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     public void setAutoAssignWeight(final Integer autoAssignWeight) {
         this.autoAssignWeight = autoAssignWeight;
+    }
+
+    public Boolean getConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final Boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

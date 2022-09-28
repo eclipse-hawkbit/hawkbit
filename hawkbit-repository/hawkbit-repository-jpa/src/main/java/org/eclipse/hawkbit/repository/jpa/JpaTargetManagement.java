@@ -40,12 +40,14 @@ import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
@@ -57,6 +59,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
@@ -638,7 +641,7 @@ public class JpaTargetManagement implements TargetManagement {
                 pageable.getPageSize(), Sort.unsorted());
 
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
-        specList.add(TargetSpecifications.orderedByLinkedDistributionSet(orderByDistributionId));
+        specList.add(TargetSpecifications.orderedByLinkedDistributionSet(orderByDistributionId, pageable.getSort()));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, unsortedPage, specList);
     }

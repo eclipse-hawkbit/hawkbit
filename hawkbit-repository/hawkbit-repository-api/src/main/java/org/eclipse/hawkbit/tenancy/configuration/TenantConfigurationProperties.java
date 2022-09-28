@@ -152,6 +152,11 @@ public class TenantConfigurationProperties {
          */
         public static final String BATCH_ASSIGNMENTS_ENABLED = "batch.assignments.enabled";
 
+        /**
+         * Switch to enable/disable the user-consent flow
+         */
+        public static final String USER_CONSENT_ENABLED = "user.consent.flow.enabled";
+
         private String keyName;
         private String defaultValue = "";
         private Class<?> dataType = String.class;

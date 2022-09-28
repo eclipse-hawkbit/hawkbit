@@ -23,10 +23,13 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -54,11 +57,15 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     private final EntityFactory entityFactory;
 
+    private final TenantConfigHelper tenantConfigHelper;
+
     MgmtTargetTagResource(final TargetTagManagement tagManagement, final TargetManagement targetManagement,
-            final EntityFactory entityFactory) {
+            final EntityFactory entityFactory, final SystemSecurityContext securityContext,
+            final TenantConfigurationManagement configurationManagement) {
         this.tagManagement = tagManagement;
         this.targetManagement = targetManagement;
         this.entityFactory = entityFactory;
+        this.tenantConfigHelper = TenantConfigHelper.usingContext(securityContext, configurationManagement);
     }
 
     @Override
@@ -149,7 +156,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = targetManagement.findByRsqlAndTag(pageable, rsqlParam, targetTagId);
         }
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, findTargetsAll.getTotalElements()));
     }
 
@@ -164,8 +171,10 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
                 .toggleTagAssignment(findTargetControllerIds(assignedTargetRequestBodies), targetTag.getName());
 
         final MgmtTargetTagAssigmentResult tagAssigmentResultRest = new MgmtTargetTagAssigmentResult();
-        tagAssigmentResultRest.setAssignedTargets(MgmtTargetMapper.toResponse(assigmentResult.getAssignedEntity()));
-        tagAssigmentResultRest.setUnassignedTargets(MgmtTargetMapper.toResponse(assigmentResult.getUnassignedEntity()));
+        tagAssigmentResultRest.setAssignedTargets(
+                MgmtTargetMapper.toResponse(assigmentResult.getAssignedEntity(), tenantConfigHelper));
+        tagAssigmentResultRest.setUnassignedTargets(
+                MgmtTargetMapper.toResponse(assigmentResult.getUnassignedEntity(), tenantConfigHelper));
         return ResponseEntity.ok(tagAssigmentResultRest);
     }
 
@@ -175,7 +184,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
         LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
-        return ResponseEntity.ok(MgmtTargetMapper.toResponse(assignedTarget));
+        return ResponseEntity.ok(MgmtTargetMapper.toResponse(assignedTarget, tenantConfigHelper));
     }
 
     @Override

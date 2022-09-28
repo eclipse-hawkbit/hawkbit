@@ -28,6 +28,8 @@ public final class SPUIStyleDefinitions {
 
     public static final String SP_TEXTFIELD_LAYOUT_ERROR_HIGHTLIGHT = "v-textfield-error";
 
+    public static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
+
     /**
      * Action history message grid style.
      */

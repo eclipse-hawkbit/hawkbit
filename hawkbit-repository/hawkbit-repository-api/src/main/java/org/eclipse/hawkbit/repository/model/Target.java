@@ -99,6 +99,14 @@ public interface Target extends NamedEntity {
     PollStatus getPollStatus();
 
     /**
+     * The auto confirmation status is present, when it's active for the target.
+     * Will only be considered in case the user consent flow is active.
+     *
+     * @return the {@link AutoConfirmationStatus} if activated
+     */
+    AutoConfirmationStatus getAutoConfirmationStatus();
+
+    /**
      * @return <code>true</code> if the {@link Target} has not jet provided
      *         {@link #getControllerAttributes()}.
      */

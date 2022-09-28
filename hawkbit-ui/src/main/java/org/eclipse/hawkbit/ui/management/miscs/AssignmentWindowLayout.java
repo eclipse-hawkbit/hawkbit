@@ -36,6 +36,10 @@ public class AssignmentWindowLayout extends VerticalLayout {
 
     private final BoundComponent<ActionTypeOptionGroupAssignmentLayout> actionTypeLayout;
     private final CheckBox maintenanceWindowToggle;
+    private final CheckBox confirmationRequiredToggle;
+    
+    private final Link confirmationHelpLink;
+
     private final BoundComponent<TextField> maintenanceSchedule;
     private final BoundComponent<TextField> maintenanceDuration;
     private final ComboBox<String> maintenanceTimeZoneCombo;
@@ -47,9 +51,9 @@ public class AssignmentWindowLayout extends VerticalLayout {
      * Constructor for AssignmentWindowLayout
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      * @param uiProperties
-     *          UiProperties
+     *            UiProperties
      */
     public AssignmentWindowLayout(final VaadinMessageSource i18n, final UiProperties uiProperties) {
         this.proxyAssignmentBinder = new Binder<>();
@@ -57,6 +61,8 @@ public class AssignmentWindowLayout extends VerticalLayout {
 
         this.actionTypeLayout = componentBuilder.createActionTypeOptionGroupLayout(proxyAssignmentBinder);
         this.maintenanceWindowToggle = componentBuilder.createEnableMaintenanceWindowToggle(proxyAssignmentBinder);
+        this.confirmationRequiredToggle = componentBuilder.createConfirmationToggle(proxyAssignmentBinder);
+        this.confirmationHelpLink = componentBuilder.createConfirmationHelpLink(uiProperties);
 
         this.maintenanceSchedule = componentBuilder.createMaintenanceSchedule(proxyAssignmentBinder);
         this.maintenanceDuration = componentBuilder.createMaintenanceDuration(proxyAssignmentBinder);
@@ -90,6 +96,19 @@ public class AssignmentWindowLayout extends VerticalLayout {
         maintenanceWindowLayout.setVisible(false);
         maintenanceWindowLayout.setEnabled(false);
         addComponent(maintenanceWindowLayout);
+
+        final HorizontalLayout confirmationOptionsLayout = new HorizontalLayout();
+        confirmationOptionsLayout.addComponent(confirmationRequiredToggle);
+        confirmationOptionsLayout.addComponent(confirmationHelpLink);
+        addComponent(confirmationOptionsLayout);
+        refreshConfirmCheckBoxState(false);
+    }
+
+    public void refreshConfirmCheckBoxState(final boolean isUserConsentFlowEnabled) {
+        confirmationRequiredToggle.setEnabled(isUserConsentFlowEnabled);
+        confirmationRequiredToggle.setVisible(isUserConsentFlowEnabled);
+        confirmationHelpLink.setEnabled(isUserConsentFlowEnabled);
+        confirmationHelpLink.setVisible(isUserConsentFlowEnabled);
     }
 
     private void addValueChangeListeners() {

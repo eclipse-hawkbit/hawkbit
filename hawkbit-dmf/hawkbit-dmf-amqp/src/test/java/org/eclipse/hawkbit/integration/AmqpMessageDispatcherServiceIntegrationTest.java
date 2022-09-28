@@ -466,7 +466,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
-                filterQuery, ds, "50", "5", ActionType.FORCED, weight);
+                filterQuery, ds, "50", "5", ActionType.FORCED, weight, false);
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
         return rollout;
@@ -694,5 +694,29 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                     assertThat(requestTarget).isNotNull();
                     assertThat(tokens.contains(requestTarget.getTargetSecurityToken()));
                 });
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment send a confirm message.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void sendConfirmStatus() {
+        final String controllerId = TARGET_PREFIX + "sendConfirmStatus";
+        enableUserConsentFlow();
+        registerTargetAndAssignDistributionSet(controllerId);
+
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
+        assertConfirmMessage(getDistributionSet().getModules(), controllerId);
+        assertEventMessageNotPresent(EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+    protected void assertEventMessageNotPresent(final EventTopic eventTopic) {
+        assertThat(replyToListener.getLatestEventMessage(eventTopic)).isNull();
     }
 }

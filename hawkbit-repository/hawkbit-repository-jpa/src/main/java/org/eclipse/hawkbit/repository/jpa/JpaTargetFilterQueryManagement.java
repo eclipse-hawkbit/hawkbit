@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -249,6 +250,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             // set the new query
             targetFilterQuery.setQuery(query);
         });
+        update.getConfirmationRequired().ifPresent(targetFilterQuery::setConfirmationRequired);
 
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
@@ -263,6 +265,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
             targetFilterQuery.setAutoAssignInitiatedBy(null);
+            targetFilterQuery.setConfirmationRequired(false);
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             // we cannot be sure that the quota was enforced at creation time
@@ -277,8 +280,15 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
+            final boolean confirmationRequired = update.isConfirmationRequired() == null ? isUserConsentEnabled()
+                    : update.isConfirmationRequired();
+            targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return targetFilterQueryRepository.save(targetFilterQuery);
+    }
+    
+    private boolean isUserConsentEnabled(){
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isUserConsentEnabled();
     }
 
     private static void verifyDistributionSetAndThrowExceptionIfDeleted(final DistributionSet distributionSet) {

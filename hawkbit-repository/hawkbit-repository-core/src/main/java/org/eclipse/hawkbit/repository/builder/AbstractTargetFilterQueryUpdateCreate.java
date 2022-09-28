@@ -39,6 +39,8 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     @Min(Action.WEIGHT_MIN)
     @Max(Action.WEIGHT_MAX)
     protected Integer weight;
+    
+    protected Boolean confirmationRequired;
 
     /**
      * Set DS ID of the {@link Action} created during auto assignment
@@ -119,5 +121,20 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
 
     public Optional<String> getQuery() {
         return Optional.ofNullable(query);
+    }
+
+    /**
+     * @param confirmationRequired
+     *            if confirmation is required for configured auto assignment
+     *            (considered with user consent flow active)
+     * @return updated builder instance
+     */
+    public T confirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
+        return (T) this;
+    }
+
+    public Optional<Boolean> getConfirmationRequired() {
+        return Optional.ofNullable(confirmationRequired);
     }
 }

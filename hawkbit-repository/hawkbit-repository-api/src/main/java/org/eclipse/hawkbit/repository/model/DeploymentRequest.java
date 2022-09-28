@@ -25,8 +25,8 @@ public class DeploymentRequest {
     private final TargetWithActionType targetWithActionType;
 
     /**
-     * Constructor that also accepts maintenance schedule parameters and checks
-     * for validity of the specified maintenance schedule.
+     * Constructor that also accepts maintenance schedule parameters and checks for
+     * validity of the specified maintenance schedule.
      *
      * @param controllerId
      *            for which the action is created.
@@ -48,18 +48,30 @@ public class DeploymentRequest {
      *            window, for example 00:30:00 for 30 minutes
      * @param maintenanceWindowTimeZone
      *            is the time zone specified as +/-hh:mm offset from UTC, for
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone.
+     *            example +02:00 for CET summer time and +00:00 for UTC. The start
+     *            time of a maintenance window calculated based on the cron
+     *            expression is relative to this time zone.
      *
+     * @param confirmationRequired
+     *            is a flag whether the confirmation should be required for the
+     *            resulting {@link Action} or not. In case the confirmation is not
+     *            required, the action will be automatically confirmed and put in
+     *            the
+     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING
+     *            state. Otherwise the normal confirmation flow will be triggered
+     *            and the {@link Action} will stay in the
+     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
+     *            state.} (Only considered with USER CONSENT FLOW active via tenant
+     *            configuration)
      * @throws InvalidMaintenanceScheduleException
      *             if the parameters do not define a valid maintenance schedule.
      */
     public DeploymentRequest(final String controllerId, final Long distributionSetId, final ActionType actionType,
             final long forceTime, final Integer weight, final String maintenanceSchedule,
-            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone) {
+            final String maintenanceWindowDuration, final String maintenanceWindowTimeZone,
+            final boolean confirmationRequired) {
         this.targetWithActionType = new TargetWithActionType(controllerId, actionType, forceTime, weight,
-                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
+                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, confirmationRequired);
         this.distributionSetId = distributionSetId;
     }
 
@@ -78,11 +90,11 @@ public class DeploymentRequest {
     @Override
     public String toString() {
         return String.format(
-                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, weight=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s]",
+                "DeploymentRequest [controllerId=%s, distributionSetId=%d, actionType=%s, forceTime=%d, weight=%d, maintenanceSchedule=%s, maintenanceWindowDuration=%s, maintenanceWindowTimeZone=%s, confirmationRequired=%s]",
                 targetWithActionType.getControllerId(), getDistributionSetId(), targetWithActionType.getActionType(),
                 targetWithActionType.getForceTime(), targetWithActionType.getWeight(),
                 targetWithActionType.getMaintenanceSchedule(), targetWithActionType.getMaintenanceWindowDuration(),
-                targetWithActionType.getMaintenanceWindowTimeZone());
+                targetWithActionType.getMaintenanceWindowTimeZone(), targetWithActionType.isConfirmationRequired());
     }
 
     @Override

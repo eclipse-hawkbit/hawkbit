@@ -20,6 +20,7 @@ public class ProxySimpleRolloutGroupsDefinition implements Serializable {
     private Integer numberOfGroups;
     private String triggerThresholdPercentage;
     private String errorThresholdPercentage;
+    private boolean confirmationRequired = true;
 
     /**
      * Gets the count of simple rollout Groups
@@ -78,4 +79,22 @@ public class ProxySimpleRolloutGroupsDefinition implements Serializable {
         this.errorThresholdPercentage = errorThresholdPercentage;
     }
 
+    /**
+     * Gets a flag if a confirmation is required by the device
+     * 
+     * @return isConfirmationRequired as boolean flag
+     */
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    /**
+     * sets the isConfirmationRequired flag
+     * 
+     * @param confirmationRequired
+     *            flag
+     */
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
+    }
 }

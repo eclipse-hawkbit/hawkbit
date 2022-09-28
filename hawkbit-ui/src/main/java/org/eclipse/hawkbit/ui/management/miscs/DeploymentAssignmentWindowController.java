@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.vaadin.spring.events.EventBus.UIEventBus;
@@ -44,6 +45,8 @@ import org.vaadin.spring.events.EventBus.UIEventBus;
  */
 public class DeploymentAssignmentWindowController {
     private static final Logger LOG = LoggerFactory.getLogger(DeploymentAssignmentWindowController.class);
+    
+    private final TenantConfigHelper tenantConfigHelper;
 
     private final VaadinMessageSource i18n;
     private final UIEventBus eventBus;
@@ -65,11 +68,13 @@ public class DeploymentAssignmentWindowController {
      *            DeploymentManagement
      */
     public DeploymentAssignmentWindowController(final CommonUiDependencies uiDependencies,
-            final UiProperties uiProperties, final DeploymentManagement deploymentManagement) {
+            final UiProperties uiProperties, final DeploymentManagement deploymentManagement,
+            final TenantConfigHelper tenantConfigHelper) {
         this.i18n = uiDependencies.getI18n();
         this.eventBus = uiDependencies.getEventBus();
         this.notification = uiDependencies.getUiNotification();
         this.deploymentManagement = deploymentManagement;
+        this.tenantConfigHelper = tenantConfigHelper;
 
         this.assignmentWindowLayout = new AssignmentWindowLayout(i18n, uiProperties);
     }
@@ -92,8 +97,9 @@ public class DeploymentAssignmentWindowController {
         proxyAssignmentWindow.setMaintenanceTimeZone(SPDateTimeUtil.getClientTimeZoneOffsetId());
 
         assignmentWindowLayout.getProxyAssignmentBinder().setBean(proxyAssignmentWindow);
+        assignmentWindowLayout.refreshConfirmCheckBoxState(tenantConfigHelper.isUserConsentEnabled());
     }
-
+    
     /**
      * Save the given distribution sets to target assignments
      *
@@ -114,13 +120,16 @@ public class DeploymentAssignmentWindowController {
         final String maintenanceDuration = proxyAssignmentWindow.getMaintenanceDuration();
         final String maintenanceTimeZone = proxyAssignmentWindow.getMaintenanceTimeZone();
 
+        final boolean confirmationRequired = proxyAssignmentWindow.isConfirmationRequired();
+
         final Set<Long> dsIdsToAssign = proxyDistributionSets.stream().map(ProxyDistributionSet::getId)
                 .collect(Collectors.toSet());
 
         final List<DeploymentRequest> deploymentRequests = new ArrayList<>();
         dsIdsToAssign.forEach(dsId -> proxyTargets.forEach(t -> {
             final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(t.getControllerId(), dsId)
-                    .setActionType(actionType).setForceTime(forcedTimeStamp);
+                    .setActionType(actionType).setForceTime(forcedTimeStamp)
+                    .setConfirmationRequired(confirmationRequired);
             if (proxyAssignmentWindow.isMaintenanceWindowEnabled()) {
                 request.setMaintenance(maintenanceSchedule, maintenanceDuration, maintenanceTimeZone);
             }

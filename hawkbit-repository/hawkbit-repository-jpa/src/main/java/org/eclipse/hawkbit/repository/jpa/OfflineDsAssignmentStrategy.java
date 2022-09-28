@@ -45,9 +45,10 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OfflineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final BooleanSupplier userConsentConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig);
+                quotaManagement, multiAssignmentsConfig, userConsentConfig);
     }
 
     @Override

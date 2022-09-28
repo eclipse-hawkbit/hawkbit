@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.AbstractMap.SimpleEntry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,10 +18,14 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.vaadin.ui.Component;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.providers.TargetMetaDataDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyKeyValueDetails;
@@ -36,6 +41,7 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Target details layout which is shown on the Deployment View.
@@ -47,6 +53,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
     private final transient TargetManagement targetManagement;
     private final transient DeploymentManagement deploymentManagement;
+    private final transient ConfirmationManagement confirmationManagement;
 
     private final TargetAttributesDetailsComponent attributesLayout;
     private final KeyValueDetailsComponent assignedDsDetails;
@@ -54,16 +61,23 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
     private final transient TargetTagToken targetTagToken;
     private final MetadataDetailsGrid<String> targetMetadataGrid;
 
+    private final Tab confirmationOptionsTab;
     private final transient TargetMetaDataWindowBuilder targetMetaDataWindowBuilder;
+
+    private final transient TenantConfigHelper tenantConfigHelper;
 
     TargetDetails(final CommonUiDependencies uiDependencies, final TargetTagManagement tagManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder) {
+            final ConfirmationManagement confirmationManagement,
+            final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder, final TenantConfigHelper tenantConfigHelper,
+            final UiProperties uiProperties, final TenantAware tenantAware) {
         super(uiDependencies.getI18n());
 
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
+        this.confirmationManagement = confirmationManagement;
         this.targetMetaDataWindowBuilder = targetMetaDataWindowBuilder;
+        this.tenantConfigHelper = tenantConfigHelper;
 
         this.attributesLayout = buildAttributesLayout();
 
@@ -73,13 +87,16 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
         this.targetTagToken = new TargetTagToken(uiDependencies, tagManagement, targetManagement);
 
-        addDetailsComponents(Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
-                new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),
-                new SimpleEntry<>(i18n.getMessage("caption.attributes.tab"), attributesLayout),
-                new SimpleEntry<>(i18n.getMessage("header.target.assigned"), assignedDsDetails),
-                new SimpleEntry<>(i18n.getMessage("header.target.installed"), installedDsDetails),
-                new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
-                new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
+        final List<Map.Entry<String, Component>> components = new ArrayList<>(
+                Arrays.asList(new SimpleEntry<>(i18n.getMessage("caption.tab.details"), entityDetails),
+                        new SimpleEntry<>(i18n.getMessage("caption.tab.description"), entityDescription),
+                        new SimpleEntry<>(i18n.getMessage("caption.attributes.tab"), attributesLayout),
+                        new SimpleEntry<>(i18n.getMessage("header.target.assigned"), assignedDsDetails),
+                        new SimpleEntry<>(i18n.getMessage("header.target.installed"), installedDsDetails),
+                        new SimpleEntry<>(i18n.getMessage("caption.tags.tab"), getTargetTagToken().getTagPanel()),
+                        new SimpleEntry<>(i18n.getMessage("caption.logs.tab"), logDetails)));
+
+        addDetailsComponents(components);
 
         if (uiDependencies.getPermChecker().hasReadRepositoryPermission()) {
             this.targetMetadataGrid = new MetadataDetailsGrid<>(i18n, uiDependencies.getEventBus(),
@@ -91,6 +108,20 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         }
 
         buildDetails();
+
+        confirmationOptionsTab = addAutoConfirmationTab(uiDependencies, uiProperties, tenantAware);
+        confirmationOptionsTab.setVisible(tenantConfigHelper.isUserConsentEnabled());
+    }
+
+    private Tab addAutoConfirmationTab(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
+            final TenantAware tenantAware) {
+        final TargetConfirmationOptionsComponent confirmationOptions = buildConfirmationOptionsLayout(uiDependencies,
+                uiProperties, tenantAware);
+        return addTab(buildTabWrapperDetailsLayout(confirmationOptions), i18n.getMessage("caption.tab.confirmation"));
+    }
+
+    protected void alignWithConsentFlowState() {
+        confirmationOptionsTab.setVisible(tenantConfigHelper.isUserConsentEnabled());
     }
 
     @Override
@@ -139,6 +170,17 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         }, null);
 
         return attributesDetails;
+    }
+
+    private TargetConfirmationOptionsComponent buildConfirmationOptionsLayout(
+            final CommonUiDependencies commonUiDependencies, final UiProperties uiProperties,
+            final TenantAware tenantAware) {
+        final TargetConfirmationOptionsComponent confirmationOptions = new TargetConfirmationOptionsComponent(
+                commonUiDependencies, uiProperties, confirmationManagement, tenantAware);
+
+        binder.forField(confirmationOptions).bind(ProxyTarget::getTargetConfirmationOptions, null);
+
+        return confirmationOptions;
     }
 
     private KeyValueDetailsComponent buildAssignedDsDetails() {

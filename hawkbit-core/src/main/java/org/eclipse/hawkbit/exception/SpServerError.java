@@ -20,10 +20,16 @@ public enum SpServerError {
     SP_REPO_GENERIC_ERROR("hawkbit.server.error.repo.genericError", "unknown error occurred"),
 
     /**
-    *
-    */
+     *
+     */
     SP_REPO_ENTITY_ALREADY_EXISTS("hawkbit.server.error.repo.entitiyAlreayExists",
-            "The given entity already exists in database"),
+          "The given entity already exists in database"),
+
+    /**
+     *
+     */
+    SP_REPO_AUTO_CONF_ALREADY_ACTIVE("hawkbit.server.error.repo.autoConfAlreadyActive",
+          "Auto confirmation is already active"),
 
     /**
     *

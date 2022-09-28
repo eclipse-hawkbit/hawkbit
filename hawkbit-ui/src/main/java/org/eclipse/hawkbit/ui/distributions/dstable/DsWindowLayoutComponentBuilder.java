@@ -22,14 +22,13 @@ import com.vaadin.ui.TextArea;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
 
+import static org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions.DIST_CHECKBOX_STYLE;
+
 /**
  * Builder for Distribution set window layout component
  */
 public class DsWindowLayoutComponentBuilder {
 
-    public static final String TEXTFIELD_NAME = "textfield.name";
-    public static final String TEXTFIELD_VERSION = "textfield.version";
-    public static final String TEXTFIELD_DESCRIPTION = "textfield.description";
     public static final String MIGRATION_STEP = "label.dist.required.migration.step";
 
     private final VaadinMessageSource i18n;
@@ -112,7 +111,7 @@ public class DsWindowLayoutComponentBuilder {
                 ProxyDistributionSet::setRequiredMigrationStep);
 
         migrationRequired.setDescription(i18n.getMessage(MIGRATION_STEP));
-        migrationRequired.addStyleName("dist-checkbox-style");
+        migrationRequired.addStyleName(DIST_CHECKBOX_STYLE);
         migrationRequired.addStyleName(ValoTheme.CHECKBOX_SMALL);
 
         return migrationRequired;

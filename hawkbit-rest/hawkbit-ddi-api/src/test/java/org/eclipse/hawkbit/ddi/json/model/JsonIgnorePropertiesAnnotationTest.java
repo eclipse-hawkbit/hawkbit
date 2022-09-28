@@ -31,20 +31,23 @@ import io.qameta.allure.Story;
 public class JsonIgnorePropertiesAnnotationTest {
 
     @Test
-    @Description(
-            "This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
+    @Description("This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
     public void shouldCheckAnnotationsForAllModelClasses() throws IOException {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         final String packageName = this.getClass().getPackage().getName();
 
-        final ImmutableSet<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader).getTopLevelClasses(packageName);
+        final ImmutableSet<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader)
+                .getTopLevelClasses(packageName);
         for (final ClassPath.ClassInfo classInfo : topLevelClasses) {
             final Class<?> modelClass = classInfo.load();
             if (modelClass.getSimpleName().contains("Test") || modelClass.isEnum()) {
                 continue;
             }
             final JsonIgnoreProperties annotation = modelClass.getAnnotation(JsonIgnoreProperties.class);
-            assertThat(annotation).isNotNull();
+            assertThat(annotation)
+                    .describedAs(
+                            "Annotation 'JsonIgnoreProperties' is missing for class: " + modelClass.getSimpleName())
+                    .isNotNull();
             assertThat(annotation.ignoreUnknown()).isTrue();
         }
     }

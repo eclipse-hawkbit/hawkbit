@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.ValidationException;
@@ -16,6 +17,7 @@ import javax.validation.ValidationException;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
+import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -26,6 +28,7 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -35,6 +38,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -60,15 +65,19 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private final TargetFilterQueryManagement targetFilterQueryManagement;
 
     private final EntityFactory entityFactory;
+    private final TenantConfigHelper tenantConfigHelper;
 
     MgmtRolloutResource(final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory) {
+            final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.entityFactory = entityFactory;
+        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -118,24 +127,42 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final DistributionSet distributionSet = distributionSetManagement
                 .getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
-
         final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
+        final boolean userConsentFlowActive = tenantConfigHelper.isUserConsentEnabled();
 
         Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
             final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
-                    .map(mgmtRolloutGroup -> MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup))
-                    .collect(Collectors.toList());
+                    .map(mgmtRolloutGroup -> {
+                        final boolean confirmationRequired = isConfirmationRequiredForGroup(mgmtRolloutGroup,
+                                rolloutRequestBody).orElse(userConsentFlowActive);
+                        return MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup)
+                                .confirmationRequired(confirmationRequired);
+                    }).collect(Collectors.toList());
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
 
         } else if (rolloutRequestBody.getAmountGroups() != null) {
-            rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), rolloutGroupConditions);
+            final boolean confirmationRequired = rolloutRequestBody.isConfirmationRequired() == null
+                    ? userConsentFlowActive
+                    : rolloutRequestBody.isConfirmationRequired();
+            rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
+                    rolloutGroupConditions);
 
         } else {
             throw new ValidationException("Either 'amountGroups' or 'groups' must be defined in the request");
         }
 
         return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(rollout, true));
+    }
+
+    private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
+            final MgmtRolloutRestRequestBody request) {
+        if (group.isConfirmationRequired() != null) {
+            return Optional.of(group.isConfirmationRequired());
+        } else if (request.isConfirmationRequired() != null) {
+            return Optional.of(request.isConfirmationRequired());
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -195,7 +222,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper
-                .toResponseRolloutGroup(findRolloutGroupsAll.getContent());
+                .toResponseRolloutGroup(findRolloutGroupsAll.getContent(), tenantConfigHelper.isUserConsentEnabled());
         return ResponseEntity.ok(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()));
     }
 
@@ -206,7 +233,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
-        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true));
+        return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true,
+                tenantConfigHelper.isUserConsentEnabled()));
     }
 
     private void findRolloutOrThrowException(final Long rolloutId) {
@@ -237,7 +265,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             final Page<Target> pageTargets = this.rolloutGroupManagement.findTargetsOfRolloutGroup(pageable, groupId);
             rolloutGroupTargets = pageTargets;
         }
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent());
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
     }
 }

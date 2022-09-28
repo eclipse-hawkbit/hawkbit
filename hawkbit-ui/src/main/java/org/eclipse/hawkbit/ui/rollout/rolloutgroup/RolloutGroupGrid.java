@@ -40,7 +40,9 @@ import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import com.google.common.base.Predicates;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.renderers.HtmlRenderer;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Rollout group list grid component.
@@ -53,18 +55,22 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
     private final RolloutManagementUIState rolloutManagementUIState;
     private final transient RolloutGroupManagement rolloutGroupManagement;
     private final transient RolloutGroupToProxyRolloutGroupMapper rolloutGroupMapper;
+    
+    private final transient TenantConfigHelper tenantConfigHelper;
 
     private final RolloutGroupStatusIconSupplier<ProxyRolloutGroup> rolloutGroupStatusIconSupplier;
 
     private final transient MasterEntitySupport<ProxyRollout> masterEntitySupport;
+    
 
     RolloutGroupGrid(final CommonUiDependencies uiDependencies, final RolloutGroupManagement rolloutGroupManagement,
-            final RolloutManagementUIState rolloutManagementUIState) {
+            final RolloutManagementUIState rolloutManagementUIState, final TenantConfigHelper tenantConfigHelper) {
         super(uiDependencies.getI18n(), uiDependencies.getEventBus(), uiDependencies.getPermChecker());
 
         this.rolloutManagementUIState = rolloutManagementUIState;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.rolloutGroupMapper = new RolloutGroupToProxyRolloutGroupMapper();
+        this.tenantConfigHelper = tenantConfigHelper;
 
         setSelectionSupport(new SelectionSupport<>(this, eventBus, EventLayout.ROLLOUT_GROUP_LIST, EventView.ROLLOUT,
                 this::mapIdToProxyEntity, this::getSelectedEntityIdFromUiState, this::setSelectedEntityIdToUiState));
@@ -112,14 +118,17 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addComponentColumn(this, this::buildRolloutGroupLink).setId(ROLLOUT_GROUP_LINK_ID)
+        final Column<ProxyRolloutGroup, Button> nameColumn = GridComponentBuilder.addComponentColumn(this, this::buildRolloutGroupLink).setId(ROLLOUT_GROUP_LINK_ID)
                 .setCaption(i18n.getMessage("header.name")).setHidable(false).setExpandRatio(3);
+        GridComponentBuilder.setColumnSortable(nameColumn, "name");
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setHidable(true)
                 .setHidden(true);
 
-        GridComponentBuilder.addIconColumn(this, rolloutGroupStatusIconSupplier::getLabel,
+        final Column<ProxyRolloutGroup, Label> statusColumn = GridComponentBuilder
+                .addIconColumn(this, rolloutGroupStatusIconSupplier::getLabel,
                 SPUILabelDefinitions.VAR_STATUS, i18n.getMessage("header.status")).setHidable(true);
+        GridComponentBuilder.setColumnSortable(statusColumn, "status");
 
         addColumn(rolloutGroup -> DistributionBarHelper
                 .getDistributionBarAsHTMLString(rolloutGroup.getTotalTargetCountStatus().getStatusTotalCountMap()),
@@ -143,10 +152,17 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
                 .setId(SPUILabelDefinitions.ROLLOUT_GROUP_ERROR_THRESHOLD)
                 .setCaption(i18n.getMessage("header.rolloutgroup.threshold.error")).setHidable(true);
 
-        GridComponentBuilder.addColumn(this, group -> group.getSuccessConditionExp() + "%")
+        GridComponentBuilder.addColumn(this, group -> group
+                .getSuccessConditionExp() + "%")
                 .setId(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD)
                 .setCaption(i18n.getMessage("header.rolloutgroup.threshold")).setHidable(true);
 
+        if (tenantConfigHelper.isUserConsentEnabled()) {
+            GridComponentBuilder.addColumn(this, group -> group.isConfirmationRequired() ? "required" : "not required")
+                  .setId(SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED)
+                  .setCaption(i18n.getMessage("header.rolloutgroup.confirmation")).setHidable(true);
+        }
+        
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n)
                 .forEach(col -> col.setHidable(true).setHidden(true));
     }
@@ -155,7 +171,7 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
         final boolean enableButton = RolloutGroupStatus.CREATING != rolloutGroup.getStatus()
                 && permissionChecker.hasRolloutTargetsReadPermission();
 
-        return GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link.", rolloutGroup.getName(), enableButton,
+        return GridComponentBuilder.buildLink(rolloutGroup, "rolloutgroup.link", rolloutGroup.getName(), enableButton,
                 clickEvent -> onClickOfRolloutGroupName(rolloutGroup));
     }
 
@@ -194,10 +210,27 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
         }
     }
 
+    public void alignWithConsentFlowState() {
+        alignWithConsentFlowState(tenantConfigHelper.isUserConsentEnabled());
+    }
+
+    public void alignWithConsentFlowState(final boolean active) {
+        final boolean columnPresent = GridComponentBuilder.isColumnPresent(this,
+                SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED);
+        if (active && !columnPresent) {
+            GridComponentBuilder.addColumn(this, group -> group.isConfirmationRequired() ? "required" : "not required")
+                    .setId(SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED)
+                    .setCaption(i18n.getMessage("header.rolloutgroup.confirmation")).setHidable(true);
+        } else if (!active && columnPresent) {
+            GridComponentBuilder.removeColumn(this, SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED);
+        }
+    }
+
     /**
      * @return Rollout master entity support
      */
     public MasterEntitySupport<ProxyRollout> getMasterEntitySupport() {
         return masterEntitySupport;
     }
+    
 }

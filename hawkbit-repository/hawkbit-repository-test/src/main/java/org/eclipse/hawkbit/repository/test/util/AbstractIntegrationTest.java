@@ -28,6 +28,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
@@ -159,6 +160,8 @@ public abstract class AbstractIntegrationTest {
     protected DeploymentManagement deploymentManagement;
 
     @Autowired
+    protected ConfirmationManagement confirmationManagement;
+    @Autowired
     protected DistributionSetInvalidationManagement distributionSetInvalidationManagement;
 
     @Autowired
@@ -235,14 +238,24 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType, final long forcedTime, final Integer weight) {
+        final boolean userConsentFlowActive = isUserConsentFlowActive();
+
         final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
                 .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
-                        .setForceTime(forcedTime).setWeight(weight).build())
+                        .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(userConsentFlowActive)
+                        .build())
                 .collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> results = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
         assertThat(results).hasSize(1);
         return results.get(0);
+    }
+
+    protected List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> requests) {
+        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults = deploymentManagement
+                .assignDistributionSets(requests);
+        assertThat(distributionSetAssignmentResults).hasSize(requests.size());
+        return distributionSetAssignmentResults;
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
@@ -296,7 +309,7 @@ public abstract class AbstractIntegrationTest {
 
         return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
                 .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
-                .build());
+                .setConfirmationRequired(true).build());
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
@@ -310,6 +323,15 @@ public abstract class AbstractIntegrationTest {
 
     protected void enableMultiAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
+    }
+
+    protected void enableUserConsentFlow() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONSENT_ENABLED, true);
+    }    
+    
+    protected boolean isUserConsentFlowActive() {
+        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONSENT_ENABLED,
+                Boolean.class).getValue();
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
@@ -473,4 +495,10 @@ public abstract class AbstractIntegrationTest {
     protected void disableBatchAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
     }
+
+    protected boolean isUserConsentEnabled() {
+        return tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.USER_CONSENT_ENABLED, Boolean.class).getValue();
+    }
+
 }

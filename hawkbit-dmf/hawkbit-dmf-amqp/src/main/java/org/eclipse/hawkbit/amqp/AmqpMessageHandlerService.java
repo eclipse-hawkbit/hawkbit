@@ -24,8 +24,10 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
@@ -314,6 +316,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         case UPDATE_ATTRIBUTES:
             updateAttributes(message);
             break;
+        case UPDATE_AUTO_CONFIRM:
+            setAutoConfirmationState(message);
+            break;
         default:
             logAndThrowMessageError(message, "Got event without appropriate topic.");
             break;
@@ -331,7 +336,23 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
-                getUpdateMode(attributeUpdate));
+              getUpdateMode(attributeUpdate));
+    }
+
+    private void setAutoConfirmationState(final Message message) {
+        final DmfAutoConfirmation autoConfirmation = convertMessage(message, DmfAutoConfirmation.class);
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
+        if (autoConfirmation.isEnabled()) {
+            LOG.debug("Activate auto-confirmation for device {} using DMF. Initiator: {}. Remark: {}", thingId,
+                    autoConfirmation.getInitiator(), autoConfirmation.getRemark());
+            final String remark = autoConfirmation.getRemark() == null
+                    ? "Activated using Device Management Federation API."
+                    : autoConfirmation.getRemark();
+            controllerManagement.activateAutoConfirmation(thingId, autoConfirmation.getInitiator(), remark);
+        } else {
+            LOG.debug("Deactivate auto-confirmation for device {} using DMF.", thingId);
+            controllerManagement.deactivateAutoConfirmation(thingId);
+        }
     }
 
     /**
@@ -364,7 +385,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
                 ? controllerManagement.addCancelActionStatus(actionStatus)
                 : controllerManagement.addUpdateActionStatus(actionStatus);
 
-        if (shouldTargetProceed(updatedAction)) {
+        if (shouldTargetProceed(updatedAction) || actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
             sendUpdateCommandToTarget(action.getTarget());
         }
     }
@@ -391,7 +412,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             status = Status.RETRIEVED;
             break;
         case RUNNING:
-            status = Status.RUNNING;
+            case CONFIRMED:
+                status = Status.RUNNING;
             break;
         case CANCELED:
             status = Status.CANCELED;
@@ -410,6 +432,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             break;
         case CANCEL_REJECTED:
             status = handleCancelRejectedState(message, action);
+            break;
+        case DENIED:
+            status = Status.WAIT_FOR_CONFIRMATION;
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");

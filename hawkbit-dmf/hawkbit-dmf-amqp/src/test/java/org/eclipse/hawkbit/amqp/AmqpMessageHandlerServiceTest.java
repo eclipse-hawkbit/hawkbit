@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
@@ -46,6 +47,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -147,6 +149,12 @@ public class AmqpMessageHandlerServiceTest {
     private ArgumentCaptor<String> targetIdCaptor;
 
     @Captor
+    private ArgumentCaptor<String> initiatorCaptor;
+
+    @Captor
+    private ArgumentCaptor<String> remarkCaptor;
+
+    @Captor
     private ArgumentCaptor<String> targetNameCaptor;
 
     @Captor
@@ -228,6 +236,16 @@ public class AmqpMessageHandlerServiceTest {
     @Step
     private void assertReplyToCapturedField(final String replyTo) {
         assertThat(uriCaptor.getValue()).as("Uri is not right").hasToString("amqp://" + VIRTUAL_HOST + "/" + replyTo);
+    }
+
+    @Step
+    private void assertInitiatorCapturedField(final String initiator) {
+        assertThat(initiatorCaptor.getValue()).as("Initiator is wrong").isEqualTo(initiator);
+    }
+
+    @Step
+    private void assertRemarkCapturedField(final String remark) {
+        assertThat(remarkCaptor.getValue()).as("Remark is wrong").isEqualTo(remark);
     }
 
     @Test
@@ -556,6 +574,7 @@ public class AmqpMessageHandlerServiceTest {
         final ActionStatusCreate create = mock(ActionStatusCreate.class);
         when(builder.create(22L)).thenReturn(create);
         when(create.status(any())).thenReturn(create);
+        when(create.messages(any())).thenReturn(create);
         when(entityFactoryMock.actionStatus()).thenReturn(builder);
         // for the test the same action can be used
         when(controllerManagementMock.findActiveActionWithHighestWeight(any())).thenReturn(Optional.of(action));
@@ -572,7 +591,7 @@ public class AmqpMessageHandlerServiceTest {
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
 
         verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionPropertiesCaptor.capture(),
-              targetCaptor.capture(), any(Map.class));
+                targetCaptor.capture(), any(Map.class));
         final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
         assertThat(actionProperties).isNotNull();
         assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
@@ -614,6 +633,56 @@ public class AmqpMessageHandlerServiceTest {
         assertThat(jpaActionStatus.getCode()).as("Action status for reported code is missing").contains(12);
         assertThat(jpaActionStatus.getMessages()).as("Action status message for reported code is missing")
                 .contains("Device reported status code: 12");
+    }
+
+    @Test
+    @Description("Tests activating auto-confirmation on a target.")
+    void setAutoConfirmationStateActive() {
+        final String knownThingId = "1";
+        final String initiator = "iAmTheInitiator";
+        final String remark = "remarkForTesting";
+
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_AUTO_CONFIRM");
+        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation();
+        autoConfirmation.setEnabled(true);
+        autoConfirmation.setInitiator(initiator);
+        autoConfirmation.setRemark(remark);
+
+        final Message message = createMessage(autoConfirmation, messageProperties);
+
+        when(controllerManagementMock.activateAutoConfirmation(targetIdCaptor.capture(), initiatorCaptor.capture(),
+              remarkCaptor.capture())).thenReturn(null);
+
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
+
+        verify(controllerManagementMock, times(0)).deactivateAutoConfirmation(anyString());
+
+        assertThingIdCapturedField(knownThingId);
+        assertInitiatorCapturedField(initiator);
+        assertRemarkCapturedField(remark);
+    }
+
+
+    @Test
+    @Description("Tests deactivating auto-confirmation on a target.")
+    void setAutoConfirmationStateDeactivated() {
+        final String knownThingId = "1";
+
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.THING_ID, knownThingId);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, "UPDATE_AUTO_CONFIRM");
+        final DmfAutoConfirmation autoConfirmation = new DmfAutoConfirmation();
+
+        final Message message = createMessage(autoConfirmation, messageProperties);
+
+        amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
+
+        verify(controllerManagementMock).deactivateAutoConfirmation(targetIdCaptor.capture());
+        verify(controllerManagementMock, times(0)).activateAutoConfirmation(anyString(), anyString(), anyString());
+
+        assertThingIdCapturedField(knownThingId);
     }
 
     private DmfActionUpdateStatus createActionUpdateStatus(final DmfActionStatus status) {

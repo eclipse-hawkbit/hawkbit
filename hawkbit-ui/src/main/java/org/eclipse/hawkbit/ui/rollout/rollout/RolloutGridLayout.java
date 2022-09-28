@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelec
 import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowBuilder;
 import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Rollout list view.
@@ -82,7 +83,8 @@ public class RolloutGridLayout extends AbstractGridComponentLayout {
             final SystemSecurityContext systemSecurityContext) {
         final RolloutWindowDependencies rolloutWindowDependecies = new RolloutWindowDependencies(uiDependencies,
                 rolloutManagement, targetManagement, uiProperties, targetFilterQueryManagement, rolloutGroupManagement,
-                quotaManagement, distributionSetManagement);
+                quotaManagement, distributionSetManagement,
+                TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigManagement));
 
         final RolloutWindowBuilder rolloutWindowBuilder = new RolloutWindowBuilder(rolloutWindowDependecies);
 

@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -992,5 +993,49 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
         final ObjectNode node = objectMapper.readValue(new String(body, Charset.defaultCharset()), ObjectNode.class);
         assertThat(node.has("actionId")).isTrue();
         return node.get("actionId").asText();
+    }
+
+    @Test
+    @Description("Register a target and send a update action status (confirmed). Verify if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void confirmedActionStatus() {
+        enableUserConsentFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.CONFIRMED);
+        assertAction(actionId, 1, Status.WAIT_FOR_CONFIRMATION, Status.RUNNING);
+
+        // assert download and install message
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.CONFIRM, EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
+    @Description("Register a target and send a update action status (denied). Verify if the updated action status is correct.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class), @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void deniedActionStatus() {
+        enableUserConsentFlow();
+        final String controllerId = TARGET_PREFIX + "deniedActionStatus";
+        final Long actionId = registerTargetAndSendActionStatus(DmfActionStatus.DENIED, controllerId);
+        assertAction(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
     }
 }

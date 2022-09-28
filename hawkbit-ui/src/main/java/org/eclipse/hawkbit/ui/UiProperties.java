@@ -255,6 +255,15 @@ public class UiProperties implements Serializable {
             private String maintenanceWindowView = "";
 
             /**
+             * Link to documentation of the user consent and confirmation flow.
+             */
+            private String userConsentAndConfirmationGuide = "";
+
+            public String getAutoConfirmationView() {
+                return autoConfirmationView;
+            }
+
+            /**
              * Link to documentation of system configuration view.
              */
             private String systemConfigurationView = "";
@@ -278,6 +287,11 @@ public class UiProperties implements Serializable {
              * Link to documentation of rollout view.
              */
             private String rolloutView = "";
+
+            /**
+             * Link to documentation of auto confirmation view.
+             */
+            private String autoConfirmationView = "";
 
             /**
              * Link to documentation of state machine
@@ -354,6 +368,13 @@ public class UiProperties implements Serializable {
             }
 
             /**
+             * @return Link to documentation of the user consent and confirmation flow.
+             */
+            public String getUserConsentAndConfirmationGuide() {
+                return userConsentAndConfirmationGuide;
+            }
+
+            /**
              * @return Link to documentation of provisioning state machine
              */
             public String getProvisioningStateMachine() {
@@ -423,6 +444,10 @@ public class UiProperties implements Serializable {
 
             public void setMaintenanceWindowView(final String maintenanceWindowView) {
                 this.maintenanceWindowView = maintenanceWindowView;
+            }
+
+            public void setUserConsentAndConfirmationGuide(final String userConsentAndConfirmationGuide) {
+                this.userConsentAndConfirmationGuide = userConsentAndConfirmationGuide;
             }
 
             public void setProvisioningStateMachine(final String provisioningStateMachine) {

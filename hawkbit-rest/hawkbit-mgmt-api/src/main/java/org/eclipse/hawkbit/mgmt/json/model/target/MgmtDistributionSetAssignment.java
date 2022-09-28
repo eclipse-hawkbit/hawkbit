@@ -19,6 +19,8 @@ public class MgmtDistributionSetAssignment extends MgmtId {
     private long forcetime;
     @JsonProperty(required = false)
     private Integer weight;
+    @JsonProperty(required = false)
+    private Boolean confirmationRequired;
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
@@ -76,5 +78,13 @@ public class MgmtDistributionSetAssignment extends MgmtId {
      */
     public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
+    }
+
+    public Boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final Boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

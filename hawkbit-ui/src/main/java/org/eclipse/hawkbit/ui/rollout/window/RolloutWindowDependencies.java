@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 /**
@@ -34,6 +35,7 @@ public final class RolloutWindowDependencies {
     private final DistributionSetManagement distributionSetManagement;
     private final UiProperties uiProperties;
     private final CommonUiDependencies uiDependencies;
+    private final TenantConfigHelper tenantConfigHelper;
 
     /**
      * Constructor for RolloutWindowDependencies
@@ -59,7 +61,7 @@ public final class RolloutWindowDependencies {
             final TargetManagement targetManagement, final UiProperties uiProperties,
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
-            final DistributionSetManagement distributionSetManagement) {
+            final DistributionSetManagement distributionSetManagement, final TenantConfigHelper tenantConfigHelper) {
         this.uiDependencies = uiDependencies;
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
@@ -68,6 +70,7 @@ public final class RolloutWindowDependencies {
         this.uiProperties = uiProperties;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.distributionSetManagement = distributionSetManagement;
+        this.tenantConfigHelper = tenantConfigHelper;
     }
 
     /**
@@ -152,5 +155,9 @@ public final class RolloutWindowDependencies {
      */
     public CommonUiDependencies getuiDependencies() {
         return uiDependencies;
+    }
+
+    public TenantConfigHelper getTenantConfigHelper() {
+        return tenantConfigHelper;
     }
 }

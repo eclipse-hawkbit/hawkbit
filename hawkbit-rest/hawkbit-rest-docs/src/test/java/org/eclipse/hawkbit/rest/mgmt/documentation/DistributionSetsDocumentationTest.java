@@ -353,6 +353,8 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
     @Description("Handles the POST request for assigning multiple targets to a distribution set.The request body must always be a list of target IDs."
             + " Required Permission: " + SpPermission.READ_REPOSITORY + " and " + SpPermission.UPDATE_TARGET)
     public void createAssignedTarget() throws Exception {
+        enableUserConsentFlow();
+
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 
         // prepare targets
@@ -395,7 +397,10 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW_TIMEZONE),
                                 optionalRequestFieldWithPath("[].type")
                                         .description(MgmtApiModelProperties.ASSIGNMENT_TYPE).attributes(
-                                                key("value").value("['soft', 'forced','timeforced', 'downloadonly']"))),
+                                                key("value").value("['soft', 'forced','timeforced', 'downloadonly']")),
+                                optionalRequestFieldWithPath("[].confirmationRequired")
+                                        .description(MgmtApiModelProperties.ACTION_CONFIRMATION_REQUIRED)
+                                        .type(JsonFieldType.BOOLEAN.toString())),
                         responseFields(
                                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
                                 fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
