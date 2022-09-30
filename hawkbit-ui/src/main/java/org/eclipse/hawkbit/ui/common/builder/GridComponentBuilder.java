@@ -1,4 +1,4 @@
-/** 
+/**
  * Copyright (c) 2020 Bosch.IO GmbH and others.
  *
  * All rights reserved. This program and the accompanying materials
@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyNamedEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.grid.support.DeleteSupport;
-import org.eclipse.hawkbit.ui.utils.ControllerIdHtmlEncoder;
+import org.eclipse.hawkbit.ui.utils.StringHtmlEncoder;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
@@ -43,7 +43,6 @@ import com.vaadin.ui.themes.ValoTheme;
  * Builder class for grid components
  */
 public final class GridComponentBuilder {
-
     public static final double DEFAULT_MIN_WIDTH = 100D;
 
     public static final String CREATED_BY_ID = "createdBy";
@@ -51,12 +50,20 @@ public final class GridComponentBuilder {
     public static final String MODIFIED_BY_ID = "modifiedBy";
     public static final String MODIFIED_DATE_ID = "modifiedDate";
 
+    public static final String CREATED_BY_PROPERTY_NAME = "createdBy";
+    public static final String CREATED_AT_PROPERTY_NAME = "createdAt";
+    public static final String LAST_MODIFIED_BY_PROPERTY_NAME = "lastModifiedBy";
+    public static final String LAST_MODIFIED_AT_PROPERTY_NAME = "lastModifiedAt";
+    public static final String VERSION_PROPERTY_NAME = "version";
+    public static final String NAME_PROPERTY_NAME = "name";
+    public static final String CONTROLLER_ID_PROPERTY_NAME = "controllerId";
+
     private GridComponentBuilder() {
     }
 
     /**
      * Create a {@link Button} with link optic
-     * 
+     *
      * @param idSuffix
      *            suffix to build the button ID
      * @param idPrefix
@@ -90,7 +97,7 @@ public final class GridComponentBuilder {
 
     /**
      * Create a {@link Button} with link optic
-     * 
+     *
      * @param entity
      *            to build the button ID
      * @param idPrefix
@@ -103,14 +110,16 @@ public final class GridComponentBuilder {
      *            execute on button click (null for none)
      * @return the button
      */
-    public static <E extends ProxyIdentifiableEntity> Button buildLink(final E entity, final String idPrefix,
+    public static <E extends ProxyNamedEntity> Button buildLink(final E entity, final String idPrefix,
             final String caption, final boolean enabled, final ClickListener clickListener) {
-        return buildLink(entity.getId().toString(), idPrefix, caption, enabled, clickListener);
+        final String idSuffix = StringHtmlEncoder.encode(entity.getName());
+        return buildLink(idSuffix, idPrefix, caption, enabled, clickListener);
     }
 
     /**
-     * Add name column to grid
-     * 
+     * Add name column to grid. The column is set to sortable which implies a
+     * JPA field "name" that is used for sorting.
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -123,11 +132,15 @@ public final class GridComponentBuilder {
      */
     public static <E extends ProxyNamedEntity> Column<E, String> addNameColumn(final Grid<E> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addColumn(i18n, grid, E::getName, "header.name", columnId, DEFAULT_MIN_WIDTH);
+        final Column<E, String> nameColumn = addColumn(i18n, grid, E::getName, "header.name", columnId,
+                DEFAULT_MIN_WIDTH);
+        setColumnSortable(nameColumn, NAME_PROPERTY_NAME);
+        return nameColumn;
     }
 
     /**
-     * Add controllerId column to grid
+     * Add controllerId column to grid.  The column is set to sortable which implies a
+     * JPA field "controllerId" that is used for sorting.
      *
      * @param grid
      *            to add the column to
@@ -139,20 +152,23 @@ public final class GridComponentBuilder {
      */
     public static Column<ProxyTarget, Button> addControllerIdColumn(final Grid<ProxyTarget> grid,
             final VaadinMessageSource i18n, final String columnId) {
-        return addComponentColumn(grid, t -> GridComponentBuilder.buildControllerIdLink(t, columnId)).setId(columnId)
-                .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
-                .setMinimumWidth(DEFAULT_MIN_WIDTH);
+        final Column<ProxyTarget, Button> column = addComponentColumn(grid,
+                t -> buildControllerIdLink(t, columnId)).setId(columnId)
+                        .setCaption(i18n.getMessage("header.controllerId")).setHidable(false)
+                        .setMinimumWidth(DEFAULT_MIN_WIDTH);
+        setColumnSortable(column, CONTROLLER_ID_PROPERTY_NAME);
+        return column;
     }
 
     private static Button buildControllerIdLink(final ProxyTarget target, final String linkIdPrefix) {
-        final String idSuffix = ControllerIdHtmlEncoder.encode(target.getControllerId());
+        final String idSuffix = StringHtmlEncoder.encode(target.getControllerId());
         return buildLink(idSuffix, linkIdPrefix, target.getControllerId(), true, clickEvent -> UI.getCurrent()
                 .getNavigator().navigateTo("deployment/target=" + target.getControllerId()));
     }
 
     /**
      * Add description column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -170,7 +186,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add "created by", "created at", "modified by" and "modified at" column
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -182,18 +198,30 @@ public final class GridComponentBuilder {
     public static <E extends ProxyNamedEntity> List<Column<E, String>> addCreatedAndModifiedColumns(final Grid<E> grid,
             final VaadinMessageSource i18n) {
         final List<Column<E, String>> columns = new ArrayList<>();
-        columns.add(addColumn(i18n, grid, E::getCreatedBy, "header.createdBy", CREATED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH));
-        columns.add(
-                addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH));
-        columns.add(
-                addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH));
+
+        final Column<E, String> createdByColumn = addColumn(i18n, grid, E::getCreatedBy, "header.createdBy",
+                CREATED_BY_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(createdByColumn, CREATED_BY_PROPERTY_NAME);
+        columns.add(createdByColumn);
+
+        final Column<E, String> createdDate = addColumn(i18n, grid, E::getCreatedDate, "header.createdDate", CREATED_DATE_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(createdDate, CREATED_AT_PROPERTY_NAME);
+        columns.add(createdDate);
+
+        final Column<E, String> modifiedBy = addColumn(i18n, grid, E::getLastModifiedBy, "header.modifiedBy", MODIFIED_BY_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(modifiedBy, LAST_MODIFIED_BY_PROPERTY_NAME);
+        columns.add(modifiedBy);
+
+        final Column<E, String> modifiedDate = addColumn(i18n, grid, E::getModifiedDate, "header.modifiedDate", MODIFIED_DATE_ID, DEFAULT_MIN_WIDTH);
+        setColumnSortable(modifiedDate, LAST_MODIFIED_AT_PROPERTY_NAME);
+        columns.add(modifiedDate);
+
         return columns;
     }
 
     /**
      * Add version column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -208,7 +236,10 @@ public final class GridComponentBuilder {
      */
     public static <E> Column<E, String> addVersionColumn(final Grid<E> grid, final VaadinMessageSource i18n,
             final ValueProvider<E, String> valueProvider, final String columnId) {
-        return addColumn(i18n, grid, valueProvider, "header.version", columnId, DEFAULT_MIN_WIDTH);
+        final Column<E, String> column = addColumn(i18n, grid, valueProvider, "header.version", columnId,
+                DEFAULT_MIN_WIDTH);
+        setColumnSortable(column, VERSION_PROPERTY_NAME);
+        return column;
     }
 
     private static <E, T> Column<E, T> addColumn(final VaadinMessageSource i18n, final Grid<E> grid,
@@ -225,7 +256,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -240,7 +271,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -253,16 +284,14 @@ public final class GridComponentBuilder {
      */
     public static <E, T> Column<E, T> addColumn(final Grid<E> grid, final ValueProvider<E, T> valueProvider,
             final StyleGenerator<E> styleGenerator) {
-        final Column<E, T> column = grid.addColumn(valueProvider).setMinimumWidthFromContent(false).setExpandRatio(1);
-        if (styleGenerator != null) {
-            column.setStyleGenerator(styleGenerator);
-        }
+        final Column<E, T> column = grid.addColumn(valueProvider);
+        commonColumnConfiguration(column, styleGenerator);
         return column;
     }
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -278,7 +307,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add column to grid with the standard settings
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -291,8 +320,17 @@ public final class GridComponentBuilder {
      */
     public static <E, T extends Component> Column<E, T> addComponentColumn(final Grid<E> grid,
             final ValueProvider<E, T> componentProvider, final StyleGenerator<E> styleGenerator) {
-        final Column<E, T> column = grid.addComponentColumn(componentProvider).setMinimumWidthFromContent(false)
-                .setExpandRatio(1);
+        final Column<E, T> column = grid.addComponentColumn(componentProvider);
+        commonColumnConfiguration(column, styleGenerator);
+        return column;
+    }
+
+    private static <E, T> Column<E, T> commonColumnConfiguration(final Column<E, T> column,
+            final StyleGenerator<E> styleGenerator) {
+        column.setMinimumWidthFromContent(false);
+        column.setExpandRatio(1);
+        column.setSortable(false);
+
         if (styleGenerator != null) {
             column.setStyleGenerator(styleGenerator);
         }
@@ -301,7 +339,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add delete button column to grid
-     * 
+     *
      * @param <E>
      *            entity type of the grid
      * @param grid
@@ -331,7 +369,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add an action button column to a grid
-     * 
+     *
      * @param <T>
      *            type of the entity displayed by the grid
      * @param grid
@@ -351,7 +389,7 @@ public final class GridComponentBuilder {
 
     /**
      * Add an action button column to a grid
-     * 
+     *
      * @param <T>
      *            type of the entity displayed by the grid
      * @param grid
@@ -374,10 +412,29 @@ public final class GridComponentBuilder {
         final StyleGenerator<T> finalStyleGenerator = merge(Arrays.asList(styleGenerator, additionalStyleGenerator));
 
         final Column<T, V> column = grid.addComponentColumn(iconProvider).setId(columnId)
-                .setStyleGenerator(finalStyleGenerator).setWidth(60D).setResizable(false);
+                .setStyleGenerator(finalStyleGenerator).setWidth(60D).setResizable(false).setSortable(false);
         if (!StringUtils.isEmpty(caption)) {
             column.setCaption(caption);
         }
+        return column;
+    }
+
+    /**
+     * Makes the column sortable.
+     *
+     * @param <T>
+     *            type of the entity displayed by the grid
+     * @param <V>
+     *            type of column value
+     * @param column
+     *            the column to set sortable
+     * @param sortPropertyName
+     *            the jpa property name to sort by
+     * @return the provided column
+     */
+    public static <T, V> Column<T, V> setColumnSortable(final Column<T, V> column,
+            final String sortPropertyName) {
+        column.setSortable(true).setSortProperty(sortPropertyName);
         return column;
     }
 
@@ -388,7 +445,7 @@ public final class GridComponentBuilder {
 
     /**
      * Join columns to form an action column
-     * 
+     *
      * @param i18n
      *            message source for internationalization
      * @param headerRow
@@ -403,7 +460,7 @@ public final class GridComponentBuilder {
 
     /**
      * Join columns to form an icon column
-     * 
+     *
      * @param headerRow
      *            header row
      * @param headerCaption
@@ -423,7 +480,7 @@ public final class GridComponentBuilder {
 
     /**
      * Create an action button (e.g. a delete button)
-     * 
+     *
      * @param i18n
      *            message source for internationalization
      * @param clickListener
@@ -458,5 +515,4 @@ public final class GridComponentBuilder {
 
         return actionButton;
     }
-
 }

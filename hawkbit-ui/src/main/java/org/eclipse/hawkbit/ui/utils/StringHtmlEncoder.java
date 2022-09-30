@@ -13,33 +13,34 @@ import java.util.Base64.Encoder;
 import java.util.Objects;
 
 /**
- * Encodes controller IDs to make them embeddable into HTML as element
- * identifiers.
+ * Encodes a string attribute of an entity (e.g. name) to make it embeddable
+ * into HTML as element identifiers.
  */
-public class ControllerIdHtmlEncoder {
+public class StringHtmlEncoder {
 
     /**
      * Base64 encoder which suppresses trailing padding characters.
      */
     private static Encoder BASE64 = Base64.getEncoder().withoutPadding();
 
-    private ControllerIdHtmlEncoder() {
+    private StringHtmlEncoder() {
         // class should not be instantiated
     }
 
     /**
-     * Encodes the given controller ID so that it can be used as part of DOM
+     * Encodes the given string attribute so that it can be used as part of DOM
      * element IDs.
-     * 
-     * @param controllerId
-     *            The controller ID to be encoded. Must not be
+     *
+     * @param attribute
+     *            The attribute of an entity to be encoded. Must not be
      *            <code>null</code>.
-     * 
-     * @return The encoded controller ID.
+     *
+     * @return The encoded string attribute to be used as element identifier in
+     *         DOM tree.
      */
-    public static String encode(final String controllerId) {
-        Objects.requireNonNull(controllerId);
-        return BASE64.encodeToString(controllerId.getBytes());
+    public static String encode(final String attribute) {
+        Objects.requireNonNull(attribute);
+        return BASE64.encodeToString(attribute.getBytes());
     }
 
 }

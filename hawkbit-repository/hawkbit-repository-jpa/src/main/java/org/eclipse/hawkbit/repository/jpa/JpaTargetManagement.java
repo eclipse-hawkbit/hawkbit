@@ -638,7 +638,7 @@ public class JpaTargetManagement implements TargetManagement {
                 pageable.getPageSize(), Sort.unsorted());
 
         final List<Specification<JpaTarget>> specList = buildSpecificationList(filterParams);
-        specList.add(TargetSpecifications.orderedByLinkedDistributionSet(orderByDistributionId));
+        specList.add(TargetSpecifications.orderedByLinkedDistributionSet(orderByDistributionId, pageable.getSort()));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, unsortedPage, specList);
     }

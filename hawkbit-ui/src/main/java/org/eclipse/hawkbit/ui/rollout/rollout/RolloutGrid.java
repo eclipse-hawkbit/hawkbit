@@ -61,6 +61,7 @@ import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.shared.ui.ContentMode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.renderers.HtmlRenderer;
@@ -75,6 +76,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private static final String ROLLOUT_LINK_ID = "rollout";
     private static final String DIST_NAME_VERSION_ID = "distNameVersion";
     private static final String STATUS_ID = "status";
+    private static final String STATUS_PROPERTY_NAME = "status";
     private static final String TOTAL_TARGETS_COUNT_STATUS_ID = "totalTargetsCountStatus";
     private static final String NUMBER_OF_GROUPS_ID = "numberOfGroups";
     private static final String TOTAL_TARGETS_ID = "totalTargets";
@@ -263,8 +265,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
     @Override
     public void addColumns() {
-        GridComponentBuilder.addComponentColumn(this, this::buildRolloutLink).setId(ROLLOUT_LINK_ID)
+        final Column<ProxyRollout, Button> nameColumn = GridComponentBuilder
+                .addComponentColumn(this, this::buildRolloutLink).setId(ROLLOUT_LINK_ID)
                 .setCaption(i18n.getMessage("header.name")).setHidable(false).setExpandRatio(3);
+        GridComponentBuilder.setColumnSortable(nameColumn, "name");
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, DESC_ID).setHidable(true).setHidden(true);
 
@@ -272,9 +276,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 .setId(DIST_NAME_VERSION_ID).setCaption(i18n.getMessage("header.distributionset"))
                 .setDescriptionGenerator(this::createDSTooltipText).setHidable(true).setExpandRatio(2);
 
-        GridComponentBuilder
+        final Column<ProxyRollout, Label> statusColumn = GridComponentBuilder
                 .addIconColumn(this, rolloutStatusIconSupplier::getLabel, STATUS_ID, i18n.getMessage("header.status"))
                 .setHidable(true);
+        GridComponentBuilder.setColumnSortable(statusColumn, STATUS_PROPERTY_NAME);
 
         GridComponentBuilder
                 .addIconColumn(this, actionTypeIconSupplier::getLabel, ACTION_TYPE_ID, i18n.getMessage("header.type"))
