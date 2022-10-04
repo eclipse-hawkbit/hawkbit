@@ -184,6 +184,7 @@
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <awaitility.version>3.1.2</awaitility.version>
       <io-protostuff.version>1.5.6</io-protostuff.version>
+      <oauth2-oidc-sdk.version>9.22.2</oauth2-oidc-sdk.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -671,6 +672,11 @@
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
             <version>${jaxb-api.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>com.nimbusds</groupId>
+            <artifactId>oauth2-oidc-sdk</artifactId>
+            <version>${oauth2-oidc-sdk.version}</version>
          </dependency>
 
          <!-- Spring -->
