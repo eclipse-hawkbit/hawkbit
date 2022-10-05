@@ -50,10 +50,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
@@ -549,7 +546,7 @@ public class AmqpMessageHandlerServiceTest {
     public void lookupNextUpdateActionAfterFinished() throws IllegalAccessException {
 
         // Mock
-        final Action action = createActionWithTarget(22L, Status.FINISHED);
+        final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
@@ -568,16 +565,13 @@ public class AmqpMessageHandlerServiceTest {
         // test
         amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT, VIRTUAL_HOST);
 
-        final ArgumentCaptor<ActionProperties> actionPropertiesCaptor = ArgumentCaptor.forClass(ActionProperties.class);
+        final ArgumentCaptor<Action> actionCaptor = ArgumentCaptor.forClass(Action.class);
         final ArgumentCaptor<Target> targetCaptor = ArgumentCaptor.forClass(Target.class);
 
-        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionPropertiesCaptor.capture(),
-              targetCaptor.capture(), any(Map.class));
-        final ActionProperties actionProperties = actionPropertiesCaptor.getValue();
-        assertThat(actionProperties).isNotNull();
-        assertThat(actionProperties.getTenant()).as("event has tenant").isEqualTo("DEFAULT");
-        assertThat(targetCaptor.getValue().getControllerId()).as("event has wrong controller id").isEqualTo("target1");
-        assertThat(actionProperties.getId()).as("event has wrong action id").isEqualTo(22L);
+        verify(amqpMessageDispatcherServiceMock, times(1)).sendUpdateMessageToTarget(actionCaptor.capture(),
+                targetCaptor.capture());
+        assertThat(actionCaptor.getValue()).isEqualTo(action);
+        assertThat(targetCaptor.getValue()).isEqualTo(action.getTarget());
     }
 
     @Test
@@ -585,7 +579,7 @@ public class AmqpMessageHandlerServiceTest {
     public void feedBackCodeIsPersistedInMessages() throws IllegalAccessException {
 
         // Mock
-        final Action action = createActionWithTarget(22L, Status.FINISHED);
+        final Action action = createActionWithTarget(22L);
         when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
         when(controllerManagementMock.addUpdateActionStatus(any())).thenReturn(action);
         final ActionStatusBuilder builder = new JpaActionStatusBuilder();
@@ -641,20 +635,16 @@ public class AmqpMessageHandlerServiceTest {
         return messageProperties;
     }
 
-    private Action createActionWithTarget(final Long targetId, final Status status) throws IllegalAccessException {
+    private Action createActionWithTarget(final Long actionId) throws IllegalAccessException {
         // is needed for the creation of targets
         initializeSecurityTokenGenerator();
 
         // Mock
         final Action actionMock = mock(Action.class);
         final Target targetMock = mock(Target.class);
-        final DistributionSet distributionSetMock = mock(DistributionSet.class);
 
-        when(actionMock.getDistributionSet()).thenReturn(distributionSetMock);
-        when(actionMock.getId()).thenReturn(targetId);
-        when(actionMock.getTenant()).thenReturn("DEFAULT");
+        when(actionMock.getId()).thenReturn(actionId);
         when(actionMock.getTarget()).thenReturn(targetMock);
-        when(actionMock.getActionType()).thenReturn(Action.ActionType.SOFT);
         when(targetMock.getControllerId()).thenReturn("target1");
         return actionMock;
     }
