@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
+import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -281,7 +282,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             amqpMessageDispatcherService.sendCancelMessageToTarget(target.getTenant(), target.getControllerId(),
                     action.getId(), target.getAddress());
         } else {
-            amqpMessageDispatcherService.sendUpdateMessageToTarget(action, target);
+            amqpMessageDispatcherService.sendUpdateMessageToTarget(new ActionProperties(action), action.getTarget(),
+                    getSoftwareModulesWithMetadata(action.getDistributionSet()));
         }
     }
 

@@ -198,27 +198,33 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         });
     }
 
-    protected void sendUpdateMessageToTarget(final Action action, final Target target) {
-        final Map<String, ActionProperties> actionProp = new HashMap<>();
-        actionProp.put(target.getControllerId(), new ActionProperties(action));
-        sendUpdateMessageToTargets(action.getDistributionSet().getId(), actionProp, Collections.singletonList(target));
-    }
-
     private void sendUpdateMessageToTargets(final Long dsId, final Map<String, ActionProperties> actionsPropsByTargetId,
             final List<Target> targets) {
         distributionSetManagement.get(dsId).ifPresent(ds -> {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules = getSoftwareModulesWithMetadata(
                     ds);
-
-            if (!targets.isEmpty() && isBatchAssignmentsEnabled()) {
-                sendBatchUpdateMessage(actionsPropsByTargetId, targets, softwareModules);
-            } else {
-                targets.forEach(target -> {
-                    final ActionProperties actionProp = actionsPropsByTargetId.get(target.getControllerId());
-                    sendSingleUpdateMessage(actionProp, target, softwareModules);
-                });
-            }
+            sendUpdateMessageToTargets(actionsPropsByTargetId, targets, softwareModules);
         });
+    }
+
+    protected void sendUpdateMessageToTarget(final ActionProperties actionsProps, final Target target,
+            final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+        final Map<String, ActionProperties> actionProp = new HashMap<>();
+        actionProp.put(target.getControllerId(), actionsProps);
+        sendUpdateMessageToTargets(actionProp, Collections.singletonList(target), softwareModules);
+    }
+
+    private void sendUpdateMessageToTargets(final Map<String, ActionProperties> actionsPropsByTargetId,
+            final List<Target> targets, final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
+
+        if (!targets.isEmpty() && isBatchAssignmentsEnabled()) {
+            sendBatchUpdateMessage(actionsPropsByTargetId, targets, softwareModules);
+        } else {
+            targets.forEach(target -> {
+                final ActionProperties actionProp = actionsPropsByTargetId.get(target.getControllerId());
+                sendSingleUpdateMessage(actionProp, target, softwareModules);
+            });
+        }
     }
 
     private void sendMultiActionRequestMessages(final String tenant, final List<String> controllerIds) {
