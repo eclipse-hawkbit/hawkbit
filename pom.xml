@@ -195,6 +195,8 @@
       <!-- Sonar - START -->
       <sonar.host.url>https://sonarcloud.io</sonar.host.url>
       <sonar.organization>bosch-iot-rollouts</sonar.organization>
+      <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
+      <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
       <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
@@ -204,7 +206,7 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
-      <jacoco.version>0.8.4</jacoco.version>
+      <jacoco.version>0.8.8</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,
