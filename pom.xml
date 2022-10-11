@@ -197,7 +197,8 @@
       <sonar.organization>bosch-iot-rollouts</sonar.organization>
       <sonar.projectKey>${project.groupId}:${project.artifactId}</sonar.projectKey>
       <sonar.branch.name>LOCAL_SCAN</sonar.branch.name>
-      <sonar.github.repository>eclipse/hawkbit</sonar.github.repository>
+      <sonar.qualitygate.wait>true</sonar.qualitygate.wait>
+      <sonar.qualitygate.timeout>600</sonar.qualitygate.timeout>
       <sonar.links.homepage>https://www.eclipse.org/hawkbit</sonar.links.homepage>
       <sonar.links.ci>https://circleci.com/gh/eclipse/hawkbit</sonar.links.ci>
       <sonar.exclusions>
