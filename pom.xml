@@ -163,6 +163,7 @@
       <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
       <maven.failsafe.plugin.version>3.0.0-M7</maven.failsafe.plugin.version>
       <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
+      <maven.sonar.plugin.version>3.9.1.2184</maven.sonar.plugin.version>
       <!-- ************************ -->
       <!-- Maven Surefire settings -->
       <!-- ************************ -->
@@ -207,7 +208,6 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
-      <sonar.version>3.9.1.2184</sonar.version>
       <jacoco.version>0.8.8</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
@@ -322,7 +322,7 @@
             <plugin>
                <groupId>org.sonarsource.scanner.maven</groupId>
                <artifactId>sonar-maven-plugin</artifactId>
-               <version>${sonar.version}</version>
+               <version>${maven.sonar.plugin.version}</version>
             </plugin>
          
             <plugin>
