@@ -207,6 +207,7 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
+      <sonar.version>3.9.1.2184</sonar.version>
       <jacoco.version>0.8.8</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
@@ -315,6 +316,15 @@
 
       <pluginManagement>
          <plugins>
+         
+	    	<!-- override groupid that is set in maven to supress warning regarding relocation of sonar-maven-plugin -->
+	    	<!-- see https://stackoverflow.com/a/35289210 -->
+            <plugin>
+               <groupId>org.sonarsource.scanner.maven</groupId>
+               <artifactId>sonar-maven-plugin</artifactId>
+               <version>${sonar.version}</version>
+            </plugin>
+         
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-javadoc-plugin</artifactId>
