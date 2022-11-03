@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
@@ -41,6 +42,7 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
@@ -252,6 +254,19 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final Join<RolloutTargetGroup, JpaTarget> targetJoin = targetRoot.join(RolloutTargetGroup_.target);
         final ListJoin<RolloutTargetGroup, JpaAction> actionJoin = targetRoot.join(RolloutTargetGroup_.actions,
                 JoinType.LEFT);
+        final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionJoin.join(JpaAction_.actionStatus,
+                JoinType.LEFT);
+
+         final CriteriaQuery<Object[]> multiselect = query
+                 .multiselect(targetJoin, actionJoin.get(JpaAction_.status), actionStatusJoin)
+                 .where(cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id),
+                         rolloutGroupId))
+                 .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin, actionStatusJoin));
+         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
+                 .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
+                 .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
+                         ((ActionStatus) o[2]).getCode()))
+                 .collect(Collectors.toList());
 
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.distinct(true).from(RolloutTargetGroup.class);
         countQueryFrom.join(RolloutTargetGroup_.target);
@@ -260,21 +275,13 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 .equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), rolloutGroupId));
         final Long totalCount = entityManager.createQuery(countQuery).getSingleResult();
 
-        final CriteriaQuery<Object[]> multiselect = query.multiselect(targetJoin, actionJoin.get(JpaAction_.status))
-                .where(cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id),
-                        rolloutGroupId))
-                .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin));
-        final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
-                .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
-                .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1]))
-                .collect(Collectors.toList());
-
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
     }
 
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
             final Join<RolloutTargetGroup, JpaTarget> targetJoin,
-            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
+            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin,
+            final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin) {
 
         return pageRequest.getSort().get().flatMap(order -> {
             final List<Order> orders;
@@ -282,6 +289,10 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             // we consider status as property from JpaAction ...
             if ("status".equals(property)) {
                 orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb);
+            }
+            // we consider statusCode as property from JpaActionStatus ...
+            else if ("code".equals(property)) {
+                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionStatusJoin, cb);
             }
             // ... and every other property from JpaTarget
             else {

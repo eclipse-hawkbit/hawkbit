@@ -38,6 +38,7 @@ public class TargetWithActionStatusToProxyTargetMapper
         proxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(target.getCreatedAt()));
         proxyTarget.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(target));
         proxyTarget.setLastTargetQuery(target.getLastTargetQuery());
+        proxyTarget.setStatusCode(targetWithActionStatus.getStatusCode().orElse(null));
 
         if (targetWithActionStatus.getStatus() != null) {
             proxyTarget.setStatus(targetWithActionStatus.getStatus());

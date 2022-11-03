@@ -80,6 +80,11 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
                 i18n.getMessage("header.status"));
         GridComponentBuilder.setColumnSortable(statusColumn, "status");
 
+        final Column<ProxyTarget, Integer> statusCodeColumn = GridComponentBuilder.addColumn(this,
+                ProxyTarget::getStatusCode).setId(SPUILabelDefinitions.VAR_STATUS_CODE)
+                .setCaption(i18n.getMessage("header.status.code"));
+        GridComponentBuilder.setColumnSortable(statusCodeColumn, "code");
+
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 
         getColumns().forEach(column -> column.setHidable(true));
