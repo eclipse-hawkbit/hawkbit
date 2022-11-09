@@ -22,7 +22,9 @@ import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Order;
+import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Subquery;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -31,6 +33,7 @@ import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
@@ -245,7 +248,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     public Page<TargetWithActionStatus> findAllTargetsOfRolloutGroupWithActionStatus(final Pageable pageRequest,
             final long rolloutGroupId) {
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
-
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
@@ -257,25 +259,75 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionJoin.join(JpaAction_.actionStatus,
                 JoinType.LEFT);
 
-         final CriteriaQuery<Object[]> multiselect = query
-                 .multiselect(targetJoin, actionJoin.get(JpaAction_.status), actionStatusJoin)
-                 .where(cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id),
-                         rolloutGroupId))
-                 .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin, actionStatusJoin));
-         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
-                 .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
-                 .stream().map(o -> new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
-                         ((ActionStatus) o[2]).getCode()))
-                 .collect(Collectors.toList());
+        final Subquery<Long> lastCreatedAtQuery = createLastActionStatusSubQuery(cb, query, actionJoin);
+        final Subquery<JpaActionStatus> actionStatusSubQuery = createActionStatusSubQuery(cb, query,
+                actionJoin);
+
+        final CriteriaQuery<Object[]> multiselect = query
+                .multiselect(targetJoin, actionJoin.get(JpaAction_.status), actionStatusJoin)
+                .where(
+                        getSelectJoinCondition(rolloutGroupId, cb, targetRoot, actionStatusJoin, lastCreatedAtQuery,
+                                actionStatusSubQuery))
+                .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin, actionStatusJoin));
+        final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
+                .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
+                .stream().map(this::getTargetWithActionStatusFromQuery).collect(Collectors.toList());
 
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.distinct(true).from(RolloutTargetGroup.class);
         countQueryFrom.join(RolloutTargetGroup_.target);
         countQueryFrom.join(RolloutTargetGroup_.actions, JoinType.LEFT);
-        countQuery.select(cb.count(countQueryFrom)).where(cb
-                .equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), rolloutGroupId));
+        countQuery.select(cb.count(countQueryFrom))
+                .where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, targetRoot));
         final Long totalCount = entityManager.createQuery(countQuery).getSingleResult();
 
         return new PageImpl<>(targetWithActionStatus, pageRequest, totalCount);
+    }
+
+    private Predicate getRolloutGroupTargetWithRolloutGroupJoinCondition(final long rolloutGroupId, final CriteriaBuilder cb,
+            final Root<RolloutTargetGroup> targetRoot) {
+        return cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), //
+                rolloutGroupId);
+    }
+
+    private Predicate getSelectJoinCondition(final long rolloutGroupId, final CriteriaBuilder cb,
+            final Root<RolloutTargetGroup> targetRoot, final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin,
+            final Subquery<Long> lastCreatedAtQuery, final Subquery<JpaActionStatus> notExistentActionStatusSubQuery) {
+        return cb.and( //
+                getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, targetRoot), //
+                cb.or( //
+                        cb.equal(actionStatusJoin.get(JpaActionStatus_.createdAt), lastCreatedAtQuery), //
+                        cb.not(cb.exists(notExistentActionStatusSubQuery)) //
+                ) //
+        );
+    }
+
+    private Subquery<JpaActionStatus> createActionStatusSubQuery(final CriteriaBuilder cb,
+            final CriteriaQuery<Object[]> query, final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
+        final Subquery<JpaActionStatus> subQuery = query.subquery(JpaActionStatus.class);
+        final Root<JpaActionStatus> actionStatusRoot = subQuery.from(JpaActionStatus.class);
+        subQuery.select(actionStatusRoot);
+        subQuery.where(getActionStatusWithActionJoinCondition(cb, actionJoin, actionStatusRoot));
+        return subQuery;
+    }
+
+    private Subquery<Long> createLastActionStatusSubQuery(final CriteriaBuilder cb, final CriteriaQuery<Object[]> query,
+            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
+        final Subquery<Long> subQuery = query.subquery(Long.class);
+        final Root<JpaActionStatus> actionStatusRoot = subQuery.from(JpaActionStatus.class);
+        subQuery.select(cb.max(actionStatusRoot.get(JpaActionStatus_.createdAt)));
+        subQuery.where(getActionStatusWithActionJoinCondition(cb, actionJoin, actionStatusRoot));
+        return subQuery;
+    }
+
+    private Predicate getActionStatusWithActionJoinCondition(final CriteriaBuilder cb,
+            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin, final Root<JpaActionStatus> actionStatusRoot) {
+        return cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(JpaAction_.id),
+                actionJoin.get(JpaAction_.id));
+    }
+
+    private TargetWithActionStatus getTargetWithActionStatusFromQuery(final Object[] o) {
+        return new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
+                o[2] == null ? Optional.empty() : ((ActionStatus) o[2]).getCode());
     }
 
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
@@ -309,8 +361,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.from(RolloutTargetGroup.class);
-        countQuery.select(cb.count(countQueryFrom)).where(cb
-                .equal(countQueryFrom.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), rolloutGroupId));
+        countQuery.select(cb.count(countQueryFrom)).where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, countQueryFrom));
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 
