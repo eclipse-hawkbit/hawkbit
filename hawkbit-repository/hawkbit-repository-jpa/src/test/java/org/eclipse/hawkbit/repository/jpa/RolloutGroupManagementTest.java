@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -32,6 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.util.CollectionUtils;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -62,9 +64,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 125),
             @Expect(type = RolloutCreatedEvent.class, count = 1) })
-
     void entityQueriesReferringToNotExistingEntitiesThrowsException() {
-        testdataFactory.createRollout("xxx");
+        testdataFactory.createRollout();
 
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countByRollout(NOT_EXIST_IDL), "Rollout");
         verifyThrownExceptionBy(() -> rolloutGroupManagement.countTargetsOfRolloutsGroup(NOT_EXIST_IDL),
@@ -87,14 +88,10 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the returned result considers the provided sort parameters.")
     void findAllTargetsOfRolloutGroupWithActionStatusConsidersSorting() {
-        final String prefix = RandomStringUtils.randomAlphanumeric(5);
-        final Rollout rollout = testdataFactory.createRollout(prefix);
+        final Rollout rollout = testdataFactory.createAndStartRollout();
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
                 .getContent();
         final RolloutGroup rolloutGroup = rolloutGroups.get(0);
-        rolloutManagement.handleRollouts();
-        rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
         rolloutManagement.pauseRollout(rollout.getId());
         rolloutManagement.handleRollouts();
         final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroup.getId())
@@ -129,6 +126,105 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                         rolloutGroup.getId())
                 .getContent();
         assertThatListIsSortedByTargetName(targetsWithActionStatusOrderedByNameAsc, Direction.ASC);
+    }
+
+    @Test
+    @Description("Verifies that the returned result considers sorting by action status code.")
+    void findAllTargetsOfRolloutGroupWithActionStatusConsidersSortingByActionStatusCode() {
+        final Rollout rollout = testdataFactory.createAndStartRollout();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
+                .getContent();
+        final RolloutGroup rolloutGroup = rolloutGroups.get(0);
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        final Target target0 = runningActions.get(0).getTarget();
+        final Target target24 = CollectionUtils.lastElement(runningActions).getTarget();
+        int i = 0;
+        for (final Action action : runningActions) {
+            controllerManagement.addUpdateActionStatus(
+                    entityFactory.actionStatus().create(action.getId()).status(Status.RUNNING).code(i++));
+        }
+
+        List<TargetWithActionStatus> targetsWithActionStatus = rolloutGroupManagement
+                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.ASC, "code")),
+                        rolloutGroup.getId())
+                .getContent();
+        assertSortedListOfActionStatus(targetsWithActionStatus, target0, 0, target24, 24);
+
+        targetsWithActionStatus = rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(
+                PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")), rolloutGroup.getId()).getContent();
+        assertSortedListOfActionStatus(targetsWithActionStatus, target24, 24, target0, 0);
+    }
+
+    private void assertSortedListOfActionStatus(final List<TargetWithActionStatus> targetsWithActionStatus,
+            final Target first, final Integer firstStatusCode, final Target last, final Integer lastStatusCode) {
+        assertTargetAndActionStatusCode(CollectionUtils.firstElement(targetsWithActionStatus), first, firstStatusCode);
+        assertTargetAndActionStatusCode(CollectionUtils.lastElement(targetsWithActionStatus), last, lastStatusCode);
+    }
+
+    private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
+            final Target target, final Integer actionStatusCode) {
+        assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
+        assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(Optional.of(actionStatusCode));
+    }
+
+    private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
+            final TargetWithActionStatus targetWithActionStatus, final Optional<Integer> actionStatusCode) {
+        assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+        assertThat(targetWithActionStatus.getStatus()).isNull();
+        assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(actionStatusCode);
+    }
+
+    private void assertTargetNotNullAndActionStatusAndActionStatusCode(
+            final TargetWithActionStatus targetWithActionStatus, final Status actionStatus,
+            final Optional<Integer> actionStatusCode) {
+        assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
+        assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
+        assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(actionStatusCode);
+    }
+
+    @Test
+    @Description("Verifies that Rollouts in different states are handled correctly.")
+    void findAllTargetsOfRolloutGroupWithActionStatus() {
+        final Rollout rollout = testdataFactory.createRollout();
+        final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
+                .getContent();
+        rolloutManagement.handleRollouts();
+
+        // check query when no actions exist
+        final List<TargetWithActionStatus> targetsWithActionStatus = rolloutGroupManagement
+                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                        rolloutGroups.get(0).getId())
+                .getContent();
+        assertTargetNotNullAndActionStatusNullAndActionStatusCode(targetsWithActionStatus.get(0), Optional.empty());
+
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        // check query when no action status code exist
+        final List<Action> scheduledActions = findActionsByRolloutAndStatus(rollout, Status.SCHEDULED);
+        final RolloutGroup rolloutGroupScheduled = scheduledActions.get(0).getRolloutGroup();
+
+        final List<TargetWithActionStatus> targetsWithActionStatusForScheduledRG = rolloutGroupManagement
+                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                        rolloutGroupScheduled.getId())
+                .getContent();
+        assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForScheduledRG.get(0),
+                Status.SCHEDULED, Optional.empty());
+
+        final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
+        final RolloutGroup rolloutGroupRunning = runningActions.get(0).getRolloutGroup();
+        for (final Action action : runningActions) {
+            controllerManagement.addUpdateActionStatus(
+                    entityFactory.actionStatus().create(action.getId()).status(Status.RUNNING).code(100));
+        }
+
+        // check query when action status code exists
+        final List<TargetWithActionStatus> targetsWithActionStatusForRunningRG = rolloutGroupManagement
+                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                        rolloutGroupRunning.getId())
+                .getContent();
+        assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForRunningRG.get(0),
+                Status.RUNNING, Optional.of(100));
     }
 
     private void assertThatListIsSortedByTargetName(final List<TargetWithActionStatus> targets,
