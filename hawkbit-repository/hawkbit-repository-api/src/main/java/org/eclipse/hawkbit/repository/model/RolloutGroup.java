@@ -111,7 +111,7 @@ public interface RolloutGroup extends NamedEntity {
 
     /**
      * @return if a confirmation is required for the resulting actions (considered
-     *         with user consent flow active only)
+     *         with confirmation flow active only)
      */
     boolean isConfirmationRequired();
 

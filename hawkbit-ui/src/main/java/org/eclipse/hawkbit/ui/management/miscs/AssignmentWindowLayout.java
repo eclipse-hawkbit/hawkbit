@@ -104,11 +104,11 @@ public class AssignmentWindowLayout extends VerticalLayout {
         refreshConfirmCheckBoxState(false);
     }
 
-    public void refreshConfirmCheckBoxState(final boolean isUserConsentFlowEnabled) {
-        confirmationRequiredToggle.setEnabled(isUserConsentFlowEnabled);
-        confirmationRequiredToggle.setVisible(isUserConsentFlowEnabled);
-        confirmationHelpLink.setEnabled(isUserConsentFlowEnabled);
-        confirmationHelpLink.setVisible(isUserConsentFlowEnabled);
+    public void refreshConfirmCheckBoxState(final boolean confirmationFlowEnabled) {
+        confirmationRequiredToggle.setEnabled(confirmationFlowEnabled);
+        confirmationRequiredToggle.setVisible(confirmationFlowEnabled);
+        confirmationHelpLink.setEnabled(confirmationFlowEnabled);
+        confirmationHelpLink.setVisible(confirmationFlowEnabled);
     }
 
     private void addValueChangeListeners() {

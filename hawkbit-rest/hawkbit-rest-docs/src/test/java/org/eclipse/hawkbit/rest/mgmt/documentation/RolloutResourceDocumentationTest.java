@@ -51,8 +51,6 @@ import org.springframework.restdocs.payload.FieldDescriptor;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.snippet.Snippet;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
@@ -177,7 +175,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Test
     @Description("Handles the POST request of creating a rollout. Required Permission: " + SpPermission.CREATE_ROLLOUT)
     public void createRollout() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         testdataFactory.createTargets(20, "targets-");
 
@@ -254,7 +252,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the POST request of creating a rollout with a groups definition. Required Permission: "
             + SpPermission.CREATE_ROLLOUT)
     public void createRolloutWithGroupsDefinition() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "targets-", "rollout");
@@ -455,7 +453,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving the deploy groups of a rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRolloutDeployGroups() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Rollout rollout = createRolloutEntity();
 
@@ -475,7 +473,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     @Description("Handles the GET request of retrieving a deploy group of a rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRolloutDeployGroup() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Rollout rollout = createRolloutEntity();
         final RolloutGroup firstRolloutGroup = rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getContent()

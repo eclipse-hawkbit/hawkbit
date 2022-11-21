@@ -1344,14 +1344,14 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Ensures that confirmation option is considered in assignment request.")
-    void assignDistributionSetToTargetWithConfirmationOptions(final boolean consentFlowActive,
+    void assignDistributionSetToTargetWithConfirmationOptions(final boolean confirmationFlowActive,
             final Boolean confirmationRequired) throws Exception {
 
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
-        if (consentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
         
         final JSONObject jsonPayload = new JSONObject();
@@ -1370,7 +1370,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, set.getId()).getContent()).hasSize(1)
                 .allMatch(action -> {
-                    if (!consentFlowActive) {
+                    if (!confirmationFlowActive) {
                         return !action.isWaitingConfirmation();
                     }
                     return confirmationRequired == null ? action.isWaitingConfirmation()
@@ -2403,7 +2403,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(jsonPath("content.[0].autoConfirmActive").doesNotExist());
 
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         // GET if not active
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
@@ -2439,15 +2439,15 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownTargetId = "targetId";
         testdataFactory.createTarget(knownTargetId);
 
-        // GET with consent flow not active should not expose
+        // GET with confirmation flow not active should not expose
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownTargetId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("autoConfirmActive").doesNotExist())
                 .andExpect(jsonPath("_links.autoConfirm").doesNotExist());
 
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
-        // GET with consent flow active should expose
+        // GET with confirmation flow active should expose
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownTargetId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("autoConfirmActive").exists()).andExpect(jsonPath("_links.autoConfirm").exists());

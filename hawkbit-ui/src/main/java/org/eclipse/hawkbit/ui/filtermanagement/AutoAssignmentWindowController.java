@@ -83,7 +83,7 @@ public class AutoAssignmentWindowController extends
             autoAssignmentFilter.setAutoAssignmentEnabled(false);
             autoAssignmentFilter.setAutoAssignActionType(ActionType.FORCED);
             autoAssignmentFilter.setDistributionSetInfo(null);
-            autoAssignmentFilter.setConfirmationRequired(configHelper.isUserConsentEnabled());
+            autoAssignmentFilter.setConfirmationRequired(configHelper.isConfirmationFlowEnabled());
         }
 
         return autoAssignmentFilter;
@@ -115,7 +115,7 @@ public class AutoAssignmentWindowController extends
                     : getI18n().getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT,
                             targetsForAutoAssignmentCount);
 
-            final String conformationHint = configHelper.isUserConsentEnabled() && !entity.isConfirmationRequired()
+            final String conformationHint = configHelper.isConfirmationFlowEnabled() && !entity.isConfirmationRequired()
                     ? getI18n().getMessage(MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_CONF_HINT,
                             tenantAware.getCurrentUsername())
                     : null;

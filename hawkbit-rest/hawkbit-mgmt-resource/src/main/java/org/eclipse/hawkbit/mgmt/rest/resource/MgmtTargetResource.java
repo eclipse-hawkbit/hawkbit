@@ -327,7 +327,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
-                    ? tenantConfigHelper.isUserConsentEnabled()
+                    ? tenantConfigHelper.isConfirmationFlowEnabled()
                     : dsAssignment.isConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .setConfirmationRequired(isConfirmationRequired).build();

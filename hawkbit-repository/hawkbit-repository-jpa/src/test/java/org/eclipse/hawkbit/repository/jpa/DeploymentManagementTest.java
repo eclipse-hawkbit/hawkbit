@@ -739,13 +739,13 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
-    @Description("Assignments with user consent flow active will result in actions in 'WAIT_FOR_CONFIRMATION' state")
-    void assignmentWithUserConsentFlowActive(final boolean confirmationRequired) {
+    @Description("Assignments with confirmation flow active will result in actions in 'WAIT_FOR_CONFIRMATION' state")
+    void assignmentWithConfirmationFlowActive(final boolean confirmationRequired) {
         final List<String> controllerIds = testdataFactory.createTargets(1).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
 
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         List<DistributionSetAssignmentResult> results = assignDistributionSetToTargets(distributionSet, controllerIds,
                 confirmationRequired);
 
@@ -769,7 +769,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ValueSource(booleans = { true, false })
     @Description("Verify auto confirmation assignments and check action status with messages")
     void assignmentWithAutoConfirmationWillBeHandledCorrectly(final boolean confirmationRequired) {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Target target = testdataFactory.createTarget();
         assertThat(target.getAutoConfirmationStatus()).isNull();
@@ -813,13 +813,13 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Multiple assignments with user consent flow active will result in correct cancel behaviour")
-    void multipleAssignmentWithUserConsentFlowActiveVerifyCancelBehaviour() {
+    @Description("Multiple assignments with confirmation flow active will result in correct cancel behaviour")
+    void multipleAssignmentWithConfirmationFlowActiveVerifyCancelBehaviour() {
         final Target target = testdataFactory.createTarget("firstDevice");
         final DistributionSet firstDs = testdataFactory.createDistributionSet();
         final DistributionSet secondDs = testdataFactory.createDistributionSet();
 
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         final List<Action> resultActions = assignDistributionSet(firstDs.getId(), target.getControllerId())
                 .getAssignedEntity();
         assertThat(resultActions).hasSize(1);
@@ -849,7 +849,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Assignments with user consent flow deactivated will result in actions in only in 'RUNNING' state")
+    @Description("Assignments with confirmation flow deactivated will result in actions in only in 'RUNNING' state")
     void verifyConfirmationRequiredFlagHaveNoInfluenceIfFlowIsDeactivated() {
         final List<String> targets1 = testdataFactory.createTargets("group1", 1).stream().map(Target::getControllerId)
                 .collect(Collectors.toList());

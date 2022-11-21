@@ -82,7 +82,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all targets within SP. Required Permission: READ_TARGET.")
     public void getTargets() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
 
@@ -131,7 +131,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the POST request of creating new targets within SP. The request body must always be a list of targets. Required Permission: CREATE_TARGET.")
     public void postTargets() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final TargetType defaultType = testdataFactory.createTargetType("defaultType", Collections.emptyList());
         final String target = createTargetJsonForPostRequest("123456", "controllerId", "test", defaultType);
@@ -185,7 +185,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving a single target within SP. Required Permission: READ_TARGET.")
     public void getTarget() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
 
@@ -199,7 +199,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the PUT request of updating a target within SP. Required Permission: UPDATE_TARGET.")
     public void putTarget() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
         final String targetAsJson = createJsonTarget(targetId, "newTargetName", "I've been updated");

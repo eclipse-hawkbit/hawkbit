@@ -180,13 +180,13 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Test auto assignment of a DS to filtered targets with different confirmation options")
-    void checkAutoAssignWithConfirmationOptions(final boolean consentFlowActive, final boolean confirmationRequired,
+    void checkAutoAssignWithConfirmationOptions(final boolean confirmationFlowActive, final boolean confirmationRequired,
             final Action.Status expectedStatus) {
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsA");
 
-        if (consentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
@@ -208,13 +208,13 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Test auto assignment of a DS for a specific device with different confirmation options")
-    void checkAutoAssignmentForDeviceWithConfirmationRequired(final boolean consentFlowActive,
+    void checkAutoAssignmentForDeviceWithConfirmationRequired(final boolean confirmationFlowActive,
             final boolean confirmationRequired, final Action.Status expectedStatus) {
 
         final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
 
-        if (consentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         // target filter query that matches all targets

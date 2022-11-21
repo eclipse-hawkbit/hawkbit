@@ -172,10 +172,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisherHolder,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled,
-                this::isUserConsentEnabled);
+                this::isConfirmationFlowEnabled);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit,
                 eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement,
-                this::isMultiAssignmentsEnabled, this::isUserConsentEnabled);
+                this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
@@ -708,7 +708,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             action.setActive(true);
             final boolean confirmationRequired = action.getRolloutGroup().isConfirmationRequired()
                     && action.getTarget().getAutoConfirmationStatus() == null;
-            if (isUserConsentEnabled() && confirmationRequired) {
+            if (isConfirmationFlowEnabled() && confirmationRequired) {
                 action.setStatus(Status.WAIT_FOR_CONFIRMATION);
                 return;
             }
@@ -994,9 +994,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .isMultiAssignmentsEnabled();
     }
 
-    private boolean isUserConsentEnabled() {
+    private boolean isConfirmationFlowEnabled() {
         return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
-            .isUserConsentEnabled();
+            .isConfirmationFlowEnabled();
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {

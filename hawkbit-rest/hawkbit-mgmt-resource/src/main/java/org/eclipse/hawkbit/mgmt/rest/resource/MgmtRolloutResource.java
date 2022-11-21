@@ -128,14 +128,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 .getValidAndComplete(rolloutRequestBody.getDistributionSetId());
         final RolloutGroupConditions rolloutGroupConditions = MgmtRolloutMapper.fromRequest(rolloutRequestBody, true);
         final RolloutCreate create = MgmtRolloutMapper.fromRequest(entityFactory, rolloutRequestBody, distributionSet);
-        final boolean userConsentFlowActive = tenantConfigHelper.isUserConsentEnabled();
+        final boolean confirmationFlowActive = tenantConfigHelper.isConfirmationFlowEnabled();
 
         Rollout rollout;
         if (rolloutRequestBody.getGroups() != null) {
             final List<RolloutGroupCreate> rolloutGroups = rolloutRequestBody.getGroups().stream()
                     .map(mgmtRolloutGroup -> {
                         final boolean confirmationRequired = isConfirmationRequiredForGroup(mgmtRolloutGroup,
-                                rolloutRequestBody).orElse(userConsentFlowActive);
+                                rolloutRequestBody).orElse(confirmationFlowActive);
                         return MgmtRolloutMapper.fromRequest(entityFactory, mgmtRolloutGroup)
                                 .confirmationRequired(confirmationRequired);
                     }).collect(Collectors.toList());
@@ -143,7 +143,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         } else if (rolloutRequestBody.getAmountGroups() != null) {
             final boolean confirmationRequired = rolloutRequestBody.isConfirmationRequired() == null
-                    ? userConsentFlowActive
+                    ? confirmationFlowActive
                     : rolloutRequestBody.isConfirmationRequired();
             rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
                     rolloutGroupConditions);
@@ -222,7 +222,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper
-                .toResponseRolloutGroup(findRolloutGroupsAll.getContent(), tenantConfigHelper.isUserConsentEnabled());
+                .toResponseRolloutGroup(findRolloutGroupsAll.getContent(), tenantConfigHelper.isConfirmationFlowEnabled());
         return ResponseEntity.ok(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()));
     }
 
@@ -234,7 +234,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true,
-                tenantConfigHelper.isUserConsentEnabled()));
+                tenantConfigHelper.isConfirmationFlowEnabled()));
     }
 
     private void findRolloutOrThrowException(final Long rolloutId) {

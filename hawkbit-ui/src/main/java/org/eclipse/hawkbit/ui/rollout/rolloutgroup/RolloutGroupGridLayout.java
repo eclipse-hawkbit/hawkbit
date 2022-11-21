@@ -78,14 +78,14 @@ public class RolloutGroupGridLayout extends AbstractGridComponentLayout {
                         .entityModifiedAwareSupports(getEntityModifiedAwareSupports()).build();
         this.tenantConfigChangedListener = TenantConfigChangedListener.newBuilder(uiDependencies.getEventBus())
                 .tenantFilter(tenantAware.getCurrentTenant())
-                .addConfigFilter(TenantConfigurationProperties.TenantConfigurationKey.USER_CONSENT_ENABLED)
-                .applicationEventConsumer(this::onConsentConfigChange).build();
+                .addConfigFilter(TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED)
+                .applicationEventConsumer(this::onConfirmationFlowConfigChange).build();
 
         buildLayout(rolloutGroupsListHeader, rolloutGroupListGrid);
     }
 
-    private void onConsentConfigChange(final TenantConfigChangedEventPayload payload) {
-        payload.getValue(Boolean.class).ifPresent(rolloutGroupListGrid::alignWithConsentFlowState);
+    private void onConfirmationFlowConfigChange(final TenantConfigChangedEventPayload payload) {
+        payload.getValue(Boolean.class).ifPresent(rolloutGroupListGrid::alignWithConfirmationFlowState);
     }
 
     private List<MasterEntityAwareComponent<ProxyRollout>> getMasterEntityAwareComponents() {
@@ -106,7 +106,7 @@ public class RolloutGroupGridLayout extends AbstractGridComponentLayout {
 
     @Override
     public void onViewEnter() {
-        rolloutGroupListGrid.alignWithConsentFlowState();
+        rolloutGroupListGrid.alignWithConfirmationFlowState();
     }
 
     @Override

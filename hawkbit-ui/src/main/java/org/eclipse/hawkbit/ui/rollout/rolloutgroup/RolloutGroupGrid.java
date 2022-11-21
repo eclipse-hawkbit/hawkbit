@@ -157,7 +157,7 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
                 .setId(SPUILabelDefinitions.ROLLOUT_GROUP_THRESHOLD)
                 .setCaption(i18n.getMessage("header.rolloutgroup.threshold")).setHidable(true);
 
-        if (tenantConfigHelper.isUserConsentEnabled()) {
+        if (tenantConfigHelper.isConfirmationFlowEnabled()) {
             GridComponentBuilder.addColumn(this, group -> group.isConfirmationRequired() ? "required" : "not required")
                   .setId(SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED)
                   .setCaption(i18n.getMessage("header.rolloutgroup.confirmation")).setHidable(true);
@@ -210,11 +210,11 @@ public class RolloutGroupGrid extends AbstractGrid<ProxyRolloutGroup, Long> {
         }
     }
 
-    public void alignWithConsentFlowState() {
-        alignWithConsentFlowState(tenantConfigHelper.isUserConsentEnabled());
+    public void alignWithConfirmationFlowState() {
+        alignWithConfirmationFlowState(tenantConfigHelper.isConfirmationFlowEnabled());
     }
 
-    public void alignWithConsentFlowState(final boolean active) {
+    public void alignWithConfirmationFlowState(final boolean active) {
         final boolean columnPresent = GridComponentBuilder.isColumnPresent(this,
                 SPUILabelDefinitions.ROLLOUT_GROUP_CONFIRMATION_REQUIRED);
         if (active && !columnPresent) {

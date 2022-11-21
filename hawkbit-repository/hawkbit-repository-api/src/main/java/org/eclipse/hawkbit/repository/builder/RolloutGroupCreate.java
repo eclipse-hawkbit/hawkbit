@@ -66,7 +66,7 @@ public interface RolloutGroupCreate {
     /**
      * @param confirmationRequired
      *            if confirmation is required for this rollout group (considered
-     *            with user consent flow active)
+     *            with confirmation flow active)
      * @return updated builder instance
      */
     RolloutGroupCreate confirmationRequired(boolean confirmationRequired);

@@ -1549,9 +1549,9 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration checkbox for
-     * {@link TenantConfigurationKey#USER_CONSENT_ENABLED}.
+     * {@link TenantConfigurationKey#USER_CONFIRMATION_ENABLED}.
      */
-    public static final String REPOSITORY_USER_CONSENT_CHECKBOX = "repositoryuserconsentcheckbox";
+    public static final String REPOSITORY_USER_CONFIRMATION_CHECKBOX = "repositoryuserconfirmationcheckbox";
 
     /**
      * Configuration checkbox for

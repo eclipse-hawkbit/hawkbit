@@ -49,9 +49,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier userConsentConfig) {
+            final BooleanSupplier confirmationFlowConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, userConsentConfig);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
     }
 
     @Override
@@ -133,7 +133,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         if (result != null) {
             final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
                     && result.getTarget().getAutoConfirmationStatus() == null;
-            if (isUserConsentEnabled() && confirmationRequired) {
+            if (isConfirmationFlowEnabled() && confirmationRequired) {
                 result.setStatus(Status.WAIT_FOR_CONFIRMATION);
             } else {
                 result.setStatus(Status.RUNNING);
@@ -148,7 +148,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
-        if (isUserConsentEnabled()) {
+        if (isConfirmationFlowEnabled()) {
             result.setStatus(Status.WAIT_FOR_CONFIRMATION);
         } else {
             result.setStatus(Status.RUNNING);

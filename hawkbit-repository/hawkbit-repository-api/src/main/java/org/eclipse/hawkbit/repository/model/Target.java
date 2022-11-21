@@ -100,7 +100,7 @@ public interface Target extends NamedEntity {
 
     /**
      * The auto confirmation status is present, when it's active for the target.
-     * Will only be considered in case the user consent flow is active.
+     * Will only be considered in case the confirmation flow is active.
      *
      * @return the {@link AutoConfirmationStatus} if activated
      */

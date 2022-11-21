@@ -57,14 +57,13 @@ public abstract class AbstractDsAssignmentStrategy {
     private final ActionStatusRepository actionStatusRepository;
     private final QuotaManagement quotaManagement;
     private final BooleanSupplier multiAssignmentsConfig;
-
-    private final BooleanSupplier userConsentConfig;
+    private final BooleanSupplier confirmationFlowConfig;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
             final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier userConsentConfig) {
+            final BooleanSupplier confirmationFlowConfig) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisherHolder = eventPublisherHolder;
@@ -72,7 +71,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.actionStatusRepository = actionStatusRepository;
         this.quotaManagement = quotaManagement;
         this.multiAssignmentsConfig = multiAssignmentsConfig;
-        this.userConsentConfig = userConsentConfig;
+        this.confirmationFlowConfig = confirmationFlowConfig;
     }
 
     /**
@@ -281,7 +280,7 @@ public abstract class AbstractDsAssignmentStrategy {
         return multiAssignmentsConfig.getAsBoolean();
     }
 
-    protected boolean isUserConsentEnabled() {
-        return userConsentConfig.getAsBoolean();
+    protected boolean isConfirmationFlowEnabled() {
+        return confirmationFlowConfig.getAsBoolean();
     }
 }

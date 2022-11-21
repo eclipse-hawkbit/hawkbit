@@ -311,12 +311,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verify the confirmation required flag is not part of the rollout parent entity")
-    void verifyConfirmationFlagIsNeverPartOfRolloutEntity(final boolean userConsentFlowActive) throws Exception {
+    void verifyConfirmationFlagIsNeverPartOfRolloutEntity(final boolean confirmationFlowActive) throws Exception {
         testdataFactory.createTargets(20, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        if (userConsentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         // create rollout including the created targets with prefix 'rollout'
@@ -336,9 +336,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verify the confirmation required flag will be set based on the feature state")
-    void verifyConfirmationStateIfNotProvided(final boolean userConsentFlowActive) throws Exception {
-        if (userConsentFlowActive) {
-            enableUserConsentFlow();
+    void verifyConfirmationStateIfNotProvided(final boolean confirmationFlowActive) throws Exception {
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         testdataFactory.createTargets(20, "target", "rollout");
@@ -350,14 +350,14 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(content).hasSizeGreaterThan(0).allSatisfy(rollout -> {
             assertThat(rolloutGroupManagement.findByRollout(PAGE, rollout.getId()))
                 .describedAs("Confirmation required flag depends on feature active.")
-                  .allMatch(group -> group.isConfirmationRequired() == userConsentFlowActive);
+                  .allMatch(group -> group.isConfirmationRequired() == confirmationFlowActive);
         });
     }
 
     @Test
     @Description("Confirmation required flag will be read from the Rollout, if specified.")
     void verifyRolloutGroupWillUseRolloutPropertyFirst() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
@@ -396,9 +396,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Confirmation required flag will be read from the tenant config (user consent flow state), if never specified.")
+    @Description("Confirmation required flag will be read from the tenant config (confirmation flow state), if never specified.")
     void verifyRolloutGroupWillUseConfigIfNotProvidedWithRollout() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet dsA = testdataFactory.createDistributionSet("ro");
 
@@ -586,14 +586,14 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Testing that rollout paged list is limited by the query param limit")
-    void retrieveRolloutGroupsForSpecificRollout(final boolean userConsentEnabled, final boolean confirmationRequired) throws Exception {
+    void retrieveRolloutGroupsForSpecificRollout(final boolean confirmationFlowEnabled, final boolean confirmationRequired) throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        if (userConsentEnabled) {
-            enableUserConsentFlow();
+        if (confirmationFlowEnabled) {
+            enableConfirmationFlow();
         }
 
         // create rollout including the created targets with prefix 'rollout'
@@ -610,16 +610,16 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.content[1].status", equalTo("ready")))
                 .andExpect(jsonPath("$.content[2].status", equalTo("ready")))
                 .andExpect(jsonPath("$.content[3].status", equalTo("ready")))
-                .andExpect(isUserConsentEnabled()
+                .andExpect(isConfirmationFlowEnabled()
                         ? jsonPath("$.content[0].confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist())
-                .andExpect(isUserConsentEnabled()
+                .andExpect(isConfirmationFlowEnabled()
                         ? jsonPath("$.content[1].confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist())
-                .andExpect(isUserConsentEnabled()
+                .andExpect(isConfirmationFlowEnabled()
                         ? jsonPath("$.content[2].confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist())
-                .andExpect(isUserConsentEnabled()
+                .andExpect(isConfirmationFlowEnabled()
                         ? jsonPath("$.content[3].confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist());
     }
@@ -793,15 +793,15 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Testing that a single rollout group can be retrieved")
-    void retrieveSingleRolloutGroup(final boolean userConsentEnabled, final boolean confirmationRequired)
+    void retrieveSingleRolloutGroup(final boolean confirmationFlowEnabled, final boolean confirmationRequired)
             throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
-        if (userConsentEnabled) {
-            enableUserConsentFlow();
+        if (confirmationFlowEnabled) {
+            enableConfirmationFlow();
         }
         
         // create rollout including the created targets with prefix 'rollout'
@@ -818,7 +818,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         retrieveAndVerifyRolloutGroupInCreating(rollout, firstGroup);
         retrieveAndVerifyRolloutGroupInReady(rollout, firstGroup);
-        retrieveAndVerifyRolloutGroupInRunningAndScheduled(rollout, firstGroup, secondGroup, userConsentEnabled,
+        retrieveAndVerifyRolloutGroupInRunningAndScheduled(rollout, firstGroup, secondGroup, confirmationFlowEnabled,
                 confirmationRequired);
     }
 
@@ -828,7 +828,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Step
     private void retrieveAndVerifyRolloutGroupInRunningAndScheduled(final Rollout rollout,
-            final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean userConsentEnabled,
+            final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean confirmationFlowEnabled,
             final boolean confirmationRequired) throws Exception {
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
@@ -842,7 +842,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(isUserConsentEnabled() ? jsonPath("confirmationRequired", equalTo(confirmationRequired))
+                .andExpect(isConfirmationFlowEnabled() ? jsonPath("confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist());
 
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), secondGroup.getId())
@@ -855,7 +855,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(isUserConsentEnabled() ? jsonPath("confirmationRequired", equalTo(confirmationRequired))
+                .andExpect(isConfirmationFlowEnabled() ? jsonPath("confirmationRequired", equalTo(confirmationRequired))
                         : jsonPath("confirmationRequired").doesNotExist());
         ;
     }
@@ -877,7 +877,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(isUserConsentEnabled() ? jsonPath("confirmationRequired").exists()
+                .andExpect(isConfirmationFlowEnabled() ? jsonPath("confirmationRequired").exists()
                         : jsonPath("confirmationRequired").doesNotExist());
         ;
     }
@@ -890,7 +890,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("id", equalTo(firstGroup.getId().intValue())))
-                .andExpect(isUserConsentEnabled() ? jsonPath("confirmationRequired").exists()
+                .andExpect(isConfirmationFlowEnabled() ? jsonPath("confirmationRequired").exists()
                         : jsonPath("confirmationRequired").doesNotExist())
                 .andExpect(jsonPath("status", equalTo("creating"))).andExpect(jsonPath("name", endsWith("1")))
                 .andExpect(jsonPath("description", endsWith("1")))

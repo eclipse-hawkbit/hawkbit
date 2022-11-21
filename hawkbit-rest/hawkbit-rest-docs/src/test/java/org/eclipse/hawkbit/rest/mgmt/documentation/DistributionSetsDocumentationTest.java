@@ -353,7 +353,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
     @Description("Handles the POST request for assigning multiple targets to a distribution set.The request body must always be a list of target IDs."
             + " Required Permission: " + SpPermission.READ_REPOSITORY + " and " + SpPermission.UPDATE_TARGET)
     public void createAssignedTarget() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
 

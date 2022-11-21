@@ -1287,12 +1287,12 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Ensures that confirmation option is considered in assignment request.")
-    public void assignTargetsToDistributionSetWithConfirmationOptions(final boolean consentFlowActive,
+    public void assignTargetsToDistributionSetWithConfirmationOptions(final boolean confirmationFlowActive,
             final Boolean confirmationRequired) throws Exception {
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
-        if (consentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         // prepare targets
@@ -1306,7 +1306,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(1)
                 .allMatch(action -> {
-                    if (!consentFlowActive) {
+                    if (!confirmationFlowActive) {
                         return !action.isWaitingConfirmation();
                     }
                     return confirmationRequired == null ? action.isWaitingConfirmation()

@@ -82,7 +82,7 @@ public class AutoAssignDistributionSetUpdate {
      *
      * @param confirmationRequired
      *            if confirmation is required for this auto assignment (considered
-     *            with user consent flow active)
+     *            with confirmation flow active)
      * @return updated builder instance
      */
     public AutoAssignDistributionSetUpdate confirmationRequired(final boolean confirmationRequired) {

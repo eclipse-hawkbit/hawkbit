@@ -168,7 +168,7 @@ public class TargetFilterGrid extends AbstractGrid<ProxyTargetFilterQuery, Strin
             final Label icon = actionTypeIconSupplier.getLabel(filter);
             horizontalLayout.addComponent(icon);
 
-            if (tenantConfigHelper.isUserConsentEnabled()) {
+            if (tenantConfigHelper.isConfirmationFlowEnabled()) {
                 final Label confirmationIcon = confirmationIconSupplier.getLabel(filter);
                 horizontalLayout.addComponent(confirmationIcon);
             }

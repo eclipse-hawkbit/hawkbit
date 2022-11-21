@@ -585,7 +585,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Resource to retrieve the current state of auto confirmation. In case auto-confirm is active a reference to disable it will be provided.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getConfirmationBaseWithAutoConfirmActive() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
@@ -619,7 +619,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Resource to retrieve the current state of auto confirmation. In case actions are waiting for a confirmation, they will be referenced.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getConfirmationBaseWithAutoConfirmDeactivated() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
         final Target target = targetManagement.create(entityFactory.target().create().controllerId(CONTROLLER_ID));
@@ -648,7 +648,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Core resource for confirmation of actions. Contains all necessary information for confirmation.")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void getConfirmationBaseAction() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -737,7 +737,7 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Feedback channel for confirming an action")
     @WithUser(tenantId = "TENANT_ID", authorities = "ROLE_CONTROLLER", allSpPermissions = true)
     public void postConfirmationFeedback() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 

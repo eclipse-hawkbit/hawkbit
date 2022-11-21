@@ -379,13 +379,13 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Ensures that the distribution set auto-assignment works as intended with distribution set, action type and confirmation validation")
-    public void setAutoAssignDistributionSetToTargetFilterQuery(final boolean userConsentFlowActive,
+    public void setAutoAssignDistributionSetToTargetFilterQuery(final boolean confirmationFlowActive,
             final Boolean confirmationRequired) throws Exception {
         final String knownQuery = "name==test05";
         final String knownName = "filter05";
 
-        if (userConsentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -411,12 +411,12 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verify the confirmation required flag will be set based on the feature state")
-    void verifyConfirmationStateIfNotProvided(final boolean userConsentFlowActive) throws Exception {
+    void verifyConfirmationStateIfNotProvided(final boolean confirmationFlowActive) throws Exception {
         final String knownQuery = "name==test05";
         final String knownName = "filter05";
 
-        if (userConsentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         final DistributionSet set = testdataFactory.createDistributionSet();
@@ -426,7 +426,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         verifyAutoAssignmentByActionType(tfq, set, null, null);
 
         assertThat(targetFilterQueryManagement.get(tfq.getId())).hasValueSatisfying(filter -> {
-            assertThat(filter.isConfirmationRequired()).isEqualTo(userConsentFlowActive);
+            assertThat(filter.isConfirmationRequired()).isEqualTo(confirmationFlowActive);
         });
     }
 
@@ -481,7 +481,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId())).andDo(print())
                 .andExpect(status().isOk()).andExpect(jsonPath(JSON_PATH_NAME, equalTo(tfq.getName())))
                 .andExpect(jsonPath(JSON_PATH_QUERY, equalTo(tfq.getQuery())))
-                .andExpect(isUserConsentEnabled()
+                .andExpect(isConfirmationFlowEnabled()
                         ? jsonPath(JSON_PATH_CONFIRMATION_REQUIRED,
                                 equalTo(confirmationRequired == null || confirmationRequired))
                         : jsonPath(JSON_PATH_CONFIRMATION_REQUIRED).doesNotExist())

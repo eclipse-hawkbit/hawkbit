@@ -107,7 +107,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
         gridLayout.setSpacing(true);
         gridLayout.setSizeUndefined();
         gridLayout.setRows(3);
-        if (tenantConfigHelper.isUserConsentEnabled()) {
+        if (tenantConfigHelper.isConfirmationFlowEnabled()) {
             gridLayout.setColumns(7);
         } else {
             gridLayout.setColumns(6);
@@ -125,7 +125,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
     private void addHeaderRow(final GridLayout gridLayout, final int headerRow) {
         final List<String> headerColumns = new ArrayList<>(Arrays.asList("header.name", "header.target.filter.query",
                 "header.target.percentage", "header.rolloutgroup.threshold", "header.rolloutgroup.threshold.error"));
-        if (tenantConfigHelper.isUserConsentEnabled()) {
+        if (tenantConfigHelper.isConfirmationFlowEnabled()) {
             headerColumns.add("header.rolloutgroup.confirmation");
         }
         for (int i = 0; i < headerColumns.size(); i++) {
@@ -181,7 +181,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
 
     private AdvancedGroupRow addGroupRow() {
         final AdvancedGroupRow groupRow = new AdvancedGroupRow(i18n, targetFilterQueryDataProvider,
-                tenantConfigHelper.isUserConsentEnabled());
+                tenantConfigHelper.isConfirmationFlowEnabled());
 
         addRowToLayout(groupRow);
         groupRows.add(groupRow);
@@ -198,7 +198,7 @@ public class AdvancedGroupsLayout extends ValidatableLayout {
 
         groupRow.addRowToLayout(layout, index);
 
-        final int removeButtonColumnIndex = tenantConfigHelper.isUserConsentEnabled() ? 6 : 5;
+        final int removeButtonColumnIndex = tenantConfigHelper.isConfirmationFlowEnabled() ? 6 : 5;
 
         layout.addComponent(createRemoveButton(groupRow, index), removeButtonColumnIndex, index);
     }

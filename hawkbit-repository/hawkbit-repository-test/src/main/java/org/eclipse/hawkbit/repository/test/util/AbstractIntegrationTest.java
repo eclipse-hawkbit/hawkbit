@@ -238,11 +238,11 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType, final long forcedTime, final Integer weight) {
-        final boolean userConsentFlowActive = isUserConsentFlowActive();
+        final boolean confirmationFlowActive = isConfirmationFlowActive();
 
         final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
                 .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
-                        .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(userConsentFlowActive)
+                        .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
                         .build())
                 .collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> results = deploymentManagement
@@ -325,12 +325,12 @@ public abstract class AbstractIntegrationTest {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
     }
 
-    protected void enableUserConsentFlow() {
-        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONSENT_ENABLED, true);
+    protected void enableConfirmationFlow() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
     }    
     
-    protected boolean isUserConsentFlowActive() {
-        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONSENT_ENABLED,
+    protected boolean isConfirmationFlowActive() {
+        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
                 Boolean.class).getValue();
     }
 
@@ -496,9 +496,9 @@ public abstract class AbstractIntegrationTest {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
     }
 
-    protected boolean isUserConsentEnabled() {
+    protected boolean isConfirmationFlowEnabled() {
         return tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.USER_CONSENT_ENABLED, Boolean.class).getValue();
+                .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
     }
 
 }

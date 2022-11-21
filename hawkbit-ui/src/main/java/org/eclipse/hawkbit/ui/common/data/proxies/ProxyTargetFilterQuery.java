@@ -127,7 +127,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
 
     /**
      * @return if confirmation is required for configured auto assignment
-     *         (considered with user consent flow active)
+     *         (considered with confirmation flow active)
      */
     public boolean isConfirmationRequired() {
         return isConfirmationRequired;
@@ -139,7 +139,7 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
      *
      * @param confirmationRequired
      *            if confirmation is required for configured auto assignment
-     *            (considered with user consent flow active)
+     *            (considered with confirmation flow active)
      */
     public void setConfirmationRequired(final boolean confirmationRequired) {
         isConfirmationRequired = confirmationRequired;

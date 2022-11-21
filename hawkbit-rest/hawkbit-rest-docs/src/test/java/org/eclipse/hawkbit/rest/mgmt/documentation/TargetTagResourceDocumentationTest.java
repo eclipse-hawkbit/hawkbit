@@ -153,7 +153,7 @@ public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumenta
     @Test
     @Description("Handles the GET request of retrieving all assigned targets by the given")
     public void getAssignedTargets() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final TargetTag tag = createTargetTagEntitiy();
         final Target target = createTargetByGivenNameWithAttributes("Target1", distributionSet);
@@ -202,7 +202,7 @@ public class TargetTagResourceDocumentationTest extends AbstractApiRestDocumenta
     @Test
     @Description("Handles the POST request to assign targets to the given tag id")
     public void assignTargets() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final Long tagId = createTargetTagId();
         final MgmtAssignedTargetRequestBody assignedTargetRequestBody1 = new MgmtAssignedTargetRequestBody();

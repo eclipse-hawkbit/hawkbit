@@ -126,7 +126,7 @@ public abstract class AbstractTargetFilterQueryUpdateCreate<T> extends AbstractB
     /**
      * @param confirmationRequired
      *            if confirmation is required for configured auto assignment
-     *            (considered with user consent flow active)
+     *            (considered with confirmation flow active)
      * @return updated builder instance
      */
     public T confirmationRequired(final boolean confirmationRequired) {

@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * New update actions require confirmation when user consent flow is switched on. This is the feedback channel for
+ * New update actions require confirmation when confirmation flow is switched on. This is the feedback channel for
  * confirmation messages for DDI API. The confirmation message has a mandatory field confirmation with possible values:
  * "confirmed" and "denied".
  *

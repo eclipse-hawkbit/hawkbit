@@ -159,7 +159,7 @@ public class TargetWithActionType {
     }
 
     /**
-     * Return if a confirmation is required for this assignment (depends if user consent flow is active)
+     * Return if a confirmation is required for this assignment (depends on confirmation flow active)
      *
      * @return the flag
      */

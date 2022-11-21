@@ -16,11 +16,11 @@ import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
  * This class represents the UI item for enabling/disabling the
  * User-consent flow feature as part of the repository configuration view.
  */
-public class UserConsentConfigurationItem extends VerticalLayout {
+public class ConfirmationFlowConfigurationItem extends VerticalLayout {
 
   private static final long serialVersionUID = 1L;
 
-  private static final String MSG_KEY_CHECKBOX = "label.configuration.repository.userconsent";
+  private static final String MSG_KEY_CHECKBOX = "label.configuration.repository.confirmationflow";
 
   /**
    * Constructor.
@@ -28,7 +28,7 @@ public class UserConsentConfigurationItem extends VerticalLayout {
    * @param i18n
    *            VaadinMessageSource
    */
-  public UserConsentConfigurationItem(final VaadinMessageSource i18n) {
+  public ConfirmationFlowConfigurationItem(final VaadinMessageSource i18n) {
     this.setSpacing(false);
     this.setMargin(false);
     addComponent(SPUIComponentProvider.generateLabel(i18n, MSG_KEY_CHECKBOX));

@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
@@ -187,7 +186,7 @@ public final class MgmtTargetMapper {
         if (target.getTargetType() != null) {
             targetRest.setTargetType(target.getTargetType().getId());
         }
-        if (configHelper.isUserConsentEnabled()) {
+        if (configHelper.isConfirmationFlowEnabled()) {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 

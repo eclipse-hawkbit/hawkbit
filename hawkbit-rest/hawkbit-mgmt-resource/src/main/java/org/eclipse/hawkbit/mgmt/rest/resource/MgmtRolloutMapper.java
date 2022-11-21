@@ -148,17 +148,17 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts,
-            final boolean userConsentFlowEnabled) {
+            final boolean confirmationFlowEnabled) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false, userConsentFlowEnabled))
+        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false, confirmationFlowEnabled))
                 .collect(Collectors.toList());
     }
 
     static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup,
-            final boolean withDetailedStatus, final boolean userConsentFlowEnabled) {
+            final boolean withDetailedStatus, final boolean confirmationFlowEnabled) {
         final MgmtRolloutGroupResponseBody body = new MgmtRolloutGroupResponseBody();
         body.setCreatedAt(rolloutGroup.getCreatedAt());
         body.setCreatedBy(rolloutGroup.getCreatedBy());
@@ -172,7 +172,7 @@ final class MgmtRolloutMapper {
         body.setTargetFilterQuery(rolloutGroup.getTargetFilterQuery());
         body.setTotalTargets(rolloutGroup.getTotalTargets());
 
-        if (userConsentFlowEnabled) {
+        if (confirmationFlowEnabled) {
             body.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
         }
 

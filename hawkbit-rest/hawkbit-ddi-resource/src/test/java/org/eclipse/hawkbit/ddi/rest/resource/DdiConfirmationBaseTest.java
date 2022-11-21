@@ -71,7 +71,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     @Description("Forced deployment to a controller. Checks if the confirmation resource response payload for a given"
             + " deployment is as expected.")
     public void verifyConfirmationReferencesInControllerBase() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
         final DistributionSet ds2 = testdataFactory.createDistributionSet("2", true);
@@ -136,7 +136,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Ensure that the deployment resource is available as CBOR")
     public void confirmationResourceCbor() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         final Target target = testdataFactory.createTarget();
         final DistributionSet distributionSet = testdataFactory.createDistributionSet("");
 
@@ -182,7 +182,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Ensure that the deploymentBase endpoint is not available for action ins WFC state.")
     public void deploymentEndpointNotAccessibleForActionsWFC() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("988");
@@ -218,7 +218,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendConfirmedActionStateFeedbackTest() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("988");
@@ -250,7 +250,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Confirmation base provides right values if auto-confirm not active.")
     void getConfirmationBaseProvidesAutoConfirmStatusNotActive() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget("989").getControllerId();
         assignDistributionSet(testdataFactory.createDistributionSet("").getId(), controllerId);
@@ -344,7 +344,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendDeniedActionStateFeedbackTest() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("989");
@@ -394,7 +394,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void testActionHistoryCount() throws Exception {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         Target savedTarget = testdataFactory.createTarget("990");

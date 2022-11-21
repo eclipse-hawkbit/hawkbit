@@ -19,7 +19,7 @@ public class ProxySystemConfigRepository extends ProxySystemConfigWindow {
     private boolean actionAutoclose;
     private boolean actionAutocleanup;
     private boolean multiAssignments;
-    private boolean userConsent;
+    private boolean confirmationFlow;
     private ActionAutoCleanupConfigurationItem.ActionStatusOption actionCleanupStatus;
     private String actionExpiryDays;
 
@@ -68,22 +68,22 @@ public class ProxySystemConfigRepository extends ProxySystemConfigWindow {
     /**
      * Sets the flag that indicates if the user-consent option is enabled.
      *
-     * @param userConsent
+     * @param confirmationFlow
      *            <code>true</code> if the user-consent is enabled, otherwise
      *            <code>false</code>
      */
-    public void setUserConsent(final boolean userConsent) {
-        this.userConsent = userConsent;
+    public void setConfirmationFlow(final boolean confirmationFlow) {
+        this.confirmationFlow = confirmationFlow;
     }
 
     /**
-     * Flag that indicates if the user-consent option is enabled.
+     * Flag that indicates if the confirmation flow option is enabled.
      *
-     * @return <code>true</code> if the user-consent is enabled, otherwise
+     * @return <code>true</code> if the confirmation flow is enabled, otherwise
      *         <code>false</code>
      */
-    public boolean isUserConsent() {
-        return userConsent;
+    public boolean isConfirmationFlow() {
+        return confirmationFlow;
     }
 
     /**

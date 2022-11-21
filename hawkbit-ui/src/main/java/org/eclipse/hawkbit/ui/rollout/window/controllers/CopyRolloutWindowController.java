@@ -112,7 +112,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
                 targetFilterQueryManagement);
         final List<ProxyAdvancedRolloutGroup> advancedGroupDefinitions = groupsMapper.loadRolloutGroupsFromBackend(
                 proxyRolloutWindow.getId(), rolloutGroupManagement, quotaManagement.getMaxRolloutGroupsPerRollout());
-        if (!tenantConfigHelper.isUserConsentEnabled()) {
+        if (!tenantConfigHelper.isConfirmationFlowEnabled()) {
             // do not require confirmation, since feature is not active and UI elements are not visible
             advancedGroupDefinitions.forEach(def -> def.setConfirmationRequired(false));
         }

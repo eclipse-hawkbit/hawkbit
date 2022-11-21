@@ -46,7 +46,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify 'findActiveActionsWaitingConfirmation' method is filtering like expected")
     void retrieveActionsWithConfirmationState() {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -69,7 +69,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify 'findActiveActionsWaitingConfirmation' method is filtering like expected with multi assignment active")
     void retrieveActionsWithConfirmationStateInMultiAssignment() {
         enableMultiAssignments();
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -99,7 +99,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify multiple actions in WFC state will be transferred in RUNNING state in case auto-confirmation is activated.")
     void activateAutoConfirmationInMultiAssignment() {
         enableMultiAssignments();
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -124,7 +124,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify action in WFC state will be transferred in RUNNING state in case auto-confirmation is activated.")
     void activateAutoConfirmationOnActiveAction() {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -146,7 +146,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verify created action after activating auto confirmation is directly in running state.")
     void activateAutoConfirmationAndCreateAction() {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();

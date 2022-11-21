@@ -187,7 +187,7 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Description("Handles the POST request of setting a distribution set for auto assignment within SP. Required Permission: CREATE_TARGET.")
     public void postAutoAssignDS() throws Exception {
         enableMultiAssignments();
-        enableUserConsentFlow();
+        enableConfirmationFlow();
 
         final TargetFilterQuery tfq = createTargetFilterQuery();
         final DistributionSet distributionSet = createDistributionSet();

@@ -110,7 +110,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         buildDetails();
 
         confirmationOptionsTab = addAutoConfirmationTab(uiDependencies, uiProperties, tenantAware);
-        confirmationOptionsTab.setVisible(tenantConfigHelper.isUserConsentEnabled());
+        confirmationOptionsTab.setVisible(tenantConfigHelper.isConfirmationFlowEnabled());
     }
 
     private Tab addAutoConfirmationTab(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
@@ -120,8 +120,8 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
         return addTab(buildTabWrapperDetailsLayout(confirmationOptions), i18n.getMessage("caption.tab.confirmation"));
     }
 
-    protected void alignWithConsentFlowState() {
-        confirmationOptionsTab.setVisible(tenantConfigHelper.isUserConsentEnabled());
+    protected void alignWithConfirmationFlowState() {
+        confirmationOptionsTab.setVisible(tenantConfigHelper.isConfirmationFlowEnabled());
     }
 
     @Override

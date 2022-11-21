@@ -66,7 +66,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery findTarget = findFilterWithExceptionIfNotFound(filterId);
         // to single response include poll status
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(findTarget,
-                tenantConfigHelper.isUserConsentEnabled());
+                tenantConfigHelper.isConfirmationFlowEnabled());
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
@@ -96,7 +96,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         }
 
         final List<MgmtTargetFilterQuery> rest = MgmtTargetFilterQueryMapper
-                .toResponse(findTargetFiltersAll.getContent(), tenantConfigHelper.isUserConsentEnabled());
+                .toResponse(findTargetFiltersAll.getContent(), tenantConfigHelper.isConfirmationFlowEnabled());
         return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
     }
 
@@ -107,7 +107,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
                 .create(MgmtTargetFilterQueryMapper.fromRequest(entityFactory, filter));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(createdTarget,
-                tenantConfigHelper.isUserConsentEnabled());
+                tenantConfigHelper.isConfirmationFlowEnabled());
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -123,7 +123,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
                         .query(targetFilterRest.getQuery()));
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter,
-                tenantConfigHelper.isUserConsentEnabled());
+                tenantConfigHelper.isConfirmationFlowEnabled());
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);
@@ -142,7 +142,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @RequestBody final MgmtDistributionSetAutoAssignment autoAssignRequest) {
 
         final boolean confirmationRequired = autoAssignRequest.isConfirmationRequired() == null
-                ? tenantConfigHelper.isUserConsentEnabled()
+                ? tenantConfigHelper.isConfirmationFlowEnabled()
                 : autoAssignRequest.isConfirmationRequired();
 
         final AutoAssignDistributionSetUpdate update = MgmtTargetFilterQueryMapper
@@ -151,7 +151,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
         final TargetFilterQuery updateFilter = filterManagement.updateAutoAssignDS(update);
 
         final MgmtTargetFilterQuery response = MgmtTargetFilterQueryMapper.toResponse(updateFilter,
-                tenantConfigHelper.isUserConsentEnabled());
+                tenantConfigHelper.isConfirmationFlowEnabled());
         MgmtTargetFilterQueryMapper.addLinks(response);
 
         return ResponseEntity.ok(response);

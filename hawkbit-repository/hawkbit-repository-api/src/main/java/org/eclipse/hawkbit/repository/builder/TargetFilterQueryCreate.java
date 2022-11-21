@@ -89,7 +89,7 @@ public interface TargetFilterQueryCreate {
      *
      * @param confirmationRequired
      *            if confirmation is required for configured auto assignment (considered
-     *            with user consent flow active)
+     *            with confirmation flow active)
      * @return updated builder instance
      */
     TargetFilterQueryCreate confirmationRequired(boolean confirmationRequired);

@@ -709,7 +709,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void sendConfirmStatus() {
         final String controllerId = TARGET_PREFIX + "sendConfirmStatus";
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         registerTargetAndAssignDistributionSet(controllerId);
 
         waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);

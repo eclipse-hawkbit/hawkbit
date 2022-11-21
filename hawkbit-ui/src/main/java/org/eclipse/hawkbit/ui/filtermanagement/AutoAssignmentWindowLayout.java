@@ -77,7 +77,7 @@ public class AutoAssignmentWindowLayout extends AbstractEntityWindowLayout<Proxy
         autoAssignmentLayout.addComponent(actionTypeOptionGroupLayout);
         autoAssignmentLayout.addComponent(autoAssignDsComboBox.getComponent());
         
-        if (configHelper.isUserConsentEnabled()) {
+        if (configHelper.isConfirmationFlowEnabled()) {
             autoAssignmentLayout.addComponent(confirmationCheckBox);
         }
         

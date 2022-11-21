@@ -1173,7 +1173,7 @@ public class TestdataFactory {
      * @param weight
      *            weight of the Rollout
      * @param confirmationRequired
-     *            if the confirmation is required (considered with user consent flow
+     *            if the confirmation is required (considered with confirmation flow
      *            active)
      * @return created {@link Rollout}
      */

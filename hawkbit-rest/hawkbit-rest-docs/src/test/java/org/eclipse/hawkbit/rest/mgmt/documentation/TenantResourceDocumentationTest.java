@@ -91,8 +91,8 @@ public class TenantResourceDocumentationTest extends AbstractApiRestDocumentatio
                 "if multiple distribution sets can be assigned to the same targets.");
         CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED,
                 "if distribution set can be assigned to multiple targets in a single batch message.");
-        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.USER_CONSENT_ENABLED,
-                "if user confirmation is required when distribution set is assigned to target.");
+        CONFIG_ITEM_DESCRIPTIONS.put(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
+                "if confirmation is required when distribution set is assigned to target.");
     }
 
     @Autowired

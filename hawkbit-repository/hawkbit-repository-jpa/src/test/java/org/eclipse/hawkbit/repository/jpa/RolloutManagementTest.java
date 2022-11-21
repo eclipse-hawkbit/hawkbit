@@ -147,15 +147,15 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @ParameterizedTest
     @MethodSource("simpleRolloutsPossibilities")
     @Description("Verifies that action states are correctly initialized after starting a rollout with different options in regard to the confirmation.")
-    void runRolloutWithConfirmationFlagAndConsentFlowOptions(final boolean consentFlowActive,
+    void runRolloutWithConfirmationFlagAndCoonfirmationFlowOptions(final boolean confirmationFlowActive,
             final boolean confirmationRequired, final Status expectedStatus) {
         // manually assign distribution set to target
         final String knownControllerId = "controller12345";
         final DistributionSet knownDistributionSet = testdataFactory.createDistributionSet();
         testdataFactory.createTarget(knownControllerId);
 
-        if (consentFlowActive) {
-            enableUserConsentFlow();
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
         }
 
         // create rollout with the same distribution set already assigned
@@ -1578,8 +1578,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
     
     @Test
-    @Description("Verify rollout execution with advanced group definition and user consent flow active.")
-    void createRolloutWithGroupDefinitionAndUserConsentFlowActive() {
+    @Description("Verify rollout execution with advanced group definition and confirmation flow active.")
+    void createRolloutWithGroupDefinitionAndConfirmationFlowActive() {
         final String rolloutName = "rolloutTest4";
 
         final int amountTargetsInGroup1 = 10;
@@ -1596,8 +1596,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutGroups.add(generateRolloutGroup(0, 100, "id==" + rolloutName + "-gr1-*", true));
         rolloutGroups.add(generateRolloutGroup(1, 100, null, false));
 
-        // enable user consent flow
-        enableUserConsentFlow();
+        // enable confirmation flow
+        enableConfirmationFlow();
 
         final Long rolloutId = rolloutManagement.create(rolloutcreate, rolloutGroups, conditions).getId();
 

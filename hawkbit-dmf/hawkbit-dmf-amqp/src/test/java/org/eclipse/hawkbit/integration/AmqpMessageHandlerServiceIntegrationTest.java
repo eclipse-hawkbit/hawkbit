@@ -1008,7 +1008,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void confirmedActionStatus() {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
 
         final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
@@ -1033,7 +1033,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = TargetPollEvent.class, count = 1),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void deniedActionStatus() {
-        enableUserConsentFlow();
+        enableConfirmationFlow();
         final String controllerId = TARGET_PREFIX + "deniedActionStatus";
         final Long actionId = registerTargetAndSendActionStatus(DmfActionStatus.DENIED, controllerId);
         assertAction(actionId, 1, Status.WAIT_FOR_CONFIRMATION);

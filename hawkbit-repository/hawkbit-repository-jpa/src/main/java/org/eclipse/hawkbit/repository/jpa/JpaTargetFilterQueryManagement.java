@@ -280,15 +280,16 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
-            final boolean confirmationRequired = update.isConfirmationRequired() == null ? isUserConsentEnabled()
+            final boolean confirmationRequired = update.isConfirmationRequired() == null ? isConfirmationFlowEnabled()
                     : update.isConfirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return targetFilterQueryRepository.save(targetFilterQuery);
     }
-    
-    private boolean isUserConsentEnabled(){
-        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).isUserConsentEnabled();
+
+    private boolean isConfirmationFlowEnabled() {
+        return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
+                .isConfirmationFlowEnabled();
     }
 
     private static void verifyDistributionSetAndThrowExceptionIfDeleted(final DistributionSet distributionSet) {

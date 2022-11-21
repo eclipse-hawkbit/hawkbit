@@ -103,7 +103,7 @@ public class SimpleGroupsLayout extends ValidatableLayout {
         this.requireConfirmationToggle = createConfirmationToggle();
         this.confirmationHelpLink = createConfirmationHelpLink(uiProperties);
 
-        this.layout = buildLayout(tenantConfigHelper.isUserConsentEnabled());
+        this.layout = buildLayout(tenantConfigHelper.isConfirmationFlowEnabled());
 
         addValueChangeListeners();
         setValidationStatusByBinder(binder);
@@ -282,12 +282,12 @@ public class SimpleGroupsLayout extends ValidatableLayout {
         return link;
     }
 
-    private GridLayout buildLayout(final boolean isUserConsentEnabled) {
+    private GridLayout buildLayout(final boolean isConfirmationFlowEnabled) {
         final GridLayout gridLayout = new GridLayout();
         gridLayout.setMargin(false);
         gridLayout.setSpacing(true);
         gridLayout.setSizeUndefined();
-        if (isUserConsentEnabled) {
+        if (isConfirmationFlowEnabled) {
             gridLayout.setRows(5);
         } else {
             gridLayout.setRows(4);
@@ -310,7 +310,7 @@ public class SimpleGroupsLayout extends ValidatableLayout {
         gridLayout.addComponent(errorThreshold.getComponent(), 1, 3);
         gridLayout.addComponent(errorThresholdOptionGroup, 2, 3);
 
-        if (isUserConsentEnabled) {
+        if (isConfirmationFlowEnabled) {
             gridLayout.addComponent(SPUIComponentProvider.generateLabel(i18n, "prompt.confirmation.required"), 0, 4);
             final HorizontalLayout confirmationLayout = initializeConfirmationElements();
             gridLayout.addComponent(confirmationLayout, 1, 4);

@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCleanupConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCloseConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.MultiAssignmentsConfigurationItem;
-import org.eclipse.hawkbit.ui.tenantconfiguration.repository.UserConsentConfigurationItem;
+import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ConfirmationFlowConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -68,7 +68,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
 
     private CheckBox multiAssignmentsCheckBox;
 
-    private UserConsentConfigurationItem userConsentConfigurationItem;
+    private ConfirmationFlowConfigurationItem confirmationFlowConfigurationItem;
 
     RepositoryConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
             final TenantConfigurationManagement tenantConfigurationManagement,
@@ -86,7 +86,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         this.actionAutocloseConfigurationItem = new ActionAutoCloseConfigurationItem(i18n);
         this.actionAutocleanupConfigurationItem = new ActionAutoCleanupConfigurationItem(getBinder(), i18n);
         this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(i18n, getBinder());
-        this.userConsentConfigurationItem = new UserConsentConfigurationItem(i18n);
+        this.confirmationFlowConfigurationItem = new ConfirmationFlowConfigurationItem(i18n);
         init();
     }
 
@@ -139,12 +139,12 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         gridLayout.addComponent(multiAssignmentsCheckBox, 0, 1);
         gridLayout.addComponent(multiAssignmentsConfigurationItem, 1, 1);
 
-        final CheckBox userConsentCheckBox = FormComponentBuilder.createCheckBox(
-              UIComponentIdProvider.REPOSITORY_USER_CONSENT_CHECKBOX, getBinder(),
-              ProxySystemConfigRepository::isUserConsent, ProxySystemConfigRepository::setUserConsent);
-        userConsentCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
-        gridLayout.addComponent(userConsentCheckBox, 0, 2);
-        gridLayout.addComponent(userConsentConfigurationItem, 1, 2);
+        final CheckBox confirmationFlowCheckBox = FormComponentBuilder.createCheckBox(
+              UIComponentIdProvider.REPOSITORY_USER_CONFIRMATION_CHECKBOX, getBinder(),
+              ProxySystemConfigRepository::isConfirmationFlow, ProxySystemConfigRepository::setConfirmationFlow);
+        confirmationFlowCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
+        gridLayout.addComponent(confirmationFlowCheckBox, 0, 2);
+        gridLayout.addComponent(confirmationFlowConfigurationItem, 1, 2);
 
         final CheckBox actionAutoCleanupCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX, getBinder(),
@@ -199,8 +199,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
             setConfig(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, getBinderBean().isMultiAssignments());
             this.disableMultipleAssignmentOption();
         }
-        if (getBinderBean().isUserConsent() != readConfigOption(TenantConfigurationKey.USER_CONSENT_ENABLED)) {
-            setConfig(TenantConfigurationKey.USER_CONSENT_ENABLED, getBinderBean().isUserConsent());
+        if (getBinderBean().isConfirmationFlow() != readConfigOption(TenantConfigurationKey.USER_CONFIRMATION_ENABLED)) {
+            setConfig(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, getBinderBean().isConfirmationFlow());
         }
     }
 
@@ -215,7 +215,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         final ProxySystemConfigRepository configBean = new ProxySystemConfigRepository();
         configBean.setActionAutoclose(readConfigOption(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED));
         configBean.setMultiAssignments(readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED));
-        configBean.setUserConsent(readConfigOption(TenantConfigurationKey.USER_CONSENT_ENABLED));
+        configBean.setConfirmationFlow(readConfigOption(TenantConfigurationKey.USER_CONFIRMATION_ENABLED));
         configBean.setActionAutocleanup(readConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED));
         configBean.setActionCleanupStatus(getActionStatusOption());
         configBean.setActionExpiryDays(String.valueOf(getActionExpiry()));

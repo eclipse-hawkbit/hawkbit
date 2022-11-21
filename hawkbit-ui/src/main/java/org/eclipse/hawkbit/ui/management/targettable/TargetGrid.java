@@ -67,8 +67,6 @@ import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Label;
 
-import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONSENT_ENABLED;
-
 /**
  * Concrete implementation of Target grid which is displayed on the Deployment
  * View.

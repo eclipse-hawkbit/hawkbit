@@ -167,7 +167,7 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
     }
 
     /**
-     * Only considered if user consent flow active
+     * Only considered if confirmation flow active
      * 
      * @return if the confirmation is required for this rollout
      */

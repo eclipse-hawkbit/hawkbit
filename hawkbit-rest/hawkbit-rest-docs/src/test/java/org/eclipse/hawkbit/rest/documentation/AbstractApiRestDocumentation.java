@@ -192,7 +192,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
             final Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "rollout desc", 1,
                     "name==" + name, distributionSet, "50", "5", timeforced ? ActionType.TIMEFORCED : ActionType.FORCED,
-                    isMultiAssignmentsEnabled() ? 600 : null, isUserConsentFlowActive());
+                    isMultiAssignmentsEnabled() ? 600 : null, isConfirmationFlowActive());
 
             // start the rollout and handle it
             rolloutManagement.start(rollout.getId());
@@ -368,9 +368,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
               .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
     }    
     
-    protected boolean isUserConsentFlowActive() {
+    protected boolean isConfirmationFlowActive() {
         return Boolean.TRUE.equals(tenantConfigurationManagement
-              .getConfigurationValue(TenantConfigurationKey.USER_CONSENT_ENABLED, Boolean.class).getValue());
+              .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue());
     }
 
 }

@@ -275,7 +275,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
         targetGrid.getSelectionSupport().reselectCurrentEntity();
         countMessageLabel.updateTotalAndFilteredCount();
         countMessageLabel.updatePinningDetails();
-        targetDetails.alignWithConsentFlowState();
+        targetDetails.alignWithConfirmationFlowState();
     }
 
     @Override

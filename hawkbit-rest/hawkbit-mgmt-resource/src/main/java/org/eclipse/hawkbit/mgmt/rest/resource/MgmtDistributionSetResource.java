@@ -260,7 +260,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         return ResponseEntity
                 .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(),
-                        tenantConfigHelper.isUserConsentEnabled()), targetFilterQueries.getTotalElements()));
+                        tenantConfigHelper.isConfirmationFlowEnabled()), targetFilterQueries.getTotalElements()));
     }
 
     @Override
@@ -278,7 +278,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         final List<DeploymentRequest> deploymentRequests = assignments.stream().map(dsAssignment -> {
             final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
-                    ? tenantConfigHelper.isUserConsentEnabled()
+                    ? tenantConfigHelper.isConfirmationFlowEnabled()
                     : dsAssignment.isConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
                     .setConfirmationRequired(isConfirmationRequired).build();

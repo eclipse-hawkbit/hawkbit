@@ -97,7 +97,7 @@ public class DeploymentAssignmentWindowController {
         proxyAssignmentWindow.setMaintenanceTimeZone(SPDateTimeUtil.getClientTimeZoneOffsetId());
 
         assignmentWindowLayout.getProxyAssignmentBinder().setBean(proxyAssignmentWindow);
-        assignmentWindowLayout.refreshConfirmCheckBoxState(tenantConfigHelper.isUserConsentEnabled());
+        assignmentWindowLayout.refreshConfirmCheckBoxState(tenantConfigHelper.isConfirmationFlowEnabled());
     }
     
     /**

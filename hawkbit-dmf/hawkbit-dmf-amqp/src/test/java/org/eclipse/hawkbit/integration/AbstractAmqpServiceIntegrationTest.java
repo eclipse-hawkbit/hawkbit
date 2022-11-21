@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -139,7 +138,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         registerAndAssertTargetWithExistingTenant(controllerId, 1, expectedStatus, CREATED_BY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, controllerId);
-        if (isUserConsentEnabled()) {
+        if (isConfirmationFlowEnabled()) {
             assertConfirmMessage(expectedSoftwareModulesInMessage, controllerId);
         } else {
             assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage, controllerId);
