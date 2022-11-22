@@ -174,4 +174,13 @@ public interface RolloutGroupRepository
     @Query("DELETE FROM JpaRolloutGroup g where g.id in :rolloutGroupIds")
     void deleteByIds(@Param("rolloutGroupIds") List<Long> rolloutGroups);
 
+    /**
+     * Retrieves all {@link RolloutGroup} referring a specific rollout in a
+     * specific {@link RolloutGroupStatus} ordered by ID descending.
+     *
+     * @param rollout the rollout the rolloutgroup belong to
+     * @param status the status of the rollout groups
+     * @return the rollout groups belonging to a rollout in a specific status
+     */
+    List<JpaRolloutGroup> findByRolloutAndStatusOrderByIdDesc(JpaRollout rollout, RolloutGroupStatus status);
 }

@@ -213,6 +213,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         verifyThrownExceptionBy(() -> rolloutManagement.update(entityFactory.rollout().update(NOT_EXIST_IDL)),
                 "Rollout");
+        verifyThrownExceptionBy(() -> rolloutManagement.triggerNextGroup(NOT_EXIST_IDL), "Rollout");
     }
 
     @Test
@@ -2073,5 +2074,49 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                         .runAsPrivileged(
                                 () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))
                         .getStatus().equals(RolloutStatus.RUNNING));
+    }
+
+    @Test
+    @Description("Verifying that next group is started on manual trigger next group.")
+    void checkRunningRolloutsManualTriggerNextGroup() {
+
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 3;
+        final String successCondition = "100";
+        final String errorCondition = "80";
+
+        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+                successCondition, errorCondition);
+
+        // triggers next group
+        rolloutManagement.triggerNextGroup(createdRollout.getId());
+
+        //second group should in running state
+        List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+
+        // triggers next group
+        rolloutManagement.triggerNextGroup(createdRollout.getId());
+
+        //third group should be in running state
+        runningRolloutGroups = rolloutGroupManagement
+                .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
+                .getContent();
+        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+
+
+        //finish action of all groups and verify rollout
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
+                createdRollout.getId(), Status.RUNNING);
+        runningActionsSlice.getContent().forEach(this::finishAction);
+
+        verifyRolloutAndAllGroupsAreFinished(createdRollout);
     }
 }

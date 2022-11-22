@@ -232,4 +232,16 @@ public interface MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
+
+    /**
+     * Handles the POST request to force trigger processing next group of a rollout even success threshold isn't yet met
+     *
+     * @param rolloutId
+     *            the ID of the rollout to trigger next group.
+     * @return OK response (200). In case of any
+     *         exception the corresponding errors occur.
+     */
+    @PostMapping(value = "/{rolloutId}/triggerNextGroup", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") Long rolloutId);
 }

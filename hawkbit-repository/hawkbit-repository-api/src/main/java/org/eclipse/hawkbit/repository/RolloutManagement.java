@@ -463,4 +463,19 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void cancelRolloutsForDistributionSet(DistributionSet set);
 
+    /**
+     * Triggers next group of a rollout for processing even success threshold isn't met yet.
+     * Current running groups will not change their status.
+     *
+     * @param rolloutId
+     *            the rollout to be paused.
+     *
+     * @throws EntityNotFoundException
+     *             if rollout or group with given ID does not exist
+     * @throws RolloutIllegalStateException
+     *             if given rollout is not in {@link RolloutStatus#RUNNING}.
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    void triggerNextGroup(long rolloutId);
 }
