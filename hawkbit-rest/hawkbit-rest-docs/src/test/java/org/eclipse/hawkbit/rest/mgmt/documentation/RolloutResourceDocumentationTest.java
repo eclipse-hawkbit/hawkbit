@@ -445,6 +445,23 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
     }
 
     @Test
+    @Description("Handles the POST request of triggering the next group of a rollout. Required Permission: "
+            + SpPermission.UPDATE_ROLLOUT)
+    public void triggerNextGroup() throws Exception {
+        final Rollout rollout = createRolloutEntity();
+        rolloutManagement.start(rollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        mockMvc.perform(
+                post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup", rollout.getId())
+                        .accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document.document(
+                        pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
     @Description("Handles the GET request of retrieving the deploy groups of a rollout. Required Permission: "
             + SpPermission.READ_ROLLOUT)
     public void getRolloutDeployGroups() throws Exception {

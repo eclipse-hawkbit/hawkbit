@@ -356,6 +356,40 @@ include::../errors/406.adoc[]
 include::../errors/429.adoc[]
 |===
 
+== POST /rest/v1/rollouts/{rolloutId}/triggerNextGroup
+
+=== Implementation Notes
+Handles the POST request of triggering the next group of a rollout within Hawkbit. Required Permission: UPDATE_ROLLOUT
+
+=== Trigger next group
+
+
+==== CURL
+
+include::{snippets}/rollouts/trigger-next-group/curl-request.adoc[]
+
+
+==== Request URL
+
+include::{snippets}/rollouts/trigger-next-group/http-request.adoc[]
+
+==== Response example
+
+include::{snippets}/rollouts/trigger-next-group/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/429.adoc[]
+|===
+
 == DELETE /rest/v1/rollouts/{rolloutId} 
 
 === Implementation Notes
