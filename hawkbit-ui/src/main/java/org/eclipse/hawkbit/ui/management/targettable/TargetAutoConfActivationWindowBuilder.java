@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetConfirmationOptions
 import com.vaadin.ui.Window;
 import org.springframework.util.StringUtils;
 
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_ACTIVATION_DIALOG;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_TOGGLE_DIALOG;
 
 /**
  * Target auto confirmation activation windows builder
@@ -48,7 +48,7 @@ public class TargetAutoConfActivationWindowBuilder extends AbstractEntityWindowB
 
     @Override
     protected String getWindowId() {
-        return AUTO_CONFIRMATION_ACTIVATION_DIALOG;
+        return AUTO_CONFIRMATION_TOGGLE_DIALOG;
     }
 
     @Override
