@@ -31,7 +31,7 @@ public interface ConfirmationManagement {
      *            of the target to check
      * @return a list of {@link Action}
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     List<Action> findActiveActionsWaitingConfirmation(@NotEmpty String controllerId);
 
     /**
@@ -47,7 +47,7 @@ public interface ConfirmationManagement {
      *            optional field to set a remark
      * @return the persisted {@link AutoConfirmationStatus}
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator,
             final String remark);
 
@@ -79,7 +79,7 @@ public interface ConfirmationManagement {
      * @param controllerId
      *            to disable auto confirmation for
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
 
 }

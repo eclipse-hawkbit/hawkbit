@@ -1245,9 +1245,9 @@ public final class UIComponentIdProvider {
     public static final String AUTO_CONFIRMATION_DETAILS_ACTIVATEDAT = AUTO_CONFIRMATION_DETAILS + ".activatedat";
     public static final String AUTO_CONFIRMATION_DETAILS_REMARK = AUTO_CONFIRMATION_DETAILS + ".remark";
 
-    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG = "target.auto.confirmation.activation.dialog";
-    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_INITIATOR = AUTO_CONFIRMATION_ACTIVATION_DIALOG + ".initiator";
-    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_REMARK = AUTO_CONFIRMATION_ACTIVATION_DIALOG + ".remark";
+    public static final String AUTO_CONFIRMATION_TOGGLE_DIALOG = "target.auto.confirmation.toggle.dialog";
+    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_INITIATOR = AUTO_CONFIRMATION_TOGGLE_DIALOG + ".initiator";
+    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_REMARK = AUTO_CONFIRMATION_TOGGLE_DIALOG + ".remark";
 
     /**
      * Validation status icon .

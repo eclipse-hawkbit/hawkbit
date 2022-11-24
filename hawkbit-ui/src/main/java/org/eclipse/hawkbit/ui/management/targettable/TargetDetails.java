@@ -109,6 +109,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
 
         buildDetails();
 
+        // build tab separately to change visibility afterwards
         confirmationOptionsTab = addAutoConfirmationTab(uiDependencies, uiProperties, tenantAware);
         confirmationOptionsTab.setVisible(tenantConfigHelper.isConfirmationFlowEnabled());
     }

@@ -9,7 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.server.FontAwesome;
@@ -17,6 +17,7 @@ import com.vaadin.ui.UI;
 import com.vaadin.ui.Window;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -38,7 +39,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.themes.ValoTheme;
 import org.springframework.util.StringUtils;
 
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_ACTIVATION_DIALOG;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_TOGGLE_DIALOG;
 import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_ACTIVATEDAT;
 import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_INITIATOR;
 import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_REMARK;
@@ -54,6 +55,7 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
 
     private final transient TargetAutoConfActivationWindowBuilder windowBuilder;
     private final transient ConfirmationManagement confirmationManagement;
+    private final transient SpPermissionChecker permissionChecker;
     private final VaadinMessageSource i18n;
     private final HorizontalLayout targetConfirmationOptionsLayout;
 
@@ -74,6 +76,7 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
             final TenantAware tenantAware) {
         this.i18n = commonUiDependencies.getI18n();
         this.confirmationManagement = confirmationManagement;
+        this.permissionChecker = commonUiDependencies.getPermChecker();
         this.windowBuilder = new TargetAutoConfActivationWindowBuilder(commonUiDependencies, uiProperties, tenantAware,
                 confirmationManagement);
 
@@ -111,13 +114,20 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
             targetConfirmationOptionsLayout.addComponent(detailsLayout);
             targetConfirmationOptionsLayout.setExpandRatio(detailsLayout, 1.0F);
         } else {
-            final Label confirmationRequiredLabel = buildConfirmationRequiredLabel();
-            targetConfirmationOptionsLayout.addComponent(confirmationRequiredLabel);
-            targetConfirmationOptionsLayout.setExpandRatio(confirmationRequiredLabel, 1.0F);
+            final KeyValueDetailsComponent component = toKeyValueDetailsComponent(
+                    Collections.singletonList(new ProxyKeyValueDetails(AUTO_CONFIRMATION_DETAILS_STATE,
+                            i18n.getMessage("label.target.auto.confirmation.state"),
+                            i18n.getMessage("label.target.auto.confirmation.deactivated"))));
+
+            targetConfirmationOptionsLayout.addComponent(component);
+            targetConfirmationOptionsLayout.setExpandRatio(component, 1.0F);
         }
 
-        final Button button = buildAutoConfirmationToggleButton(targetConfirmationOptions);
-        targetConfirmationOptionsLayout.addComponent(button);
+        // do only provide toggle button when having permission for that
+        if (permissionChecker.hasUpdateTargetPermission()) {
+            final Button button = buildAutoConfirmationToggleButton(targetConfirmationOptions);
+            targetConfirmationOptionsLayout.addComponent(button);
+        }
     }
 
     private KeyValueDetailsComponent buildAutoConfirmationDetailsLayout(final ProxyTargetConfirmationOptions options) {
@@ -140,17 +150,14 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
                 i18n.getMessage("label.target.auto.confirmation.activatedat"),
                 SPDateTimeUtil.getFormattedDate(options.getActivatedAt())));
 
+        return toKeyValueDetailsComponent(values);
+    }
+
+    private static KeyValueDetailsComponent toKeyValueDetailsComponent(final List<ProxyKeyValueDetails> values) {
         final KeyValueDetailsComponent details = new KeyValueDetailsComponent();
         details.disableSpacing();
         details.setValue(values);
-
         return details;
-    }
-
-    private Label buildConfirmationRequiredLabel() {
-        final Label confirmationLabel = new Label(i18n.getMessage("label.target.auto.confirmation.disabled"));
-        confirmationLabel.setStyleName(ValoTheme.LABEL_SMALL);
-        return confirmationLabel;
     }
 
     private Button buildAutoConfirmationToggleButton(final ProxyTargetConfirmationOptions options) {
@@ -171,7 +178,7 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
         toggleAutoConfirmationButton.addClickListener(e -> {
             if (options.isAutoConfirmationEnabled()) {
                 final ConfirmationDialog dialog = ConfirmationDialog
-                        .newBuilder(i18n, AUTO_CONFIRMATION_ACTIVATION_DIALOG).icon(VaadinIcons.WARNING)
+                        .newBuilder(i18n, AUTO_CONFIRMATION_TOGGLE_DIALOG).icon(VaadinIcons.WARNING)
                         .caption(i18n.getMessage("caption.target.auto.confirmation.disable"))
                         .question(i18n.getMessage("message.target.auto.confirmation.disable")).onSaveOrUpdate(() -> {
                             confirmationManagement.deactivateAutoConfirmation(options.getControllerId());

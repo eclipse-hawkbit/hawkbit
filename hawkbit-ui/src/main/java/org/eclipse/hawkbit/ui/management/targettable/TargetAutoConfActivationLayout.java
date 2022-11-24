@@ -12,7 +12,6 @@ import com.vaadin.data.Binder;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.UI;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
