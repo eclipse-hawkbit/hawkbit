@@ -130,7 +130,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Verifies that the returned result considers sorting by action status code.")
-    void findAllTargetsOfRolloutGroupWithActionStatusConsidersSortingByActionStatusCode() {
+    void findAllTargetsOfRolloutGroupWithActionStatusConsidersSortingByLastActionStatusCode() {
         final Rollout rollout = testdataFactory.createAndStartRollout();
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
                 .getContent();
@@ -145,7 +145,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         }
 
         List<TargetWithActionStatus> targetsWithActionStatus = rolloutGroupManagement
-                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.ASC, "code")),
+                .findAllTargetsOfRolloutGroupWithActionStatus(
+                        PageRequest.of(0, 500, Sort.by(Direction.ASC, "lastActionStatusCode")),
                         rolloutGroup.getId())
                 .getContent();
         assertSortedListOfActionStatus(targetsWithActionStatus, target0, 0, target24, 24);
@@ -153,7 +154,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroup.getId()));
 
         targetsWithActionStatus = rolloutGroupManagement.findAllTargetsOfRolloutGroupWithActionStatus(
-                PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")), rolloutGroup.getId()).getContent();
+                PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")), rolloutGroup.getId())
+                .getContent();
         assertSortedListOfActionStatus(targetsWithActionStatus, target24, 24, target0, 0);
     }
 
@@ -198,7 +200,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
         // check query when no actions exist
         final List<TargetWithActionStatus> targetsWithActionStatus = rolloutGroupManagement
-                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                .findAllTargetsOfRolloutGroupWithActionStatus(
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")),
                         rolloutGroups.get(0).getId())
                 .getContent();
         assertThat(targetsWithActionStatus)
@@ -213,7 +216,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroup rolloutGroupScheduled = scheduledActions.get(0).getRolloutGroup();
 
         final List<TargetWithActionStatus> targetsWithActionStatusForScheduledRG = rolloutGroupManagement
-                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                .findAllTargetsOfRolloutGroupWithActionStatus(
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")),
                         rolloutGroupScheduled.getId())
                 .getContent();
         assertThat(targetsWithActionStatusForScheduledRG)
@@ -230,7 +234,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
         // check query when action status code exists
         final List<TargetWithActionStatus> targetsWithActionStatusForRunningRG = rolloutGroupManagement
-                .findAllTargetsOfRolloutGroupWithActionStatus(PageRequest.of(0, 500, Sort.by(Direction.DESC, "code")),
+                .findAllTargetsOfRolloutGroupWithActionStatus(
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "lastActionStatusCode")),
                         rolloutGroupRunning.getId())
                 .getContent();
         assertThat(targetsWithActionStatusForRunningRG)
