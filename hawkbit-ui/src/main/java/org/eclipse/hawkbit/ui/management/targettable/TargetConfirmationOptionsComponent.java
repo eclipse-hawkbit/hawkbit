@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.vaadin.server.FontAwesome;
@@ -113,9 +114,13 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
             targetConfirmationOptionsLayout.addComponent(detailsLayout);
             targetConfirmationOptionsLayout.setExpandRatio(detailsLayout, 1.0F);
         } else {
-            final Label confirmationRequiredLabel = buildConfirmationRequiredLabel();
-            targetConfirmationOptionsLayout.addComponent(confirmationRequiredLabel);
-            targetConfirmationOptionsLayout.setExpandRatio(confirmationRequiredLabel, 1.0F);
+            final KeyValueDetailsComponent component = toKeyValueDetailsComponent(
+                    Collections.singletonList(new ProxyKeyValueDetails(AUTO_CONFIRMATION_DETAILS_STATE,
+                            i18n.getMessage("label.target.auto.confirmation.state"),
+                            i18n.getMessage("label.target.auto.confirmation.deactivated"))));
+
+            targetConfirmationOptionsLayout.addComponent(component);
+            targetConfirmationOptionsLayout.setExpandRatio(component, 1.0F);
         }
 
         // do only provide toggle button when having permission for that
@@ -145,17 +150,14 @@ public class TargetConfirmationOptionsComponent extends CustomField<ProxyTargetC
                 i18n.getMessage("label.target.auto.confirmation.activatedat"),
                 SPDateTimeUtil.getFormattedDate(options.getActivatedAt())));
 
+        return toKeyValueDetailsComponent(values);
+    }
+
+    private static KeyValueDetailsComponent toKeyValueDetailsComponent(final List<ProxyKeyValueDetails> values) {
         final KeyValueDetailsComponent details = new KeyValueDetailsComponent();
         details.disableSpacing();
         details.setValue(values);
-
         return details;
-    }
-
-    private Label buildConfirmationRequiredLabel() {
-        final Label confirmationLabel = new Label(i18n.getMessage("label.target.auto.confirmation.disabled"));
-        confirmationLabel.setStyleName(ValoTheme.LABEL_SMALL);
-        return confirmationLabel;
     }
 
     private Button buildAutoConfirmationToggleButton(final ProxyTargetConfirmationOptions options) {

@@ -61,7 +61,7 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
     private final transient TargetTagToken targetTagToken;
     private final MetadataDetailsGrid<String> targetMetadataGrid;
 
-    private final TargetConfirmationOptionsComponent confirmationOptionsTab;
+    private final Tab confirmationOptionsTab;
     private final transient TargetMetaDataWindowBuilder targetMetaDataWindowBuilder;
 
     private final transient TenantConfigHelper tenantConfigHelper;
@@ -107,14 +107,18 @@ public class TargetDetails extends AbstractGridDetailsLayout<ProxyTarget> {
             this.targetMetadataGrid = null;
         }
 
-        if (tenantConfigHelper.isConfirmationFlowEnabled()) {
-            confirmationOptionsTab = buildConfirmationOptionsLayout(uiDependencies, uiProperties, tenantAware);
-            addDetailsComponent(new SimpleEntry<>(i18n.getMessage("caption.tab.confirmation"), confirmationOptionsTab));
-        } else {
-            confirmationOptionsTab = null;
-        }
-
         buildDetails();
+
+        // build tab separately to change visibility afterwards
+        confirmationOptionsTab = addAutoConfirmationTab(uiDependencies, uiProperties, tenantAware);
+        confirmationOptionsTab.setVisible(tenantConfigHelper.isConfirmationFlowEnabled());
+    }
+
+    private Tab addAutoConfirmationTab(final CommonUiDependencies uiDependencies, final UiProperties uiProperties,
+            final TenantAware tenantAware) {
+        final TargetConfirmationOptionsComponent confirmationOptions = buildConfirmationOptionsLayout(uiDependencies,
+                uiProperties, tenantAware);
+        return addTab(buildTabWrapperDetailsLayout(confirmationOptions), i18n.getMessage("caption.tab.confirmation"));
     }
 
     protected void alignWithConfirmationFlowState() {

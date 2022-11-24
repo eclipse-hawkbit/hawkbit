@@ -11,9 +11,11 @@ package org.eclipse.hawkbit.ddi.json.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import org.springframework.hateoas.RepresentationModel;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
 public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirmationState> {
