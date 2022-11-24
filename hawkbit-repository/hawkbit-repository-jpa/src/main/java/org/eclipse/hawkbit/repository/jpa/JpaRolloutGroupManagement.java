@@ -24,7 +24,6 @@ import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import javax.persistence.criteria.Subquery;
 
 import org.eclipse.hawkbit.repository.RolloutGroupFields;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -32,8 +31,6 @@ import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
-import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
@@ -248,22 +245,19 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
             final long rolloutGroupId) {
 
         throwExceptionIfRolloutGroupDoesNotExist(rolloutGroupId);
-        
+
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
         final Root<RolloutTargetGroup> targetRoot = query.distinct(true).from(RolloutTargetGroup.class);
         final Join<RolloutTargetGroup, JpaTarget> targetJoin = targetRoot.join(RolloutTargetGroup_.target);
         final ListJoin<RolloutTargetGroup, JpaAction> actionJoin = targetRoot.join(RolloutTargetGroup_.actions,
                 JoinType.LEFT);
-        final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin = actionJoin.join(JpaAction_.actionStatus,
-                JoinType.LEFT);
-        final Subquery<Long> lastCreatedAtQuery = createLastActionStatusSubQuery(cb, query, actionJoin);
-        actionStatusJoin.on(cb.equal(actionStatusJoin.get(JpaActionStatus_.createdAt), lastCreatedAtQuery));
 
         final CriteriaQuery<Object[]> multiselect = query
-                .multiselect(targetJoin, actionJoin.get(JpaAction_.status), actionStatusJoin.get(JpaActionStatus_.code))
+                .multiselect(targetJoin, actionJoin.get(JpaAction_.status),
+                        actionJoin.get(JpaAction_.lastActionStatusCode))
                 .where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, targetRoot))
-                .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin, actionStatusJoin));
+                .orderBy(getOrderBy(pageRequest, cb, targetJoin, actionJoin));
         final List<TargetWithActionStatus> targetWithActionStatus = entityManager.createQuery(multiselect)
                 .setFirstResult((int) pageRequest.getOffset()).setMaxResults(pageRequest.getPageSize()).getResultList()
                 .stream().map(this::getTargetWithActionStatusFromQuery).collect(Collectors.toList());
@@ -277,16 +271,6 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
                 rolloutGroupId);
     }
 
-    private Subquery<Long> createLastActionStatusSubQuery(final CriteriaBuilder cb, final CriteriaQuery<Object[]> query,
-            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
-        final Subquery<Long> subQuery = query.subquery(Long.class);
-        final Root<JpaActionStatus> actionStatusRoot = subQuery.from(JpaActionStatus.class);
-        subQuery.select(cb.max(actionStatusRoot.get(JpaActionStatus_.createdAt)));
-        subQuery.where(cb.equal(actionStatusRoot.get(JpaActionStatus_.action).get(JpaAction_.id),
-                actionJoin.get(JpaAction_.id)));
-        return subQuery;
-    }
-
     private TargetWithActionStatus getTargetWithActionStatusFromQuery(final Object[] o) {
         return new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
                 Optional.ofNullable((Integer) o[2]));
@@ -294,19 +278,14 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
             final Join<RolloutTargetGroup, JpaTarget> targetJoin,
-            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin,
-            final ListJoin<JpaAction, JpaActionStatus> actionStatusJoin) {
+            final ListJoin<RolloutTargetGroup, JpaAction> actionJoin) {
 
         return pageRequest.getSort().get().flatMap(order -> {
             final List<Order> orders;
             final String property = order.getProperty();
-            // we consider status as property from JpaAction ...
-            if ("status".equals(property)) {
+            // we consider status, last_action_status_code as property from JpaAction ...
+            if ("status".equals(property) || "lastActionStatusCode".equals(property)) {
                 orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb);
-            }
-            // we consider statusCode as property from JpaActionStatus ...
-            else if ("code".equals(property)) {
-                orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionStatusJoin, cb);
             }
             // ... and every other property from JpaTarget
             else {
