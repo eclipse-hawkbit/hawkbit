@@ -38,13 +38,14 @@ import org.apache.commons.lang3.RandomUtils;
 import org.assertj.core.api.Assertions;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.UpdateMode;
+import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
@@ -421,29 +422,25 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void simulateIntermediateStatusOnUpdate(final Long actionId) {
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RUNNING));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.RUNNING, true);
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.empty());
 
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOAD));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.DOWNLOAD, true);
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.DOWNLOADED));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.DOWNLOADED, true);
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD, Optional.empty());
 
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.RETRIEVED));
-        assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.RETRIEVED, true);
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED, Optional.empty());
 
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED, Optional.empty());
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING, Optional.empty());
+    }
+
+    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus,
+            final Optional<Integer> code) {
+        final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(actionStatus);
+        code.ifPresent(c -> status.code(c));
         controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(actionId).status(Action.Status.WARNING));
+                .addUpdateActionStatus(status);
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
-                Action.Status.WARNING, true);
+                actionStatus, true);
     }
 
     private void assertActionStatus(final Long actionId, final String controllerId,
@@ -1377,7 +1374,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 knownControllerId);
         final Long actionId = getFirstAssignedActionId(assignmentResult);
         controllerManagement.updateActionExternalRef(actionId, knownExternalRef);
-        
+
         // WHEN
         final Optional<Action> foundAction = controllerManagement.getActionByExternalRef(knownExternalRef);
 
@@ -1583,5 +1580,27 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(EntityNotFoundException.class)
                 .as("No EntityNotFoundException thrown when deleting a non-existing target")
                 .isThrownBy(() -> controllerManagement.deleteExistingTarget(target.getControllerId()));
+    }
+
+    @Test
+    @Description("When action status code is provided in feedback it is also stored in the action field lastActionStatusCode")
+    void lastActionStatusCodeIsSet() {
+        final Long actionId = createTargetAndAssignDs();
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.of(10));
+        assertAction(actionId, Optional.of(10));
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.empty());
+        assertAction(actionId, Optional.empty());
+
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.of(20));
+        assertAction(actionId, Optional.of(20));
+
+    }
+
+    private void assertAction(final Long actionId, final Optional<Integer> expectedLastACtionStatusCode) {
+        final Optional<Action> action = actionRepository.getById(actionId);
+        assertThat(action).isPresent();
+        assertThat(action.get().getLastActionStatusCode()).isEqualTo(expectedLastACtionStatusCode);
     }
 }
