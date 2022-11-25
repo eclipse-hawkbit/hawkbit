@@ -761,10 +761,20 @@ public class JpaRolloutManagement implements RolloutManagement {
                     + "but current state is " + rollout.getStatus().name().toLowerCase());
         }
 
+        if (countGroupsByRolloutAndStatus(rolloutId,  RolloutGroupStatus.SCHEDULED) == 0) {
+            throw new RolloutIllegalStateException("No group is scheduled for running");
+        }
+
         final List<JpaRolloutGroup> rolloutGroupsRunning =
                 rolloutGroupRepository.findByRolloutAndStatusOrderByIdDesc(rollout, RolloutGroupStatus.RUNNING);
         JpaRolloutGroup jpaRolloutGroup = rolloutGroupsRunning.get(0);
 
         startNextRolloutGroupAction.eval(rollout, jpaRolloutGroup, jpaRolloutGroup.getSuccessActionExp());
     }
+
+    @Override
+    public long countGroupsByRolloutAndStatus(final long rolloutId, RolloutGroup.RolloutGroupStatus groupStatus) {
+        return rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rolloutId, groupStatus, groupStatus);
+    }
+
 }
