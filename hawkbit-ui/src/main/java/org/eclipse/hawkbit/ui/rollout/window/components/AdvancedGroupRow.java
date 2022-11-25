@@ -181,7 +181,7 @@ public class AdvancedGroupRow {
         targetPercentage.setId(UIComponentIdProvider.ROLLOUT_GROUP_TARGET_PERC_ID + "." + index);
         triggerThreshold.setId(UIComponentIdProvider.ROLLOUT_TRIGGER_THRESOLD_ID + "." + index);
         errorThreshold.setId(UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID + "." + index);
-        errorThreshold.setId(UIComponentIdProvider.ROLLOUT_CONFIRMATION_REQUIRED + "." + index);
+        requireConfirmationToggle.setId(UIComponentIdProvider.ROLLOUT_CONFIRMATION_REQUIRED + "." + index);
     }
 
     /**
