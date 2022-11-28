@@ -370,8 +370,8 @@ public interface DdiRootControllerRestApi {
      *         auto-confirmation was active already.
      */
     @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/"
-            + DdiRestConstants.AUTO_CONFIRM_ACTIVATE, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+            + DdiRestConstants.AUTO_CONFIRM_ACTIVATE, consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> activateAutoConfirmation(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @Valid @RequestBody(required = false) final DdiActivateAutoConfirmation body);
@@ -387,8 +387,7 @@ public interface DdiRootControllerRestApi {
      *         executed
      */
     @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/"
-            + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+            + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE)
     ResponseEntity<Void> deactivateAutoConfirmation(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId);
 }

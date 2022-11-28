@@ -427,7 +427,7 @@ public interface MgmtTargetRestApi {
      *            properties to update
      * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
      */
-    @PostMapping(value = "/{targetId}/autoConfirm/activate", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "/{targetId}/autoConfirm/activate")
     ResponseEntity<Void> activateAutoConfirm(@PathVariable("targetId") String targetId,
             @RequestBody(required = false) MgmtTargetAutoConfirmUpdate update);
 
@@ -439,7 +439,7 @@ public interface MgmtTargetRestApi {
      * 
      * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
      */
-    @PostMapping(value = "/{targetId}/autoConfirm/deactivate", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = "/{targetId}/autoConfirm/deactivate")
     ResponseEntity<Void> deactivateAutoConfirm(@PathVariable("targetId") String targetId);
 
 }
