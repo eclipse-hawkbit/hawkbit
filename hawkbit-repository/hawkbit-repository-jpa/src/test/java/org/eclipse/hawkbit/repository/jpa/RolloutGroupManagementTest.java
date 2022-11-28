@@ -168,7 +168,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
             final Target target, final Integer actionStatusCode) {
         assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(Optional.of(actionStatusCode));
+        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(Optional.of(actionStatusCode));
     }
 
     private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
@@ -176,7 +176,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         targetsWithActionStatus.forEach(targetWithActionStatus -> {
             assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
             assertThat(targetWithActionStatus.getStatus()).isNull();
-            assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(actionStatusCode);
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
         });
     }
 
@@ -186,7 +186,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         targetsWithActionStatus.forEach(targetWithActionStatus -> {
             assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
             assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
-            assertThat(targetWithActionStatus.getStatusCode()).isEqualTo(actionStatusCode);
+            assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
         });
     }
 

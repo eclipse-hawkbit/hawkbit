@@ -24,7 +24,7 @@ public class TargetWithActionStatus implements Identifiable<Long> {
 
     private Status status;
 
-    private Optional<Integer> statusCode;
+    private Optional<Integer> lastActionStatusCode;
 
     public TargetWithActionStatus(final Target target) {
         this.target = target;
@@ -35,10 +35,10 @@ public class TargetWithActionStatus implements Identifiable<Long> {
         this.target = target;
     }
 
-    public TargetWithActionStatus(final Target target, final Status status, final Optional<Integer> statusCode) {
+    public TargetWithActionStatus(final Target target, final Status status, final Optional<Integer> lastActionStatusCode) {
         this.status = status;
         this.target = target;
-        this.statusCode = statusCode;
+        this.lastActionStatusCode = lastActionStatusCode;
     }
 
     public Target getTarget() {
@@ -62,11 +62,11 @@ public class TargetWithActionStatus implements Identifiable<Long> {
         return target.getId();
     }
 
-    public Optional<Integer> getStatusCode() {
-        return statusCode;
+    public Optional<Integer> getLastActionStatusCode() {
+        return lastActionStatusCode;
     }
 
-    public void setStatusCode(final Optional<Integer> statusCode) {
-        this.statusCode = statusCode;
+    public void setLastActionStatusCode(final Optional<Integer> lastActionStatusCode) {
+        this.lastActionStatusCode = lastActionStatusCode;
     }
 }
