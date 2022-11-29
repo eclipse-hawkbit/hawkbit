@@ -478,4 +478,19 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
+
+    /**
+     * Retrieves a page of {@link RolloutGroup}s filtered by a given
+     * {@link Rollout}.
+     *
+     * @param rolloutId
+     *            the ID of the rollout to filter the {@link RolloutGroup}s
+     * @param groupStatus
+     *            the group status to filter the {@link RolloutGroup}s
+     * @return a page of found {@link RolloutGroup}s
+     */
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
+    long countGroupsByRolloutAndStatus(long rolloutId, RolloutGroup.RolloutGroupStatus groupStatus);
+
 }

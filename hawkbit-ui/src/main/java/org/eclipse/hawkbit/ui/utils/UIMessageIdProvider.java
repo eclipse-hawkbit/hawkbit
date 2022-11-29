@@ -351,6 +351,8 @@ public final class UIMessageIdProvider {
 
     public static final String TOOLTIP_UPLOAD_STATUS_PREFIX = "tooltip.upload.status.";
 
+    public static final String TOOLTIP_ROLLOUT_TRIGGER_NEXT_GROUP = "tooltip.rollout.triggernextgroup";
+
     /**
      * Private Constructor.
      */
