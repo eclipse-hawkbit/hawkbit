@@ -1471,6 +1471,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
 
     /**
+     * Id of the rollout 'trigger next group' confirmation window
+     */
+    public static final String ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG = "rollout.triggernext.confirmation.window";
+
+    /**
      * Id of the target filter deletion confirmation window
      */
     public static final String TARGET_FILTER_DELETE_CONFIRMATION_DIALOG = "target.filter.delete.confirmation.window";

@@ -22,10 +22,12 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutStatusIconSupplier;
@@ -228,10 +230,9 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         return RolloutStatus.RUNNING == status;
     }
 
-    private static boolean isTriggerNextGroupAllowed(final ProxyRollout rollout, RolloutManagement rolloutManagement) {
-        return RolloutStatus.RUNNING == rollout.getStatus() &&
-                rolloutManagement.countGroupsByRolloutAndStatus(rollout.getId(),
-                        RolloutGroup.RolloutGroupStatus.SCHEDULED) > 0;
+    private static boolean isTriggerNextGroupAllowed(final ProxyRollout rollout) {
+        final Long scheduled = rollout.getStatusTotalCountMap().get(TotalTargetCountStatus.Status.SCHEDULED);
+        return RolloutStatus.RUNNING == rollout.getStatus() && scheduled != null && scheduled > 0;
     }
 
     private static boolean isApprovingAllowed(final RolloutStatus status) {
@@ -343,14 +344,14 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 permissionChecker.hasRolloutHandlePermission() && isPausingAllowed(rollout.getStatus()));
         actionColumns.add(GridComponentBuilder.addIconColumn(this, pauseButton, PAUSE_BUTTON_ID, null));
 
-        final ValueProvider<ProxyRollout, Button> triggerNextGroupButton = rollout ->
-                GridComponentBuilder.buildActionButton(i18n, clickEvent -> triggerNextRolloutGroup(rollout.getId(),
-                                rollout.getName(), rollout.getStatus()), VaadinIcons.STEP_FORWARD,
-                        UIMessageIdProvider.TOOLTIP_ROLLOUT_TRIGGER_NEXT_GROUP, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
-                UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID + "." + rollout.getId(),
-                permissionChecker.hasRolloutHandlePermission() && isTriggerNextGroupAllowed(rollout, rolloutManagement));
-        actionColumns.add(GridComponentBuilder.addIconColumn(this, triggerNextGroupButton,
-                TRIGGER_NEXT_GROUP_BUTTON_ID, null));
+        final ValueProvider<ProxyRollout, Button> triggerNextGroupButton = rollout -> GridComponentBuilder
+                .buildActionButton(i18n, clickEvent -> triggerNextRolloutGroup(rollout.getId(), rollout.getStatus()),
+                        VaadinIcons.STEP_FORWARD, UIMessageIdProvider.TOOLTIP_ROLLOUT_TRIGGER_NEXT_GROUP,
+                        SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                        UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID + "." + rollout.getId(),
+                        permissionChecker.hasRolloutHandlePermission() && isTriggerNextGroupAllowed(rollout));
+        actionColumns.add(
+                GridComponentBuilder.addIconColumn(this, triggerNextGroupButton, TRIGGER_NEXT_GROUP_BUTTON_ID, null));
 
         final ValueProvider<ProxyRollout, Button> updateButton = rollout -> GridComponentBuilder.buildActionButton(i18n,
                 clickEvent -> updateRollout(rollout), VaadinIcons.EDIT, UIMessageIdProvider.TOOLTIP_ROLLOUT_UPDATE,
@@ -506,15 +507,27 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         return tooltipText.toString();
     }
 
-    private void triggerNextRolloutGroup(final Long rolloutId, final String rolloutName,
-            final RolloutStatus rolloutStatus) {
-        if (RolloutStatus.RUNNING != rolloutStatus
-                || rolloutManagement.countGroupsByRolloutAndStatus(rolloutId, RolloutGroup.RolloutGroupStatus.SCHEDULED)
-                == 0) {
-            return;
+    private void triggerNextRolloutGroup(final Long rolloutId, final RolloutStatus rolloutStatus) {
+        if (RolloutStatus.RUNNING != rolloutStatus) {
+            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.not.running"));
+        } else if (rolloutManagement.countGroupsByRolloutAndStatus(rolloutId,
+                RolloutGroup.RolloutGroupStatus.SCHEDULED) == 0) {
+            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.non.left"));
+        } else {
+            final ConfirmationDialog triggerNextDialog = createTriggerNextGroupDialog(rolloutId);
+            UI.getCurrent().addWindow(triggerNextDialog.getWindow());
+            triggerNextDialog.getWindow().bringToFront();
         }
+    }
 
-        rolloutManagement.triggerNextGroup(rolloutId);
-        uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group", rolloutName));
+    private ConfirmationDialog createTriggerNextGroupDialog(final Long rolloutId) {
+        final String caption = i18n.getMessage("caption.rollout.confirm.trigger.next");
+        final String question = i18n.getMessage("message.rollout.confirm.trigger.next");
+        return new ConfirmationDialog(i18n, caption, question, ok -> {
+            if (Boolean.TRUE.equals(ok)) {
+                rolloutManagement.triggerNextGroup(rolloutId);
+                uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group"));
+            }
+        }, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG);
     }
 }
