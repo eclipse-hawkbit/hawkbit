@@ -48,7 +48,7 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
-import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -130,7 +130,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private RolloutStatusCache rolloutStatusCache;
 
     @Autowired
-    private RolloutGroupActionEvaluator startNextRolloutGroupAction;
+    private StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
 
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;

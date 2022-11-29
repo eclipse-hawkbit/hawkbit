@@ -476,6 +476,6 @@ public interface RolloutManagement {
      *             if given rollout is not in {@link RolloutStatus#RUNNING}.
      *
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_HANDLE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
 }

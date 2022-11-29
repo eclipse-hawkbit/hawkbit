@@ -1086,23 +1086,23 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // CREATING state
         final Rollout rollout = createRolloutInCreatingSatate("rollout1", 2, dsA.getId(), "controllerId==rollout*");
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // READY state
         rolloutManagement.handleRollouts();
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // STARTING state
         rolloutManagement.start(rollout.getId());
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // RUNNING state
         rolloutManagement.handleRollouts();
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isOk());
 
         // PAUSED state
         rolloutManagement.pauseRollout(rollout.getId());
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         rolloutManagement.resumeRollout(rollout.getId());
         triggerNextGroupAndExpect(rollout, status().isOk());
@@ -1110,7 +1110,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // FINISHED state
         setTargetsStatus(targets, Status.FINISHED);
         rolloutManagement.handleRollouts();
-        triggerNextGroupAndExpect(rollout, status().isConflict());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
     }
 

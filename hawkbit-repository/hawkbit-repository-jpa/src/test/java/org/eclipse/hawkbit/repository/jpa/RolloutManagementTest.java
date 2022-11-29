@@ -2093,23 +2093,23 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.triggerNextGroup(createdRollout.getId());
 
         //second group should in running state
-        List<RolloutGroup> runningRolloutGroups = rolloutGroupManagement
+        List<RolloutGroup> rolloutGroups = rolloutGroupManagement
                 .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
                 .getContent();
-        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+        assertThat(rolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(rolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(rolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
 
         // triggers next group
         rolloutManagement.triggerNextGroup(createdRollout.getId());
 
         //third group should be in running state
-        runningRolloutGroups = rolloutGroupManagement
+        rolloutGroups = rolloutGroupManagement
                 .findByRollout(new OffsetBasedPageRequest(0, 10, Sort.by(Direction.ASC, "id")), createdRollout.getId())
                 .getContent();
-        assertThat(runningRolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        assertThat(runningRolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        assertThat(runningRolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(rolloutGroups.get(0).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(rolloutGroups.get(1).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        assertThat(rolloutGroups.get(2).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
 
 
         //finish action of all groups and verify rollout
@@ -2118,5 +2118,50 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         runningActionsSlice.getContent().forEach(this::finishAction);
 
         verifyRolloutAndAllGroupsAreFinished(createdRollout);
+    }
+    @Test
+    @Description("Trigger next rollout group if rollout is in wrong state")
+    void triggeringNextGroupRolloutWrongState() {
+
+        final int amountTargetsForRollout = 15;
+        final int amountOtherTargets = 0;
+        final int amountGroups = 3;
+        final String successCondition = "100";
+        final String errorCondition = "80";
+
+        final String errorMessage = "Next group can be triggered only when rollout is in state running";
+
+
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
+
+        //check CREATING state
+        assertThatExceptionOfType(RolloutIllegalStateException.class).isThrownBy(
+                () -> rolloutManagement.triggerNextGroup(createdRollout.getId())).withMessageContaining(errorMessage);
+
+
+        rolloutManagement.start(createdRollout.getId());
+        //check STARTING state
+        assertThatExceptionOfType(RolloutIllegalStateException.class).isThrownBy(
+                () -> rolloutManagement.triggerNextGroup(createdRollout.getId())).withMessageContaining(errorMessage);
+
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+        Rollout rollout = reloadRollout(createdRollout);
+
+        rolloutManagement.pauseRollout(rollout.getId());
+
+        //check STOPPED state
+        assertThatExceptionOfType(RolloutIllegalStateException.class).isThrownBy(
+                () -> rolloutManagement.triggerNextGroup(createdRollout.getId())).withMessageContaining(errorMessage);
+
+        final Slice<JpaAction> runningActionsSlice = actionRepository.findByRolloutIdAndStatus(PAGE,
+                createdRollout.getId(), Status.RUNNING);
+        runningActionsSlice.getContent().forEach(this::finishAction);
+
+        //check FINISHED state
+        assertThatExceptionOfType(RolloutIllegalStateException.class).isThrownBy(
+                () -> rolloutManagement.triggerNextGroup(createdRollout.getId())).withMessageContaining(errorMessage);
     }
 }
