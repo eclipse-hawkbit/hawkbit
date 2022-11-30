@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.ddi.rest.resource;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
@@ -208,6 +209,41 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     @Test
+    @Description("Ensure that the confirmation endpoints are still available after deactivating the confirmation flow.")
+    public void verifyConfirmationBaseEndpointsArePresentAfterDisablingConfirmationFlow() throws Exception {
+        enableConfirmationFlow();
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        Target savedTarget = testdataFactory.createTarget("988");
+        savedTarget = getFirstAssignedTarget(assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+
+        final String controllerId = savedTarget.getControllerId();
+
+        final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, controllerId).getContent()
+                .get(0);
+
+        // disable confirmation flow
+        disableConfirmationFlow();
+
+        // confirmation base should still be exposed
+        verifyActionInConfirmationBaseState(savedTarget.getControllerId(), savedAction.getId());
+
+        // verify confirmation endpoint is still accessible
+        sendConfirmationFeedback(savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.DENIED, 20,
+              "Action denied message.").andExpect(status().isOk());
+
+        // confirmation base should still be exposed
+        verifyActionInConfirmationBaseState(savedTarget.getControllerId(), savedAction.getId());
+
+        // verify confirmation endpoint is still accessible
+        sendConfirmationFeedback(savedTarget, savedAction, DdiConfirmationFeedback.Confirmation.CONFIRMED, 10,
+              "Action confirmed message.").andExpect(status().isOk());
+
+        // assert deployment link is exposed to the target
+        verifyActionInDeploymentBaseState(controllerId, savedAction.getId());
+    }
+
+    @Test
     @Description("Controller sends a confirmed action state.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
@@ -233,18 +269,39 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 "Action confirmed message.").andExpect(status().isOk());
 
         // assert deployment link is exposed to the target
+        verifyActionInDeploymentBaseState(controllerId, savedAction.getId());
+    }
+
+    @Step
+    private void verifyActionInDeploymentBaseState(final String controllerId, final long actionId) throws Exception {
         final String expectedDeploymentBaseLink = String.format("/%s/controller/v1/%s/deploymentBase/%d",
-                tenantAware.getCurrentTenant(), controllerId, savedAction.getId());
+              tenantAware.getCurrentTenant(), controllerId, actionId);
 
         mvc.perform(
-                get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)))
-                .andExpect(jsonPath("$._links.confirmationBase.href").doesNotExist());
+                    get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
+              .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+              .andExpect(jsonPath("$._links.deploymentBase.href", containsString(expectedDeploymentBaseLink)))
+              .andExpect(jsonPath("$._links.confirmationBase.href").doesNotExist());
 
         // assert that deployment endpoint is working
         mvc.perform(get(expectedDeploymentBaseLink).accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+              .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+    }
+
+    @Step
+    private void verifyActionInConfirmationBaseState(final String controllerId, final long actionId) throws Exception {
+        mvc.perform(
+                get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("$._links.confirmationBase.href").exists())
+                .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
+
+        mvc.perform(get(CONFIRMATION_BASE_ACTION, tenantAware.getCurrentTenant(), controllerId, actionId)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        mvc.perform(get(DEPLOYMENT_BASE, tenantAware.getCurrentTenant(), controllerId, actionId)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     @Test
