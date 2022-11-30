@@ -464,8 +464,8 @@ public interface RolloutManagement {
     void cancelRolloutsForDistributionSet(DistributionSet set);
 
     /**
-     * Triggers next group of a rollout for processing even success threshold isn't met yet.
-     * Current running groups will not change their status.
+     * Triggers next group of a rollout for processing even success threshold
+     * isn't met yet. Current running groups will not change their status.
      *
      * @param rolloutId
      *            the rollout to be paused.
@@ -478,19 +478,5 @@ public interface RolloutManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
-
-    /**
-     * Retrieves a page of {@link RolloutGroup}s filtered by a given
-     * {@link Rollout}.
-     *
-     * @param rolloutId
-     *            the ID of the rollout to filter the {@link RolloutGroup}s
-     * @param groupStatus
-     *            the group status to filter the {@link RolloutGroup}s
-     * @return a page of found {@link RolloutGroup}s
-     */
-
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    long countGroupsByRolloutAndStatus(long rolloutId, RolloutGroup.RolloutGroupStatus groupStatus);
 
 }

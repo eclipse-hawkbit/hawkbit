@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.a
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -757,24 +758,23 @@ public class JpaRolloutManagement implements RolloutManagement {
     public void triggerNextGroup(final long rolloutId) {
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         if (RolloutStatus.RUNNING != rollout.getStatus()) {
-            throw new RolloutIllegalStateException("Next group can be triggered only when rollout is in state running "
-                    + "but current state is " + rollout.getStatus().name().toLowerCase());
+            throw new RolloutIllegalStateException("Rollout is not in running state");
+        }
+        final List<RolloutGroup> groups = rollout.getRolloutGroups();
+
+        final boolean isNextGroupTriggerable = groups.stream()
+                .anyMatch(g -> RolloutGroupStatus.SCHEDULED.equals(g.getStatus()));
+
+        if (!isNextGroupTriggerable) {
+            throw new RolloutIllegalStateException("No next group found to trigger");
         }
 
-        if (countGroupsByRolloutAndStatus(rolloutId,  RolloutGroupStatus.SCHEDULED) == 0) {
-            throw new RolloutIllegalStateException("No group is scheduled for running");
-        }
+        final RolloutGroup latestRunning = groups.stream()
+                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
+                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus())).findFirst()
+                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
 
-        final List<JpaRolloutGroup> rolloutGroupsRunning =
-                rolloutGroupRepository.findByRolloutAndStatusOrderByIdDesc(rollout, RolloutGroupStatus.RUNNING);
-        JpaRolloutGroup jpaRolloutGroup = rolloutGroupsRunning.get(0);
-
-        startNextRolloutGroupAction.eval(rollout, jpaRolloutGroup, jpaRolloutGroup.getSuccessActionExp());
-    }
-
-    @Override
-    public long countGroupsByRolloutAndStatus(final long rolloutId, RolloutGroup.RolloutGroupStatus groupStatus) {
-        return rolloutGroupRepository.countByRolloutIdAndStatusOrStatus(rolloutId, groupStatus, groupStatus);
+        startNextRolloutGroupAction.eval(rollout, latestRunning, latestRunning.getSuccessActionExp());
     }
 
 }

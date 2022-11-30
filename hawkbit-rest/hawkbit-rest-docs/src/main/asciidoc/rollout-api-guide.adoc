@@ -386,7 +386,6 @@ include::../errors/401.adoc[]
 include::../errors/403.adoc[]
 include::../errors/405.adoc[]
 include::../errors/406.adoc[]
-include::../errors/409.adoc[]
 include::../errors/429.adoc[]
 |===
 

@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -57,6 +57,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cronutils.utils.StringUtils;
 import com.google.common.base.Predicates;
@@ -73,6 +75,8 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  * Rollout list grid component.
  */
 public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutGrid.class);
+
     private static final long serialVersionUID = 1L;
     private static final String ROLLOUT_CAPTION_MSG_KEY = "caption.rollout";
 
@@ -349,7 +353,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                         VaadinIcons.STEP_FORWARD, UIMessageIdProvider.TOOLTIP_ROLLOUT_TRIGGER_NEXT_GROUP,
                         SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                         UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID + "." + rollout.getId(),
-                        permissionChecker.hasRolloutHandlePermission() && isTriggerNextGroupAllowed(rollout));
+                        permissionChecker.hasRolloutUpdatePermission() && isTriggerNextGroupAllowed(rollout));
         actionColumns.add(
                 GridComponentBuilder.addIconColumn(this, triggerNextGroupButton, TRIGGER_NEXT_GROUP_BUTTON_ID, null));
 
@@ -510,9 +514,6 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private void triggerNextRolloutGroup(final Long rolloutId, final RolloutStatus rolloutStatus) {
         if (RolloutStatus.RUNNING != rolloutStatus) {
             uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.not.running"));
-        } else if (rolloutManagement.countGroupsByRolloutAndStatus(rolloutId,
-                RolloutGroup.RolloutGroupStatus.SCHEDULED) == 0) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.non.left"));
         } else {
             final ConfirmationDialog triggerNextDialog = createTriggerNextGroupDialog(rolloutId);
             UI.getCurrent().addWindow(triggerNextDialog.getWindow());
@@ -525,8 +526,13 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         final String question = i18n.getMessage("message.rollout.confirm.trigger.next");
         return new ConfirmationDialog(i18n, caption, question, ok -> {
             if (Boolean.TRUE.equals(ok)) {
-                rolloutManagement.triggerNextGroup(rolloutId);
-                uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group"));
+                try {
+                    rolloutManagement.triggerNextGroup(rolloutId);
+                    uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group.success"));
+                } catch (final RolloutIllegalStateException e) {
+                    LOGGER.warn("Error on manually triggering next rollout group: {}", e.getMessage());
+                    uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.error"));
+                }
             }
         }, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG);
     }
