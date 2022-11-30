@@ -513,7 +513,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
 
     private void triggerNextRolloutGroup(final Long rolloutId, final RolloutStatus rolloutStatus) {
         if (RolloutStatus.RUNNING != rolloutStatus) {
-            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.not.running"));
+            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.not.running"));
         } else {
             final ConfirmationDialog triggerNextDialog = createTriggerNextGroupDialog(rolloutId);
             UI.getCurrent().addWindow(triggerNextDialog.getWindow());
@@ -531,7 +531,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                     uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group.success"));
                 } catch (final RolloutIllegalStateException e) {
                     LOGGER.warn("Error on manually triggering next rollout group: {}", e.getMessage());
-                    uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.error"));
+                    uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.error"));
                 }
             }
         }, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG);
