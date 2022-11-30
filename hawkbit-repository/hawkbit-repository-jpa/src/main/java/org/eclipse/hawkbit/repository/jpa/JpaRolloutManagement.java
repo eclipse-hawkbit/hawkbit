@@ -766,7 +766,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .anyMatch(g -> RolloutGroupStatus.SCHEDULED.equals(g.getStatus()));
 
         if (!isNextGroupTriggerable) {
-            throw new RolloutIllegalStateException("No next group found to trigger");
+            throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
         }
 
         final RolloutGroup latestRunning = groups.stream()
