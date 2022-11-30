@@ -190,7 +190,7 @@
       <!-- SONATYPE-2021-1175 -->
       <logback.version>1.2.9</logback.version>
       <!-- CVE-2020-36518, CVE-2022-42003, CVE-2022-42004 -->
-      <jackson-bom.version>2.14.0-rc1</jackson-bom.version>
+      <jackson-bom.version>2.14.0</jackson-bom.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
@@ -679,12 +679,6 @@
             <artifactId>jaxb-api</artifactId>
             <version>${jaxb-api.version}</version>
          </dependency>
-         <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-all</artifactId>
-            <version>${netty.version}</version>
-         </dependency>
-
 
          <!-- Spring -->
          <dependency>
