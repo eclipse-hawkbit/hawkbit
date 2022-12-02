@@ -106,6 +106,7 @@ public final class MgmtSoftwareModuleMapper {
         response.setModuleId(softwareModule.getId());
         response.setVersion(softwareModule.getVersion());
         response.setType(softwareModule.getType().getKey());
+        response.setTypeName(softwareModule.getType().getName());
         response.setVendor(softwareModule.getVendor());
         response.setDeleted(softwareModule.isDeleted());
         response.setEncrypted(softwareModule.isEncrypted());

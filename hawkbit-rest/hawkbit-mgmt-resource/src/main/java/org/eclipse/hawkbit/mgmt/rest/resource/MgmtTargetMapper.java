@@ -17,7 +17,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
@@ -82,8 +81,8 @@ public final class MgmtTargetMapper {
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
         if (response.getTargetType() != null) {
-            response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class)
-                    .getTargetType(response.getTargetType())).withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
+            response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(response.getTargetType()))
+                    .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
         }
     }
 
@@ -159,8 +158,9 @@ public final class MgmtTargetMapper {
         if (installationDate != null) {
             targetRest.setInstalledAt(installationDate);
         }
-        if (target.getTargetType() != null){
+        if (target.getTargetType() != null) {
             targetRest.setTargetType(target.getTargetType().getId());
+            targetRest.setTargetTypeName(target.getTargetType().getName());
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
@@ -226,12 +226,12 @@ public final class MgmtTargetMapper {
             result.setStatus(MgmtAction.ACTION_FINISHED);
         }
 
-        Rollout rollout = action.getRollout();
+        final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.setRollout(rollout.getId());
             result.setRolloutName(rollout.getName());
         }
-        
+
         if (action.hasMaintenanceSchedule()) {
             final MgmtMaintenanceWindow maintenanceWindow = new MgmtMaintenanceWindow();
             maintenanceWindow.setSchedule(action.getMaintenanceWindowSchedule());
@@ -270,7 +270,7 @@ public final class MgmtTargetMapper {
             result.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId()))
                     .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT));
         }
-        
+
         return result;
     }
 
