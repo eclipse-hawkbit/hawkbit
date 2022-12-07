@@ -327,8 +327,12 @@ public abstract class AbstractIntegrationTest {
 
     protected void enableConfirmationFlow() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
-    }    
-    
+    }
+
+    protected void disableConfirmationFlow() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, false);
+    }
+
     protected boolean isConfirmationFlowActive() {
         return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
                 Boolean.class).getValue();

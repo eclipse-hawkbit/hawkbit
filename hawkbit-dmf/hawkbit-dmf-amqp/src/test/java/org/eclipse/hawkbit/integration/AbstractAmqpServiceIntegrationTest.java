@@ -129,7 +129,13 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
 
         return registerTargetAndAssignDistributionSet(distributionSet.getId(), TargetUpdateStatus.REGISTERED,
-                distributionSet.getModules(), controllerId);
+              distributionSet.getModules(), controllerId);
+    }
+
+    protected DistributionSetAssignmentResult prepareDistributionSetAndAssign(final String controllerId) {
+        distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        return assignDistributionSet(distributionSet.getId(), controllerId);
     }
 
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final Long assignDs,
