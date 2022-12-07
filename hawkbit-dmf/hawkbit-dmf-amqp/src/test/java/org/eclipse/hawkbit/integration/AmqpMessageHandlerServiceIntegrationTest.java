@@ -1104,6 +1104,36 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     }
 
     @Test
+    @Description("Verify the DMF download and install message is send directly if auto-confirmation is active")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 2),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void verifyDownloadAndInstallDirectlySendOnAutoConfirmationEnabled() {
+        enableConfirmationFlow();
+        final String controllerId = TARGET_PREFIX + "confirmedActionStatus";
+
+        registerAndAssertTargetWithExistingTenant(controllerId);
+
+        confirmationManagement.activateAutoConfirmation(controllerId, null, null);
+
+        final DistributionSetAssignmentResult assignmentResult = prepareDistributionSetAndAssign(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        // verify action status is in WAIT_FOR_CONFIRMATION
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+
+        // assert download and install message
+        waitUntilEventMessagesAreDispatchedToTarget(EventTopic.DOWNLOAD_AND_INSTALL);
+        assertDownloadAndInstallMessage(assignmentResult.getDistributionSet().getModules(), controllerId);
+    }
+
+    @Test
     @Description("Register a target and send a update action status (denied). Verify if the updated action status is correct.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
@@ -1117,7 +1147,10 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     void deniedActionStatus() {
         enableConfirmationFlow();
         final String controllerId = TARGET_PREFIX + "deniedActionStatus";
-        final Long actionId = registerTargetAndSendActionStatus(DmfActionStatus.DENIED, controllerId);
+        final DistributionSetAssignmentResult assignmentResult = registerTargetAndAssignDistributionSet(controllerId);
+        final Long actionId = getFirstAssignedActionId(assignmentResult);
+        assertActionStatusList(actionId, 1, Status.WAIT_FOR_CONFIRMATION);
+        createAndSendActionStatusUpdateMessage(controllerId, actionId, DmfActionStatus.DENIED);
         assertActionStatusList(actionId, 2, Status.WAIT_FOR_CONFIRMATION);
     }
 }
