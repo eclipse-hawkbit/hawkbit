@@ -14,7 +14,6 @@ import java.util.List;
 
 /**
  * Sort fields for {@link ActionRest}.
- *
  */
 public enum ActionFields implements FieldNameProvider, FieldValueConverter<ActionFields> {
 
@@ -22,32 +21,35 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
      * The status field.
      */
     STATUS("active"),
-    
+
     /**
      * The id field.
      */
     ID("id"),
-    
+
     /**
      * The weight field.
      */
     WEIGHT("weight"),
-    
+
     /**
      * The target field
      */
-    TARGET("target", TargetFields.ID.getFieldName(), TargetFields.NAME.getFieldName(), TargetFields.UPDATESTATUS.getFieldName(), TargetFields.IPADDRESS.getFieldName()),
-    
+    TARGET("target", TargetFields.ID.getFieldName(), TargetFields.NAME.getFieldName(),
+            TargetFields.UPDATESTATUS.getFieldName(), TargetFields.IPADDRESS.getFieldName()),
+
     /**
      * The distribution set field
      */
-    DISTRIBUTIONSET("distributionSet", DistributionSetFields.ID.getFieldName(), DistributionSetFields.NAME.getFieldName(), DistributionSetFields.VERSION.getFieldName(), DistributionSetFields.TYPE.getFieldName()),
-    
+    DISTRIBUTIONSET("distributionSet", DistributionSetFields.ID.getFieldName(),
+            DistributionSetFields.NAME.getFieldName(), DistributionSetFields.VERSION.getFieldName(),
+            DistributionSetFields.TYPE.getFieldName()),
+
     /**
      * The rollout field
      */
     ROLLOUT("rollout", RolloutFields.ID.getFieldName(), RolloutFields.NAME.getFieldName()),
-    
+
     /**
      * The rollout field
      */
