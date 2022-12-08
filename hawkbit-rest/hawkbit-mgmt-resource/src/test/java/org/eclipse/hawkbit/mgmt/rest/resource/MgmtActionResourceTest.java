@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -37,6 +38,9 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
+/**
+ * Integration test for the {@link MgmtActionRestApi}.
+ */
 @Feature("Component Tests - Management API")
 @Story("Action Resource")
 class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
