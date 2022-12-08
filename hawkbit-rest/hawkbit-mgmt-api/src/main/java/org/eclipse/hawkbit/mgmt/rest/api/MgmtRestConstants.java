@@ -141,6 +141,11 @@ public final class MgmtRestConstants {
     public static final String DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING = "/{distributionsetTagId}/assigned";
 
     /**
+     * The action URL mapping rest resource.
+     */
+    public static final String ACTION_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/actions";
+
+    /**
      * The default offset parameter in case the offset parameter is not present
      * in the request.
      *
