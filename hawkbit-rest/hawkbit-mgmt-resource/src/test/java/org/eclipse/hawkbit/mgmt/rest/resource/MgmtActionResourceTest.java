@@ -51,8 +51,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
 
     @Test
-    @Description("Verifies that actions history is returned as defined by filter status==pending,status==finished.")
-    void searchActionsRsql() throws Exception {
+    @Description("Verifies that actions can be filtered based on action status.")
+    void filterActionsByStatus() throws Exception {
 
         // prepare test
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
@@ -79,6 +79,56 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 createTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content[0].status", equalTo("pending")));
+
+    }
+
+    @Test
+    @Description("Verifies that actions can be filtered based on distribution set fields.")
+    void filterActionsByDistributionSet() throws Exception {
+
+        // prepare test
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Target createTarget = testdataFactory.createTarget("knownTargetId");
+
+        assignDistributionSet(dsA, Collections.singletonList(createTarget));
+
+        final String rsqlDsName = "distributionSet.name==" + dsA.getName() + "*";
+        final String rsqlDsVersion = "distributionSet.version==" + dsA.getVersion();
+
+        mvc.perform(
+                get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName, createTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)));
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsVersion,
+                createTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)));
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName + "," + rsqlDsVersion,
+                createTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)));
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=distributionSet.name==FooBar",
+                createTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(0))).andExpect(jsonPath("size", equalTo(0)));
+    }
+
+    @Test
+    @Description("Verifies that actions can be filtered based on target fields.")
+    void filterActionsByTarget() throws Exception {
+
+        // prepare test
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Target createTarget = testdataFactory.createTarget("knownTargetId");
+
+        assignDistributionSet(dsA, Collections.singletonList(createTarget));
+
+        final String rsqlTargetName = "target.name==knownTargetId";
+
+        // pending status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName,
+                createTarget.getControllerId())).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)));
     }
 
     @Test
