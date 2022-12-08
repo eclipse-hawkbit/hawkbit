@@ -50,8 +50,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_PAGED_LIST_SIZE = JSON_PATH_ROOT + JSON_PATH_FIELD_SIZE;
     private static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
 
-    //@Test
-    //@Description("Verifies that actions history is returned as defined by filter status==pending,status==finished.")
+    @Test
+    @Description("Verifies that actions history is returned as defined by filter status==pending,status==finished.")
     void searchActionsRsql() throws Exception {
 
         // prepare test

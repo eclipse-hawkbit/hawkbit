@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -24,8 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class MgmtActionResource implements MgmtActionRestApi {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtActionResource.class);
 
     private final DeploymentManagement deploymentManagement;
 
@@ -45,8 +41,8 @@ public class MgmtActionResource implements MgmtActionRestApi {
         final Slice<Action> actions;
         final Long totalActionCount;
         if (rsqlParam != null) {
-            actions = this.deploymentManagement.findActionsAll(pageable);
-            totalActionCount = this.deploymentManagement.countActionsAll();
+            actions = this.deploymentManagement.findActions(rsqlParam, pageable);
+            totalActionCount = this.deploymentManagement.countActions(rsqlParam);
         } else {
             actions = this.deploymentManagement.findActionsAll(pageable);
             totalActionCount = this.deploymentManagement.countActionsAll();
