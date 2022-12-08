@@ -81,7 +81,7 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
 
     @Test
     @Description("Handles the GET request of retrieving all actions based on parameters. Required Permission: READ_TARGET.")
-    public void getActionsFromTargetWithParameters() throws Exception {
+    public void getActionsWithParameters() throws Exception {
         generateActionForTarget(targetId);
 
         mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING
