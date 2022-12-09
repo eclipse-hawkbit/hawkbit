@@ -82,32 +82,22 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all actions based on parameters. Required Permission: READ_TARGET.")
     public void getActionsWithParameters() throws Exception {
-        generateActionForTarget(targetId);
+        generateRolloutActionForTarget(targetId);
 
         mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING
-                + "?limit=10&sort=id:ASC&offset=0&q=target.name==" + targetId)).andExpect(status().isOk())
+                + "?limit=10&sort=id:ASC&offset=0&q=target.name==" + targetId + "&representation=full")).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
                         parameterWithName("sort").description(ApiModelPropertiesGeneric.SORT),
                         parameterWithName("offset").description(ApiModelPropertiesGeneric.OFFSET),
-                        parameterWithName("q").description(ApiModelPropertiesGeneric.FIQL))));
-    }
-
-    private Action generateActionForTarget(final String knownControllerId) throws Exception {
-        return generateActionForTarget(knownControllerId, true, false, null, null, null);
+                        parameterWithName("q").description(ApiModelPropertiesGeneric.FIQL),
+                        parameterWithName("representation").description(MgmtApiModelProperties.REPRESENTATION_MODE))));
     }
 
     private Action generateRolloutActionForTarget(final String knownControllerId) throws Exception {
         return generateActionForTarget(knownControllerId, true, false, null, null, null, true);
-    }
-
-    private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
-            final boolean timeforced, final String maintenanceWindowSchedule, final String maintenanceWindowDuration,
-            final String maintenanceWindowTimeZone) throws Exception {
-        return generateActionForTarget(knownControllerId, inSync, timeforced, maintenanceWindowSchedule,
-                maintenanceWindowDuration, maintenanceWindowTimeZone, false);
     }
 
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
