@@ -63,7 +63,7 @@ public final class MgmtRestConstants {
     /**
      * The target URL mapping, href link for assigned target type.
      */
-    public static final String TARGET_V1_ASSIGNED_TARGET_TYPE= "targetType";
+    public static final String TARGET_V1_ASSIGNED_TARGET_TYPE = "targetType";
 
     /**
      * The target URL mapping, href link for assigned distribution set.
@@ -190,6 +190,17 @@ public final class MgmtRestConstants {
      * must be in the FIQL syntax.
      */
     public static final String REQUEST_PARAMETER_SEARCH = "q";
+
+    /**
+     * The request parameter for specifying the representation mode. The value
+     * of this parameter can either be "full" or "compact".
+     */
+    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE = "representation";
+
+    /**
+     * The default representation mode.
+     */
+    public static final String REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT = "compact";
 
     /**
      * The software module type URL mapping rest resource.

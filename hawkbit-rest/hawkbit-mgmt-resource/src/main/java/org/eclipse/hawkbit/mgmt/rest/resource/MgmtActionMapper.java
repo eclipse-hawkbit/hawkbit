@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 
@@ -32,19 +33,25 @@ public final class MgmtActionMapper {
      *
      * @param actions
      *            list of actions
+     * @param repMode
+     *            the representation mode
      * 
      * @return the response
      */
-    public static List<MgmtAction> toResponse(final Collection<Action> actions) {
+    public static List<MgmtAction> toResponse(final Collection<Action> actions, final MgmtRepresentationMode repMode) {
         if (actions == null) {
             return Collections.emptyList();
         }
-        return new ResponseList<>(actions.stream().map(MgmtActionMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(actions.stream().map(action -> MgmtActionMapper.toResponse(action, repMode))
+                .collect(Collectors.toList()));
     }
 
-    static MgmtAction toResponse(final Action action) {
-        // dispatch
-        return MgmtTargetMapper.toResponse(action.getTarget().getControllerId(), action);
+    static MgmtAction toResponse(final Action action, final MgmtRepresentationMode repMode) {
+        final String controllerId = action.getTarget().getControllerId();
+        if (repMode == MgmtRepresentationMode.COMPACT) {
+            return MgmtTargetMapper.toResponse(controllerId, action);
+        }
+        return MgmtTargetMapper.toResponseWithLinks(controllerId, action, repMode);
     }
 
 }
