@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
@@ -122,16 +123,18 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     void filterActionsByDistributionSet() throws Exception {
 
         // prepare test
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        assignDistributionSet(dsA, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        assignDistributionSet(ds, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
 
-        final String rsqlDsName = "distributionSet.name==" + dsA.getName() + "*";
-        final String rsqlDsVersion = "distributionSet.version==" + dsA.getVersion();
-        final String rsqlDsId = "distributionSet.id==" + dsA.getId();
+        final String rsqlDsName = "distributionSet.name==" + ds.getName() + "*";
+        final String rsqlDsVersion = "distributionSet.version==" + ds.getVersion();
+        final String rsqlDsId = "distributionSet.id==" + ds.getId();
 
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName))
+        mvc.perform(
+                get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName).param("representation", "full"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
-                .andExpect(jsonPath("size", equalTo(1)));
+                .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content.[0]._links.distributionset.name",
+                        equalTo(ds.getName() + ":" + ds.getVersion())));
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsVersion))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
@@ -151,19 +154,56 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that actions can be filtered based on rollout fields.")
+    void filterActionsByRollout() throws Exception {
+
+        // prepare test
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        final Target target0 = testdataFactory.createTarget("t0");
+
+        // manual assignment
+        assignDistributionSet(ds, Collections.singletonList(target0));
+
+        // rollout
+        final Target target1 = testdataFactory.createTarget("t1");
+        final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
+                "name==" + target1.getName(), ds, "50", "5");
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        final String rsqlRolloutName = "rollout.name==" + rollout.getName() + "*";
+        final String rsqlRolloutId = "rollout.id==" + rollout.getId();
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName).param("representation",
+                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
+                        "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutId).param("representation",
+                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
+                        "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
+    }
+
+    @Test
     @Description("Verifies that actions can be filtered based on target fields.")
     void filterActionsByTarget() throws Exception {
-        
+
         // prepare test
-        final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        assignDistributionSet(dsA, Collections.singletonList(testdataFactory.createTarget("knownTargetId")));
+        final Target target = testdataFactory.createTarget("knownTargetId");
+        final DistributionSet ds = testdataFactory.createDistributionSet("");
+        assignDistributionSet(ds, Collections.singletonList(target));
 
         final String rsqlTargetName = "target.name==knownTargetId";
 
         // pending status one result
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
-                .andExpect(jsonPath("size", equalTo(1)));
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName).param("representation",
+                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target.getName()))).andExpect(jsonPath(
+                        "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
     }
 
     @Test

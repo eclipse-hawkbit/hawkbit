@@ -155,6 +155,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_APPROVE));
             allFieldDescriptor.add(
                     fieldWithPath(arrayPrefix + "_links.deny").description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.distributionset")
+                    .description(MgmtApiModelProperties.LINK_TO_DS));
         }
 
         return new DocumenationResponseFieldsSnippet(allFieldDescriptor);

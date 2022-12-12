@@ -33,6 +33,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
     public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
+    public static final String LINK_TO_TARGET = "The link to the target.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
