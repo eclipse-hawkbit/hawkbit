@@ -156,6 +156,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
 
+    public static final String ACTION_DETAIL_STATUS = "Detailed status of action.";
+
     public static final String ACTION_LIST = "List of actions.";
 
     public static final String ACTION_WEIGHT = "Weight of the action showing the importance of the update.";

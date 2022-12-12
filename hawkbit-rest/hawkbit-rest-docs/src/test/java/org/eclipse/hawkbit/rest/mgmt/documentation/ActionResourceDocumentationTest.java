@@ -71,6 +71,9 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
 
                         fieldWithPath("content[].status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                 .attributes(key("value").value("['finished', 'pending']")),
+                        fieldWithPath("content[].detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                .attributes(key("value").value(
+                                        "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                         fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                         fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                         fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
@@ -85,8 +88,8 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
         generateRolloutActionForTarget(targetId);
 
         mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING
-                + "?limit=10&sort=id:ASC&offset=0&q=target.name==" + targetId + "&representation=full")).andExpect(status().isOk())
-                .andDo(MockMvcResultPrinter.print())
+                + "?limit=10&sort=id:ASC&offset=0&q=target.name==" + targetId + "&representation=full"))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
                                 .description(ApiModelPropertiesGeneric.LIMIT),
