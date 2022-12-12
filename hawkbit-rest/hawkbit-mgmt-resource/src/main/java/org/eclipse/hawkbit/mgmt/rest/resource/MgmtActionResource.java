@@ -15,6 +15,8 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -26,6 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnProperty(name = "hawkbit.rest.MgmtActionResource.enabled", matchIfMissing = true)
 public class MgmtActionResource implements MgmtActionRestApi {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MgmtActionResource.class);
+
     private final DeploymentManagement deploymentManagement;
 
     MgmtActionResource(final DeploymentManagement deploymentManagement) {
@@ -34,15 +38,13 @@ public class MgmtActionResource implements MgmtActionRestApi {
 
     @Override
     public ResponseEntity<PagedList<MgmtAction>> getActions(final int pagingOffsetParam, final int pagingLimitParam,
-            final String sortParam, final String rsqlParam, final String representationMode) {
+            final String sortParam, final String rsqlParam, final String representationModeParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeActionSortParam(sortParam);
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
-        final MgmtRepresentationMode repMode = MgmtRepresentationMode.fromValue(representationMode);
-        
         final Slice<Action> actions;
         final Long totalActionCount;
         if (rsqlParam != null) {
@@ -53,7 +55,16 @@ public class MgmtActionResource implements MgmtActionRestApi {
             totalActionCount = this.deploymentManagement.countActionsAll();
         }
 
-        return ResponseEntity.ok(new PagedList<>(MgmtActionMapper.toResponse(actions.getContent(), repMode), totalActionCount));
+        final MgmtRepresentationMode repMode = MgmtRepresentationMode.fromValue(representationModeParam)
+                .orElseGet(() -> {
+                    // no need for a 400, just apply a safe fallback
+                    LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+                    return MgmtRepresentationMode.COMPACT;
+                });
+
+        return ResponseEntity
+                .ok(new PagedList<>(MgmtActionMapper.toResponse(actions.getContent(), repMode), totalActionCount));
+
     }
 
 }

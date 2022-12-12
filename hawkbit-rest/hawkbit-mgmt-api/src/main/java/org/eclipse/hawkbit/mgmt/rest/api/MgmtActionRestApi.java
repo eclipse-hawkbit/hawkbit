@@ -37,7 +37,10 @@ public interface MgmtActionRestApi {
      *            {@code field:direction, field:direction}
      * @param rsqlParam
      *            the search parameter in the request URL, syntax
-     *            {@code q=name==abc}
+     *            {@code q=distributionSet.id==1}
+     * @param representationModeParam
+     *            the representation mode parameter specifying whether a compact
+     *            or a full representation shall be returned
      * @return a list of all actions for a defined or default page request with
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
@@ -49,6 +52,6 @@ public interface MgmtActionRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationMode);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
 
 }

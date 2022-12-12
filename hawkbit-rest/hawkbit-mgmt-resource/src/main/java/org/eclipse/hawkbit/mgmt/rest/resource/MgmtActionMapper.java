@@ -51,7 +51,7 @@ public final class MgmtActionMapper {
         if (repMode == MgmtRepresentationMode.COMPACT) {
             return MgmtTargetMapper.toResponse(controllerId, action);
         }
-        return MgmtTargetMapper.toResponseWithLinks(controllerId, action, repMode);
+        return MgmtTargetMapper.toResponseWithLinks(controllerId, action);
     }
 
 }

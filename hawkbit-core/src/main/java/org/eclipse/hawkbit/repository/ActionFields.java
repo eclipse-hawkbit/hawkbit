@@ -21,11 +21,11 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
      * The status field.
      */
     STATUS("active"),
-    
+
     /**
      * The detailed action status
      */
-    ACTIONSTATUS("status"),
+    DETAILSTATUS("status"),
 
     /**
      * The id field.

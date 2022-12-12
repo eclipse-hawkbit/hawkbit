@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Enumeration of the supported representation modes.
@@ -16,23 +17,22 @@ import java.util.Arrays;
 public enum MgmtRepresentationMode {
 
     FULL("full"),
-    
+
     COMPACT("compact");
-    
+
     private final String mode;
-    
+
     private MgmtRepresentationMode(final String mode) {
         this.mode = mode;
     }
-    
+
     @Override
     public String toString() {
         return mode;
     }
-    
-    public static MgmtRepresentationMode fromValue(final String value) {
-        return Arrays.stream(MgmtRepresentationMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unknown representation mode: " + value));
+
+    public static Optional<MgmtRepresentationMode> fromValue(final String value) {
+        return Arrays.stream(MgmtRepresentationMode.values()).filter(v -> v.mode.equalsIgnoreCase(value)).findFirst();
     }
-    
+
 }
