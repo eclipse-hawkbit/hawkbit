@@ -8,8 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
-import java.util.Optional;
-
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 
@@ -24,7 +22,7 @@ public class TargetWithActionStatus implements Identifiable<Long> {
 
     private Status status;
 
-    private Optional<Integer> lastActionStatusCode;
+    private Integer lastActionStatusCode;
 
     public TargetWithActionStatus(final Target target) {
         this.target = target;
@@ -35,7 +33,7 @@ public class TargetWithActionStatus implements Identifiable<Long> {
         this.target = target;
     }
 
-    public TargetWithActionStatus(final Target target, final Status status, final Optional<Integer> lastActionStatusCode) {
+    public TargetWithActionStatus(final Target target, final Status status, final Integer lastActionStatusCode) {
         this.status = status;
         this.target = target;
         this.lastActionStatusCode = lastActionStatusCode;
@@ -62,11 +60,11 @@ public class TargetWithActionStatus implements Identifiable<Long> {
         return target.getId();
     }
 
-    public Optional<Integer> getLastActionStatusCode() {
+    public Integer getLastActionStatusCode() {
         return lastActionStatusCode;
     }
 
-    public void setLastActionStatusCode(final Optional<Integer> lastActionStatusCode) {
+    public void setLastActionStatusCode(final Integer lastActionStatusCode) {
         this.lastActionStatusCode = lastActionStatusCode;
     }
 }

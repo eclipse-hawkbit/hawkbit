@@ -273,7 +273,7 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
 
     private TargetWithActionStatus getTargetWithActionStatusFromQuery(final Object[] o) {
         return new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
-                Optional.ofNullable((Integer) o[2]));
+                (Integer) o[2]);
     }
 
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,

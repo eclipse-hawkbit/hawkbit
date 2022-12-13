@@ -422,21 +422,27 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void simulateIntermediateStatusOnUpdate(final Long actionId) {
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOAD);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.DOWNLOADED);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RETRIEVED);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.WARNING);
+    }
+
+    private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus) {
+        addUpdateActionStatusAndAssert(actionId, actionStatus, null);
     }
 
     private void addUpdateActionStatusAndAssert(final Long actionId, final Action.Status actionStatus,
-            final Optional<Integer> code) {
+            final Integer code) {
         final ActionStatusCreate status = entityFactory.actionStatus().create(actionId).status(actionStatus);
-        code.ifPresent(c -> status.code(c));
+        if (code != null) {
+            status.code(code.intValue());
+        }
         controllerManagement
                 .addUpdateActionStatus(status);
         assertActionStatus(actionId, DEFAULT_CONTROLLER_ID, TargetUpdateStatus.PENDING, Action.Status.RUNNING,
@@ -1587,20 +1593,20 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     void lastActionStatusCodeIsSet() {
         final Long actionId = createTargetAndAssignDs();
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.of(10));
-        assertAction(actionId, Optional.of(10));
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, 10);
+        assertLastActionStatusCodeInAction(actionId, 10);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.empty());
-        assertAction(actionId, Optional.empty());
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING);
+        assertLastActionStatusCodeInAction(actionId, null);
 
-        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, Optional.of(20));
-        assertAction(actionId, Optional.of(20));
+        addUpdateActionStatusAndAssert(actionId, Action.Status.RUNNING, 20);
+        assertLastActionStatusCodeInAction(actionId, 20);
 
     }
 
-    private void assertAction(final Long actionId, final Optional<Integer> expectedLastACtionStatusCode) {
+    private void assertLastActionStatusCodeInAction(final Long actionId, final Integer expectedLastActionStatusCode) {
         final Optional<Action> action = actionRepository.getById(actionId);
         assertThat(action).isPresent();
-        assertThat(action.get().getLastActionStatusCode()).isEqualTo(expectedLastACtionStatusCode);
+        assertThat(action.get().getLastActionStatusCode()).isEqualTo(Optional.ofNullable(expectedLastActionStatusCode));
     }
 }

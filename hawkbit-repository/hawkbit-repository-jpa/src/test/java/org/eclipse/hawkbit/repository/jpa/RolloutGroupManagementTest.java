@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
@@ -168,11 +167,11 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
     private void assertTargetAndActionStatusCode(final TargetWithActionStatus targetWithActionStatus,
             final Target target, final Integer actionStatusCode) {
         assertThat(targetWithActionStatus.getTarget().getControllerId()).isEqualTo(target.getControllerId());
-        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(Optional.of(actionStatusCode));
+        assertThat(targetWithActionStatus.getLastActionStatusCode()).isEqualTo(actionStatusCode);
     }
 
     private void assertTargetNotNullAndActionStatusNullAndActionStatusCode(
-            final List<TargetWithActionStatus> targetsWithActionStatus, final Optional<Integer> actionStatusCode) {
+            final List<TargetWithActionStatus> targetsWithActionStatus, final Integer actionStatusCode) {
         targetsWithActionStatus.forEach(targetWithActionStatus -> {
             assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
             assertThat(targetWithActionStatus.getStatus()).isNull();
@@ -182,7 +181,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
 
     private void assertTargetNotNullAndActionStatusAndActionStatusCode(
             final List<TargetWithActionStatus> targetsWithActionStatus, final Status actionStatus,
-            final Optional<Integer> actionStatusCode) {
+            final Integer actionStatusCode) {
         targetsWithActionStatus.forEach(targetWithActionStatus -> {
             assertThat(targetWithActionStatus.getTarget().getControllerId()).isNotNull();
             assertThat(targetWithActionStatus.getStatus()).isEqualTo(actionStatus);
@@ -206,7 +205,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .getContent();
         assertThat(targetsWithActionStatus)
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroups.get(0).getId()));
-        assertTargetNotNullAndActionStatusNullAndActionStatusCode(targetsWithActionStatus, Optional.empty());
+        assertTargetNotNullAndActionStatusNullAndActionStatusCode(targetsWithActionStatus, null);
 
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
@@ -223,7 +222,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetsWithActionStatusForScheduledRG)
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroupScheduled.getId()));
         assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForScheduledRG,
-                Status.SCHEDULED, Optional.empty());
+                Status.SCHEDULED, null);
 
         final List<Action> runningActions = findActionsByRolloutAndStatus(rollout, Status.RUNNING);
         final RolloutGroup rolloutGroupRunning = runningActions.get(0).getRolloutGroup();
@@ -241,7 +240,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetsWithActionStatusForRunningRG)
                 .hasSize((int) rolloutGroupManagement.countTargetsOfRolloutsGroup(rolloutGroupRunning.getId()));
         assertTargetNotNullAndActionStatusAndActionStatusCode(targetsWithActionStatusForRunningRG,
-                Status.RUNNING, Optional.of(100));
+                Status.RUNNING, 100);
     }
 
     private void assertThatListIsSortedByTargetName(final List<TargetWithActionStatus> targets,

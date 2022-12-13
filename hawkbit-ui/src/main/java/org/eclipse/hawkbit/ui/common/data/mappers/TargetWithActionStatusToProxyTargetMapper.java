@@ -38,11 +38,8 @@ public class TargetWithActionStatusToProxyTargetMapper
         proxyTarget.setCreatedDate(SPDateTimeUtil.getFormattedDate(target.getCreatedAt()));
         proxyTarget.setCreatedBy(UserDetailsFormatter.loadAndFormatCreatedBy(target));
         proxyTarget.setLastTargetQuery(target.getLastTargetQuery());
-        proxyTarget.setLastActionStatusCode(targetWithActionStatus.getLastActionStatusCode().orElse(null));
-
-        if (targetWithActionStatus.getStatus() != null) {
-            proxyTarget.setStatus(targetWithActionStatus.getStatus());
-        }
+        proxyTarget.setLastActionStatusCode(targetWithActionStatus.getLastActionStatusCode());
+        proxyTarget.setStatus(targetWithActionStatus.getStatus());
 
         return proxyTarget;
     }
