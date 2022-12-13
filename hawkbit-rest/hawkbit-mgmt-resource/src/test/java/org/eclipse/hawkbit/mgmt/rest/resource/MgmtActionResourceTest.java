@@ -130,8 +130,8 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlDsVersion = "distributionSet.version==" + ds.getVersion();
         final String rsqlDsId = "distributionSet.id==" + ds.getId();
 
-        mvc.perform(
-                get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName).param("representation", "full"))
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlDsName)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content.[0]._links.distributionset.name",
                         equalTo(ds.getName() + ":" + ds.getVersion())));
@@ -174,15 +174,17 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlRolloutName = "rollout.name==" + rollout.getName() + "*";
         final String rsqlRolloutId = "rollout.id==" + rollout.getId();
 
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName).param("representation",
-                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
                         "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
 
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutId).param("representation",
-                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutId)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target1.getName()))).andExpect(jsonPath(
                         "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
     }
@@ -199,9 +201,10 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final String rsqlTargetName = "target.name==knownTargetId";
 
         // pending status one result
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName).param("representation",
-                "full")).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("total", equalTo(1))).andExpect(jsonPath("size", equalTo(1)))
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
                 .andExpect(jsonPath("content.[0]._links.target.name", equalTo(target.getName()))).andExpect(jsonPath(
                         "content.[0]._links.distributionset.name", equalTo(ds.getName() + ":" + ds.getVersion())));
     }
