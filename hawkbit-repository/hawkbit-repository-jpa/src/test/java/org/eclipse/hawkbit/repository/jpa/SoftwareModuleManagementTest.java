@@ -308,6 +308,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
         assertTrue(assignedModule.isDeleted(), "The module should be flagged as deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
+        assertThat(softwareModuleManagement.findByRsql(PAGE, "name==*")).isEmpty();
+        assertThat(softwareModuleManagement.count()).isZero();
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
         // verify: binary data is deleted

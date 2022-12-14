@@ -115,9 +115,8 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set invalid description text should not be created")
-                .isThrownBy(() -> distributionSetManagement.create(
-                        entityFactory.distributionSet().create().name("a").version("a")
-                                .description(INVALID_TEXT_HTML)));
+                .isThrownBy(() -> distributionSetManagement.create(entityFactory.distributionSet().create().name("a")
+                        .version("a").description(INVALID_TEXT_HTML)));
 
         assertThatExceptionOfType(ConstraintViolationException.class)
                 .as("set with too long description should not be updated")
@@ -334,6 +333,7 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
     @Test
     @Description("Tests the successfull deletion of used (soft delete) distribution set types.")
     public void deleteAssignedDistributionSetType() {
+        final int existing = (int) distributionSetTypeManagement.count();
         final JpaDistributionSetType toBeDeleted = (JpaDistributionSetType) distributionSetTypeManagement
                 .create(entityFactory.distributionSetType().create().key("softdeleted").name("to be deleted"));
 
@@ -345,6 +345,10 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         final Optional<DistributionSetType> softdeleted = distributionSetTypeManagement.getByKey("softdeleted");
         assertThat(softdeleted).isPresent();
         assertThat(softdeleted.get().isDeleted()).isTrue();
+        System.out.println();
+        assertThat(distributionSetTypeManagement.findAll(PAGE)).hasSize(existing);
+        assertThat(distributionSetTypeManagement.findByRsql(PAGE, "name==*")).hasSize(existing);
+        assertThat(distributionSetTypeManagement.count()).isEqualTo(existing);
     }
 
     @Test
