@@ -345,7 +345,6 @@ public class DistributionSetTypeManagementTest extends AbstractJpaIntegrationTes
         final Optional<DistributionSetType> softdeleted = distributionSetTypeManagement.getByKey("softdeleted");
         assertThat(softdeleted).isPresent();
         assertThat(softdeleted.get().isDeleted()).isTrue();
-        System.out.println();
         assertThat(distributionSetTypeManagement.findAll(PAGE)).hasSize(existing);
         assertThat(distributionSetTypeManagement.findByRsql(PAGE, "name==*")).hasSize(existing);
         assertThat(distributionSetTypeManagement.count()).isEqualTo(existing);
