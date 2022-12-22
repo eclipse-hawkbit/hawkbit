@@ -171,7 +171,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
 
-        final String rsqlRolloutName = "rollout.name==" + rollout.getName() + "*";
+        final String rsqlRolloutName = "rollout.name==" + rollout.getName();
         final String rsqlRolloutId = "rollout.id==" + rollout.getId();
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlRolloutName)

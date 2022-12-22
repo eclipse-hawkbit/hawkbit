@@ -41,7 +41,7 @@ import io.qameta.allure.Story;
 @Story("Action Resource")
 public class ActionResourceDocumentationTest extends AbstractApiRestDocumentation {
 
-    private final String targetId = "137";
+    private final String targetId = "target137";
 
     @Override
     public String getResourceName() {
@@ -85,10 +85,11 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Test
     @Description("Handles the GET request of retrieving all actions based on parameters. Required Permission: READ_TARGET.")
     public void getActionsWithParameters() throws Exception {
-        generateRolloutActionForTarget(targetId);
+        final Action action = generateRolloutActionForTarget(targetId);
 
-        mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING
-                + "?limit=10&sort=id:ASC&offset=0&q=target.name==" + targetId + "&representation=full"))
+        mockMvc.perform(
+                get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?limit=10&sort=id:ASC&offset=0&q=rollout.id=="
+                        + action.getRollout().getId() + "&representation=full"))
                 .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
                 .andDo(this.document.document(requestParameters(
                         parameterWithName("limit").attributes(key("type").value("query"))
