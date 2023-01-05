@@ -1576,7 +1576,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThat(groups.get(2).getTotalTargets()).isEqualTo(countTargetsInGroup3);
 
     }
-    
+
     @Test
     @Description("Verify rollout execution with advanced group definition and confirmation flow active.")
     void createRolloutWithGroupDefinitionAndConfirmationFlowActive() {
@@ -1664,7 +1664,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             }
         });
     }
-    
+
     private void assertAllActionOfRolloutGroupHavingStatus(final long rolloutGroupId, final Status status) {
         final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
               .getContent();
@@ -1674,8 +1674,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
             assertThat(activeActions).hasSize(1);
             assertThat(activeActions.get(0).getStatus()).isEqualTo(status);
         });
-    }    
-    
+    }
+
     private void forceQuitAllActionsOfRolloutGroup(final long rolloutGroupId) {
         final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroupId)
                 .getContent();
@@ -1904,6 +1904,9 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(rolloutManagement.findAll(PAGE, true).getContent()).hasSize(1);
         assertThat(rolloutManagement.findAll(PAGE, false).getContent()).isEmpty();
+        assertThat(rolloutManagement.findByRsql(PAGE, "name==*", true).getContent()).hasSize(1);
+        assertThat(rolloutManagement.findByRsql(PAGE, "name==*", false).getContent()).isEmpty();
+        assertThat(rolloutManagement.count()).isZero();
         assertThat(rolloutGroupManagement.findByRolloutWithDetailedStatus(PAGE, createdRollout.getId()).getContent())
                 .hasSize(amountGroups);
 
@@ -1939,8 +1942,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final String prefixRolloutReady = randomString + "2";
         final RolloutCreate rolloutReadyCreate = entityFactory.rollout().create()
-                .name(prefixRolloutReady + "-testRollout").targetFilterQuery("name==" + randomString + "*")
-                .set(testDs);
+                .name(prefixRolloutReady + "-testRollout").targetFilterQuery("name==" + randomString + "*").set(testDs);
         Rollout rolloutReady = rolloutManagement.create(rolloutReadyCreate, 1, false, conditions);
         // Let the executor handle created Rollout
         rolloutManagement.handleRollouts();
@@ -1954,7 +1956,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
                 .findAll(PageRequest.of(0, 500, Sort.by(Direction.ASC, "name")), false).getContent();
         assertThat(rolloutsOrderedByName).containsSubsequence(List.of(rolloutRunning, rolloutReady));
     }
-
 
     @Test
     @Description("Creating a rollout without weight value when multi assignment in enabled.")
