@@ -161,7 +161,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
             final RepositoryProperties repositoryProperties) {
-        super(actionRepository, repositoryProperties);
+        super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.distributionSetManagement = distributionSetManagement;

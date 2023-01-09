@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.ddi.rest.resource.DdiRootController.DEVICE_REPORTED_CONFIRMATION_CODE;
+import static org.eclipse.hawkbit.repository.jpa.JpaConfirmationManagement.CONFIRMATION_CODE_MSG_PREFIX;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
@@ -479,7 +479,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.actionHistory.messages", hasItem(containsString(CONFIRMED_MESSAGE))))
                 .andExpect(jsonPath("$.actionHistory.messages",
-                        hasItem(containsString(String.format(DEVICE_REPORTED_CONFIRMATION_CODE, CONFIRMED_CODE)))));
+                        hasItem(containsString(String.format(CONFIRMATION_CODE_MSG_PREFIX, CONFIRMED_CODE)))));
     }
 
 }

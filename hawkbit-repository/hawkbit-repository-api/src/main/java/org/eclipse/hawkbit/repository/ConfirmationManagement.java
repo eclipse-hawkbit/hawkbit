@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.validation.constraints.NotEmpty;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -72,6 +73,33 @@ public interface ConfirmationManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Action> autoConfirmActiveActions(@NotEmpty String controllerId);
+
+    /**
+     * Confirm a given action to put it from
+     * {@link Action.Status#WAIT_FOR_CONFIRMATION} to {@link Action.Status#RUNNING}
+     * state.
+     * 
+     * @param action
+     *            mandatory to know which action to confirm
+     * @param code
+     *            optional value to specify a code for the created action status
+     * @param messages
+     *            optional value to specify message for the created action status
+     */
+    void confirmAction(@NotEmpty Action action, Integer code, Collection<String> messages);
+
+    /**
+     * Deny a given action and leave it in
+     * {@link Action.Status#WAIT_FOR_CONFIRMATION} state.
+     *
+     * @param action
+     *            mandatory to know which action to deny
+     * @param code
+     *            optional value to specify a code for the created action status
+     * @param messages
+     *            optional value to specify message for the created action status
+     */
+    void denyAction(Action action, Integer code, Collection<String> messages);
 
     /**
      * Deactivate auto confirmation for a specific controller id

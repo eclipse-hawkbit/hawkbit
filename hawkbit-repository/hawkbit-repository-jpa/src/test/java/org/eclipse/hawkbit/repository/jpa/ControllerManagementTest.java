@@ -793,6 +793,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.IN_SYNC);
 
+        assertThat(actionRepository.findById(action.getId()))
+                .hasValueSatisfying(a -> assertThat(a.getStatus()).isEqualTo(Status.FINISHED));
         assertThat(actionStatusRepository.count()).isEqualTo(3);
         assertThat(controllerManagement.findActionStatusByAction(PAGE, action.getId()).getNumberOfElements())
                 .isEqualTo(3);
@@ -803,7 +805,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
             + "configured to accept them.")
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = ActionCreatedEvent.class, count = 1), @Expect(type = ActionUpdatedEvent.class, count = 2),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),

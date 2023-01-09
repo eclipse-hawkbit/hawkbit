@@ -747,9 +747,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ConfirmationManagement confirmationManagement(final TargetRepository targetRepository,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final RepositoryProperties repositoryProperties, final EntityFactory entityFactory) {
+            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
+            final EntityFactory entityFactory) {
         return new JpaConfirmationManagement(targetRepository, actionRepository, actionStatusRepository,
-                repositoryProperties, entityFactory);
+                repositoryProperties, quotaManagement, entityFactory);
     }
 
     /**
@@ -760,8 +761,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
-        return new JpaControllerManagement(executorService, repositoryProperties, actionRepository);
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+        return new JpaControllerManagement(executorService, actionRepository, actionStatusRepository, quotaManagement,
+                repositoryProperties);
     }
 
     @Bean

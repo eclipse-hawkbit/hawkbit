@@ -31,6 +31,13 @@ public enum SpServerError {
     SP_REPO_AUTO_CONF_ALREADY_ACTIVE("hawkbit.server.error.repo.autoConfAlreadyActive",
           "Auto confirmation is already active"),
 
+
+    /**
+     *
+     */
+    SP_CONFIRMATION_FEEDBACK_INVALID("hawkbit.server.confirmation.feedback.invalid",
+          "Confirmation feedback is not valid"),
+
     /**
     *
     */

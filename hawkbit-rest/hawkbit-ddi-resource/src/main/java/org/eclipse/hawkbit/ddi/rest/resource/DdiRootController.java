@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.event.remote.DownloadProgressEvent;
 import org.eclipse.hawkbit.repository.exception.ArtifactBinaryNotFoundException;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.exception.SoftwareModuleNotAssignedToTargetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -98,8 +99,6 @@ public class DdiRootController implements DdiRootControllerRestApi {
 
     private static final Logger LOG = LoggerFactory.getLogger(DdiRootController.class);
     private static final String GIVEN_ACTION_IS_NOT_ASSIGNED_TO_GIVEN_TARGET = "given action ({}) is not assigned to given target ({}).";
-
-    protected static final String DEVICE_REPORTED_CONFIRMATION_CODE = "Device reported status code: %d";
     private static final String FALLBACK_REMARK = "Initiated using the Device Direct Integration API without providing a remark.";
 
     @Autowired
@@ -686,50 +685,31 @@ public class DdiRootController implements DdiRootControllerRestApi {
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
 
-        if (!action.isActive()) {
-            LOG.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
-                    action.getId(), feedback.getConfirmation());
-            return new ResponseEntity<>(HttpStatus.GONE);
+        try {
+
+            switch (feedback.getConfirmation()) {
+            case CONFIRMED:
+                LOG.info("Controller confirmed the action (actionId: {}, controllerId: {}) as we got {} report.",
+                        actionId, controllerId, feedback.getConfirmation());
+                confirmationManagement.confirmAction(action, feedback.getCode(), feedback.getDetails());
+                break;
+            case DENIED:
+            default:
+                LOG.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.",
+                        actionId, controllerId, feedback.getConfirmation());
+                confirmationManagement.denyAction(action, feedback.getCode(), feedback.getDetails());
+                break;
+            }
+        } catch (final InvalidConfirmationFeedbackException e) {
+            if (e.getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED) {
+                LOG.warn("Updating action {} with confirmation {} not possible since action not active anymore.",
+                        action.getId(), feedback.getConfirmation());
+                return new ResponseEntity<>(HttpStatus.GONE);
+            } else if (e.getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION) {
+                LOG.debug("Action is not waiting for confirmation, deny request.");
+                return ResponseEntity.notFound().build();
+            }
         }
-
-        if (!action.isWaitingConfirmation()) {
-            LOG.debug("Action is not waiting for confirmation, deny request.");
-            return ResponseEntity.notFound().build();
-        }
-
-        final ActionStatusCreate actionStatusCreate = entityFactory.actionStatus().create(actionId);
-        final List<String> messages = new ArrayList<>();
-
-        if (!CollectionUtils.isEmpty(feedback.getDetails())) {
-            messages.addAll(feedback.getDetails());
-        }
-
-        final Integer code = feedback.getCode();
-        if (code != null) {
-            actionStatusCreate.code(code);
-            messages.add(String.format(DEVICE_REPORTED_CONFIRMATION_CODE, code));
-        }
-
-        final Status status;
-        switch (feedback.getConfirmation()) {
-        case CONFIRMED:
-            LOG.info("Controller confirmed the action (actionId: {}, controllerId: {}) as we got {} report.", actionId,
-                    controllerId, feedback.getConfirmation());
-            status = Status.RUNNING;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target confirmed action."
-                    + " Therefore, it will be set to the running state to proceed with the deployment.");
-            break;
-        case DENIED:
-        default:
-            LOG.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.", actionId,
-                    controllerId, feedback.getConfirmation());
-            status = Status.WAIT_FOR_CONFIRMATION;
-            messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected action."
-                    + " Action will stay in confirmation pending state.");
-            break;
-        }
-
-        controllerManagement.addUpdateActionStatus(actionStatusCreate.status(status).messages(messages));
 
         return ResponseEntity.ok().build();
     }
