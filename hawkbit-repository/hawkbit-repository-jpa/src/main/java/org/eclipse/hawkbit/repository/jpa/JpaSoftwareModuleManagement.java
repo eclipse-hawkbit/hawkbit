@@ -270,11 +270,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
-                SoftwareModuleFields.class, virtualPropertyReplacer, database);
+        final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(2);
+        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class, virtualPropertyReplacer,
+                database));
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable,
-                Collections.singletonList(spec));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable, specList);
     }
 
     @Override
