@@ -86,7 +86,7 @@ public interface ConfirmationManagement {
      * @param messages
      *            optional value to specify message for the created action status
      */
-    void confirmAction(@NotEmpty Action action, Integer code, Collection<String> messages);
+    void confirmAction(Action action, Integer code, Collection<String> messages);
 
     /**
      * Deny a given action and leave it in
