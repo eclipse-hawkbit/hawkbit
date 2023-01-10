@@ -33,6 +33,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
     public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
+    public static final String LINK_TO_TARGET = "The link to the target.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
@@ -158,6 +159,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
 
+    public static final String ACTION_DETAIL_STATUS = "Detailed status of action.";
+
     public static final String ACTION_LIST = "List of actions.";
 
     public static final String ACTION_WEIGHT = "Weight of the action showing the importance of the update.";
@@ -245,4 +248,7 @@ public final class MgmtApiModelProperties {
     public static final String CONFIG_PARAM = "The name of the configuration parameter.";
 
     public static final String DS_NEW_ASSIGNED_ACTIONS = "The newly created actions as a result of this assignment";
+
+    public static final String REPRESENTATION_MODE = "The representation mode. Can be \"full\" or \"compact\". Defaults to \"compact\"";
+
 }

@@ -237,6 +237,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("content[].status")
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("content[].detailStatus")
+                                        .description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                                 fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
@@ -270,11 +274,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("String"),
                                 fieldWithPath("content[].type").description(MgmtApiModelProperties.ACTION_TYPE)
                                         .attributes(key("value").value("['update', 'cancel']")),
-
                                 fieldWithPath("content[].status")
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
-                                fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
+                                fieldWithPath("content[].detailStatus")
+                                        .description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                                fieldWithPath("content[]._links.self")
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                                 fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("content[].maintenanceWindow")
@@ -363,13 +371,17 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
                                 fieldWithPath("rolloutName").description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
                                         .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
-                                fieldWithPath("_links.rollout").description(MgmtApiModelProperties.LINK_TO_ROLLOUT))));
+                                fieldWithPath("_links.rollout").description(MgmtApiModelProperties.LINK_TO_ROLLOUT),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
@@ -401,6 +413,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
                                 fieldWithPath("maintenanceWindow.schedule")
@@ -414,7 +429,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
-                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES))));
+                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
@@ -451,10 +467,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
-                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES))));
+                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
