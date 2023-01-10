@@ -109,6 +109,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
                         fieldWithPath("content[].targetType").description(MgmtApiModelProperties.TARGETTYPE_ID)
                                 .type("Number"),
+                        fieldWithPath("content[].targetTypeName").description(MgmtApiModelProperties.TARGETTYPE_NAME)
+                                .type("String"),
                         fieldWithPath("content[]._links.self").ignored())));
     }
 
@@ -156,6 +158,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("[]requestAttributes")
                                         .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
                                 fieldWithPath("[]targetType").description(MgmtApiModelProperties.TARGETTYPE_ID),
+                                fieldWithPath("[]targetTypeName").description(MgmtApiModelProperties.TARGETTYPE_NAME),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 

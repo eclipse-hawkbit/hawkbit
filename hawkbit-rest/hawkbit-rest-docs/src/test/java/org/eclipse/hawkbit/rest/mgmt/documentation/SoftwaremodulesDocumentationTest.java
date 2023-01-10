@@ -92,6 +92,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                         fieldWithPath("content[].lastModifiedAt")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                         fieldWithPath("content[].type").description(MgmtApiModelProperties.SM_TYPE),
+                        fieldWithPath("content[].typeName").description(MgmtApiModelProperties.SM_TYPE_NAME),
                         fieldWithPath("content[].version").description(MgmtApiModelProperties.VERSION),
                         fieldWithPath("content[]._links.self").ignored())));
     }
@@ -151,6 +152,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("[].lastModifiedAt")
                                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                                 fieldWithPath("[].type").description(MgmtApiModelProperties.SM_TYPE),
+                                fieldWithPath("[].typeName").description(MgmtApiModelProperties.SM_TYPE_NAME),
                                 fieldWithPath("[].version").description(MgmtApiModelProperties.VERSION),
                                 fieldWithPath("[]._links.self").ignored())));
     }
@@ -193,6 +195,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("encrypted").description(MgmtApiModelProperties.ENCRYPTED),
                                 fieldWithPath("deleted").description(ApiModelPropertiesGeneric.DELETED),
                                 fieldWithPath("type").description(MgmtApiModelProperties.SM_TYPE),
+                                fieldWithPath("typeName").description(MgmtApiModelProperties.SM_TYPE_NAME),
                                 fieldWithPath("version").description(MgmtApiModelProperties.VERSION),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.type").description(MgmtApiModelProperties.SM_TYPE),
@@ -228,6 +231,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                 fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY),
                                 fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                                 fieldWithPath("type").description(MgmtApiModelProperties.SM_TYPE),
+                                fieldWithPath("typeName").description(MgmtApiModelProperties.SM_TYPE_NAME),
                                 fieldWithPath("version").description(MgmtApiModelProperties.VERSION),
                                 fieldWithPath("vendor").description(MgmtApiModelProperties.VENDOR),
                                 fieldWithPath("encrypted").description(MgmtApiModelProperties.ENCRYPTED),

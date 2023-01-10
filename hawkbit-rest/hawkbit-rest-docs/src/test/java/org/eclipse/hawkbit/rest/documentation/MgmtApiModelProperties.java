@@ -44,6 +44,7 @@ public final class MgmtApiModelProperties {
 
     // software module
     public static final String SM_TYPE = "The software module type " + ApiModelPropertiesGeneric.ENDING;
+    public static final String SM_TYPE_NAME = "The software module type name " + ApiModelPropertiesGeneric.ENDING;
     public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts should be encrypted upon upload.";
     public static final String ARTIFACT_HASHES = "Hashes of the artifact.";
     public static final String ARTIFACT_SIZE = "Size of the artifact.";
@@ -86,6 +87,7 @@ public final class MgmtApiModelProperties {
 
     // Target type
     public static final String TARGETTYPE_ID = "ID of the target type";
+    public static final String TARGETTYPE_NAME = "Name of the target type";
     public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
     public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
 
@@ -194,6 +196,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_TYPE_LIST = "List of distribution set types.";
 
     public static final String DS_TYPE = "The type of the distribution set.";
+
+    public static final String DS_TYPE_NAME = "The type name of the distribution set.";
 
     public static final String DS_COMPLETE = "True of the distribution set software module setup is complete as defined by the distribution set type.";
 

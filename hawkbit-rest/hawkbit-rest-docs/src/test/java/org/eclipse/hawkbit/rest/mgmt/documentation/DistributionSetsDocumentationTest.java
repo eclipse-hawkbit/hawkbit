@@ -99,6 +99,7 @@ public class DistributionSetsDocumentationTest extends AbstractApiRestDocumentat
                         fieldWithPath("content[].lastModifiedAt")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                         fieldWithPath("content[].type").description(MgmtApiModelProperties.DS_TYPE),
+                        fieldWithPath("content[].typeName").description(MgmtApiModelProperties.DS_TYPE_NAME),
                         fieldWithPath("content[].requiredMigrationStep")
                                 .description(MgmtApiModelProperties.DS_REQUIRED_STEP),
                         fieldWithPath("content[].complete").description(MgmtApiModelProperties.DS_COMPLETE),

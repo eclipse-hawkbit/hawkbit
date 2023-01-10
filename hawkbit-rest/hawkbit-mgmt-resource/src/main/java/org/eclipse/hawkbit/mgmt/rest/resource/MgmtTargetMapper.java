@@ -161,6 +161,7 @@ public final class MgmtTargetMapper {
         }
         if (target.getTargetType() != null) {
             targetRest.setTargetType(target.getTargetType().getId());
+            targetRest.setTargetTypeName(target.getTargetType().getName());
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
