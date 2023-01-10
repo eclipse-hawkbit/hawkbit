@@ -184,6 +184,11 @@
       <rsql-parser.version>2.1.0</rsql-parser.version>
       <awaitility.version>3.1.2</awaitility.version>
       <io-protostuff.version>1.5.6</io-protostuff.version>
+
+      <!-- SONATYPE-2021-1175 -->
+      <logback.version>1.2.9</logback.version>
+      <!-- CVE-2020-36518, CVE-2022-42003, CVE-2022-42004 -->
+      <jackson-bom.version>2.14.0</jackson-bom.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
