@@ -72,8 +72,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
-import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -582,7 +580,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             if (rolloutGroupActions.getContent().isEmpty()) {
                 return 0L;
             }
-            
+
             final List<Action> newTargetAssignments = handleTargetAssignments(rolloutGroupActions);
 
             if (!newTargetAssignments.isEmpty()) {
@@ -592,7 +590,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return rolloutGroupActions.getTotalElements();
         });
     }
-    
+
     private List<Action> handleTargetAssignments(final Page<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
         final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
@@ -651,9 +649,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return Collections.unmodifiableList(savedActions);
     }
 
-    private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions){
+    private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions) {
         final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId)
-              .collect(Collectors.toList());
+                .collect(Collectors.toList());
         if (isActionsAutocloseEnabled()) {
             onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetIds);
         } else {
@@ -661,7 +659,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private List<JpaAction> activateActions(final List<JpaAction> actions){
+    private List<JpaAction> activateActions(final List<JpaAction> actions) {
         actions.forEach(action -> {
             action.setActive(true);
             action.setStatus(Status.RUNNING);
@@ -861,6 +859,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    public long countActions(final String rsqlParam) {
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.countBySpec(actionRepository, specList);
+    }
+
+    @Override
     public long countActionsByDistributionSetIdAndActiveIsTrue(final Long distributionSet) {
         return actionRepository.countByDistributionSetIdAndActiveIsTrue(distributionSet);
     }
@@ -880,6 +885,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public Slice<Action> findActionsAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
+    }
+
+    @Override
+    public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
     }
 
     @Override
@@ -990,4 +1002,5 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             });
         }
     }
+
 }
