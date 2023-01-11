@@ -139,14 +139,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final DistributionSetManagement distributionSetManagement;
     private final DistributionSetRepository distributionSetRepository;
     private final TargetRepository targetRepository;
-    private final ActionStatusRepository actionStatusRepository;
     private final AuditorAware<String> auditorProvider;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final PlatformTransactionManager txManager;
     private final OnlineDsAssignmentStrategy onlineDsAssignmentStrategy;
     private final OfflineDsAssignmentStrategy offlineDsAssignmentStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
-    private final QuotaManagement quotaManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final Database database;
@@ -166,7 +164,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.distributionSetRepository = distributionSetRepository;
         this.distributionSetManagement = distributionSetManagement;
         this.targetRepository = targetRepository;
-        this.actionStatusRepository = actionStatusRepository;
         this.auditorProvider = auditorProvider;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.txManager = txManager;
@@ -177,7 +174,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement,
                 this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
-        this.quotaManagement = quotaManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;

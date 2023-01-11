@@ -204,6 +204,10 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
                 "Automatically confirm actionId '{}' due to active auto-confirmation initiated by '{}' and rollouts system user '{}'",
                 action.getId(), autoConfirmationStatus.getInitiator(), autoConfirmationStatus.getCreatedBy());
 
+        // do not make use of
+        // org.eclipse.hawkbit.repository.jpa.JpaActionManagement.handleAddUpdateActionStatus
+        // to bypass the quota check. Otherwise the action will not be confirmed in case
+        // of exceeded action status quota.
         action.setStatus(Status.RUNNING);
         actionStatus.setAction(action);
 

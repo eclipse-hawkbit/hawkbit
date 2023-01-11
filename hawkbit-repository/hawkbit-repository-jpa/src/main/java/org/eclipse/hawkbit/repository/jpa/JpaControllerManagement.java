@@ -127,12 +127,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private SoftwareModuleRepository softwareModuleRepository;
 
     @Autowired
-    private ActionStatusRepository actionStatusRepository;
-
-    @Autowired
-    private QuotaManagement quotaManagement;
-
-    @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
