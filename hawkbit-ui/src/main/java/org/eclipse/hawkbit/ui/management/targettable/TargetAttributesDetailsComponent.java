@@ -90,14 +90,13 @@ public class TargetAttributesDetailsComponent extends CustomField<ProxyTargetAtt
         }
         targetAttributesDetailsLayout.addComponent(topRow);
 
-        final VerticalLayout attributesLayout = buildAttributesLayout(isRequestAttributes, targetAttributes);
+        final VerticalLayout attributesLayout = buildAttributesLayout(targetAttributes);
         targetAttributesDetailsLayout.addComponent(attributesLayout);
         targetAttributesDetailsLayout.setExpandRatio(attributesLayout, 1.0F);
 
     }
 
-    private VerticalLayout buildAttributesLayout(final boolean isRequestAttributes,
-            final List<ProxyKeyValueDetails> targetAttributes) {
+    private VerticalLayout buildAttributesLayout(final List<ProxyKeyValueDetails> targetAttributes) {
         final VerticalLayout attributesLayout = new VerticalLayout();
         attributesLayout.setMargin(false);
         attributesLayout.setSpacing(false);
