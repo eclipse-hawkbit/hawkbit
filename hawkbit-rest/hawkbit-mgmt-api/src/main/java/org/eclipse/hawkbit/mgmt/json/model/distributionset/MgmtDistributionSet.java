@@ -44,6 +44,9 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     private String type;
 
     @JsonProperty
+    private String typeName;
+
+    @JsonProperty
     private Boolean complete;
 
     @JsonProperty
@@ -107,6 +110,14 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
 
     public void setType(final String type) {
         this.type = type;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(final String typeName) {
+        this.typeName = typeName;
     }
 
     public Boolean getComplete() {

@@ -218,6 +218,16 @@ public interface DeploymentManagement {
     long countActionsAll();
 
     /**
+     * Counts the actions which match the given query.
+     * 
+     * @param rsqlParam
+     *            RSQL query.
+     * @return the total number of actions matching the given RSQL query.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActions(@NotNull String rsqlParam);
+
+    /**
      * Counts all actions associated to a specific target.
      *
      * @param controllerId
@@ -273,6 +283,19 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsAll(@NotNull Pageable pageable);
+
+    /**
+     * Retrieves all {@link Action} entities which match the given RSQL query.
+     * 
+     * @param rsqlParam
+     *            RSQL query string
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * 
+     * @return a paged list of {@link Action}s.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<Action> findActions(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link Action} which assigned to a specific

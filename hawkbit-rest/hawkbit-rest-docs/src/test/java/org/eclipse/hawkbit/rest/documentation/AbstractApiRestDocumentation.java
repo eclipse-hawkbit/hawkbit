@@ -255,7 +255,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
         controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(action.getId()).code(code).status(Status.RUNNING));
     }
-    
+
     protected Target createTargetByGivenNameWithAttributes(final String name, final DistributionSet distributionSet) {
         return createTargetByGivenNameWithAttributes(name, true, false, distributionSet);
     }
@@ -289,8 +289,10 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                         .type("String"),
                 fieldWithPath(fieldArrayPrefix + "lastControllerRequestAt")
                         .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
-                fieldWithPath(fieldArrayPrefix + "targetType")
-                        .description(MgmtApiModelProperties.TARGETTYPE_ID).type("Number"),
+                fieldWithPath(fieldArrayPrefix + "targetType").description(MgmtApiModelProperties.TARGETTYPE_ID)
+                        .type("Number"),
+                fieldWithPath(fieldArrayPrefix + "targetTypeName").description(MgmtApiModelProperties.TARGETTYPE_NAME)
+                        .type("String"),
                 fieldWithPath(fieldArrayPrefix + "_links.self").ignored());
 
         if (!isArray) {
@@ -331,6 +333,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                 fieldWithPath(arrayPrefix + "lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                 fieldWithPath(arrayPrefix + "type").description(MgmtApiModelProperties.DS_TYPE),
+                fieldWithPath(arrayPrefix + "typeName").description(MgmtApiModelProperties.DS_TYPE_NAME),
                 fieldWithPath(arrayPrefix + "requiredMigrationStep")
                         .description(MgmtApiModelProperties.DS_REQUIRED_STEP),
                 fieldWithPath(arrayPrefix + "complete").description(MgmtApiModelProperties.DS_COMPLETE),

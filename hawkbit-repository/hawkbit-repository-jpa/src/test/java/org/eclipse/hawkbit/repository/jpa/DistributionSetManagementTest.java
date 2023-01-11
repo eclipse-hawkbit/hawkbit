@@ -678,8 +678,8 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // correct
         final List<DistributionSet> tSecondPinOrderedByName = distributionSetManagement
                 .findByDistributionSetFilterOrderByLinkedTarget(
-                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "version")),
-                        distributionSetFilter, tSecond.getControllerId())
+                        PageRequest.of(0, 500, Sort.by(Direction.DESC, "version")), distributionSetFilter,
+                        tSecond.getControllerId())
                 .getContent();
         assertThat(tSecondPinOrderedByName).hasSize(10);
         // installed
@@ -1081,6 +1081,9 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         // not assigned so not marked as deleted
         assertThat(distributionSetRepository.findAll()).hasSize(4);
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(2);
+        assertThat(distributionSetManagement.findAll(PAGE)).hasSize(2);
+        assertThat(distributionSetManagement.findByRsql(PAGE, "name==*")).hasSize(2);
+        assertThat(distributionSetManagement.count()).isEqualTo(2);
     }
 
     @Test
