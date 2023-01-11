@@ -10,12 +10,11 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.springframework.hateoas.RepresentationModel;
 
 /**
  * Payload to activate the auto-confirmation by given initiator and remark.
  */
-public class MgmtTargetAutoConfirmUpdate extends RepresentationModel<MgmtTargetAutoConfirmUpdate> {
+public class MgmtTargetAutoConfirmUpdate {
     @JsonProperty(required = false)
     private final String initiator;
 

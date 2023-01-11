@@ -245,6 +245,152 @@ include::../errors/429.adoc[]
 |===
 
 
+== GET /rest/v1/targets/{targetId}/autoConfirm
+
+=== Implementation Notes
+
+Handles the GET request to check the current auto-confirmation state of a target. Required Permission: READ_TARGET
+
+=== Request auto-confirmation state for a specific target
+
+==== Curl
+
+include::{snippets}/targets/get-target-auto-confirm-state-active/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/get-target-auto-confirm-state-active/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/get-target-auto-confirm-state-active/path-parameters.adoc[]
+
+=== Response in case auto-confirmation is active (Status 200)
+
+In case auto-confirmation is active, details like the initiator, remark and date of activation (as unix timestamp) will be provided. Reference links to switch the auto-confirmation state are exposed as well.
+
+==== Response fields
+
+include::{snippets}/targets/get-target-auto-confirm-state-active/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-target-auto-confirm-state-active/http-response.adoc[]
+
+=== Response in case auto-confirmation is not active (Status 200)
+
+The response body references a link to activate auto-confirmation.
+
+==== Response fields
+
+include::{snippets}/targets/get-target-auto-confirm-state-not-active/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/targets/get-target-auto-confirm-state-not-active/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targets/{targetId}/autoConfirm/activate
+
+=== Implementation Notes
+
+Handles the POST request to activate auto-confirmation for a specific target.
+As a result all current active as well as future actions will automatically be confirmed by mentioning the initiator as triggered person.
+Actions will be automatically confirmed, as long as auto-confirmation is active.
+Required Permission: UPDATE_TARGET
+
+=== Activate auto-confirmation for a target
+
+==== Curl
+
+include::{snippets}/targets/post-activate-auto-confirm/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/post-activate-auto-confirm/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/post-activate-auto-confirm/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/targets/post-activate-auto-confirm/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
+== POST /rest/v1/targets/{targetId}/autoConfirm/deactivate
+
+=== Implementation Notes
+
+Handles the POST request to deactivate auto-confirmation for a specific target.
+All active actions will remain unchanged while all future actions need to be confirmed, before processing with the deployment.
+Required Permission: UPDATE_TARGET
+
+=== Deactivate auto-confirmation for a target
+
+==== Curl
+
+include::{snippets}/targets/post-deactivate-auto-confirm/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/targets/post-deactivate-auto-confirm/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/targets/post-deactivate-auto-confirm/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+
 == GET /rest/v1/targets/{targetId}/actions
 
 === Implementation Notes

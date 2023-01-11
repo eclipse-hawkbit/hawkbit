@@ -929,8 +929,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("initiator")
                                         .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVATE_INITIATOR),
                                 optionalRequestFieldWithPath("remark")
-                                        .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVATE_REMARK),
-                                requestFieldWithPath("links").ignored())));
+                                        .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVATE_REMARK))));
     }
 
     @Test

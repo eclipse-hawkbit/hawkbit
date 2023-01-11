@@ -141,7 +141,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action denyAction(final long actionId, final Integer code, Collection<String> deviceMessages) {
+    public Action denyAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
         LOG.trace("Action with id {} deny request is triggered.", actionId);
         final Action action = getActionAndThrowExceptionIfNotFound(actionId);
         assertActionCanAcceptFeedback(action);

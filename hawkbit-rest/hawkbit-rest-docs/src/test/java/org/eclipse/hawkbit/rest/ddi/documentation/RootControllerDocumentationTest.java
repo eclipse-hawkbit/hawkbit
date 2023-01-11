@@ -791,7 +791,6 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                         requestFields(
                                 optionalRequestFieldWithPath("initiator")
                                         .description(DdiApiModelProperties.TARGET_AUTO_CONFIRM_ACTIVATE_INITIATOR),
-
                                 optionalRequestFieldWithPath("remark")
                                         .description(DdiApiModelProperties.TARGET_AUTO_CONFIRM_ACTIVATE_REMARK))));
     }
@@ -806,7 +805,10 @@ public class RootControllerDocumentationTest extends AbstractApiRestDocumentatio
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/"
                         + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE,
                 tenantAware.getCurrentTenant(), target.getControllerId())).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andDo(this.document.document(
+                        pathParameters(parameterWithName("tenant").description(ApiModelPropertiesGeneric.TENANT),
+                                parameterWithName("controllerId").description(DdiApiModelProperties.CONTROLLER_ID))));
     }
 
 }
