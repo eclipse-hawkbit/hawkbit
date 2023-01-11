@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -118,6 +119,9 @@ public class AmqpControllerAuthenticationTest {
     private ControllerManagement controllerManagement;
 
     @Mock
+    private ConfirmationManagement confirmationManagement;
+
+    @Mock
     private DdiSecurityProperties securityProperties;
 
     @Mock
@@ -156,7 +160,7 @@ public class AmqpControllerAuthenticationTest {
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate,
                 mock(AmqpMessageDispatcherService.class), controllerManagement, new JpaEntityFactory(),
-                systemSecurityContext, tenantConfigurationManagementMock);
+                systemSecurityContext, tenantConfigurationManagementMock, confirmationManagement);
 
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManager, artifactManagementMock, cacheMock, hostnameResolverMock, controllerManagement,

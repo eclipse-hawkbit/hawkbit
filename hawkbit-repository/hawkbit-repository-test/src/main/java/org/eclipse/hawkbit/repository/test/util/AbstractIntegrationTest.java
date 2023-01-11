@@ -371,6 +371,10 @@ public abstract class AbstractIntegrationTest {
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
+        if (savedAction.getStatus() == Action.Status.WAIT_FOR_CONFIRMATION) {
+            confirmationManagement.confirmAction(savedAction.getId(), null, null);
+        }
+
         savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
 

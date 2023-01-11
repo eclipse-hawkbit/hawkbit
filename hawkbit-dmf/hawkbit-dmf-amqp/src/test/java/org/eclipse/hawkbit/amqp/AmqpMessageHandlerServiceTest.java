@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadResponse;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -113,6 +114,9 @@ public class AmqpMessageHandlerServiceTest {
     private ControllerManagement controllerManagementMock;
 
     @Mock
+    private ConfirmationManagement confirmationManagementMock;
+
+    @Mock
     private EntityFactory entityFactoryMock;
 
     @Mock
@@ -177,7 +181,8 @@ public class AmqpMessageHandlerServiceTest {
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,
-                controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement);
+                controllerManagementMock, entityFactoryMock, systemSecurityContext, tenantConfigurationManagement,
+                confirmationManagementMock);
         amqpAuthenticationMessageHandlerService = new AmqpAuthenticationMessageHandler(rabbitTemplate,
                 authenticationManagerMock, artifactManagementMock, downloadIdCache, hostnameResolverMock,
                 controllerManagementMock, tenantAwareMock);

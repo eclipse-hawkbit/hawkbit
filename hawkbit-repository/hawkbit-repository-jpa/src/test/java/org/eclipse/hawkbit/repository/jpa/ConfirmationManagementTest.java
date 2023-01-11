@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.exception.AutoConfirmationAlreadyActiveException;
+import org.eclipse.hawkbit.repository.exception.InvalidConfirmationFeedbackException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -47,7 +48,7 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verify 'findActiveActionsWaitingConfirmation' method is filtering like expected")
     void retrieveActionsWithConfirmationState() {
         enableConfirmationFlow();
-        
+
         final String controllerId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
@@ -86,13 +87,100 @@ class ConfirmationManagementTest extends AbstractJpaIntegrationTest {
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(2)
                 .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
 
-        controllerManagement.addUpdateActionStatus(
-                entityFactory.actionStatus().create(actions.get(0).getId()).status(Status.RUNNING));
+        confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
 
         assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
                 .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION
                         && Objects.equals(action.getDistributionSet().getId(), dsId2));
 
+    }
+
+    @Test
+    @Description("Verify confirming an action will put it to the running state")
+    void confirmedActionWillSwitchToRunningState() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
+                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actions.get(0).getId())).hasSize(1)
+                .allMatch(status -> status.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+
+        final Action newAction = confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
+
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).isEmpty();
+
+        // verify action in RUNNING state
+        assertThat(newAction.getStatus()).isEqualTo(Status.RUNNING);
+
+        // status entry RUNNING should be present in status history
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, newAction.getId())).hasSize(2)
+                .anyMatch(status -> status.getStatus() == Status.RUNNING);
+    }
+
+    @Test
+    @Description("Verify confirming an confirmed action will lead to a specific failure")
+    void confirmedActionCannotBeConfirmedAgain() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        final Action newAction = confirmationManagement.confirmAction(actions.get(0).getId(), null, null);
+        // verify action in RUNNING state
+        assertThat(newAction.getStatus()).isEqualTo(Status.RUNNING);
+
+        assertThatThrownBy(() -> confirmationManagement.confirmAction(actions.get(0).getId(), null, null))
+              .isInstanceOf(InvalidConfirmationFeedbackException.class)
+              .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                    .getReason() == InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION);
+    }
+
+    @Test
+    @Description("Verify confirming a closed action will lead to a specific failure")
+    void confirmedActionCannotBeGivenOnFinishedAction() {
+        enableConfirmationFlow();
+        final Action action = prepareFinishedUpdate();
+
+        assertThatThrownBy(() -> confirmationManagement.confirmAction(action.getId(), null, null))
+              .isInstanceOf(InvalidConfirmationFeedbackException.class)
+              .matches(e -> ((InvalidConfirmationFeedbackException) e)
+                    .getReason() == InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED);
+    }
+
+    @Test
+    @Description("Verify denying an action will leave it in WFC state")
+    void deniedActionWillStayInWfcState() {
+        enableConfirmationFlow();
+
+        final String controllerId = testdataFactory.createTarget().getControllerId();
+        final Long dsId = testdataFactory.createDistributionSet().getId();
+
+        final List<Action> actions = assignDistributionSet(dsId, controllerId).getAssignedEntity();
+        assertThat(actions).hasSize(1).allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
+                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, actions.get(0).getId())).hasSize(1)
+                .allMatch(status -> status.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+
+        final Action newAction = confirmationManagement.denyAction(actions.get(0).getId(), null, null);
+
+        assertThat(confirmationManagement.findActiveActionsWaitingConfirmation(controllerId)).hasSize(1)
+                .allMatch(action -> action.getStatus() == Status.WAIT_FOR_CONFIRMATION);
+
+        // verify action still in WFC state
+        assertThat(newAction.getStatus()).isEqualTo(Status.WAIT_FOR_CONFIRMATION);
+
+        // no status entry RUNNING should be present in status history
+        assertThat(controllerManagement.findActionStatusByAction(PAGE, newAction.getId())).hasSize(2)
+                .noneMatch(status -> status.getStatus() == Status.RUNNING);
     }
 
     @Test

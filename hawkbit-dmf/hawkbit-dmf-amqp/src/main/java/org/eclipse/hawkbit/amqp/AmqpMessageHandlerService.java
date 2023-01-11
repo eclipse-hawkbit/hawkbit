@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -77,6 +78,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private ControllerManagement controllerManagement;
+    private ConfirmationManagement confirmationManagement;
 
     private final EntityFactory entityFactory;
 
@@ -103,18 +105,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the system Security Context
      * @param tenantConfigurationManagement
      *            the tenant configuration Management
+     * @param confirmationManagement
+     *            the confirmation management
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final ConfirmationManagement confirmationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.confirmationManagement = confirmationManagement;
     }
 
     /**
@@ -373,17 +378,25 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         final Status status = mapStatus(message, actionUpdateStatus, action);
-        final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
-                .messages(messages);
 
-        actionUpdateStatus.getCode().ifPresent(code -> {
-            actionStatus.code(code);
-            actionStatus.message("Device reported status code: " + code);
-        });
+        final Action updatedAction;
 
-        final Action updatedAction = (Status.CANCELED == status)
-                ? controllerManagement.addCancelActionStatus(actionStatus)
-                : controllerManagement.addUpdateActionStatus(actionStatus);
+        if (actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
+            updatedAction = confirmationManagement.confirmAction(action.getId(),
+                    actionUpdateStatus.getCode().orElse(null), messages);
+        } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
+            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode().orElse(null),
+                    messages);
+        } else {
+            final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
+                    .messages(messages);
+            actionUpdateStatus.getCode().ifPresent(code -> {
+                actionStatus.code(code);
+                actionStatus.message("Device reported status code: " + code);
+            });
+            updatedAction = (Status.CANCELED == status) ? controllerManagement.addCancelActionStatus(actionStatus)
+                    : controllerManagement.addUpdateActionStatus(actionStatus);
+        }
 
         if (shouldTargetProceed(updatedAction) || actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
             sendUpdateCommandToTarget(action.getTarget());

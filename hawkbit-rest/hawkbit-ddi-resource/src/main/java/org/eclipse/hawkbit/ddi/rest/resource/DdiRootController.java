@@ -691,13 +691,13 @@ public class DdiRootController implements DdiRootControllerRestApi {
             case CONFIRMED:
                 LOG.info("Controller confirmed the action (actionId: {}, controllerId: {}) as we got {} report.",
                         actionId, controllerId, feedback.getConfirmation());
-                confirmationManagement.confirmAction(action, feedback.getCode(), feedback.getDetails());
+                confirmationManagement.confirmAction(actionId, feedback.getCode(), feedback.getDetails());
                 break;
             case DENIED:
             default:
                 LOG.debug("Controller denied the action (actionId: {}, controllerId: {}) as we got {} report.",
                         actionId, controllerId, feedback.getConfirmation());
-                confirmationManagement.denyAction(action, feedback.getCode(), feedback.getDetails());
+                confirmationManagement.denyAction(actionId, feedback.getCode(), feedback.getDetails());
                 break;
             }
         } catch (final InvalidConfirmationFeedbackException e) {

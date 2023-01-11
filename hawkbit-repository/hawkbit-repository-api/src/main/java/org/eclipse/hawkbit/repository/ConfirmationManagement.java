@@ -79,27 +79,27 @@ public interface ConfirmationManagement {
      * {@link Action.Status#WAIT_FOR_CONFIRMATION} to {@link Action.Status#RUNNING}
      * state.
      * 
-     * @param action
+     * @param actionId
      *            mandatory to know which action to confirm
      * @param code
      *            optional value to specify a code for the created action status
      * @param messages
      *            optional value to specify message for the created action status
      */
-    void confirmAction(Action action, Integer code, Collection<String> messages);
+    Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
      * Deny a given action and leave it in
      * {@link Action.Status#WAIT_FOR_CONFIRMATION} state.
      *
-     * @param action
+     * @param actionId
      *            mandatory to know which action to deny
      * @param code
      *            optional value to specify a code for the created action status
      * @param messages
      *            optional value to specify message for the created action status
      */
-    void denyAction(Action action, Integer code, Collection<String> messages);
+    Action denyAction(long actionId, Integer code, Collection<String> messages);
 
     /**
      * Deactivate auto confirmation for a specific controller id

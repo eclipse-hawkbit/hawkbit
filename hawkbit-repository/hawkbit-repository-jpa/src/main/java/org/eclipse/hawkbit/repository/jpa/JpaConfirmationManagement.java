@@ -122,8 +122,9 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void confirmAction(final Action action, final Integer code, final Collection<String> deviceMessages) {
-        LOG.trace("Action with id {} confirm request is triggered.", action.getId());
+    public Action confirmAction(final long actionId, final Integer code, final Collection<String> deviceMessages) {
+        LOG.trace("Action with id {} confirm request is triggered.", actionId);
+        final Action action = getActionAndThrowExceptionIfNotFound(actionId);
         assertActionCanAcceptFeedback(action);
         final List<String> messages = new ArrayList<>();
         if (deviceMessages != null) {
@@ -133,25 +134,26 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
                 + " Therefore, it will be set to the running state to proceed with the deployment.");
         final ActionStatusCreate statusCreate = createConfirmationActionStatus(action.getId(), code, messages)
                 .status(Status.RUNNING);
-        addActionStatus((JpaActionStatusCreate) statusCreate);
+        return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void denyAction(final Action action, final Integer code, Collection<String> deviceMessages) {
-        LOG.trace("Action with id {} deny request is triggered.", action.getId());
+    public Action denyAction(final long actionId, final Integer code, Collection<String> deviceMessages) {
+        LOG.trace("Action with id {} deny request is triggered.", actionId);
+        final Action action = getActionAndThrowExceptionIfNotFound(actionId);
         assertActionCanAcceptFeedback(action);
         final List<String> messages = new ArrayList<>();
         if (deviceMessages != null) {
             messages.addAll(deviceMessages);
         }
         messages.add(RepositoryConstants.SERVER_MESSAGE_PREFIX + "Target rejected action."
-              + " Action will stay in confirmation pending state.");
+                + " Action will stay in confirmation pending state.");
         final ActionStatusCreate statusCreate = createConfirmationActionStatus(action.getId(), code, messages)
                 .status(Status.WAIT_FOR_CONFIRMATION);
-        addActionStatus((JpaActionStatusCreate) statusCreate);
+        return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
     private ActionStatusCreate createConfirmationActionStatus(final long actionId, final Integer code,
@@ -167,20 +169,19 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
         return statusCreate;
     }
 
-
     private static void assertActionCanAcceptFeedback(final Action action) {
         if (!action.isActive()) {
             final String msg = String.format(
-                  "Confirming action %s is not possible since the action is not active anymore.", action.getId());
+                    "Confirming action %s is not possible since the action is not active anymore.", action.getId());
             LOG.warn(msg);
             throw new InvalidConfirmationFeedbackException(InvalidConfirmationFeedbackException.Reason.ACTION_CLOSED,
-                  msg);
+                    msg);
         } else if (!action.isWaitingConfirmation()) {
             LOG.debug("Action is not waiting for confirmation, deny request.");
             final String msg = String.format("Action %s is not waiting for confirmation.", action.getId());
             LOG.warn(msg);
             throw new InvalidConfirmationFeedbackException(
-                  InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
+                    InvalidConfirmationFeedbackException.Reason.NOT_AWAITING_CONFIRMATION, msg);
         }
     }
 
