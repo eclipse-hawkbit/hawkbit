@@ -2082,7 +2082,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final String successCondition = "100";
         final String errorCondition = "80";
 
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         // triggers next group
@@ -2127,7 +2127,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         final String errorMessage = "Rollout is not in running state";
 
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // check CREATING state
