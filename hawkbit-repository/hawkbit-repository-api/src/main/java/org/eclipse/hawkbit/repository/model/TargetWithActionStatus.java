@@ -12,7 +12,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 
 /**
- * 
+ *
  * Target with action status.
  *
  */
@@ -22,6 +22,8 @@ public class TargetWithActionStatus implements Identifiable<Long> {
 
     private Status status;
 
+    private Integer lastActionStatusCode;
+
     public TargetWithActionStatus(final Target target) {
         this.target = target;
     }
@@ -29,6 +31,12 @@ public class TargetWithActionStatus implements Identifiable<Long> {
     public TargetWithActionStatus(final Target target, final Status status) {
         this.status = status;
         this.target = target;
+    }
+
+    public TargetWithActionStatus(final Target target, final Status status, final Integer lastActionStatusCode) {
+        this.status = status;
+        this.target = target;
+        this.lastActionStatusCode = lastActionStatusCode;
     }
 
     public Target getTarget() {
@@ -52,4 +60,11 @@ public class TargetWithActionStatus implements Identifiable<Long> {
         return target.getId();
     }
 
+    public Integer getLastActionStatusCode() {
+        return lastActionStatusCode;
+    }
+
+    public void setLastActionStatusCode(final Integer lastActionStatusCode) {
+        this.lastActionStatusCode = lastActionStatusCode;
+    }
 }

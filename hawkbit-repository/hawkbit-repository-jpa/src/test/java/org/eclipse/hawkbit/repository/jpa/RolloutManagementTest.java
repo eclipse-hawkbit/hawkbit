@@ -264,7 +264,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // verify the split of the target and targetGroup
@@ -282,7 +283,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         // verify first group is running
@@ -317,7 +319,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         final List<Action> runningActions = findActionsByRolloutAndStatus(createdRollout, Status.RUNNING);
@@ -360,7 +363,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 3;
         final String successCondition = "100";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         finishActionAndDeleteTargetsOfFirstRunningGroup(createdRollout);
@@ -373,20 +377,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         verifyRolloutAndAllGroupsAreFinished(createdRollout);
 
-    }
-
-    @Step("Create a rollout by the given parameter and start it.")
-    private Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
-            final int amountGroups, final String successCondition, final String errorCondition) {
-
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
-                amountOtherTargets, amountGroups, successCondition, errorCondition);
-        rolloutManagement.start(createdRollout.getId());
-
-        // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
-
-        return reloadRollout(createdRollout);
     }
 
     @Step("Finish three actions of the rollout group and delete two targets")
@@ -460,7 +450,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         // set both actions in error state so error condition is hit and error
@@ -503,7 +494,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         // set both actions in error state so error condition is hit and error
@@ -554,7 +546,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        final Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout,
+                amountOtherTargets, amountGroups,
                 successCondition, errorCondition);
 
         // finish running actions, 2 actions should be finished
@@ -592,7 +585,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 4;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // targets have not started
@@ -655,7 +649,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 4;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition, ActionType.DOWNLOAD_ONLY, null);
 
         // targets have not started
@@ -722,7 +717,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 4;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // 8 targets have not started
@@ -759,7 +755,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 4;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
 
         changeStatusForAllRunningActions(createdRollout, Status.FINISHED);
@@ -800,7 +797,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout createdRollout = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout createdRollout = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
         final DistributionSet ds = createdRollout.getDistributionSet();
 
@@ -843,7 +841,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 3;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout rolloutOne = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
 
         rolloutOne = reloadRollout(rolloutOne);
@@ -884,7 +883,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 3;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout rolloutOne = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
         final DistributionSet distributionSet = rolloutOne.getDistributionSet();
 
@@ -942,7 +942,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "80";
-        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout rolloutOne = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
 
         rolloutOne = reloadRollout(rolloutOne);
@@ -967,7 +968,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "80";
         final String errorCondition = "90";
-        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout rolloutOne = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
 
         rolloutOne = reloadRollout(rolloutOne);
@@ -992,7 +994,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 2;
         final String successCondition = "50";
         final String errorCondition = "20";
-        Rollout rolloutOne = createAndStartRollout(amountTargetsForRollout, amountOtherTargets, amountGroups,
+        Rollout rolloutOne = testdataFactory.createAndStartRollout(amountTargetsForRollout, amountOtherTargets,
+                amountGroups,
                 successCondition, errorCondition);
 
         rolloutOne = reloadRollout(rolloutOne);
@@ -1743,7 +1746,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
                 .isThrownBy(() -> rolloutManagement.create(rollout, maxGroups + 1, false, conditions))
                 .withMessageContaining("not be greater than " + maxGroups);
-
     }
 
     @Test
@@ -1773,7 +1775,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(RolloutIllegalStateException.class)
                 .isThrownBy(() -> rolloutManagement.start(rolloutId))
                 .withMessageContaining("can only be started in state ready");
-
     }
 
     @Test
@@ -1783,7 +1784,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(false);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5,
+                successCondition,
                 errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.READY);
     }
@@ -1795,7 +1797,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5,
+                successCondition,
                 errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
     }
@@ -1806,7 +1809,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5,
+                successCondition,
                 errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
         rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED);
@@ -1820,7 +1824,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         approvalStrategy.setApprovalNeeded(true);
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5, successCondition,
+        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 5,
+                successCondition,
                 errorCondition);
         assertThat(rollout.getStatus()).isEqualTo(Rollout.RolloutStatus.WAITING_FOR_APPROVAL);
         rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.DENIED);
@@ -1843,7 +1848,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // test
@@ -1875,7 +1881,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountGroups = 5;
         final String successCondition = "50";
         final String errorCondition = "80";
-        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+        final Rollout createdRollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(
+                amountTargetsForRollout,
                 amountOtherTargets, amountGroups, successCondition, errorCondition);
 
         // start the rollout, so it has active running actions and a group which
@@ -1961,7 +1968,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Creating a rollout without weight value when multi assignment in enabled.")
     void weightNotRequiredInMultiAssignmentMode() {
         enableMultiAssignments();
-        final Rollout rollout = createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50", "80",
+        final Rollout rollout = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
+                "80",
                 ActionType.FORCED, null);
         assertThat(rollout).isNotNull();
     }
@@ -1970,7 +1978,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Creating a rollout with a weight causes an error when multi assignment in disabled.")
     void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
         Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
-                .isThrownBy(() -> createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50", "80",
+                .isThrownBy(() -> testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
+                        "80",
                         ActionType.FORCED, 66));
     }
 
@@ -2003,7 +2012,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountOfTargets = 5;
         final int weight = 99;
         enableMultiAssignments();
-        final Long rolloutId = createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
+        final Long rolloutId = testdataFactory
+                .createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
                 "80", "50", null, weight).getId();
         rolloutManagement.start(rolloutId);
         rolloutManagement.handleRollouts();
@@ -2017,7 +2027,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     @Description("Rollout can be created without weight in single assignment and be started in multi assignment")
     void createInSingleStartInMultiassigMode() {
         final int amountOfTargets = 5;
-        final Long rolloutId = createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2, amountOfTargets,
+        final Long rolloutId = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2,
+                amountOfTargets,
                 "80", "50", null, null).getId();
 
         enableMultiAssignments();
@@ -2163,23 +2174,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         }
     }
 
-    private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
-            final int amountOtherTargets, final int groupSize, final String successCondition,
-            final String errorCondition) {
-        return createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountOtherTargets,
-                groupSize, successCondition, errorCondition, ActionType.FORCED, null);
-    }
 
-    private Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
-            final int amountOtherTargets, final int groupSize, final String successCondition,
-            final String errorCondition, final ActionType actionType, final Integer weight) {
-        final DistributionSet rolloutDS = testdataFactory.createDistributionSet("rolloutDS");
-        testdataFactory.createTargets(amountTargetsForRollout, "rollout-", "rollout");
-        testdataFactory.createTargets(amountOtherTargets, "others-", "rollout");
-        final String filterQuery = "controllerId==rollout-*";
-        return testdataFactory.createRolloutByVariables("test-rollout-name-1", "test-rollout-description-1", groupSize,
-                filterQuery, rolloutDS, successCondition, errorCondition, actionType, weight, false);
-    }
 
     private Rollout createTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
             final int groupSize, final String successCondition, final String errorCondition, final String rolloutName,

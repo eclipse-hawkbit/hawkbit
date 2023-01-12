@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
@@ -185,6 +186,7 @@ public final class MgmtTargetMapper {
         }
         if (target.getTargetType() != null) {
             targetRest.setTargetType(target.getTargetType().getId());
+            targetRest.setTargetTypeName(target.getTargetType().getName());
         }
         if (configHelper.isConfirmationFlowEnabled()) {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
@@ -253,12 +255,14 @@ public final class MgmtTargetMapper {
             result.setStatus(MgmtAction.ACTION_FINISHED);
         }
 
-        Rollout rollout = action.getRollout();
+        result.setDetailStatus(action.getStatus().toString().toLowerCase());
+
+        final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.setRollout(rollout.getId());
             result.setRolloutName(rollout.getName());
         }
-        
+
         if (action.hasMaintenanceSchedule()) {
             final MgmtMaintenanceWindow maintenanceWindow = new MgmtMaintenanceWindow();
             maintenanceWindow.setSchedule(action.getMaintenanceWindowSchedule());
@@ -283,9 +287,13 @@ public final class MgmtTargetMapper {
             result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
                     .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
         }
-        result.add(linkTo(
-                methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(action.getDistributionSet().getId()))
-                        .withRel("distributionset"));
+
+        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(controllerId)).withRel("target")
+                .withName(action.getTarget().getName()));
+
+        final DistributionSet distributionSet = action.getDistributionSet();
+        result.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
+                .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()));
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
@@ -295,9 +303,9 @@ public final class MgmtTargetMapper {
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT));
+                    .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT).withName(rollout.getName()));
         }
-        
+
         return result;
     }
 

@@ -15,7 +15,9 @@ metadataformat = "toml"
 canonifyurls = false
 
 [markup]
-  defaultMarkdownHandler = "blackfriday"
+	[markup.goldmark]
+		[markup.goldmark.extensions]
+			typographer = true
 
 [markup.highlight]
 	codeFences = false
@@ -103,9 +105,3 @@ canonifyurls = false
 	name   = "Release notes"
 	url    = "/release-notes/"
 	weight = 100
-
-[blackfriday]
-	smartypants	= true
-	fractions = false
-	smartDashes = true
-	plainIDAnchors = true

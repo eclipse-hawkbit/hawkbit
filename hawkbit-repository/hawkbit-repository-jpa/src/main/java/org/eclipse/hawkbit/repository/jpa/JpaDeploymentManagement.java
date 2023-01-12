@@ -476,7 +476,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final AbstractDsAssignmentStrategy assignmentStrategy, final JpaDistributionSet set) {
 
         final Map<TargetWithActionType, JpaAction> persistedActions = new LinkedHashMap<>();
-        
+
         for (final TargetWithActionType twt : targetsWithActionType) {
             final JpaAction targetAction = assignmentStrategy.createTargetAction(initiatedBy, twt, targets, set);
             if (targetAction != null) {
@@ -620,7 +620,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             if (rolloutGroupActions.getContent().isEmpty()) {
                 return 0L;
             }
-            
+
             final List<Action> newTargetAssignments = handleTargetAssignments(rolloutGroupActions);
 
             if (!newTargetAssignments.isEmpty()) {
@@ -630,7 +630,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return rolloutGroupActions.getTotalElements();
         });
     }
-    
+
     private List<Action> handleTargetAssignments(final Page<Action> rolloutGroupActions) {
         // Close actions already assigned and collect pending assignments
         final List<JpaAction> pendingTargetAssignments = rolloutGroupActions.getContent().stream()
@@ -896,6 +896,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     @Override
+    public long countActions(final String rsqlParam) {
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.countBySpec(actionRepository, specList);
+    }
+
+    @Override
     public long countActionsByDistributionSetIdAndActiveIsTrue(final Long distributionSet) {
         return actionRepository.countByDistributionSetIdAndActiveIsTrue(distributionSet);
     }
@@ -915,6 +922,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Override
     public Slice<Action> findActionsAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, null);
+    }
+
+    @Override
+    public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
+        final List<Specification<JpaAction>> specList = Arrays.asList(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
+        return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
     }
 
     @Override

@@ -53,6 +53,9 @@ public class MgmtTarget extends MgmtNamedEntity {
     private Long targetType;
 
     @JsonProperty
+    private String targetTypeName;
+
+    @JsonProperty
     private Boolean autoConfirmActive;
 
     /**
@@ -64,10 +67,25 @@ public class MgmtTarget extends MgmtNamedEntity {
 
     /**
      * @param targetType
-     *          Target type ID
+     *            Target type ID
      */
-    public void setTargetType(Long targetType) {
+    public void setTargetType(final Long targetType) {
         this.targetType = targetType;
+    }
+
+    /**
+     * @return Target type name
+     */
+    public String getTargetTypeName() {
+        return targetTypeName;
+    }
+
+    /**
+     * @param targetTypeName
+     *            Target type name
+     */
+    public void setTargetTypeName(final String targetTypeName) {
+        this.targetTypeName = targetTypeName;
     }
 
     /**

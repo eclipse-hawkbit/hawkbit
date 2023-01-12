@@ -36,6 +36,8 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
 
     private Status status;
 
+    private Integer lastActionStatusCode;
+
     private String securityToken;
 
     private boolean isRequestAttributes;
@@ -173,6 +175,25 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
     }
 
     /**
+     * Gets the last action status code as reported by the controller
+     *
+     * @return statusCode
+     */
+    public Integer getLastActionStatusCode() {
+        return lastActionStatusCode;
+    }
+
+    /**
+     * Sets the last action status code
+     *
+     * @param lastActionStatusCode
+     *            Action status code as reported by the controller
+     */
+    public void setLastActionStatusCode(final Integer lastActionStatusCode) {
+        this.lastActionStatusCode = lastActionStatusCode;
+    }
+
+    /**
      * Gets the securityToken
      *
      * @return securityToken
@@ -213,7 +234,7 @@ public class ProxyTarget extends ProxyNamedEntity implements TypeInfoAware {
     }
 
     @Override
-    public void setTypeInfo(ProxyTypeInfo typeInfo) {
+    public void setTypeInfo(final ProxyTypeInfo typeInfo) {
         this.typeInfo = typeInfo;
     }
 

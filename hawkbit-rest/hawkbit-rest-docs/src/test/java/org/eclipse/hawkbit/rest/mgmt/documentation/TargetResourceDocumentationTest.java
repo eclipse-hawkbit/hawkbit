@@ -115,8 +115,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .type("String"),
                         fieldWithPath("content[].lastControllerRequestAt")
                                 .description(MgmtApiModelProperties.LAST_REQUEST_AT).type("Number"),
-                        fieldWithPath("content[].targetType")
-                                .description(MgmtApiModelProperties.TARGETTYPE_ID).type("Number"),
+                        fieldWithPath("content[].targetType").description(MgmtApiModelProperties.TARGETTYPE_ID)
+                                .type("Number"),
+                        fieldWithPath("content[].targetTypeName").description(MgmtApiModelProperties.TARGETTYPE_NAME)
+                                .type("String"),
                         fieldWithPath("content[]._links.self").ignored())));
     }
 
@@ -148,8 +150,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 .description(MgmtApiModelProperties.SECURITY_TOKEN),
                         optionalRequestFieldWithPath("[]targetType").description(MgmtApiModelProperties.TARGETTYPE_ID)),
                         responseFields(fieldWithPath("[]controllerId").description(ApiModelPropertiesGeneric.ITEM_ID),
-                                fieldWithPath(
-                                        "[]name").description(ApiModelPropertiesGeneric.NAME),
+                                fieldWithPath("[]name").description(ApiModelPropertiesGeneric.NAME),
                                 fieldWithPath("[]description").description(ApiModelPropertiesGeneric.DESCRPTION),
                                 fieldWithPath("[]address").description(MgmtApiModelProperties.ADDRESS),
                                 fieldWithPath("[]createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
@@ -169,6 +170,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("[]autoConfirmActive")
                                         .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVE),
                                 fieldWithPath("[]targetType").description(MgmtApiModelProperties.TARGETTYPE_ID),
+                                fieldWithPath("[]targetTypeName").description(MgmtApiModelProperties.TARGETTYPE_NAME),
                                 fieldWithPath("[]_links.self").ignored())));
     }
 
@@ -251,6 +253,10 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("content[].status")
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("content[].detailStatus")
+                                        .description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                                 fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
@@ -284,11 +290,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("String"),
                                 fieldWithPath("content[].type").description(MgmtApiModelProperties.ACTION_TYPE)
                                         .attributes(key("value").value("['update', 'cancel']")),
-
                                 fieldWithPath("content[].status")
                                         .description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
-                                fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
+                                fieldWithPath("content[].detailStatus")
+                                        .description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                                fieldWithPath("content[]._links.self")
+                                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
                                 fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                                 fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),
                                 fieldWithPath("content[].maintenanceWindow")
@@ -337,7 +347,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void deleteActionFromTargetWithParameters() throws Exception {
         final Action action = generateActionForTarget(targetId, false);
         deploymentManagement.cancelAction(action.getId());
-        
+
         mockMvc.perform(delete(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}?force=true", targetId, action.getId()))
                 .andExpect(status().isNoContent()).andDo(MockMvcResultPrinter.print())
@@ -377,15 +387,17 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
-                               fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
-                               fieldWithPath("rolloutName")
-                                                .description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                                fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
+                                fieldWithPath("rolloutName").description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
                                         .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
-                                fieldWithPath("_links.rollout")
-                                        .description(MgmtApiModelProperties.LINK_TO_ROLLOUT))));
+                                fieldWithPath("_links.rollout").description(MgmtApiModelProperties.LINK_TO_ROLLOUT),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
@@ -417,6 +429,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .type("String"),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
                                 fieldWithPath("maintenanceWindow.schedule")
@@ -430,7 +445,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
-                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES))));
+                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
@@ -445,10 +461,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         final Map<String, Object> body = new HashMap<>();
         body.put("forceType", "forced");
 
-        mockMvc.perform(
-                put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + MgmtRestConstants.TARGET_V1_ACTIONS
-                        + "/{actionId}", targetId, actionId).content(this.objectMapper.writeValueAsString(body))
-                                .contentType(MediaType.APPLICATION_JSON))
+        mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
+                + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, actionId)
+                        .content(this.objectMapper.writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID),
@@ -468,10 +483,14 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                         .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
                                 fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
                                         .attributes(key("value").value("['finished', 'pending']")),
+                                fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                                        .attributes(key("value").value(
+                                                "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
                                 fieldWithPath("_links.self").ignored(),
                                 fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
                                 fieldWithPath("_links.status")
-                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES))));
+                                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                                fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     @Test
@@ -533,7 +552,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
                         getResponseFieldsDistributionSet(false)));
     }
-    
+
     @Test
     @Description("Handles the POST request for assigning a distribution set to a specific target. Required Permission: READ_REPOSITORY and UPDATE_TARGET.")
     public void postAssignDistributionSetToTarget() throws Exception {
@@ -590,10 +609,11 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
 
         final long forceTime = System.currentTimeMillis();
         final JSONArray body = new JSONArray();
-        body.put(new JSONObject().put("id", sets.get(1).getId()).put("weight", 500).put("type", "timeforced")
-                .put("forcetime", forceTime)
-                .put("maintenanceWindow", new JSONObject().put("schedule", getTestSchedule(100))
-                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())))
+        body.put(
+                new JSONObject().put("id", sets.get(1).getId()).put("weight", 500).put("type", "timeforced")
+                        .put("forcetime", forceTime).put("maintenanceWindow",
+                                new JSONObject().put("schedule", getTestSchedule(100))
+                                        .put("duration", getTestDuration(10)).put("timezone", getTestTimeZone())))
                 .toString();
         body.put(new JSONObject().put("id", sets.get(0).getId()).put("type", "forced").put("weight", 800)
                 .put("confirmationRequired", true));
@@ -601,7 +621,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         enableMultiAssignments();
         mockMvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET, targetId).content(body.toString())
-                .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
                         pathParameters(parameterWithName("targetId").description(ApiModelPropertiesGeneric.ITEM_ID)),
@@ -634,15 +654,15 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     private static FieldDescriptor[] getDsAssignmentResponseFieldDescriptors() {
         final FieldDescriptor[] descriptors = {
                 fieldWithPath("assigned").description(MgmtApiModelProperties.DS_NEW_ASSIGNED_TARGETS),
-            fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
-            .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
-    fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
-            .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
-    fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
-            .description(MgmtApiModelProperties.ACTION_ID),
-    fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
-            .description(MgmtApiModelProperties.LINK_TO_ACTION),
-    fieldWithPath("total").type(JsonFieldType.NUMBER)
+                fieldWithPath("alreadyAssigned").type(JsonFieldType.NUMBER)
+                        .description(MgmtApiModelProperties.DS_ALREADY_ASSIGNED_TARGETS),
+                fieldWithPath("assignedActions").type(JsonFieldType.ARRAY)
+                        .description(MgmtApiModelProperties.DS_NEW_ASSIGNED_ACTIONS),
+                fieldWithPath("assignedActions.[].id").type(JsonFieldType.NUMBER)
+                        .description(MgmtApiModelProperties.ACTION_ID),
+                fieldWithPath("assignedActions.[]._links.self").type(JsonFieldType.OBJECT)
+                        .description(MgmtApiModelProperties.LINK_TO_ACTION),
+                fieldWithPath("total").type(JsonFieldType.NUMBER)
                         .description(MgmtApiModelProperties.DS_TOTAL_ASSIGNED_TARGETS) };
         return descriptors;
     }

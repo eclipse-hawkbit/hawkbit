@@ -48,9 +48,9 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -603,7 +603,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * Handles the case where the {@link Action.Status#DOWNLOADED} status is
      * reported by the device. In case the update is finished, a controllerId will
      * be returned to trigger a request for attributes.
-     * 
+     *
      * @param action
      *            updated action
      * @return a present controllerId in case the attributes needs to be requested.

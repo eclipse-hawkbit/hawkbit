@@ -55,6 +55,9 @@ public class MgmtAction extends MgmtBaseEntity {
     private String status;
 
     @JsonProperty
+    private String detailStatus;
+
+    @JsonProperty
     private Long forceTime;
 
     @JsonProperty(value = "forceType")
@@ -65,7 +68,7 @@ public class MgmtAction extends MgmtBaseEntity {
 
     @JsonProperty
     private MgmtMaintenanceWindow maintenanceWindow;
-    
+
     @JsonProperty
     private Long rollout;
 
@@ -132,7 +135,7 @@ public class MgmtAction extends MgmtBaseEntity {
         return rollout;
     }
 
-    public void setRollout(Long rollout) {
+    public void setRollout(final Long rollout) {
         this.rollout = rollout;
     }
 
@@ -140,8 +143,16 @@ public class MgmtAction extends MgmtBaseEntity {
         return rolloutName;
     }
 
-    public void setRolloutName(String rolloutName) {
+    public void setRolloutName(final String rolloutName) {
         this.rolloutName = rolloutName;
+    }
+
+    public String getDetailStatus() {
+        return detailStatus;
+    }
+
+    public void setDetailStatus(final String detailStatus) {
+        this.detailStatus = detailStatus;
     }
 
 }

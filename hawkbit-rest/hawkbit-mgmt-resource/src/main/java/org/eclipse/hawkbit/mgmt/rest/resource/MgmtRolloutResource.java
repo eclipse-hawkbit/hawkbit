@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -38,6 +39,8 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.Page;
@@ -56,6 +59,9 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MgmtRolloutResource.class);
+
     private final RolloutManagement rolloutManagement;
 
     private final RolloutGroupManagement rolloutGroupManagement;
@@ -85,14 +91,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
+            final String representationModeParam) {
 
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutSortParam(sortParam);
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-
         final Page<Rollout> findRolloutsAll;
         if (rsqlParam != null) {
             findRolloutsAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
@@ -100,7 +106,15 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             findRolloutsAll = this.rolloutManagement.findAll(pageable, false);
         }
 
-        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findRolloutsAll.getContent());
+        final MgmtRepresentationMode repMode = MgmtRepresentationMode.fromValue(representationModeParam)
+                .orElseGet(() -> {
+                    // no need for a 400, just apply a safe fallback
+                    LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+                    return MgmtRepresentationMode.COMPACT;
+                });
+
+        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findRolloutsAll.getContent(),
+                repMode == MgmtRepresentationMode.FULL);
         return ResponseEntity.ok(new PagedList<>(rest, findRolloutsAll.getTotalElements()));
     }
 

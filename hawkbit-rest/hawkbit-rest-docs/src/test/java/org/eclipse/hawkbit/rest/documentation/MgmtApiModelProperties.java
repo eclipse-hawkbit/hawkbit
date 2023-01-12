@@ -33,6 +33,7 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
     public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
+    public static final String LINK_TO_TARGET = "The link to the target.";
 
     public static final String LINK_TO_AUTO_CONFIRM = "The link to the detailed auto confirm state.";
 
@@ -45,6 +46,7 @@ public final class MgmtApiModelProperties {
 
     // software module
     public static final String SM_TYPE = "The software module type " + ApiModelPropertiesGeneric.ENDING;
+    public static final String SM_TYPE_NAME = "The software module type name " + ApiModelPropertiesGeneric.ENDING;
     public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts should be encrypted upon upload.";
     public static final String ARTIFACT_HASHES = "Hashes of the artifact.";
     public static final String ARTIFACT_SIZE = "Size of the artifact.";
@@ -87,6 +89,7 @@ public final class MgmtApiModelProperties {
 
     // Target type
     public static final String TARGETTYPE_ID = "ID of the target type";
+    public static final String TARGETTYPE_NAME = "Name of the target type";
     public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
     public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
 
@@ -162,6 +165,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
 
+    public static final String ACTION_DETAIL_STATUS = "Detailed status of action.";
+
     public static final String ACTION_LIST = "List of actions.";
 
     public static final String ACTION_WEIGHT = "Weight of the action showing the importance of the update.";
@@ -215,6 +220,8 @@ public final class MgmtApiModelProperties {
 
     public static final String DS_TYPE = "The type of the distribution set.";
 
+    public static final String DS_TYPE_NAME = "The type name of the distribution set.";
+
     public static final String DS_COMPLETE = "True of the distribution set software module setup is complete as defined by the distribution set type.";
 
     public static final String DS_VALID = "True by default and false after the distribution set is invalidated by the user.";
@@ -265,4 +272,7 @@ public final class MgmtApiModelProperties {
     public static final String CONFIG_PARAM = "The name of the configuration parameter.";
 
     public static final String DS_NEW_ASSIGNED_ACTIONS = "The newly created actions as a result of this assignment";
+
+    public static final String REPRESENTATION_MODE = "The representation mode. Can be \"full\" or \"compact\". Defaults to \"compact\"";
+
 }

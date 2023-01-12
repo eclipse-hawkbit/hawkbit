@@ -141,6 +141,9 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Column(name = "initiated_by", updatable = false, nullable = false, length = USERNAME_FIELD_LENGTH)
     private String initiatedBy;
 
+    @Column(name = "last_action_status_code", nullable = true, updatable = true)
+    private Integer lastActionStatusCode;
+
     @Override
     public DistributionSet getDistributionSet() {
         return distributionSet;
@@ -376,6 +379,15 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     @Override
     public String getInitiatedBy() {
         return initiatedBy;
+    }
+
+    @Override
+    public Optional<Integer> getLastActionStatusCode() {
+        return Optional.ofNullable(lastActionStatusCode);
+    }
+
+    public void setLastActionStatusCode(final Integer lastActionStatusCode) {
+        this.lastActionStatusCode = lastActionStatusCode;
     }
 
     public boolean isWaitingConfirmation() {

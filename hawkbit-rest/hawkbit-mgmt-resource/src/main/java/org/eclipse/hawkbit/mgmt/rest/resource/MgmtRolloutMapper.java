@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.SuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -57,11 +58,15 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
+        return toResponseRollout(rollouts, false);
+    }
+
+    static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(rollout -> toResponseRollout(rollout, false)).collect(Collectors.toList());
+        return rollouts.stream().map(rollout -> toResponseRollout(rollout, withDetails)).collect(Collectors.toList());
     }
 
     static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
@@ -95,6 +100,10 @@ final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups"));
+
+            final DistributionSet distributionSet = rollout.getDistributionSet();
+            body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
+                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()));
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel());
