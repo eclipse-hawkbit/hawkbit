@@ -166,6 +166,10 @@ public final class SPUILabelDefinitions {
     public static final String VAR_STATUS = "status";
 
     /**
+     * Status code - column property.
+     */
+    public static final String VAR_STATUS_CODE = "statusCode";
+    /**
      * Distribution name and version - column property.
      */
     public static final String VAR_DIST_NAME_VERSION = "distributionSetNameVersion";

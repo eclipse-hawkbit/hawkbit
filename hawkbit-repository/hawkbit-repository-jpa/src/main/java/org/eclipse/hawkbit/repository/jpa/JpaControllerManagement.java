@@ -48,9 +48,9 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -650,6 +650,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         actionStatus.setAction(action);
         actionStatusRepository.save(actionStatus);
+
+        action.setLastActionStatusCode(actionStatus.getCode().orElse(null));
         final Action savedAction = actionRepository.save(action);
 
         if (controllerId != null) {

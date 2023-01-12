@@ -136,6 +136,12 @@ public interface Action extends TenantAwareBaseEntity {
     String getInitiatedBy();
 
     /**
+     * @return the latest action status code. Performance optimization to not
+     *         query the action status table for the last action status code.
+     */
+    Optional<Integer> getLastActionStatusCode();
+
+    /**
      * checks if the {@link #getForcedTime()} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
