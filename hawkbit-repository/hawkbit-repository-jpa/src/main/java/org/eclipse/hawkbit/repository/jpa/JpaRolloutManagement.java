@@ -13,6 +13,7 @@ import static org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate.a
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -48,6 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -127,6 +129,9 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Autowired
     private RolloutStatusCache rolloutStatusCache;
+
+    @Autowired
+    private StartNextGroupRolloutGroupSuccessAction startNextRolloutGroupAction;
 
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;
@@ -744,6 +749,32 @@ public class JpaRolloutManagement implements RolloutManagement {
         return new AsyncResult<>(
                 validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
                         baseFilter, totalTargets, dsTypeId));
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void triggerNextGroup(final long rolloutId) {
+        final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
+        if (RolloutStatus.RUNNING != rollout.getStatus()) {
+            throw new RolloutIllegalStateException("Rollout is not in running state");
+        }
+        final List<RolloutGroup> groups = rollout.getRolloutGroups();
+
+        final boolean isNextGroupTriggerable = groups.stream()
+                .anyMatch(g -> RolloutGroupStatus.SCHEDULED.equals(g.getStatus()));
+
+        if (!isNextGroupTriggerable) {
+            throw new RolloutIllegalStateException("Rollout does not have any groups left to be triggered");
+        }
+
+        final RolloutGroup latestRunning = groups.stream()
+                .sorted(Comparator.comparingLong(RolloutGroup::getId).reversed())
+                .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus())).findFirst()
+                .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
+
+        startNextRolloutGroupAction.eval(rollout, latestRunning, latestRunning.getSuccessActionExp());
     }
 
 }

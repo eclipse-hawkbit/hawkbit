@@ -173,5 +173,4 @@ public interface RolloutGroupRepository
     @Modifying
     @Query("DELETE FROM JpaRolloutGroup g where g.id in :rolloutGroupIds")
     void deleteByIds(@Param("rolloutGroupIds") List<Long> rolloutGroups);
-
 }

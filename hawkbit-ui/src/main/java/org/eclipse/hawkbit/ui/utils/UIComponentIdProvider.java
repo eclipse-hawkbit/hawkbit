@@ -1155,6 +1155,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".7";
 
     /**
+     * Rollout trigger next group button id.
+     */
+    public static final String ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID = ROLLOUT_ACTION_ID + ".13";
+
+    /**
      * Rollout update button id.
      */
     public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".8";
@@ -1464,6 +1469,11 @@ public final class UIComponentIdProvider {
      * Id of the rollout deletion confirmation window
      */
     public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
+
+    /**
+     * Id of the rollout 'trigger next group' confirmation window
+     */
+    public static final String ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG = "rollout.triggernext.confirmation.window";
 
     /**
      * Id of the target filter deletion confirmation window
