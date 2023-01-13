@@ -30,7 +30,9 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -116,6 +118,37 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].detailStatus", equalTo("running")))
                 .andExpect(jsonPath("content[0].status", equalTo("pending")));
 
+    }
+
+    @Test
+    @Description("Verifies that actions can be filtered based on the action status code that was reported last.")
+    void filterActionsByLastStatusCode() throws Exception {
+
+        // assign a distribution set to three targets
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(dsA,
+                testdataFactory.createTargets("target1", "target2", "target3"));
+        final List<Action> actions = assignmentResult.getAssignedEntity();
+        assertThat(actions).hasSize(3);
+
+        // then simulate a status update with code 200 for the first action
+        final Action action = actions.get(0);
+        controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).code(200)
+                .message("Update succeeded").status(Status.FINISHED));
+
+        // verify that one result is returned if the actions are filtered for
+        // status code 200
+        final String rsqlStatusCode = "lastStatusCode==200";
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlStatusCode))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content[0].status", equalTo("finished")));
+
+        // verify no result is returned if we filter for a non-existing status
+        // code
+        final String rsqlWrongStatusCode = "lastStatusCode==999";
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlWrongStatusCode))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(0)))
+                .andExpect(jsonPath("size", equalTo(0)));
     }
 
     @Test
