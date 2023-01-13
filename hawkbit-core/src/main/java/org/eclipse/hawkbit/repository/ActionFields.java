@@ -30,7 +30,7 @@ public enum ActionFields implements FieldNameProvider, FieldValueConverter<Actio
     /**
      * The last action status code
      */
-    STATUSCODE("lastActionStatusCode"),
+    LASTSTATUSCODE("lastActionStatusCode"),
 
     /**
      * The id field.

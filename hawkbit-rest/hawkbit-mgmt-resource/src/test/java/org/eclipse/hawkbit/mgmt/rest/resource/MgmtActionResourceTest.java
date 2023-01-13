@@ -138,14 +138,14 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
         // verify that one result is returned if the actions are filtered for
         // status code 200
-        final String rsqlStatusCode = "statusCode==200";
+        final String rsqlStatusCode = "lastStatusCode==200";
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlStatusCode))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1))).andExpect(jsonPath("content[0].status", equalTo("finished")));
 
         // verify no result is returned if we filter for a non-existing status
         // code
-        final String rsqlWrongStatusCode = "statusCode==999";
+        final String rsqlWrongStatusCode = "lastStatusCode==999";
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlWrongStatusCode))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(0)))
                 .andExpect(jsonPath("size", equalTo(0)));
