@@ -1328,7 +1328,7 @@ public class TestdataFactory {
         createTargets(amountOtherTargets, "others-" + suffix + "-", "rollout");
         final String filterQuery = "controllerId==rollout-" + suffix + "-*";
         return createRolloutByVariables("rollout-" + suffix, "test-rollout-description", amountOfGroups,
-                filterQuery, rolloutDS, successCondition, errorCondition, actionType, weight);
+                filterQuery, rolloutDS, successCondition, errorCondition, actionType, weight, false);
     }
 
     /**
