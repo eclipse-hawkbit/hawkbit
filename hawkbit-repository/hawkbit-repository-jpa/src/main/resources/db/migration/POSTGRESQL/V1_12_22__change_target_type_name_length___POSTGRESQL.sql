@@ -1,1 +1,1 @@
-ALTER TABLE sp_target_type ALTER COLUMN name VARCHAR (128);
+ALTER TABLE sp_target_type ALTER COLUMN name TYPE VARCHAR (128);

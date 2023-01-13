@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 public class AutoConfirmationAlreadyActiveException extends AbstractServerRtException {
 
     private static final long serialVersionUID = 1L;
-    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_AUTO_CONF_ALREADY_ACTIVE;
+    private static final SpServerError THIS_ERROR = SpServerError.SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE;
 
     /**
      * Default constructor.

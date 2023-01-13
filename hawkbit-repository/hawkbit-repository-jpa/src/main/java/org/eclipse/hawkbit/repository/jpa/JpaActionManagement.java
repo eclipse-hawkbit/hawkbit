@@ -75,7 +75,7 @@ public class JpaActionManagement {
             return Collections.emptyList();
         }
         return Collections
-                .unmodifiableList(actionRepository.findByTargetIdInAndIsActiveAndActionStatus(controllerId, status));
+                .unmodifiableList(actionRepository.findByTargetIdAndIsActiveAndActionStatus(controllerId, status));
     }
 
     protected Action addActionStatus(final JpaActionStatusCreate statusCreate) {

@@ -126,7 +126,7 @@ public interface RolloutManagement {
      * @param amountGroup
      *            the amount of groups to split the rollout into
      * @param confirmationRequired
-     *            if a confirmation is required by the device
+     *            if a confirmation is required by the device group(s) of the rollout
      * @param conditions
      *            the rolloutgroup conditions and actions which should be applied
      *            for each {@link RolloutGroup}

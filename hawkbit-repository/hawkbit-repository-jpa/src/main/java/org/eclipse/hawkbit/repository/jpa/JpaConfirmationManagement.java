@@ -73,16 +73,18 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
+    @Transactional
     public List<Action> findActiveActionsWaitingConfirmation(final String controllerId) {
         return Collections.unmodifiableList(findActiveActionsHavingStatus(controllerId, Status.WAIT_FOR_CONFIRMATION));
     }
 
     @Override
+    @Transactional
     public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator,
             final String remark) {
         LOG.trace("'activateAutoConfirmation' was called with values: controllerId={}; initiator={}; remark={}",
                 controllerId, initiator, remark);
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
         if (target.getAutoConfirmationStatus() != null) {
             LOG.debug("'activateAutoConfirmation' was called for an controller id {} with active auto confirmation.",
                     controllerId);
@@ -104,13 +106,15 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
+    @Transactional
     public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
-        return Optional.of(getByControllerIdAndThrowIfNotFound(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
+        return Optional.of(getTargetByControllerIdAndThrowIfNotFound(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
     }
 
     @Override
+    @Transactional
     public List<Action> autoConfirmActiveActions(final String controllerId) {
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
         if (target.getAutoConfirmationStatus() == null) {
             // auto-confirmation is not active
             return Collections.emptyList();
@@ -218,12 +222,12 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     @Override
     public void deactivateAutoConfirmation(String controllerId) {
         LOG.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
-        final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
+        final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);
         target.setAutoConfirmationStatus(null);
         targetRepository.save(target);
     }
 
-    private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
+    private JpaTarget getTargetByControllerIdAndThrowIfNotFound(final String controllerId) {
         return targetRepository.findOne(TargetSpecifications.hasControllerId(controllerId))
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }

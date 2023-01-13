@@ -28,7 +28,7 @@ public enum SpServerError {
     /**
      *
      */
-    SP_REPO_AUTO_CONF_ALREADY_ACTIVE("hawkbit.server.error.repo.autoConfAlreadyActive",
+    SP_REPO_AUTO_CONFIRMATION_ALREADY_ACTIVE("hawkbit.server.error.repo.autoConfAlreadyActive",
           "Auto confirmation is already active"),
 
 

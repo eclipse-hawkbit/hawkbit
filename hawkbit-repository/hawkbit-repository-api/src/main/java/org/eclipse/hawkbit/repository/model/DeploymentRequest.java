@@ -58,11 +58,11 @@ public class DeploymentRequest {
      *            required, the action will be automatically confirmed and put in
      *            the
      *            {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING
-     *            state. Otherwise the normal confirmation flow will be triggered
+     *            state. Otherwise the confirmation flow will be triggered
      *            and the {@link Action} will stay in the
      *            {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
-     *            state.} (Only considered with CONFIRMATION_FLOW active via tenant
-     *            configuration)
+     *            state until the confirmation is given.} (Only considered
+     *            with CONFIRMATION_FLOW active via tenant configuration)
      * @throws InvalidMaintenanceScheduleException
      *             if the parameters do not define a valid maintenance schedule.
      */
