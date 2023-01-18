@@ -604,7 +604,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
 
         // create rollout including the created targets with prefix 'rollout'
-        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*",
+        final Rollout rollout = createRolloutInCreatingState("rollout1", 4, dsA.getId(), "controllerId==rollout*",
                 confirmationRequired);
 
         // retrieve rollout groups from created rollout
@@ -1210,7 +1210,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        final Rollout rollout = createRolloutInCreatingSatate(name, amountGroups, distributionSetId, targetFilterQuery, false);
+        final Rollout rollout = createRolloutInCreatingState(name, amountGroups, distributionSetId, targetFilterQuery, false);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
@@ -1218,11 +1218,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
 
-    private Rollout createRolloutInCreatingSatate(final String name, final int amountGroups,
+    private Rollout createRolloutInCreatingState(final String name, final int amountGroups,
             final long distributionSetId, final String targetFilterQuery, final boolean confirmationRequired) {
         return rolloutManagement.create(
                 entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
-                amountGroups,confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
+                amountGroups, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
 
@@ -1255,7 +1255,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         // CREATING state
-        final Rollout rollout = createRolloutInCreatingSatate("rollout1", 3, dsA.getId(), "controllerId==rollout*");
+        final Rollout rollout = createRolloutInCreatingState("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // READY state
