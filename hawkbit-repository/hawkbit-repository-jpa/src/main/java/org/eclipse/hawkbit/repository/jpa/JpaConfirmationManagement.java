@@ -73,7 +73,6 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
-    @Transactional
     public List<Action> findActiveActionsWaitingConfirmation(final String controllerId) {
         return Collections.unmodifiableList(findActiveActionsHavingStatus(controllerId, Status.WAIT_FOR_CONFIRMATION));
     }
@@ -106,7 +105,6 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
-    @Transactional
     public Optional<AutoConfirmationStatus> getStatus(final String controllerId) {
         return Optional.of(getTargetByControllerIdAndThrowIfNotFound(controllerId)).map(JpaTarget::getAutoConfirmationStatus);
     }
@@ -220,6 +218,7 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
     }
 
     @Override
+    @Transactional
     public void deactivateAutoConfirmation(String controllerId) {
         LOG.debug("Deactivate auto confirmation for controllerId '{}'", controllerId);
         final JpaTarget target = getTargetByControllerIdAndThrowIfNotFound(controllerId);

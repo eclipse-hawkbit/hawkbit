@@ -57,11 +57,11 @@ public class DeploymentRequest {
      *            resulting {@link Action} or not. In case the confirmation is not
      *            required, the action will be automatically confirmed and put in
      *            the
-     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING
+     *            {@link org.eclipse.hawkbit.repository.model.Action.Status#RUNNING}
      *            state. Otherwise the confirmation flow will be triggered
      *            and the {@link Action} will stay in the
      *            {@link org.eclipse.hawkbit.repository.model.Action.Status#WAIT_FOR_CONFIRMATION}
-     *            state until the confirmation is given.} (Only considered
+     *            state until the confirmation is given. (Only considered
      *            with CONFIRMATION_FLOW active via tenant configuration)
      * @throws InvalidMaintenanceScheduleException
      *             if the parameters do not define a valid maintenance schedule.

@@ -8,7 +8,7 @@ UPDATE sp_target_filter_query SET confirmation_required = FALSE;
 
 CREATE TABLE sp_target_conf_status
 (
-    id               BIGSERIAL   NOT NULL DEFAULT nextval('sp_target_conf_status_seq'),
+    id               BIGSERIAL,
     target_id        BIGINT      NOT NULL,
     initiator        VARCHAR(64),
     remark           VARCHAR(512),
@@ -18,10 +18,7 @@ CREATE TABLE sp_target_conf_status
     last_modified_at BIGINT      NOT NULL,
     last_modified_by VARCHAR(64) NOT NULL,
     optlock_revision BIGINT NULL
-)
-    WITH (
-        OIDS = FALSE
-        );
+);
 
 
 ALTER TABLE sp_target_conf_status

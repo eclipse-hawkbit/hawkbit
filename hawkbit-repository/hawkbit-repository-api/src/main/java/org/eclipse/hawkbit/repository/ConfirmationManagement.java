@@ -86,6 +86,7 @@ public interface ConfirmationManagement {
      * @param messages
      *            optional value to specify message for the created action status
      */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
@@ -99,6 +100,7 @@ public interface ConfirmationManagement {
      * @param messages
      *            optional value to specify message for the created action status
      */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action denyAction(long actionId, Integer code, Collection<String> messages);
 
     /**
