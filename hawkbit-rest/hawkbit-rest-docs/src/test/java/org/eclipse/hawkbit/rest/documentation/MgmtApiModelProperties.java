@@ -122,6 +122,7 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_LINKS_START_SYNC = "Link to start the rollout in sync mode";
     public static final String ROLLOUT_LINKS_START_ASYNC = "Link to start the rollout in async mode";
     public static final String ROLLOUT_LINKS_PAUSE = "Link to pause a running rollout";
+    public static final String ROLLOUT_LINKS_TRIGGER_NEXT_GROUP = "Link for triggering next rollout group on a running rollout";
     public static final String ROLLOUT_LINKS_RESUME = "Link to resume a paused rollout";
     public static final String ROLLOUT_LINKS_APPROVE = "Link to approve a rollout";
     public static final String ROLLOUT_LINKS_DENY = "Link to deny a rollout";

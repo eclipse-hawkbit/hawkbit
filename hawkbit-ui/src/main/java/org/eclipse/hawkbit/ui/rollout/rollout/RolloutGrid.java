@@ -19,12 +19,15 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
+import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus.Status;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
 import org.eclipse.hawkbit.ui.common.builder.GridComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.ActionTypeIconSupplier;
 import org.eclipse.hawkbit.ui.common.builder.StatusIconBuilder.RolloutStatusIconSupplier;
@@ -54,6 +57,8 @@ import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cronutils.utils.StringUtils;
 import com.google.common.base.Predicates;
@@ -70,6 +75,8 @@ import com.vaadin.ui.renderers.HtmlRenderer;
  * Rollout list grid component.
  */
 public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutGrid.class);
+
     private static final long serialVersionUID = 1L;
     private static final String ROLLOUT_CAPTION_MSG_KEY = "caption.rollout";
 
@@ -88,6 +95,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private static final String APPROVE_BUTTON_ID = "approve";
     private static final String RUN_BUTTON_ID = "run";
     private static final String PAUSE_BUTTON_ID = "pause";
+    private static final String TRIGGER_NEXT_GROUP_BUTTON_ID = "triggerNextGroup";
     private static final String UPDATE_BUTTON_ID = "update";
     private static final String COPY_BUTTON_ID = "copy";
     private static final String DELETE_BUTTON_ID = "delete";
@@ -226,6 +234,11 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         return RolloutStatus.RUNNING == status;
     }
 
+    private static boolean isTriggerNextGroupAllowed(final ProxyRollout rollout) {
+        final Long scheduled = rollout.getStatusTotalCountMap().get(TotalTargetCountStatus.Status.SCHEDULED);
+        return RolloutStatus.RUNNING == rollout.getStatus() && scheduled != null && scheduled > 0;
+    }
+
     private static boolean isApprovingAllowed(final RolloutStatus status) {
         return RolloutStatus.WAITING_FOR_APPROVAL == status;
     }
@@ -334,6 +347,15 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 UIComponentIdProvider.ROLLOUT_PAUSE_BUTTON_ID + "." + rollout.getId(),
                 permissionChecker.hasRolloutHandlePermission() && isPausingAllowed(rollout.getStatus()));
         actionColumns.add(GridComponentBuilder.addIconColumn(this, pauseButton, PAUSE_BUTTON_ID, null));
+
+        final ValueProvider<ProxyRollout, Button> triggerNextGroupButton = rollout -> GridComponentBuilder
+                .buildActionButton(i18n, clickEvent -> triggerNextRolloutGroup(rollout.getId(), rollout.getStatus()),
+                        VaadinIcons.STEP_FORWARD, UIMessageIdProvider.TOOLTIP_ROLLOUT_TRIGGER_NEXT_GROUP,
+                        SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                        UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID + "." + rollout.getId(),
+                        permissionChecker.hasRolloutUpdatePermission() && isTriggerNextGroupAllowed(rollout));
+        actionColumns.add(
+                GridComponentBuilder.addIconColumn(this, triggerNextGroupButton, TRIGGER_NEXT_GROUP_BUTTON_ID, null));
 
         final ValueProvider<ProxyRollout, Button> updateButton = rollout -> GridComponentBuilder.buildActionButton(i18n,
                 clickEvent -> updateRollout(rollout), VaadinIcons.EDIT, UIMessageIdProvider.TOOLTIP_ROLLOUT_UPDATE,
@@ -487,5 +509,31 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
             tooltipText.append(i18n.getMessage(UIMessageIdProvider.TOOLTIP_DISTRIBUTIONSET_INVALID));
         }
         return tooltipText.toString();
+    }
+
+    private void triggerNextRolloutGroup(final Long rolloutId, final RolloutStatus rolloutStatus) {
+        if (RolloutStatus.RUNNING != rolloutStatus) {
+            uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.not.running"));
+        } else {
+            final ConfirmationDialog triggerNextDialog = createTriggerNextGroupDialog(rolloutId);
+            UI.getCurrent().addWindow(triggerNextDialog.getWindow());
+            triggerNextDialog.getWindow().bringToFront();
+        }
+    }
+
+    private ConfirmationDialog createTriggerNextGroupDialog(final Long rolloutId) {
+        final String caption = i18n.getMessage("caption.rollout.confirm.trigger.next");
+        final String question = i18n.getMessage("message.rollout.confirm.trigger.next");
+        return new ConfirmationDialog(i18n, caption, question, ok -> {
+            if (Boolean.TRUE.equals(ok)) {
+                try {
+                    rolloutManagement.triggerNextGroup(rolloutId);
+                    uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group.success"));
+                } catch (final RolloutIllegalStateException e) {
+                    LOGGER.warn("Error on manually triggering next rollout group: {}", e.getMessage());
+                    uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.error"));
+                }
+            }
+        }, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG);
     }
 }

@@ -145,6 +145,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_START_SYNC));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.pause")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_PAUSE));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.triggerNextGroup")
+                    .description(MgmtApiModelProperties.ROLLOUT_LINKS_TRIGGER_NEXT_GROUP));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.resume")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_RESUME));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.groups")
@@ -448,6 +450,23 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", rollout.getId())
                 .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andDo(this.document.document(
+                        pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
+    }
+
+    @Test
+    @Description("Handles the POST request of triggering the next group of a rollout. Required Permission: "
+            + SpPermission.UPDATE_ROLLOUT)
+    public void triggerNextGroup() throws Exception {
+        final Rollout rollout = createRolloutEntity();
+        rolloutManagement.start(rollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        mockMvc.perform(
+                post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup", rollout.getId())
+                        .accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andDo(this.document.document(
                         pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 

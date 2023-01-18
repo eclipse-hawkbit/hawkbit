@@ -37,7 +37,7 @@ public class TargetAttributesDetailsComponent extends CustomField<ProxyTargetAtt
     private final VaadinMessageSource i18n;
     private final transient TargetManagement targetManagement;
 
-    private final HorizontalLayout targetAttributesDetailsLayout;
+    private final VerticalLayout targetAttributesDetailsLayout;
 
     /**
      * constructor for TargetAttributesDetailsComponent
@@ -51,11 +51,10 @@ public class TargetAttributesDetailsComponent extends CustomField<ProxyTargetAtt
         this.i18n = i18n;
         this.targetManagement = targetManagement;
 
-        this.targetAttributesDetailsLayout = new HorizontalLayout();
+        this.targetAttributesDetailsLayout = new VerticalLayout();
         this.targetAttributesDetailsLayout.setSpacing(true);
         this.targetAttributesDetailsLayout.setMargin(false);
         this.targetAttributesDetailsLayout.setSizeFull();
-        this.targetAttributesDetailsLayout.addStyleName("disable-horizontal-scroll");
 
         setReadOnly(true);
     }
@@ -84,23 +83,23 @@ public class TargetAttributesDetailsComponent extends CustomField<ProxyTargetAtt
         final List<ProxyKeyValueDetails> targetAttributes = targetAttributesDetails.getTargetAttributes();
         final String controllerId = targetAttributesDetails.getControllerId();
 
-        final VerticalLayout attributesLayout = buildAttributesLayout(isRequestAttributes, targetAttributes);
+        final Button requestAttributesButton = buildRequestAttributesUpdateButton(controllerId, isRequestAttributes);
+        final HorizontalLayout topRow = new HorizontalLayout(requestAttributesButton);
+        if (isRequestAttributes) {
+            topRow.addComponent(buildAttributesUpdateLabel());
+        }
+        targetAttributesDetailsLayout.addComponent(topRow);
+
+        final VerticalLayout attributesLayout = buildAttributesLayout(targetAttributes);
         targetAttributesDetailsLayout.addComponent(attributesLayout);
         targetAttributesDetailsLayout.setExpandRatio(attributesLayout, 1.0F);
 
-        final Button requestAttributesButton = buildRequestAttributesUpdateButton(controllerId, isRequestAttributes);
-        targetAttributesDetailsLayout.addComponent(requestAttributesButton);
     }
 
-    private VerticalLayout buildAttributesLayout(final boolean isRequestAttributes,
-            final List<ProxyKeyValueDetails> targetAttributes) {
+    private VerticalLayout buildAttributesLayout(final List<ProxyKeyValueDetails> targetAttributes) {
         final VerticalLayout attributesLayout = new VerticalLayout();
         attributesLayout.setMargin(false);
         attributesLayout.setSpacing(false);
-
-        if (isRequestAttributes) {
-            attributesLayout.addComponent(buildAttributesUpdateLabel());
-        }
 
         final KeyValueDetailsComponent attributes = new KeyValueDetailsComponent();
         attributes.disableSpacing();

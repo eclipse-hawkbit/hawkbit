@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -37,13 +38,16 @@ import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCondition;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -57,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -407,7 +412,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final float percentTargetsInGroup1 = 20;
         final float percentTargetsInGroup2 = 100;
-        
+
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
         final List<String> rolloutGroups = Arrays.asList(
@@ -517,6 +522,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$._links.pause.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/pause"))))
                 .andExpect(
                         jsonPath("$._links.resume.href", allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/resume"))))
+                .andExpect(jsonPath("$._links.triggerNextGroup.href",
+                        allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/triggerNextGroup"))))
                 .andExpect(jsonPath("$._links.groups.href",
                         allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
@@ -803,7 +810,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         if (confirmationFlowEnabled) {
             enableConfirmationFlow();
         }
-        
+
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
                 entityFactory.rollout().create().name("rollout1").set(dsA.getId())
@@ -1203,19 +1210,95 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
             final String targetFilterQuery) {
-        return createRollout(name, amountGroups, distributionSetId, targetFilterQuery, false);
-    }
-
-    private Rollout createRollout(final String name, final int amountGroups, final long distributionSetId,
-            final String targetFilterQuery, final boolean confirmationRequired) {
-        final Rollout rollout = rolloutManagement.create(
-                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
-                amountGroups, confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
-                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+        final Rollout rollout = createRolloutInCreatingSatate(name, amountGroups, distributionSetId, targetFilterQuery, false);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
 
         return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
+
+    private Rollout createRolloutInCreatingSatate(final String name, final int amountGroups,
+            final long distributionSetId, final String targetFilterQuery, final boolean confirmationRequired) {
+        return rolloutManagement.create(
+                entityFactory.rollout().create().name(name).set(distributionSetId).targetFilterQuery(targetFilterQuery),
+                amountGroups,confirmationRequired, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+    }
+
+    @Test
+    @Description("Trigger next rollout group")
+    void triggeringNextGroupRollout() throws Exception {
+        // setup
+        final int amountTargets = 20;
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/triggerNextGroup", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
+
+        final List<RolloutGroupStatus> groupStatus = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
+                .getContent().stream().map(RolloutGroup::getStatus).collect(Collectors.toList());
+        assertThat(groupStatus).containsExactly(RolloutGroupStatus.RUNNING, RolloutGroupStatus.RUNNING,
+                RolloutGroupStatus.SCHEDULED, RolloutGroupStatus.SCHEDULED);
+    }
+
+    @Test
+    @Description("Trigger next rollout group if rollout is in wrong state")
+    void triggeringNextGroupRolloutWrongState() throws Exception {
+        final int amountTargets = 2;
+        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // CREATING state
+        final Rollout rollout = createRolloutInCreatingSatate("rollout1", 3, dsA.getId(), "controllerId==rollout*");
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+        // READY state
+        rolloutManagement.handleRollouts();
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+        // STARTING state
+        rolloutManagement.start(rollout.getId());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+        // RUNNING state
+        rolloutManagement.handleRollouts();
+        triggerNextGroupAndExpect(rollout, status().isOk());
+
+        // PAUSED state
+        rolloutManagement.pauseRollout(rollout.getId());
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+        rolloutManagement.resumeRollout(rollout.getId());
+        triggerNextGroupAndExpect(rollout, status().isOk());
+
+        // last group already running
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+        // FINISHED state
+        setTargetsStatus(targets, Status.FINISHED);
+        rolloutManagement.handleRollouts();
+        triggerNextGroupAndExpect(rollout, status().isBadRequest());
+
+    }
+
+    private void triggerNextGroupAndExpect(final Rollout rollout, final ResultMatcher expect) throws Exception {
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/triggerNextGroup", rollout.getId()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(expect);
+    }
+
+    private void setTargetsStatus(final List<Target> targets, final Status status) {
+        for (final Target target : targets) {
+            final Long action = deploymentManagement.findActionsByTarget(target.getControllerId(), PAGE).toList().get(0)
+                    .getId();
+            controllerManagement
+                    .addUpdateActionStatus(entityFactory.actionStatus().create(action).status(status).message("test"));
+        }
+    }
+
 }

@@ -282,4 +282,10 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(rolloutGroupTargets.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, rolloutGroupTargets.getTotalElements()));
     }
+
+    @Override
+    public ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") final Long rolloutId) {
+        this.rolloutManagement.triggerNextGroup(rolloutId);
+        return ResponseEntity.ok().build();
+    }
 }
