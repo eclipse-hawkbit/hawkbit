@@ -138,6 +138,8 @@ public class JpaActionManagement {
         onActionStatusUpdate(actionStatus.getStatus(), action);
 
         actionStatusRepository.save(actionStatus);
+
+        action.setLastActionStatusCode(actionStatus.getCode().orElse(null));
         return actionRepository.save(action);
     }
     
