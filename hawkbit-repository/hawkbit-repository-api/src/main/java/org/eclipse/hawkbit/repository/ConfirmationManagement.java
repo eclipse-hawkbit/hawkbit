@@ -48,7 +48,7 @@ public interface ConfirmationManagement {
      *            optional field to set a remark
      * @return the persisted {@link AutoConfirmationStatus}
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, final String initiator,
             final String remark);
 
@@ -71,7 +71,7 @@ public interface ConfirmationManagement {
      *            to confirm actions for
      * @return a list of confirmed actions
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     List<Action> autoConfirmActiveActions(@NotEmpty String controllerId);
 
     /**
@@ -86,7 +86,7 @@ public interface ConfirmationManagement {
      * @param messages
      *            optional value to specify message for the created action status
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action confirmAction(long actionId, Integer code, Collection<String> messages);
 
     /**
@@ -100,7 +100,7 @@ public interface ConfirmationManagement {
      * @param messages
      *            optional value to specify message for the created action status
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     Action denyAction(long actionId, Integer code, Collection<String> messages);
 
     /**
@@ -109,7 +109,7 @@ public interface ConfirmationManagement {
      * @param controllerId
      *            to disable auto confirmation for
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER_OR_HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     void deactivateAutoConfirmation(@NotEmpty String controllerId);
 
 }
