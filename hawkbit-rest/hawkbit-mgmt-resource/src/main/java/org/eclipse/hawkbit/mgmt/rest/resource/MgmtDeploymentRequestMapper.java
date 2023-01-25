@@ -14,7 +14,6 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignment;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
-import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DeploymentRequestBuilder;
 
 /**
@@ -26,38 +25,37 @@ public final class MgmtDeploymentRequestMapper {
     }
 
     /**
-     * Convert assignment information to an {@link DeploymentRequest}
+     * Convert assignment information to an {@link DeploymentRequestBuilder}
      * 
      * @param dsAssignment
      *            DS assignment information
      * @param targetId
      *            target to assign the DS to
-     * @return resulting {@link DeploymentRequest}
+     * @return resulting {@link DeploymentRequestBuilder}
      */
-    public static DeploymentRequest createAssignmentRequest(final MgmtDistributionSetAssignment dsAssignment,
-            final String targetId) {
+    public static DeploymentRequestBuilder createAssignmentRequestBuilder(
+            final MgmtDistributionSetAssignment dsAssignment, final String targetId) {
 
-        return createAssignmentRequest(targetId, dsAssignment.getId(), dsAssignment.getType(),
+        return createAssignmentRequestBuilder(targetId, dsAssignment.getId(), dsAssignment.getType(),
                 dsAssignment.getForcetime(), dsAssignment.getWeight(), dsAssignment.getMaintenanceWindow());
     }
 
     /**
-     * Convert assignment information to an {@link DeploymentRequest}
+     * Convert assignment information to an {@link DeploymentRequestBuilder}
      * 
      * @param targetAssignment
      *            target assignment information
      * @param dsId
      *            DS to assign the target to
-     * @return resulting {@link DeploymentRequest}
+     * @return resulting {@link DeploymentRequestBuilder}
      */
-    public static DeploymentRequest createAssignmentRequest(final MgmtTargetAssignmentRequestBody targetAssignment,
-            final Long dsId) {
-
-        return createAssignmentRequest(targetAssignment.getId(), dsId, targetAssignment.getType(),
+    public static DeploymentRequestBuilder createAssignmentRequestBuilder(
+            final MgmtTargetAssignmentRequestBody targetAssignment, final Long dsId) {
+        return createAssignmentRequestBuilder(targetAssignment.getId(), dsId, targetAssignment.getType(),
                 targetAssignment.getForcetime(), targetAssignment.getWeight(), targetAssignment.getMaintenanceWindow());
     }
 
-    private static DeploymentRequest createAssignmentRequest(final String targetId, final Long dsId,
+    private static DeploymentRequestBuilder createAssignmentRequestBuilder(final String targetId, final Long dsId,
             final MgmtActionType type, final long forcetime, final Integer weight,
             final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         final DeploymentRequestBuilder request = DeploymentManagement.deploymentRequest(targetId, dsId)
@@ -69,6 +67,6 @@ public final class MgmtDeploymentRequestMapper {
             MaintenanceScheduleHelper.validateMaintenanceSchedule(cronSchedule, duration, timezone);
             request.setMaintenance(cronSchedule, duration, timezone);
         }
-        return request.build();
+        return request;
     }
 }

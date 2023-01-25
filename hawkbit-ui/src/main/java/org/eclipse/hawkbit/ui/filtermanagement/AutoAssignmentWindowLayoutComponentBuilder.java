@@ -69,6 +69,13 @@ public class AutoAssignmentWindowLayoutComponentBuilder {
                 ProxyTargetFilterQuery::isAutoAssignmentEnabled, ProxyTargetFilterQuery::setAutoAssignmentEnabled);
     }
 
+    public CheckBox createConfirmationCheckbox(final Binder<ProxyTargetFilterQuery> binder) {
+        final String caption = i18n.getMessage(UIMessageIdProvider.LABEL_AUTO_ASSIGNMENT_CONFIRMATION_REQUIRED);
+        return FormComponentBuilder.createCheckBox(caption, UIComponentIdProvider.ASSIGNMENT_CONFIRMATION_REQUIRED,
+                binder, ProxyTargetFilterQuery::isConfirmationRequired,
+                ProxyTargetFilterQuery::setConfirmationRequired);
+    }
+
     /**
      * Create layout for action type option group
      *

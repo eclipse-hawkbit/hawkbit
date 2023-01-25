@@ -53,6 +53,7 @@ public class ProxyRolloutGroup extends ProxyNamedEntity {
     private String errorConditionExp;
     private RolloutGroupErrorAction errorAction;
     private String errorActionExp;
+    private boolean confirmationRequired;
 
     /**
      * Constructor
@@ -281,6 +282,15 @@ public class ProxyRolloutGroup extends ProxyNamedEntity {
      */
     public void setErrorConditionExp(final String errorConditionExp) {
         this.errorConditionExp = errorConditionExp;
+    }
+
+
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 
     public RolloutGroupErrorAction getErrorAction() {

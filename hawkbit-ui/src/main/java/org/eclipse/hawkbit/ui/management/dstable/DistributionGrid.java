@@ -47,11 +47,13 @@ import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.data.ValueProvider;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.ui.Button;
+
 
 /**
  * Distribution set grid which is shown on the Deployment View.
@@ -100,7 +102,7 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
             final DeploymentManagement deploymentManagement, final UiProperties uiProperties,
             final DistributionGridLayoutUiState distributionGridLayoutUiState,
             final TargetGridLayoutUiState targetGridLayoutUiState,
-            final TagFilterLayoutUiState distributionTagLayoutUiState) {
+            final TagFilterLayoutUiState distributionTagLayoutUiState, final TenantConfigHelper tenantConfigHelper) {
         super(uiDependencies, distributionSetManagement, distributionGridLayoutUiState, EventView.DEPLOYMENT);
 
         this.targetGridLayoutUiState = targetGridLayoutUiState;
@@ -113,9 +115,9 @@ public class DistributionGrid extends AbstractDsGrid<DsManagementFilterParams> {
                 this::getInstalledToTargetDsIds);
 
         final Map<String, AssignmentSupport<?, ProxyDistributionSet>> sourceTargetAssignmentStrategies = new HashMap<>();
-
+        
         final DeploymentAssignmentWindowController assignmentController = new DeploymentAssignmentWindowController(
-                uiDependencies, uiProperties, deploymentManagement);
+                uiDependencies, uiProperties, deploymentManagement, tenantConfigHelper);
         final TargetsToDistributionSetAssignmentSupport targetsToDsAssignment = new TargetsToDistributionSetAssignmentSupport(
                 uiDependencies, assignmentController);
         final TargetTagsToDistributionSetAssignmentSupport targetTagsToDsAssignment = new TargetTagsToDistributionSetAssignmentSupport(

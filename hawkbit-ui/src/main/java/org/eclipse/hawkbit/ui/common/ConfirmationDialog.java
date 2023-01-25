@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
 import org.eclipse.hawkbit.ui.utils.SPUIDefinitions;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 import com.vaadin.server.Resource;
@@ -37,30 +38,12 @@ public class ConfirmationDialog implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final transient Consumer<Boolean> callback;
+    private final transient Runnable callback;
 
     private final CommonDialogWindow window;
 
-    /**
-     * Constructor for configuring confirmation dialog.
-     * 
-     * @param i18n
-     *            internationalization
-     * @param caption
-     *            the dialog caption.
-     * @param question
-     *            the question.
-     * @param callback
-     *            the callback.
-     * @param tab
-     *            ConfirmationTab which contains more information about the
-     *            action which has to be confirmed, e.g. maintenance window
-     * @param id
-     *            the id of the confirmation window
-     */
-    public ConfirmationDialog(final VaadinMessageSource i18n, final String caption, final String question,
-            final Consumer<Boolean> callback, final Component tab, final String id) {
-        this(i18n, caption, question, callback, null, id, tab);
+    public static Builder newBuilder(final VaadinMessageSource i18n, final String id) {
+        return new Builder(i18n, id);
     }
 
     /**
@@ -72,51 +55,43 @@ public class ConfirmationDialog implements Serializable {
      *            the dialog caption.
      * @param question
      *            the question.
-     * @param callback
-     *            the callback.
-     * @param id
-     *            the id of the confirmation dialog
-     */
-    public ConfirmationDialog(final VaadinMessageSource i18n, final String caption, final String question,
-            final Consumer<Boolean> callback, final String id) {
-        this(i18n, caption, question, callback, null, id, null);
-    }
-
-    /**
-     * Constructor for configuring confirmation dialog.
-     *
-     * @param i18n
-     *            internationalization
-     * @param caption
-     *            the dialog caption.
-     * @param question
-     *            the question.
-     * @param callback
-     *            the callback.
+     * @param hint
+     *            added in the dialog
+     * @param onSaveOrUpdate
+     *            the callback onSaveOrUpdate.
+     * @param onCancel
+     *            the callback on cancel.
      * @param icon
      *            the icon of the dialog
      * @param id
      *            the id of the confirmation dialog
      * @param tab
-     *            ConfirmationTab which contains more information about the
-     *            action which has to be confirmed, e.g. maintenance window
+     *            ConfirmationTab which contains more information about the action
+     *            which has to be confirmed, e.g. maintenance window
      */
-    public ConfirmationDialog(final VaadinMessageSource i18n, final String caption, final String question,
-            final Consumer<Boolean> callback, final Resource icon, final String id, final Component tab) {
+    private ConfirmationDialog(final VaadinMessageSource i18n, final String caption, final String question,
+            final String hint, final Runnable onSaveOrUpdate, final Runnable onCancel, final Resource icon,
+            final String id, final Component tab) {
 
         final VerticalLayout content = new VerticalLayout();
         content.setMargin(false);
         content.setSpacing(false);
 
         if (question != null) {
-            content.addComponent(createConfirmationQuestion(question));
+            content.addComponent(createConfirmationLabel(question));
+        }
+        if (hint != null) {
+            content.addComponent(createConfirmationLabel(hint));
         }
         if (tab != null) {
             content.addComponent(tab);
         }
         final WindowBuilder windowBuilder = new WindowBuilder(SPUIDefinitions.CONFIRMATION_WINDOW).caption(caption)
-                .content(content).cancelButtonClickListener(e -> callback.accept(false))
-                .saveDialogCloseListener(getSaveDialogCloseListener()).hideMandatoryExplanation()
+                .content(content).cancelButtonClickListener(e -> {
+                    if (onCancel != null) {
+                        onCancel.run();
+                    }
+                }).saveDialogCloseListener(getSaveDialogCloseListener()).hideMandatoryExplanation()
                 .buttonDecorator(SPUIButtonStyleTiny.class).confirmStyle(ConfirmStyle.OK).i18n(i18n);
 
         if (!StringUtils.isEmpty(id)) {
@@ -124,7 +99,7 @@ public class ConfirmationDialog implements Serializable {
         }
         this.window = windowBuilder.buildCommonDialogWindow();
         window.setSaveButtonEnabled(true);
-        this.callback = callback;
+        this.callback = onSaveOrUpdate;
 
         if (icon != null) {
             window.setIcon(icon);
@@ -137,7 +112,9 @@ public class ConfirmationDialog implements Serializable {
         return new SaveDialogCloseListener() {
             @Override
             public void saveOrUpdate() {
-                callback.accept(true);
+                if (callback != null) {
+                    callback.run();
+                }
             }
 
             @Override
@@ -147,10 +124,10 @@ public class ConfirmationDialog implements Serializable {
         };
     }
 
-    private static Label createConfirmationQuestion(final String question) {
+    private static Label createConfirmationLabel(final String text) {
         // ContentMode.HTML is used instead of ContentMode.PREFORMATTED here due
         // to no linebreaks if an entity name is very long
-        final String questionHtmlSave = HawkbitCommonUtil.sanitizeHtml(question);
+        final String questionHtmlSave = HawkbitCommonUtil.sanitizeHtml(text);
         final Label questionLbl = new Label(questionHtmlSave, ContentMode.HTML);
         questionLbl.setWidth(100, Unit.PERCENTAGE);
         questionLbl.addStyleName(SPUIStyleDefinitions.CONFIRMBOX_QUESTION_LABEL);
@@ -175,4 +152,75 @@ public class ConfirmationDialog implements Serializable {
         return window;
     }
 
+    /**
+     * Builder for a confirmation dialog
+     */
+    public static class Builder {
+
+        private final VaadinMessageSource i18n;
+        private final String id;
+        private String caption;
+        private String question;
+        private String hint;
+        private Resource icon;
+        private Component tab;
+
+        private Runnable callbackOnSaveOrUpdate;
+
+        private Runnable callbackOnCancel;
+
+        /**
+         * private constructor
+         * 
+         * @param i18n
+         *            required field
+         * @param id
+         *            required field
+         */
+        Builder(final VaadinMessageSource i18n, final String id) {
+            this.i18n = i18n;
+            this.id = id;
+        }
+
+        public Builder caption(final String caption) {
+            this.caption = caption;
+            return this;
+        }
+
+        public Builder question(final String question) {
+            this.question = question;
+            return this;
+        }
+
+        public Builder hint(final String hint) {
+            this.hint = hint;
+            return this;
+        }
+
+        public Builder icon(final Resource icon) {
+            this.icon = icon;
+            return this;
+        }
+
+        public Builder tab(final Component tab) {
+            this.tab = tab;
+            return this;
+        }
+
+        public Builder onSaveOrUpdate(final Runnable callback) {
+            this.callbackOnSaveOrUpdate = callback;
+            return this;
+        }
+
+        public Builder onCancel(final Runnable callback) {
+            this.callbackOnCancel = callback;
+            return this;
+        }
+
+        public ConfirmationDialog build() {
+            Assert.isTrue(StringUtils.hasText(caption), "Caption cannot be null.");
+            return new ConfirmationDialog(i18n, caption, question, hint, callbackOnSaveOrUpdate, callbackOnCancel, icon,
+                    id, tab);
+        }
+    }
 }

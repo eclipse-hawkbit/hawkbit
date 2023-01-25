@@ -34,6 +34,11 @@ public enum EventTopic {
     UPDATE_ATTRIBUTES,
 
     /**
+     * Topic when updating auto-confirmation state.
+     */
+    UPDATE_AUTO_CONFIRM,
+
+    /**
      * Topic when sending a download only task, skipping the install.
      */
     DOWNLOAD,
@@ -56,6 +61,10 @@ public enum EventTopic {
     /**
      * Topic when sending a download and install action to multiple devices.
      */
-    BATCH_DOWNLOAD_AND_INSTALL
+    BATCH_DOWNLOAD_AND_INSTALL,
 
+    /**
+     * Topic when confirmation of an action is requested.
+     */
+    CONFIRM
 }

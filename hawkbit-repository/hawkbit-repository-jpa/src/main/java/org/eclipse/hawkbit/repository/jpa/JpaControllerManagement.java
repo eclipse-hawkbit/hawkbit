@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.model.Action.Status.DOWNLOADED;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 import static org.eclipse.hawkbit.repository.model.Target.CONTROLLER_ATTRIBUTE_KEY_SIZE;
@@ -39,6 +38,7 @@ import javax.persistence.criteria.Root;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.MaintenanceScheduleHelper;
@@ -72,6 +72,7 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
@@ -126,12 +127,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private SoftwareModuleRepository softwareModuleRepository;
 
     @Autowired
-    private ActionStatusRepository actionStatusRepository;
-
-    @Autowired
-    private QuotaManagement quotaManagement;
-
-    @Autowired
     private TenantConfigurationManagement tenantConfigurationManagement;
 
     @Autowired
@@ -155,9 +150,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Autowired
     private TenantAware tenantAware;
 
+    @Autowired
+    private ConfirmationManagement confirmationManagement;
+
     public JpaControllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
-        super(actionRepository, repositoryProperties);
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+        super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
 
         if (!repositoryProperties.isEagerPollPersistence()) {
             executorService.scheduleWithFixedDelay(this::flushUpdateQueue,
@@ -565,11 +564,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return action;
     }
 
-    private void assertActionStatusMessageQuota(final JpaActionStatus actionStatus) {
-        QuotaHelper.assertAssignmentQuota(actionStatus.getId(), actionStatus.getMessages().size(),
-                quotaManagement.getMaxMessagesPerActionStatus(), "Message", ActionStatus.class.getSimpleName(), null);
-    }
-
     private void handleFinishedCancelation(final JpaActionStatus actionStatus, final JpaAction action) {
         // in case of successful cancellation we also report the success at
         // the canceled action itself.
@@ -582,88 +576,41 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Action addUpdateActionStatus(final ActionStatusCreate c) {
-        final JpaActionStatusCreate create = (JpaActionStatusCreate) c;
-        final JpaAction action = getActionAndThrowExceptionIfNotFound(create.getActionId());
-        final JpaActionStatus actionStatus = create.build();
-
-        if (isUpdatingActionStatusAllowed(action, actionStatus)) {
-            return handleAddUpdateActionStatus(actionStatus, action);
-        }
-
-        LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
-                actionStatus.getStatus(), action.getId());
-        return action;
+    public Action addUpdateActionStatus(final ActionStatusCreate statusCreate) {
+        return addActionStatus((JpaActionStatusCreate) statusCreate);
     }
 
-    /**
-     * ActionStatus updates are allowed mainly if the action is active. If the
-     * action is not active we accept further status updates if permitted so by
-     * repository configuration. In this case, only the values: Status.ERROR and
-     * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we accept
-     * status updates only once.
-     */
-    private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
-
-        final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
-                && (Status.ERROR != actionStatus.getStatus());
-
-        final boolean isAllowedByRepositoryConfiguration = !repositoryProperties.isRejectActionStatusForClosedAction()
-                && isIntermediateFeedback;
-
-        final boolean isAllowedForDownloadOnlyActions = isDownloadOnly(action) && !isIntermediateFeedback;
-
-        return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
-    }
-
-    private static boolean isDownloadOnly(final JpaAction action) {
-        return DOWNLOAD_ONLY == action.getActionType();
-    }
-
-    /**
-     * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
-     */
-    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
-
-        String controllerId = null;
-        LOG.debug("handleAddUpdateActionStatus for action {}", action.getId());
-
-        // information status entry - check for a potential DOS attack
-        assertActionStatusQuota(action);
-        assertActionStatusMessageQuota(actionStatus);
-
-        switch (actionStatus.getStatus()) {
+    @Override
+    protected void onActionStatusUpdate(final Action.Status updatedActionStatus, final JpaAction action) {
+        switch (updatedActionStatus) {
         case ERROR:
             final JpaTarget target = (JpaTarget) action.getTarget();
             target.setUpdateStatus(TargetUpdateStatus.ERROR);
             handleErrorOnAction(action, target);
             break;
         case FINISHED:
-            controllerId = handleFinishedAndStoreInTargetStatus(action);
+            handleFinishedAndStoreInTargetStatus(action).ifPresent(this::requestControllerAttributes);
             break;
         case DOWNLOADED:
-            controllerId = handleDownloadedActionStatus(action);
+            handleDownloadedActionStatus(action).ifPresent(this::requestControllerAttributes);
             break;
         default:
             break;
         }
-
-        actionStatus.setAction(action);
-        actionStatusRepository.save(actionStatus);
-
-        action.setLastActionStatusCode(actionStatus.getCode().orElse(null));
-        final Action savedAction = actionRepository.save(action);
-
-        if (controllerId != null) {
-            requestControllerAttributes(controllerId);
-        }
-
-        return savedAction;
     }
 
-    private String handleDownloadedActionStatus(final JpaAction action) {
+    /**
+     * Handles the case where the {@link Action.Status#DOWNLOADED} status is
+     * reported by the device. In case the update is finished, a controllerId will
+     * be returned to trigger a request for attributes.
+     *
+     * @param action
+     *            updated action
+     * @return a present controllerId in case the attributes needs to be requested.
+     */
+    private Optional<String> handleDownloadedActionStatus(final JpaAction action) {
         if (!isDownloadOnly(action)) {
-            return null;
+            return Optional.empty();
         }
 
         final JpaTarget target = (JpaTarget) action.getTarget();
@@ -672,7 +619,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
         targetRepository.save(target);
 
-        return target.getControllerId();
+        return Optional.of(target.getControllerId());
     }
 
     private void requestControllerAttributes(final String controllerId) {
@@ -695,12 +642,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         targetRepository.save(mergedTarget);
     }
 
-    private void assertActionStatusQuota(final JpaAction action) {
-        QuotaHelper.assertAssignmentQuota(action.getId(), 1, quotaManagement.getMaxStatusEntriesPerAction(),
-                ActionStatus.class, Action.class, actionStatusRepository::countByActionId);
-    }
-
-    private String handleFinishedAndStoreInTargetStatus(final JpaAction action) {
+    /**
+     * Handles the case where the {@link Action.Status#FINISHED} status is
+     * reported by the device. In case the update is finished, a controllerId will
+     * be returned to trigger a request for attributes.
+     *
+     * @param action
+     *            updated action
+     * @return a present controllerId in case the attributes needs to be requested.
+     */
+    private Optional<String> handleFinishedAndStoreInTargetStatus(final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
         action.setActive(false);
         action.setStatus(Status.FINISHED);
@@ -727,7 +678,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         targetRepository.save(target);
         entityManager.detach(ds);
 
-        return target.getControllerId();
+        return Optional.of(target.getControllerId());
     }
 
     @Override
@@ -882,11 +833,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         assertActionStatusMessageQuota(statusMessage);
 
         return actionStatusRepository.save(statusMessage);
-    }
-
-    private JpaAction getActionAndThrowExceptionIfNotFound(final Long actionId) {
-        return actionRepository.findById(actionId)
-                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
     }
 
     @Override
@@ -1074,6 +1020,17 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public AutoConfirmationStatus activateAutoConfirmation(final String controllerId, final String initiator,
+            final String remark) {
+        return confirmationManagement.activateAutoConfirmation(controllerId, initiator, remark);
+    }
+
+    @Override
+    public void deactivateAutoConfirmation(final String controllerId) {
+        confirmationManagement.deactivateAutoConfirmation(controllerId);
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {

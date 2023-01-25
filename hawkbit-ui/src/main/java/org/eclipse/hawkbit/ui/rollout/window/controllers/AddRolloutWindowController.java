@@ -114,7 +114,8 @@ public class AddRolloutWindowController
 
         Rollout rolloutToCreate;
         if (GroupDefinitionMode.SIMPLE == entity.getGroupDefinitionMode()) {
-            rolloutToCreate = rolloutManagement.create(rolloutCreate, entity.getNumberOfGroups(), conditions);
+            rolloutToCreate = rolloutManagement.create(rolloutCreate, entity.getNumberOfGroups(),
+                    entity.isConfirmationRequired(), conditions);
         } else {
             rolloutToCreate = rolloutManagement.create(rolloutCreate,
                     getRolloutGroupsCreateFromDefinitions(entity.getAdvancedRolloutGroupDefinitions()), conditions);

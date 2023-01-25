@@ -108,7 +108,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
             @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
-            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10") })
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
+            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11")})
     @Convert("status")
     @NotNull
     private Status status;
@@ -236,7 +237,8 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
     public String toString() {
         return "JpaAction [distributionSet=" + distributionSet.getId() + ", version=" + getOptLockRevision() + ", id="
                 + getId() + ", actionType=" + getActionType() + ", weight=" + getWeight() + ", isActive=" + isActive()
-                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + "]";
+                + ",  createdAt=" + getCreatedAt() + ", lastModifiedAt=" + getLastModifiedAt() + ", status="
+                + getStatus().name() + "]";
     }
 
     @Override
@@ -386,5 +388,9 @@ public class JpaAction extends AbstractJpaTenantAwareBaseEntity implements Actio
 
     public void setLastActionStatusCode(final Integer lastActionStatusCode) {
         this.lastActionStatusCode = lastActionStatusCode;
+    }
+
+    public boolean isWaitingConfirmation() {
+        return status == Status.WAIT_FOR_CONFIRMATION;
     }
 }

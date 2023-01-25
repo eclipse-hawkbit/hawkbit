@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifact;
 import org.eclipse.hawkbit.dmf.json.model.DmfArtifactHash;
 import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
+import org.eclipse.hawkbit.dmf.json.model.DmfConfirmRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
@@ -273,6 +274,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             final Map<SoftwareModule, List<SoftwareModuleMetadata>> softwareModules) {
         if (action.isCancelingOrCanceled()) {
             return createPlainActionRequest(action);
+        } else if (action.isWaitingConfirmation()) {
+            return createConfirmRequest(target, action.getId(), softwareModules);
         }
         return createDownloadAndUpdateRequest(target, action.getId(), softwareModules);
     }
@@ -310,6 +313,9 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
      * @return {@link EventTopic} to use for message.
      */
     private static EventTopic getEventTypeForTarget(final ActionProperties action) {
+        if (action.isWaitingConfirmation()) {
+            return EventTopic.CONFIRM;
+        }
         return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
                 ? EventTopic.DOWNLOAD
                 : EventTopic.DOWNLOAD_AND_INSTALL;
@@ -415,9 +421,16 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
             return;
         }
 
-        final DmfDownloadAndUpdateRequest downloadAndUpdateRequest = createDownloadAndUpdateRequest(target,
-                action.getId(), modules);
-        final Message message = getMessageConverter().toMessage(downloadAndUpdateRequest,
+        DmfActionRequest request;
+        if (action.isWaitingConfirmation()) {
+            // For the moment the confirmation request is the same as download and update request.
+            // It can be modified not to expose all the software modules in the future.
+            request = createConfirmRequest(target, action.getId(), modules);
+        } else {
+            request = createDownloadAndUpdateRequest(target, action.getId(), modules);
+        }
+
+        final Message message = getMessageConverter().toMessage(request,
                 createConnectorMessagePropertiesEvent(tenant, target.getControllerId(), getEventTypeForTarget(action)));
         amqpSenderService.sendMessage(message, targetAddress);
     }
@@ -623,5 +636,26 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return (Action.ActionType.DOWNLOAD_ONLY == action.getActionType() || !action.isMaintenanceWindowAvailable())
                 ? EventTopic.BATCH_DOWNLOAD
                 : EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
+    }
+
+    /**
+     * Creates a Confirmation request.
+     * @param target the target
+     * @param actionId the actionId
+     * @param softwareModules the software modules
+     * @return
+     */
+    protected DmfConfirmRequest createConfirmRequest(final Target target, final Long actionId, final Map<SoftwareModule,
+            List<SoftwareModuleMetadata>> softwareModules) {
+        final DmfConfirmRequest request = new DmfConfirmRequest();
+        request.setActionId(actionId);
+        request.setTargetSecurityToken(systemSecurityContext.runAsSystem(target::getSecurityToken));
+
+        //Software modules can be filtered in the future exposing only the needed.
+        if (softwareModules != null) {
+            softwareModules.entrySet()
+                    .forEach(entry -> request.addSoftwareModule(convertToAmqpSoftwareModule(target, entry)));
+        }
+        return request;
     }
 }

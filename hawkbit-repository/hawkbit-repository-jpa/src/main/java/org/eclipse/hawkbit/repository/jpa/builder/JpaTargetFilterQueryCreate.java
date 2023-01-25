@@ -31,11 +31,10 @@ public class JpaTargetFilterQueryCreate extends AbstractTargetFilterQueryUpdateC
 
     @Override
     public JpaTargetFilterQuery build() {
-
         return new JpaTargetFilterQuery(name, query,
                 getAutoAssignDistributionSetId().map(distributionSetManagement::getValidAndComplete).orElse(null),
                 getAutoAssignActionType().filter(JpaTargetFilterQueryCreate::isAutoAssignActionTypeValid).orElse(null),
-                weight);
+                weight, getConfirmationRequired().orElse(false));
     }
 
     private static boolean isAutoAssignActionTypeValid(final ActionType actionType) {

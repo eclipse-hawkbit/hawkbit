@@ -192,7 +192,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
             final Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "rollout desc", 1,
                     "name==" + name, distributionSet, "50", "5", timeforced ? ActionType.TIMEFORCED : ActionType.FORCED,
-                    isMultiAssignmentsEnabled() ? 600 : null);
+                    isMultiAssignmentsEnabled() ? 600 : null, isConfirmationFlowActive());
 
             // start the rollout and handle it
             rolloutManagement.start(rollout.getId());
@@ -280,6 +280,8 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                 fieldWithPath(fieldArrayPrefix + "securityToken").description(MgmtApiModelProperties.SECURITY_TOKEN),
                 fieldWithPath(fieldArrayPrefix + "requestAttributes")
                         .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                fieldWithPath(fieldArrayPrefix + "autoConfirmActive")
+                        .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVE),
                 fieldWithPath(fieldArrayPrefix + "installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
                 fieldWithPath(fieldArrayPrefix + "lastModifiedAt")
                         .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
@@ -314,7 +316,9 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
                             .description(MgmtApiModelProperties.LINKS_ACTIONS),
                     fieldWithPath(fieldArrayPrefix + "_links.metadata").description(MgmtApiModelProperties.META_DATA),
                     fieldWithPath(fieldArrayPrefix + "_links.targetType")
-                            .description(MgmtApiModelProperties.LINK_TO_TARGET_TYPE)));
+                            .description(MgmtApiModelProperties.LINK_TO_TARGET_TYPE),
+                    fieldWithPath(fieldArrayPrefix + "_links.autoConfirm")
+                            .description(MgmtApiModelProperties.LINK_TO_AUTO_CONFIRM)));
 
         }
         fields.addAll(Arrays.asList(descriptors));
@@ -364,7 +368,12 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
     protected boolean isMultiAssignmentsEnabled() {
         return Boolean.TRUE.equals(tenantConfigurationManagement
-                .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+              .getConfigurationValue(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    }
+
+    protected boolean isConfirmationFlowActive() {
+        return Boolean.TRUE.equals(tenantConfigurationManagement
+              .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue());
     }
 
 }

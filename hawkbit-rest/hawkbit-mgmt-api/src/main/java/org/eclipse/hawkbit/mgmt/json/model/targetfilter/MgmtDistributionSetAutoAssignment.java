@@ -25,6 +25,9 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
     @JsonProperty(required = false)
     private Integer weight;
 
+    @JsonProperty(required = false)
+    private Boolean confirmationRequired;
+
     public MgmtActionType getType() {
         return type;
     }
@@ -39,5 +42,13 @@ public class MgmtDistributionSetAutoAssignment extends MgmtId {
 
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    public Boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final Boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

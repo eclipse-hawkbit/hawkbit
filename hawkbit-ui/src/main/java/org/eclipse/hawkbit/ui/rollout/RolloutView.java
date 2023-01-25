@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -36,6 +37,7 @@ import org.eclipse.hawkbit.ui.rollout.rolloutgroup.RolloutGroupGridLayout;
 import org.eclipse.hawkbit.ui.rollout.rolloutgrouptargets.RolloutGroupTargetGridLayout;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -68,7 +70,7 @@ public class RolloutView extends AbstractEventListenersAwareView {
             final VaadinMessageSource i18n, final TargetFilterQueryManagement targetFilterQueryManagement,
             final QuotaManagement quotaManagement, final TenantConfigurationManagement tenantConfigManagement,
             final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
         this.rolloutManagementUIState = rolloutManagementUIState;
 
         final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
@@ -78,7 +80,8 @@ public class RolloutView extends AbstractEventListenersAwareView {
                 targetManagement, uiProperties, targetFilterQueryManagement, rolloutGroupManagement, quotaManagement,
                 tenantConfigManagement, distributionSetManagement, systemSecurityContext);
         this.rolloutGroupsLayout = new RolloutGroupGridLayout(uiDependencies, rolloutGroupManagement,
-                rolloutManagementUIState);
+                rolloutManagementUIState,
+                TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigManagement), tenantAware);
         this.rolloutGroupTargetsLayout = new RolloutGroupTargetGridLayout(uiDependencies, rolloutGroupManagement,
                 rolloutManagementUIState);
 

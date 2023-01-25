@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Utility class to handle weight validation in Rollout, Auto Assignments, and

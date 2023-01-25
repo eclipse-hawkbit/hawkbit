@@ -290,6 +290,35 @@ public final class GridComponentBuilder {
     }
 
     /**
+     * Remove column based on it's id
+     * 
+     * @param grid
+     *            to add the column to
+     * @param columnId
+     *            of the column
+     * @param <E>
+     *            entity type of the grid
+     */
+    public static <E> void removeColumn(final Grid<E> grid, final String columnId) {
+        grid.removeColumn(columnId);
+    }
+
+    /**
+     * Check if a column is present based on it's id
+     *
+     * @param grid
+     *            to add the column to
+     * @param columnId
+     *            of the column
+     * @param <E>
+     *            entity type of the grid
+     * @return if the column is present
+     */
+    public static <E> boolean isColumnPresent(final Grid<E> grid, final String columnId) {
+        return grid.getColumn(columnId) != null;
+    }
+
+    /**
      * Add column to grid with the standard settings
      *
      * @param <E>

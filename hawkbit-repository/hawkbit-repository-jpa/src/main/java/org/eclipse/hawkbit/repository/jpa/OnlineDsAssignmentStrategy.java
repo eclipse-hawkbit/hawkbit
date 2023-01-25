@@ -48,9 +48,10 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final BooleanSupplier confirmationFlowConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
     }
 
     @Override
@@ -130,15 +131,28 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
         if (result != null) {
-            result.setStatus(Status.RUNNING);
+            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
+                    && result.getTarget().getAutoConfirmationStatus() == null;
+            if (isConfirmationFlowEnabled() && confirmationRequired) {
+                result.setStatus(Status.WAIT_FOR_CONFIRMATION);
+            } else {
+                result.setStatus(Status.RUNNING);
+            }
         }
         return result;
     }
 
+    /**
+     * Will be called to create the initial action status for an action
+     */
     @Override
     public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
-        result.setStatus(Status.RUNNING);
+        if (isConfirmationFlowEnabled()) {
+            result.setStatus(Status.WAIT_FOR_CONFIRMATION);
+        } else {
+            result.setStatus(Status.RUNNING);
+        }
         return result;
     }
 

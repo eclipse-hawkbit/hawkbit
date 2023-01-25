@@ -11,14 +11,18 @@ package org.eclipse.hawkbit.ui.tenantconfiguration;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySystemConfigRepository;
+import org.eclipse.hawkbit.ui.common.event.EventTopics;
+import org.eclipse.hawkbit.ui.common.event.TenantConfigChangedEventPayload;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCleanupConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ActionAutoCloseConfigurationItem;
 import org.eclipse.hawkbit.ui.tenantconfiguration.repository.MultiAssignmentsConfigurationItem;
+import org.eclipse.hawkbit.ui.tenantconfiguration.repository.ConfirmationFlowConfigurationItem;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -29,6 +33,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.Link;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
+import org.vaadin.spring.events.EventBus;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -40,13 +45,13 @@ import java.util.stream.Collectors;
 
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY;
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.ACTION_CLEANUP_ACTION_STATUS;
+import static org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions.DIST_CHECKBOX_STYLE;
 
 /**
  * View to configure the authentication mode.
  */
 public class RepositoryConfigurationView extends BaseConfigurationView<ProxySystemConfigRepository> {
 
-    private static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
     private static final Set<Action.Status> EMPTY_STATUS_SET = EnumSet.noneOf(Action.Status.class);
 
     private static final long serialVersionUID = 1L;
@@ -54,17 +59,25 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
     private final VaadinMessageSource i18n;
     private final UiProperties uiProperties;
 
+    private final transient EventBus.ApplicationEventBus eventBus;
+    private final transient TenantAware tenantAware;
+
     private ActionAutoCloseConfigurationItem actionAutocloseConfigurationItem;
     private ActionAutoCleanupConfigurationItem actionAutocleanupConfigurationItem;
     private MultiAssignmentsConfigurationItem multiAssignmentsConfigurationItem;
 
     private CheckBox multiAssignmentsCheckBox;
 
+    private ConfirmationFlowConfigurationItem confirmationFlowConfigurationItem;
+
     RepositoryConfigurationView(final VaadinMessageSource i18n, final UiProperties uiProperties,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final EventBus.ApplicationEventBus eventBus, final TenantAware tenantAware) {
         super(tenantConfigurationManagement);
         this.i18n = i18n;
         this.uiProperties = uiProperties;
+        this.eventBus = eventBus;
+        this.tenantAware = tenantAware;
     }
 
     @Override
@@ -73,6 +86,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         this.actionAutocloseConfigurationItem = new ActionAutoCloseConfigurationItem(i18n);
         this.actionAutocleanupConfigurationItem = new ActionAutoCleanupConfigurationItem(getBinder(), i18n);
         this.multiAssignmentsConfigurationItem = new MultiAssignmentsConfigurationItem(i18n, getBinder());
+        this.confirmationFlowConfigurationItem = new ConfirmationFlowConfigurationItem(i18n);
         init();
     }
 
@@ -92,7 +106,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         header.addStyleName("config-panel-header");
         vLayout.addComponent(header);
 
-        final GridLayout gridLayout = new GridLayout(3, 3);
+        final GridLayout gridLayout = new GridLayout(3, 4);
         gridLayout.setSpacing(true);
 
         gridLayout.setColumnExpandRatio(1, 1.0F);
@@ -125,6 +139,13 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         gridLayout.addComponent(multiAssignmentsCheckBox, 0, 1);
         gridLayout.addComponent(multiAssignmentsConfigurationItem, 1, 1);
 
+        final CheckBox confirmationFlowCheckBox = FormComponentBuilder.createCheckBox(
+              UIComponentIdProvider.REPOSITORY_USER_CONFIRMATION_CHECKBOX, getBinder(),
+              ProxySystemConfigRepository::isConfirmationFlow, ProxySystemConfigRepository::setConfirmationFlow);
+        confirmationFlowCheckBox.setStyleName(DIST_CHECKBOX_STYLE);
+        gridLayout.addComponent(confirmationFlowCheckBox, 0, 2);
+        gridLayout.addComponent(confirmationFlowConfigurationItem, 1, 2);
+
         final CheckBox actionAutoCleanupCheckBox = FormComponentBuilder.createCheckBox(
                 UIComponentIdProvider.REPOSITORY_ACTIONS_AUTOCLEANUP_CHECKBOX, getBinder(),
                 ProxySystemConfigRepository::isActionAutocleanup, ProxySystemConfigRepository::setActionAutocleanup);
@@ -136,8 +157,8 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
                 actionAutocleanupConfigurationItem.hideSettings();
             }
         });
-        gridLayout.addComponent(actionAutoCleanupCheckBox, 0, 2);
-        gridLayout.addComponent(actionAutocleanupConfigurationItem, 1, 2);
+        gridLayout.addComponent(actionAutoCleanupCheckBox, 0, 3);
+        gridLayout.addComponent(actionAutocleanupConfigurationItem, 1, 3);
 
         final Link linkToProvisioningHelp = SPUIComponentProvider.getHelpLink(i18n,
                 uiProperties.getLinks().getDocumentation().getProvisioningStateMachine());
@@ -159,23 +180,34 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
 
     @Override
     public void save() {
-        writeConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED, getBinderBean().isActionAutocleanup());
+        if (getBinderBean().isActionAutocleanup() != readConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED)) {
+            setConfig(TenantConfigurationKey.ACTION_CLEANUP_ENABLED, getBinderBean().isActionAutocleanup());
+        }
         if (getBinderBean().isActionAutocleanup()) {
-            writeConfigOption(ACTION_CLEANUP_ACTION_STATUS, getBinderBean().getActionCleanupStatus().getStatus()
+            setConfig(ACTION_CLEANUP_ACTION_STATUS, getBinderBean().getActionCleanupStatus().getStatus()
                     .stream().map(Action.Status::name).collect(Collectors.joining(",")));
 
-            writeConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
+            setConfig(TenantConfigurationKey.ACTION_CLEANUP_ACTION_EXPIRY,
                     TimeUnit.DAYS.toMillis(Long.parseLong(getBinderBean().getActionExpiryDays())));
         }
         if (!readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
-            writeConfigOption(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED,
+            setConfig(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED,
                     getBinderBean().isActionAutoclose());
         }
         if (getBinderBean().isMultiAssignments()
                 && !readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED)) {
-            writeConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, getBinderBean().isMultiAssignments());
+            setConfig(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, getBinderBean().isMultiAssignments());
             this.disableMultipleAssignmentOption();
         }
+        if (getBinderBean().isConfirmationFlow() != readConfigOption(TenantConfigurationKey.USER_CONFIRMATION_ENABLED)) {
+            setConfig(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, getBinderBean().isConfirmationFlow());
+        }
+    }
+
+    private <T extends Serializable> void setConfig(final String key, final T value) {
+        final TenantConfigurationValue<T> config = writeConfigOption(key, value);
+        eventBus.publish(EventTopics.TENANT_CONFIG_CHANGED, this,
+                new TenantConfigChangedEventPayload(tenantAware.getCurrentTenant(), key, config));
     }
 
     @Override
@@ -183,6 +215,7 @@ public class RepositoryConfigurationView extends BaseConfigurationView<ProxySyst
         final ProxySystemConfigRepository configBean = new ProxySystemConfigRepository();
         configBean.setActionAutoclose(readConfigOption(TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED));
         configBean.setMultiAssignments(readConfigOption(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED));
+        configBean.setConfirmationFlow(readConfigOption(TenantConfigurationKey.USER_CONFIRMATION_ENABLED));
         configBean.setActionAutocleanup(readConfigOption(TenantConfigurationKey.ACTION_CLEANUP_ENABLED));
         configBean.setActionCleanupStatus(getActionStatusOption());
         configBean.setActionExpiryDays(String.valueOf(getActionExpiry()));

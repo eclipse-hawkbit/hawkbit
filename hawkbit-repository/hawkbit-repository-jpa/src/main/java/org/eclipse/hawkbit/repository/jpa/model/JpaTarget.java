@@ -36,6 +36,8 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.NotNull;
@@ -49,6 +51,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityChecker;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -176,6 +179,10 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
     @CascadeOnDelete
     @OneToMany(mappedBy = "target", fetch = FetchType.LAZY, targetEntity = JpaTargetMetadata.class)
     private List<TargetMetadata> metadata;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "target", orphanRemoval = true)
+    @PrimaryKeyJoinColumn
+    private JpaAutoConfirmationStatus autoConfirmationStatus;
 
     /**
      * Constructor.
@@ -370,6 +377,15 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
             final LocalDateTime overdueDate = nextPollDate.plus(overdueTime);
             return new PollStatus(lastPollDate, nextPollDate, overdueDate, currentDate);
         });
+    }
+
+    @Override
+    public AutoConfirmationStatus getAutoConfirmationStatus() {
+        return autoConfirmationStatus;
+    }
+
+    public void setAutoConfirmationStatus(final JpaAutoConfirmationStatus autoConfirmationStatus) {
+        this.autoConfirmationStatus =  autoConfirmationStatus;
     }
 
     @Override

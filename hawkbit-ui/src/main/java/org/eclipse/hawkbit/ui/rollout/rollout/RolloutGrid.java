@@ -16,6 +16,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.cronutils.utils.StringUtils;
+import com.google.common.base.Predicates;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.shared.ui.ContentMode;
+import com.vaadin.ui.Button;
+import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
+import com.vaadin.ui.renderers.HtmlRenderer;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
@@ -59,17 +69,6 @@ import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.cronutils.utils.StringUtils;
-import com.google.common.base.Predicates;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.renderers.HtmlRenderer;
 
 /**
  * Rollout list grid component.
@@ -524,16 +523,17 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     private ConfirmationDialog createTriggerNextGroupDialog(final Long rolloutId) {
         final String caption = i18n.getMessage("caption.rollout.confirm.trigger.next");
         final String question = i18n.getMessage("message.rollout.confirm.trigger.next");
-        return new ConfirmationDialog(i18n, caption, question, ok -> {
-            if (Boolean.TRUE.equals(ok)) {
-                try {
-                    rolloutManagement.triggerNextGroup(rolloutId);
-                    uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group.success"));
-                } catch (final RolloutIllegalStateException e) {
-                    LOGGER.warn("Error on manually triggering next rollout group: {}", e.getMessage());
-                    uiNotification.displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.error"));
-                }
-            }
-        }, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG);
+
+        return ConfirmationDialog.newBuilder(i18n, UIComponentIdProvider.ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG)
+                .caption(caption).question(question).onSaveOrUpdate(() -> {
+                    try {
+                        rolloutManagement.triggerNextGroup(rolloutId);
+                        uiNotification.displaySuccess(i18n.getMessage("message.rollout.trigger.next.group.success"));
+                    } catch (final RolloutIllegalStateException e) {
+                        LOGGER.warn("Error on manually triggering next rollout group: {}", e.getMessage());
+                        uiNotification
+                                .displayValidationError(i18n.getMessage("message.rollout.trigger.next.group.error"));
+                    }
+                }).build();
     }
 }

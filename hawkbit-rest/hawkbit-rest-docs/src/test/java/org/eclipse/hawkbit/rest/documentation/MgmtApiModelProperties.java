@@ -35,6 +35,8 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
     public static final String LINK_TO_TARGET = "The link to the target.";
 
+    public static final String LINK_TO_AUTO_CONFIRM = "The link to the detailed auto confirm state.";
+
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
     public static final String SMT_VENDOR = "The software vendor of the entity.";
@@ -93,6 +95,8 @@ public final class MgmtApiModelProperties {
 
     // rollout
     public static final String ROLLOUT_FILTER_QUERY = "target filter query language expression";
+    public static final String ROLLOUT_CONFIRMATION_REQUIRED = "(available with user consent flow active) if the confirmation is required for this rollout. Value will be used if confirmation options are missing in the rollout group definitions. Confirmation is required per default";
+    public static final String ROLLOUT_GROUP_CONFIRMATION_REQUIRED = "(available with user consent flow active) if the confirmation is required for this rollout group. Confirmation is required per default.";
     public static final String ROLLOUT_GROUP_FILTER_QUERY = "target filter query language expression that selects a subset of targets which match the target filter of the Rollout";
     public static final String ROLLOUT_GROUP_TARGET_PERCENTAGE = "percentage of remaining and matching targets that should be added to this group";
     public static final String ROLLOUT_DS_ID = "the ID of distributionset of this rollout";
@@ -144,6 +148,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_FORCE_TYPE = "Force type of the action that provides a hint if the controller should apply the action immediately or whenever possible.";
 
+    public static final String ACTION_CONFIRMATION_REQUIRED = "(Available with user consent flow active) Defines, if the confirmation is required for an action. Confirmation is required per default.";
+
     public static final String ACTION_FORCE_TIME = "In case of timeforced mode the difference, measured in milliseconds, between the time the action should switch to forced and midnight, January 1, 1970 UTC.";
 
     public static final String ACTION_FORCED = "Set to forced in order to switch action to forced mode.";
@@ -178,6 +184,8 @@ public final class MgmtApiModelProperties {
 
     public static final String REQUEST_ATTRIBUTES = "Request re-transmission of target attributes.";
 
+    public static final String AUTO_CONFIRM_ACTIVE = "Present if user consent flow active. Indicates if auto-confirm is active";
+
     public static final String META_DATA = "List of metadata.";
 
     public static final String META_DATA_KEY = "Metadata property key.";
@@ -185,6 +193,21 @@ public final class MgmtApiModelProperties {
     public static final String META_DATA_VALUE = "Metadata property value.";
 
     public static final String SM_META_DATA_TARGET_VISIBLE = "Metadata property is visible to targets as part of software update action.";
+
+    public static final String AUTO_CONFIRM_STATE_ACTIVE = "Flag if auto confirm is active";
+
+    public static final String AUTO_CONFIRM_STATE_INITIATOR = "(Optional) initiator set on activation";
+
+    public static final String AUTO_CONFIRM_STATE_REMARK = "(Optional) remark set on activation";
+
+    public static final String AUTO_CONFIRM_STATE_ACTIVATED_AT = "timestamp of the activation";
+
+    public static final String AUTO_CONFIRM_STATE_REFERENCE_ACTIVATE_AUTO_CONFIRM = "reference link to activate auto confirm (present if not active)";
+
+    public static final String AUTO_CONFIRM_STATE_REFERENCE_DEACTIVATE_AUTO_CONFIRM = "reference link to deactivate auto confirm (present if active)";
+
+    public static final String AUTO_CONFIRM_ACTIVATE_INITIATOR = "individual value (e.g. username) stored as initiator and automatically used as confirmed user in future actions";
+    public static final String AUTO_CONFIRM_ACTIVATE_REMARK = "individual value to attach a remark which will be persisted when automatically confirming future actions";
 
     public static final String SM_TYPE_KEY = "Key that can be interpreted by the target.";
 
@@ -225,6 +248,7 @@ public final class MgmtApiModelProperties {
     public static final String FORCETIME = "Forcetime in milliseconds.";
     public static final String FORCE = "Force as boolean.";
     public static final String ASSIGNMENT_WEIGHT = "Importance of the assignment.";
+    public static final String ASSIGNMENT_CONFIRMATION_REQUIRED = "(Available with user consent flow active) Specifies if the confirmation by the device is required for this action.";
     public static final String ASSIGNMENT_TYPE = "The type of the assignment.";
     public static final String TARGET_ASSIGNED = "The number of targets that have been assigned as part of this operation.";
     public static final String TARGET_ASSIGNED_ALREADY = "The number of targets which already had been the assignment.";

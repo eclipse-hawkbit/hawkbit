@@ -159,6 +159,7 @@ public class SecurityManagedConfiguration {
     static class ControllerSecurityConfigurationAdapter extends WebSecurityConfigurerAdapter {
 
         private static final String[] DDI_ANT_MATCHERS = { DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}",
+                DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/confirmationBase/**",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/deploymentBase/**",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/installedBase/**",
                 DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/cancelAction/**",

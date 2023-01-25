@@ -71,6 +71,7 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -193,10 +194,11 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Rollout create(final RolloutCreate rollout, final int amountGroup, final RolloutGroupConditions conditions) {
+    public Rollout create(final RolloutCreate rollout, final int amountGroup, final boolean confirmationRequired,
+            final RolloutGroupConditions conditions) {
         RolloutHelper.verifyRolloutGroupParameter(amountGroup, quotaManagement);
         final JpaRollout savedRollout = createRollout((JpaRollout) rollout.build());
-        return createRolloutGroups(amountGroup, conditions, savedRollout);
+        return createRolloutGroups(amountGroup, conditions, savedRollout, confirmationRequired);
     }
 
     @Override
@@ -222,7 +224,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private Rollout createRolloutGroups(final int amountOfGroups, final RolloutGroupConditions conditions,
-            final JpaRollout rollout) {
+            final JpaRollout rollout, final boolean isConfirmationRequired) {
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.CREATING);
         RolloutHelper.verifyRolloutGroupConditions(conditions);
 
@@ -241,6 +243,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setRollout(savedRollout);
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
+            group.setConfirmationRequired(isConfirmationRequired);
 
             addSuccessAndErrorConditionsAndActions(group, conditions);
 
@@ -283,6 +286,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             group.setRollout(savedRollout);
             group.setParent(lastSavedGroup);
             group.setStatus(RolloutGroupStatus.CREATING);
+            group.setConfirmationRequired(srcGroup.isConfirmationRequired());
 
             group.setTargetPercentage(srcGroup.getTargetPercentage());
             if (srcGroup.getTargetFilterQuery() != null) {

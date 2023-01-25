@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtPollStatus;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtActionStatus;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirm;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -40,6 +41,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -48,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.PageRequest;
 
 /**
@@ -85,6 +88,27 @@ public final class MgmtTargetMapper {
             response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(response.getTargetType()))
                     .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
         }
+        if (response.getAutoConfirmActive() != null) {
+            response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAutoConfirmStatus(response.getControllerId()))
+                    .withRel(MgmtRestConstants.TARGET_V1_AUTO_CONFIRM));
+        }
+    }
+
+    public static MgmtTargetAutoConfirm getTargetAutoConfirmResponse(final Target target) {
+        final AutoConfirmationStatus status = target.getAutoConfirmationStatus();
+        final MgmtTargetAutoConfirm response;
+        if (status != null) {
+            response = MgmtTargetAutoConfirm.active(status.getActivatedAt());
+            response.setInitiator(status.getInitiator());
+            response.setRemark(status.getRemark());
+            response.add(linkTo(methodOn(MgmtTargetRestApi.class).deactivateAutoConfirm(target.getControllerId()))
+                    .withRel(MgmtRestConstants.TARGET_V1_DEACTIVATE_AUTO_CONFIRM));
+        } else {
+            response = MgmtTargetAutoConfirm.disabled();
+            response.add(linkTo(methodOn(MgmtTargetRestApi.class).activateAutoConfirm(target.getControllerId(), null))
+                    .withRel(MgmtRestConstants.TARGET_V1_ACTIVATE_AUTO_CONFIRM));
+        }
+        return response;
     }
 
     static void addPollStatus(final Target target, final MgmtTarget targetRest) {
@@ -107,12 +131,13 @@ public final class MgmtTargetMapper {
      *            list of targets
      * @return the response
      */
-    public static List<MgmtTarget> toResponse(final Collection<Target> targets) {
+    public static List<MgmtTarget> toResponse(final Collection<Target> targets, final TenantConfigHelper configHelper) {
         if (targets == null) {
             return Collections.emptyList();
         }
 
-        return new ResponseList<>(targets.stream().map(MgmtTargetMapper::toResponse).collect(Collectors.toList()));
+        return new ResponseList<>(
+                targets.stream().map(target -> toResponse(target, configHelper)).collect(Collectors.toList()));
     }
 
     /**
@@ -122,7 +147,7 @@ public final class MgmtTargetMapper {
      *            the target
      * @return the response
      */
-    public static MgmtTarget toResponse(final Target target) {
+    public static MgmtTarget toResponse(final Target target, final TenantConfigHelper configHelper) {
         if (target == null) {
             return null;
         }
@@ -162,6 +187,9 @@ public final class MgmtTargetMapper {
         if (target.getTargetType() != null) {
             targetRest.setTargetType(target.getTargetType().getId());
             targetRest.setTargetTypeName(target.getTargetType().getName());
+        }
+        if (configHelper.isConfirmationFlowEnabled()) {
+            targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 
         targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());

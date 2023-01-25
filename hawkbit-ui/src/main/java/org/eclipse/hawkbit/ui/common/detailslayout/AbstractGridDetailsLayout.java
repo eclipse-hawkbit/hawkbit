@@ -158,7 +158,7 @@ public abstract class AbstractGridDetailsLayout<T extends ProxyNamedEntity> exte
         });
     }
 
-    private static VerticalLayout buildTabWrapperDetailsLayout(final Component detailsComponent) {
+    protected static VerticalLayout buildTabWrapperDetailsLayout(final Component detailsComponent) {
         final VerticalLayout tabWrapperDetailsLayout = new VerticalLayout();
         tabWrapperDetailsLayout.setSpacing(false);
         tabWrapperDetailsLayout.setMargin(false);

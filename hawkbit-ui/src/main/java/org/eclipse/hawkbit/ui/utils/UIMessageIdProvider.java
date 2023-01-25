@@ -49,6 +49,8 @@ public final class UIMessageIdProvider {
 
     public static final String CAPTION_ACTION_TIME_FORCED = "label.action.time.forced";
 
+    public static final String CAPTION_ACTION_CONFIRMATION_REQUIRED = "label.action.confirmation.required";
+
     public static final String CAPTION_ACTION_MESSAGES = "caption.action.messages";
 
     public static final String CAPTION_ACTION_HISTORY = "caption.action.history";
@@ -111,6 +113,8 @@ public final class UIMessageIdProvider {
 
     public static final String LABEL_AUTO_ASSIGNMENT_ENABLE = "label.auto.assign.enable";
 
+    public static final String LABEL_AUTO_ASSIGNMENT_CONFIRMATION_REQUIRED = "label.auto.assign.confirmation.required";
+
     public static final String LABEL_INVALIDATE_DS_STOP_ROLLOUTS = "label.invalidate.distributionset.stop.rollouts";
 
     public static final String LABEL_INVALIDATE_DS_TYPE_OF_CANCELLATION = "label.invalidate.ds.cancelation.type";
@@ -132,6 +136,8 @@ public final class UIMessageIdProvider {
     public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_NONE = "message.confirm.assign.consequences.none";
 
     public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT = "message.confirm.assign.consequences.text";
+
+    public static final String MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_CONF_HINT = "message.confirm.assign.consequences.confirmation.hint";
 
     public static final String MESSAGE_CONFIRM_ASSIGN_MULTIPLE_ENTITIES_TO_ENTITY = "message.confirm.assign.multiple.entities.to.entity";
 
@@ -276,6 +282,12 @@ public final class UIMessageIdProvider {
     public static final String TOOLTIP_ROLLOUT_APPROVE = "tooltip.rollout.approve";
 
     public static final String TOOLTIP_IN_TIME = "tooltip.in.time";
+
+    public static final String TOOLTIP_TARGET_FILTER_CONFIRMATION_REQUIRED = "tooltip.target.filter.confirmation.required";
+
+    public static final String TOOLTIP_TARGET_FILTER_CONFIRMATION_NOT_REQUIRED = "tooltip.target.filter.confirmation.not.required";
+
+    public static final String TOOLTIP_TARGET_FILTER_CONFIRMATION_NOT_CONFIGURED = "tooltip.target.filter.confirmation.not.configured";
 
     public static final String TOOLTIP_DELETE_CUSTOM_FILTER = "tooltip.delete.custom.filter";
 

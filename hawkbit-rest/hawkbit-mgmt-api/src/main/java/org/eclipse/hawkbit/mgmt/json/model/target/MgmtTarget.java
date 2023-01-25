@@ -55,6 +55,9 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonProperty
     private String targetTypeName;
 
+    @JsonProperty
+    private Boolean autoConfirmActive;
+
     /**
      * @return Target type ID
      */
@@ -220,5 +223,14 @@ public class MgmtTarget extends MgmtNamedEntity {
     @JsonIgnore
     public void setRequestAttributes(final boolean requestAttributes) {
         this.requestAttributes = requestAttributes;
+    }
+
+    public Boolean getAutoConfirmActive() {
+        return autoConfirmActive;
+    }
+
+    @JsonIgnore
+    public void setAutoConfirmActive(final boolean autoConfirmActive) {
+        this.autoConfirmActive = autoConfirmActive;
     }
 }

@@ -77,14 +77,14 @@ public final class FormComponentBuilder {
      * @return the TextField with its Binding
      */
     public static <T extends NameAware> BoundComponent<TextField> createNameInput(final Binder<T> binder,
-            final VaadinMessageSource i18n, final String fieldId) {
+                                                                                  final VaadinMessageSource i18n, final String fieldId) {
         final TextField nameInput = new TextFieldBuilder(NamedEntity.NAME_MAX_SIZE).id(fieldId)
-                .caption(i18n.getMessage(TEXTFIELD_NAME)).prompt(i18n.getMessage(TEXTFIELD_NAME)).buildTextComponent();
+              .caption(i18n.getMessage(TEXTFIELD_NAME)).prompt(i18n.getMessage(TEXTFIELD_NAME)).buildTextComponent();
         nameInput.setSizeUndefined();
 
         final Binding<T, String> binding = binder.forField(nameInput)
-                .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_NAMEREQUIRED))
-                .bind(NameAware::getName, NameAware::setName);
+              .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_NAMEREQUIRED))
+              .bind(NameAware::getName, NameAware::setName);
 
         return new BoundComponent<>(nameInput, binding);
     }
@@ -131,13 +131,19 @@ public final class FormComponentBuilder {
      */
     public static <T extends DescriptionAware> BoundComponent<TextArea> createDescriptionInput(final Binder<T> binder,
             final VaadinMessageSource i18n, final String fieldId) {
+        return createBigTextInput(binder, i18n, fieldId, TEXTFIELD_DESCRIPTION, TEXTFIELD_DESCRIPTION,
+                DescriptionAware::getDescription, DescriptionAware::setDescription);
+    }
+
+    public static <T> BoundComponent<TextArea> createBigTextInput(final Binder<T> binder,
+            final VaadinMessageSource i18n, final String fieldId, final String caption, final String prompt,
+            ValueProvider<T, String> getter, Setter<T, String> setter) {
         final TextArea descriptionInput = new TextAreaBuilder(NamedEntity.DESCRIPTION_MAX_SIZE).id(fieldId)
-                .caption(i18n.getMessage(TEXTFIELD_DESCRIPTION)).prompt(i18n.getMessage(TEXTFIELD_DESCRIPTION))
-                .style("text-area-style").buildTextComponent();
+                .caption(i18n.getMessage(caption)).prompt(i18n.getMessage(prompt)).style("text-area-style")
+                .buildTextComponent();
         descriptionInput.setSizeUndefined();
 
-        final Binding<T, String> binding = binder.forField(descriptionInput).bind(DescriptionAware::getDescription,
-                DescriptionAware::setDescription);
+        final Binding<T, String> binding = binder.forField(descriptionInput).bind(getter, setter);
 
         return new BoundComponent<>(descriptionInput, binding);
     }

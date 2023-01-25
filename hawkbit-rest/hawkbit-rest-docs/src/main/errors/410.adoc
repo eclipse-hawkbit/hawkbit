@@ -1,0 +1,2 @@
+| `410 Gone`
+| Action is not active anymore.

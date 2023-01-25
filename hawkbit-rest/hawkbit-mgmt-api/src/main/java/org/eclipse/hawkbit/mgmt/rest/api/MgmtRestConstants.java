@@ -66,6 +66,21 @@ public final class MgmtRestConstants {
     public static final String TARGET_V1_ASSIGNED_TARGET_TYPE = "targetType";
 
     /**
+     * The target URL mapping, href link for autoConfirm state of a target.
+     */
+    public static final String TARGET_V1_AUTO_CONFIRM = "autoConfirm";
+
+    /**
+     * The target URL mapping, href link activate auto-confirm on a target.
+     */
+    public static final String TARGET_V1_ACTIVATE_AUTO_CONFIRM = "activate";
+
+    /**
+     * The target URL mapping, href link deactivate auto-confirm on a target.
+     */
+    public static final String TARGET_V1_DEACTIVATE_AUTO_CONFIRM = "deactivate";
+
+    /**
      * The target URL mapping, href link for assigned distribution set.
      */
     public static final String TARGET_V1_ASSIGNED_DISTRIBUTION_SET = "assignedDS";

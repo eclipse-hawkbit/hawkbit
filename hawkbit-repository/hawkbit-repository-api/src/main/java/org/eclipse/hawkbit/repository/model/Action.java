@@ -259,7 +259,12 @@ public interface Action extends TenantAwareBaseEntity {
          * Action has been downloaded by the target and waiting for update to
          * start.
          */
-        DOWNLOADED
+        DOWNLOADED,
+
+        /**
+         * Action is waiting to be confirmed by the user
+         */
+        WAIT_FOR_CONFIRMATION
     }
 
     /**
@@ -330,4 +335,11 @@ public interface Action extends TenantAwareBaseEntity {
      * @return true if maintenance window is available, else false.
      */
     boolean isMaintenanceWindowAvailable();
+
+    /**
+     * Checks if the action is waiting for confirmation.
+     * @return true if the action is waiting for confirmation, else false
+     */
+    boolean isWaitingConfirmation();
+
 }

@@ -167,7 +167,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                 .map(controllerId -> DeploymentManagement
                         .deploymentRequest(controllerId, filterQuery.getAutoAssignDistributionSet().getId())
                         .setActionType(autoAssignActionType).setWeight(filterQuery.getAutoAssignWeight().orElse(null))
-                        .build())
+                        .setConfirmationRequired(filterQuery.isConfirmationRequired()).build())
                 .collect(Collectors.toList());
     }
 
