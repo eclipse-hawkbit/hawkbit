@@ -59,6 +59,6 @@ public class SmMetaDataDataProvider extends AbstractMetaDataDataProvider<Softwar
             return 0L;
         }
 
-        return loadBackendEntities(PageRequest.of(0, 1), smId).getTotalElements();
+        return softwareModuleManagement.countMetaDataBySoftwareModuleId(smId);
     }
 }

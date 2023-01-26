@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
@@ -37,6 +38,9 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
 
     @JsonProperty(required = false)
     private Integer weight;
+
+    @JsonProperty(required = false)
+    private Boolean confirmationRequired;
 
     private MgmtActionType type;
 
@@ -160,5 +164,22 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      */
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    /**
+     * Only considered if confirmation flow active
+     * 
+     * @return if the confirmation is required for this rollout
+     */
+    public Boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    /**
+     * @param confirmationRequired
+     *            if the confirmation is required for this rollout
+     */
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

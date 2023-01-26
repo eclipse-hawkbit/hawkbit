@@ -52,7 +52,6 @@ public class TargetMetaDataDataProvider extends AbstractMetaDataDataProvider<Tar
             return 0L;
         }
 
-        return targetManagement.findMetaDataByControllerId(PageRequest.of(0, 1), currentlySelectedControllerId)
-                .getTotalElements();
+        return targetManagement.countMetaDataByControllerId(currentlySelectedControllerId);
     }
 }

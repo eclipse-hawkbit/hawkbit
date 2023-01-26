@@ -31,12 +31,12 @@ import com.vaadin.ui.Panel;
 import com.vaadin.ui.VerticalLayout;
 import org.springframework.util.StringUtils;
 
+import static org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions.DIST_CHECKBOX_STYLE;
+
 /**
  * View to configure the authentication mode.
  */
 public class AuthenticationConfigurationView extends BaseConfigurationView<ProxySystemConfigAuthentication> {
-
-    private static final String DIST_CHECKBOX_STYLE = "dist-checkbox-style";
 
     private static final long serialVersionUID = 1L;
 

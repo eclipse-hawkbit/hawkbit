@@ -70,8 +70,8 @@ public abstract class BaseConfigurationView<B extends ProxySystemConfigWindow> e
         return enabled.getValue() && !enabled.isGlobal();
     }
 
-    protected <T extends Serializable> void writeConfigOption(final String key, final T value) {
-        tenantConfigurationManagement.addOrUpdateConfiguration(key, value);
+    protected <T extends Serializable> TenantConfigurationValue<T> writeConfigOption(final String key, final T value) {
+        return tenantConfigurationManagement.addOrUpdateConfiguration(key, value);
     }
 
     protected TenantConfigurationManagement getTenantConfigurationManagement() {

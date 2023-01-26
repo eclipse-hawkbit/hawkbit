@@ -33,6 +33,9 @@ public final class MgmtApiModelProperties {
     public static final String LINK_TO_OPTIONAL_SMT = "Link to optional software modules types in this distribution set type.";
     public static final String LINK_TO_ROLLOUT = "The link to the rollout.";
     public static final String LINK_TO_TARGET_TYPE = "The link to the target type.";
+    public static final String LINK_TO_TARGET = "The link to the target.";
+
+    public static final String LINK_TO_AUTO_CONFIRM = "The link to the detailed auto confirm state.";
 
     // software module types
     public static final String SMT_TYPE = "The type of the software module identified by its key.";
@@ -43,6 +46,7 @@ public final class MgmtApiModelProperties {
 
     // software module
     public static final String SM_TYPE = "The software module type " + ApiModelPropertiesGeneric.ENDING;
+    public static final String SM_TYPE_NAME = "The software module type name " + ApiModelPropertiesGeneric.ENDING;
     public static final String ENCRYPTED = "Encryption flag, used to identify that artifacts should be encrypted upon upload.";
     public static final String ARTIFACT_HASHES = "Hashes of the artifact.";
     public static final String ARTIFACT_SIZE = "Size of the artifact.";
@@ -85,11 +89,14 @@ public final class MgmtApiModelProperties {
 
     // Target type
     public static final String TARGETTYPE_ID = "ID of the target type";
+    public static final String TARGETTYPE_NAME = "Name of the target type";
     public static final String COMPATIBLE_DS_TYPES = "Array of distribution set types that are compatible to that target type";
     public static final String LINK_COMPATIBLE_DS_TYPES = "Link to the compatible distribution set types in this target type";
 
     // rollout
     public static final String ROLLOUT_FILTER_QUERY = "target filter query language expression";
+    public static final String ROLLOUT_CONFIRMATION_REQUIRED = "(available with user consent flow active) if the confirmation is required for this rollout. Value will be used if confirmation options are missing in the rollout group definitions. Confirmation is required per default";
+    public static final String ROLLOUT_GROUP_CONFIRMATION_REQUIRED = "(available with user consent flow active) if the confirmation is required for this rollout group. Confirmation is required per default.";
     public static final String ROLLOUT_GROUP_FILTER_QUERY = "target filter query language expression that selects a subset of targets which match the target filter of the Rollout";
     public static final String ROLLOUT_GROUP_TARGET_PERCENTAGE = "percentage of remaining and matching targets that should be added to this group";
     public static final String ROLLOUT_DS_ID = "the ID of distributionset of this rollout";
@@ -115,6 +122,7 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_LINKS_START_SYNC = "Link to start the rollout in sync mode";
     public static final String ROLLOUT_LINKS_START_ASYNC = "Link to start the rollout in async mode";
     public static final String ROLLOUT_LINKS_PAUSE = "Link to pause a running rollout";
+    public static final String ROLLOUT_LINKS_TRIGGER_NEXT_GROUP = "Link for triggering next rollout group on a running rollout";
     public static final String ROLLOUT_LINKS_RESUME = "Link to resume a paused rollout";
     public static final String ROLLOUT_LINKS_APPROVE = "Link to approve a rollout";
     public static final String ROLLOUT_LINKS_DENY = "Link to deny a rollout";
@@ -140,6 +148,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_FORCE_TYPE = "Force type of the action that provides a hint if the controller should apply the action immediately or whenever possible.";
 
+    public static final String ACTION_CONFIRMATION_REQUIRED = "(Available with user consent flow active) Defines, if the confirmation is required for an action. Confirmation is required per default.";
+
     public static final String ACTION_FORCE_TIME = "In case of timeforced mode the difference, measured in milliseconds, between the time the action should switch to forced and midnight, January 1, 1970 UTC.";
 
     public static final String ACTION_FORCED = "Set to forced in order to switch action to forced mode.";
@@ -150,9 +160,13 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_STATUS_REPORTED_AT = "Time at which the status was reported (server time).";
 
+    public static final String ACTION_STATUS_CODE = "(Optional) Code provided by the device related to the status.";
+
     public static final String ACTION_STATUS_LIST = "List of action status.";
 
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
+
+    public static final String ACTION_DETAIL_STATUS = "Detailed status of action.";
 
     public static final String ACTION_LIST = "List of actions.";
 
@@ -170,6 +184,8 @@ public final class MgmtApiModelProperties {
 
     public static final String REQUEST_ATTRIBUTES = "Request re-transmission of target attributes.";
 
+    public static final String AUTO_CONFIRM_ACTIVE = "Present if user consent flow active. Indicates if auto-confirm is active";
+
     public static final String META_DATA = "List of metadata.";
 
     public static final String META_DATA_KEY = "Metadata property key.";
@@ -177,6 +193,21 @@ public final class MgmtApiModelProperties {
     public static final String META_DATA_VALUE = "Metadata property value.";
 
     public static final String SM_META_DATA_TARGET_VISIBLE = "Metadata property is visible to targets as part of software update action.";
+
+    public static final String AUTO_CONFIRM_STATE_ACTIVE = "Flag if auto confirm is active";
+
+    public static final String AUTO_CONFIRM_STATE_INITIATOR = "(Optional) initiator set on activation";
+
+    public static final String AUTO_CONFIRM_STATE_REMARK = "(Optional) remark set on activation";
+
+    public static final String AUTO_CONFIRM_STATE_ACTIVATED_AT = "timestamp of the activation";
+
+    public static final String AUTO_CONFIRM_STATE_REFERENCE_ACTIVATE_AUTO_CONFIRM = "reference link to activate auto confirm (present if not active)";
+
+    public static final String AUTO_CONFIRM_STATE_REFERENCE_DEACTIVATE_AUTO_CONFIRM = "reference link to deactivate auto confirm (present if active)";
+
+    public static final String AUTO_CONFIRM_ACTIVATE_INITIATOR = "individual value (e.g. username) stored as initiator and automatically used as confirmed user in future actions";
+    public static final String AUTO_CONFIRM_ACTIVATE_REMARK = "individual value to attach a remark which will be persisted when automatically confirming future actions";
 
     public static final String SM_TYPE_KEY = "Key that can be interpreted by the target.";
 
@@ -189,6 +220,8 @@ public final class MgmtApiModelProperties {
     public static final String DS_TYPE_LIST = "List of distribution set types.";
 
     public static final String DS_TYPE = "The type of the distribution set.";
+
+    public static final String DS_TYPE_NAME = "The type name of the distribution set.";
 
     public static final String DS_COMPLETE = "True of the distribution set software module setup is complete as defined by the distribution set type.";
 
@@ -215,6 +248,7 @@ public final class MgmtApiModelProperties {
     public static final String FORCETIME = "Forcetime in milliseconds.";
     public static final String FORCE = "Force as boolean.";
     public static final String ASSIGNMENT_WEIGHT = "Importance of the assignment.";
+    public static final String ASSIGNMENT_CONFIRMATION_REQUIRED = "(Available with user consent flow active) Specifies if the confirmation by the device is required for this action.";
     public static final String ASSIGNMENT_TYPE = "The type of the assignment.";
     public static final String TARGET_ASSIGNED = "The number of targets that have been assigned as part of this operation.";
     public static final String TARGET_ASSIGNED_ALREADY = "The number of targets which already had been the assignment.";
@@ -239,4 +273,7 @@ public final class MgmtApiModelProperties {
     public static final String CONFIG_PARAM = "The name of the configuration parameter.";
 
     public static final String DS_NEW_ASSIGNED_ACTIONS = "The newly created actions as a result of this assignment";
+
+    public static final String REPRESENTATION_MODE = "The representation mode. Can be \"full\" or \"compact\". Defaults to \"compact\"";
+
 }

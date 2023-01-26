@@ -166,6 +166,10 @@ public final class SPUILabelDefinitions {
     public static final String VAR_STATUS = "status";
 
     /**
+     * Status code - column property.
+     */
+    public static final String VAR_STATUS_CODE = "statusCode";
+    /**
      * Distribution name and version - column property.
      */
     public static final String VAR_DIST_NAME_VERSION = "distributionSetNameVersion";
@@ -181,7 +185,7 @@ public final class SPUILabelDefinitions {
     public static final String VAR_TOTAL_TARGETS = "totalTargetsCount";
 
     /**
-     * Total target count status coulmn property name.
+     * Total target count status column property name.
      */
     public static final String VAR_TOTAL_TARGETS_COUNT_STATUS = "totalTargetCountStatus";
 
@@ -189,6 +193,11 @@ public final class SPUILabelDefinitions {
      * Rollout group started date column property.
      */
     public static final String ROLLOUT_GROUP_ERROR_THRESHOLD = "errorConditionExp";
+
+    /**
+     * Rollout group confirmation required column property.
+     */
+    public static final String ROLLOUT_GROUP_CONFIRMATION_REQUIRED = "confirmationRequired";
 
     /**
      * Rollout group started date column property.

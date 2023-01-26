@@ -11,17 +11,22 @@ package org.eclipse.hawkbit.repository.jpa.rsql;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.Callable;
+
 import org.apache.commons.lang3.text.StrSubstitutor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyResolver;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +48,9 @@ public class VirtualPropertyResolverTest {
     @MockBean
     private TenantConfigurationManagement confMgmt;
 
+    @MockBean
+    private SystemSecurityContext securityContext;
+
     private StrSubstitutor substitutor;
 
     private static final TenantConfigurationValue<String> TEST_POLLING_TIME_INTERVAL = TenantConfigurationValue
@@ -55,6 +63,11 @@ public class VirtualPropertyResolverTest {
         @Bean
         TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
             return TenantConfigurationManagementHolder.getInstance();
+        }
+
+        @Bean
+        SystemSecurityContextHolder systemSecurityContextHolder() {
+            return SystemSecurityContextHolder.getInstance();
         }
     }
 
@@ -73,6 +86,7 @@ public class VirtualPropertyResolverTest {
     @ValueSource(strings = { "${NOW_TS}", "${OVERDUE_TS}", "${overdue_ts}" })
     @Description("Tests resolution of NOW_TS by using a StrSubstitutor configured with the VirtualPropertyResolver.")
     void resolveNowTimestampPlaceholder(final String placeholder) {
+        when(securityContext.runAsSystem(Mockito.any())).thenAnswer(a -> ((Callable<?>) a.getArgument(0)).call());
         final String testString = "lhs=lt=" + placeholder;
 
         final String resolvedPlaceholders = substitutor.replace(testString);

@@ -299,9 +299,237 @@ include::{snippets}/rootcontroller/post-basedeployment-action-feedback/request-f
 include::../errors/400.adoc[]
 include::../errors/401.adoc[]
 include::../errors/403.adoc[]
+include::../errors/404.adoc[]
 include::../errors/405.adoc[]
 include::../errors/406.adoc[]
 include::../errors/409.adoc[]
+include::../errors/410.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /{tenant}/controller/v1/{controllerid}/confirmationBase
+
+=== Implementation notes
+
+Core resource for confirmation related operations. While active actions awaiting confirmation will be referenced, the current auto-confirmation status will be shown. In case auto-confirmation is active, details like the initiator, remark and date of activation (as unix timestamp) will be provided. Reference links to switch the auto-confirmation state are exposed as well.
+
+=== Resource to request confirmation specific information for the controller
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-confirmation-base-with-auto-confirm-active/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-confirmation-base-with-auto-confirm-active/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-confirmation-base-with-auto-confirm-active/path-parameters.adoc[]
+
+==== Response example (auto-confirmation is active)
+
+The response body in case auto-confirmation is active.
+
+include::{snippets}/rootcontroller/get-confirmation-base-with-auto-confirm-active/http-response.adoc[]
+
+==== Response example (auto-confirmation is not active)
+
+The response body references a link to activate auto-confirmation as well as a link to an open action waiting for confirmation (if present).
+
+include::{snippets}/rootcontroller/get-confirmation-base-with-auto-confirm-deactivated/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /{tenant}/controller/v1/{controllerid}/confirmationBase/activateAutoConfirm
+
+=== Implementation notes
+
+The device can use this resource to activate auto-confirmation. As a result all current active as well as future actions will automatically be confirmed by mentioning the initiator as triggered person. Actions will be automatically confirmed, as long as auto-confirmation is active.
+
+=== Interface to activate auto-confirmation for a specific device
+
+==== Curl
+
+include::{snippets}/rootcontroller/activate-auto-confirmation/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/activate-auto-confirmation/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/activate-auto-confirmation/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/rootcontroller/activate-auto-confirmation/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /{tenant}/controller/v1/{controllerid}/confirmationBase/deactivateAutoConfirm
+
+=== Implementation notes
+
+The device can use this resource to deactivate auto-confirmation. All active actions will remain unchanged while all future actions need to be confirmed, before processing with the deployment.
+
+=== Interface to deactivate auto-confirmation for a specific controller
+
+==== Curl
+
+include::{snippets}/rootcontroller/deactivate-auto-confirmation/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/deactivate-auto-confirmation/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/deactivate-auto-confirmation/path-parameters.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/415.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /{tenant}/controller/v1/{controllerid}/confirmationBase/{actionId}
+
+=== Implementation notes
+
+Resource to receive information about a pending confirmation.
+The response will be of the same format as the deploymentBase operation.
+The controller should provide feedback about the confirmation first, before processing the deployment.
+
+Keep in mind that the provided download links for the artifacts are generated dynamically by the update server.
+Host, port and path are not guaranteed to be similar to the provided examples below but will be defined at runtime.
+
+=== Confirmation status of an action
+
+==== Curl
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/path-parameters.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/request-parameters.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/response-fields.adoc[]
+
+==== Response example
+
+The response body includes the detailed information about the action awaiting confirmation in the same format as for the deploymentBase operation.
+
+include::{snippets}/rootcontroller/get-confirmation-base-action/http-response.adoc[]
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404_target_action.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== POST /{tenant}/controller/v1/{controllerid}/confirmationBase/{actionId}/feedback
+
+=== Implementation notes
+
+The device will use this resource to either confirm or deny an action which is waiting for confirmation. The action will be transferred into the RUNNING state in case the device is confirming it. Afterwards it will be exposed by the deploymentBase.
+
+=== Feedback channel for actions waiting for confirmation
+
+==== Curl
+
+include::{snippets}/rootcontroller/post-confirmation-feedback/curl-request.adoc[]
+
+==== Request URL
+
+include::{snippets}/rootcontroller/post-confirmation-feedback/http-request.adoc[]
+
+==== Request path parameter
+
+include::{snippets}/rootcontroller/post-confirmation-feedback/path-parameters.adoc[]
+
+==== Request fields
+
+include::{snippets}/rootcontroller/post-confirmation-feedback/request-fields.adoc[]
+
+=== Response (Status 200)
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/404_target_action.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/409.adoc[]
+include::../errors/410.adoc[]
 include::../errors/415.adoc[]
 include::../errors/429.adoc[]
 |===

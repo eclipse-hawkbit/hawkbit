@@ -9,9 +9,13 @@
 package org.eclipse.hawkbit.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD;
+import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.BATCH_DOWNLOAD_AND_INSTALL;
 import static org.eclipse.hawkbit.dmf.amqp.api.EventTopic.DOWNLOAD;
 import static org.eclipse.hawkbit.dmf.amqp.api.MessageType.EVENT;
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
+import static org.eclipse.hawkbit.repository.model.Action.ActionType.FORCED;
 
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
@@ -29,10 +33,12 @@ import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
+import org.eclipse.hawkbit.dmf.json.model.DmfBatchDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionElement;
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
+import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
@@ -42,7 +48,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.CancelTargetAssignmentEvent;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -53,6 +59,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -66,6 +73,8 @@ import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 import org.springframework.amqp.core.Message;
 
@@ -457,7 +466,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
 
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
-                filterQuery, ds, "50", "5", ActionType.FORCED, weight);
+                filterQuery, ds, "50", "5", ActionType.FORCED, weight, false);
         rolloutManagement.start(rollout.getId());
         rolloutManagement.handleRollouts();
         return rollout;
@@ -603,4 +612,111 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                 || multiActionElement.getTopic().equals(EventTopic.DOWNLOAD_AND_INSTALL);
     }
 
+    @Test
+    @Description("Verify payload of batch assignment download and install message.")
+    public void assertBatchAssignmentsDownloadAndInstall() {
+        assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD_AND_INSTALL);
+    }
+
+    @Test
+    @Description("Verify payload of batch assignments download only message.")
+    public void assertBatchAssignmentsDownloadOnly() {
+        assertBatchAssignmentsMessagePayload(BATCH_DOWNLOAD);
+    }
+
+    @Test
+    @Description("Verify that batch and multi-assignments can't be activated at the same time.")
+    void assertBatchAndMultiAssignmentsNotCompatible() {
+        enableBatchAssignments();
+        assertThatExceptionOfType(TenantConfigurationValueChangeNotAllowedException.class)
+                .isThrownBy(() -> enableMultiAssignments());
+        disableBatchAssignments();
+
+        enableMultiAssignments();
+        assertThatExceptionOfType(TenantConfigurationValueChangeNotAllowedException.class)
+                .isThrownBy(() -> enableBatchAssignments());
+    }
+
+    @ParameterizedTest
+    @EnumSource(names = { "BATCH_DOWNLOAD_AND_INSTALL", "BATCH_DOWNLOAD" })
+    @Description("Verify payload of batch assignments.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 3),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 3), @Expect(type = ActionUpdatedEvent.class, count = 0),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 3), @Expect(type = TargetPollEvent.class, count = 3),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void assertBatchAssignmentsMessagePayload(final EventTopic topic) {
+        enableBatchAssignments();
+
+        final List<String> targets = Arrays.asList("batchCtrlID1", "batchCtrlID2", "batchCtrlID3");
+        for (int i = 0; i < targets.size(); i++) {
+            registerAndAssertTargetWithExistingTenant(targets.get(i), i+1);
+        }
+
+        final DistributionSet ds = testdataFactory.createDistributionSet();
+        testdataFactory.addSoftwareModuleMetadata(ds);
+
+        assignDistributionSet(ds.getId(), targets, topic == BATCH_DOWNLOAD?DOWNLOAD_ONLY:FORCED);
+
+        waitUntilEventMessagesAreDispatchedToTarget(topic);
+
+        final Message message = replyToListener.getLatestEventMessage(topic);
+        final Map<String, Object> headers = message.getMessageProperties().getHeaders();
+        assertThat(headers).containsEntry("type", EVENT.toString());
+        assertThat(headers).containsEntry("topic",topic.toString());
+
+        final DmfBatchDownloadAndUpdateRequest batchRequest = (DmfBatchDownloadAndUpdateRequest) getDmfClient()
+                .getMessageConverter().fromMessage(message);
+
+        assertThat(batchRequest).isExactlyInstanceOf(DmfBatchDownloadAndUpdateRequest.class);
+        assertDmfBatchDownloadAndUpdateRequest(batchRequest, ds.getModules(), targets);
+    }
+
+    protected void assertDmfBatchDownloadAndUpdateRequest(final DmfBatchDownloadAndUpdateRequest request,
+                                                     final Set<SoftwareModule> softwareModules,
+                                                     final List<String> controllerIds) {
+        assertSoftwareModules(softwareModules, request.getSoftwareModules());
+
+        List<Object> tokens = controllerIds.stream().map(controllerId -> {
+            final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
+            assertThat(target).isPresent();
+            return target.get().getSecurityToken();
+        }).collect(Collectors.toList());
+
+
+        List<DmfTarget> requestTargets = request.getTargets();
+
+        assertThat(requestTargets).hasSameSizeAs(controllerIds);
+        requestTargets.forEach(requestTarget -> {
+                    assertThat(requestTarget).isNotNull();
+                    assertThat(tokens.contains(requestTarget.getTargetSecurityToken()));
+                });
+    }
+
+    @Test
+    @Description("Verify that a distribution assignment send a confirm message.")
+    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
+            @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
+            @Expect(type = ActionCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
+            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = TargetUpdatedEvent.class, count = 1),
+            @Expect(type = TargetPollEvent.class, count = 1),
+            @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
+    void sendConfirmStatus() {
+        final String controllerId = TARGET_PREFIX + "sendConfirmStatus";
+        enableConfirmationFlow();
+        registerTargetAndAssignDistributionSet(controllerId);
+
+        waitUntilTargetHasStatus(controllerId, TargetUpdateStatus.PENDING);
+        assertConfirmMessage(getDistributionSet().getModules(), controllerId);
+        assertEventMessageNotPresent(EventTopic.DOWNLOAD_AND_INSTALL);
+    }
+    protected void assertEventMessageNotPresent(final EventTopic eventTopic) {
+        assertThat(replyToListener.getLatestEventMessage(eventTopic)).isNull();
+    }
 }

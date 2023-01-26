@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.rabbitmq.test;
 
 import java.time.Duration;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
@@ -17,6 +18,8 @@ import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.AbstractIntegrationTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
@@ -37,6 +40,8 @@ import org.springframework.test.context.ContextConfiguration;
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)
 public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTest {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractAmqpIntegrationTest.class);
 
     private static final Duration TIMEOUT = Duration.ofSeconds(5);
 
@@ -72,8 +77,15 @@ public abstract class AbstractAmqpIntegrationTest extends AbstractIntegrationTes
     }
 
     protected int getQueueMessageCount(final String queueName) {
-        return Integer
-                .parseInt(rabbitAdmin.getQueueProperties(queueName).get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+        final Properties queueProps = rabbitAdmin.getQueueProperties(queueName);
+        if (queueProps != null && queueProps.containsKey(RabbitAdmin.QUEUE_MESSAGE_COUNT)) {
+            return Integer.parseInt(queueProps.get(RabbitAdmin.QUEUE_MESSAGE_COUNT).toString());
+        }
+        final int fallbackCount = 0;
+        LOG.warn(
+                "Cannot determine the queue message count for queue '{}' (queue properties {}). Returning queue message count {}.",
+                queueName, queueProps, fallbackCount);
+        return fallbackCount;
     }
 
     protected RabbitAdmin getRabbitAdmin() {

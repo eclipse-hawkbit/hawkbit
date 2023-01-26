@@ -19,11 +19,15 @@ import org.eclipse.hawkbit.ui.common.grid.support.SelectionSupport;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
+import com.vaadin.data.ValueProvider;
 import com.vaadin.data.provider.DataCommunicator;
 import com.vaadin.data.provider.DataProviderListener;
 import com.vaadin.data.provider.Query;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.Grid;
+import com.vaadin.ui.Grid.Column.NestedNullBehavior;
 import com.vaadin.ui.components.grid.GridSelectionModel;
+import com.vaadin.ui.renderers.AbstractRenderer;
 
 /**
  * Abstract grid that offers various capabilities (aka support) to offer
@@ -123,7 +127,6 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
         setId(getGridId());
         setColumnReorderingAllowed(false);
         addColumns();
-        disableColumnSorting();
         setFrozenColumnCount(-1);
 
         if (selectionSupport == null) {
@@ -176,10 +179,48 @@ public abstract class AbstractGrid<T extends ProxyIdentifiableEntity, F> extends
      */
     public abstract void addColumns();
 
-    private void disableColumnSorting() {
-        for (final Column<T, ?> c : getColumns()) {
-            c.setSortable(false);
-        }
+    @Override
+    public Column<T, ?> addColumn(final String propertyName) {
+        return super.addColumn(propertyName).setSortable(false);
+    }
+
+    @Override
+    public Column<T, ?> addColumn(final String propertyName, final AbstractRenderer<? super T, ?> renderer) {
+        return super.addColumn(propertyName, renderer).setSortable(false);
+    }
+
+    @Override
+    public Column<T, ?> addColumn(final String propertyName, final AbstractRenderer<? super T, ?> renderer,
+            final NestedNullBehavior nestedNullBehavior) {
+        return super.addColumn(propertyName, renderer, nestedNullBehavior).setSortable(false);
+    }
+
+    @Override
+    public <V> Column<T, V> addColumn(final ValueProvider<T, V> valueProvider) {
+        return super.addColumn(valueProvider).setSortable(false);
+    }
+
+    @Override
+    public <V> Column<T, V> addColumn(final ValueProvider<T, V> valueProvider,
+            final AbstractRenderer<? super T, ? super V> renderer) {
+        return super.addColumn(valueProvider, renderer).setSortable(false);
+    }
+
+    @Override
+    public <V, P> Column<T, V> addColumn(final ValueProvider<T, V> valueProvider,
+            final ValueProvider<V, P> presentationProvider, final AbstractRenderer<? super T, ? super P> renderer) {
+        return super.addColumn(valueProvider, presentationProvider, renderer).setSortable(false);
+    }
+
+    @Override
+    public <V> Column<T, V> addColumn(final ValueProvider<T, V> valueProvider,
+            final ValueProvider<V, String> presentationProvider) {
+        return super.addColumn(valueProvider, presentationProvider).setSortable(false);
+    }
+
+    @Override
+    public <V extends Component> Column<T, V> addComponentColumn(final ValueProvider<T, V> componentProvider) {
+        return super.addComponentColumn(componentProvider).setSortable(false);
     }
 
     /**

@@ -61,7 +61,6 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Test
     @Description("Handles the GET request of retrieving all target filter queries within SP. Required Permission: READ_TARGET.")
     public void getTargetFilterQueries() throws Exception {
-
         createTargetFilterQueryWithDS(createDistributionSet());
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)).andExpect(status().isOk())
@@ -80,6 +79,12 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                                 .description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
                                 .type(JsonFieldType.STRING.toString())
                                 .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
+                        fieldWithPath("content[].autoAssignWeight")
+                                .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
+                                .type(JsonFieldType.NUMBER.toString()),
+                        fieldWithPath("content[].confirmationRequired")
+                                .description(MgmtApiModelProperties.ACTION_CONFIRMATION_REQUIRED)
+                                .type(JsonFieldType.BOOLEAN.toString()),
                         fieldWithPath("content[].createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                         fieldWithPath("content[].createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                         fieldWithPath("content[].lastModifiedAt")
@@ -182,6 +187,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
     @Description("Handles the POST request of setting a distribution set for auto assignment within SP. Required Permission: CREATE_TARGET.")
     public void postAutoAssignDS() throws Exception {
         enableMultiAssignments();
+        enableConfirmationFlow();
+
         final TargetFilterQuery tfq = createTargetFilterQuery();
         final DistributionSet distributionSet = createDistributionSet();
         final String autoAssignBody = new JSONObject().put("id", distributionSet.getId())
@@ -201,7 +208,10 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                                         .attributes(key("value").value("['forced', 'soft', 'downloadonly']")),
                                 requestFieldWithPathMandatoryInMultiAssignMode("weight")
                                         .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
-                                        .attributes(key("value").value("0 - 1000"))),
+                                        .attributes(key("value").value("0 - 1000")),
+                                optionalRequestFieldWithPath("confirmationRequired")
+                                        .description(MgmtApiModelProperties.ACTION_CONFIRMATION_REQUIRED)
+                                        .type(JsonFieldType.BOOLEAN.toString())),
                         getResponseFieldTargetFilterQuery(false)));
     }
 
@@ -232,6 +242,9 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "autoAssignWeight")
                         .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                         .type(JsonFieldType.NUMBER.toString()),
+                fieldWithPath(arrayPrefix + "confirmationRequired")
+                        .description(MgmtApiModelProperties.ACTION_CONFIRMATION_REQUIRED)
+                        .type(JsonFieldType.BOOLEAN.toString()),
                 fieldWithPath(arrayPrefix + "createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
                 fieldWithPath(arrayPrefix + "createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),

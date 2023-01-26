@@ -218,6 +218,16 @@ public interface DeploymentManagement {
     long countActionsAll();
 
     /**
+     * Counts the actions which match the given query.
+     * 
+     * @param rsqlParam
+     *            RSQL query.
+     * @return the total number of actions matching the given RSQL query.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActions(@NotNull String rsqlParam);
+
+    /**
      * Counts all actions associated to a specific target.
      *
      * @param controllerId
@@ -273,6 +283,19 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActionsAll(@NotNull Pageable pageable);
+
+    /**
+     * Retrieves all {@link Action} entities which match the given RSQL query.
+     * 
+     * @param rsqlParam
+     *            RSQL query string
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * 
+     * @return a paged list of {@link Action}s.
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<Action> findActions(@NotNull String rsqlParam, @NotNull Pageable pageable);
 
     /**
      * Retrieves all {@link Action} which assigned to a specific
@@ -331,7 +354,7 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all the {@link ActionStatus} entries of the given
-     * {@link Action} and {@link Target}.
+     * {@link Action}.
      *
      * @param pageReq
      *            pagination parameter
@@ -346,6 +369,19 @@ public interface DeploymentManagement {
     Page<ActionStatus> findActionStatusByAction(@NotNull Pageable pageReq, long actionId);
 
     /**
+     * Counts all the {@link ActionStatus} entries of the given {@link Action}.
+     *
+     * @param actionId
+     *            to be filtered on
+     * @return count of {@link ActionStatus} entries
+     *
+     * @throws EntityNotFoundException
+     *             if action with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countActionStatusByAction(long actionId);
+
+    /**
      * Retrieves all messages for an {@link ActionStatus}.
      *
      *
@@ -357,6 +393,19 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<String> findMessagesByActionStatusId(@NotNull Pageable pageable, long actionStatusId);
+
+    /**
+     * Counts all messages for an {@link ActionStatus}.
+     *
+     *
+     * @param pageable
+     *            the page request parameter for paging and sorting the result
+     * @param actionStatusId
+     *            the id of {@link ActionStatus} to count the messages from
+     * @return count of messages by a specific {@link ActionStatus} id
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countMessagesByActionStatusId(long actionStatusId);
 
     /**
      * Get the {@link Action} entity for given actionId with all lazy attributes
@@ -400,8 +449,8 @@ public interface DeploymentManagement {
     Page<Action> findInActiveActionsByTarget(@NotNull Pageable pageable, @NotEmpty String controllerId);
 
     /**
-     * Retrieves active {@link Action}s with highest weight that are assigned to
-     * a {@link Target}.
+     * Retrieves active {@link Action}s with highest weight that are assigned to a
+     * {@link Target}.
      *
      * @param controllerId
      *            identifies the target to retrieve the action from
@@ -473,6 +522,8 @@ public interface DeploymentManagement {
      *
      * @param rolloutId
      *            the rollout the actions belong to
+     * @param distributionSetId
+     *            to assign
      * @param rolloutGroupParentId
      *            the parent rollout group the actions should reference. null
      *            references the first group

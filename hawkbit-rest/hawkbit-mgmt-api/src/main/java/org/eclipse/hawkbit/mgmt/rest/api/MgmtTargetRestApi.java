@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirm;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -31,6 +33,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -396,12 +399,47 @@ public interface MgmtTargetRestApi {
      *            the ID of the targetId to create meta data for
      * @param metadataRest
      *            the list of meta data entries to create
-     * @return status created if post request is successful with the value of
-     *         the created meta data
+     * @return status created if post request is successful with the value of the
+     *         created meta data
      */
     @PostMapping(value = "/{targetId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
             MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("targetId") String targetId,
             List<MgmtMetadata> metadataRest);
+
+    /**
+     * Get the current auto-confirm state for a specific target.
+     *
+     * @param targetId
+     *            to check the state for
+     * @return the current state as {@link MgmtTargetAutoConfirm}
+     */
+    @GetMapping(value = "/{targetId}/autoConfirm", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtTargetAutoConfirm> getAutoConfirmStatus(@PathVariable("targetId") String targetId);
+
+    /**
+     * Activate auto-confirm on a specific target.
+     *
+     * @param targetId
+     *            to activate auto-confirm on
+     * @param update
+     *            properties to update
+     * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
+     */
+    @PostMapping(value = "/{targetId}/autoConfirm/activate")
+    ResponseEntity<Void> activateAutoConfirm(@PathVariable("targetId") String targetId,
+            @RequestBody(required = false) MgmtTargetAutoConfirmUpdate update);
+
+    /**
+     * Deactivate auto-confirm on a specific target.
+     *
+     * @param targetId
+     *            to deactivate auto-confirm on
+     * 
+     * @return {@link org.springframework.http.HttpStatus#OK} in case of a success
+     */
+    @PostMapping(value = "/{targetId}/autoConfirm/deactivate")
+    ResponseEntity<Void> deactivateAutoConfirm(@PathVariable("targetId") String targetId);
 
 }

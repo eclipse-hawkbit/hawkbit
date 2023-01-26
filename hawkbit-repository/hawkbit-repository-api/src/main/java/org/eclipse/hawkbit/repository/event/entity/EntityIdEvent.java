@@ -21,6 +21,11 @@ public interface EntityIdEvent extends TenantAwareEvent {
     String getEntityClass();
 
     /**
+     * @return the class of entities interface
+     */
+    String getInterfaceClass();
+
+    /**
      * @return the ID of the entity of this event.
      */
     Long getEntityId();

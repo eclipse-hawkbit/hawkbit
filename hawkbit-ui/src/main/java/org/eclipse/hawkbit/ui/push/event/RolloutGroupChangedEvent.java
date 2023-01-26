@@ -43,7 +43,7 @@ public class RolloutGroupChangedEvent extends RemoteIdEvent implements EntityUpd
      */
     public RolloutGroupChangedEvent(final String tenant, final Long rolloutId, final Long entityId) {
         // application id is not needed, because we compose the event ourselves
-        super(entityId, tenant, RolloutGroup.class.getName(), null);
+        super(entityId, tenant, RolloutGroup.class, null);
 
         this.rolloutId = rolloutId;
     }

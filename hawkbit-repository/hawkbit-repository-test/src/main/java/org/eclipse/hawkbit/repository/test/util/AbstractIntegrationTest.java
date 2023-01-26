@@ -28,6 +28,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
@@ -158,6 +159,8 @@ public abstract class AbstractIntegrationTest {
     protected DeploymentManagement deploymentManagement;
 
     @Autowired
+    protected ConfirmationManagement confirmationManagement;
+    @Autowired
     protected DistributionSetInvalidationManagement distributionSetInvalidationManagement;
 
     @Autowired
@@ -234,14 +237,24 @@ public abstract class AbstractIntegrationTest {
 
     protected DistributionSetAssignmentResult assignDistributionSet(final long dsID, final List<String> controllerIds,
             final ActionType actionType, final long forcedTime, final Integer weight) {
+        final boolean confirmationFlowActive = isConfirmationFlowActive();
+
         final List<DeploymentRequest> deploymentRequests = controllerIds.stream()
                 .map(id -> DeploymentManagement.deploymentRequest(id, dsID).setActionType(actionType)
-                        .setForceTime(forcedTime).setWeight(weight).build())
+                        .setForceTime(forcedTime).setWeight(weight).setConfirmationRequired(confirmationFlowActive)
+                        .build())
                 .collect(Collectors.toList());
         final List<DistributionSetAssignmentResult> results = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
         assertThat(results).hasSize(1);
         return results.get(0);
+    }
+
+    protected List<DistributionSetAssignmentResult> assignDistributionSets(final List<DeploymentRequest> requests) {
+        final List<DistributionSetAssignmentResult> distributionSetAssignmentResults = deploymentManagement
+                .assignDistributionSets(requests);
+        assertThat(distributionSetAssignmentResults).hasSize(requests.size());
+        return distributionSetAssignmentResults;
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet ds,
@@ -295,7 +308,7 @@ public abstract class AbstractIntegrationTest {
 
         return makeAssignment(DeploymentManagement.deploymentRequest(controllerId, dsID)
                 .setMaintenance(maintenanceWindowSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone)
-                .build());
+                .setConfirmationRequired(true).build());
     }
 
     protected DistributionSetAssignmentResult assignDistributionSet(final DistributionSet pset, final Target target) {
@@ -309,6 +322,19 @@ public abstract class AbstractIntegrationTest {
 
     protected void enableMultiAssignments() {
         tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED, true);
+    }
+
+    protected void enableConfirmationFlow() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, true);
+    }
+
+    protected void disableConfirmationFlow() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, false);
+    }
+
+    protected boolean isConfirmationFlowActive() {
+        return tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED,
+                Boolean.class).getValue();
     }
 
     protected DistributionSetMetadata createDistributionSetMetadata(final long dsId, final MetaData md) {
@@ -343,6 +369,10 @@ public abstract class AbstractIntegrationTest {
                 assignDistributionSet(ds.getId(), savedTarget.getControllerId(), ActionType.FORCED));
         Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
+
+        if (savedAction.getStatus() == Action.Status.WAIT_FOR_CONFIRMATION) {
+            confirmationManagement.confirmAction(savedAction.getId(), null, null);
+        }
 
         savedAction = controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(savedAction.getId()).status(Action.Status.RUNNING));
@@ -464,4 +494,18 @@ public abstract class AbstractIntegrationTest {
     protected static Comparator<Target> controllerIdComparator() {
         return (o1, o2) -> o1.getControllerId().equals(o2.getControllerId()) ? 0 : 1;
     }
+
+    protected void enableBatchAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, true);
+    }
+
+    protected void disableBatchAssignments() {
+        tenantConfigurationManagement.addOrUpdateConfiguration(TenantConfigurationKey.BATCH_ASSIGNMENTS_ENABLED, false);
+    }
+
+    protected boolean isConfirmationFlowEnabled() {
+        return tenantConfigurationManagement
+                .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
+    }
+
 }

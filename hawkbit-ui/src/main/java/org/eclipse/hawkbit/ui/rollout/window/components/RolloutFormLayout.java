@@ -72,8 +72,8 @@ public class RolloutFormLayout extends ValidatableLayout {
     private Long rolloutId;
     private Long totalTargets;
 
-    private Consumer<String> filterQueryChangedListener;
-    private Consumer<Long> distSetChangedListener;
+    private Consumer<ProxyTargetFilterQuery> filterQueryChangedListener;
+    private Consumer<ProxyDistributionSet> distSetChangedListener;
 
     /**
      * Constructor for RolloutFormLayout
@@ -204,7 +204,7 @@ public class RolloutFormLayout extends ValidatableLayout {
     private HasValue.ValueChangeListener<ProxyTargetFilterQuery> filterQueryChangedListener() {
         return event -> {
             if (filterQueryChangedListener != null) {
-                filterQueryChangedListener.accept(event.getValue() != null ? event.getValue().getQuery() : null);
+                filterQueryChangedListener.accept(event.getValue());
             }
         };
     }
@@ -212,11 +212,7 @@ public class RolloutFormLayout extends ValidatableLayout {
     private HasValue.ValueChangeListener<ProxyDistributionSet> distSetChangedListener() {
         return event -> {
             if (distSetChangedListener != null) {
-                if (event.getValue() != null && event.getValue().getTypeInfo() != null) {
-                    distSetChangedListener.accept(event.getValue().getTypeInfo().getId());
-                } else {
-                    distSetChangedListener.accept(null);
-                }
+                distSetChangedListener.accept(event.getValue());
             }
         };
     }
@@ -300,7 +296,7 @@ public class RolloutFormLayout extends ValidatableLayout {
      * @param filterQueryChangedListener
      *            Changed listener
      */
-    public void setFilterQueryChangedListener(final Consumer<String> filterQueryChangedListener) {
+    public void setFilterQueryChangedListener(final Consumer<ProxyTargetFilterQuery> filterQueryChangedListener) {
         this.filterQueryChangedListener = filterQueryChangedListener;
     }
 
@@ -310,7 +306,7 @@ public class RolloutFormLayout extends ValidatableLayout {
      * @param distSetChangedListener
      *            Changed listener
      */
-    public void setDistSetChangedListener(final Consumer<Long> distSetChangedListener) {
+    public void setDistSetChangedListener(final Consumer<ProxyDistributionSet> distSetChangedListener) {
         this.distSetChangedListener = distSetChangedListener;
     }
 

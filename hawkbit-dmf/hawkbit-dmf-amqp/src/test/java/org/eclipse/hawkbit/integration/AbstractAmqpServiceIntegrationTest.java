@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -29,9 +30,11 @@ import org.eclipse.hawkbit.dmf.json.model.DmfActionRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfConfirmRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfDownloadAndUpdateRequest;
 import org.eclipse.hawkbit.dmf.json.model.DmfMetadata;
+import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.integration.listener.DeadletterListener;
 import org.eclipse.hawkbit.integration.listener.ReplyToListener;
 import org.eclipse.hawkbit.matcher.SoftwareModuleJsonMatcher;
@@ -95,7 +98,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         getDmfClient().setExchange(AmqpSettings.DMF_EXCHANGE);
     }
 
-    private <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
+    protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
 
         createConditionFactory()
                 .until(() -> WithSpringAuthorityRule.runAsPrivileged(() -> callable.call().isPresent()));
@@ -126,7 +129,13 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         testdataFactory.addSoftwareModuleMetadata(distributionSet);
 
         return registerTargetAndAssignDistributionSet(distributionSet.getId(), TargetUpdateStatus.REGISTERED,
-                distributionSet.getModules(), controllerId);
+              distributionSet.getModules(), controllerId);
+    }
+
+    protected DistributionSetAssignmentResult prepareDistributionSetAndAssign(final String controllerId) {
+        distributionSet = testdataFactory.createDistributionSet(UUID.randomUUID().toString());
+        testdataFactory.addSoftwareModuleMetadata(distributionSet);
+        return assignDistributionSet(distributionSet.getId(), controllerId);
     }
 
     protected DistributionSetAssignmentResult registerTargetAndAssignDistributionSet(final Long assignDs,
@@ -135,7 +144,11 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
         registerAndAssertTargetWithExistingTenant(controllerId, 1, expectedStatus, CREATED_BY);
 
         final DistributionSetAssignmentResult assignmentResult = assignDistributionSet(assignDs, controllerId);
-        assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage, controllerId);
+        if (isConfirmationFlowEnabled()) {
+            assertConfirmMessage(expectedSoftwareModulesInMessage, controllerId);
+        } else {
+            assertDownloadAndInstallMessage(expectedSoftwareModulesInMessage, controllerId);
+        }
         return assignmentResult;
     }
 
@@ -194,10 +207,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
     protected void assertDmfDownloadAndUpdateRequest(final DmfDownloadAndUpdateRequest request,
             final Set<SoftwareModule> softwareModules, final String controllerId) {
-        assertThat(softwareModules)
-                .is(new HamcrestCondition<>(SoftwareModuleJsonMatcher.containsExactly(request.getSoftwareModules())));
-        request.getSoftwareModules().forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
-                new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
+        assertSoftwareModules(softwareModules, request.getSoftwareModules());
         final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
         assertThat(updatedTarget).isNotNull();
         assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
@@ -443,6 +453,33 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
         assignDistributionSet(distributionSet.getId(), controllerId, actionType);
         return distributionSet;
+    }
+
+    protected void assertSoftwareModules(final Set<SoftwareModule> expectedSoftwareModules,
+                                         final List<DmfSoftwareModule> softwareModules) {
+        assertThat(expectedSoftwareModules)
+                .is(new HamcrestCondition<>(SoftwareModuleJsonMatcher.containsExactly(softwareModules)));
+        softwareModules.forEach(dmfModule -> assertThat(dmfModule.getMetadata()).containsExactly(
+                new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE)));
+    }
+
+    protected void assertConfirmMessage(final Set<SoftwareModule> dsModules, final String controllerId) {
+
+        final Message replyMessage = assertReplyMessageHeader(EventTopic.CONFIRM, controllerId);
+        assertAllTargetsCount(1);
+
+        final DmfConfirmRequest confirmRequest = (DmfConfirmRequest) getDmfClient()
+                .getMessageConverter().fromMessage(replyMessage);
+
+        assertConfirmRequest(confirmRequest, dsModules, controllerId);
+    }
+
+    protected void assertConfirmRequest(final DmfConfirmRequest request, final Set<SoftwareModule> softwareModules,
+            final String controllerId) {
+        assertSoftwareModules(softwareModules, request.getSoftwareModules());
+        final Target updatedTarget = waitUntilIsPresent(() -> targetManagement.getByControllerID(controllerId));
+        assertThat(updatedTarget).isNotNull();
+        assertThat(updatedTarget.getSecurityToken()).isEqualTo(request.getTargetSecurityToken());
     }
 
 }

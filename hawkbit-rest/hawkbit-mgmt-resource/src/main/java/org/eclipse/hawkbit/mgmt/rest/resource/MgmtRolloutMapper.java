@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutSuccessAction.SuccessAction;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroupResponseBody;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRolloutRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -57,11 +58,15 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts) {
+        return toResponseRollout(rollouts, false);
+    }
+
+    static List<MgmtRolloutResponseBody> toResponseRollout(final List<Rollout> rollouts, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(rollout -> toResponseRollout(rollout, false)).collect(Collectors.toList());
+        return rollouts.stream().map(rollout -> toResponseRollout(rollout, withDetails)).collect(Collectors.toList());
     }
 
     static MgmtRolloutResponseBody toResponseRollout(final Rollout rollout, final boolean withDetails) {
@@ -90,11 +95,16 @@ final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).triggerNextGroup(rollout.getId())).withRel("triggerNextGroup"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).approve(rollout.getId(), null)).withRel("approve"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups"));
+
+            final DistributionSet distributionSet = rollout.getDistributionSet();
+            body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
+                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()));
         }
 
         body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel());
@@ -147,16 +157,18 @@ final class MgmtRolloutMapper {
         return conditions.build();
     }
 
-    static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts) {
+    static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts,
+            final boolean confirmationFlowEnabled) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false)).collect(Collectors.toList());
+        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false, confirmationFlowEnabled))
+                .collect(Collectors.toList());
     }
 
     static MgmtRolloutGroupResponseBody toResponseRolloutGroup(final RolloutGroup rolloutGroup,
-            final boolean withDetailedStatus) {
+            final boolean withDetailedStatus, final boolean confirmationFlowEnabled) {
         final MgmtRolloutGroupResponseBody body = new MgmtRolloutGroupResponseBody();
         body.setCreatedAt(rolloutGroup.getCreatedAt());
         body.setCreatedBy(rolloutGroup.getCreatedBy());
@@ -169,6 +181,10 @@ final class MgmtRolloutMapper {
         body.setTargetPercentage(rolloutGroup.getTargetPercentage());
         body.setTargetFilterQuery(rolloutGroup.getTargetFilterQuery());
         body.setTotalTargets(rolloutGroup.getTotalTargets());
+
+        if (confirmationFlowEnabled) {
+            body.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
+        }
 
         body.setSuccessCondition(new MgmtRolloutCondition(map(rolloutGroup.getSuccessCondition()),
                 rolloutGroup.getSuccessConditionExp()));

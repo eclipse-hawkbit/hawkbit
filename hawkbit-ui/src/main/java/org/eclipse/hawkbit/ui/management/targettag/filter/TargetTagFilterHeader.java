@@ -9,13 +9,18 @@
 package org.eclipse.hawkbit.ui.management.targettag.filter;
 
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.event.CommandTopics;
 import org.eclipse.hawkbit.ui.common.event.EventLayout;
 import org.eclipse.hawkbit.ui.common.event.EventView;
+import org.eclipse.hawkbit.ui.common.event.LayoutResizeEventPayload;
+import org.eclipse.hawkbit.ui.common.event.LayoutResizeEventPayload.ResizeType;
 import org.eclipse.hawkbit.ui.common.grid.header.AbstractFilterHeader;
+import org.eclipse.hawkbit.ui.common.grid.header.support.ResizeHeaderSupport;
 import org.eclipse.hawkbit.ui.management.targettag.TargetTagWindowBuilder;
 import org.eclipse.hawkbit.ui.management.targettag.targettype.TargetTypeWindowBuilder;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
+import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.ui.Window;
 
@@ -31,24 +36,34 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
 
     private final transient TargetTypeWindowBuilder targetTypeWindowBuilder;
 
+    private final transient ResizeHeaderSupport resizeHeaderSupport;
 
     /**
      * Constructor for TargetTagFilterHeader
-     *  @param uiDependencies
+     * 
+     * @param uiDependencies
      *            {@link CommonUiDependencies}
      * @param targetTagFilterLayoutUiState
-     *            TargetTagFilterLayoutUiState
+     *            {@link TargetTagFilterLayoutUiState}
      * @param targetTagWindowBuilder
+     *            {@link TargetTagWindowBuilder}
      * @param targetTypeWindowBuilder
+     *            {@link TargetTypeWindowBuilder}
      */
-    public TargetTagFilterHeader(final CommonUiDependencies uiDependencies,
-                                 final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-                                 final TargetTagWindowBuilder targetTagWindowBuilder, TargetTypeWindowBuilder targetTypeWindowBuilder) {
+    public TargetTagFilterHeader(
+            final CommonUiDependencies uiDependencies,
+            final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
+            final TargetTagWindowBuilder targetTagWindowBuilder,
+            final TargetTypeWindowBuilder targetTypeWindowBuilder) {
         super(uiDependencies.getI18n(), uiDependencies.getPermChecker(), uiDependencies.getEventBus());
 
         this.targetTagFilterLayoutUiState = targetTagFilterLayoutUiState;
         this.targetTagWindowBuilder = targetTagWindowBuilder;
         this.targetTypeWindowBuilder = targetTypeWindowBuilder;
+
+        this.resizeHeaderSupport = new ResizeHeaderSupport(i18n, UIComponentIdProvider.CUSTOM_FILTER_MAX_MIN_TABLE_ICON,
+                this::maximizeTable, this::minimizeTable, this::onLoadIsTableMaximized);
+        addHeaderSupport(resizeHeaderSupport);
 
         buildHeader();
     }
@@ -96,6 +111,24 @@ public class TargetTagFilterHeader extends AbstractFilterHeader {
     @Override
     protected void updateHiddenUiState() {
         targetTagFilterLayoutUiState.setHidden(true);
+    }
+
+    protected void maximizeTable() {
+        eventBus.publish(CommandTopics.RESIZE_LAYOUT, this,
+                new LayoutResizeEventPayload(ResizeType.MAXIMIZE, getLayout(), EventView.DEPLOYMENT));
+
+        targetTagFilterLayoutUiState.setMaximized(true);
+    }
+
+    protected void minimizeTable() {
+        eventBus.publish(CommandTopics.RESIZE_LAYOUT, this,
+                new LayoutResizeEventPayload(ResizeType.MINIMIZE, getLayout(), EventView.DEPLOYMENT));
+
+        targetTagFilterLayoutUiState.setMaximized(false);
+    }
+
+    protected Boolean onLoadIsTableMaximized() {
+        return targetTagFilterLayoutUiState.isMaximized();
     }
 
     @Override

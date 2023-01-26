@@ -14,6 +14,7 @@ import java.util.List;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.event.EventView;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.EntityModifiedListener.Enti
 import org.eclipse.hawkbit.ui.common.layout.listener.FilterChangedListener;
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedGridRefreshAwareSupport;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * TargetFilter table layout.
@@ -54,15 +56,17 @@ public class TargetFilterGridLayout extends AbstractGridComponentLayout {
     public TargetFilterGridLayout(final CommonUiDependencies uiDependencies,
             final TargetFilterQueryManagement targetFilterQueryManagement, final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement,
-            final FilterManagementUIState filterManagementUIState) {
+            final FilterManagementUIState filterManagementUIState, final TenantConfigHelper tenantConfigHelper,
+            final TenantAware tenantAware) {
         this.targetFilterGridHeader = new TargetFilterGridHeader(uiDependencies,
                 filterManagementUIState.getGridLayoutUiState());
 
         final AutoAssignmentWindowBuilder autoAssignmentWindowBuilder = new AutoAssignmentWindowBuilder(uiDependencies,
-                targetManagement, targetFilterQueryManagement, distributionSetManagement);
+                targetManagement, targetFilterQueryManagement, distributionSetManagement, tenantConfigHelper,
+                tenantAware);
 
         this.targetFilterGrid = new TargetFilterGrid(uiDependencies, filterManagementUIState.getGridLayoutUiState(),
-                targetFilterQueryManagement, autoAssignmentWindowBuilder);
+                targetFilterQueryManagement, autoAssignmentWindowBuilder, tenantConfigHelper);
 
         final EventViewAware viewAware = new EventViewAware(EventView.TARGET_FILTER);
         this.targetQueryFilterListener = new FilterChangedListener<>(uiDependencies.getEventBus(),

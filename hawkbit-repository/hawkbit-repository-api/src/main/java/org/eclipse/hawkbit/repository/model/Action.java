@@ -136,6 +136,12 @@ public interface Action extends TenantAwareBaseEntity {
     String getInitiatedBy();
 
     /**
+     * @return the latest action status code. Performance optimization to not
+     *         query the action status table for the last action status code.
+     */
+    Optional<Integer> getLastActionStatusCode();
+
+    /**
      * checks if the {@link #getForcedTime()} is hit by the given
      * {@code hitTimeMillis}, by means if the given milliseconds are greater
      * than the forcedTime.
@@ -253,7 +259,12 @@ public interface Action extends TenantAwareBaseEntity {
          * Action has been downloaded by the target and waiting for update to
          * start.
          */
-        DOWNLOADED
+        DOWNLOADED,
+
+        /**
+         * Action is waiting to be confirmed by the user
+         */
+        WAIT_FOR_CONFIRMATION
     }
 
     /**
@@ -324,4 +335,11 @@ public interface Action extends TenantAwareBaseEntity {
      * @return true if maintenance window is available, else false.
      */
     boolean isMaintenanceWindowAvailable();
+
+    /**
+     * Checks if the action is waiting for confirmation.
+     * @return true if the action is waiting for confirmation, else false
+     */
+    boolean isWaitingConfirmation();
+
 }

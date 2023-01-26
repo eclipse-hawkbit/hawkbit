@@ -21,7 +21,7 @@
       {{ if (eq (trim .Site.Params.provider " " | lower) "github") | and (isset .Site.Params "repo_url") }}
         <ul class="repo">
           <li class="repo-download">
-            <a href="https://hawkbit.eclipse.org" target="_blank" title="hawkBit Sandbox" data-action="sandbox">
+            <a href="https://hawkbit.eclipseprojects.io" target="_blank" title="hawkBit Sandbox" data-action="sandbox">
               <i class="fas fa-desktop"></i> &nbsp; Sandbox
             </a>
           </li>
@@ -57,8 +57,8 @@
             </a>
           </li>
           <li>
-            <a href="https://sonar.ops.bosch-iot-rollouts.com" title="SonarQube Status" target="_blank">
-              <img src="https://sonar.ops.bosch-iot-rollouts.com/api/badges/gate?key=org.eclipse.hawkbit:hawkbit-parent" />
+            <a href="https://sonarcloud.io/organizations/bosch-iot-rollouts/projects?sort=name" title="Sonarcloud Status" target="_blank">
+              <img src="https://sonarcloud.io/api/project_badges/measure?project=org.eclipse.hawkbit%3Ahawkbit-parent&metric=alert_status" />
             </a>
           </li>
           <li>

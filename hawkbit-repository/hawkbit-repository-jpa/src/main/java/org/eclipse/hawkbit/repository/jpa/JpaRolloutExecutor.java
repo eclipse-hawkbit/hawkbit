@@ -55,7 +55,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -355,7 +354,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         afterCommit.afterCommit(() -> groupIds.forEach(rolloutGroupId -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new RolloutGroupDeletedEvent(tenantAware.getCurrentTenant(), rolloutGroupId,
-                        JpaRolloutGroup.class.getName(), eventPublisherHolder.getApplicationId()))));
+                        JpaRolloutGroup.class, eventPublisherHolder.getApplicationId()))));
     }
 
     private boolean isRolloutComplete(final JpaRollout rollout) {
@@ -575,7 +574,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Page<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
+            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
                     pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
 
             createAssignmentOfTargetsToGroup(targets, group);
@@ -585,8 +584,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Schedules a group of the rollout. Scheduled Actions are created to achieve
-     * this. The creation of those Actions is allowed to fail.
+     * Schedules a group of the rollout. Scheduled Actions are created to
+     * achieve this. The creation of those Actions is allowed to fail.
      */
     private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
         final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
@@ -634,8 +633,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final ActionType actionType = rollout.getActionType();
             final long forceTime = rollout.getForcedTime();
 
-            final Page<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest, groupId);
-            if (targets.getTotalElements() > 0) {
+            final Slice<Target> targets = targetManagement.findByInRolloutGroupWithoutAction(pageRequest, groupId);
+            if (targets.getNumberOfElements() > 0) {
                 createScheduledAction(targets.getContent(), distributionSet, actionType, forceTime, rollout, group);
             }
 
@@ -643,14 +642,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         });
     }
 
-    private void createAssignmentOfTargetsToGroup(final Page<Target> targets, final RolloutGroup group) {
+    private void createAssignmentOfTargetsToGroup(final Slice<Target> targets, final RolloutGroup group) {
         targets.forEach(target -> rolloutTargetGroupRepository.save(new RolloutTargetGroup(group, target)));
     }
 
     /**
      * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action is
-     * created in-active.
+     * scheduled actions the scheduled actions gets canceled. A scheduled action
+     * is created in-active.
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,

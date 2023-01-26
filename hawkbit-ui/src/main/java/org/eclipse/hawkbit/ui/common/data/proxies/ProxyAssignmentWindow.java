@@ -26,6 +26,7 @@ public class ProxyAssignmentWindow implements Serializable, ActionTypeAware {
     private String maintenanceSchedule;
     private String maintenanceDuration;
     private String maintenanceTimeZone;
+    private boolean confirmationRequired = true;
 
     /**
      * Gets the actionType
@@ -120,7 +121,7 @@ public class ProxyAssignmentWindow implements Serializable, ActionTypeAware {
      * @param maintenanceDuration
      *          Duration of maintenance
      */
-    public void setMaintenanceDuration(String maintenanceDuration) {
+    public void setMaintenanceDuration(final String maintenanceDuration) {
         this.maintenanceDuration = maintenanceDuration;
     }
 
@@ -139,7 +140,25 @@ public class ProxyAssignmentWindow implements Serializable, ActionTypeAware {
      * @param maintenanceTimeZone
      *          Time zone of Maintenance
      */
-    public void setMaintenanceTimeZone(String maintenanceTimeZone) {
+    public void setMaintenanceTimeZone(final String maintenanceTimeZone) {
         this.maintenanceTimeZone = maintenanceTimeZone;
+    }
+
+    /**
+     * Get as boolean if the confirmation of the assignment is required
+     *
+     * @return if the confirmation of the assignment is required
+     */
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    /**
+     * Sets if the confirmation of the assignment is required
+     *
+     * @param confirmationRequired set required
+     */
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

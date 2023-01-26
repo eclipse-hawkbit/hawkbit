@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
@@ -40,4 +41,18 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      */
     Optional<T> findById(I id);
 
+    /**
+     * Overrides
+     * {@link org.springframework.data.repository.CrudRepository#saveAll(Iterable)}
+     * to return a list of created entities instead of an instance of
+     * {@link Iterable} to be able to work with it directly in further code
+     * processing instead of converting the {@link Iterable}.
+     *
+     * @param entities
+     *            to persist in the database
+     * @return the created entities
+     */
+    @Override
+    @Transactional
+    <S extends T> List<S> saveAll(Iterable<S> entities);
 }

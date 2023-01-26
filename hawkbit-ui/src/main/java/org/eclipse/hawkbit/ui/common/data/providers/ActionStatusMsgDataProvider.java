@@ -105,6 +105,6 @@ public class ActionStatusMsgDataProvider extends AbstractGenericDataProvider<Pro
             return 0L;
         }
 
-        return loadBackendEntities(PageRequest.of(0, 1), actionStatusId).getTotalElements();
+        return deploymentManagement.countMessagesByActionStatusId(actionStatusId);
     }
 }

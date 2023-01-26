@@ -8,57 +8,54 @@
  */
 package org.eclipse.hawkbit.ui.filtermanagement;
 
+import java.util.function.IntSupplier;
+
 import org.eclipse.hawkbit.ui.common.layout.AbstractFooterSupport;
-import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
-import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
+import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
-import com.vaadin.ui.Label;
-
 /**
- * Count message label which display current filter details and details on
- * pinning.
+ * Count message label which display current total filtered targets count.
  */
 public class TargetFilterCountMessageLabel extends AbstractFooterSupport {
 
-    private final VaadinMessageSource i18n;
-
-    private final Label targetCountLabel;
+    private int totalFilteredTargetsCount;
 
     /**
      * Constructor for TargetFilterCountMessageLabel
      *
      * @param i18n
-     *          VaadinMessageSource
+     *            VaadinMessageSource
      */
-    public TargetFilterCountMessageLabel(final VaadinMessageSource i18n) {
-        this.i18n = i18n;
-        this.targetCountLabel = new Label();
-        init();
-    }
-
-    private void init() {
-        targetCountLabel.setId(UIComponentIdProvider.COUNT_LABEL);
-        targetCountLabel.addStyleName(SPUIStyleDefinitions.SP_LABEL_MESSAGE_STYLE);
-
-        updateTotalFilteredTargetsCount(0);
+    public TargetFilterCountMessageLabel(final VaadinMessageSource i18n, final UINotification notification) {
+        super(i18n, notification);
     }
 
     @Override
-    protected Label getFooterMessageLabel() {
-        return targetCountLabel;
+    protected void init() {
+        super.init();
+
+        totalFilteredTargetsCount = 0;
+        updateTotalFilteredTargetsCountLabel();
     }
 
     /**
-     * Update the total count of target filtered
+     * Update the total count of filtered targets asynchronously.
+     * 
+     * @param fetchTotalFilteredTargetsCount
+     *            total filtered targets count provider
      *
-     * @param count
-     *          Total target filtered count
      */
-    public void updateTotalFilteredTargetsCount(final long count) {
+    public void updateTotalFilteredTargetsCount(final IntSupplier fetchTotalFilteredTargetsCount) {
+        updateCountAsynchronously(() -> totalFilteredTargetsCount = fetchTotalFilteredTargetsCount.getAsInt(),
+                this::updateTotalFilteredTargetsCountLabel);
+    }
+
+    private void updateTotalFilteredTargetsCountLabel() {
         final StringBuilder targetMessage = new StringBuilder(i18n.getMessage("label.target.filtered.total"));
         targetMessage.append(": ");
-        targetMessage.append(count);
-        targetCountLabel.setCaption(targetMessage.toString());
+        targetMessage.append(totalFilteredTargetsCount);
+
+        countLabel.setCaption(targetMessage.toString());
     }
 }

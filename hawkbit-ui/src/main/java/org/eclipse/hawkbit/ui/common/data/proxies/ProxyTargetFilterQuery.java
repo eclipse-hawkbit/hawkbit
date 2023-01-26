@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.ui.common.data.proxies;
 
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.aware.DsIdAware;
@@ -21,6 +22,8 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
     private String query;
 
     private boolean isAutoAssignmentEnabled;
+
+    private boolean isConfirmationRequired;
 
     private ProxyDistributionSetInfo autoAssignDsInfo;
 
@@ -123,6 +126,26 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
     }
 
     /**
+     * @return if confirmation is required for configured auto assignment
+     *         (considered with confirmation flow active)
+     */
+    public boolean isConfirmationRequired() {
+        return isConfirmationRequired;
+    }
+
+    /**
+     * Specify initial confirmation state of resulting {@link Action} in auto
+     * assignment
+     *
+     * @param confirmationRequired
+     *            if confirmation is required for configured auto assignment
+     *            (considered with confirmation flow active)
+     */
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        isConfirmationRequired = confirmationRequired;
+    }
+
+    /**
      * Sets the Id, name and query of target filter query
      *
      * @param tfqInfo
@@ -148,4 +171,5 @@ public class ProxyTargetFilterQuery extends ProxyNamedEntity implements DsIdAwar
     public ProxyTargetFilterQueryInfo getInfo() {
         return new ProxyTargetFilterQueryInfo(getId(), getName(), getQuery());
     }
+
 }

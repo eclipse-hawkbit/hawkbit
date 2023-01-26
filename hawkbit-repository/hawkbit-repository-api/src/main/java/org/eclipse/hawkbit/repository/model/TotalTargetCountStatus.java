@@ -161,6 +161,7 @@ public class TotalTargetCountStatus {
         case RUNNING:
         case WARNING:
         case DOWNLOAD:
+        case WAIT_FOR_CONFIRMATION:
         case CANCELING:
             return Status.RUNNING;
         case DOWNLOADED:

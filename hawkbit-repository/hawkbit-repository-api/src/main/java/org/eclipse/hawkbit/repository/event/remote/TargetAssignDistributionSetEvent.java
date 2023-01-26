@@ -9,27 +9,22 @@
 package org.eclipse.hawkbit.repository.event.remote;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.model.Action;
-import org.eclipse.hawkbit.repository.model.ActionProperties;
 
 /**
  * TenantAwareEvent that gets sent when a distribution set gets assigned to a
  * target.
  */
-public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
+public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
 
     private static final long serialVersionUID = 1L;
 
     private long distributionSetId;
 
     private boolean maintenanceWindowAvailable;
-
-    private final Map<String, ActionProperties> actions = new HashMap<>();
 
     /**
      * Default constructor.
@@ -54,12 +49,12 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
      */
     public TargetAssignDistributionSetEvent(final String tenant, final long distributionSetId, final List<Action> a,
             final String applicationId, final boolean maintenanceWindowAvailable) {
-        super(distributionSetId, tenant, applicationId);
+        super(distributionSetId, tenant,
+                a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
+                        .collect(Collectors.toList()),
+                applicationId);
         this.distributionSetId = distributionSetId;
         this.maintenanceWindowAvailable = maintenanceWindowAvailable;
-        actions.putAll(a.stream().filter(action -> action.getDistributionSet().getId().longValue() == distributionSetId)
-                .collect(Collectors.toMap(action -> action.getTarget().getControllerId(), ActionProperties::new)));
-
     }
 
     /**
@@ -81,10 +76,6 @@ public class TargetAssignDistributionSetEvent extends RemoteTenantAwareEvent {
 
     public boolean isMaintenanceWindowAvailable() {
         return maintenanceWindowAvailable;
-    }
-
-    public Map<String, ActionProperties> getActions() {
-        return actions;
     }
 
 }

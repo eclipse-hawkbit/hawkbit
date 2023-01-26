@@ -48,13 +48,14 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
             final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
             final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig) {
+            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+            final BooleanSupplier confirmationFlowConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
     }
 
     @Override
-    void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
+    public void sendTargetUpdatedEvents(final DistributionSet set, final List<JpaTarget> targets) {
         targets.forEach(target -> {
             target.setUpdateStatus(TargetUpdateStatus.PENDING);
             sendTargetUpdatedEvent(target);
@@ -62,7 +63,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
+    public void sendDeploymentEvents(final DistributionSetAssignmentResult assignmentResult) {
         if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvents(Collections.singletonList(assignmentResult));
         } else {
@@ -71,7 +72,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
+    public void sendDeploymentEvents(final List<DistributionSetAssignmentResult> assignmentResults) {
         if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvent(assignmentResults.stream().flatMap(result -> result.getAssignedEntity().stream())
                     .collect(Collectors.toList()));
@@ -80,7 +81,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         }
     }
 
-    void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
+    public void sendDeploymentEvents(final long distributionSetId, final List<Action> actions) {
         if (isMultiAssignmentsEnabled()) {
             sendDeploymentEvent(actions);
             return;
@@ -94,7 +95,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
+    public List<JpaTarget> findTargetsForAssignment(final List<String> controllerIDs, final long setId) {
         final Function<List<String>, List<JpaTarget>> mapper;
         if (isMultiAssignmentsEnabled()) {
             mapper = ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids));
@@ -107,18 +108,18 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
+    public Set<Long> cancelActiveActions(final List<List<Long>> targetIds) {
         return targetIds.stream().map(this::overrideObsoleteUpdateActions).flatMap(Collection::stream)
                 .collect(Collectors.toSet());
     }
 
     @Override
-    void closeActiveActions(final List<List<Long>> targetIds) {
+    public void closeActiveActions(final List<List<Long>> targetIds) {
         targetIds.forEach(this::closeObsoleteUpdateActions);
     }
 
     @Override
-    void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
+    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
             final String currentUser) {
         targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
                 set, System.currentTimeMillis(), currentUser, tIds));
@@ -126,19 +127,32 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
+    public JpaAction createTargetAction(final String initiatedBy, final TargetWithActionType targetWithActionType,
             final List<JpaTarget> targets, final JpaDistributionSet set) {
         final JpaAction result = super.createTargetAction(initiatedBy, targetWithActionType, targets, set);
         if (result != null) {
-            result.setStatus(Status.RUNNING);
+            final boolean confirmationRequired = targetWithActionType.isConfirmationRequired()
+                    && result.getTarget().getAutoConfirmationStatus() == null;
+            if (isConfirmationFlowEnabled() && confirmationRequired) {
+                result.setStatus(Status.WAIT_FOR_CONFIRMATION);
+            } else {
+                result.setStatus(Status.RUNNING);
+            }
         }
         return result;
     }
 
+    /**
+     * Will be called to create the initial action status for an action
+     */
     @Override
-    JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
+    public JpaActionStatus createActionStatus(final JpaAction action, final String actionMessage) {
         final JpaActionStatus result = super.createActionStatus(action, actionMessage);
-        result.setStatus(Status.RUNNING);
+        if (isConfirmationFlowEnabled()) {
+            result.setStatus(Status.WAIT_FOR_CONFIRMATION);
+        } else {
+            result.setStatus(Status.RUNNING);
+        }
         return result;
     }
 
@@ -146,7 +160,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
         if (isMultiAssignmentsEnabled()) {
             sendMultiActionCancelEvent(action);
         } else {
-            cancelAssignDistributionSetEvent(action.getTarget(), action.getId());
+            cancelAssignDistributionSetEvent(action);
         }
     }
 

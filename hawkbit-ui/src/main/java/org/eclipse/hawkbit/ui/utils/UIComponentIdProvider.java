@@ -386,6 +386,11 @@ public final class UIComponentIdProvider {
     public static final String MAINTENANCE_WINDOW_TIME_ZONE_ID = "maintenance.window.time.zone";
 
     /**
+     * Id for the confirmation required checkbox
+     */
+    public static final String ASSIGNMENT_CONFIRMATION_REQUIRED = "deployment.assignment.action.confirmation.required";
+
+    /**
      * Id for maintenance window - label schedule translator
      */
     public static final String MAINTENANCE_WINDOW_SCHEDULE_TRANSLATOR_ID = "maintenance.window.schedule.translator";
@@ -780,9 +785,14 @@ public final class UIComponentIdProvider {
     public static final String TARGET_ATTRIBUTES_UPDATE = "target.attributes.update";
 
     /**
-     * Id of maximize/minimize icon of table - Software module table.
+     * Id of maximize/minimize icon of table - Target table.
      */
     public static final String TARGET_MAX_MIN_TABLE_ICON = "target.max.min.table.icon";
+
+    /**
+     * Id of maximize/minimize icon of table - Custom filter table.
+     */
+    public static final String CUSTOM_FILTER_MAX_MIN_TABLE_ICON = "custom.filter.max.min.table.icon";
 
     /**
      * Id of Assignment type in Software Module Details.
@@ -999,6 +1009,8 @@ public final class UIComponentIdProvider {
      */
     public static final String TARGET_FILTER_TABLE_TYPE_LABEL_ID = "target.query.filter.table.typeId";
 
+    public static final String TARGET_FILTER_TABLE_CONFIRMATION_LABEL_ID = "target.query.filter.table.confirmationId";
+
     /**
      * create or update target filter query - name label id.
      */
@@ -1150,6 +1162,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_PAUSE_BUTTON_ID = ROLLOUT_ACTION_ID + ".7";
 
     /**
+     * Rollout trigger next group button id.
+     */
+    public static final String ROLLOUT_TRIGGER_NEXT_GROUP_BUTTON_ID = ROLLOUT_ACTION_ID + ".13";
+
+    /**
      * Rollout update button id.
      */
     public static final String ROLLOUT_UPDATE_BUTTON_ID = ROLLOUT_ACTION_ID + ".8";
@@ -1219,6 +1236,23 @@ public final class UIComponentIdProvider {
      * Action confirmation popup id.
      */
     public static final String CONFIRMATION_POPUP_ID = "action.confirmation.popup.id";
+
+    public static final String AUTO_CONFIRMATION_DETAILS = "target.details.auto.confirmation";
+
+    public static final String AUTO_CONFIRMATION_DETAILS_TOGGLE = "target.details.auto.confirmation.toggle";
+
+    public static final String AUTO_CONFIRMATION_DETAILS_STATE = AUTO_CONFIRMATION_DETAILS + ".state";
+
+    public static final String AUTO_CONFIRMATION_DETAILS_INITIATOR = AUTO_CONFIRMATION_DETAILS + ".initiator";
+
+    public static final String AUTO_CONFIRMATION_DETAILS_ROLLOUTS_USER = AUTO_CONFIRMATION_DETAILS + ".rolloutsuser";
+
+    public static final String AUTO_CONFIRMATION_DETAILS_ACTIVATEDAT = AUTO_CONFIRMATION_DETAILS + ".activatedat";
+    public static final String AUTO_CONFIRMATION_DETAILS_REMARK = AUTO_CONFIRMATION_DETAILS + ".remark";
+
+    public static final String AUTO_CONFIRMATION_TOGGLE_DIALOG = "target.auto.confirmation.toggle.dialog";
+    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_INITIATOR = AUTO_CONFIRMATION_TOGGLE_DIALOG + ".initiator";
+    public static final String AUTO_CONFIRMATION_ACTIVATION_DIALOG_REMARK = AUTO_CONFIRMATION_TOGGLE_DIALOG + ".remark";
 
     /**
      * Validation status icon .
@@ -1461,6 +1495,11 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_DELETE_CONFIRMATION_DIALOG = "rollout.delete.confirmation.window";
 
     /**
+     * Id of the rollout 'trigger next group' confirmation window
+     */
+    public static final String ROLLOUT_TRIGGER_NEXT_CONFIRMATION_DIALOG = "rollout.triggernext.confirmation.window";
+
+    /**
      * Id of the target filter deletion confirmation window
      */
     public static final String TARGET_FILTER_DELETE_CONFIRMATION_DIALOG = "target.filter.delete.confirmation.window";
@@ -1520,6 +1559,12 @@ public final class UIComponentIdProvider {
 
     /**
      * Configuration checkbox for
+     * {@link TenantConfigurationKey#USER_CONFIRMATION_ENABLED}.
+     */
+    public static final String REPOSITORY_USER_CONFIRMATION_CHECKBOX = "repositoryuserconfirmationcheckbox";
+
+    /**
+     * Configuration checkbox for
      * {@link TenantConfigurationKey#ROLLOUT_APPROVAL_ENABLED}
      */
     public static final String ROLLOUT_APPROVAL_ENABLED_CHECKBOX = "rollout.approve.enabled.checkbox";
@@ -1556,6 +1601,8 @@ public final class UIComponentIdProvider {
     public static final String ROLLOUT_ACTION_TYPE_OPTIONS_ID = "rollout.action.type.options.id";
 
     public static final String ROLLOUT_START_OPTIONS_ID = "rollout.start.options.id";
+
+    public static final String ROLLOUT_CONFIRMATION_REQUIRED = "rollout.confirmation.required";
 
     public static final String SM_TYPE_COLOR_STYLE = "sm-type-colors";
 

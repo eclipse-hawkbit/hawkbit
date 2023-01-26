@@ -36,7 +36,6 @@ public class KeyValueDetailsComponent extends CustomField<List<ProxyKeyValueDeta
         keyValueDetailsLayout.setSpacing(true);
         keyValueDetailsLayout.setMargin(false);
         keyValueDetailsLayout.setWidthFull();
-        keyValueDetailsLayout.addStyleName("enable-horizontal-scroll");
 
         setReadOnly(true);
     }

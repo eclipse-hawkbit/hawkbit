@@ -23,9 +23,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.util.StringUtils;
@@ -38,11 +38,11 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAutoAssignExecutor.class);
 
     /**
-     * The message which is added to the action status when a distribution set is
-     * assigned to an target. First %s is the name of the target filter.
+     * The message which is added to the action status when a distribution set
+     * is assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
-    
+
     /**
      * Maximum for target filter queries with auto assign DS activated.
      */
@@ -94,7 +94,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
-        Page<TargetFilterQuery> filterQueries;
+        Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
 
         do {
@@ -117,8 +117,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     /**
-     * Runs target assignments within a dedicated transaction for a given list of
-     * controllerIDs
+     * Runs target assignments within a dedicated transaction for a given list
+     * of controllerIDs
      * 
      * @param targetFilterQuery
      *            the target filter query
@@ -146,8 +146,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     /**
-     * Creates a list of {@link DeploymentRequest} for given list of controllerIds
-     * and {@link TargetFilterQuery}
+     * Creates a list of {@link DeploymentRequest} for given list of
+     * controllerIds and {@link TargetFilterQuery}
      *
      * @param controllerIds
      *            list of controllerIds
@@ -167,7 +167,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                 .map(controllerId -> DeploymentManagement
                         .deploymentRequest(controllerId, filterQuery.getAutoAssignDistributionSet().getId())
                         .setActionType(autoAssignActionType).setWeight(filterQuery.getAutoAssignWeight().orElse(null))
-                        .build())
+                        .setConfirmationRequired(filterQuery.isConfirmationRequired()).build())
                 .collect(Collectors.toList());
     }
 

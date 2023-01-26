@@ -24,7 +24,6 @@ import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Slice;
 
 import io.qameta.allure.Description;
@@ -158,11 +157,11 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         createDistributionSetForTenant(anotherTenant);
 
         // ensure both tenants see their distribution sets
-        final Page<DistributionSet> findDistributionSetsForTenant = findDistributionSetForTenant(tenant);
+        final Slice<DistributionSet> findDistributionSetsForTenant = findDistributionSetForTenant(tenant);
         assertThat(findDistributionSetsForTenant).hasSize(1);
         assertThat(findDistributionSetsForTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(tenant.toUpperCase());
-        final Page<DistributionSet> findDistributionSetsForAnotherTenant = findDistributionSetForTenant(anotherTenant);
+        final Slice<DistributionSet> findDistributionSetsForAnotherTenant = findDistributionSetForTenant(anotherTenant);
         assertThat(findDistributionSetsForAnotherTenant).hasSize(1);
         assertThat(findDistributionSetsForAnotherTenant.getContent().get(0).getTenant().toUpperCase())
                 .isEqualTo(anotherTenant.toUpperCase());
@@ -191,7 +190,7 @@ public class MultiTenancyEntityTest extends AbstractJpaIntegrationTest {
         return runAsTenant(tenant, () -> testdataFactory.createDistributionSet());
     }
 
-    private Page<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
+    private Slice<DistributionSet> findDistributionSetForTenant(final String tenant) throws Exception {
         return runAsTenant(tenant, () -> distributionSetManagement.findByCompleted(PAGE, true));
     }
 }

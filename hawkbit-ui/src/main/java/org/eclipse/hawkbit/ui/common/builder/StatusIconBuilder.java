@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyAction.IsActiveDecoration;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
+import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyUploadProgress.ProgressSatus;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.rollout.ProxyFontIcon;
@@ -86,6 +87,8 @@ public final class StatusIconBuilder {
             addMapping(Status.CANCEL_REJECTED, VaadinIcons.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_ORANGE);
             addMapping(Status.CANCELED, VaadinIcons.CLOSE_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_GREEN);
             addMapping(Status.ERROR, VaadinIcons.EXCLAMATION_CIRCLE, SPUIStyleDefinitions.STATUS_ICON_RED);
+            addMapping(Status.WAIT_FOR_CONFIRMATION, VaadinIcons.USER_CLOCK, SPUIStyleDefinitions.STATUS_ICON_PENDING);
+
         }
     }
 
@@ -323,6 +326,43 @@ public final class StatusIconBuilder {
                     UIMessageIdProvider.CAPTION_ACTION_SOFT);
             addMapping(ActionType.DOWNLOAD_ONLY, VaadinIcons.DOWNLOAD, SPUIStyleDefinitions.STATUS_ICON_DOWNLOAD_ONLY,
                     UIMessageIdProvider.CAPTION_ACTION_DOWNLOAD_ONLY);
+        }
+    }
+
+    /**
+     * Generate labels with confirmation icons according to entity' {@link ProxyTargetFilterQuery}
+     */
+    public static class ConfirmationIconSupplier extends AbstractEntityStatusIconBuilder<ProxyTargetFilterQuery> {
+
+        private static final long serialVersionUID = 1L;
+
+        /**
+         * constructor
+         *
+         * @param i18n
+         *            message source for internationalization
+         * @param labelIdPrefix
+         *            to generate the label ID
+         */
+        public ConfirmationIconSupplier(final VaadinMessageSource i18n, final String labelIdPrefix) {
+            super(i18n, labelIdPrefix);
+        }
+
+        @Override
+        public Label getLabel(final ProxyTargetFilterQuery entity) {
+            final ProxyFontIcon icon;
+            if (entity.isAutoAssignmentEnabled() && entity.getDistributionSetInfo() != null) {
+                icon = entity.isConfirmationRequired()
+                        ? new ProxyFontIcon(VaadinIcons.USER_CLOCK, SPUIStyleDefinitions.STATUS_ICON_GREEN,
+                                i18n.getMessage(UIMessageIdProvider.TOOLTIP_TARGET_FILTER_CONFIRMATION_REQUIRED))
+                        : new ProxyFontIcon(VaadinIcons.USER_CHECK, SPUIStyleDefinitions.STATUS_ICON_RED,
+                                i18n.getMessage(UIMessageIdProvider.TOOLTIP_TARGET_FILTER_CONFIRMATION_NOT_REQUIRED));
+            } else {
+                icon = new ProxyFontIcon(VaadinIcons.MINUS_CIRCLE_O, SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
+                        i18n.getMessage(UIMessageIdProvider.TOOLTIP_TARGET_FILTER_CONFIRMATION_NOT_CONFIGURED));
+            }
+
+            return getLabel(entity, icon);
         }
     }
 

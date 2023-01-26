@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedSelec
 import org.eclipse.hawkbit.ui.common.layout.listener.support.EntityModifiedTagTokenAwareSupport;
 import org.eclipse.hawkbit.ui.common.state.TagFilterLayoutUiState;
 import org.eclipse.hawkbit.ui.management.targettable.TargetGridLayoutUiState;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Distribution Set table layout in deployment view.
@@ -113,9 +114,11 @@ public class DistributionGridLayout extends AbstractDistributionSetGridLayout {
 
         this.distributionGrid = new DistributionGrid(uiDependencies, targetManagement, distributionSetManagement,
                 dsInvalidationManagement, deploymentManagement, uiProperties, distributionGridLayoutUiState,
-                targetGridLayoutUiState, distributionTagLayoutUiState);
+                targetGridLayoutUiState, distributionTagLayoutUiState,
+                TenantConfigHelper.usingContext(systemSecurityContext, configManagement));
 
-        this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(uiDependencies, getDsWindowBuilder(),
+        this.distributionSetDetailsHeader = new DistributionSetDetailsHeader(
+                uiDependencies, getDsWindowBuilder(),
                 getDsMetaDataWindowBuilder());
 
         this.distributionDetails = new DistributionSetDetails(uiDependencies, distributionSetManagement, smManagement,

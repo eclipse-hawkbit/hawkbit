@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.dmf.amqp.api.AmqpSettings;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -275,9 +276,10 @@ public class AmqpConfiguration {
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final ConfirmationManagement confirmationManagement) {
         return new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherService, controllerManagement,
-                entityFactory, systemSecurityContext, tenantConfigurationManagement);
+                entityFactory, systemSecurityContext, tenantConfigurationManagement, confirmationManagement);
     }
 
     /**
@@ -354,10 +356,11 @@ public class AmqpConfiguration {
             final AmqpMessageSenderService amqpSenderService, final ArtifactUrlHandler artifactUrlHandler,
             final SystemSecurityContext systemSecurityContext, final SystemManagement systemManagement,
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement) {
+            final SoftwareModuleManagement softwareModuleManagement, final DeploymentManagement deploymentManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         return new AmqpMessageDispatcherService(rabbitTemplate, amqpSenderService, artifactUrlHandler,
                 systemSecurityContext, systemManagement, targetManagement, serviceMatcher, distributionSetManagement,
-                softwareModuleManagement, deploymentManagement);
+                softwareModuleManagement, deploymentManagement, tenantConfigurationManagement);
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {

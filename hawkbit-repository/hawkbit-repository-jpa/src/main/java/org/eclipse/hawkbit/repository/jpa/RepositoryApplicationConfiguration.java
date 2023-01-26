@@ -14,6 +14,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
+import javax.validation.Validation;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.repository.ArtifactEncryption;
@@ -21,6 +22,7 @@ import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -79,7 +81,6 @@ import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecuto
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
-import org.eclipse.hawkbit.repository.jpa.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
@@ -97,6 +98,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
+import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
 import org.eclipse.hawkbit.repository.rsql.RsqlVisitorFactory;
@@ -107,6 +109,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.hibernate.validator.HibernateValidatorConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -385,7 +388,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      */
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
-        return new MethodValidationPostProcessor();
+        final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+        processor.setValidator(Validation.byDefaultProvider().configure()
+                .addProperty(HibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
+                        "true")
+                .buildValidatorFactory().getValidator());
+        return processor;
     }
 
     /**
@@ -735,6 +743,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    ConfirmationManagement confirmationManagement(final TargetRepository targetRepository,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
+            final EntityFactory entityFactory) {
+        return new JpaConfirmationManagement(targetRepository, actionRepository, actionStatusRepository,
+                repositoryProperties, quotaManagement, entityFactory);
+    }
+
     /**
      * {@link JpaControllerManagement} bean.
      *
@@ -743,8 +761,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
-        return new JpaControllerManagement(executorService, repositoryProperties, actionRepository);
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+        return new JpaControllerManagement(executorService, actionRepository, actionStatusRepository, quotaManagement,
+                repositoryProperties);
     }
 
     @Bean

@@ -32,6 +32,8 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     @JsonProperty(required = true)
     private String type;
 
+    private String typeName;
+
     @JsonProperty
     private String vendor;
 
@@ -72,6 +74,14 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
 
     public void setType(final String type) {
         this.type = type;
+    }
+
+    public String getTypeName() {
+        return typeName;
+    }
+
+    public void setTypeName(final String typeName) {
+        this.typeName = typeName;
     }
 
     public String getVendor() {

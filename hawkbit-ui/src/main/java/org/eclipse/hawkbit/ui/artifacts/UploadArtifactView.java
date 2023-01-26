@@ -302,22 +302,22 @@ public class UploadArtifactView extends AbstractEventListenersAwareView implemen
     @Override
     public void beforeLeave(final ViewBeforeLeaveEvent event) {
         if (isAnyUploadInUploadQueue()) {
-            final ConfirmationDialog confirmDeleteDialog = new ConfirmationDialog(i18n,
-                    i18n.getMessage(UIMessageIdProvider.CAPTION_CLEAR_FILE_UPLOAD_QUEUE),
-                    i18n.getMessage(UIMessageIdProvider.MESSAGE_CLEAR_FILE_UPLOAD_QUEUE), ok -> {
-                        if (Boolean.TRUE.equals(ok)) {
-                            // Clear all queued file uploads
-                            artifactUploadState.clearFileStates();
-                            super.beforeLeave(event);
-                        } else {
-                            // Send a PostViewChangeEvent to the DashboardMenu
-                            // as if the navigation actually
-                            // happened to prevent the DashboardMenu navigation
-                            // from getting stuck
-                            final DashboardMenuItem dashboardMenuItem = dashboardMenu.getByViewName(VIEW_NAME);
-                            dashboardMenu.postViewChange(DashboardEvent.createPostViewChangeEvent(dashboardMenuItem));
-                        }
-                    }, UIComponentIdProvider.UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG);
+            final ConfirmationDialog confirmDeleteDialog = ConfirmationDialog
+                    .newBuilder(i18n, UIComponentIdProvider.UPLOAD_QUEUE_CLEAR_CONFIRMATION_DIALOG)
+                    .caption(i18n.getMessage(UIMessageIdProvider.CAPTION_CLEAR_FILE_UPLOAD_QUEUE))
+                    .question(i18n.getMessage(UIMessageIdProvider.MESSAGE_CLEAR_FILE_UPLOAD_QUEUE))
+                    .onSaveOrUpdate(() -> {
+                        // Clear all queued file uploads
+                        artifactUploadState.clearFileStates();
+                        super.beforeLeave(event);
+                    }).onCancel(() -> {
+                        // Send a PostViewChangeEvent to the DashboardMenu
+                        // as if the navigation actually
+                        // happened to prevent the DashboardMenu navigation
+                        // from getting stuck
+                        final DashboardMenuItem dashboardMenuItem = dashboardMenu.getByViewName(VIEW_NAME);
+                        dashboardMenu.postViewChange(DashboardEvent.createPostViewChangeEvent(dashboardMenuItem));
+                    }).build();
             UI.getCurrent().addWindow(confirmDeleteDialog.getWindow());
             confirmDeleteDialog.getWindow().bringToFront();
         } else {

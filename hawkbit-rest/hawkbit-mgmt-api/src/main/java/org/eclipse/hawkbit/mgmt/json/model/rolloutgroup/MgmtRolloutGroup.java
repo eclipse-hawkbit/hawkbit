@@ -22,6 +22,7 @@ public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
 
     private String targetFilterQuery;
     private Float targetPercentage;
+    private Boolean confirmationRequired;
 
     public String getTargetFilterQuery() {
         return targetFilterQuery;
@@ -37,5 +38,13 @@ public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
 
     public void setTargetPercentage(Float targetPercentage) {
         this.targetPercentage = targetPercentage;
+    }
+
+    public Boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final Boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

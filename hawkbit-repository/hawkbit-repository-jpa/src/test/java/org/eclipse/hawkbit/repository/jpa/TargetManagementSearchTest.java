@@ -15,13 +15,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.FilterParams;
-import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -34,7 +31,10 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
@@ -110,19 +110,6 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final String installedC = targCs.iterator().next().getControllerId();
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(installedSet.getId(), assignedC));
 
-        // add attributes to match against only attribute value or attribute
-        // value and name
-        final Map<String, String> attributes = new HashMap<>();
-        attributes.put("key", "targ-C-attribute-value");
-        final Target targAttribute = controllerManagement.updateControllerAttributes(targCs.get(0).getControllerId(),
-                attributes, UpdateMode.REPLACE);
-        // prepare one target with an attribute value equal to controller id
-        Target targAttributeId = targCs.get(15);
-        final Map<String, String> idAttributes = new HashMap<>();
-        idAttributes.put("key", targAttributeId.getControllerId());
-        targAttributeId = controllerManagement.updateControllerAttributes(targAttributeId.getControllerId(),
-                idAttributes, UpdateMode.REPLACE);
-
         // set one installed DS also
         controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(actionId).status(Status.FINISHED).message("message"));
@@ -142,9 +129,6 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         // try to find several targets with different filter settings
         verifyThat1TargetHasNameAndId("targ-A-special", targSpecialName.getControllerId());
-        verifyThat1TargetHasAttributeValue("%c-attribute%", targAttribute.getControllerId());
-        verifyThat1TargetHasAttributeValue("%" + targAttributeId.getControllerId() + "%",
-                targAttributeId.getControllerId());
         verifyThatRepositoryContains500Targets();
         verifyThat200TargetsHaveTagD(targTagW, concat(targBs, targCs));
         verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(targTagY, targTagW, targBs);
@@ -183,8 +167,10 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         verifyThat1TargetAIsInStatusPendingAndHasDSInstalled(installedSet, pending,
                 targetManagement.getByControllerID(installedC).get());
         verifyThat1TargetHasTypeAndDSAssigned(targetTypeX, setB, targetManagement.getByControllerID(assignedE).get());
-        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(setA,  targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
-        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(installedSet,  targetManagement.getByControllerID(Collections.singletonList(installedC)));
+        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(setA,
+                targetManagement.getByControllerID(Arrays.asList(assignedA, assignedB, assignedC)));
+        verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(installedSet,
+                targetManagement.getByControllerID(Collections.singletonList(installedC)));
         verifyThat100TargetsContainsGivenTextAndHaveTypeAssigned(targetTypeX, targEs);
         verifyThat400TargetsContainsGivenTextAndHaveNoTypeAssigned(concat(targAs, targBs, targCs, targDs));
 
@@ -482,14 +468,6 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
-    private void verifyThat1TargetHasAttributeValue(final String value, final String controllerId) {
-        final FilterParams filterParams = new FilterParams(null, null, value, null, Boolean.FALSE);
-        assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
-                .hasSize(1).as("that number is also returned by count query")
-                .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)));
-    }
-
-    @Step
     private void verifyThat100TargetsContainsGivenTextAndHaveTagAssigned(final TargetTag targTagY,
             final TargetTag targTagW, final List<Target> expected) {
         final FilterParams filterParams = new FilterParams(null, null, "%targ-B%", null, Boolean.FALSE,
@@ -544,7 +522,8 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     }
 
     @Step
-    private void verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(final DistributionSet set, final List<Target> expected) {
+    private void verifyThatTargetsHasNoTypeAndDSAssignedOrInstalled(final DistributionSet set,
+            final List<Target> expected) {
         final FilterParams filterParams = new FilterParams(null, set.getId(), Boolean.TRUE, null);
         assertThat(targetManagement.findByFilters(PAGE, filterParams).getContent()).as("has number of elements")
                 .hasSize(expected.size()).as("that number is also returned by count query")
@@ -556,11 +535,12 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     private void verifyThat100TargetsContainsGivenTextAndHaveTypeAssigned(final TargetType targetType,
             final List<Target> expected) {
         final FilterParams filterParams = new FilterParams("%targ-E%", null, Boolean.FALSE, targetType.getId());
-        List<Target> filteredTargets = targetManagement.findByFilters(PAGE, filterParams).getContent();
+        final List<Target> filteredTargets = targetManagement.findByFilters(PAGE, filterParams).getContent();
         assertThat(filteredTargets).as("has number of elements").hasSize(100)
                 .as("that number is also returned by count query")
                 .hasSize(Ints.saturatedCast(targetManagement.countByFilters(filterParams)));
-        // Comparing the controller ids, as one of the targets was modified, so a 1:1
+        // Comparing the controller ids, as one of the targets was modified, so
+        // a 1:1
         // comparison of the objects is not possible
         assertThat(filteredTargets.stream().map(Target::getControllerId).collect(Collectors.toList()))
                 .containsAll(expected.stream().map(Target::getControllerId).collect(Collectors.toList()));
@@ -596,7 +576,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
                 new FilterParams(null, null, null, null, Boolean.FALSE));
 
-        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
+        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e1.getId(), e2.getId());
 
         assertThat(result.getNumberOfElements()).isEqualTo(9);
         final List<Target> expected = new ArrayList<>();
@@ -609,7 +589,45 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
 
         assertThat(result.getContent()).usingElementComparator(controllerIdComparator())
                 .containsExactly(expected.toArray(new Target[0]));
+    }
 
+    @Test
+    @Description("Tests the correct order of targets based on selected distribution set and sort parameter. The system expects to have an order based on installed, assigned DS.")
+    void targetSearchWithOrderByDistributionSetAndSortParam() {
+
+        final List<Target> notAssigned = testdataFactory.createTargets(3, "not", "first description");
+        List<Target> targAssigned = testdataFactory.createTargets(3, "assigned", "first description");
+        List<Target> targInstalled = testdataFactory.createTargets(3, "installed", "first description");
+
+        final DistributionSet ds = testdataFactory.createDistributionSet("a");
+
+        targAssigned = assignDistributionSet(ds, targAssigned).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = assignDistributionSet(ds, targInstalled).getAssignedEntity().stream().map(Action::getTarget)
+                .collect(Collectors.toList());
+        targInstalled = testdataFactory
+                .sendUpdateActionStatusToTargets(targInstalled, Status.FINISHED, Collections.singletonList("installed"))
+                .stream().map(Action::getTarget).collect(Collectors.toList());
+
+        final List<Target> targetsOrderedByDistAndName = targetManagement
+                .findByFilterOrderByLinkedDistributionSet(PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")),
+                        ds.getId(), new FilterParams(null, null, null, null, Boolean.FALSE))
+                .getContent();
+        assertThat(targetsOrderedByDistAndName).hasSize(9);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 0, targInstalled, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 1, targInstalled, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 2, targInstalled, 0);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 3, targAssigned, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 4, targAssigned, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 5, targAssigned, 0);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 6, notAssigned, 2);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 7, notAssigned, 1);
+        assertThatTargetNameEquals(targetsOrderedByDistAndName, 8, notAssigned, 0);
+    }
+
+    private void assertThatTargetNameEquals(final List<Target> targets1, final int index1, final List<Target> targets2,
+            final int index2) {
+        assertThat(targets1.get(index1).getName()).isEqualTo(targets2.get(index2).getName());
     }
 
     @Test
@@ -649,7 +667,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Slice<Target> result = targetManagement.findByFilterOrderByLinkedDistributionSet(PAGE, ds.getId(),
                 new FilterParams(null, Boolean.TRUE, null, null, Boolean.FALSE));
 
-        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e2.getId(), e1.getId());
+        final Comparator<TenantAwareBaseEntity> byId = (e1, e2) -> Long.compare(e1.getId(), e2.getId());
 
         assertThat(result.getNumberOfElements()).isEqualTo(9);
         final List<Target> expected = new ArrayList<>();
@@ -787,19 +805,18 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that targets with given target type are returned from repository.")
     public void findTargetByTargetType() {
-        TargetType testType = testdataFactory.createTargetType("testType", Collections.singletonList(standardDsType));
-        List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
-        List<Target> assigned = testdataFactory.createTargetsWithType(11, "assigned", testType);
+        final TargetType testType = testdataFactory.createTargetType("testType",
+                Collections.singletonList(standardDsType));
+        final List<Target> unassigned = testdataFactory.createTargets(9, "unassigned");
+        final List<Target> assigned = testdataFactory.createTargetsWithType(11, "assigned", testType);
 
-        assertThat(targetManagement.findByFilters(PAGE,
-                new FilterParams(null,null, false, testType.getId())))
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, false, testType.getId())))
                 .as("Contains the targets with set type").containsAll(assigned)
                 .as("and that means the following expected amount").hasSize(11);
-        assertThat(targetManagement.countByFilters(new FilterParams(null,null, false, testType.getId())))
+        assertThat(targetManagement.countByFilters(new FilterParams(null, null, false, testType.getId())))
                 .as("Count the targets with set type").isEqualTo(11);
 
-        assertThat(targetManagement.findByFilters(PAGE,
-                new FilterParams(null, null, true, null)))
+        assertThat(targetManagement.findByFilters(PAGE, new FilterParams(null, null, true, null)))
                 .as("Contains the targets without a type").containsAll(unassigned)
                 .as("and that means the following expected amount").hasSize(9);
         assertThat(targetManagement.countByFilters(new FilterParams(null, null, true, null)))

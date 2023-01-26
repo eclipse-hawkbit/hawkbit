@@ -59,6 +59,6 @@ public class ArtifactDataProvider extends AbstractProxyDataProvider<ProxyArtifac
             return 0L;
         }
 
-        return loadBackendEntities(PageRequest.of(0, 1), smId).getTotalElements();
+        return artifactManagement.countBySoftwareModule(smId);
     }
 }

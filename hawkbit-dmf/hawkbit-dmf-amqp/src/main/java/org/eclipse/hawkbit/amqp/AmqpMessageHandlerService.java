@@ -24,12 +24,15 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageHeaderKey;
 import org.eclipse.hawkbit.dmf.amqp.api.MessageType;
+import org.eclipse.hawkbit.dmf.json.model.DmfActionStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfActionUpdateStatus;
 import org.eclipse.hawkbit.dmf.json.model.DmfAttributeUpdate;
+import org.eclipse.hawkbit.dmf.json.model.DmfAutoConfirmation;
 import org.eclipse.hawkbit.dmf.json.model.DmfCreateThing;
 import org.eclipse.hawkbit.dmf.json.model.DmfUpdateMode;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
@@ -75,6 +78,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
     private final AmqpMessageDispatcherService amqpMessageDispatcherService;
 
     private ControllerManagement controllerManagement;
+    private ConfirmationManagement confirmationManagement;
 
     private final EntityFactory entityFactory;
 
@@ -101,18 +105,21 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
      *            the system Security Context
      * @param tenantConfigurationManagement
      *            the tenant configuration Management
+     * @param confirmationManagement
+     *            the confirmation management
      */
     public AmqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement, final ConfirmationManagement confirmationManagement) {
         super(rabbitTemplate);
         this.amqpMessageDispatcherService = amqpMessageDispatcherService;
         this.controllerManagement = controllerManagement;
         this.entityFactory = entityFactory;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.confirmationManagement = confirmationManagement;
     }
 
     /**
@@ -314,6 +321,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         case UPDATE_ATTRIBUTES:
             updateAttributes(message);
             break;
+        case UPDATE_AUTO_CONFIRM:
+            setAutoConfirmationState(message);
+            break;
         default:
             logAndThrowMessageError(message, "Got event without appropriate topic.");
             break;
@@ -331,7 +341,23 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
 
         controllerManagement.updateControllerAttributes(thingId, attributeUpdate.getAttributes(),
-                getUpdateMode(attributeUpdate));
+              getUpdateMode(attributeUpdate));
+    }
+
+    private void setAutoConfirmationState(final Message message) {
+        final DmfAutoConfirmation autoConfirmation = convertMessage(message, DmfAutoConfirmation.class);
+        final String thingId = getStringHeaderKey(message, MessageHeaderKey.THING_ID, THING_ID_NULL);
+        if (autoConfirmation.isEnabled()) {
+            LOG.debug("Activate auto-confirmation for device {} using DMF. Initiator: {}. Remark: {}", thingId,
+                    autoConfirmation.getInitiator(), autoConfirmation.getRemark());
+            final String remark = autoConfirmation.getRemark() == null
+                    ? "Activated using Device Management Federation API."
+                    : autoConfirmation.getRemark();
+            controllerManagement.activateAutoConfirmation(thingId, autoConfirmation.getInitiator(), remark);
+        } else {
+            LOG.debug("Deactivate auto-confirmation for device {} using DMF.", thingId);
+            controllerManagement.deactivateAutoConfirmation(thingId);
+        }
     }
 
     /**
@@ -352,14 +378,27 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
         }
 
         final Status status = mapStatus(message, actionUpdateStatus, action);
-        final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
-                .messages(messages);
 
-        final Action updatedAction = (Status.CANCELED == status)
-                ? controllerManagement.addCancelActionStatus(actionStatus)
-                : controllerManagement.addUpdateActionStatus(actionStatus);
+        final Action updatedAction;
 
-        if (shouldTargetProceed(updatedAction)) {
+        if (actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
+            updatedAction = confirmationManagement.confirmAction(action.getId(),
+                    actionUpdateStatus.getCode().orElse(null), messages);
+        } else if (actionUpdateStatus.getActionStatus() == DmfActionStatus.DENIED) {
+            updatedAction = confirmationManagement.denyAction(action.getId(), actionUpdateStatus.getCode().orElse(null),
+                    messages);
+        } else {
+            final ActionStatusCreate actionStatus = entityFactory.actionStatus().create(action.getId()).status(status)
+                    .messages(messages);
+            actionUpdateStatus.getCode().ifPresent(code -> {
+                actionStatus.code(code);
+                actionStatus.message("Device reported status code: " + code);
+            });
+            updatedAction = (Status.CANCELED == status) ? controllerManagement.addCancelActionStatus(actionStatus)
+                    : controllerManagement.addUpdateActionStatus(actionStatus);
+        }
+
+        if (shouldTargetProceed(updatedAction) || actionUpdateStatus.getActionStatus() == DmfActionStatus.CONFIRMED) {
             sendUpdateCommandToTarget(action.getTarget());
         }
     }
@@ -386,6 +425,7 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             status = Status.RETRIEVED;
             break;
         case RUNNING:
+        case CONFIRMED:
             status = Status.RUNNING;
             break;
         case CANCELED:
@@ -405,6 +445,9 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             break;
         case CANCEL_REJECTED:
             status = handleCancelRejectedState(message, action);
+            break;
+        case DENIED:
+            status = Status.WAIT_FOR_CONFIRMATION;
             break;
         default:
             logAndThrowMessageError(message, "Status for action does not exisit.");

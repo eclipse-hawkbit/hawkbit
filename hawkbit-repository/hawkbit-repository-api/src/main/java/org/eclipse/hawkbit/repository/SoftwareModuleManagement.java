@@ -53,7 +53,7 @@ public interface SoftwareModuleManagement
      * @param typeId
      *            to filter the result by type
      * @return number of found {@link SoftwareModule}s
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module type with given ID does not exist
      */
@@ -62,19 +62,19 @@ public interface SoftwareModuleManagement
 
     /**
      * Creates a list of software module meta data entries.
-     * 
+     *
      * @param metadata
      *            the meta data entries to create
-     * 
+     *
      * @return the updated or created software module meta data entries
-     * 
+     *
      * @throws EntityAlreadyExistsException
      *             in case one of the meta data entry already exists for the
      *             specific key
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleMetadata}
      *             entries is exceeded for the addressed {@link SoftwareModule}
@@ -84,19 +84,19 @@ public interface SoftwareModuleManagement
 
     /**
      * Creates or updates a single software module meta data entry.
-     * 
+     *
      * @param metadata
      *            the meta data entry to create
-     * 
+     *
      * @return the updated or created software module meta data entry
-     * 
+     *
      * @throws EntityAlreadyExistsException
      *             in case the meta data entry already exists for the specific
      *             key
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
-     * 
+     *
      * @throws AssignmentQuotaExceededException
      *             if the maximum number of {@link SoftwareModuleMetadata}
      *             entries is exceeded for the addressed {@link SoftwareModule}
@@ -111,7 +111,7 @@ public interface SoftwareModuleManagement
      *            where meta data has to be deleted
      * @param key
      *            of the metda data element
-     * 
+     *
      * @throws EntityNotFoundException
      *             of module or metadata entry does not exist
      */
@@ -120,15 +120,15 @@ public interface SoftwareModuleManagement
 
     /**
      * Returns all modules assigned to given {@link DistributionSet}.
-     * 
+     *
      * @param pageable
      *            the page request to page the result set
      * @param setId
      *            to search for
-     * 
+     *
      * @return all {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
-     * 
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -137,13 +137,13 @@ public interface SoftwareModuleManagement
 
     /**
      * Returns count of all modules assigned to given {@link DistributionSet}.
-     * 
+     *
      * @param setId
      *            to search for
-     * 
+     *
      * @return count of {@link SoftwareModule}s that are assigned to given
      *         {@link DistributionSet}.
-     * 
+     *
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
@@ -161,9 +161,9 @@ public interface SoftwareModuleManagement
      *            to be filtered as "like" on {@link SoftwareModule#getName()}
      * @param typeId
      *            to be filtered as "like" on {@link SoftwareModule#getType()}
-     * 
+     *
      * @return the page of found {@link SoftwareModule}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if given software module type does not exist
      */
@@ -179,9 +179,9 @@ public interface SoftwareModuleManagement
      *            of the {@link SoftwareModule}
      * @param typeId
      *            of the {@link SoftwareModule}
-     * 
+     *
      * @return the found {@link SoftwareModule}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module type with given ID does not exist
      */
@@ -196,7 +196,7 @@ public interface SoftwareModuleManagement
      * @param key
      *            of the meta data element
      * @return the found SoftwareModuleMetadata or {@code null} if not exits
-     * 
+     *
      * @throws EntityNotFoundException
      *             is module with given ID does not exist
      */
@@ -205,7 +205,7 @@ public interface SoftwareModuleManagement
 
     /**
      * Finds all meta data by the given software module id.
-     * 
+     *
      * @param pageable
      *            the page request to page the result
      * @param moduleId
@@ -213,7 +213,7 @@ public interface SoftwareModuleManagement
      *
      * @return a paged result of all meta data entries for a given software
      *         module id
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      */
@@ -221,9 +221,23 @@ public interface SoftwareModuleManagement
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long moduleId);
 
     /**
+     * Counts all meta data by the given software module id.
+     *
+     * @param moduleId
+     *            the software module id to retrieve the meta data count from
+     *
+     * @return count of all meta data entries for a given software module id
+     *
+     * @throws EntityNotFoundException
+     *             if software module with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    long countMetaDataBySoftwareModuleId(long moduleId);
+
+    /**
      * Finds all meta data by the given software module id where
      * {@link SoftwareModuleMetadata#isTargetVisible()}.
-     * 
+     *
      * @param pageable
      *            the page request to page the result
      * @param moduleId
@@ -231,7 +245,7 @@ public interface SoftwareModuleManagement
      *
      * @return a paged result of all meta data entries for a given software
      *         module id
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      */
@@ -241,7 +255,7 @@ public interface SoftwareModuleManagement
 
     /**
      * Finds all meta data by the given software module id.
-     * 
+     *
      * @param pageable
      *            the page request to page the result
      * @param moduleId
@@ -251,14 +265,14 @@ public interface SoftwareModuleManagement
      *
      * @return a paged result of all meta data entries for a given software
      *         module id
-     * 
+     *
      * @throws RSQLParameterUnsupportedFieldException
      *             if a field in the RSQL string is used but not provided by the
      *             given {@code fieldNameProvider}
-     * 
+     *
      * @throws RSQLParameterSyntaxException
      *             if the RSQL syntax is wrong
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module with given ID does not exist
      */
@@ -272,9 +286,12 @@ public interface SoftwareModuleManagement
      * search text and {@link SoftwareModule#getType()} that are not marked as
      * deleted and sort them by means of given distribution set related modules
      * on top of the list.
-     * 
-     * After that the modules are sorted by {@link SoftwareModule#getName()} and
-     * {@link SoftwareModule#getVersion()} in ascending order.
+     *
+     * After that the modules are sorted by by default by
+     * {@link SoftwareModule#getName()} and {@link SoftwareModule#getVersion()}
+     * in ascending order if no other sorting is provided in {@link Pageable}.
+     * If sorting is provided in {@link Pageable} parameter the provided sorting
+     * is used.
      *
      * @param pageable
      *            page parameter
@@ -284,9 +301,9 @@ public interface SoftwareModuleManagement
      *            filtered as "like" on {@link SoftwareModule#getName()}
      * @param typeId
      *            filtered as "equal" on {@link SoftwareModule#getType()}
-     * 
+     *
      * @return the page of found {@link SoftwareModule}
-     * 
+     *
      * @throws EntityNotFoundException
      *             if given software module type does not exist
      */
@@ -302,9 +319,9 @@ public interface SoftwareModuleManagement
      *            page parameters
      * @param typeId
      *            to be filtered on
-     * 
+     *
      * @return the found {@link SoftwareModule}s
-     * 
+     *
      * @throws EntityNotFoundException
      *             if software module type with given ID does not exist
      */
@@ -313,12 +330,12 @@ public interface SoftwareModuleManagement
 
     /**
      * Updates a distribution set meta data value if corresponding entry exists.
-     * 
+     *
      * @param update
      *            the meta data entry to be updated
-     * 
+     *
      * @return the updated meta data entry
-     * 
+     *
      * @throws EntityNotFoundException
      *             in case the meta data entry does not exists and cannot be
      *             updated

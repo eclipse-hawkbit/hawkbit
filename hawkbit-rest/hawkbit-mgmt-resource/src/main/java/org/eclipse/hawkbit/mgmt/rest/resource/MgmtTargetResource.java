@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -31,13 +32,17 @@ import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentR
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtDistributionSetAssignments;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAttributes;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirm;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -45,6 +50,8 @@ import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -69,22 +76,30 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     private final TargetManagement targetManagement;
 
+    private final ConfirmationManagement confirmationManagement;
+
     private final DeploymentManagement deploymentManagement;
 
     private final EntityFactory entityFactory;
 
+    private final TenantConfigHelper tenantConfigHelper;
+
     MgmtTargetResource(final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final EntityFactory entityFactory) {
+            final ConfirmationManagement confirmationManagement, final EntityFactory entityFactory,
+            final SystemSecurityContext systemSecurityContext,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.targetManagement = targetManagement;
         this.deploymentManagement = deploymentManagement;
+        this.confirmationManagement = confirmationManagement;
         this.entityFactory = entityFactory;
+        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
     public ResponseEntity<MgmtTarget> getTarget(@PathVariable("targetId") final String targetId) {
         final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
         // to single response include poll status
-        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(findTarget, tenantConfigHelper);
         MgmtTargetMapper.addPollStatus(findTarget, response);
         MgmtTargetMapper.addTargetLinks(response);
 
@@ -106,15 +121,14 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Slice<Target> findTargetsAll;
         final long countTargetsAll;
         if (rsqlParam != null) {
-            final Page<Target> findTargetPage = this.targetManagement.findByRsql(pageable, rsqlParam);
-            countTargetsAll = findTargetPage.getTotalElements();
-            findTargetsAll = findTargetPage;
+            findTargetsAll = targetManagement.findByRsql(pageable, rsqlParam);
+            countTargetsAll = targetManagement.countByRsql(rsqlParam);
         } else {
-            findTargetsAll = this.targetManagement.findAll(pageable);
-            countTargetsAll = this.targetManagement.count();
+            findTargetsAll = targetManagement.findAll(pageable);
+            countTargetsAll = targetManagement.count();
         }
 
-        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent());
+        final List<MgmtTarget> rest = MgmtTargetMapper.toResponse(findTargetsAll.getContent(), tenantConfigHelper);
         return ResponseEntity.ok(new PagedList<>(rest, countTargetsAll));
     }
 
@@ -124,7 +138,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Collection<Target> createdTargets = this.targetManagement
                 .create(MgmtTargetMapper.fromRequest(entityFactory, targets));
         LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
-        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets), HttpStatus.CREATED);
+        return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper),
+                HttpStatus.CREATED);
     }
 
     @Override
@@ -144,7 +159,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
                 .requestAttributes(targetRest.isRequestAttributes()));
 
-        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget);
+        final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
         MgmtTargetMapper.addTargetLinks(response);
 
@@ -165,7 +180,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId, @RequestBody final MgmtId targetTypeId) {
+    public ResponseEntity<Void> assignTargetType(@PathVariable("targetId") final String targetId,
+            @RequestBody final MgmtId targetTypeId) {
         this.targetManagement.assignType(targetId, targetTypeId.getId());
         return ResponseEntity.ok().build();
     }
@@ -304,14 +320,18 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()
                     .map(dsAssignment -> new SimpleEntry<String, Long>(targetId, dsAssignment.getId()))
                     .collect(Collectors.toList());
-            return ResponseEntity.ok(MgmtDistributionSetMapper.toResponse(
-                    deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
+            return ResponseEntity.ok(MgmtDistributionSetMapper
+                    .toResponse(deploymentManagement.offlineAssignedDistributionSets(offlineAssignments)));
         }
         findTargetWithExceptionIfNotFound(targetId);
 
-        final List<DeploymentRequest> deploymentRequests = dsAssignments.stream()
-                .map(dsAssignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(dsAssignment, targetId))
-                .collect(Collectors.toList());
+        final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
+            final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
+                    ? tenantConfigHelper.isConfirmationFlowEnabled()
+                    : dsAssignment.isConfirmationRequired();
+            return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
+                    .setConfirmationRequired(isConfirmationRequired).build();
+        }).collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deploymentManagement
                 .assignDistributionSets(deploymentRequests);
@@ -414,6 +434,32 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final List<TargetMetadata> created = targetManagement.createMetaData(targetId,
                 MgmtTargetMapper.fromRequestTargetMetadata(metadataRest, entityFactory));
         return new ResponseEntity<>(MgmtTargetMapper.toResponseTargetMetadata(created), HttpStatus.CREATED);
+    }
+
+    @Override
+    public ResponseEntity<MgmtTargetAutoConfirm> getAutoConfirmStatus(@PathVariable("targetId") final String targetId) {
+        final Target findTarget = findTargetWithExceptionIfNotFound(targetId);
+        final MgmtTargetAutoConfirm state = MgmtTargetMapper.getTargetAutoConfirmResponse(findTarget);
+        return ResponseEntity.ok(state);
+    }
+
+    @Override
+    public ResponseEntity<Void> activateAutoConfirm(@PathVariable("targetId") final String targetId,
+            @RequestBody(required = false) final MgmtTargetAutoConfirmUpdate update) {
+        final String initiator = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getInitiator);
+        final String remark = getNullIfEmpty(update, MgmtTargetAutoConfirmUpdate::getRemark);
+        confirmationManagement.activateAutoConfirmation(targetId, initiator, remark);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private <T, R> R getNullIfEmpty(final T object, final Function<T, R> extractMethod) {
+        return object == null ? null : extractMethod.apply(object);
+    }
+
+    @Override
+    public ResponseEntity<Void> deactivateAutoConfirm(@PathVariable("targetId") final String targetId) {
+        confirmationManagement.deactivateAutoConfirmation(targetId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }
