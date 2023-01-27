@@ -52,7 +52,8 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
     @Description("Handles the GET request of retrieving all actions. Required Permission: READ_TARGET.")
     public void getActions() throws Exception {
         enableMultiAssignments();
-        generateRolloutActionForTarget(targetId);
+        final Action action = generateRolloutActionForTarget(targetId);
+        provideCodeFeedback(action, 200);
 
         mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)).andExpect(status().isOk())
                 .andDo(MockMvcResultPrinter.print())
@@ -74,6 +75,8 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
                         fieldWithPath("content[].detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
                                 .attributes(key("value").value(
                                         "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                        optionalRequestFieldWithPath("content[].lastStatusCode")
+                                .description(MgmtApiModelProperties.ACTION_LAST_STATUS_CODE).type("Integer"),
                         fieldWithPath("content[]._links").description(MgmtApiModelProperties.LINK_TO_ACTION),
                         fieldWithPath("content[].id").description(MgmtApiModelProperties.ACTION_ID),
                         fieldWithPath("content[].weight").description(MgmtApiModelProperties.ACTION_WEIGHT),

@@ -107,8 +107,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                         fieldWithPath("content[].autoConfirmActive")
                                 .description(MgmtApiModelProperties.AUTO_CONFIRM_ACTIVE),
                         fieldWithPath("content[].installedAt").description(MgmtApiModelProperties.INSTALLED_AT),
-                        fieldWithPath("content[].lastModifiedAt").description(
-                                ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
+                        fieldWithPath("content[].lastModifiedAt")
+                                .description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT).type("Number"),
                         fieldWithPath("content[].lastModifiedBy")
                                 .description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY).type("String"),
                         fieldWithPath("content[].ipAddress").description(MgmtApiModelProperties.IP_ADDRESS)
@@ -362,6 +362,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     public void getActionFromTarget() throws Exception {
         enableMultiAssignments();
         final Action action = generateRolloutActionForTarget(targetId, true, true);
+        provideCodeFeedback(action, 200);
+        
         assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
                 .isEqualTo(ActionType.TIMEFORCED);
 
@@ -390,6 +392,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
                                         .attributes(key("value").value(
                                                 "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                                optionalRequestFieldWithPath("lastStatusCode")
+                                        .description(MgmtApiModelProperties.ACTION_LAST_STATUS_CODE).type("Integer"),
                                 fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
                                 fieldWithPath("rolloutName").description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
                                 fieldWithPath("_links.self").ignored(),
@@ -406,6 +410,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         enableMultiAssignments();
         final Action action = generateActionForTarget(targetId, true, true, getTestSchedule(2), getTestDuration(1),
                 getTestTimeZone());
+        provideCodeFeedback(action, 200);
 
         mockMvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/{actionId}", targetId, action.getId()))
@@ -432,6 +437,8 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
                                         .attributes(key("value").value(
                                                 "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                                optionalRequestFieldWithPath("lastStatusCode")
+                                        .description(MgmtApiModelProperties.ACTION_LAST_STATUS_CODE).type("Integer"),
                                 fieldWithPath("maintenanceWindow")
                                         .description(MgmtApiModelProperties.MAINTENANCE_WINDOW),
                                 fieldWithPath("maintenanceWindow.schedule")
@@ -1003,11 +1010,6 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
     private Action generateRolloutActionForTarget(final String knownControllerId, final boolean inSync,
             final boolean timeforced) throws Exception {
         return generateActionForTarget(knownControllerId, inSync, timeforced, null, null, null, true);
-    }
-
-    private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
-            final boolean timeforced) throws Exception {
-        return generateActionForTarget(knownControllerId, inSync, timeforced, null, null, null);
     }
 
     private Action generateActionForTarget(final String knownControllerId, final boolean inSync,
