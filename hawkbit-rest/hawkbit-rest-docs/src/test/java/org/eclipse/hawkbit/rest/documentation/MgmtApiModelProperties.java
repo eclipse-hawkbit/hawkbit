@@ -162,6 +162,8 @@ public final class MgmtApiModelProperties {
 
     public static final String ACTION_STATUS_CODE = "(Optional) Code provided by the device related to the status.";
 
+    public static final String ACTION_LAST_STATUS_CODE = "(Optional) Code provided as part of the last status update that was sent by the device.";
+
     public static final String ACTION_STATUS_LIST = "List of action status.";
 
     public static final String ACTION_EXECUTION_STATUS = "Status of action.";
