@@ -44,7 +44,7 @@ import org.springframework.orm.jpa.vendor.EclipseLinkJpaDialect;
  * 3.a) here a cause might be an {@link SQLException} which might be mappable by
  * {@link SQLStateSQLExceptionTranslator} or
  * <p>
- * 3.b.) the the cause is not an {@link SQLException} and as a result cannot be
+ * 3.b.) the cause is not an {@link SQLException} and as a result cannot be
  * mapped.
  *
  */
