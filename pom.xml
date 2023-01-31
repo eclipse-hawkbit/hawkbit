@@ -171,7 +171,7 @@
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.1.6</cron-utils.version>
       <jsoup.version>1.15.3</jsoup.version>
-      <allure.version>2.13.6</allure.version>
+      <allure.version>2.13.10</allure.version>
       <eclipselink.version>2.7.11</eclipselink.version>
       <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
