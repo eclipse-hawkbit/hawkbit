@@ -145,7 +145,7 @@
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
-      <vaadin.version>8.14.1</vaadin.version>
+      <vaadin.version>8.19.0</vaadin.version>
       <vaadin.spring.version>3.2.1</vaadin.spring.version>
       <vaadin.spring.addon.version>2.0.0.RELEASE</vaadin.spring.addon.version>
       <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
