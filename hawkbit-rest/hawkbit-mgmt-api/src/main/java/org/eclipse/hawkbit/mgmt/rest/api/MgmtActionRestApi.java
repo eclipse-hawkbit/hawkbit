@@ -59,12 +59,10 @@ public interface MgmtActionRestApi {
      * Handles the GET request of retrieving a specific Action by <code>actionId</code>
      *
      * @param actionId
-     *            to load
+     *
      * @return the action
      */
-    @GetMapping(value = "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
-        MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(
-        @PathVariable("actionId") Long actionId,
-        @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
+        @PathVariable("actionId") Long actionId);
 }

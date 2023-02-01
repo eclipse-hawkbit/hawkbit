@@ -64,14 +64,12 @@ public class MgmtActionResource implements MgmtActionRestApi {
     }
 
     @Override
-    public ResponseEntity<MgmtAction> getAction(final Long actionId, final String representationModeParam) {
+    public ResponseEntity<MgmtAction> getAction(final Long actionId) {
 
        final Action action = deploymentManagement.findAction(actionId)
             .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
-       final MgmtRepresentationMode representationMode = getRepresentationModeFromString(representationModeParam);
-
-       return ResponseEntity.ok(MgmtActionMapper.toResponse(action, representationMode));
+       return ResponseEntity.ok(MgmtActionMapper.toResponse(action, MgmtRepresentationMode.FULL));
     }
 
     private MgmtRepresentationMode getRepresentationModeFromString(final String representationModeParam) {
