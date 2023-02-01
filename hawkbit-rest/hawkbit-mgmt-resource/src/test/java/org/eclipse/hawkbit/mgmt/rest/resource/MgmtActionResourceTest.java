@@ -54,9 +54,13 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_FIELD_SIZE = ".size";
     private static final String JSON_PATH_FIELD_TOTAL = ".total";
 
+    private static final String JSON_PATH_FIELD_ID = ".id";
+
     private static final String JSON_PATH_PAGED_LIST_CONTENT = JSON_PATH_ROOT + JSON_PATH_FIELD_CONTENT;
     private static final String JSON_PATH_PAGED_LIST_SIZE = JSON_PATH_ROOT + JSON_PATH_FIELD_SIZE;
     private static final String JSON_PATH_PAGED_LIST_TOTAL = JSON_PATH_ROOT + JSON_PATH_FIELD_TOTAL;
+
+    private static final String JSON_PATH_ACTION_ID = JSON_PATH_ROOT + JSON_PATH_FIELD_ID;
 
     @Test
     @Description("Verifies that actions can be filtered based on action status.")
@@ -381,10 +385,6 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
         final Long actionId = actions.get(0).getId();
 
-        // ensure specific action cannot be accessed via the actions resource
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + actionId))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
-
         // not allowed methods
         mvc.perform(post(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
@@ -392,6 +392,28 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isMethodNotAllowed());
         mvc.perform(delete(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isMethodNotAllowed());
+    }
+
+    @Test
+    @Description("Verifies that the correct action is returned")
+    void shouldRetrieveCorrectActionById() throws Exception {
+        final String knownTargetId = "targetId";
+
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+        final Long actionId = actions.get(0).getId();
+
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + actionId))
+            .andDo(MockMvcResultPrinter.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath(JSON_PATH_ACTION_ID, equalTo(actionId.intValue())));
+    }
+
+    @Test
+    @Description("Verifies that NOT_FOUND is returned when there is no such action.")
+    void requestActionThatDoesNotExistsLeadsToNotFound() throws Exception {
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + 101))
+            .andDo(MockMvcResultPrinter.print())
+            .andExpect(status().isNotFound());
     }
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {
