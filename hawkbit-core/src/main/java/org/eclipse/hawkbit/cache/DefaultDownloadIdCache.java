@@ -20,7 +20,7 @@ import org.springframework.cache.CacheManager;
  */
 public class DefaultDownloadIdCache implements DownloadIdCache {
 
-    static final String DOWNLOAD_ID_CACHE = "DowonloadIdCache";
+    static final String DOWNLOAD_ID_CACHE = "DownloadIdCache";
 
     private final CacheManager cacheManager;
 

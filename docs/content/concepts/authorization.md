@@ -87,13 +87,13 @@ An example configuration is given below.
 
 ### Permission Matrix for example uses cases that need more than one permission
 
-Use Case                                                                   | Needed permissions
--------------------------------------------------------------------------- | ---------------------------------------------------------------------------
-Search _targets_ by installed or assigned _distribution set_               | READ_REPOSITORY, READ_TARGET
-Assign _DS_ to a _target_                                                  | READ_REPOSITORY, UPDATE_TARGET
-Assign DS to target through a _Rollout_, i.e. _Rollout_ creation and start | READ_REPOSITORY, READ_TARGET, READ_ROLLOUT, CREATE_ROLLOUT, HANDLE_ROLLOUT
-Read _Rollout_ status including its _deployment groups_                    | READ_REPOSITORY, READ_ROLLOUT
-Checks _targets_ inside _Rollout deployment group_                         | READ_REPOSITORY, READ_TARGET, READ_ROLLOUT
+| Use Case                                                                   | Needed permissions                                                         |
+|----------------------------------------------------------------------------|----------------------------------------------------------------------------|
+| Search _targets_ by installed or assigned _distribution set_               | READ_REPOSITORY, READ_TARGET                                               |
+| Assign _DS_ to a _target_                                                  | READ_REPOSITORY, UPDATE_TARGET                                             |
+| Assign DS to target through a _Rollout_, i.e. _Rollout_ creation and start | READ_REPOSITORY, READ_TARGET, READ_ROLLOUT, CREATE_ROLLOUT, HANDLE_ROLLOUT |
+| Read _Rollout_ status including its _deployment groups_                    | READ_REPOSITORY, READ_ROLLOUT                                              |
+| Checks _targets_ inside _Rollout deployment group_                         | READ_REPOSITORY, READ_TARGET, READ_ROLLOUT                                 |
 
 ## Device Management Federation API
 

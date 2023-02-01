@@ -44,7 +44,7 @@ Examples:
 
 ### Test documentation
 
-Please documented the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
+Please document the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
 
 All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and **@Story** annotations in the following format:
 

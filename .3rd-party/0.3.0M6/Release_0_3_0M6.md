@@ -3,7 +3,7 @@
 ## Eclipse CQs - Provided/compile
 
 | Group ID                             | Artifact ID                            | Version        | CQ                                                               |
-| ------------------------------------ | -------------------------------------- | -------------- | ---------------------------------------------------------------- |
+|--------------------------------------|----------------------------------------|----------------|------------------------------------------------------------------|
 | ch.qos.logback                       | logback-classic                        | 1.2.3          | [CQ17369](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17369) |
 | ch.qos.logback                       | logback-core                           | 1.2.3          | [CQ17370](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=17370) |
 | com.cronutils                        | cron-utils                             | 5.0.5          | [CQ15762](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=15762) |
@@ -66,7 +66,7 @@
 | org.ow2.asm                          | asm-commons                            | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
 | org.ow2.asm                          | asm                                    | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
 | org.ow2.asm                          | asm-tree                               | 6.2            | [CQ18183](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18183) |
-| org.postgresql                       | postgresql                             | 42.2.5         |  CQ17092 Piggybacked 
+| org.postgresql                       | postgresql                             | 42.2.5         | CQ17092 Piggybacked                                              |
 | org.reactivestreams                  | reactive-streams                       | 1.0.2          | [CQ18184](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18184) |
 | org.slf4j                            | jul-to-slf4j                           | 1.7.25         | [CQ12937](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12937) |
 | org.slf4j                            | slf4j-api                              | 1.7.25         | [CQ12940](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=12940) |
@@ -132,7 +132,7 @@
 CQ: [CQ18804](https://dev.eclipse.org/ipzilla/show_bug.cgi?id=18804)
 
 | Group ID                        | Artifact ID                      | Version              |
-| ------------------------------- | -------------------------------- | -------------------- |
+|---------------------------------|----------------------------------|----------------------|
 | ant                             | ant                              | 1.6.5                |
 | colt                            | colt                             | 1.2.0                |
 | com.fasterxml.jackson.module    | jackson-module-jaxb-annotations  | 2.9.8                |

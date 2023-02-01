@@ -104,7 +104,7 @@ Software rollout in large scale, rollout status overview and rollout management.
   - Selection of _distribution set_
   - Auto-splitting of the input target list based on _group number_ defined
   - _Trigger threshold_ to define the percentage of installation to be completed , to trigger the start of next group
-  - _Error threshold_ defines the percentage of error tolerance of a group before calling for a emergency shutdown of a rollout
+  - _Error threshold_ defines the percentage of error tolerance of a group before calling for an emergency shutdown of a rollout
 
 ![Rollout Management view](../images/ui/rollout_mgmt.png)
 
@@ -141,17 +141,17 @@ The basic syntax to filter is: `field<basic_operator>value <composite_operator> 
 
 ### Examples
 
-Custom query                                                                               | Description
------------------------------------------------------------------------------------------- | -----------------------------------------------------------------------------------------------------------------------------------------------------
-updatestatus==error                                                                        | Gives all targets in ‘error’ state.
-controllerId!=192.168.2.42                                                                 | Gives all targets that do not have the controllerId 192.168.2.42.
-name==\*CCU\*                                                                              | Gives all targets which contain the term ‘CCU’ in there name.
-name==\*CCU\* or description==\*CCU\*                                                      | Gives all targets that either have the term ‘CCU’ in their name or their description.
-name==\*SHC\* and description==\*SHC\*                                                     | Gives all targets that have the term SHC in their name and their description.
-name==CCU* and updatestatus==pending                                                       | Gives all targets with their name starting with ‘CCU’ and which are in ‘pending’ state.
-(assignedds.name==‘ECU-DS’ and description==test) or updatestatus!=error                   | Gives all targets which are either assigned to ‘ECU-DS’ and have description equals to ‘test’ or which are not in error status.
-(updatestatus!=In\_sync or updatestatus!=error) and name==\*SHC1\*                         | Gives all targets that do not have the update status In\_sync or error and that contains the term SHC1 in their name.
-(updatestatus!=error or updatestatus!=pending) and (name==\*CCU\* or description==\*CCU\*) | Gives all targets that either have the term ‘CCU’ in their name or their description and that either have the _update status_ not in state error or pending.
+| Custom query                                                                               | Description                                                                                                                                                  |
+|--------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| updatestatus==error                                                                        | Gives all targets in ‘error’ state.                                                                                                                          |
+| controllerId!=192.168.2.42                                                                 | Gives all targets that do not have the controllerId 192.168.2.42.                                                                                            |
+| name==\*CCU\*                                                                              | Gives all targets which contain the term ‘CCU’ in there name.                                                                                                |
+| name==\*CCU\* or description==\*CCU\*                                                      | Gives all targets that either have the term ‘CCU’ in their name or their description.                                                                        |
+| name==\*SHC\* and description==\*SHC\*                                                     | Gives all targets that have the term SHC in their name and their description.                                                                                |
+| name==CCU* and updatestatus==pending                                                       | Gives all targets with their name starting with ‘CCU’ and which are in ‘pending’ state.                                                                      |
+| (assignedds.name==‘ECU-DS’ and description==test) or updatestatus!=error                   | Gives all targets which are either assigned to ‘ECU-DS’ and have description equals to ‘test’ or which are not in error status.                              |
+| (updatestatus!=In\_sync or updatestatus!=error) and name==\*SHC1\*                         | Gives all targets that do not have the update status In\_sync or error and that contains the term SHC1 in their name.                                        |
+| (updatestatus!=error or updatestatus!=pending) and (name==\*CCU\* or description==\*CCU\*) | Gives all targets that either have the term ‘CCU’ in their name or their description and that either have the _update status_ not in state error or pending. |
 
 ![Target Filter Management view](../images/ui/target_filter.png)
 
