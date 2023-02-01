@@ -64,7 +64,7 @@ public interface ArtifactRepository {
     void deleteBySha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 
     /**
-     * Retrieves a {@link AbstractDbArtifact} from the store by it's SHA1 hash.
+     * Retrieves a {@link AbstractDbArtifact} from the store by its SHA1 hash.
      * 
      * @param tenant
      *            the tenant to store the artifact
@@ -93,7 +93,7 @@ public interface ArtifactRepository {
      * @param sha1Hash
      *            the sha1-hash of the file to lookup.
      *
-     * @return the boolean whether the atrifact exists or not
+     * @return the boolean whether the artifact exists or not
      */
     boolean existsByTenantAndSha1(@NotEmpty String tenant, @NotEmpty String sha1Hash);
 }

@@ -104,7 +104,7 @@ Software rollout in large scale, rollout status overview and rollout management.
   - Selection of _distribution set_
   - Auto-splitting of the input target list based on _group number_ defined
   - _Trigger threshold_ to define the percentage of installation to be completed , to trigger the start of next group
-  - _Error threshold_ defines the percentage of error tolerance of a group before calling for a emergency shutdown of a rollout
+  - _Error threshold_ defines the percentage of error tolerance of a group before calling for an emergency shutdown of a rollout
 
 ![Rollout Management view](../images/ui/rollout_mgmt.png)
 
