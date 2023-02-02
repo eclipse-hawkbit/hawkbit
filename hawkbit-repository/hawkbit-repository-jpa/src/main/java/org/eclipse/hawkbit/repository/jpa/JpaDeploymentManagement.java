@@ -391,8 +391,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         targetEntitiesIdsChunks.forEach(this::cancelInactiveScheduledActionsForTargets);
         setAssignedDistributionSetAndTargetUpdateStatus(assignmentStrategy, distributionSetEntity,
                 targetEntitiesIdsChunks);
-        final Map<TargetWithActionType, JpaAction> assignedActions = createActions(initiatedBy, targetsWithActionType, targetEntities,
-                assignmentStrategy, distributionSetEntity);
+        final Map<TargetWithActionType, JpaAction> assignedActions = createActions(initiatedBy, targetsWithActionType,
+                targetEntities, assignmentStrategy, distributionSetEntity);
         // create initial action status when action is created so we remember
         // the initial running status because we will change the status
         // of the action itself and with this action status we have a nicer
@@ -510,7 +510,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final boolean isConfirmationRequired) {
         if (actionStatus.getStatus() == Status.WAIT_FOR_CONFIRMATION) {
             if (action.getStatus().equals(Status.RUNNING)) {
-                // action is in RUNNING state only if it's confirmed during assignment already
+                // action is in RUNNING state only if it's confirmed during
+                // assignment already
                 if (!isConfirmationRequired) {
                     // confirmation given on assignment dialog
                     actionStatus.addMessage(
@@ -689,9 +690,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return Collections.unmodifiableList(savedActions);
     }
 
-    private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions){
+    private void closeOrCancelOpenDeviceActions(final List<JpaAction> actions) {
         final List<Long> targetIds = actions.stream().map(JpaAction::getTarget).map(Target::getId)
-              .collect(Collectors.toList());
+                .collect(Collectors.toList());
         if (isActionsAutocloseEnabled()) {
             onlineDsAssignmentStrategy.closeObsoleteUpdateActions(targetIds);
         } else {
@@ -741,7 +742,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
-        return actionRepository.getById(actionId);
+        // TODO the exists call is only a workaround to avoid the
+        // javax.persistence.EntityNotFoundException
+        if (actionRepository.existsById(actionId)) {
+            return actionRepository.getById(actionId);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -783,6 +790,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
         return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
     }
+
     @Override
     public int getWeightConsideringDefault(final Action action) {
         return super.getWeightConsideringDefault(action);
@@ -1006,7 +1014,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private boolean isConfirmationFlowEnabled() {
         return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
-            .isConfirmationFlowEnabled();
+                .isConfirmationFlowEnabled();
     }
 
     private <T extends Serializable> T getConfigValue(final String key, final Class<T> valueType) {
