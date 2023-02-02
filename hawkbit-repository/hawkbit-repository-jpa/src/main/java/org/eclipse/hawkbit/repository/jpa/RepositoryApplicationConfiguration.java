@@ -391,6 +391,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
         processor.setValidator(Validation.byDefaultProvider().configure()
                 .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARAMETER_CONSTRAINT_OVERRIDE, "true")
+                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
+                        "true")
                 .buildValidatorFactory().getValidator());
         return processor;
     }
