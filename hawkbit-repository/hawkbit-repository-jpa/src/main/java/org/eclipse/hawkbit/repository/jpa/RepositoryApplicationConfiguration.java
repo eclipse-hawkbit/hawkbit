@@ -109,6 +109,7 @@ import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
+import org.hibernate.validator.BaseHibernateValidatorConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -389,8 +390,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     public MethodValidationPostProcessor methodValidationPostProcessor() {
         final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
         processor.setValidator(Validation.byDefaultProvider().configure()
-                .addProperty("hibernate.validator.allow_parameter_constraint_override", "true").buildValidatorFactory()
-                .getValidator());
+                .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARAMETER_CONSTRAINT_OVERRIDE, "true")
+                .buildValidatorFactory().getValidator());
         return processor;
     }
 

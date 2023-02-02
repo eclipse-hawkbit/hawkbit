@@ -142,6 +142,7 @@
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
+      <h2.version>1.4.200</h2.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- Vaadin versions - START -->
