@@ -19,10 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
-import org.springframework.cloud.stream.annotation.StreamMessageConverter;
+// import org.springframework.cloud.stream.annotation.StreamMessageConverter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,6 +59,11 @@ public class EventPublisherAutoConfiguration {
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
         return simpleApplicationEventMulticaster;
     }
+    
+    @Bean
+    public BusProperties busProperties() {
+        return new BusProperties();
+    }    
 
     /**
      * Bean for creating a singleton instance of the
@@ -138,7 +144,6 @@ public class EventPublisherAutoConfiguration {
          * @return the protostuff io message converter
          */
         @Bean
-        @StreamMessageConverter
         public MessageConverter busProtoBufConverter() {
             return new BusProtoStuffMessageConverter();
         }

@@ -104,7 +104,7 @@ public final class DataConversionHelper {
                         new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                                 artifact.getSha1Hash())),
                         ApiType.DDI, request.getURI())
-                .forEach(entry -> file.add(new Link(entry.getRef()).withRel(entry.getRel())));
+                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel())));
 
         return file;
 

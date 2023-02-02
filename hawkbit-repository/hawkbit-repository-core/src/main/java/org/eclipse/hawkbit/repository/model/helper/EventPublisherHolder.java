@@ -53,6 +53,6 @@ public final class EventPublisherHolder {
      *         when available or {@link BusProperties} otherwise.
      */
     public String getApplicationId() {
-        return serviceMatcher != null ? serviceMatcher.getServiceId() : bus.getId();
+        return serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId();
     }
 }

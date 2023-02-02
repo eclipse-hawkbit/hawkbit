@@ -210,7 +210,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent,
                                 total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
                                         tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
-                                        serviceMatcher != null ? serviceMatcher.getServiceId() : bus.getId())));
+                                        serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId())));
 
             }
         }
