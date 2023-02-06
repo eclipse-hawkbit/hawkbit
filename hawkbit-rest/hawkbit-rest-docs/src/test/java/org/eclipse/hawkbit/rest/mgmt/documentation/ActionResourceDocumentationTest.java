@@ -11,8 +11,7 @@ package org.eclipse.hawkbit.rest.mgmt.documentation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.payload.PayloadDocumentation.responseFields;
-import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
-import static org.springframework.restdocs.request.RequestDocumentation.requestParameters;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.key;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -101,6 +100,47 @@ public class ActionResourceDocumentationTest extends AbstractApiRestDocumentatio
                         parameterWithName("offset").description(ApiModelPropertiesGeneric.OFFSET),
                         parameterWithName("q").description(ApiModelPropertiesGeneric.FIQL),
                         parameterWithName("representation").description(MgmtApiModelProperties.REPRESENTATION_MODE))));
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving a specific action.")
+    public void getAction() throws Exception {
+        final Action action = generateRolloutActionForTarget(targetId);
+        provideCodeFeedback(action, 200);
+
+        assertThat(deploymentManagement.findAction(action.getId()).get().getActionType())
+            .isEqualTo(Action.ActionType.FORCED);
+
+        mockMvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", action.getId()))
+            .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print())
+            .andDo(this.document.document(
+                pathParameters(parameterWithName("actionId").description(ApiModelPropertiesGeneric.ITEM_ID)),
+                responseFields(fieldWithPath("createdBy").description(ApiModelPropertiesGeneric.CREATED_BY),
+                    fieldWithPath("createdAt").description(ApiModelPropertiesGeneric.CREATED_AT),
+                    fieldWithPath("id").description(MgmtApiModelProperties.ACTION_ID),
+                    fieldWithPath("lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY)
+                        .type("String"),
+                    fieldWithPath("lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT)
+                        .type("String"),
+                    fieldWithPath("type").description(MgmtApiModelProperties.ACTION_TYPE)
+                        .attributes(key("value").value("['update', 'cancel']")),
+                    fieldWithPath("forceType").description(MgmtApiModelProperties.ACTION_FORCE_TYPE)
+                        .attributes(key("value").value("['forced', 'soft', 'timeforced']")),
+                    fieldWithPath("status").description(MgmtApiModelProperties.ACTION_EXECUTION_STATUS)
+                        .attributes(key("value").value("['finished', 'pending']")),
+                    fieldWithPath("detailStatus").description(MgmtApiModelProperties.ACTION_DETAIL_STATUS)
+                        .attributes(key("value").value(
+                            "['finished', 'error', 'running', 'warning', 'scheduled', 'canceling', 'canceled', 'download', 'downloaded', 'retrieved', 'cancel_rejected']")),
+                    optionalRequestFieldWithPath("lastStatusCode")
+                        .description(MgmtApiModelProperties.ACTION_LAST_STATUS_CODE).type("Integer"),
+                    fieldWithPath("rollout").description(MgmtApiModelProperties.ACTION_ROLLOUT),
+                    fieldWithPath("rolloutName").description(MgmtApiModelProperties.ACTION_ROLLOUT_NAME),
+                    fieldWithPath("_links.self").ignored(),
+                    fieldWithPath("_links.distributionset").description(MgmtApiModelProperties.LINK_TO_DS),
+                    fieldWithPath("_links.status")
+                        .description(MgmtApiModelProperties.LINKS_ACTION_STATUSES),
+                    fieldWithPath("_links.rollout").description(MgmtApiModelProperties.LINK_TO_ROLLOUT),
+                    fieldWithPath("_links.target").description(MgmtApiModelProperties.LINK_TO_TARGET))));
     }
 
     private Action generateRolloutActionForTarget(final String knownControllerId) throws Exception {

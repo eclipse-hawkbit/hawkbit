@@ -14,6 +14,7 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -54,4 +55,14 @@ public interface MgmtActionRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
 
+    /**
+     * Handles the GET request of retrieving a specific Action by <code>actionId</code>
+     *
+     * @param actionId
+     *
+     * @return the action
+     */
+    @GetMapping(value = "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtAction> getAction(
+        @PathVariable("actionId") Long actionId);
 }

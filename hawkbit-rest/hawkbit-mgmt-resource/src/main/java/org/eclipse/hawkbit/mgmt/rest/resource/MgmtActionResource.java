@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,16 +56,29 @@ public class MgmtActionResource implements MgmtActionRestApi {
             totalActionCount = this.deploymentManagement.countActionsAll();
         }
 
-        final MgmtRepresentationMode repMode = MgmtRepresentationMode.fromValue(representationModeParam)
-                .orElseGet(() -> {
-                    // no need for a 400, just apply a safe fallback
-                    LOG.warn("Received an invalid representation mode: {}", representationModeParam);
-                    return MgmtRepresentationMode.COMPACT;
-                });
+        final MgmtRepresentationMode repMode = getRepresentationModeFromString(representationModeParam);
 
         return ResponseEntity
                 .ok(new PagedList<>(MgmtActionMapper.toResponse(actions.getContent(), repMode), totalActionCount));
 
+    }
+
+    @Override
+    public ResponseEntity<MgmtAction> getAction(final Long actionId) {
+
+       final Action action = deploymentManagement.findAction(actionId)
+            .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
+
+       return ResponseEntity.ok(MgmtActionMapper.toResponse(action, MgmtRepresentationMode.FULL));
+    }
+
+    private MgmtRepresentationMode getRepresentationModeFromString(final String representationModeParam) {
+        return MgmtRepresentationMode.fromValue(representationModeParam)
+            .orElseGet(() -> {
+                // no need for a 400, just apply a safe fallback
+                LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+                return MgmtRepresentationMode.COMPACT;
+            });
     }
 
 }
