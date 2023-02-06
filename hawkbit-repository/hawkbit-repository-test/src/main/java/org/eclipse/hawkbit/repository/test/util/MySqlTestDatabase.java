@@ -41,7 +41,7 @@ public class MySqlTestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected void createSchema() {
-        LOG.info("Trying to connect to {} with user '{}'", uri, username);
+        LOG.info("Trying to connect to {}", uri);
         try (Connection connection = DriverManager.getConnection(uri, username, password)) {
             try (PreparedStatement statement = connection.prepareStatement("CREATE SCHEMA " + schemaName + ";")) {
                 LOG.info("Creating schema {} on uri {}", schemaName, uri);
