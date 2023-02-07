@@ -23,7 +23,6 @@ import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
-// import org.springframework.cloud.stream.annotation.StreamMessageConverter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
