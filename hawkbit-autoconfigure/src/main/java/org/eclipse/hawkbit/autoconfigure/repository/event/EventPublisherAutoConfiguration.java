@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
@@ -59,11 +58,6 @@ public class EventPublisherAutoConfiguration {
         return simpleApplicationEventMulticaster;
     }
     
-    @Bean
-    public BusProperties busProperties() {
-        return new BusProperties();
-    }    
-
     /**
      * Bean for creating a singleton instance of the
      * {@link EventPublisherHolder}
