@@ -1608,7 +1608,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void assertLastActionStatusCodeInAction(final Long actionId, final Integer expectedLastActionStatusCode) {
-        final Optional<Action> action = actionRepository.getById(actionId);
+        final Optional<Action> action = actionRepository.getActionById(actionId);
         assertThat(action).isPresent();
         assertThat(action.get().getLastActionStatusCode()).isEqualTo(Optional.ofNullable(expectedLastActionStatusCode));
     }

@@ -742,13 +742,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
-        // TODO the exists call is only a workaround to avoid the
-        // javax.persistence.EntityNotFoundException
-        if (actionRepository.existsById(actionId)) {
-            return actionRepository.getById(actionId);
-        } else {
-            return Optional.empty();
-        }
+        return actionRepository.getActionById(actionId);
     }
 
     @Override
