@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,9 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 /**
  * REST Resource handling for SoftwareModule and related Artifact CRUD
  * operations.
- *
  */
-@RequestMapping(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 public interface MgmtSoftwareModuleRestApi {
 
     /**
@@ -60,8 +57,9 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @PostMapping(value = "/{softwareModuleId}/artifacts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/artifacts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {
+                    MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtArtifact> uploadArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestPart("file") final MultipartFile file,
             @RequestParam(value = "filename", required = false) final String optionalFileName,
@@ -80,8 +78,9 @@ public interface MgmtSoftwareModuleRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @GetMapping(value = "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtArtifact>> getArtifacts(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
@@ -95,8 +94,9 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return responseEntity with status ok if successful
      */
-    @GetMapping(value = "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     @ResponseBody
     ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId);
@@ -111,7 +111,8 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return status OK if delete as successful.
      */
-    @DeleteMapping(value = "/{softwareModuleId}/artifacts/{artifactId}")
+    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
     ResponseEntity<Void> deleteArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("artifactId") final Long artifactId);
@@ -136,7 +137,8 @@ public interface MgmtSoftwareModuleRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @GetMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
@@ -151,8 +153,8 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return a single softwareModule with status OK.
      */
-    @GetMapping(value = "/{softwareModuleId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
@@ -166,8 +168,9 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @PostMapping(consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
             final List<MgmtSoftwareModuleRequestBodyPost> softwareModules);
 
@@ -180,8 +183,8 @@ public interface MgmtSoftwareModuleRestApi {
      *            the modules to be updated.
      * @return status OK if update was successful
      */
-    @PutMapping(value = "/{softwareModuleId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> updateSoftwareModule(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -195,7 +198,7 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if delete was successful.
      *
      */
-    @DeleteMapping(value = "/{softwareModuleId}")
+    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}")
     ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
     /**
@@ -218,8 +221,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if get request is successful with the paged list of
      *         meta data
      */
-    @GetMapping(value = "/{softwareModuleId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleMetadata>> getMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
@@ -237,8 +241,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
-    @GetMapping(value = "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> getMetadataValue(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
@@ -255,8 +260,9 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if the update request is successful and the updated
      *         meta data result
      */
-    @PutMapping(value = "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleMetadata> updateMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey, final MgmtSoftwareModuleMetadataBodyPut metadata);
@@ -270,7 +276,8 @@ public interface MgmtSoftwareModuleRestApi {
      *            the key of the meta data to delete
      * @return status OK if the delete request is successful
      */
-    @DeleteMapping(value = "/{softwareModuleId}/metadata/{metadataKey}")
+    @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
             @PathVariable("metadataKey") final String metadataKey);
 
@@ -284,8 +291,10 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status created if post request is successful with the value of
      *         the created meta data
      */
-    @PostMapping(value = "/{softwareModuleId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSoftwareModuleMetadata>> createMetadata(
             @PathVariable("softwareModuleId") final Long softwareModuleId,
             final List<MgmtSoftwareModuleMetadata> metadataRest);

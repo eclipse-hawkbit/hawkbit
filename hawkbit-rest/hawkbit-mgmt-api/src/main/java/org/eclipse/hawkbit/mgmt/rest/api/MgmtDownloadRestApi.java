@@ -14,14 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * A resource for download artifacts.
- *
  */
-@RequestMapping(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE)
 @FunctionalInterface
 public interface MgmtDownloadRestApi {
 
@@ -37,7 +34,8 @@ public interface MgmtDownloadRestApi {
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */
-    @GetMapping(value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)
+    @GetMapping(value = MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE
+            + MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING)
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifactByDownloadId(@PathVariable("tenant") String tenant,
             @PathVariable("downloadId") String downloadId);

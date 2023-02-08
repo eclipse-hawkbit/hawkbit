@@ -33,13 +33,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * REST Resource handling for DistributionSet CRUD operations.
  */
-@RequestMapping(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)
 public interface MgmtDistributionSetRestApi {
 
     /**
@@ -61,7 +59,8 @@ public interface MgmtDistributionSetRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @GetMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtDistributionSet>> getDistributionSets(
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -77,8 +76,8 @@ public interface MgmtDistributionSetRestApi {
      * @return a single DistributionSet with status OK.
      *
      */
-    @GetMapping(value = "/{distributionSetId}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> getDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
@@ -92,8 +91,9 @@ public interface MgmtDistributionSetRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @PostMapping(consumes = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(List<MgmtDistributionSetRequestBodyPost> sets);
 
     /**
@@ -104,7 +104,7 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if delete as successful.
      *
      */
-    @DeleteMapping(value = "/{distributionSetId}")
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}")
     ResponseEntity<Void> deleteDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
@@ -118,9 +118,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if update as successful with updated content.
      *
      */
-    @PutMapping(value = "/{distributionSetId}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-                    MediaTypes.HAL_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
+                    MediaType.APPLICATION_JSON_VALUE, MediaTypes.HAL_JSON_VALUE })
     ResponseEntity<MgmtDistributionSet> updateDistributionSet(@PathVariable("distributionSetId") Long distributionSetId,
             MgmtDistributionSetRequestBodyPut toUpdate);
 
@@ -146,8 +146,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of
      *         targets
      */
-    @GetMapping(value = "/{distributionSetId}/assignedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/assignedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -176,8 +177,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of
      *         targets
      */
-    @GetMapping(value = "/{distributionSetId}/installedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/installedTargets", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getInstalledTargets(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -206,8 +208,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of
      *         targets
      */
-    @GetMapping(value = "/{distributionSetId}/autoAssignTargetFilters", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/autoAssignTargetFilters", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTargetFilterQuery>> getAutoAssignTargetFilterQueries(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
@@ -231,9 +234,10 @@ public interface MgmtDistributionSetRestApi {
      *         complex return body which contains information about the assigned
      *         targets and the already assigned targets counters
      */
-    @PostMapping(value = "/{distributionSetId}/assignedTargets", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/assignedTargets", consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> createAssignedTarget(
             @PathVariable("distributionSetId") Long distributionSetId,
             final List<MgmtTargetAssignmentRequestBody> targetIds,
@@ -259,8 +263,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the paged list of
      *         meta data
      */
-    @GetMapping(value = "/{distributionSetId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtMetadata>> getMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
@@ -277,7 +282,8 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
-    @GetMapping(value = "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> getMetadataValue(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -293,8 +299,9 @@ public interface MgmtDistributionSetRestApi {
      * @return status OK if the update request is successful and the updated
      *         meta data result
      */
-    @PutMapping(value = "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtMetadata> updateMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey, MgmtMetadataBodyPut metadata);
 
@@ -307,7 +314,8 @@ public interface MgmtDistributionSetRestApi {
      *            the key of the meta data to delete
      * @return status OK if the delete request is successful
      */
-    @DeleteMapping(value = "/{distributionSetId}/metadata/{metadataKey}")
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("metadataKey") String metadataKey);
 
@@ -321,8 +329,10 @@ public interface MgmtDistributionSetRestApi {
      * @return status created if post request is successful with the value of
      *         the created meta data
      */
-    @PostMapping(value = "/{distributionSetId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtMetadata>> createMetadata(@PathVariable("distributionSetId") Long distributionSetId,
             List<MgmtMetadata> metadataRest);
 
@@ -336,8 +346,10 @@ public interface MgmtDistributionSetRestApi {
      * @return http status
      *
      */
-    @PostMapping(value = "/{distributionSetId}/assignedSM", consumes = { MediaType.APPLICATION_JSON_VALUE,
-            MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/assignedSM", consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> assignSoftwareModules(@PathVariable("distributionSetId") Long distributionSetId,
             List<MgmtSoftwareModuleAssigment> softwareModuleIDs);
 
@@ -352,7 +364,8 @@ public interface MgmtDistributionSetRestApi {
      *            set
      * @return status OK if rejection was successful.
      */
-    @DeleteMapping(value = "/{distributionSetId}/assignedSM/{softwareModuleId}")
+    @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/assignedSM/{softwareModuleId}")
     ResponseEntity<Void> deleteAssignSoftwareModules(@PathVariable("distributionSetId") Long distributionSetId,
             @PathVariable("softwareModuleId") Long softwareModuleId);
 
@@ -374,8 +387,9 @@ public interface MgmtDistributionSetRestApi {
      * @return a list of the assigned software modules of a distribution set
      *         with status OK, if none is assigned than {@code null}
      */
-    @GetMapping(value = "/{distributionSetId}/assignedSM", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/assignedSM", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getAssignedSoftwareModules(
             @PathVariable("distributionSetId") Long distributionSetId,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
@@ -391,9 +405,10 @@ public interface MgmtDistributionSetRestApi {
      *            the definition if rollouts and actions should be canceled
      * @return status OK if the invalidation was successful
      */
-    @PostMapping(value = "/{distributionSetId}/invalidate", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
-                    MediaType.APPLICATION_JSON_VALUE })
+    @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING
+            + "/{distributionSetId}/invalidate", consumes = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+                            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> invalidateDistributionSet(@PathVariable("distributionSetId") Long distributionSetId,
             @Valid MgmtInvalidateDistributionSetRequestBody invalidateRequestBody);
 }

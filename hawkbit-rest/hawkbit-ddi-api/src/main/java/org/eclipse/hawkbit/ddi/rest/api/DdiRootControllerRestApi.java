@@ -35,13 +35,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * REST resource handling for root controller CRUD operations.
  */
-@RequestMapping(DdiRestConstants.BASE_V1_REQUEST_MAPPING)
 public interface DdiRootControllerRestApi {
 
     /**
@@ -55,8 +53,9 @@ public interface DdiRootControllerRestApi {
      *            of the software module
      * @return the response
      */
-    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+            + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<List<DdiArtifact>> getSoftwareModulesArtifacts(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId);
@@ -71,8 +70,8 @@ public interface DdiRootControllerRestApi {
      * 
      * @return the response
      */
-    @GetMapping(value = "/{controllerId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE,
-            DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiControllerBase> getControllerBase(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId);
 
@@ -93,7 +92,8 @@ public interface DdiRootControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
-    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+            + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
             @PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -114,7 +114,8 @@ public interface DdiRootControllerRestApi {
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */
-    @GetMapping(value = "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+            + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
             + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
     ResponseEntity<Void> downloadArtifactMd5(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") final String controllerId,
@@ -129,36 +130,41 @@ public interface DdiRootControllerRestApi {
      * @param controllerId
      *            of the target
      * @param actionId
-     *            of the {@link DdiDeploymentBase} that matches to active actions.
+     *            of the {@link DdiDeploymentBase} that matches to active
+     *            actions.
      * @param resource
-     *            an hashcode of the resource which indicates if the action has been
-     *            changed, e.g. from 'soft' to 'force' and the eTag needs to be
-     *            re-generated
+     *            an hashcode of the resource which indicates if the action has
+     *            been changed, e.g. from 'soft' to 'force' and the eTag needs
+     *            to be re-generated
      * @param actionHistoryMessageCount
      *            specifies the number of messages to be returned from action
      *            history. Regardless of the passed value, in order to restrict
-     *            resource utilization by controllers, maximum number of messages
-     *            that are retrieved from database is limited by
+     *            resource utilization by controllers, maximum number of
+     *            messages that are retrieved from database is limited by
      *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
      * 
-     *            actionHistoryMessageCount less than zero: retrieves the maximum
-     *            allowed number of action status messages from history;
+     *            actionHistoryMessageCount less than zero: retrieves the
+     *            maximum allowed number of action status messages from history;
      * 
      *            actionHistoryMessageCount equal to zero: does not retrieve any
      *            message;
      * 
      *            actionHistoryMessageCount greater than zero: retrieves the
-     *            specified number of messages, limited by maximum allowed number.
+     *            specified number of messages, limited by maximum allowed
+     *            number.
      * 
      * @return the response
      */
-    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                    + "c", required = false, defaultValue = "-1") final int resource,
+            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                    + "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiDeploymentBase} action.
@@ -174,9 +180,9 @@ public interface DdiRootControllerRestApi {
      *
      * @return the response
      */
-    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
-                    DdiRestConstants.MEDIA_TYPE_CBOR })
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.DEPLOYMENT_BASE_ACTION + "/{actionId}/" + DdiRestConstants.FEEDBACK, consumes = {
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
@@ -193,8 +199,9 @@ public interface DdiRootControllerRestApi {
      *
      * @return status of the request
      */
-    @PutMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIG_DATA_ACTION, consumes = {
-            MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @PutMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIG_DATA_ACTION, consumes = { MediaType.APPLICATION_JSON_VALUE,
+                    DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> putConfigData(@Valid final DdiConfigData configData,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId);
 
@@ -210,15 +217,16 @@ public interface DdiRootControllerRestApi {
      *
      * @return the {@link DdiCancel} response
      */
-    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
+            + "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE,
+                    DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiCancel> getControllerCancelAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
-     * RequestMethod.POST method receiving the {@link DdiActionFeedback} from the
-     * target.
+     * RequestMethod.POST method receiving the {@link DdiActionFeedback} from
+     * the target.
      *
      * @param feedback
      *            the {@link DdiActionFeedback} from the target.
@@ -231,8 +239,8 @@ public interface DdiRootControllerRestApi {
      *
      * @return the {@link DdiActionFeedback} response
      */
-    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/" + DdiRestConstants.CANCEL_ACTION
+            + "/{actionId}/" + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
                     DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postCancelActionFeedback(@Valid final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant,
@@ -248,37 +256,42 @@ public interface DdiRootControllerRestApi {
      * @param controllerId
      *            of the target
      * @param actionId
-     *            of the {@link DdiDeploymentBase} that matches to installed action.
+     *            of the {@link DdiDeploymentBase} that matches to installed
+     *            action.
      * @param actionHistoryMessageCount
      *            specifies the number of messages to be returned from action
      *            history. Regardless of the passed value, in order to restrict
-     *            resource utilization by controllers, maximum number of messages
-     *            that are retrieved from database is limited by
+     *            resource utilization by controllers, maximum number of
+     *            messages that are retrieved from database is limited by
      *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
      * 
-     *            actionHistoryMessageCount less than zero: retrieves the maximum
-     *            allowed number of action status messages from history;
+     *            actionHistoryMessageCount less than zero: retrieves the
+     *            maximum allowed number of action status messages from history;
      * 
      *            actionHistoryMessageCount equal to zero: does not retrieve any
      *            message;
      * 
      *            actionHistoryMessageCount greater than zero: retrieves the
-     *            specified number of messages, limited by maximum allowed number.
+     *            specified number of messages, limited by maximum allowed
+     *            number.
      * 
-     * @return the {@link DdiDeploymentBase}. The response is of same format as for
-     *         the /deploymentBase resource.
+     * @return the {@link DdiDeploymentBase}. The response is of same format as
+     *         for the /deploymentBase resource.
      */
-    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.INSTALLED_BASE_ACTION + "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiDeploymentBase> getControllerInstalledAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                    + "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
 
     /**
-     * Returns the confirmation base with the current auto-confirmation state for a
-     * given controllerId and toggle links. In case there are actions present where
-     * the confirmation is required, a reference to it will be returned as well.
+     * Returns the confirmation base with the current auto-confirmation state
+     * for a given controllerId and toggle links. In case there are actions
+     * present where the confirmation is required, a reference to it will be
+     * returned as well.
      *
      * @param tenant
      *            the controllerId is corresponding too
@@ -286,8 +299,9 @@ public interface DdiRootControllerRestApi {
      *            to check the state for
      * @return the state as {@link DdiAutoConfirmationState}
      */
-    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE, produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIRMATION_BASE, produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiConfirmationBase> getConfirmationBase(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId);
 
@@ -299,37 +313,41 @@ public interface DdiRootControllerRestApi {
      * @param controllerId
      *            of the target
      * @param actionId
-     *            of the {@link DdiConfirmationBaseAction} that matches to active
-     *            actions in WAITING_FOR_CONFIRMATION status.
+     *            of the {@link DdiConfirmationBaseAction} that matches to
+     *            active actions in WAITING_FOR_CONFIRMATION status.
      * @param resource
-     *            an hashcode of the resource which indicates if the action has been
-     *            changed, e.g. from 'soft' to 'force' and the eTag needs to be
-     *            re-generated
+     *            an hashcode of the resource which indicates if the action has
+     *            been changed, e.g. from 'soft' to 'force' and the eTag needs
+     *            to be re-generated
      * @param actionHistoryMessageCount
      *            specifies the number of messages to be returned from action
      *            history. Regardless of the passed value, in order to restrict
-     *            resource utilization by controllers, maximum number of messages
-     *            that are retrieved from database is limited by
+     *            resource utilization by controllers, maximum number of
+     *            messages that are retrieved from database is limited by
      *            {@link RepositoryConstants#MAX_ACTION_HISTORY_MSG_COUNT}.
      *
-     *            actionHistoryMessageCount less than zero: retrieves the maximum
-     *            allowed number of action status messages from history;
+     *            actionHistoryMessageCount less than zero: retrieves the
+     *            maximum allowed number of action status messages from history;
      *
      *            actionHistoryMessageCount equal to zero: does not retrieve any
      *            message;
      *
      *            actionHistoryMessageCount greater than zero: retrieves the
-     *            specified number of messages, limited by maximum allowed number.
+     *            specified number of messages, limited by maximum allowed
+     *            number.
      *
      * @return the response
      */
-    @GetMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}", produces = {
-            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
+    @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}", produces = { MediaTypes.HAL_JSON_VALUE,
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<DdiConfirmationBaseAction> getConfirmationBaseAction(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId,
-            @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
-            @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
+            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                    + "c", required = false, defaultValue = "-1") final int resource,
+            @RequestParam(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
+                    + "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount);
 
     /**
      * This is the feedback channel for the {@link DdiConfirmationBaseAction}
@@ -346,16 +364,16 @@ public interface DdiRootControllerRestApi {
      *
      * @return the response
      */
-    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}/"
-            + DdiRestConstants.FEEDBACK, consumes = { MediaType.APPLICATION_JSON_VALUE,
-                    DdiRestConstants.MEDIA_TYPE_CBOR })
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIRMATION_BASE + "/{actionId}/" + DdiRestConstants.FEEDBACK, consumes = {
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> postConfirmationActionFeedback(@Valid final DdiConfirmationFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotEmpty final Long actionId);
 
     /**
-     * Activate auto confirmation for a given controllerId. Will use the provided
-     * initiator and remark field from the provided
+     * Activate auto confirmation for a given controllerId. Will use the
+     * provided initiator and remark field from the provided
      * {@link DdiActivateAutoConfirmation}. If not present, the values will be
      * prefilled with a default remark and the CONTROLLER as initiator.
      *
@@ -369,9 +387,9 @@ public interface DdiRootControllerRestApi {
      *         {@link org.springframework.http.HttpStatus#CONFLICT} in case
      *         auto-confirmation was active already.
      */
-    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/"
-            + DdiRestConstants.AUTO_CONFIRM_ACTIVATE, consumes = { MediaType.APPLICATION_JSON_VALUE,
-                    DdiRestConstants.MEDIA_TYPE_CBOR })
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIRMATION_BASE + "/" + DdiRestConstants.AUTO_CONFIRM_ACTIVATE, consumes = {
+                    MediaType.APPLICATION_JSON_VALUE, DdiRestConstants.MEDIA_TYPE_CBOR })
     ResponseEntity<Void> activateAutoConfirmation(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId,
             @Valid @RequestBody(required = false) final DdiActivateAutoConfirmation body);
@@ -386,8 +404,8 @@ public interface DdiRootControllerRestApi {
      * @return {@link org.springframework.http.HttpStatus#OK} if successfully
      *         executed
      */
-    @PostMapping(value = "/{controllerId}/" + DdiRestConstants.CONFIRMATION_BASE + "/"
-            + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE)
+    @PostMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING + "/{controllerId}/"
+            + DdiRestConstants.CONFIRMATION_BASE + "/" + DdiRestConstants.AUTO_CONFIRM_DEACTIVATE)
     ResponseEntity<Void> deactivateAutoConfirmation(@PathVariable("tenant") final String tenant,
             @PathVariable("controllerId") @NotEmpty final String controllerId);
 }
