@@ -14,6 +14,7 @@ import java.util.Objects;
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleDataProvider;
 
 import com.google.common.base.MoreObjects;
+import org.springframework.util.StringUtils;
 
 /**
  * Filter params for {@link SoftwareModuleDataProvider}.
@@ -44,7 +45,7 @@ public class SwFilterParams implements Serializable {
      */
     public SwFilterParams(final String searchText, final Long softwareModuleTypeId,
             final Long lastSelectedDistributionId) {
-        this.searchText = searchText;
+        this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
         this.softwareModuleTypeId = softwareModuleTypeId;
         this.lastSelectedDistributionId = lastSelectedDistributionId;
     }
@@ -77,7 +78,7 @@ public class SwFilterParams implements Serializable {
      *            String
      */
     public void setSearchText(final String searchText) {
-        this.searchText = searchText;
+        this.searchText = !StringUtils.isEmpty(searchText) ? String.format("%%%s%%", searchText) : null;
     }
 
     /**

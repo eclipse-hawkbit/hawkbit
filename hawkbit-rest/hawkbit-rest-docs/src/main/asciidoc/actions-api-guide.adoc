@@ -65,6 +65,44 @@ include::../errors/406.adoc[]
 include::../errors/429.adoc[]
 |===
 
+== GET /rest/v1/actions/{actionId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single action within Hawkbit by actionId.
+
+=== Get single action
+
+==== CURL
+
+include::{snippets}/actions/get-action/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access a single action
+
+include::{snippets}/actions/get-action/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/actions/get-action/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/actions/get-action/http-response.adoc[]
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/404.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
 == Additional content
 
 [[error-body]]
