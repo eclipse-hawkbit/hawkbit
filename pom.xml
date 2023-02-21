@@ -141,7 +141,6 @@
          upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
-      <h2.version>1.4.200</h2.version>
       <!-- CVE-2022-25857 -->
       <snakeyaml.version>1.31</snakeyaml.version>
       <!-- Spring boot version overrides - END -->
