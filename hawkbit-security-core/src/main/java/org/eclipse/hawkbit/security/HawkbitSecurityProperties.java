@@ -130,6 +130,9 @@ public class HawkbitSecurityProperties {
          */
         private List<String> allowedMethods = Arrays.asList("DELETE", "GET", "POST", "PATCH", "PUT");
 
+        /**
+         * Exposed headers for CORS.
+         */
         private List<String> exposedHeaders = Collections.emptyList();
 
         public boolean isEnabled() {
