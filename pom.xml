@@ -142,7 +142,12 @@
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <h2.version>1.4.200</h2.version>
+      <!-- CVE-2022-25857 -->
+      <snakeyaml.version>1.31</snakeyaml.version>
       <!-- Spring boot version overrides - END -->
+
+      <!-- CVE-2022-31690 -->
+      <spring-security-oauth2-client.version>5.7.6</spring-security-oauth2-client.version>
 
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
 
@@ -777,6 +782,11 @@
             <groupId>org.springframework.plugin</groupId>
             <artifactId>spring-plugin-core</artifactId>
             <version>${spring.plugin.core.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+            <version>${spring-security-oauth2-client.version}</version>
          </dependency>
 
          <!-- Protostuff Io -->
