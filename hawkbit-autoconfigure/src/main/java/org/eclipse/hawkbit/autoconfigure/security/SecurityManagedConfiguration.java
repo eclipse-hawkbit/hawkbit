@@ -593,6 +593,7 @@ public class SecurityManagedConfiguration {
             corsConfiguration.setAllowCredentials(true);
             corsConfiguration.setAllowedHeaders(securityProperties.getCors().getAllowedHeaders());
             corsConfiguration.setAllowedMethods(securityProperties.getCors().getAllowedMethods());
+            corsConfiguration.setExposedHeaders(securityProperties.getCors().getExposedHeaders());
 
             return corsConfiguration;
         }

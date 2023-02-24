@@ -130,6 +130,11 @@ public class HawkbitSecurityProperties {
          */
         private List<String> allowedMethods = Arrays.asList("DELETE", "GET", "POST", "PATCH", "PUT");
 
+        /**
+         * Exposed headers for CORS.
+         */
+        private List<String> exposedHeaders = Collections.emptyList();
+
         public boolean isEnabled() {
             return enabled;
         }
@@ -160,6 +165,14 @@ public class HawkbitSecurityProperties {
 
         public void setAllowedMethods(final List<String> allowedMethods) {
             this.allowedMethods = allowedMethods;
+        }
+
+        public List<String> getExposedHeaders() {
+            return exposedHeaders;
+        }
+
+        public void setExposedHeaders(final List<String> exposedHeaders) {
+            this.exposedHeaders = exposedHeaders;
         }
     }
 
@@ -448,6 +461,10 @@ public class HawkbitSecurityProperties {
             return maxDistributionSetTypesPerTargetType;
         }
 
+        public void setMaxDistributionSetTypesPerTargetType(final int maxDistributionSetTypesPerTargetType) {
+            this.maxDistributionSetTypesPerTargetType = maxDistributionSetTypesPerTargetType;
+        }
+        
         /**
          * Configuration for hawkBits DOS prevention filter. This is usually an
          * infrastructure topic (e.g. Web Application Firewall (WAF)) but might
