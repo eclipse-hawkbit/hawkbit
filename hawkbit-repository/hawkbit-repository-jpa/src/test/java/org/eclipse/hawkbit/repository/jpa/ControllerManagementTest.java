@@ -1094,9 +1094,11 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(testDs, testTarget));
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 1")));
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
+                .messages(Lists.newArrayList("proceeding message 1")));
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
-                .status(Action.Status.RUNNING).messages(Lists.newArrayList("proceeding message 2")));
+                .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
+                .messages(Lists.newArrayList("proceeding message 2")));
 
         final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
 
