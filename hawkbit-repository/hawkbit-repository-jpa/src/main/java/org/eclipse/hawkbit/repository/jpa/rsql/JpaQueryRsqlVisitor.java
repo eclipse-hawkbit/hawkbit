@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
@@ -35,6 +34,13 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.Subquery;
 
+import com.google.common.collect.Lists;
+import cz.jirutka.rsql.parser.ast.AndNode;
+import cz.jirutka.rsql.parser.ast.ComparisonNode;
+import cz.jirutka.rsql.parser.ast.LogicalNode;
+import cz.jirutka.rsql.parser.ast.Node;
+import cz.jirutka.rsql.parser.ast.OrNode;
+import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
@@ -48,15 +54,6 @@ import org.springframework.beans.TypeMismatchException;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
-import com.google.common.collect.Lists;
-
-import cz.jirutka.rsql.parser.ast.AndNode;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.LogicalNode;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.OrNode;
-import cz.jirutka.rsql.parser.ast.RSQLVisitor;
 
 /**
  * An implementation of the {@link RSQLVisitor} to visit the parsed tokens and
@@ -76,6 +73,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     public static final Character LIKE_WILDCARD = '*';
     private static final char ESCAPE_CHAR = '\\';
     private static final List<String> NO_JOINS_OPERATOR = Lists.newArrayList("!=", "=out=");
+    private static final String ESCAPE_CHAR_WITH_ASTERISK = ESCAPE_CHAR +"*";
 
     private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);
 
@@ -571,8 +569,19 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         } else {
             escaped = transformedValue.replace("%", ESCAPE_CHAR + "%").replace("_", ESCAPE_CHAR + "_");
         }
+        return replaceIfRequired(escaped);
+    }
 
-        return escaped.replace(LIKE_WILDCARD, '%').toUpperCase();
+    private String replaceIfRequired(final String escapedValue) {
+        String finalizedValue;
+        if (escapedValue.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
+            final String temporaryReplacement = escapedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$");
+            finalizedValue = temporaryReplacement.replace(LIKE_WILDCARD, '%').replace("$", ESCAPE_CHAR_WITH_ASTERISK)
+                    .toUpperCase();
+        } else {
+            finalizedValue = escapedValue.replace(LIKE_WILDCARD, '%').toUpperCase();
+        }
+        return finalizedValue;
     }
 
     @SuppressWarnings("unchecked")

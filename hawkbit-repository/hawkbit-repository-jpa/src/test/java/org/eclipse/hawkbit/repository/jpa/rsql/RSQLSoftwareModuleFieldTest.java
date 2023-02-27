@@ -41,6 +41,9 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         softwareModuleManagement.create(
                 entityFactory.softwareModule().create().type(osType).name("poky").version("3.0.2").description("aa"));
         softwareModuleManagement
+                .create(entityFactory.softwareModule().create().type(osType).name("*§$%&/&%ÄÜ*Ö@").version("1.0.0")
+                        .description("wildcard testing"));
+        softwareModuleManagement
                 .create(entityFactory.softwareModule().create().type(osType).name("noDesc").version("noDesc"));
 
         final JpaSoftwareModule ah2 = (JpaSoftwareModule) softwareModuleManagement.create(entityFactory.softwareModule()
@@ -59,62 +62,77 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
     @Description("Test filter software module by id")
     public void testFilterByParameterId() {
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + ah.getId(), 1);
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + ah.getId(), 4);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + ah.getId(), 5);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==" + -1, 0);
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + -1, 5);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "!=" + -1, 6);
 
         // Not supported for numbers
         if (Database.POSTGRESQL.equals(getDatabase())) {
             return;
         }
 
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 5);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "==*", 6);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "==noexist*", 0);
         assertRSQLQuery(SoftwareModuleFields.ID.name() + "=in=(" + ah.getId() + ",1000000)", 1);
-        assertRSQLQuery(SoftwareModuleFields.ID.name() + "=out=(" + ah.getId() + ",1000000)", 4);
+        assertRSQLQuery(SoftwareModuleFields.ID.name() + "=out=(" + ah.getId() + ",1000000)", 5);
     }
 
     @Test
     @Description("Test filter software module by name")
     public void testFilterByParameterName() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 4);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub", 5);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==agent-hub*", 2);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 3);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "!=agent-hub*", 4);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=in=(agent-hub,notexist)", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 4);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 5);
+
+        String what = "*§$%&/&%ÄÜ*Ö@";
+        //wildcard entries
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*$*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*§*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*@*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*/*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*&*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==***", 6);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*\\**", 1);
+
+
     }
 
     @Test
     @Description("Test filter software module by description")
     public void testFilterByParameterDescription() {
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==''", 1);
-        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=''", 4);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=''", 5);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==agent-hub", 1);
-        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 4);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "!=agent-hub", 5);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=in=(agent-hub,notexist)", 1);
-        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 4);
+        assertRSQLQuery(SoftwareModuleFields.DESCRIPTION.name() + "=out=(agent-hub,notexist)", 5);
     }
 
     @Test
     @Description("Test filter software module by version")
     public void testFilterByParameterVersion() {
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "==1.0.1", 2);
-        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "!=v1.0", 5);
+        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "!=v1.0", 6);
         assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=in=(1.0.1,1.0.2)", 2);
-        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=out=(1.0.1)", 3);
+        assertRSQLQuery(SoftwareModuleFields.VERSION.name() + "=out=(1.0.1)", 4);
     }
 
     @Test
     @Description("Test filter software module by type key")
     public void testFilterByType() {
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==" + TestdataFactory.SM_TYPE_APP, 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 3);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "!=" + TestdataFactory.SM_TYPE_APP, 4);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "==noExist*", 0);
         assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=in=(" + TestdataFactory.SM_TYPE_APP + ")", 2);
-        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 3);
+        assertRSQLQuery(SoftwareModuleFields.TYPE.name() + "=out=(" + TestdataFactory.SM_TYPE_APP + ")", 4);
     }
 
     @Test
@@ -131,10 +149,10 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     }
 
-    private void assertRSQLQuery(final String rsqlParam, final long excpectedEntity) {
+    private void assertRSQLQuery(final String rsqlParam, final long expectedEntity) {
         final Page<SoftwareModule> find = softwareModuleManagement.findByRsql(PageRequest.of(0, 100), rsqlParam);
         final long countAll = find.getTotalElements();
         assertThat(find).isNotNull();
-        assertThat(countAll).isEqualTo(excpectedEntity);
+        assertThat(countAll).isEqualTo(expectedEntity);
     }
 }
