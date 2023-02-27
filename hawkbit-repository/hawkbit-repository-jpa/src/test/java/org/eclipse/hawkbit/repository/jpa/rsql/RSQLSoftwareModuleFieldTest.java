@@ -88,7 +88,6 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=in=(agent-hub,notexist)", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "=out=(agent-hub,notexist)", 5);
 
-        String what = "*§$%&/&%ÄÜ*Ö@";
         //wildcard entries
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*$*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*§*", 1);
@@ -100,8 +99,6 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*&*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==***", 6);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*\\**", 1);
-
-
     }
 
     @Test
