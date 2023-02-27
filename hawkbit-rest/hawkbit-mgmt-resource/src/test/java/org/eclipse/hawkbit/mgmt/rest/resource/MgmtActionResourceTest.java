@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
+import io.qameta.allure.Step;
 import io.qameta.allure.Story;
 
 /**
@@ -228,17 +229,29 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies that actions can be filtered based on target fields.")
-    void filterActionsByTarget() throws Exception {
+    void filterActionsByTargetProperties() throws Exception {
 
         // prepare test
-        final Target target = testdataFactory.createTarget("knownTargetId");
+        final Target target = testdataFactory.createTarget("knownTargetId", "knownTargetName", "http://0.0.0.0");
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         assignDistributionSet(ds, Collections.singletonList(target));
 
-        final String rsqlTargetName = "target.name==knownTargetId";
+        final String rsqlTargetControllerId = "target.controllerId==knownTargetId";
+        final String rsqlTargetName = "target.name==knownTargetName";
+        final String rsqlTargetUpdateStatus = "target.updateStatus==pending";
+        final String rsqlTargetAddress = "target.address==http://0.0.0.0";
 
+        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetControllerId);
+        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetName);
+        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetUpdateStatus);
+        verifyResultsByTargetPropertyFilter(target, ds, rsqlTargetAddress);
+    }
+
+    @Step
+    private void verifyResultsByTargetPropertyFilter(final Target target, final DistributionSet ds,
+            final String rsqlTargetFilter) throws Exception {
         // pending status one result
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetName)
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlTargetFilter)
                 .param(MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, MgmtRepresentationMode.FULL.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
                 .andExpect(jsonPath("size", equalTo(1)))
@@ -403,17 +416,15 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final Long actionId = actions.get(0).getId();
 
         mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + actionId))
-            .andDo(MockMvcResultPrinter.print())
-            .andExpect(status().isOk())
-            .andExpect(jsonPath(JSON_PATH_ACTION_ID, equalTo(actionId.intValue())));
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath(JSON_PATH_ACTION_ID, equalTo(actionId.intValue())));
     }
 
     @Test
     @Description("Verifies that NOT_FOUND is returned when there is no such action.")
     void requestActionThatDoesNotExistsLeadsToNotFound() throws Exception {
-        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + 101))
-            .andDo(MockMvcResultPrinter.print())
-            .andExpect(status().isNotFound());
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/" + 101)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNotFound());
     }
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {

@@ -647,7 +647,14 @@ public class TestdataFactory {
      */
     public Target createTarget(final String controllerId, final String targetName) {
         final Target target = targetManagement
-                .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+              .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+        assertTargetProperlyCreated(target);
+        return target;
+    }
+
+    public Target createTarget(final String controllerId, final String targetName, final String address) {
+        final Target target = targetManagement
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).address(address));
         assertTargetProperlyCreated(target);
         return target;
     }
