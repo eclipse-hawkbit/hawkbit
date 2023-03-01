@@ -42,6 +42,9 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Map<String, Long> totalTargetsPerStatus;
 
     @JsonProperty
+    private Integer totalGroups;
+
+    @JsonProperty
     private boolean deleted;
 
     @JsonProperty
@@ -124,5 +127,13 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     public Integer getWeight() {
         return weight;
+    }
+
+    public void setTotalGroups(final Integer totalGroups) {
+        this.totalGroups = totalGroups;
+    }
+
+    public Integer getTotalGroups() {
+        return totalGroups;
     }
 }
