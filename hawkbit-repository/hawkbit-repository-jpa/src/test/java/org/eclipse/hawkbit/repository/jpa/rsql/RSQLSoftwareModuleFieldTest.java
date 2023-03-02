@@ -91,8 +91,8 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         //wildcard entries
 //        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*$*", 1);
 //        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*§*", 1);
-//        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
-//        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
 //        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*@*", 1);
 //        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*/*", 1);
