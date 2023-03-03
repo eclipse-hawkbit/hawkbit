@@ -10,11 +10,6 @@ package org.eclipse.hawkbit.ui.rollout.window.components;
 
 import java.util.function.IntConsumer;
 
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.ExternalResource;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Link;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.ui.UiProperties;
 import org.eclipse.hawkbit.ui.common.builder.BoundComponent;
@@ -24,9 +19,12 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySimpleRolloutGroupsDefinition;
 import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
+import org.eclipse.hawkbit.ui.utils.NumericInputValidator;
 import org.eclipse.hawkbit.ui.utils.SPUIStyleDefinitions;
+import org.eclipse.hawkbit.ui.utils.TrimmingStringConverter;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 import com.vaadin.data.Binder;
 import com.vaadin.data.Binder.Binding;
@@ -34,13 +32,17 @@ import com.vaadin.data.ValidationException;
 import com.vaadin.data.ValidationResult;
 import com.vaadin.data.converter.StringToIntegerConverter;
 import com.vaadin.data.validator.IntegerRangeValidator;
+import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.ExternalResource;
+import com.vaadin.ui.Alignment;
 import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.GridLayout;
+import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
+import com.vaadin.ui.Link;
 import com.vaadin.ui.RadioButtonGroup;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.themes.ValoTheme;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 
 /**
  * Simple group layout component
@@ -159,7 +161,10 @@ public class SimpleGroupsLayout extends ValidatableLayout {
                 .prompt(i18n.getMessage("prompt.trigger.threshold")).buildTextComponent();
         triggerThresholdField.setSizeUndefined();
 
+        final NumericInputValidator numericInputValidator = new NumericInputValidator(i18n);
+
         binder.forField(triggerThresholdField).asRequired(i18n.getMessage("prompt.trigger.threshold.required"))
+                .withConverter(new TrimmingStringConverter()).withValidator(numericInputValidator)
                 .withValidator((triggerThresholdText,
                         context) -> new IntegerRangeValidator(
                                 i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0, 100)
@@ -183,9 +188,12 @@ public class SimpleGroupsLayout extends ValidatableLayout {
                 .id(UIComponentIdProvider.ROLLOUT_ERROR_THRESOLD_ID).prompt(i18n.getMessage("prompt.error.threshold"))
                 .buildTextComponent();
         errorThresholdField.setSizeUndefined();
+        
+        final NumericInputValidator numericInputValidator = new NumericInputValidator(i18n);
 
         final Binding<ProxySimpleRolloutGroupsDefinition, String> binding = binder.forField(errorThresholdField)
                 .asRequired(i18n.getMessage("prompt.error.threshold.required"))
+                .withConverter(new TrimmingStringConverter()).withValidator(numericInputValidator)
                 .withValidator((errorThresholdText, context) -> {
                     if (ERROR_THRESHOLD_OPTIONS.PERCENT == errorThresholdOptionGroup.getValue()) {
                         return new IntegerRangeValidator(i18n.getMessage(MESSAGE_ROLLOUT_FIELD_VALUE_RANGE, 0, 100), 0,
