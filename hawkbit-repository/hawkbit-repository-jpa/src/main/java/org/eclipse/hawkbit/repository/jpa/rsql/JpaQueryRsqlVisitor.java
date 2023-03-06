@@ -575,9 +575,8 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
     private String replaceIfRequired(final String escapedValue) {
         String finalizedValue;
         if (escapedValue.contains(ESCAPE_CHAR_WITH_ASTERISK)) {
-            final String temporaryReplacement = escapedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$");
-            finalizedValue = temporaryReplacement.replace(LIKE_WILDCARD, '%').replace("$", ESCAPE_CHAR_WITH_ASTERISK)
-                    .toUpperCase();
+            finalizedValue = escapedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$").replace(LIKE_WILDCARD, '%')
+                    .replace("$", ESCAPE_CHAR_WITH_ASTERISK).toUpperCase();
         } else {
             finalizedValue = escapedValue.replace(LIKE_WILDCARD, '%').toUpperCase();
         }
