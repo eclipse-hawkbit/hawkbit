@@ -91,6 +91,7 @@ final class MgmtRolloutMapper {
                 body.addTotalTargetsPerStatus(status.name().toLowerCase(),
                         rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
             }
+            body.setTotalGroups(rollout.getRolloutGroupsCreated());
 
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));

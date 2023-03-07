@@ -10,12 +10,14 @@ package org.eclipse.hawkbit.app;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -23,9 +25,10 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@SpringBootTest(properties = {"hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
-        "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + "," + CorsTest.ALLOWED_ORIGIN_SECOND})
-@Feature("Integration Test - Security")
+@SpringBootTest(properties = { "hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
+        "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + ","
+                + CorsTest.ALLOWED_ORIGIN_SECOND,
+        "hawkbit.server.security.cors.exposedHeaders=Access-Control-Allow-Origin" })@Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest extends AbstractSecurityTest {
 
@@ -39,16 +42,21 @@ public class CorsTest extends AbstractSecurityTest {
     @Test
     @Description("Ensures that Cors is working.")
     public void validateCorsRequest() throws Exception {
-        performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_FIRST).andExpect(status().isOk());
-        performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_SECOND).andExpect(status().isOk());
+        performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_FIRST).andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN_FIRST));
+        performOptionsRequestToRestWithOrigin(ALLOWED_ORIGIN_SECOND).andExpect(status().isOk())
+                .andExpect(header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, ALLOWED_ORIGIN_SECOND));
 
         final String invalidOriginResponseBody = performOptionsRequestToRestWithOrigin(INVALID_ORIGIN)
-                .andExpect(status().isForbidden()).andReturn().getResponse().getContentAsString();
+                .andExpect(status().isForbidden())
+                .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).andReturn().getResponse()
+                .getContentAsString();
         assertThat(invalidOriginResponseBody).isEqualTo(INVALID_CORS_REQUEST);
 
         final String invalidCorsUrlResponseBody = performOptionsRequestToUrlWithOrigin(
                 MgmtRestConstants.BASE_SYSTEM_MAPPING, ALLOWED_ORIGIN_FIRST).andExpect(status().isForbidden())
-                        .andReturn().getResponse().getContentAsString();
+                        .andExpect(header().doesNotExist(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN)).andReturn()
+                        .getResponse().getContentAsString();
         assertThat(invalidCorsUrlResponseBody).isEqualTo(INVALID_CORS_REQUEST);
     }
 

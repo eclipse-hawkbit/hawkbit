@@ -40,8 +40,8 @@ import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.PollStatus;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -257,6 +257,10 @@ public final class MgmtTargetMapper {
 
         result.setDetailStatus(action.getStatus().toString().toLowerCase());
 
+        action.getLastActionStatusCode().ifPresent(statusCode -> {
+            result.setLastStatusCode(statusCode);
+        });
+        
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.setRollout(rollout.getId());

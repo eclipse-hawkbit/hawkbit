@@ -102,6 +102,8 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_DS_ID = "the ID of distributionset of this rollout";
     public static final String ROLLOUT_TOTAL_TARGETS = "the total targets of a rollout";
     public static final String ROLLOUT_TOTAL_TARGETS_PER_STATUS = "the total targets per status";
+
+    public static final String ROLLOUT_TOTAL_GROUPS = "the total number of groups created by this rollout";
     public static final String ROLLOUT_STATUS = "the status of this rollout";
     public static final String ROLLOUT_TYPE = "the type of this rollout";
     public static final String ROLLOUT_GROUP_STATUS = "the status of this rollout group";
@@ -161,6 +163,8 @@ public final class MgmtApiModelProperties {
     public static final String ACTION_STATUS_REPORTED_AT = "Time at which the status was reported (server time).";
 
     public static final String ACTION_STATUS_CODE = "(Optional) Code provided by the device related to the status.";
+
+    public static final String ACTION_LAST_STATUS_CODE = "(Optional) Code provided as part of the last status update that was sent by the device.";
 
     public static final String ACTION_STATUS_LIST = "List of action status.";
 

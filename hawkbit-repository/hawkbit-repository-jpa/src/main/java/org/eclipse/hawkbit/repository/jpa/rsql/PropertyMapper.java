@@ -12,14 +12,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Maps property of entity to its allias .
+ * Maps property of entity to its alias .
  * 
  *
  *
  */
 public final class PropertyMapper {
 
-    private static Map<Class<?>, Map<String, String>> allowedColmns = new HashMap<>();
+    private static Map<Class<?>, Map<String, String>> allowedColumns = new HashMap<>();
 
     private PropertyMapper() {
 
@@ -36,15 +36,15 @@ public final class PropertyMapper {
      *            property name
      */
     public static void addNewMapping(final Class<?> type, final String property, final String mapping) {
-        allowedColmns.computeIfAbsent(type, k -> new HashMap<>());
-        allowedColmns.get(type).put(property, mapping);
+        allowedColumns.computeIfAbsent(type, k -> new HashMap<>());
+        allowedColumns.get(type).put(property, mapping);
     }
 
     /**
      * @return the allowedcolmns
      */
     public static Map<Class<?>, Map<String, String>> getAllowedcolmns() {
-        return allowedColmns;
+        return allowedColumns;
     }
 
 }

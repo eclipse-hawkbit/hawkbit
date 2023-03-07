@@ -46,7 +46,7 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
         long lastModified = -1;
         if (!(resourceLoader instanceof ResourcePatternResolver)) {
             LOGGER.warn(
-                    "Resource Loader {} doensn't support getting multiple resources. Default properties mechanism will used",
+                    "Resource Loader {} doesn't support getting multiple resources. Default properties mechanism will used",
                     resourceLoader.getClass().getName());
             return super.refreshProperties(filename, propHolder);
         }
@@ -63,7 +63,7 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
                 }
             }
         } catch (final IOException ignored) {
-            LOGGER.warn("Resource with filname " + filename + " couldn't load", ignored);
+            LOGGER.warn("Resource with filename " + filename + " couldn't load", ignored);
         }
         return new PropertiesHolder(properties, lastModified);
     }

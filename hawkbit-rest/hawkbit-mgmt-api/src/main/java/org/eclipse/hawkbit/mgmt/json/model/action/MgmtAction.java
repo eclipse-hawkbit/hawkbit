@@ -75,6 +75,9 @@ public class MgmtAction extends MgmtBaseEntity {
     @JsonProperty
     private String rolloutName;
 
+    @JsonProperty
+    private Integer lastStatusCode;
+
     public MgmtMaintenanceWindow getMaintenanceWindow() {
         return maintenanceWindow;
     }
@@ -153,6 +156,14 @@ public class MgmtAction extends MgmtBaseEntity {
 
     public void setDetailStatus(final String detailStatus) {
         this.detailStatus = detailStatus;
+    }
+
+    public Integer getLastStatusCode() {
+        return lastStatusCode;
+    }
+
+    public void setLastStatusCode(final Integer lastStatusCode) {
+        this.lastStatusCode = lastStatusCode;
     }
 
 }

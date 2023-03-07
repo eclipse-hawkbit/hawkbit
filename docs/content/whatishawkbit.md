@@ -2,7 +2,7 @@
 title: What is hawkBit?
 weight: 10
 ---
-Eclipse hawkBit&trade; is an domain-independent back-end framework for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
+Eclipse hawkBit&trade; is a domain-independent back-end framework for rolling out software updates to constrained edge devices as well as more powerful controllers and gateways connected to IP based networking infrastructure.
 
 ![](../images/hawkbit_logo.png)
 
@@ -11,7 +11,7 @@ Having software update capabilities ensures a secure IoT by means that it gives 
 
 A more charming argument for software update is that it enables agile development for hardware and hardware near development. Concepts like a minimum viable product can be applied for devices as not all features need to be ready at manufacturing time. Changes on the cloud side of the IoT project can be applied to the devices at runtime as well.
 
-Sometimes Software Update is a business model on its own as it makes devices much more attractive to the customer if they are updateable, i.e. they do not only buy a product because of its current feature set but make also a bet on its future capabilities. In addition new revenue streams may arise from the fact that feature extensions can potentially be monetized (e.g. Apps) without the need to design, manufacture and ship a new device (revision).
+Sometimes Software Update is a business model on its own as it makes devices much more attractive to the customer if they are updatable, i.e. they do not only buy a product because of its current feature set but make also a bet on its future capabilities. In addition new revenue streams may arise from the fact that feature extensions can potentially be monetized (e.g. Apps) without the need to design, manufacture and ship a new device (revision).
 
 ## Why hawkBit?
 

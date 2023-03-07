@@ -40,24 +40,23 @@ Note: the DMF protocol was intended to be compatible to other use cases by desig
 
 Message to register and update a provisioning target.
 
-Header | Description                                      | Type                         | Mandatory
--------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
-type           | Type of the message                              | Fixed string "THING_CREATED" | true
-thingId        | The ID of the registered provisioning target   | String                       | true
-tenant         | The tenant this provisioning target belongs to | String                       | true
-sender         | Name of the message sender                       | String                       | false
+| Header  | Description                                    | Type                         | Mandatory |
+|---------|------------------------------------------------|------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "THING_CREATED" | true      |
+| thingId | The ID of the registered provisioning target   | String                       | true      |
+| tenant  | The tenant this provisioning target belongs to | String                       | true      |
+| sender  | Name of the message sender                     | String                       | false     |
 
-
-Message Properties | Description                                                                                          | Type   | Mandatory
------------------- | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload                                                                      | String | true
-reply_to           | Exchange to reply to                                                                                 | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
+| reply_to           | Exchange to reply to            | String | true      |
 
 Example headers and payload:
 
-Header                                                                             | MessageProperties
------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------
-type=THING\_CREATED <br /> tenant=default <br /> thingId=abc  <br /> sender=myClient | content\_type=application/json <br /> reply_to=myExchangeToReplyTo
+| Header                                                                               | MessageProperties                                                  |
+|--------------------------------------------------------------------------------------|--------------------------------------------------------------------|
+| type=THING\_CREATED <br /> tenant=default <br /> thingId=abc  <br /> sender=myClient | content\_type=application/json <br /> reply_to=myExchangeToReplyTo |
 
 Payload Template (optional):
 
@@ -82,34 +81,32 @@ The "attributeUpdate" property provides the attributes of the thing, for details
 
 Message to request the deletion of a provisioning target.
 
-Header | Description                                      | Type                         | Mandatory
--------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
-type           | Type of the message                              | Fixed string "THING_REMOVED" | true
-thingId        | The ID of the registered provisioning target   | String                       | true
-tenant         | The tenant this provisioning target belongs to | String                       | false
+| Header  | Description                                    | Type                         | Mandatory |
+|---------|------------------------------------------------|------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "THING_REMOVED" | true      |
+| thingId | The ID of the registered provisioning target   | String                       | true      |
+| tenant  | The tenant this provisioning target belongs to | String                       | false     |
 
-Message Properties | Description                                                                                          | Type   | Mandatory
------------------- | ---------------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload                                                                      | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Example headers
 
-Header                                                                             | MessageProperties
------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------
-type=THING\_REMOVED <br /> tenant=default <br /> thingId=abc | content\_type=application/json
-
+| Header                                                       | MessageProperties              |
+|--------------------------------------------------------------|--------------------------------|
+| type=THING\_REMOVED <br /> tenant=default <br /> thingId=abc | content\_type=application/json |
 
 ### UPDATE_ATTRIBUTES
 
 Message to update target attributes. This message can be send in response to a REQUEST_ATTRIBUTES_UPDATE event, sent by hawkBit.
 
-| Header | Description | Type | Mandatory
-|-----------------------------|----------------------------------|-------------------------------------|----------------
-| type          | Type of the message              | Fixed string "EVENT"       | true
-| topic         | Topic name identifying the event | Fixed string "UPDATE_ATTRIBUTES" | true
-| thingId       | The ID of the registered thing   | String                              | true
-| tenant        | The tenant this thing belongs to | String                              | false
-
+| Header  | Description                      | Type                             | Mandatory |
+|---------|----------------------------------|----------------------------------|-----------|
+| type    | Type of the message              | Fixed string "EVENT"             | true      |
+| topic   | Topic name identifying the event | Fixed string "UPDATE_ATTRIBUTES" | true      |
+| thingId | The ID of the registered thing   | String                           | true      |
+| tenant  | The tenant this thing belongs to | String                           | false     |
 
 | Message Properties          | Description                      | Type   | Mandatory |
 |-----------------------------|----------------------------------|--------|-----------|
@@ -117,9 +114,9 @@ Message to update target attributes. This message can be send in response to a R
 
 Example header and payload:
 
-| Header                               | MessageProperties               |
-|---------------------------------------|---------------------------------|
-| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=UPDATE\_ATTRIBUTES | content\_type=application/json <br />
+| Header                                                                               | MessageProperties                     |
+|--------------------------------------------------------------------------------------|---------------------------------------|
+| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=UPDATE\_ATTRIBUTES | content\_type=application/json <br /> |
 
 Payload Template:
 
@@ -135,26 +132,25 @@ Payload Template:
 
 The "mode" property specifies the update mode that should be applied. This property is optional. Possible [mode](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfUpdateMode.java) values:
 
-Value           | Description
---------------- | ---------------------------------------
-MERGE           | The target attributes specified in the payload are merged into the existing attributes. This is the default mode that is applied if no "mode" property is specified in the payload.
-REPLACE         | The existing attributes are replaced with the target attributes specified in the payload.
-REMOVE          | The target attributes specified in the payload are removed from the existing attributes.
-
+| Value   | Description                                                                                                                                                                         |
+|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MERGE   | The target attributes specified in the payload are merged into the existing attributes. This is the default mode that is applied if no "mode" property is specified in the payload. |
+| REPLACE | The existing attributes are replaced with the target attributes specified in the payload.                                                                                           |
+| REMOVE  | The target attributes specified in the payload are removed from the existing attributes.                                                                                            |
 
 ### UPDATE_ACTION_STATUS
 
 Message to send an action status event to hawkBit.
 
-Header | Description                      | Type                                | Mandatory
------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------
-type   | Type of the message              | Fixed string "EVENT"                | true
-topic  | Topic name identifying the event | Fixed string "UPDATE_ACTION_STATUS" | true
-tenant | The tenant this thing belongs to | String                              | false
+| Header | Description                      | Type                                | Mandatory |
+|--------|----------------------------------|-------------------------------------|-----------|
+| type   | Type of the message              | Fixed string "EVENT"                | true      |
+| topic  | Topic name identifying the event | Fixed string "UPDATE_ACTION_STATUS" | true      |
+| tenant | The tenant this thing belongs to | String                              | false     |
 
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Payload Template (the Java representation is [ActionUpdateStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionUpdateStatus.java)):
 
@@ -169,23 +165,23 @@ Payload Template (the Java representation is [ActionUpdateStatus](https://github
 
 Possible [actionStatus](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfActionStatus.java) values:
 
-Value           | Description
---------------- | ---------------------------------------
-DOWNLOAD        | Device is downloading
-DOWNLOADED      | Device completed download
-RETRIEVED       | Device has retrieved the artifact
-RUNNING         | Update is running
-FINISHED        | Update process finished successful
-ERROR           | Error during update process
-WARNING         | Warning during update process
-CANCELED        | Cancel update process successful
-CANCEL_REJECTED | Cancel update process has been rejected
+| Value           | Description                             |
+|-----------------|-----------------------------------------|
+| DOWNLOAD        | Device is downloading                   |
+| DOWNLOADED      | Device completed download               |
+| RETRIEVED       | Device has retrieved the artifact       |
+| RUNNING         | Update is running                       |
+| FINISHED        | Update process finished successful      |
+| ERROR           | Error during update process             |
+| WARNING         | Warning during update process           |
+| CANCELED        | Cancel update process successful        |
+| CANCEL_REJECTED | Cancel update process has been rejected |
 
 Example header and payload:
 
-Header                                                                 | MessageProperties
------------------------------------------------------------------------ | -----------------------------
-type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+| Header                                                                | MessageProperties             |
+|-----------------------------------------------------------------------|-------------------------------|
+| type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json |
 
 ```json
 {
@@ -200,16 +196,14 @@ type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_
 
 hawkBit allows DMF clients to check the availability of the DMF service. For this scenario DMF specifies a PING message that can be sent by the client:
 
-Header  | Description                      | Type                           | Mandatory
-------- | -------------------------------- | ------------------------------ | -------------------------------------------------------------
-type    | Type of the message              | Fixed string "PING"            | true
-tenant  | The tenant the PING belongs to   | String                         | false
+| Header | Description                    | Type                | Mandatory |
+|--------|--------------------------------|---------------------|-----------|
+| type   | Type of the message            | Fixed string "PING" | true      |
+| tenant | The tenant the PING belongs to | String              | false     |
 
-
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-correlationId | CorrelationId that allows the client to map a PING request to PING_RESPONSE | String | true
-
+| Message Properties | Description                                                                 | Type   | Mandatory |
+|--------------------|-----------------------------------------------------------------------------|--------|-----------|
+| correlationId      | CorrelationId that allows the client to map a PING request to PING_RESPONSE | String | true      |
 
 ## Messages sent by hawkBit (hawkBit -> Client)
 
@@ -217,16 +211,16 @@ correlationId | CorrelationId that allows the client to map a PING request to PI
 
 Message to cancel an update task.
 
-Header  | Description                      | Type                           | Mandatory
-------- | -------------------------------- | ------------------------------ | -------------------------------------------------------------
-type    | Type of the message              | Fixed string "Event"           | true
-thingId | The ID of the registered provisioning target   | String                         | true
-topic   | Topic name identifying the event | Fixed string "CANCEL_DOWNLOAD" | true
-tenant  | The tenant this provisioning target belongs to | String                         | false
+| Header  | Description                                    | Type                           | Mandatory |
+|---------|------------------------------------------------|--------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "Event"           | true      |
+| thingId | The ID of the registered provisioning target   | String                         | true      |
+| topic   | Topic name identifying the event               | Fixed string "CANCEL_DOWNLOAD" | true      |
+| tenant  | The tenant this provisioning target belongs to | String                         | false     |
 
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Payload template:
 
@@ -238,9 +232,9 @@ Payload template:
 
 Example Headers and Payload:
 
-| Header                               | MessageProperties               |
-|---------------------------------------|---------------------------------|
-| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=CANCEL\_DOWNLOAD   | content_type=application/json  
+| Header                                                                             | MessageProperties             |
+|------------------------------------------------------------------------------------|-------------------------------|
+| type=EVENT <br /> tenant=default <br /> thingId=abc  <br /> topic=CANCEL\_DOWNLOAD | content_type=application/json |
 
 ```json
 {
@@ -252,9 +246,9 @@ After sending this message, an action status event with either actionStatus=CANC
 
 Example header and payload when cancellation is successful:
 
-Header                                                                 | MessageProperties
------------------------------------------------------------------------ | -----------------------------
-type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+| Header                                                                | MessageProperties             |
+|-----------------------------------------------------------------------|-------------------------------|
+| type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json |
 
 ```json
 {
@@ -267,9 +261,9 @@ type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_
 
 Example header and payload when cancellation is rejected:
 
-Header                                                                 | MessageProperties
------------------------------------------------------------------------ | -----------------------------
-type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json
+| Header                                                                | MessageProperties             |
+|-----------------------------------------------------------------------|-------------------------------|
+| type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_type=application/json |
 
 ```json
 {
@@ -285,16 +279,16 @@ type=EVENT  <br /> tenant=default <br /> topic=UPDATE\_ACTION\_STATUS | content_
 
 Message sent by hawkBit to initialize an update or download task. Note: in case of a maintenance window configured but not yet active the message will have the topic _DOWNLOAD_ instead of _DOWNLOAD_AND_INSTALL_.
 
-Header  | Description                      | Type                                | Mandatory
-------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------
-type    | Type of the message              | Fixed string "EVENT"                | true
-thingId | The ID of the registered provisioning target   | String                              | true
-topic   | Topic name identifying the event | Fixed string "DOWNLOAD_AND_INSTALL" or "DOWNLOAD" | true
-tenant  | The tenant this provisioning target belongs to | String                              | false
+| Header  | Description                                    | Type                                              | Mandatory |
+|---------|------------------------------------------------|---------------------------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "EVENT"                              | true      |
+| thingId | The ID of the registered provisioning target   | String                                            | true      |
+| topic   | Topic name identifying the event               | Fixed string "DOWNLOAD_AND_INSTALL" or "DOWNLOAD" | true      |
+| tenant  | The tenant this provisioning target belongs to | String                                            | false     |
 
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Payload Template (the Java representation is [DmfDownloadAndUpdateRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfDownloadAndUpdateRequest.java)):
 
@@ -332,9 +326,9 @@ Payload Template (the Java representation is [DmfDownloadAndUpdateRequest](https
 
 Example header and payload:
 
-Header                                                                                      | MessageProperties
-------------------------------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=DOWNLOAD\_AND\_INSTALL | content_type=application/json
+| Header                                                                                    | MessageProperties             |
+|-------------------------------------------------------------------------------------------|-------------------------------|
+| type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=DOWNLOAD\_AND\_INSTALL | content_type=application/json |
 
 ```json
 {
@@ -376,16 +370,16 @@ If `multi.assignments.enabled` is enabled, this message is sent instead of DOWNL
 
  With weight, one can set the priority to the action. The higher the weight, the higher is the priority of an action.
 
-Header  | Description                      | Type                                | Mandatory
-------- | -------------------------------- | ----------------------------------- | -------------------------------------------------------------
-type    | Type of the message              | Fixed string "EVENT"                | true
-thingId | The ID of the registered provisioning target   | String                              | true
-topic   | Topic name identifying the event | Fixed string "MULTI_ACTION" | true
-tenant  | The tenant this provisioning target belongs to | String                              | false
+| Header  | Description                                    | Type                        | Mandatory |
+|---------|------------------------------------------------|-----------------------------|-----------|
+| type    | Type of the message                            | Fixed string "EVENT"        | true      |
+| thingId | The ID of the registered provisioning target   | String                      | true      |
+| topic   | Topic name identifying the event               | Fixed string "MULTI_ACTION" | true      |
+| tenant  | The tenant this provisioning target belongs to | String                      | false     |
 
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-content_type       | The content type of the payload | String | true
+| Message Properties | Description                     | Type   | Mandatory |
+|--------------------|---------------------------------|--------|-----------|
+| content_type       | The content type of the payload | String | true      |
 
 Payload Template (the Java representation is [DmfMultiActionRequest](https://github.com/eclipse/hawkbit/tree/master/hawkbit-dmf/hawkbit-dmf-api/src/main/java/org/eclipse/hawkbit/dmf/json/model/DmfMultiActionRequest.java)):
 
@@ -460,9 +454,9 @@ Payload Template (the Java representation is [DmfMultiActionRequest](https://git
 
 Example header and payload:
 
-Header                                                                                      | MessageProperties
-------------------------------------------------------------------------------------------- | -----------------------------
-type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=MULTI\_ACTION | content_type=application/json
+| Header                                                                           | MessageProperties             |
+|----------------------------------------------------------------------------------|-------------------------------|
+| type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=MULTI\_ACTION | content_type=application/json |
 
 ```json
 [{
@@ -538,57 +532,56 @@ type=EVENT  <br /> tenant=default <br /> thingId=abc  <br /> topic=MULTI\_ACTION
 
 Message sent by hawkBit when a target has been deleted.
 
-Header | Description                                      | Type                         | Mandatory
--------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
-type           | Type of the message                              | Fixed string "THING_DELETED" | true
-thingId        | The ID of the registered provisioning target     | String                       | true
-tenant         | The tenant this provisioning target belongs to   | String                       | true
+| Header  | Description                                    | Type                         | Mandatory |
+|---------|------------------------------------------------|------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "THING_DELETED" | true      |
+| thingId | The ID of the registered provisioning target   | String                       | true      |
+| tenant  | The tenant this provisioning target belongs to | String                       | true      |
 
 Example header:
 
-Header                                                                             | MessageProperties
------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------
-type=THING\_DELETED <br /> tenant=default <br /> thingId=abc                      | |
+| Header                                                       | MessageProperties |
+|--------------------------------------------------------------|-------------------|
+| type=THING\_DELETED <br /> tenant=default <br /> thingId=abc |                   |
 
 
 ### REQUEST_ATTRIBUTES_UPDATE
 
 Message sent by Eclipse hawkBit when a re-transmission of target attributes is requested.
 
-Header | Description                                      | Type                         | Mandatory
--------------- | ------------------------------------------------ | ---------------------------- | -------------------------------------------------------------
-type           | Type of the message                              | Fixed string "EVENT"         | true
-thingId        | The ID of the registered provisioning target     | String                       | true
-topic          | Topic name identifying the event                 | Fixed string "REQUEST_ATTRIBUTES_UPDATE" | true
-tenant         | The tenant this provisioning target belongs to   | String                       | true
+| Header  | Description                                    | Type                                     | Mandatory |
+|---------|------------------------------------------------|------------------------------------------|-----------|
+| type    | Type of the message                            | Fixed string "EVENT"                     | true      |
+| thingId | The ID of the registered provisioning target   | String                                   | true      |
+| topic   | Topic name identifying the event               | Fixed string "REQUEST_ATTRIBUTES_UPDATE" | true      |
+| tenant  | The tenant this provisioning target belongs to | String                                   | true      |
 
 Example headers:
 
-Header                                                                              | MessageProperties
------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------
-type=EVENT <br /> tenant=default <br /> thingId=abc <br /> topic=REQUEST\_ATTRIBUTES\_UPDATE | |
+| Header                                                                                       | MessageProperties |
+|----------------------------------------------------------------------------------------------|-------------------|
+| type=EVENT <br /> tenant=default <br /> thingId=abc <br /> topic=REQUEST\_ATTRIBUTES\_UPDATE |                   |
 
 
 ### PING_RESPONSE
 
 _hawkBit_ will respond to the PING message with a PING_RESPONSE type message that has the same correlationId as the original PING message:
 
-Header  | Description                      | Type                           | Mandatory
-------- | -------------------------------- | ------------------------------ | -------------------------------------------------------------
-type    | Type of the message | Fixed string "PING_RESPONSE" | true
-tenant  | The tenant the PING belongs to | String | false
+| Header | Description                    | Type                         | Mandatory |
+|--------|--------------------------------|------------------------------|-----------|
+| type   | Type of the message            | Fixed string "PING_RESPONSE" | true      |
+| tenant | The tenant the PING belongs to | String                       | false     |
 
-
-Message Properties | Description                     | Type   | Mandatory
------------------- | ------------------------------- | ------ | -------------------------------------------------------------
-correlationId | CorrelationId of the original PING request | String | true
-content_type       | The content type of the payload | String | true
+| Message Properties | Description                                | Type   | Mandatory |
+|--------------------|--------------------------------------------|--------|-----------|
+| correlationId      | CorrelationId of the original PING request | String | true      |
+| content_type       | The content type of the payload            | String | true      |
 
 The PING_RESPONSE also contains a timestamp (i.e. the difference, measured in milliseconds, between the current time and midnight, January 1, 1970 UTC) as plain text. It is not guaranteed that this timestamp is completely accurate.
 
-Header                                                                                      | MessageProperties
-------------------------------------------------------------------------------------------- | -----------------------------
-type=PING_RESPONSE  <br /> tenant=default | content_type=text/plain |
+| Header                                    | MessageProperties       |
+|-------------------------------------------|-------------------------|
+| type=PING_RESPONSE  <br /> tenant=default | content_type=text/plain |
 
 ```text
 1505215891247

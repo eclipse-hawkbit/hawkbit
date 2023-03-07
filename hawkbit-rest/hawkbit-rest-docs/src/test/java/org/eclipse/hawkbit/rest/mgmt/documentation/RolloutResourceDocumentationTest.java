@@ -141,6 +141,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         if (withDetails) {
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalTargetsPerStatus")
                     .description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS_PER_STATUS));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalGroups")
+                    .description(MgmtApiModelProperties.ROLLOUT_TOTAL_GROUPS));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.start")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_START_SYNC));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.pause")
