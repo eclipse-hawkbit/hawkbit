@@ -45,7 +45,7 @@ Available Management APIs resources are:
 
 For all requests an `Authorization` header has to be set.
 
-* Username: `Tenant\username`
+* Username: `username`
 * Password: `password`
 
 Also have a look to the [Security](../../concepts/authentication/) chapter.
