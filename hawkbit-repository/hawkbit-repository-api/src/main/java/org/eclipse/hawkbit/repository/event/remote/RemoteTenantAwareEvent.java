@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.event.remote;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
+import com.cronutils.utils.StringUtils;
+
 /**
  * A distributed tenant aware event. It's the base class of the other
  * distributed events. All the necessary information of distributing events to
@@ -40,7 +42,8 @@ public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements Te
      *            the applicationId
      */
     public RemoteTenantAwareEvent(final Object source, final String tenant, final String applicationId) {
-        super(source, applicationId);
+        // due to a bug in Spring Cloud, we cannot pass null for applicationId
+        super(source, applicationId != null ? applicationId : StringUtils.EMPTY);
         this.tenant = tenant;
     }
 
