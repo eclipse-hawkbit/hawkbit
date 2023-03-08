@@ -68,14 +68,15 @@ public final class MgmtTargetFilterQueryMapper {
             }
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel());
+        targetRest.add(
+                linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel().expand());
 
         return targetRest;
     }
 
     static void addLinks(final MgmtTargetFilterQuery targetRest) {
         targetRest.add(linkTo(methodOn(MgmtTargetFilterQueryRestApi.class)
-                .postAssignedDistributionSet(targetRest.getFilterId(), null)).withRel("autoAssignDS"));
+                .postAssignedDistributionSet(targetRest.getFilterId(), null)).withRel("autoAssignDS").expand());
     }
 
     static TargetFilterQueryCreate fromRequest(final EntityFactory entityFactory,

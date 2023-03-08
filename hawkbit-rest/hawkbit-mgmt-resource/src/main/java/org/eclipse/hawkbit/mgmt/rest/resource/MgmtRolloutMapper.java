@@ -93,22 +93,26 @@ final class MgmtRolloutMapper {
             }
             body.setTotalGroups(rollout.getRolloutGroupsCreated());
 
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume"));
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).triggerNextGroup(rollout.getId())).withRel("triggerNextGroup"));
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).approve(rollout.getId(), null)).withRel("approve"));
-            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny"));
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start").expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause").expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume").expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).triggerNextGroup(rollout.getId()))
+                    .withRel("triggerNextGroup").expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).approve(rollout.getId(), null)).withRel("approve")
+                    .expand());
+            body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups"));
+                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups")
+                            .expand());
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
             body.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
-                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()));
+                    .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion())
+                    .expand());
         }
 
-        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel());
+        body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId())).withSelfRel().expand());
         return body;
     }
 

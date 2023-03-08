@@ -86,7 +86,7 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(DISTRIBUTIONSETTAGS_ROOT + assigned.getId()))
                 .andExpect(jsonPath("_links.assignedDistributionSets.href",
-                        equalTo(DISTRIBUTIONSETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")));
+                        equalTo(DISTRIBUTIONSETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50")));
     }
 
     @Test

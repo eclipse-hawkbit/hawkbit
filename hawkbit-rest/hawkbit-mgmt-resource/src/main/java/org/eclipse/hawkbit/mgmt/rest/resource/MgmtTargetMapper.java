@@ -72,25 +72,26 @@ public final class MgmtTargetMapper {
      */
     public static void addTargetLinks(final MgmtTarget response) {
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAssignedDistributionSet(response.getControllerId()))
-                .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET));
+                .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_DISTRIBUTION_SET).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getInstalledDistributionSet(response.getControllerId()))
-                .withRel(MgmtRestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET));
+                .withRel(MgmtRestConstants.TARGET_V1_INSTALLED_DISTRIBUTION_SET).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAttributes(response.getControllerId()))
-                .withRel(MgmtRestConstants.TARGET_V1_ATTRIBUTES));
+                .withRel(MgmtRestConstants.TARGET_V1_ATTRIBUTES).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionHistory(response.getControllerId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionFields.ID.getFieldName() + ":" + SortDirection.DESC, null))
                         .withRel(MgmtRestConstants.TARGET_V1_ACTIONS).expand());
         response.add(linkTo(methodOn(MgmtTargetRestApi.class).getMetadata(response.getControllerId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata"));
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("metadata")
+                        .expand());
         if (response.getTargetType() != null) {
             response.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(response.getTargetType()))
-                    .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE));
+                    .withRel(MgmtRestConstants.TARGET_V1_ASSIGNED_TARGET_TYPE).expand());
         }
         if (response.getAutoConfirmActive() != null) {
             response.add(linkTo(methodOn(MgmtTargetRestApi.class).getAutoConfirmStatus(response.getControllerId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_AUTO_CONFIRM));
+                    .withRel(MgmtRestConstants.TARGET_V1_AUTO_CONFIRM).expand());
         }
     }
 
@@ -102,11 +103,11 @@ public final class MgmtTargetMapper {
             response.setInitiator(status.getInitiator());
             response.setRemark(status.getRemark());
             response.add(linkTo(methodOn(MgmtTargetRestApi.class).deactivateAutoConfirm(target.getControllerId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_DEACTIVATE_AUTO_CONFIRM));
+                    .withRel(MgmtRestConstants.TARGET_V1_DEACTIVATE_AUTO_CONFIRM).expand());
         } else {
             response = MgmtTargetAutoConfirm.disabled();
             response.add(linkTo(methodOn(MgmtTargetRestApi.class).activateAutoConfirm(target.getControllerId(), null))
-                    .withRel(MgmtRestConstants.TARGET_V1_ACTIVATE_AUTO_CONFIRM));
+                    .withRel(MgmtRestConstants.TARGET_V1_ACTIVATE_AUTO_CONFIRM).expand());
         }
         return response;
     }
@@ -192,7 +193,8 @@ public final class MgmtTargetMapper {
             targetRest.setAutoConfirmActive(target.getAutoConfirmationStatus() != null);
         }
 
-        targetRest.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel());
+        targetRest.add(
+                linkTo(methodOn(MgmtTargetRestApi.class).getTarget(target.getControllerId())).withSelfRel().expand());
 
         return targetRest;
     }
@@ -260,7 +262,7 @@ public final class MgmtTargetMapper {
         action.getLastActionStatusCode().ifPresent(statusCode -> {
             result.setLastStatusCode(statusCode);
         });
-        
+
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.setRollout(rollout.getId());
@@ -279,7 +281,8 @@ public final class MgmtTargetMapper {
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
 
-        result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel());
+        result.add(
+                linkTo(methodOn(MgmtTargetRestApi.class).getAction(targetId, action.getId())).withSelfRel().expand());
 
         return result;
     }
@@ -289,25 +292,26 @@ public final class MgmtTargetMapper {
 
         if (action.isCancelingOrCanceled()) {
             result.add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, action.getId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION));
+                    .withRel(MgmtRestConstants.TARGET_V1_CANCELED_ACTION).expand());
         }
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getTarget(controllerId)).withRel("target")
-                .withName(action.getTarget().getName()));
+                .withName(action.getTarget().getName()).expand());
 
         final DistributionSet distributionSet = action.getDistributionSet();
         result.add(linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSet(distributionSet.getId()))
-                .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion()));
+                .withRel("distributionset").withName(distributionSet.getName() + ":" + distributionSet.getVersion())
+                .expand());
 
         result.add(linkTo(methodOn(MgmtTargetRestApi.class).getActionStatusList(controllerId, action.getId(), 0,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE,
                 ActionStatusFields.ID.getFieldName() + ":" + SortDirection.DESC))
-                        .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS));
+                        .withRel(MgmtRestConstants.TARGET_V1_ACTION_STATUS).expand());
 
         final Rollout rollout = action.getRollout();
         if (rollout != null) {
             result.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRollout(rollout.getId()))
-                    .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT).withName(rollout.getName()));
+                    .withRel(MgmtRestConstants.TARGET_V1_ROLLOUT).withName(rollout.getName()).expand());
         }
 
         return result;

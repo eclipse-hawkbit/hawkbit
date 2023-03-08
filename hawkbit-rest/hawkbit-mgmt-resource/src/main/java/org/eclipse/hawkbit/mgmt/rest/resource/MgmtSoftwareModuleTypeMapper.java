@@ -72,7 +72,7 @@ final class MgmtSoftwareModuleTypeMapper {
         result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
-                .withSelfRel());
+                .withSelfRel().expand());
 
         return result;
     }

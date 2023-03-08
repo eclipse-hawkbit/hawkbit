@@ -21,7 +21,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Representation of an Action Id as a Json Object with link to the Action resource
+ * Representation of an Action Id as a Json Object with link to the Action
+ * resource
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,14 +35,15 @@ public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
     /**
      * Constructor
+     * 
      * @param actionId
-     *              the actionId
+     *            the actionId
      * @param controllerId
-     *              the controller Id
+     *            the controller Id
      */
     public MgmtActionId(final String controllerId, final long actionId) {
         this.actionId = actionId;
-        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, actionId)).withSelfRel());
+        add(linkTo(methodOn(MgmtTargetRestApi.class).getAction(controllerId, actionId)).withSelfRel().expand());
     }
 
     @JsonProperty("id")

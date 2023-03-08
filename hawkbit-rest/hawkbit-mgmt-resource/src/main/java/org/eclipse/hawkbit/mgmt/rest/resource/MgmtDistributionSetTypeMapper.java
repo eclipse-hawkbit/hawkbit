@@ -86,7 +86,7 @@ final class MgmtDistributionSetTypeMapper {
         result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
-                .withSelfRel());
+                .withSelfRel().expand());
 
         return result;
     }
@@ -94,10 +94,10 @@ final class MgmtDistributionSetTypeMapper {
     static void addLinks(final MgmtDistributionSetType result) {
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getMandatoryModules(result.getModuleId()))
-                .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES));
+                .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_MANDATORY_MODULES).expand());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getOptionalModules(result.getModuleId()))
-                .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES));
+                .withRel(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_OPTIONAL_MODULES).expand());
     }
 
 }
