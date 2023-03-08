@@ -578,9 +578,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             finalizedValue = escapedValue.replace(ESCAPE_CHAR_WITH_ASTERISK, "$").replace(LIKE_WILDCARD, '%')
                     .replace("$", ESCAPE_CHAR_WITH_ASTERISK).toUpperCase();
         } else {
-            finalizedValue = escapedValue.replace(LIKE_WILDCARD, '%').toUpperCase();
+            finalizedValue = escapedValue.replace(LIKE_WILDCARD, '%');
         }
-        return finalizedValue;
+        return finalizedValue.toUpperCase();
     }
 
     @SuppressWarnings("unchecked")
