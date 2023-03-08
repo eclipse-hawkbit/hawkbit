@@ -104,7 +104,7 @@ public final class DataConversionHelper {
                         new SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(), artifact.getId(),
                                 artifact.getSha1Hash())),
                         ApiType.DDI, request.getURI())
-                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel())));
+                .forEach(entry -> file.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
 
         return file;
 
@@ -118,19 +118,19 @@ public final class DataConversionHelper {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .deactivateAutoConfirmation(tenantAware.getCurrentTenant(), controllerId))
-                    .withRel(DdiRestConstants.AUTO_CONFIRM_DEACTIVATE));
+                    .withRel(DdiRestConstants.AUTO_CONFIRM_DEACTIVATE).expand());
         } else {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .activateAutoConfirmation(tenantAware.getCurrentTenant(), controllerId, null))
-                    .withRel(DdiRestConstants.AUTO_CONFIRM_ACTIVATE));
+                    .withRel(DdiRestConstants.AUTO_CONFIRM_ACTIVATE).expand());
         }
         if (activeAction != null && activeAction.isWaitingConfirmation()) {
             confirmationBase.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .getConfirmationBaseAction(tenantAware.getCurrentTenant(), controllerId,
                                     activeAction.getId(), calculateEtag(activeAction), null))
-                    .withRel(DdiRestConstants.CONFIRMATION_BASE));
+                    .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
         }
 
         return confirmationBase;
@@ -147,14 +147,14 @@ public final class DataConversionHelper {
                         .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getConfirmationBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
                                 activeAction.getId(), calculateEtag(activeAction), null))
-                        .withRel(DdiRestConstants.CONFIRMATION_BASE));
+                        .withRel(DdiRestConstants.CONFIRMATION_BASE).expand());
 
             } else if (activeAction.isCancelingOrCanceled()) {
                 result.add(WebMvcLinkBuilder
                         .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                 .getControllerCancelAction(tenantAware.getCurrentTenant(), target.getControllerId(),
                                         activeAction.getId()))
-                        .withRel(DdiRestConstants.CANCEL_ACTION));
+                        .withRel(DdiRestConstants.CANCEL_ACTION).expand());
             } else {
                 // we need to add the hashcode here of the actionWithStatus
                 // because the action might
@@ -165,7 +165,7 @@ public final class DataConversionHelper {
                         .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                         .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
                                 activeAction.getId(), calculateEtag(activeAction), null))
-                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION));
+                        .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
             }
         }
 
@@ -175,14 +175,14 @@ public final class DataConversionHelper {
                             .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                                     .getControllerInstalledAction(tenantAware.getCurrentTenant(),
                                             target.getControllerId(), installedAction.getId(), null))
-                            .withRel(DdiRestConstants.INSTALLED_BASE_ACTION));
+                            .withRel(DdiRestConstants.INSTALLED_BASE_ACTION).expand());
         }
 
         if (target.isRequestControllerAttributes()) {
             result.add(WebMvcLinkBuilder
                     .linkTo(WebMvcLinkBuilder.methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
                             .putConfigData(null, tenantAware.getCurrentTenant(), target.getControllerId()))
-                    .withRel(DdiRestConstants.CONFIG_DATA_ACTION));
+                    .withRel(DdiRestConstants.CONFIG_DATA_ACTION).expand());
         }
 
         return result;
