@@ -151,6 +151,7 @@
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
 
       <!-- Vaadin versions - START -->
+      <!-- Vaadin version 8.14.3 is the last version running under an Apache 2.0 license -->
       <vaadin.version>8.14.3</vaadin.version>
       <vaadin.spring.version>3.2.1</vaadin.spring.version>
       <vaadin.spring.addon.version>2.0.0.RELEASE</vaadin.spring.addon.version>

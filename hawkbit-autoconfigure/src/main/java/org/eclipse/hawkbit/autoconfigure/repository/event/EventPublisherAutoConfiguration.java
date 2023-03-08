@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
@@ -43,6 +44,7 @@ import io.protostuff.Schema;
 @Configuration
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
 @PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
+@EnableConfigurationProperties(BusProperties.class)
 public class EventPublisherAutoConfiguration {
     /**
      * Server internal event publisher that allows parallel event processing if
@@ -58,13 +60,7 @@ public class EventPublisherAutoConfiguration {
         simpleApplicationEventMulticaster.setTaskExecutor(executor);
         return simpleApplicationEventMulticaster;
     }
-    
-    @Bean
-    @ConditionalOnMissingBean
-    public BusProperties busProperties() {
-        return new BusProperties();
-    }    
-    
+
     /**
      * Bean for creating a singleton instance of the
      * {@link EventPublisherHolder}
