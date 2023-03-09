@@ -102,6 +102,8 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_DS_ID = "the ID of distributionset of this rollout";
     public static final String ROLLOUT_TOTAL_TARGETS = "the total targets of a rollout";
     public static final String ROLLOUT_TOTAL_TARGETS_PER_STATUS = "the total targets per status";
+
+    public static final String ROLLOUT_TOTAL_GROUPS = "the total number of groups created by this rollout";
     public static final String ROLLOUT_STATUS = "the status of this rollout";
     public static final String ROLLOUT_TYPE = "the type of this rollout";
     public static final String ROLLOUT_GROUP_STATUS = "the status of this rollout group";

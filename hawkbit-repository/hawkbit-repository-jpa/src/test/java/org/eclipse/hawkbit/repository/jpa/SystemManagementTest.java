@@ -20,8 +20,10 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
+import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -29,6 +31,7 @@ import io.qameta.allure.Story;
 
 @Feature("Component Tests - Repository")
 @Story("System Management")
+@ExtendWith(DisposableSqlTestDatabaseExtension.class)
 public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
     @Test

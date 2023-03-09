@@ -19,17 +19,17 @@ public class JUnitTestLoggerExtension implements BeforeTestExecutionCallback, Te
     private static final Logger LOG = LoggerFactory.getLogger(JUnitTestLoggerExtension.class);
 
     @Override
-    public void testSuccessful(ExtensionContext context) {
+    public void testSuccessful(final ExtensionContext context) {
         LOG.info("Test {} succeeded.", context.getTestMethod());
     }
 
     @Override
-    public void testFailed(ExtensionContext context, Throwable cause) {
-        LOG.error("Test {} failed with {}.", context.getTestMethod());
+    public void testFailed(final ExtensionContext context, final Throwable cause) {
+        LOG.error("Test {} failed with {}.", context.getTestMethod(), cause.getMessage());
     }
 
     @Override
-    public void beforeTestExecution(ExtensionContext context) throws Exception {
+    public void beforeTestExecution(final ExtensionContext context) {
         LOG.info("Starting Test {}...", context.getTestMethod());
     }
 }

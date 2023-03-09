@@ -456,7 +456,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -474,7 +475,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -494,7 +496,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -526,7 +529,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/triggerNextGroup"))))
                 .andExpect(jsonPath("$._links.groups.href",
                         allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
-                .andExpect(jsonPath("$.deleted", equalTo(false)));
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Test
@@ -568,6 +572,24 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
                 .andExpect(jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
                 .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
+    }
+
+    @Test
+    @Description("Testing representation mode of rollout paged list")
+    void rolloutPagedListRepresentationMode() throws Exception {
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        testdataFactory.createTargets(20, "target", "rollout");
+
+        // setup - create 2 rollouts
+        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED);
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED);
+
+        // Run here, because Scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false);
+        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true);
     }
 
     @Test
@@ -1299,6 +1321,92 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             controllerManagement
                     .addUpdateActionStatus(entityFactory.actionStatus().create(action).status(status).message("test"));
         }
+    }
+
+    private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate, boolean isFullRepresentation) throws Exception {
+        mvc.perform(get(urlTemplate).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+            .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
+            .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+            .andExpect(jsonPath("content[0].status", equalTo("ready")))
+            .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("id==target*")))
+            .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+            .andExpect(jsonPath("content[0].createdBy", equalTo("bumlux")))
+            .andExpect(jsonPath("content[0].createdAt", not(equalTo(0))))
+            .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
+            .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
+            .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0].totalTargetsPerStatus").exists()
+                : jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0].totalGroups", equalTo(5))
+                : jsonPath("content[0].totalGroups").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.start.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.pause.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.resume.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.triggerNextGroup.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.approve.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.deny.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[0]._links.groups.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0]._links.distributionset.href", startsWith("http://localhost/rest/v1/distributionsets/"))
+                : jsonPath("content[0]._links.distributionset.href").doesNotExist())
+            .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+            .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
+            .andExpect(jsonPath("content[1].status", equalTo("ready")))
+            .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
+            .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())))
+            .andExpect(jsonPath("content[1].createdBy", equalTo("bumlux")))
+            .andExpect(jsonPath("content[1].createdAt", not(equalTo(0))))
+            .andExpect(jsonPath("content[1].lastModifiedBy", equalTo("bumlux")))
+            .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
+            .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1].totalTargetsPerStatus").exists()
+                : jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[0].totalGroups", equalTo(5))
+                : jsonPath("content[0].totalGroups").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.start.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.pause.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.resume.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.triggerNextGroup.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.approve.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.deny.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
+                : jsonPath("content[1]._links.groups.href").doesNotExist())
+            .andExpect(isFullRepresentation
+                ? jsonPath("$.content[1]._links.distributionset.href", startsWith("http://localhost/rest/v1/distributionsets/"))
+                : jsonPath("content[1]._links.distributionset.href").doesNotExist())
+            .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
 }
