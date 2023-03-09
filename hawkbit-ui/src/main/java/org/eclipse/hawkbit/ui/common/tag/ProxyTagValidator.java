@@ -47,7 +47,7 @@ public class ProxyTagValidator extends EntityValidator {
         }
 
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.tag.duplicate.check", trimmedName);
+            displayValidationError("message.tag.duplicate.check", entity.getName());
             return false;
         }
 
