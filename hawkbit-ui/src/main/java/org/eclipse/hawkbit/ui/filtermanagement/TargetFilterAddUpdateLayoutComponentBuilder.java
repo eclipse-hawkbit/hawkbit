@@ -31,8 +31,6 @@ import com.vaadin.ui.TextField;
  */
 public class TargetFilterAddUpdateLayoutComponentBuilder {
 
-    public static final String TEXTFIELD_FILTER_NAME = "textfield.name";
-
     private final VaadinMessageSource i18n;
     private final UiProperties uiProperties;
     private final RsqlValidationOracle rsqlValidationOracle;

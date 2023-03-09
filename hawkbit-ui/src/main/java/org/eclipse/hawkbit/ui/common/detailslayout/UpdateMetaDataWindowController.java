@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.eclipse.hawkbit.ui.common.event.EntityModifiedEventPayload;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update meta data window
@@ -128,9 +127,8 @@ public class UpdateMetaDataWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyMetaData entity) {
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isEntityValid(entity,
-                () -> hasKeyChanged(trimmedKey) && duplicateCheckCallback.test(trimmedKey));
+        final String key = entity.getKey();
+        return validator.isEntityValid(entity, () -> hasKeyChanged(key) && duplicateCheckCallback.test(key));
     }
 
     private boolean hasKeyChanged(final String trimmedKey) {

@@ -8,16 +8,6 @@
  */
 package org.eclipse.hawkbit.ui.common.builder;
 
-import com.vaadin.data.Binder;
-import com.vaadin.data.Binder.Binding;
-import com.vaadin.data.Binder.BindingBuilder;
-import com.vaadin.data.Validator;
-import com.vaadin.data.ValueProvider;
-import com.vaadin.server.Setter;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.TextArea;
-import com.vaadin.ui.TextField;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
 import org.eclipse.hawkbit.repository.model.Type;
@@ -42,10 +32,22 @@ import org.eclipse.hawkbit.ui.components.SPUIComponentProvider;
 import org.eclipse.hawkbit.ui.management.miscs.ActionTypeOptionGroupAssignmentLayout;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.ui.utils.TrimmingStringConverter;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 import org.springframework.util.StringUtils;
+
+import com.vaadin.data.Binder;
+import com.vaadin.data.Binder.Binding;
+import com.vaadin.data.Binder.BindingBuilder;
+import com.vaadin.data.Validator;
+import com.vaadin.data.ValueProvider;
+import com.vaadin.server.Setter;
+import com.vaadin.ui.CheckBox;
+import com.vaadin.ui.ComboBox;
+import com.vaadin.ui.TextArea;
+import com.vaadin.ui.TextField;
 
 /**
  * Builder class for from components
@@ -77,14 +79,14 @@ public final class FormComponentBuilder {
      * @return the TextField with its Binding
      */
     public static <T extends NameAware> BoundComponent<TextField> createNameInput(final Binder<T> binder,
-                                                                                  final VaadinMessageSource i18n, final String fieldId) {
+            final VaadinMessageSource i18n, final String fieldId) {
         final TextField nameInput = new TextFieldBuilder(NamedEntity.NAME_MAX_SIZE).id(fieldId)
-              .caption(i18n.getMessage(TEXTFIELD_NAME)).prompt(i18n.getMessage(TEXTFIELD_NAME)).buildTextComponent();
+                .caption(i18n.getMessage(TEXTFIELD_NAME)).prompt(i18n.getMessage(TEXTFIELD_NAME)).buildTextComponent();
         nameInput.setSizeUndefined();
 
-        final Binding<T, String> binding = binder.forField(nameInput)
-              .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_NAMEREQUIRED))
-              .bind(NameAware::getName, NameAware::setName);
+        final Binding<T, String> binding = binder.forField(nameInput).withConverter(new TrimmingStringConverter())
+                .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_NAMEREQUIRED))
+                .bind(NameAware::getName, NameAware::setName);
 
         return new BoundComponent<>(nameInput, binding);
     }
@@ -109,7 +111,7 @@ public final class FormComponentBuilder {
                 .buildTextComponent();
         versionInput.setSizeUndefined();
 
-        final Binding<T, String> binding = binder.forField(versionInput)
+        final Binding<T, String> binding = binder.forField(versionInput).withConverter(new TrimmingStringConverter())
                 .asRequired(i18n.getMessage(UIMessageIdProvider.MESSAGE_ERROR_VERSIONREQUIRED))
                 .bind(VersionAware::getVersion, VersionAware::setVersion);
 
@@ -136,8 +138,8 @@ public final class FormComponentBuilder {
     }
 
     public static <T> BoundComponent<TextArea> createBigTextInput(final Binder<T> binder,
-            final VaadinMessageSource i18n, final String fieldId, final String caption, final String prompt,
-            ValueProvider<T, String> getter, Setter<T, String> setter) {
+                                                                  final VaadinMessageSource i18n, final String fieldId, final String caption, final String prompt,
+                                                                  final ValueProvider<T, String> getter, final Setter<T, String> setter) {
         final TextArea descriptionInput = new TextAreaBuilder(NamedEntity.DESCRIPTION_MAX_SIZE).id(fieldId)
                 .caption(i18n.getMessage(caption)).prompt(i18n.getMessage(prompt)).style("text-area-style")
                 .buildTextComponent();
@@ -362,8 +364,8 @@ public final class FormComponentBuilder {
                 .buildTextComponent();
         typeKey.setSizeUndefined();
 
-        binder.forField(typeKey).asRequired(i18n.getMessage("message.type.key.empty")).bind(ProxyType::getKey,
-                ProxyType::setKey);
+        binder.forField(typeKey).withConverter(new TrimmingStringConverter())
+                .asRequired(i18n.getMessage("message.type.key.empty")).bind(ProxyType::getKey, ProxyType::setKey);
 
         return typeKey;
     }

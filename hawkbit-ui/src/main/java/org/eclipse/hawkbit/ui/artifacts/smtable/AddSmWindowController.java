@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for populating and saving data in Add Software Module Window.
@@ -110,10 +109,10 @@ public class AddSmWindowController
 
     @Override
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
+        final String name = entity.getName();
+        final String version = entity.getVersion();
         final Long typeId = entity.getTypeInfo().getId();
         return validator.isEntityValid(entity,
-                () -> smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
+                () -> smManagement.getByNameAndVersionAndType(name, version, typeId).isPresent());
     }
 }

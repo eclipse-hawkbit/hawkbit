@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common.detailslayout;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
 import org.springframework.util.StringUtils;
 
@@ -42,9 +42,8 @@ public class ProxyMetadataValidator extends EntityValidator {
             return false;
         }
 
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.metadata.duplicate.check", trimmedKey);
+            displayValidationError("message.metadata.duplicate.check", entity.getKey());
             return false;
         }
 

@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.tag.ProxyTagValidator;
 import org.eclipse.hawkbit.ui.management.tag.TagWindowLayout;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update distribution set tag window
@@ -94,9 +93,9 @@ public class UpdateDsTagWindowController extends AbstractUpdateNamedEntityWindow
 
     @Override
     protected boolean isEntityValid(final ProxyTag entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> hasNamedChanged(trimmedName) && dsTagManagement.getByName(trimmedName).isPresent());
+                () -> hasNamedChanged(name) && dsTagManagement.getByName(name).isPresent());
     }
 
     private boolean hasNamedChanged(final String trimmedName) {

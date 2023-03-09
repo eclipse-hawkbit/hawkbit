@@ -20,7 +20,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
-import org.springframework.util.StringUtils;
 
 /**
  * Add distribution set type window controller
@@ -89,9 +88,7 @@ public class AddDsTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isDsTypeValid(entity, () -> dsTypeManagement.getByKey(trimmedKey).isPresent(),
-                () -> dsTypeManagement.getByName(trimmedName).isPresent());
+        return validator.isDsTypeValid(entity, () -> dsTypeManagement.getByKey(entity.getKey()).isPresent(),
+                () -> dsTypeManagement.getByName(entity.getName()).isPresent());
     }
 }

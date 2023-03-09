@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.ui.common.event.EventView;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload;
 import org.eclipse.hawkbit.ui.common.event.SelectionChangedEventPayload.SelectionChangedEventType;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for add distribution set window
@@ -111,9 +110,7 @@ public class AddDsWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         return validator.isEntityValid(entity,
-                () -> dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
+                () -> dsManagement.getByNameAndVersion(entity.getName(), entity.getVersion()).isPresent());
     }
 }

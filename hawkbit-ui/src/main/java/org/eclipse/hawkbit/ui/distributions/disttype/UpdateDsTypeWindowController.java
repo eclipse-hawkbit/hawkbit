@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update distribution set type window
@@ -154,11 +153,11 @@ public class UpdateDsTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
+        final String name = entity.getName();
+        final String key = entity.getKey();
         return validator.isDsTypeValid(entity,
-                () -> hasKeyChanged(trimmedKey) && dsTypeManagement.getByKey(trimmedKey).isPresent(),
-                () -> hasNameChanged(trimmedName) && dsTypeManagement.getByName(trimmedName).isPresent());
+                () -> hasKeyChanged(key) && dsTypeManagement.getByKey(key).isPresent(),
+                () -> hasNameChanged(name) && dsTypeManagement.getByName(name).isPresent());
     }
 
     private boolean hasNameChanged(final String trimmedName) {

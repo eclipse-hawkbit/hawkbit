@@ -16,7 +16,6 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update target filter
@@ -106,9 +105,9 @@ public class UpdateTargetFilterController extends
 
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> hasNamedChanged(trimmedName) && targetFilterManagement.getByName(trimmedName).isPresent());
+                () -> hasNamedChanged(name) && targetFilterManagement.getByName(name).isPresent());
     }
 
     private boolean hasNamedChanged(final String trimmedName) {

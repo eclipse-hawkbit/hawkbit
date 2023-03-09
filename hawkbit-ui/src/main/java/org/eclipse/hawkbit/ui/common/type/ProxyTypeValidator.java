@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common.type;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.springframework.util.CollectionUtils;
@@ -93,8 +93,7 @@ public class ProxyTypeValidator extends EntityValidator {
     private boolean keyDoesNotExistInRepo(final ProxyType entity, final BooleanSupplier keyExistsInRepository,
             final String duplicateKeyMessageKey) {
         if (keyExistsInRepository.getAsBoolean()) {
-            final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-            displayValidationError(duplicateKeyMessageKey, trimmedKey);
+            displayValidationError(duplicateKeyMessageKey, entity.getKey());
             return false;
         }
         return true;
@@ -102,8 +101,7 @@ public class ProxyTypeValidator extends EntityValidator {
 
     private boolean nameDoesNotExistInRepo(final ProxyType entity, final BooleanSupplier nameExistsInRepository) {
         if (nameExistsInRepository.getAsBoolean()) {
-            final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-            displayValidationError("message.type.duplicate.check", trimmedName);
+            displayValidationError("message.type.duplicate.check", entity.getName());
             return false;
         }
         return true;

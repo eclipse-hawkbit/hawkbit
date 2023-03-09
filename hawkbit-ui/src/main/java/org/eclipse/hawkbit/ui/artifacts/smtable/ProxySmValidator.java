@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.artifacts.smtable;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.springframework.util.StringUtils;
 
@@ -38,10 +38,8 @@ public class ProxySmValidator extends EntityValidator {
             return false;
         }
 
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.duplicate.softwaremodule", trimmedName, trimmedVersion);
+            displayValidationError("message.duplicate.softwaremodule", entity.getName(), entity.getVersion());
             return false;
         }
 

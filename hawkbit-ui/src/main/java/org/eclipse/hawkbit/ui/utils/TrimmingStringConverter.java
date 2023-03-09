@@ -21,11 +21,15 @@ import com.vaadin.data.ValueContext;
 public class TrimmingStringConverter implements Converter<String, String> {
     @Override
     public Result<String> convertToModel(final String s, final ValueContext valueContext) {
-        return Result.ok(StringUtils.trimWhitespace(s));
+        return Result.ok(trimmedString(s));
     }
 
     @Override
     public String convertToPresentation(final String s, final ValueContext valueContext) {
-        return StringUtils.trimWhitespace(s);
+        return trimmedString(s);
+    }
+
+    private static String trimmedString(final String s){
+        return s == null ? "" : StringUtils.trimWhitespace(s);
     }
 }
