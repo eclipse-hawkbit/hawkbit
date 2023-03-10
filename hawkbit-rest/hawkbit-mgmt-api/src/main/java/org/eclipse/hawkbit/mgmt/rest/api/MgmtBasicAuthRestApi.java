@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * Api for handling basic auth user validation
  */
 @SuppressWarnings("squid:S1609")
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {
     /**
      * Handles the GET request of basic auth.

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 /**
  * REST Resource for handling tenant specific configuration operations.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtTenantManagementRestApi {
 
     /**

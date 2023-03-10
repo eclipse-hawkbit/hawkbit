@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 /**
  * System management capabilities by REST.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtSystemManagementRestApi {
 
     /**

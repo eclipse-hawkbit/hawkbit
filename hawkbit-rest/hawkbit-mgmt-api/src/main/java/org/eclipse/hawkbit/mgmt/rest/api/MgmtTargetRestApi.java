@@ -37,8 +37,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * Api for handling target operations.
+ * API for handling target operations.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtTargetRestApi {
 
     /**

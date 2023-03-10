@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * API to download artifacts
  */
 @FunctionalInterface
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtDownloadArtifactRestApi {
 
     /**

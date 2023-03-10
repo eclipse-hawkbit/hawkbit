@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * REST API providing (read-only) access to actions.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtActionRestApi {
 
     /**

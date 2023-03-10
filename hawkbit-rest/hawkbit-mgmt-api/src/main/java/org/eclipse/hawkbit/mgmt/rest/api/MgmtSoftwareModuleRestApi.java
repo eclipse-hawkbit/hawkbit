@@ -34,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
  * REST Resource handling for SoftwareModule and related Artifact CRUD
  * operations.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtSoftwareModuleRestApi {
 
     /**

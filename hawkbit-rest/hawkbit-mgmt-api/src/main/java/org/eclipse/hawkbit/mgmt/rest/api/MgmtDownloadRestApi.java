@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * A resource for download artifacts.
  */
 @FunctionalInterface
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtDownloadRestApi {
 
     /**
