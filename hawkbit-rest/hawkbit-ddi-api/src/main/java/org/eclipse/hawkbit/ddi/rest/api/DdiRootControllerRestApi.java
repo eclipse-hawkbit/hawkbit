@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * REST resource handling for root controller CRUD operations.
  */
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface DdiRootControllerRestApi {
 
     /**
