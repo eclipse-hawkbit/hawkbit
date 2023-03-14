@@ -39,12 +39,13 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -98,24 +99,39 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutSortParam(sortParam);
 
+        final boolean isFullMode = MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
+            // no need for a 400, just apply a safe fallback
+            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            return MgmtRepresentationMode.COMPACT;
+        }) == MgmtRepresentationMode.FULL;
+
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Page<Rollout> findRolloutsAll;
+        final Slice<Rollout> rollouts;
+        final long totalElements;
         if (rsqlParam != null) {
-            findRolloutsAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
+            if (isFullMode) {
+                rollouts = this.rolloutManagement.findByFiltersWithDetailedStatus(pageable, rsqlParam, false);
+                totalElements = this.rolloutManagement.countByFilters(rsqlParam);
+            } else {
+                final Page<Rollout> findRolloutsAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
+                totalElements = findRolloutsAll.getTotalElements();
+                rollouts = findRolloutsAll;
+            }
         } else {
-            findRolloutsAll = this.rolloutManagement.findAll(pageable, false);
+            if (isFullMode) {
+                rollouts = this.rolloutManagement.findAllWithDetailedStatus(pageable, false);
+                totalElements = this.rolloutManagement.count();
+            } else {
+                final Page<Rollout> findRolloutsAll = this.rolloutManagement.findAll(pageable, false);
+                totalElements = findRolloutsAll.getTotalElements();
+                rollouts = findRolloutsAll;
+            }
         }
 
-        final MgmtRepresentationMode repMode = MgmtRepresentationMode.fromValue(representationModeParam)
-                .orElseGet(() -> {
-                    // no need for a 400, just apply a safe fallback
-                    LOG.warn("Received an invalid representation mode: {}", representationModeParam);
-                    return MgmtRepresentationMode.COMPACT;
-                });
+        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent(),
+                isFullMode);
 
-        final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(findRolloutsAll.getContent(),
-                repMode == MgmtRepresentationMode.FULL);
-        return ResponseEntity.ok(new PagedList<>(rest, findRolloutsAll.getTotalElements()));
+        return ResponseEntity.ok(new PagedList<>(rest, totalElements));
     }
 
     @Override
@@ -235,8 +251,8 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             findRolloutGroupsAll = this.rolloutGroupManagement.findByRollout(pageable, rolloutId);
         }
 
-        final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper
-                .toResponseRolloutGroup(findRolloutGroupsAll.getContent(), tenantConfigHelper.isConfirmationFlowEnabled());
+        final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper.toResponseRolloutGroup(
+                findRolloutGroupsAll.getContent(), tenantConfigHelper.isConfirmationFlowEnabled());
         return ResponseEntity.ok(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()));
     }
 
