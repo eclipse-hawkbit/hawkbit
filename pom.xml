@@ -157,6 +157,19 @@
       <!-- ************************ -->
       <!-- Maven Plugins -->
       <!-- ************************ -->
+      <!-- Docker image build - START -->
+      <docker.repository.name>${project.artifactId}</docker.repository.name>
+      <docker.host>unix:///var/run/docker.sock</docker.host>
+      <docker.maven.plugin.version>0.40.3</docker.maven.plugin.version>
+      <docker.memory.size>-Xms600m -Xmx600m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K
+      </docker.memory.size>
+      <docker.base.image.platform>linux/amd64</docker.base.image.platform>
+      <docker.gc.settings>-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops</docker.gc.settings>
+      <docker.jvm.args>${docker.memory.size} ${docker.gc.settings} -XX:+HeapDumpOnOutOfMemoryError
+         -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom
+      </docker.jvm.args>
+      <docker.jre.version>11.0.15_10-jre-alpine</docker.jre.version>
+      <!-- Docker image build - END -->
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
       <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
@@ -320,6 +333,67 @@
 
       <pluginManagement>
          <plugins>
+            <plugin>
+               <groupId>io.fabric8</groupId>
+               <artifactId>docker-maven-plugin</artifactId>
+               <version>${docker.maven.plugin.version}</version>
+               <configuration>
+                  <verbose>true</verbose>
+                  <dockerHost>${docker.host}</dockerHost>
+                  <images>
+                     <image>
+                        <alias>${docker.repository.name}</alias>
+                        <name>
+                           ${docker.repository.name}:${project.version}
+                        </name>
+                        <build>
+                           <from>eclipse-temurin:${docker.jre.version}</from>
+                           <createImageOptions>
+                              <platform>${docker.base.image.platform}</platform>
+                           </createImageOptions>
+                           <tags>
+                              <tag>latest</tag>
+                           </tags>
+                           <env>
+                              <SPRING_PROFILES_ACTIVE>docker</SPRING_PROFILES_ACTIVE>
+                              <JAVA_OPTS>${docker.jvm.args}</JAVA_OPTS>
+                           </env>
+                           <ports>
+                              <port>8080</port>
+                           </ports>
+                           <assembly>
+                              <inline>
+                                 <fileSets>
+                                    <fileSet>
+                                       <directory>target</directory>
+                                       <outputDirectory>.</outputDirectory>
+                                       <includes>
+                                          <include>${project.build.finalName}.jar</include>
+                                       </includes>
+                                       <fileMode>0644</fileMode>
+                                       <directoryMode>0755</directoryMode>
+                                       <filtered>false</filtered>
+                                    </fileSet>
+                                 </fileSets>
+                              </inline>
+                           </assembly>
+                           <entryPoint>
+                              <shell>java $JAVA_OPTS -jar maven/${project.build.finalName}.jar</shell>
+                           </entryPoint>
+                        </build>
+                     </image>
+                  </images>
+               </configuration>
+               <executions>
+                  <execution>
+                     <phase>package</phase>
+                     <goals>
+                        <goal>remove</goal>
+                        <goal>build</goal>
+                     </goals>
+                  </execution>
+               </executions>
+            </plugin>
             <plugin>
                <groupId>org.apache.maven.plugins</groupId>
                <artifactId>maven-javadoc-plugin</artifactId>
