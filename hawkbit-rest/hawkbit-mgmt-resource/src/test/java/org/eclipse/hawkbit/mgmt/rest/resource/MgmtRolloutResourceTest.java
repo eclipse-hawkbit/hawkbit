@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Stream;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
@@ -77,17 +77,17 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String HREF_ROLLOUT_PREFIX = "http://localhost/rest/v1/rollouts/";
 
-    @Autowired private RolloutManagement rolloutManagement;
+    @Autowired
+    private RolloutManagement rolloutManagement;
 
-    @Autowired private RolloutGroupManagement rolloutGroupManagement;
+    @Autowired
+    private RolloutGroupManagement rolloutGroupManagement;
 
     @Test
     @Description("Testing that creating rollout with wrong body returns bad request")
     void createRolloutWithInvalidBodyReturnsBadRequest() throws Exception {
-        mvc.perform(post("/rest/v1/rollouts").content("invalid body")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts").content("invalid body").contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.body.notReadable")));
     }
@@ -97,36 +97,28 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(allSpPermissions = true, removeFromAllPermission = "CREATE_ROLLOUT")
     void createRolloutWithInsufficientPermissionReturnsForbidden() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        mvc.perform(post("/rest/v1/rollouts").content(
-                                JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().is(403))
-                .andReturn();
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("name", "desc", 10, dsA.getId(), "name==test", null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().is(403)).andReturn();
     }
 
     @Test
     @Description("Testing that creating rollout with not existing distribution set returns not found")
     void createRolloutWithNotExistingDistributionSetReturnsNotFound() throws Exception {
         mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("name", "desc", 10, 1234, "name==test", null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isNotFound())
-                .andReturn();
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound()).andReturn();
     }
 
     @Test
     @Description("Testing that creating rollout with not valid formed target filter query returns bad request")
     void createRolloutWithNotWellFormedFilterReturnsBadRequest() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
-        mvc.perform(post("/rest/v1/rollouts").content(
-                                JsonBuilder.rollout("name", "desc", 5, dsA.getId(), "name=test", null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest())
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("name", "desc", 5, dsA.getId(), "name=test", null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest())
                 .andExpect(jsonPath("errorCode", equalTo("hawkbit.server.error.rest.param.rsqlParamSyntax")))
                 .andReturn();
     }
@@ -163,13 +155,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int maxGroups = quotaManagement.getMaxRolloutGroupsPerRollout();
         testdataFactory.createTargets(20, "target", "rollout");
 
-        mvc.perform(post("/rest/v1/rollouts").content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
-                                testdataFactory.createDistributionSet("ds").getId(), "id==target*",
-                                new RolloutGroupConditionBuilder().withDefaults().build()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", maxGroups + 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -182,13 +173,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int maxTargets = quotaManagement.getMaxTargetsPerRolloutGroup();
         testdataFactory.createTargets(maxTargets + 1, "target", "rollout");
 
-        mvc.perform(post("/rest/v1/rollouts").content(
-                                JsonBuilder.rollout("rollout1", "rollout1Desc", 1, testdataFactory.createDistributionSet("ds").getId(),
-                                        "id==target*", new RolloutGroupConditionBuilder().withDefaults().build()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isForbidden())
+        mvc.perform(post("/rest/v1/rollouts")
+                .content(JsonBuilder.rollout("rollout1", "rollout1Desc", 1,
+                        testdataFactory.createDistributionSet("ds").getId(), "id==target*",
+                        new RolloutGroupConditionBuilder().withDefaults().build()))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.exceptionClass", equalTo(AssignmentQuotaExceededException.class.getName())))
                 .andExpect(jsonPath("$.errorCode", equalTo(SpServerError.SP_QUOTA_EXCEEDED.getKey())));
 
@@ -229,17 +219,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(entityFactory.rolloutGroup()
-                .create()
-                .name("Group1")
-                .description("Group1desc")
-                .targetPercentage(0F)
-                .build(), entityFactory.rolloutGroup()
-                .create()
-                .name("Group2")
-                .description("Group2desc")
-                .targetPercentage(100F)
-                .build());
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(0F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(100F)
+                        .build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -260,17 +244,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final int amountTargets = 10;
         testdataFactory.createTargets(amountTargets, "ro-target", "rollout");
 
-        final List<RolloutGroup> rolloutGroups = Arrays.asList(entityFactory.rolloutGroup()
-                .create()
-                .name("Group1")
-                .description("Group1desc")
-                .targetPercentage(1F)
-                .build(), entityFactory.rolloutGroup()
-                .create()
-                .name("Group2")
-                .description("Group2desc")
-                .targetPercentage(101F)
-                .build());
+        final List<RolloutGroup> rolloutGroups = Arrays.asList(
+                entityFactory.rolloutGroup().create().name("Group1").description("Group1desc").targetPercentage(1F)
+                        .build(),
+                entityFactory.rolloutGroup().create().name("Group2").description("Group2desc").targetPercentage(101F)
+                        .build());
 
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
@@ -286,12 +264,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Testing the empty list is returned if no rollout exists")
     void noRolloutReturnsEmptyList() throws Exception {
-        mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(jsonPath("$.content", hasSize(0)))
-                .andExpect(jsonPath("$.total", equalTo(0)));
+        mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(0))).andExpect(jsonPath("$.total", equalTo(0)));
     }
 
     @Test
@@ -302,15 +277,55 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = rolloutManagement.create(
-              entityFactory.rollout().create().name("rollout1").set(dsA.getId())
-                    .targetFilterQuery("controllerId==rollout*"),
-              4, false, new RolloutGroupConditionBuilder().withDefaults()
-                    .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         retrieveAndVerifyRolloutInCreating(dsA, rollout);
         retrieveAndVerifyRolloutInReady(rollout);
         retrieveAndVerifyRolloutInStarting(rollout);
         retrieveAndVerifyRolloutInRunning(rollout);
+    }
+
+    @Test
+    @Description("Retrieves the list of rollouts with representation mode 'full'.")
+    void retrieveRolloutListFullRepresentation() throws Exception {
+        testdataFactory.createTargets(20, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create a running rollout for the created targets
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+        rolloutManagement.handleRollouts();
+        rolloutManagement.start(rollout.getId());
+        rolloutManagement.handleRollouts();
+
+        // request the list of rollouts with full representation 
+        mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+                .andExpect(jsonPath("content[0].status", equalTo("running")))
+                .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("controllerId==rollout*")))
+                .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(5)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.scheduled", equalTo(15)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("content[0].totalGroups", equalTo(4)))
+                .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
     @ParameterizedTest
@@ -354,8 +369,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(content).hasSizeGreaterThan(0).allSatisfy(rollout -> {
             assertThat(rolloutGroupManagement.findByRollout(PAGE, rollout.getId()))
-                .describedAs("Confirmation required flag depends on feature active.")
-                  .allMatch(group -> group.isConfirmationRequired() == confirmationFlowActive);
+                    .describedAs("Confirmation required flag depends on feature active.")
+                    .allMatch(group -> group.isConfirmationRequired() == confirmationFlowActive);
         });
     }
 
@@ -416,16 +431,16 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final RolloutGroupConditions rolloutGroupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
 
         final List<String> rolloutGroups = Arrays.asList(
-              JsonBuilder.rolloutGroup("Group1", "Group1desc", null, percentTargetsInGroup1, false,
-                    rolloutGroupConditions),
-              JsonBuilder.rolloutGroup("Group2", "Group1desc", null, percentTargetsInGroup2, null,
-                    rolloutGroupConditions));
+                JsonBuilder.rolloutGroup("Group1", "Group1desc", null, percentTargetsInGroup1, false,
+                        rolloutGroupConditions),
+                JsonBuilder.rolloutGroup("Group2", "Group1desc", null, percentTargetsInGroup2, null,
+                        rolloutGroupConditions));
 
         mvc.perform(post("/rest/v1/rollouts")
-                    .content(JsonBuilder.rollout("rollout2", "desc", null, dsA.getId(), "id==ro-target*",
-                          rolloutGroupConditions, rolloutGroups, null, null, null))
-                    .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
-              .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
+                .content(JsonBuilder.rollout("rollout2", "desc", null, dsA.getId(), "id==ro-target*",
+                        rolloutGroupConditions, rolloutGroups, null, null, null))
+                .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated()).andReturn();
 
         final List<Rollout> content = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(content).hasSize(1).allSatisfy(rollout -> {
@@ -456,8 +471,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)))
-                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
+                .andExpect(jsonPath("$.deleted", equalTo(false))).andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -475,8 +489,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)))
-                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
+                .andExpect(jsonPath("$.deleted", equalTo(false))).andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -496,8 +509,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.totalTargetsPerStatus.cancelled", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.finished", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.error", equalTo(0)))
-                .andExpect(jsonPath("$.deleted", equalTo(false)))
-                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
+                .andExpect(jsonPath("$.deleted", equalTo(false))).andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Step
@@ -529,8 +541,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         allOf(startsWith(HREF_ROLLOUT_PREFIX), endsWith("/triggerNextGroup"))))
                 .andExpect(jsonPath("$._links.groups.href",
                         allOf(startsWith(HREF_ROLLOUT_PREFIX), containsString("/deploygroups"))))
-                .andExpect(jsonPath("$.deleted", equalTo(false)))
-                .andExpect(jsonPath("$.totalGroups", equalTo(4)));
+                .andExpect(jsonPath("$.deleted", equalTo(false))).andExpect(jsonPath("$.totalGroups", equalTo(4)));
     }
 
     @Test
@@ -615,7 +626,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Testing that rollout paged list is limited by the query param limit")
-    void retrieveRolloutGroupsForSpecificRollout(final boolean confirmationFlowEnabled, final boolean confirmationRequired) throws Exception {
+    void retrieveRolloutGroupsForSpecificRollout(final boolean confirmationFlowEnabled,
+            final boolean confirmationRequired) throws Exception {
         // setup
         final int amountTargets = 20;
         testdataFactory.createTargets(amountTargets, "rollout", "rollout");
@@ -951,8 +963,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutGroupManagement.findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"),
-                rollout.getId()).getContent().get(0);
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         // retrieve targets from the first rollout group with known ID
         mvc.perform(
@@ -974,8 +986,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
 
-        final RolloutGroup firstGroup = rolloutGroupManagement.findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"),
-                rollout.getId()).getContent().get(0);
+        final RolloutGroup firstGroup = rolloutGroupManagement
+                .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
 
         final String targetInGroup = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, firstGroup.getId())
                 .getContent().get(0).getControllerId();
@@ -1029,8 +1041,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
 
         // starting rollout
-        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId()))
-                .andDo(MockMvcResultPrinter.print())
+        mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
@@ -1041,14 +1052,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void awaitRunningState(final Long rolloutId) {
-        Awaitility.await()
-                .atMost(Duration.ONE_MINUTE)
-                .pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
-                .with()
-                .until(() -> WithSpringAuthorityRule.runAsPrivileged(
+        Awaitility.await().atMost(Duration.ONE_MINUTE).pollInterval(Duration.ONE_HUNDRED_MILLISECONDS).with()
+                .until(() -> WithSpringAuthorityRule
+                        .runAsPrivileged(
                                 () -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
-                        .getStatus()
-                        .equals(RolloutStatus.RUNNING));
+                        .getStatus().equals(RolloutStatus.RUNNING));
     }
 
     @Test
@@ -1061,8 +1069,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         // create rollout including the created targets with prefix 'rollout'
         final Rollout rollout = createRollout("rolloutDelete", 4, dsA.getId(), "controllerId==rolloutDelete*");
 
-        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
-                .andDo(MockMvcResultPrinter.print())
+        mvc.perform(delete("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
 
         assertStatusIs(rollout, RolloutStatus.DELETING);
@@ -1073,15 +1080,13 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     void deleteRunningRollout() throws Exception {
         final Rollout rollout = testdataFactory.createSoftDeletedRollout("softDeletedRollout");
 
-        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.deleted", equalTo(true)));
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("$.deleted", equalTo(true)));
 
         assertStatusIs(rollout, RolloutStatus.DELETED);
     }
 
-    private void assertStatusIs(final Rollout rollout, RolloutStatus expected) {
+    private void assertStatusIs(final Rollout rollout, final RolloutStatus expected) {
         final Optional<Rollout> updatedRollout = rolloutManagement.get(rollout.getId());
         assertThat(updatedRollout).get().extracting(Rollout::getStatus).isEqualTo(expected);
     }
@@ -1323,90 +1328,89 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         }
     }
 
-    private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate, boolean isFullRepresentation) throws Exception {
+    private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate,
+            final boolean isFullRepresentation) throws Exception {
         mvc.perform(get(urlTemplate).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-            .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
-            .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
-            .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
-            .andExpect(jsonPath("content[0].status", equalTo("ready")))
-            .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("id==target*")))
-            .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
-            .andExpect(jsonPath("content[0].createdBy", equalTo("bumlux")))
-            .andExpect(jsonPath("content[0].createdAt", not(equalTo(0))))
-            .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
-            .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
-            .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0].totalTargetsPerStatus").exists()
-                : jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0].totalGroups", equalTo(5))
-                : jsonPath("content[0].totalGroups").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.start.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.pause.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.resume.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.triggerNextGroup.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.approve.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.deny.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[0]._links.groups.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0]._links.distributionset.href", startsWith("http://localhost/rest/v1/distributionsets/"))
-                : jsonPath("content[0]._links.distributionset.href").doesNotExist())
-            .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
-            .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
-            .andExpect(jsonPath("content[1].status", equalTo("ready")))
-            .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
-            .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())))
-            .andExpect(jsonPath("content[1].createdBy", equalTo("bumlux")))
-            .andExpect(jsonPath("content[1].createdAt", not(equalTo(0))))
-            .andExpect(jsonPath("content[1].lastModifiedBy", equalTo("bumlux")))
-            .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
-            .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1].totalTargetsPerStatus").exists()
-                : jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[0].totalGroups", equalTo(5))
-                : jsonPath("content[0].totalGroups").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.start.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.pause.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.resume.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.triggerNextGroup.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.approve.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.deny.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
-                : jsonPath("content[1]._links.groups.href").doesNotExist())
-            .andExpect(isFullRepresentation
-                ? jsonPath("$.content[1]._links.distributionset.href", startsWith("http://localhost/rest/v1/distributionsets/"))
-                : jsonPath("content[1]._links.distributionset.href").doesNotExist())
-            .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
+                .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
+                .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+                .andExpect(jsonPath("content[0].status", equalTo("ready")))
+                .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("id==target*")))
+                .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[0].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[0].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
+                .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalTargetsPerStatus").exists()
+                        : jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
+                .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalGroups", equalTo(5))
+                        : jsonPath("content[0].totalGroups").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.start.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.pause.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.resume.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.triggerNextGroup.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.approve.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.deny.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[0]._links.groups.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[0]._links.distributionset.href",
+                                startsWith("http://localhost/rest/v1/distributionsets/"))
+                        : jsonPath("content[0]._links.distributionset.href").doesNotExist())
+                .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)))
+                .andExpect(jsonPath("content[1].name", equalTo("rollout2")))
+                .andExpect(jsonPath("content[1].status", equalTo("ready")))
+                .andExpect(jsonPath("content[1].targetFilterQuery", equalTo("id==target-0001*")))
+                .andExpect(jsonPath("content[1].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[1].createdBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[1].createdAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[1].lastModifiedBy", equalTo("bumlux")))
+                .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
+                .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
+                .andExpect(isFullRepresentation ? jsonPath("$.content[1].totalTargetsPerStatus").exists()
+                        : jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
+                .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalGroups", equalTo(5))
+                        : jsonPath("content[0].totalGroups").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.start.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.pause.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.pause.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.resume.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.resume.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.triggerNextGroup.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.triggerNextGroup.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.approve.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.approve.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.deny.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.deny.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.groups.href", startsWith(HREF_ROLLOUT_PREFIX))
+                        : jsonPath("content[1]._links.groups.href").doesNotExist())
+                .andExpect(isFullRepresentation
+                        ? jsonPath("$.content[1]._links.distributionset.href",
+                                startsWith("http://localhost/rest/v1/distributionsets/"))
+                        : jsonPath("content[1]._links.distributionset.href").doesNotExist())
+                .andExpect(jsonPath("content[1]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
 }
