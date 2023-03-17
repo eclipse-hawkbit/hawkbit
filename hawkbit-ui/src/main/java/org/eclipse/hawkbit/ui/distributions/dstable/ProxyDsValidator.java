@@ -36,10 +36,8 @@ public class ProxyDsValidator extends EntityValidator {
             return false;
         }
 
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.duplicate.dist", trimmedName, trimmedVersion);
+            displayValidationError("message.duplicate.dist", entity.getName(), entity.getVersion());
             return false;
         }
 

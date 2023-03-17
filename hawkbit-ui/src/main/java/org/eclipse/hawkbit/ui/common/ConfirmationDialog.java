@@ -9,7 +9,6 @@
 package org.eclipse.hawkbit.ui.common;
 
 import java.io.Serializable;
-import java.util.function.Consumer;
 
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.ConfirmStyle;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow.SaveDialogCloseListener;

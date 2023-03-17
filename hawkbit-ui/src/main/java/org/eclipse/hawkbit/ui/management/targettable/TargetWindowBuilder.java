@@ -57,14 +57,14 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
 
     @Override
     public Window getWindowForAdd() {
-        return getWindowForNewEntity(
-                new AddTargetWindowController(uiDependencies, targetManagement, new TargetWindowLayout(getI18n(), targetTypeManagement), view));
+        return getWindowForNewEntity(new AddTargetWindowController(uiDependencies, targetManagement,
+                new TargetWindowLayout(getI18n(), targetTypeManagement), view));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTarget proxyTarget) {
-        return getWindowForEntity(proxyTarget,
-                new UpdateTargetWindowController(uiDependencies, targetManagement, new TargetWindowLayout(getI18n(), targetTypeManagement)));
+        return getWindowForEntity(proxyTarget, new UpdateTargetWindowController(uiDependencies, targetManagement,
+                new TargetWindowLayout(getI18n(), targetTypeManagement)));
     }
 }

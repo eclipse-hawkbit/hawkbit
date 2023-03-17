@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.rollout.window.controllers;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyRolloutWindow;
 import org.springframework.util.StringUtils;
 
@@ -42,9 +42,8 @@ public class ProxyRolloutValidator extends EntityValidator {
             return false;
         }
 
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.rollout.duplicate.check", trimmedName);
+            displayValidationError("message.rollout.duplicate.check", entity.getName());
             return false;
         }
 

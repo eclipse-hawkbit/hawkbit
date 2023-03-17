@@ -8,13 +8,17 @@
  */
 package org.eclipse.hawkbit.ui.management.targettable;
 
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_ACTIVATEDAT;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_INITIATOR;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_REMARK;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_ROLLOUTS_USER;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_STATE;
+import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_TOGGLE_DIALOG;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.vaadin.server.FontAwesome;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.Window;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
@@ -29,22 +33,17 @@ import org.eclipse.hawkbit.ui.decorators.SPUIButtonStyleNoBorder;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.springframework.util.StringUtils;
 
 import com.vaadin.icons.VaadinIcons;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.CustomField;
 import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
+import com.vaadin.ui.UI;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.ValoTheme;
-import org.springframework.util.StringUtils;
-
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_TOGGLE_DIALOG;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_ACTIVATEDAT;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_INITIATOR;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_REMARK;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_ROLLOUTS_USER;
-import static org.eclipse.hawkbit.ui.utils.UIComponentIdProvider.AUTO_CONFIRMATION_DETAILS_STATE;
 
 /**
  * target auto confirmation detail component

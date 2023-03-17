@@ -8,6 +8,11 @@
  */
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
+import java.util.Collections;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
@@ -20,12 +25,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
-import org.springframework.util.StringUtils;
-
-import java.util.Collections;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Controller for update target type window
@@ -80,7 +79,7 @@ public class UpdateTargetTypeWindowController
     }
 
     private Set<ProxyType> getDsTypesByDsTypeId(final Long id) {
-        Optional<TargetType> targetType = targetTypeManagement.get(id);
+        final Optional<TargetType> targetType = targetTypeManagement.get(id);
         return targetType.map(type -> type.getCompatibleDistributionSetTypes().stream()
                 .map(dsTypeToProxyTypeMapper::map).collect(Collectors.toSet())).orElse(Collections.emptySet());
 
@@ -89,13 +88,13 @@ public class UpdateTargetTypeWindowController
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
 
-        Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId).collect(Collectors.toSet());
+        final Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId).collect(Collectors.toSet());
 
-        Set<Long> selectedDsIds = entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
+        final Set<Long> selectedDsIds = entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
 
-        Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
+        final Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
                 .filter(dsType -> !selectedDsIds.contains(dsType)).collect(Collectors.toSet());
-        Set<Long> dsTypesForAdd = selectedDsIds.stream()
+        final Set<Long> dsTypesForAdd = selectedDsIds.stream()
                 .filter(dsType -> !dsTypesIds.contains(dsType)).collect(Collectors.toSet());
 
         dsTypesForRemoval.forEach(dsType -> targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType));
@@ -121,9 +120,9 @@ public class UpdateTargetTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> hasNamedChanged(trimmedName) && targetTypeManagement.getByName(trimmedName).isPresent());
+                () -> hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent());
     }
 
     private boolean hasNamedChanged(final String trimmedName) {

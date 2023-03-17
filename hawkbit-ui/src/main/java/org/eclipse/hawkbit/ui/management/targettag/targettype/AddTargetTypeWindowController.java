@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.ui.management.targettag.targettype;
 
 import java.util.stream.Collectors;
+
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
@@ -19,7 +20,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.targettype.ProxyTargetTypeValidator;
-import org.springframework.util.StringUtils;
 
 /**
  * Add target type window controller
@@ -80,7 +80,6 @@ public class AddTargetTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, () -> targetTypeManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> targetTypeManagement.getByName(entity.getName()).isPresent());
     }
 }

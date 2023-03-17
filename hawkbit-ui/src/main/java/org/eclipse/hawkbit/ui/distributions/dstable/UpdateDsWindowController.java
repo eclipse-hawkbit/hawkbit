@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyDistributionSet;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update distribution set window
@@ -103,10 +102,10 @@ public class UpdateDsWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyDistributionSet entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
-        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
-                && dsManagement.getByNameAndVersion(trimmedName, trimmedVersion).isPresent());
+        final String name = entity.getName();
+        final String version = entity.getVersion();
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(name, version)
+                && dsManagement.getByNameAndVersion(name, version).isPresent());
     }
 
     private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {

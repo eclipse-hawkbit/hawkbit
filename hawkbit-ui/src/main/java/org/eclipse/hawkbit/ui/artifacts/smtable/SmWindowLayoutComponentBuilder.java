@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.data.providers.SoftwareModuleTypeDataProvider;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTypeInfo;
+import org.eclipse.hawkbit.ui.utils.TrimmingStringConverter;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -100,7 +101,8 @@ public class SmWindowLayoutComponentBuilder {
                 .prompt(i18n.getMessage(TEXTFIELD_VENDOR)).buildTextComponent();
         smVendor.setSizeUndefined();
 
-        binder.forField(smVendor).bind(ProxySoftwareModule::getVendor, ProxySoftwareModule::setVendor);
+        binder.forField(smVendor).withConverter(new TrimmingStringConverter()).bind(ProxySoftwareModule::getVendor,
+                ProxySoftwareModule::setVendor);
 
         return smVendor;
     }

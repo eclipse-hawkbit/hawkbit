@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.filtermanagement;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.springframework.util.StringUtils;
 
@@ -37,9 +37,8 @@ public class ProxyTargetFilterValidator extends EntityValidator {
             return false;
         }
 
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
         if (duplicateCheck.getAsBoolean()) {
-            displayValidationError("message.target.filter.duplicate", trimmedName);
+            displayValidationError("message.target.filter.duplicate", entity.getName());
             return false;
         }
 
