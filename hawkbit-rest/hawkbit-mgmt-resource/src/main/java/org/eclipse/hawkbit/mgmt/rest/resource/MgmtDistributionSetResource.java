@@ -8,14 +8,17 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.text.MessageFormat;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -35,6 +38,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -45,6 +49,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -87,6 +92,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private final DistributionSetManagement distributionSetManagement;
 
+    private final DistributionSetTypeManagement distributionSetTypeManagement;
+
     private final SystemSecurityContext systemSecurityContext;
 
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
@@ -97,7 +104,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deployManagament, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext,
+            final DistributionSetTypeManagement distributionSetTypeManagement, final SystemSecurityContext systemSecurityContext,
             final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
             final TenantConfigurationManagement tenantConfigurationManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
@@ -107,6 +114,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
         this.distributionSetManagement = distributionSetManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
@@ -158,6 +166,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final String defaultDsKey = systemSecurityContext
                 .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
+
+        //check if there is already deleted DS Type
+        for (MgmtDistributionSetRequestBodyPost ds : sets) {
+            final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(ds.getType());
+            opt.ifPresent(dsType -> {
+                if (dsType.isDeleted()) {
+                    final String text = "Cannot create Distribution Set from type with key {0}. Distribution Set Type already deleted!";
+                    final String message = MessageFormat.format(text, dsType.getKey());
+                    throw new ValidationException(message);
+                }
+            });
+        }
 
         final Collection<DistributionSet> createdDSets = distributionSetManagement
                 .create(MgmtDistributionSetMapper.dsFromRequest(sets, entityFactory));

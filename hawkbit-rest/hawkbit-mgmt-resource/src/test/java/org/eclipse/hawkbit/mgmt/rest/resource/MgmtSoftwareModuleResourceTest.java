@@ -14,6 +14,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,6 +32,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
@@ -44,11 +46,7 @@ import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
-import org.eclipse.hawkbit.repository.model.Artifact;
-import org.eclipse.hawkbit.repository.model.ArtifactUpload;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.*;
 import org.eclipse.hawkbit.repository.test.util.HashGeneratorUtils;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
@@ -65,6 +63,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.jayway.jsonpath.JsonPath;
@@ -348,6 +347,43 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // hashes
         assertThat(artifactManagement.getByFilename("customFilename")).as("Local artifact is wrong").isPresent();
+    }
+
+    @Test
+    @Description("Trying to create a SM from already marked as deleted type - should get as response 400 Bad Request")
+    public void createSMFromAlreadyMarkedAsDeletedType() throws Exception {
+        final String SM_TYPE = "someSmType";
+        final SoftwareModule sm = testdataFactory.createSoftwareModule(SM_TYPE);
+        final DistributionSetType t = testdataFactory.findOrCreateDistributionSetType(
+            "testKey", "testType", Collections.singletonList(sm.getType()),
+            Collections.singletonList(sm.getType()));
+        final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType("testKey", "testType");
+        final DistributionSet ds = testdataFactory.createDistributionSet("name", "version", type, Collections.singletonList(sm));
+        final Target target = testdataFactory.createTarget("test");
+
+        assignDistributionSet(ds, target);
+        //delete sm type
+        softwareModuleTypeManagement.delete(sm.getType().getId());
+
+        //check if it is marked as deleted
+        Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(SM_TYPE);
+        if (opt.isEmpty()) {
+            throw new AssertionError("The Optional object of software module type should not be empty!");
+        }
+        final SoftwareModuleType smType = opt.get();
+        Assert.isTrue(smType.isDeleted(), "Software Module Type not marked as deleted!");
+
+        //check if we'll get bad request if we try to create module from the deleted type
+        final MvcResult mvcResult = mvc.perform(post("/rest/v1/softwaremodules")
+                .content("[{\"description\":\"someDescription\",\"key\":\"someTestKey\", \"type\":\"" + SM_TYPE + "\"}]")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertTrue(exceptionInfo.getMessage().contains("Software Module Type already deleted"));
     }
 
     @Test

@@ -10,8 +10,10 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.MessageFormat;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -26,11 +28,13 @@ import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
+import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -47,6 +51,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.ValidationException;
+
 /**
  * REST Resource handling for {@link SoftwareModule} and related
  * {@link Artifact} CRUD operations.
@@ -60,12 +66,15 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     private final SoftwareModuleManagement softwareModuleManagement;
 
+    private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
+
     private final EntityFactory entityFactory;
 
-    MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement,
-            final SoftwareModuleManagement softwareModuleManagement, final EntityFactory entityFactory) {
+    MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory) {
         this.artifactManagement = artifactManagement;
         this.softwareModuleManagement = softwareModuleManagement;
+        this.softwareModuleTypeManagement = softwareModuleTypeManagement;
         this.entityFactory = entityFactory;
     }
 
@@ -182,6 +191,17 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
 
         LOG.debug("creating {} softwareModules", softwareModules.size());
+
+        for (MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
+            Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
+            opt.ifPresent(smType -> {
+                if (smType.isDeleted()) {
+                    final String text = "Cannot create Software Module Type from type with key {0}. Software Module Type already deleted!";
+                    final String message = MessageFormat.format(text, smType.getKey());
+                    throw new ValidationException(message);
+                }
+            });
+        }
         final Collection<SoftwareModule> createdSoftwareModules = softwareModuleManagement
                 .create(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
         LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
