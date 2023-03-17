@@ -795,7 +795,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
-// use this
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
