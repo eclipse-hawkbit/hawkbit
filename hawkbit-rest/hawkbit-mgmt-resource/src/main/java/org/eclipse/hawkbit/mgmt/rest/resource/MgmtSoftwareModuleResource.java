@@ -193,10 +193,10 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         LOG.debug("creating {} softwareModules", softwareModules.size());
 
         for (MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
-            Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
+            final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
             opt.ifPresent(smType -> {
                 if (smType.isDeleted()) {
-                    final String text = "Cannot create Software Module Type from type with key {0}. Software Module Type already deleted!";
+                    final String text = "Cannot create Software Module from type with key {0}. Software Module Type already deleted!";
                     final String message = MessageFormat.format(text, smType.getKey());
                     throw new ValidationException(message);
                 }

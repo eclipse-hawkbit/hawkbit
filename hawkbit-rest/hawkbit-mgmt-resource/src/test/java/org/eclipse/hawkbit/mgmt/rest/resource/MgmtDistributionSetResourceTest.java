@@ -323,7 +323,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         distributionSetTypeManagement.delete(type.getId());
 
         // check if the ds type is marked as deleted
-        Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(type.getKey());
+        final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(type.getKey());
         if (opt.isEmpty()) {
             throw new AssertionError("The Optional object of distribution set type should not be empty!");
         }
@@ -333,14 +333,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         //request for ds creation of type which is already marked as deleted - should return bad request
         final DistributionSet generated = testdataFactory.generateDistributionSet(
             "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
-        MvcResult mvcResult = mvc
+        final MvcResult mvcResult = mvc
             .perform(post("/rest/v1/distributionsets/")
                 .content(JsonBuilder.distributionSets(Arrays.asList(generated)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest()).andReturn();
 
-        ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
         assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
         assertTrue(exceptionInfo.getMessage().contains("Distribution Set Type already deleted"));
     }

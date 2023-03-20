@@ -373,7 +373,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         softwareModuleTypeManagement.delete(sm.getType().getId());
 
         //check if it is marked as deleted
-        Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(SM_TYPE);
+        final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(SM_TYPE);
         if (opt.isEmpty()) {
             throw new AssertionError("The Optional object of software module type should not be empty!");
         }
