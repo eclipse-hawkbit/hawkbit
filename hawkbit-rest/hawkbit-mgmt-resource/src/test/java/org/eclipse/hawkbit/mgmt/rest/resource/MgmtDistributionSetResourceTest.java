@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,6 +28,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -40,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -49,6 +53,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
@@ -70,6 +75,9 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.util.Assert;
+
+import javax.validation.constraints.AssertTrue;
 
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Resource")
@@ -297,6 +305,44 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
                 .andExpect(status().isOk());
         // we just need to make sure that no error 500 is returned
+    }
+
+    @Test
+    @Description("Trying to create a DS from already marked as deleted type - should get as response 400 Bad Request")
+    public void createDsFromAlreadyMarkedAsDeletedType() throws Exception {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("exampleKey");
+        final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType(
+            "testKey", "testType", Collections.singletonList(softwareModule.getType()),
+            Collections.singletonList(softwareModule.getType()));
+        final DistributionSet ds = testdataFactory.createDistributionSet("dsName", "dsVersion", type, Collections.singletonList(softwareModule));
+        final Target target = testdataFactory.createTarget("exampleControllerId");
+
+        assignDistributionSet(ds, target);
+
+        //soft delete ds type
+        distributionSetTypeManagement.delete(type.getId());
+
+        // check if the ds type is marked as deleted
+        final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(type.getKey());
+        if (opt.isEmpty()) {
+            throw new AssertionError("The Optional object of distribution set type should not be empty!");
+        }
+        final DistributionSetType reloaded = opt.get();
+        Assert.isTrue(reloaded.isDeleted(), "Distribution Set Type not marked as deleted!");
+
+        //request for ds creation of type which is already marked as deleted - should return bad request
+        final DistributionSet generated = testdataFactory.generateDistributionSet(
+            "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
+        final MvcResult mvcResult = mvc
+            .perform(post("/rest/v1/distributionsets/")
+                .content(JsonBuilder.distributionSets(Arrays.asList(generated)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest()).andReturn();
+
+        final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertTrue(exceptionInfo.getMessage().contains("Distribution Set Type already deleted"));
     }
 
     @Test
@@ -765,7 +811,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
-
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
