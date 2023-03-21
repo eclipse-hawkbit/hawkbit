@@ -20,7 +20,7 @@ import org.eclipse.hawkbit.security.SystemSecurityContext;
  * Error action evaluator which pauses the whole {@link Rollout} and sets the
  * current {@link RolloutGroup} to error.
  */
-public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
+public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupErrorAction> {
 
     private final RolloutManagement rolloutManagement;
 
@@ -33,6 +33,11 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.systemSecurityContext = systemSecurityContext;
+    }
+
+    @Override
+    public RolloutGroup.RolloutGroupErrorAction getAction() {
+        return RolloutGroup.RolloutGroupErrorAction.PAUSE;
     }
 
     @Override

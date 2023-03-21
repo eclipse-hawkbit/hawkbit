@@ -19,13 +19,19 @@ import org.slf4j.LoggerFactory;
  * Threshold to calculate if rollout group success condition is reached and the
  * next rollout group can get started.
  */
-public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
+public class ThresholdRolloutGroupSuccessCondition
+        implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
 
     private final ActionRepository actionRepository;
 
     public ThresholdRolloutGroupSuccessCondition(final ActionRepository actionRepository) {
         this.actionRepository = actionRepository;
+    }
+
+    @Override
+    public RolloutGroup.RolloutGroupSuccessCondition getCondition() {
+        return RolloutGroup.RolloutGroupSuccessCondition.THRESHOLD;
     }
 
     @Override

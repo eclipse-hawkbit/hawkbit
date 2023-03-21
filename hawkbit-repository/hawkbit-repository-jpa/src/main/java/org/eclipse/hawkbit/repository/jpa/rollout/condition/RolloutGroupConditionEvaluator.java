@@ -14,8 +14,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 /**
  * Verifies {@link RolloutGroup#getErrorConditionExp()}.
  */
-@FunctionalInterface
-public interface RolloutGroupConditionEvaluator {
+public interface RolloutGroupConditionEvaluator<T> {
+
+    T getCondition();
 
     default boolean verifyExpression(final String expression) {
         // percentage value between 0 and 100

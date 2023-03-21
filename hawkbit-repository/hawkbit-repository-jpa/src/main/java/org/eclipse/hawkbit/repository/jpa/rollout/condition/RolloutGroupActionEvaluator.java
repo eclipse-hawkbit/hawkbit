@@ -14,7 +14,9 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 /**
  * 
  */
-public interface RolloutGroupActionEvaluator {
+public interface RolloutGroupActionEvaluator<T> {
+
+    T getAction();
 
     boolean verifyExpression(final String expression);
 

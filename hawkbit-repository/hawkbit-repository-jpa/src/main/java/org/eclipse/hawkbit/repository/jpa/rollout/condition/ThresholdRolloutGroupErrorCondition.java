@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 /**
  *
  */
-public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditionEvaluator {
+public class ThresholdRolloutGroupErrorCondition
+        implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupErrorCondition.class);
 
@@ -28,6 +29,11 @@ public class ThresholdRolloutGroupErrorCondition implements RolloutGroupConditio
 
     public ThresholdRolloutGroupErrorCondition(final ActionRepository actionRepository) {
         this.actionRepository = actionRepository;
+    }
+
+    @Override
+    public RolloutGroup.RolloutGroupErrorCondition getCondition() {
+        return RolloutGroup.RolloutGroupErrorCondition.THRESHOLD;
     }
 
     @Override

@@ -16,9 +16,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.locks.Lock;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,6 @@ import javax.validation.ValidationException;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
-import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutHelper;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -52,10 +49,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.RolloutSpecification;
-import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.WeightValidationHelper;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -70,8 +65,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,14 +75,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -137,35 +127,26 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TargetManagement targetManagement;
     private final DistributionSetManagement distributionSetManagement;
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-    private final PlatformTransactionManager txManager;
-    private final TenantAware tenantAware;
-    private final LockRegistry lockRegistry;
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
-    private final RolloutExecutor rolloutExecutor;
     private final EventPublisherHolder eventPublisherHolder;
     private final Database database;
 
     public JpaRolloutManagement(final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final Database database,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final RolloutExecutor rolloutExecutor) {
+            final SystemSecurityContext systemSecurityContext) {
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.txManager = txManager;
-        this.tenantAware = tenantAware;
-        this.lockRegistry = lockRegistry;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.eventPublisherHolder = eventPublisherHolder;
         this.database = database;
-        this.rolloutExecutor = rolloutExecutor;
     }
 
     @Override
@@ -435,41 +416,8 @@ public class JpaRolloutManagement implements RolloutManagement {
         rolloutRepository.save(rollout);
     }
 
-    @Override
-    // No transaction, will be created per handled rollout
-    @Transactional(propagation = Propagation.NEVER)
-    public void handleRollouts() {
-        final List<Long> rollouts = rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
-
-        if (rollouts.isEmpty()) {
-            return;
-        }
-
-        final String tenant = tenantAware.getCurrentTenant();
-
-        final String handlerId = createRolloutLockKey(tenant);
-        final Lock lock = lockRegistry.obtain(handlerId);
-        if (!lock.tryLock()) {
-            return;
-        }
-
-        try {
-            rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
-                    status -> handleRollout(rolloutId)));
-        } finally {
-            lock.unlock();
-        }
-    }
-
     public static String createRolloutLockKey(final String tenant) {
         return tenant + "-rollout";
-    }
-
-    private long handleRollout(final long rolloutId) {
-        final JpaRollout rollout = rolloutRepository.findById(rolloutId)
-                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
-        runInUserContext(rollout, () -> rolloutExecutor.execute(rollout));
-        return 0;
     }
 
     @Override
@@ -515,6 +463,11 @@ public class JpaRolloutManagement implements RolloutManagement {
                 Collections.singletonList(RolloutSpecification.likeName(searchText, deleted)));
         setRolloutStatusDetails(findAll);
         return findAll;
+    }
+
+    @Override
+    public List<Rollout> findActiveRollouts() {
+        return rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
     }
 
     @Override
@@ -647,11 +600,6 @@ public class JpaRolloutManagement implements RolloutManagement {
     private void assertTargetsPerRolloutGroupQuota(final long requested) {
         final int quota = quotaManagement.getMaxTargetsPerRolloutGroup();
         QuotaHelper.assertAssignmentQuota(requested, quota, Target.class, RolloutGroup.class);
-    }
-
-    private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
-        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()),
-                tenantAware);
     }
 
     @Override

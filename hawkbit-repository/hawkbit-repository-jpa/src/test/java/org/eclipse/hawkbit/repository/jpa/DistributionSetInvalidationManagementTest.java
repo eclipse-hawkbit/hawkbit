@@ -58,7 +58,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 0);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
@@ -87,7 +87,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 0, 1);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();
@@ -119,7 +119,7 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
         assertDistributionSetInvalidationCount(distributionSetInvalidationCount, 1, 5, 1);
 
         distributionSetInvalidationManagement.invalidateDistributionSet(distributionSetInvalidation);
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         assertThat(targetFilterQueryManagement.get(invalidationTestData.getTargetFilterQuery().getId()).get()
                 .getAutoAssignDistributionSet()).isNull();

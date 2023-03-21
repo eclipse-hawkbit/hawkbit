@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -180,6 +181,9 @@ public abstract class AbstractIntegrationTest {
 
     @Autowired
     protected RolloutManagement rolloutManagement;
+
+    @Autowired
+    protected RolloutHandler rolloutHandler;
 
     @Autowired
     protected RolloutGroupManagement rolloutGroupManagement;
