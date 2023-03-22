@@ -40,8 +40,8 @@ public interface RolloutRepository
      * @return the list of {@link Rollout} for specific status
      */
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm FROM JpaRollout sm WHERE sm.status IN ?1")
-    List<Rollout> findByStatusIn(Collection<RolloutStatus> status);
+    @Query("SELECT sm.id FROM JpaRollout sm WHERE sm.status IN ?1")
+    List<Long> findByStatusIn(Collection<RolloutStatus> status);
 
     /**
      * Retrieves all {@link Rollout} for a specific {@code name}

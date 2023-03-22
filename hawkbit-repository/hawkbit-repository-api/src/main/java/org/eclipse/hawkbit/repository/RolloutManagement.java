@@ -242,7 +242,7 @@ public interface RolloutManagement {
      * @return a list of active rollouts
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_READ)
-    List<Rollout> findActiveRollouts();
+    List<Long> findActiveRollouts();
 
     /**
      * Retrieves a specific rollout by its ID.

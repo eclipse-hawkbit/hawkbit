@@ -466,7 +466,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     @Override
-    public List<Rollout> findActiveRollouts() {
+    public List<Long> findActiveRollouts() {
         return rolloutRepository.findByStatusIn(ACTIVE_ROLLOUTS);
     }
 

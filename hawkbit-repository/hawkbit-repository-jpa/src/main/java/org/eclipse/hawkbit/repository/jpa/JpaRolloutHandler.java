@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,7 @@ public class JpaRolloutHandler implements RolloutHandler {
     // No transaction. Instead, a transaction will be created per handled rollout.
     @Transactional(propagation = Propagation.NEVER)
     public void handleAll() {
-        final List<Rollout> rollouts = rolloutManagement.findActiveRollouts();
+        final List<Long> rollouts = rolloutManagement.findActiveRollouts();
 
         if (rollouts.isEmpty()) {
             return;
@@ -91,7 +90,7 @@ public class JpaRolloutHandler implements RolloutHandler {
             rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
                     status -> {
                         handleRollout(rolloutId);
-                        return null;
+                        return 0L;
                     }));
         } finally {
             if (LOGGER.isTraceEnabled()) {
@@ -105,8 +104,10 @@ public class JpaRolloutHandler implements RolloutHandler {
         return tenant + "-rollout";
     }
 
-    private void handleRollout(final Rollout rollout) {
-        runInUserContext(rollout, () -> rolloutExecutor.execute(rollout));
+    private void handleRollout(final long rolloutId) {
+        rolloutManagement.get(rolloutId).ifPresentOrElse(
+                rollout -> runInUserContext(rollout, () -> rolloutExecutor.execute(rollout)), () -> LOGGER
+                        .error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
     }
 
     private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
