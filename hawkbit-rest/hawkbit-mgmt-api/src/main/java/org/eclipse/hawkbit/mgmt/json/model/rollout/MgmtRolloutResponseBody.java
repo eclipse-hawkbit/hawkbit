@@ -45,6 +45,12 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Integer totalGroups;
 
     @JsonProperty
+    private Long startAt;
+
+    @JsonProperty
+    private Long forceTime;
+
+    @JsonProperty
     private boolean deleted;
 
     @JsonProperty
@@ -99,6 +105,22 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     public Long getTotalTargets() {
         return totalTargets;
+    }
+
+    public void setStartAt(final Long startAt) {
+        this.startAt = startAt;
+    }
+
+    public Long getStartAt() {
+        return startAt;
+    }
+
+    public void setForceTime(final Long forceTime) {
+        this.forceTime = forceTime;
+    }
+
+    public Long getForceTime() {
+        return forceTime;
     }
 
     public Map<String, Long> getTotalTargetsPerStatus() {

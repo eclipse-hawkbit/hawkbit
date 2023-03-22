@@ -481,15 +481,15 @@ public abstract class JsonBuilder {
 
     public static String rollout(final String name, final String description, final int groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null,
-                null, null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, null, null,
+                null, null, null);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
             final String type) {
-        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type, null,
-                null);
+        return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions, null, type,
+            null, null, null, null);
     }
 
     public static String rolloutWithGroups(final String name, final String description, final Integer groupSize,
@@ -506,12 +506,13 @@ public abstract class JsonBuilder {
         final List<String> rolloutGroupsJson = groups.stream().map(JsonBuilder::rolloutGroup)
                 .collect(Collectors.toList());
         return rollout(name, description, groupSize, distributionSetId, targetFilterQuery, conditions,
-                rolloutGroupsJson, type, weight, confirmationRequired);
+                rolloutGroupsJson, type, weight, System.currentTimeMillis(), null, confirmationRequired);
     }
 
     public static String rollout(final String name, final String description, final Integer groupSize,
             final long distributionSetId, final String targetFilterQuery, final RolloutGroupConditions conditions,
-            final List<String> groupJsonList, final String type, final Integer weight, final Boolean confirmationRequired) {
+            final List<String> groupJsonList, final String type, final Integer weight, final Long startAt, final Long forceTime,
+            final Boolean confirmationRequired) {
         final JSONObject json = new JSONObject();
 
         try {
@@ -527,6 +528,14 @@ public abstract class JsonBuilder {
 
             if (weight != null) {
                 json.put("weight", weight);
+            }
+
+            if (startAt != null) {
+                json.put("startAt", startAt);
+            }
+
+            if (forceTime != null) {
+                json.put("forceTime", forceTime);
             }
 
             if (confirmationRequired != null) {

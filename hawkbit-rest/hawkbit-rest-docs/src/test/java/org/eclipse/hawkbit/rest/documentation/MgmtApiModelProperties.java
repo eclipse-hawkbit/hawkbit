@@ -130,6 +130,8 @@ public final class MgmtApiModelProperties {
     public static final String ROLLOUT_LINKS_DENY = "Link to deny a rollout";
     public static final String ROLLOUT_LINKS_GROUPS = "Link to retrieve the groups a rollout";
     public static final String ROLLOUT_START_ASYNC = "Start the rollout asynchronous";
+    public static final String ROLLOUT_START_AT = "Start at timestamp of Rollout.";
+
 
     public static final String RESULTING_ACTIONS_WEIGHT = "Weight of the resulting Actions";
 

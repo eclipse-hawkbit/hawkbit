@@ -84,6 +84,7 @@ final class MgmtRolloutMapper {
         body.setTotalTargets(rollout.getTotalTargets());
         body.setDeleted(rollout.isDeleted());
         body.setType(MgmtRestModelMapper.convertActionType(rollout.getActionType()));
+        body.setForceTime(rollout.getForcedTime());
         rollout.getWeight().ifPresent(body::setWeight);
 
         if (withDetails) {
@@ -92,6 +93,7 @@ final class MgmtRolloutMapper {
                         rollout.getTotalTargetCountStatus().getTotalTargetCountByStatus(status));
             }
             body.setTotalGroups(rollout.getRolloutGroupsCreated());
+            body.setStartAt(rollout.getStartAt());
 
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start"));
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause"));
