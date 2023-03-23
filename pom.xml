@@ -142,7 +142,7 @@
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <!-- CVE-2022-25857 -->
-      <!--snakeyaml.version>1.31</snakeyaml.version-->
+      <snakeyaml.version>1.33</snakeyaml.version>
       <!-- maintain compatibility with AWS Aurora for production setups -->
       <mariadb.version>2.7.8</mariadb.version>
       <!-- Spring boot version overrides - END -->
