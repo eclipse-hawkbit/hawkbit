@@ -8,14 +8,17 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import java.text.MessageFormat;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -35,15 +38,18 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
+import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
@@ -51,6 +57,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -85,16 +92,21 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
     private final DistributionSetManagement distributionSetManagement;
 
+    private final DistributionSetTypeManagement distributionSetTypeManagement;
+
     private final SystemSecurityContext systemSecurityContext;
 
     private final DistributionSetInvalidationManagement distributionSetInvalidationManagement;
+    
+    private final TenantConfigHelper tenantConfigHelper;
 
     MgmtDistributionSetResource(final SoftwareModuleManagement softwareModuleManagement,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deployManagament, final SystemManagement systemManagement,
             final EntityFactory entityFactory, final DistributionSetManagement distributionSetManagement,
-            final SystemSecurityContext systemSecurityContext,
-            final DistributionSetInvalidationManagement distributionSetInvalidationManagement) {
+            final DistributionSetTypeManagement distributionSetTypeManagement, final SystemSecurityContext systemSecurityContext,
+            final DistributionSetInvalidationManagement distributionSetInvalidationManagement,
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.softwareModuleManagement = softwareModuleManagement;
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
@@ -102,8 +114,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
         this.distributionSetManagement = distributionSetManagement;
+        this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.distributionSetInvalidationManagement = distributionSetInvalidationManagement;
+        this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
     }
 
     @Override
@@ -152,6 +166,18 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final String defaultDsKey = systemSecurityContext
                 .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
         sets.stream().filter(ds -> ds.getType() == null).forEach(ds -> ds.setType(defaultDsKey));
+
+        //check if there is already deleted DS Type
+        for (MgmtDistributionSetRequestBodyPost ds : sets) {
+            final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(ds.getType());
+            opt.ifPresent(dsType -> {
+                if (dsType.isDeleted()) {
+                    final String text = "Cannot create Distribution Set from type with key {0}. Distribution Set Type already deleted!";
+                    final String message = MessageFormat.format(text, dsType.getKey());
+                    throw new ValidationException(message);
+                }
+            });
+        }
 
         final Collection<DistributionSet> createdDSets = distributionSetManagement
                 .create(MgmtDistributionSetMapper.dsFromRequest(sets, entityFactory));
@@ -203,8 +229,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             targetsAssignedDS = this.targetManagement.findByAssignedDistributionSet(pageable, distributionSetId);
         }
 
-        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsAssignedDS.getContent()),
-                targetsAssignedDS.getTotalElements()));
+        return ResponseEntity
+                .ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsAssignedDS.getContent(), tenantConfigHelper),
+                        targetsAssignedDS.getTotalElements()));
     }
 
     @Override
@@ -231,8 +258,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
             targetsInstalledDS = this.targetManagement.findByInstalledDistributionSet(pageable, distributionSetId);
         }
 
-        return ResponseEntity.ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent()),
-                targetsInstalledDS.getTotalElements()));
+        return ResponseEntity
+                .ok(new PagedList<>(MgmtTargetMapper.toResponse(targetsInstalledDS.getContent(), tenantConfigHelper),
+                        targetsInstalledDS.getTotalElements()));
     }
 
     @Override
@@ -251,8 +279,8 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 .findByAutoAssignDSAndRsql(pageable, distributionSetId, rsqlParam);
 
         return ResponseEntity
-                .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent()),
-                        targetFilterQueries.getTotalElements()));
+                .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(),
+                        tenantConfigHelper.isConfirmationFlowEnabled()), targetFilterQueries.getTotalElements()));
     }
 
     @Override
@@ -268,9 +296,13 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                     .toResponse(deployManagament.offlineAssignedDistributionSets(offlineAssignments)));
         }
 
-        final List<DeploymentRequest> deploymentRequests = assignments.stream()
-                .map(assignment -> MgmtDeploymentRequestMapper.createAssignmentRequest(assignment, distributionSetId))
-                .collect(Collectors.toList());
+        final List<DeploymentRequest> deploymentRequests = assignments.stream().map(dsAssignment -> {
+            final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
+                    ? tenantConfigHelper.isConfirmationFlowEnabled()
+                    : dsAssignment.isConfirmationRequired();
+            return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
+                    .setConfirmationRequired(isConfirmationRequired).build();
+        }).collect(Collectors.toList());
 
         final List<DistributionSetAssignmentResult> assignmentResults = deployManagament
                 .assignDistributionSets(deploymentRequests);
@@ -302,7 +334,6 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         return ResponseEntity
                 .ok(new PagedList<>(MgmtDistributionSetMapper.toResponseDsMetadata(metaDataPage.getContent()),
                         metaDataPage.getTotalElements()));
-
     }
 
     @Override

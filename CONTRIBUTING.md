@@ -19,7 +19,7 @@ Please read this if you intend to contribute to the project.
   * we follow the standard [scss-lint](https://github.com/brigade/scss-lint/) rules with the following exception:
     * disabled rules: ImportantRule, PropertySortOrder
 * Sonarqube:
-  * Our rule set can be found [here](https://sonar.ops.bosch-iot-rollouts.com/projects) with navigating to the tab "Quality Profiles", selecting "hawkBit", and then selecting "Actions" - "Back up"
+  * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
 
 ### Utility library usage
 
@@ -44,7 +44,7 @@ Examples:
 
 ### Test documentation
 
-Please documented the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
+Please document the test cases that you contribute by means of [Allure](https://docs.qameta.io/allure/) annotations and proper test method naming.
 
 All test classes are documented with [Allure's](https://docs.qameta.io/allure/#_behaviours_mapping) **@Feature** and **@Story** annotations in the following format:
 

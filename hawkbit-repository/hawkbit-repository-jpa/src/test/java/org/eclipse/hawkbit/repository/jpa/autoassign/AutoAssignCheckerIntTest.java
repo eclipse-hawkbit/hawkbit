@@ -33,6 +33,9 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -174,6 +177,69 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
     }
 
+    @ParameterizedTest
+    @MethodSource("confirmationOptions")
+    @Description("Test auto assignment of a DS to filtered targets with different confirmation options")
+    void checkAutoAssignWithConfirmationOptions(final boolean confirmationFlowActive, final boolean confirmationRequired,
+            final Action.Status expectedStatus) {
+
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("dsA");
+
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
+        }
+
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(entityFactory
+                .targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(distributionSet.getId()).confirmationRequired(confirmationRequired));
+
+        final String targetDsAIdPref = "targ";
+        final List<Target> targets = testdataFactory.createTargets(20, targetDsAIdPref,
+                targetDsAIdPref.concat(" description"));
+
+        // Run the check
+        autoAssignChecker.checkAllTargets();
+
+        verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(distributionSet, targets, expectedStatus);
+    }
+
+    @ParameterizedTest
+    @MethodSource("confirmationOptions")
+    @Description("Test auto assignment of a DS for a specific device with different confirmation options")
+    void checkAutoAssignmentForDeviceWithConfirmationRequired(final boolean confirmationFlowActive,
+            final boolean confirmationRequired, final Action.Status expectedStatus) {
+
+        final DistributionSet toAssignDs = testdataFactory.createDistributionSet();
+
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
+        }
+
+        // target filter query that matches all targets
+        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQueryManagement
+                        .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
+                .ds(toAssignDs.getId()).confirmationRequired(confirmationRequired));
+
+        final List<Target> targets = testdataFactory.createTargets(25);
+
+        // Run the check
+        autoAssignChecker.checkSingleTarget(targets.get(0).getControllerId());
+        verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(toAssignDs, targets.subList(0, 1), expectedStatus);
+
+        verifyThatTargetsNotHaveDistributionSetAssignment(toAssignDs, targets.subList(1, 25));
+    }
+
+    private static Stream<Arguments> confirmationOptions() {
+        return Stream.of( //
+                Arguments.of(true, true, Status.WAIT_FOR_CONFIRMATION), //
+                Arguments.of(true, false, Status.RUNNING), //
+                Arguments.of(false, true, Status.RUNNING), //
+                Arguments.of(false, false, Status.RUNNING));
+    }
+
     @Test
     @Description("Test auto assignment of an incomplete DS to filtered targets, that causes failures")
     void checkAutoAssignWithFailures() {
@@ -244,6 +310,22 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
             }
         }
 
+    }
+
+    @Step
+    private void verifyThatTargetsHaveDistributionSetAssignedAndActionStatus(final DistributionSet set,
+            final List<Target> targets, final Action.Status status) {
+        final List<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toList());
+        final List<Target> targetsWithAssignedDS = targetManagement.findByAssignedDistributionSet(PAGE, set.getId())
+                .getContent();
+        assertThat(targetsWithAssignedDS).isNotEmpty();
+        assertThat(targetsWithAssignedDS).allMatch(target -> targetIds.contains(target.getControllerId()));
+
+        final List<Action> actionsByDs = deploymentManagement.findActionsByDistributionSet(PAGE, set.getId())
+                .getContent();
+
+        assertThat(actionsByDs).hasSize(targets.size());
+        assertThat(actionsByDs).allMatch(action -> action.getStatus() == status);
     }
 
     @Step

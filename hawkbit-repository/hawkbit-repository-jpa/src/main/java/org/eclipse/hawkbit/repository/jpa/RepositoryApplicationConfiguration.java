@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.ArtifactEncryptionSecretsStore;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
+import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -742,6 +743,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
     }
 
+    @Bean
+    @ConditionalOnMissingBean
+    ConfirmationManagement confirmationManagement(final TargetRepository targetRepository,
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
+            final EntityFactory entityFactory) {
+        return new JpaConfirmationManagement(targetRepository, actionRepository, actionStatusRepository,
+                repositoryProperties, quotaManagement, entityFactory);
+    }
+
     /**
      * {@link JpaControllerManagement} bean.
      *
@@ -750,8 +761,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     @ConditionalOnMissingBean
     ControllerManagement controllerManagement(final ScheduledExecutorService executorService,
-            final RepositoryProperties repositoryProperties, final ActionRepository actionRepository) {
-        return new JpaControllerManagement(executorService, repositoryProperties, actionRepository);
+            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+        return new JpaControllerManagement(executorService, actionRepository, actionStatusRepository, quotaManagement,
+                repositoryProperties);
     }
 
     @Bean

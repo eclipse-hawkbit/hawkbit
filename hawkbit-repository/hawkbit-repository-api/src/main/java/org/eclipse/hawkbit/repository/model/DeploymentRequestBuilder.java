@@ -24,6 +24,7 @@ public class DeploymentRequestBuilder {
     private String maintenanceSchedule;
     private String maintenanceWindowDuration;
     private String maintenanceWindowTimeZone;
+    private boolean confirmationRequired;
 
     /**
      * Create a builder for a target distribution set assignment with the
@@ -101,13 +102,25 @@ public class DeploymentRequestBuilder {
     }
 
     /**
+     * Set if a confirmation is required.
+     * 
+     * @param confirmationRequired
+     *            if a confirmation is required for the {@link Action}
+     * @return builder
+     */
+    public DeploymentRequestBuilder setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
+        return this;
+    }
+
+    /**
      * build the request
      * 
      * @return the request object
      */
     public DeploymentRequest build() {
         return new DeploymentRequest(controllerId, distributionSetId, actionType, forceTime, weight,
-                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone);
+                maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, confirmationRequired);
     }
 
 }

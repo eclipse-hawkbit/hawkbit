@@ -1,0 +1,111 @@
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: macro
+:toclevels: 1
+:sectlinks:
+:linkattrs:
+
+[[actions]]
+= Actions
+
+toc::[]
+
+== GET /rest/v1/actions
+
+=== Implementation notes
+
+Handles the GET request of retrieving all actions within Hawkbit. Required permission: READ_TARGET
+
+=== Get paged list of actions
+
+==== CURL
+
+include::{snippets}/actions/get-actions/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access the actions
+
+include::{snippets}/actions/get-actions/http-request.adoc[]
+
+==== Request query parameter
+
+include::{snippets}/actions/get-actions-with-parameters/request-parameters.adoc[]
+
+==== Request parameter example
+
+include::{snippets}/actions/get-actions-with-parameters/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields 
+
+include::{snippets}/actions/get-actions/response-fields.adoc[]
+
+==== Response example 
+
+include::{snippets}/actions/get-actions/http-response.adoc[]
+
+==== Response example for representation mode 'full'
+
+include::{snippets}/actions/get-actions-with-parameters/http-response.adoc[]
+
+
+=== Error responses
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/403.adoc[]
+include::../errors/405.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== GET /rest/v1/actions/{actionId}
+
+=== Implementation notes
+
+Handles the GET request of retrieving a single action within Hawkbit by actionId.
+
+=== Get single action
+
+==== CURL
+
+include::{snippets}/actions/get-action/curl-request.adoc[]
+
+==== Request URL
+
+A `GET` request is used to access a single action
+
+include::{snippets}/actions/get-action/http-request.adoc[]
+
+=== Response (Status 200)
+
+==== Response fields
+
+include::{snippets}/actions/get-action/response-fields.adoc[]
+
+==== Response example
+
+include::{snippets}/actions/get-action/http-response.adoc[]
+
+|===
+| HTTP Status Code | Reason | Response Model
+
+include::../errors/400.adoc[]
+include::../errors/401.adoc[]
+include::../errors/404.adoc[]
+include::../errors/406.adoc[]
+include::../errors/429.adoc[]
+|===
+
+== Additional content
+
+[[error-body]]
+=== Error body
+
+include::../errors/error-response-body.adoc[]

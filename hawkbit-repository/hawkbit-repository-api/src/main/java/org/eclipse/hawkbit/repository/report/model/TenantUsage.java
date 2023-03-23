@@ -29,6 +29,7 @@ public class TenantUsage {
      * Constructor.
      *
      * @param tenantName
+     *            name of the tenant
      */
     public TenantUsage(final String tenantName) {
         this.tenantName = tenantName;

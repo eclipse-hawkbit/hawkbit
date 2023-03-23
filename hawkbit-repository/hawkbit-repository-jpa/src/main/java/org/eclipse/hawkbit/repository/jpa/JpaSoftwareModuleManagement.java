@@ -27,6 +27,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -73,7 +74,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -267,11 +270,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     @Override
     public Page<SoftwareModule> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaSoftwareModule> spec = RSQLUtility.buildRsqlSpecification(rsqlParam,
-                SoftwareModuleFields.class, virtualPropertyReplacer, database);
+        final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(2);
+        specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class, virtualPropertyReplacer,
+                database));
+        specList.add(SoftwareModuleSpecification.isDeletedFalse());
 
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable,
-                Collections.singletonList(spec));
+        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable, specList);
     }
 
     @Override
@@ -308,6 +312,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
+    // In the interface org.springframework.data.domain.Pageable.getSort the
+    // return value is not guaranteed to be non-null, therefore a null check is
+    // necessary otherwise we rely on the implementation but this could change.
+    @SuppressWarnings({ "squid:S2583", "squid:S2589" })
     public Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
             final Pageable pageable, final long dsId, final String searchText, final Long smTypeId) {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -331,8 +339,16 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         query.groupBy(smRoot);
 
-        query.orderBy(cb.desc(assignedCaseMax), cb.asc(smRoot.get(JpaSoftwareModule_.name)),
-                cb.asc(smRoot.get(JpaSoftwareModule_.version)));
+        final Sort sort = pageable.getSort();
+        final List<Order> orders = new ArrayList<>();
+        orders.add(cb.desc(assignedCaseMax));
+        if (sort == null || sort.isEmpty()) {
+            orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.name)));
+            orders.add(cb.asc(smRoot.get(JpaSoftwareModule_.version)));
+        } else {
+            orders.addAll(QueryUtils.toOrders(sort, smRoot, cb));
+        }
+        query.orderBy(orders);
 
         final int pageSize = pageable.getPageSize();
         final List<Tuple> smWithAssignedFlagList = entityManager.createQuery(query)
@@ -486,7 +502,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     /**
      * Asserts the meta data quota for the software module with the given ID.
-     * 
+     *
      * @param moduleId
      *            The software module ID.
      * @param requested

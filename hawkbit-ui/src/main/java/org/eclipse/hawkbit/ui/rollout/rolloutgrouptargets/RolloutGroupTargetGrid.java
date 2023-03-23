@@ -24,6 +24,8 @@ import org.eclipse.hawkbit.ui.rollout.RolloutManagementUIState;
 import org.eclipse.hawkbit.ui.utils.SPUILabelDefinitions;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
+import com.vaadin.ui.Label;
+
 /**
  * Grid component with targets of rollout group.
  */
@@ -52,7 +54,21 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
         actionStatusIconSupplier = new RolloutActionStatusIconSupplier<>(i18n, ProxyTarget::getStatus,
                 UIComponentIdProvider.ROLLOUT_GROUP_TARGET_STATUS_LABEL_ID, rolloutGroupManagement,
                 rolloutManagementUIState);
+
+        // the min push size is set to 40 by default. This value is set as page
+        // size in the page request and is in most cases to
+        // small and would result in multiple DB calls to fetch more data.
+        // Because retrieving actions is an expensive operation we want to make
+        // only one DB call.
+        // On the other hand the window size could not be retrieved at this
+        // point in time to calculate how many rows can be displayed so
+        // set it to a fixed value is a compromise here.
+        // Value 250 was chosen because with this value in fullscreen on a 4k
+        // display Vaadin creates one call to data provider.
+        getDataCommunicator().setMinPushSize(250);
+
         init();
+
     }
 
     private void initFilterMappings() {
@@ -73,8 +89,15 @@ public class RolloutGroupTargetGrid extends AbstractGrid<ProxyTarget, Long> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, SPUILabelDefinitions.VAR_DESC).setExpandRatio(2);
 
-        GridComponentBuilder.addIconColumn(this, actionStatusIconSupplier::getLabel, SPUILabelDefinitions.VAR_STATUS,
+        final Column<ProxyTarget, Label> statusColumn = GridComponentBuilder.addIconColumn(this,
+                actionStatusIconSupplier::getLabel, SPUILabelDefinitions.VAR_STATUS,
                 i18n.getMessage("header.status"));
+        GridComponentBuilder.setColumnSortable(statusColumn, "status");
+
+        final Column<ProxyTarget, Integer> statusCodeColumn = GridComponentBuilder.addColumn(this,
+                ProxyTarget::getLastActionStatusCode).setId(SPUILabelDefinitions.VAR_STATUS_CODE)
+                .setCaption(i18n.getMessage("header.status.code"));
+        GridComponentBuilder.setColumnSortable(statusCodeColumn, "lastActionStatusCode");
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 

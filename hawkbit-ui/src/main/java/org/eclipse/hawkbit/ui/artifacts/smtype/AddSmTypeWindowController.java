@@ -18,7 +18,6 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyType.SmTypeAssign;
 import org.eclipse.hawkbit.ui.common.type.ProxyTypeValidator;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for Add software module type window
@@ -82,9 +81,7 @@ public class AddSmTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyType entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedKey = StringUtils.trimWhitespace(entity.getKey());
-        return validator.isSmTypeValid(entity, () -> smTypeManagement.getByKey(trimmedKey).isPresent(),
-                () -> smTypeManagement.getByName(trimmedName).isPresent());
+        return validator.isSmTypeValid(entity, () -> smTypeManagement.getByKey(entity.getKey()).isPresent(),
+                () -> smTypeManagement.getByName(entity.getName()).isPresent());
     }
 }

@@ -6,9 +6,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  */
-package org.eclipse.hawkbit.repository.jpa.utils;
+package org.eclipse.hawkbit.utils;
 
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.MULTI_ASSIGNMENTS_ENABLED;
+import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.USER_CONFIRMATION_ENABLED;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -49,5 +50,15 @@ public final class TenantConfigHelper {
     public boolean isMultiAssignmentsEnabled() {
         return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                 .getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class).getValue());
+    }
+
+    /**
+     * Is confirmation flow enabled for the current tenant
+     *
+     * @return is enabled
+     */
+    public boolean isConfirmationFlowEnabled() {
+        return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
+            .getConfigurationValue(USER_CONFIRMATION_ENABLED, Boolean.class).getValue());
     }
 }

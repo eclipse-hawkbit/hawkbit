@@ -35,7 +35,6 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.AddRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for populating and saving data in Add Rollout Window.
@@ -112,9 +111,10 @@ public class AddRolloutWindowController
                         : RepositoryModelConstants.NO_FORCE_TIME)
                 .startAt(entity.getStartAtByOption());
 
-        Rollout rolloutToCreate;
+        final Rollout rolloutToCreate;
         if (GroupDefinitionMode.SIMPLE == entity.getGroupDefinitionMode()) {
-            rolloutToCreate = rolloutManagement.create(rolloutCreate, entity.getNumberOfGroups(), conditions);
+            rolloutToCreate = rolloutManagement.create(rolloutCreate, entity.getNumberOfGroups(),
+                    entity.isConfirmationRequired(), conditions);
         } else {
             rolloutToCreate = rolloutManagement.create(rolloutCreate,
                     getRolloutGroupsCreateFromDefinitions(entity.getAdvancedRolloutGroupDefinitions()), conditions);
@@ -153,7 +153,6 @@ public class AddRolloutWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, () -> rolloutManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> rolloutManagement.getByName(entity.getName()).isPresent());
     }
 }

@@ -14,7 +14,9 @@ import java.io.OutputStream;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
@@ -127,7 +129,8 @@ public final class FileStreamingUtil {
         final String etag = artifact.getHashes().getSha1();
         final long length = artifact.getSize();
 
-        response.reset();
+        resetResponseExceptHeaders(response);
+
         response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + filename);
         response.setHeader(HttpHeaders.ETAG, etag);
         response.setHeader(HttpHeaders.ACCEPT_RANGES, "bytes");
@@ -189,6 +192,19 @@ public final class FileStreamingUtil {
         return result;
     }
 
+    private static void resetResponseExceptHeaders(final HttpServletResponse response){
+        // do backup the current headers (like CORS related)
+        final Map<String, String> storedHeaders = new HashMap<>();
+        for (final String header : response.getHeaderNames()) {
+            storedHeaders.put(header, response.getHeader(header));
+        }
+        // resetting the response is needed only partially. Headers set before e.b. by
+        // the CORS security config needs to be persisted.
+        response.reset();
+        // restore headers again
+        storedHeaders.forEach(response::addHeader);
+    }
+
     private static ResponseEntity<InputStream> handleFullFileRequest(final DbArtifact artifact, final String filename,
             final HttpServletResponse response, final FileStreamingProgressListener progressListener,
             final ByteRange full) {
@@ -196,7 +212,7 @@ public final class FileStreamingUtil {
         response.setHeader(HttpHeaders.CONTENT_RANGE, "bytes " + r.getStart() + "-" + r.getEnd() + "/" + r.getTotal());
         response.setContentLengthLong(r.getLength());
 
-        try (InputStream from = artifact.getFileInputStream()) {
+        try (final InputStream from = artifact.getFileInputStream()) {
             final ServletOutputStream to = response.getOutputStream();
             copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {
@@ -268,7 +284,7 @@ public final class FileStreamingUtil {
             final ServletOutputStream to = response.getOutputStream();
 
             for (final ByteRange r : ranges) {
-                try (InputStream from = artifact.getFileInputStream()) {
+                try (final InputStream from = artifact.getFileInputStream()) {
 
                     // Add multipart boundary and header fields for every range.
                     to.println();
@@ -299,7 +315,7 @@ public final class FileStreamingUtil {
         response.setContentLengthLong(r.getLength());
         response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
 
-        try (InputStream from = artifact.getFileInputStream()) {
+        try (final InputStream from = artifact.getFileInputStream()) {
             final ServletOutputStream to = response.getOutputStream();
             copyStreams(from, to, progressListener, r.getStart(), r.getLength(), filename);
         } catch (final IOException e) {

@@ -40,6 +40,7 @@ public class TargetFilterQueryToProxyTargetFilterMapper
             proxyTargetFilter.setDistributionSetInfo(new ProxyDistributionSetInfo(distributionSet.getId(),
                     distributionSet.getName(), distributionSet.getVersion(), distributionSet.isValid()));
             proxyTargetFilter.setAutoAssignActionType(targetFilterQuery.getAutoAssignActionType());
+            proxyTargetFilter.setConfirmationRequired(targetFilterQuery.isConfirmationRequired());
         }
 
         return proxyTargetFilter;

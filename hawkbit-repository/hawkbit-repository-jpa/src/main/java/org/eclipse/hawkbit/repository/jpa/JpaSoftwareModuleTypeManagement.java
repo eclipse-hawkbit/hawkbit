@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,8 +24,8 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleTypeSpecification;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -84,16 +85,18 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     @Override
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
-                Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
-                        virtualPropertyReplacer, database)));
+        return JpaManagementHelper
+                .findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
+                        Arrays.asList(
+                                RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
+                                        virtualPropertyReplacer, database),
+                                SoftwareModuleTypeSpecification.isDeleted(false)));
     }
 
     @Override
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository, pageable,
-                Collections.singletonList(
-                        (smTypeRoot, query, cb) -> cb.equal(smTypeRoot.get(JpaSoftwareModuleType_.deleted), false)));
+                Collections.singletonList(SoftwareModuleTypeSpecification.isDeleted(false)));
     }
 
     @Override

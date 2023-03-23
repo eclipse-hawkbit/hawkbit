@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.common.AbstractUpdateEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.ConfirmationDialog;
@@ -21,8 +22,13 @@ import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.UIMessageIdProvider;
 
+import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.Sizeable;
 import com.vaadin.ui.UI;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
+import org.springframework.util.StringUtils;
+
+import static org.eclipse.hawkbit.ui.utils.UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_CONF_HINT;
 
 /**
  * Controller for auto assignment window
@@ -33,6 +39,8 @@ public class AutoAssignmentWindowController extends
     private final TargetManagement targetManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final AutoAssignmentWindowLayout layout;
+    private final TenantConfigHelper configHelper;
+    private final TenantAware tenantAware;
 
     /**
      * Constructor for AutoAssignmentWindowController
@@ -48,11 +56,14 @@ public class AutoAssignmentWindowController extends
      */
     public AutoAssignmentWindowController(final CommonUiDependencies uiDependencies,
             final TargetManagement targetManagement, final TargetFilterQueryManagement targetFilterQueryManagement,
+            final TenantConfigHelper configHelper, final TenantAware tenantAware,
             final AutoAssignmentWindowLayout layout) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.configHelper = configHelper;
+        this.tenantAware = tenantAware;
         this.layout = layout;
     }
 
@@ -67,10 +78,12 @@ public class AutoAssignmentWindowController extends
             autoAssignmentFilter.setAutoAssignmentEnabled(true);
             autoAssignmentFilter.setAutoAssignActionType(proxyEntity.getAutoAssignActionType());
             autoAssignmentFilter.setDistributionSetInfo(proxyEntity.getDistributionSetInfo());
+            autoAssignmentFilter.setConfirmationRequired(proxyEntity.isConfirmationRequired());
         } else {
             autoAssignmentFilter.setAutoAssignmentEnabled(false);
             autoAssignmentFilter.setAutoAssignActionType(ActionType.FORCED);
             autoAssignmentFilter.setDistributionSetInfo(null);
+            autoAssignmentFilter.setConfirmationRequired(configHelper.isConfirmationFlowEnabled());
         }
 
         return autoAssignmentFilter;
@@ -102,8 +115,13 @@ public class AutoAssignmentWindowController extends
                     : getI18n().getMessage(UIMessageIdProvider.MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_TEXT,
                             targetsForAutoAssignmentCount);
 
-            showConsequencesDialog(confirmationCaption, confirmationQuestion, entity.getId(), autoAssignDsId,
-                    entity.getAutoAssignActionType());
+            final String conformationHint = configHelper.isConfirmationFlowEnabled() && !entity.isConfirmationRequired()
+                    ? getI18n().getMessage(MESSAGE_CONFIRM_AUTO_ASSIGN_CONSEQUENCES_CONF_HINT,
+                            tenantAware.getCurrentUsername())
+                    : null;
+
+            showConsequencesDialog(confirmationCaption, confirmationQuestion, conformationHint, entity.getId(), autoAssignDsId,
+                    entity.getAutoAssignActionType(), entity.isConfirmationRequired());
         } else {
             final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
                     getEntityFactory().targetFilterQuery().updateAutoAssign(entity.getId()).ds(null));
@@ -112,16 +130,17 @@ public class AutoAssignmentWindowController extends
     }
 
     private void showConsequencesDialog(final String confirmationCaption, final String confirmationQuestion,
-            final Long targetFilterId, final Long autoAssignDsId, final ActionType autoAssignActionType) {
-        final ConfirmationDialog confirmDialog = new ConfirmationDialog(getI18n(), confirmationCaption,
-                confirmationQuestion, ok -> {
-                    if (ok) {
-                        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
-                                getEntityFactory().targetFilterQuery().updateAutoAssign(targetFilterId)
-                                        .ds(autoAssignDsId).actionType(autoAssignActionType));
-                        publishModifiedEvent(createModifiedEventPayload(targetFilterQuery));
-                    }
-                }, UIComponentIdProvider.DIST_SET_SELECT_CONS_WINDOW_ID);
+            final String confirmationHint, final Long targetFilterId, final Long autoAssignDsId,
+            final ActionType autoAssignActionType, final boolean confirmationRequired) {
+        final ConfirmationDialog confirmDialog = ConfirmationDialog
+                .newBuilder(getI18n(), UIComponentIdProvider.DIST_SET_SELECT_CONS_WINDOW_ID)
+                .caption(confirmationCaption).question(confirmationQuestion).hint(confirmationHint)
+                .icon(StringUtils.hasText(confirmationHint) ? VaadinIcons.WARNING : null).onSaveOrUpdate(() -> {
+                    final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement.updateAutoAssignDS(
+                            getEntityFactory().targetFilterQuery().updateAutoAssign(targetFilterId).ds(autoAssignDsId)
+                                    .actionType(autoAssignActionType).confirmationRequired(confirmationRequired));
+                    publishModifiedEvent(createModifiedEventPayload(targetFilterQuery));
+                }).build();
 
         confirmDialog.getWindow().setWidth(40.0F, Sizeable.Unit.PERCENTAGE);
 

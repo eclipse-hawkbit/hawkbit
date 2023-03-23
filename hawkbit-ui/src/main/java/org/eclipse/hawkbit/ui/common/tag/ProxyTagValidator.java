@@ -10,8 +10,8 @@ package org.eclipse.hawkbit.ui.common.tag;
 
 import java.util.function.BooleanSupplier;
 
-import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
+import org.eclipse.hawkbit.ui.common.EntityValidator;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTag;
 import org.springframework.util.StringUtils;
 
@@ -47,8 +47,7 @@ public class ProxyTagValidator extends EntityValidator {
         }
 
         if (duplicateCheck.getAsBoolean()) {
-            final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-            displayValidationError("message.tag.duplicate.check", trimmedName);
+            displayValidationError("message.tag.duplicate.check", entity.getName());
             return false;
         }
 

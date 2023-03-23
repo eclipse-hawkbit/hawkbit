@@ -27,24 +27,27 @@ import io.qameta.allure.Story;
  * Check DDI api model classes for '@JsonIgnoreProperties' annotation
  */
 @Feature("Unit Tests - Direct Device Integration API")
-@Story("Serializability of DDI api Models")
+@Story("Serialization of DDI api Models")
 public class JsonIgnorePropertiesAnnotationTest {
 
     @Test
-    @Description(
-            "This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
+    @Description("This test verifies that all model classes within the 'org.eclipse.hawkbit.ddi.json.model' package are annotated with '@JsonIgnoreProperties(ignoreUnknown = true)'")
     public void shouldCheckAnnotationsForAllModelClasses() throws IOException {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String packageName = this.getClass().getPackage().getName();
+        final String packageName = this.getClass().getPackage().getName();
 
-        ImmutableSet<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader).getTopLevelClasses(packageName);
-        for (ClassPath.ClassInfo classInfo : topLevelClasses) {
-            Class<?> modelClass = classInfo.load();
+        final ImmutableSet<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader)
+                .getTopLevelClasses(packageName);
+        for (final ClassPath.ClassInfo classInfo : topLevelClasses) {
+            final Class<?> modelClass = classInfo.load();
             if (modelClass.getSimpleName().contains("Test") || modelClass.isEnum()) {
                 continue;
             }
-            JsonIgnoreProperties annotation = modelClass.getAnnotation(JsonIgnoreProperties.class);
-            assertThat(annotation).isNotNull();
+            final JsonIgnoreProperties annotation = modelClass.getAnnotation(JsonIgnoreProperties.class);
+            assertThat(annotation)
+                    .describedAs(
+                            "Annotation 'JsonIgnoreProperties' is missing for class: " + modelClass.getSimpleName())
+                    .isNotNull();
             assertThat(annotation.ignoreUnknown()).isTrue();
         }
     }

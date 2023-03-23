@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
+import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -508,4 +509,28 @@ public interface ControllerManagement {
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
     Optional<Action> getInstalledActionByTarget(@NotEmpty String controllerId);
+
+    /**
+     * Activate auto confirmation for a given controllerId
+     * 
+     * @param controllerId
+     *            to activate auto-confirmation on
+     * @param initiator
+     *            can be set optionally (fallback is the current acting security
+     *            user)
+     * @param remark
+     *            (optional) remark
+     * @return the persisted {@link AutoConfirmationStatus}
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    AutoConfirmationStatus activateAutoConfirmation(@NotEmpty String controllerId, String initiator, String remark);
+
+    /**
+     * Deactivate auto confirmation for a given controllerId
+     * 
+     * @param controllerId
+     *            to deactivate auto-confirmation on
+     */
+    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
+    void deactivateAutoConfirmation(@NotEmpty String controllerId);
 }

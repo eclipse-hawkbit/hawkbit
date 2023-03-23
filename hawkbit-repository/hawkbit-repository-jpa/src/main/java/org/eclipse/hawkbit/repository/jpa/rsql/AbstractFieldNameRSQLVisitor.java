@@ -60,7 +60,7 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
 
         for (int i = 1; i < graph.length; i++) {
 
-            final String propertyField = graph[i];
+            final String propertyField = getFormattedSubEntityAttribute(propertyEnum ,graph[i]);
             fieldNameBuilder.append(FieldNameProvider.SUB_ATTRIBUTE_SEPARATOR).append(propertyField);
 
             // the key of map is not in the graph
@@ -108,6 +108,11 @@ public abstract class AbstractFieldNameRSQLVisitor<A extends Enum<A> & FieldName
         return new RSQLParameterUnsupportedFieldException(String.format(
                 "The given search parameter field {%s} does not exist, must be one of the following fields %s",
                 node.getSelector(), getExpectedFieldList()), rootException);
+    }
+
+    private String getFormattedSubEntityAttribute(final A propertyEnum, final String propertyField) {
+        return propertyEnum.getSubEntityAttributes().stream().filter(attr -> attr.equalsIgnoreCase(propertyField))
+              .findFirst().orElse(propertyField);
     }
 
     private List<String> getExpectedFieldList() {

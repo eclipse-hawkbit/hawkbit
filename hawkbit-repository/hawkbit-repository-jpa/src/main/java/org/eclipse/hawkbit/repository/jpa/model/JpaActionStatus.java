@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.model;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.CollectionTable;
 import javax.persistence.Column;
@@ -73,7 +74,8 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             @ConversionValue(objectValue = "DOWNLOAD", dataValue = "7"),
             @ConversionValue(objectValue = "SCHEDULED", dataValue = "8"),
             @ConversionValue(objectValue = "CANCEL_REJECTED", dataValue = "9"),
-            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10")})
+            @ConversionValue(objectValue = "DOWNLOADED", dataValue = "10"),
+            @ConversionValue(objectValue = "WAIT_FOR_CONFIRMATION", dataValue = "11")})
     @Convert("status")
     @NotNull
     private Status status;
@@ -85,6 +87,9 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
     @Column(name = "detail_message", length = MESSAGE_ENTRY_LENGTH, nullable = false, updatable = false)
     private List<String> messages;
 
+    @Column(name = "code", nullable = true, updatable = false)
+    private Integer code;
+    
     /**
      * Creates a new {@link ActionStatus} object.
      *
@@ -184,4 +189,11 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
         this.status = status;
     }
 
+    public Optional<Integer> getCode() {
+        return Optional.ofNullable(code);
+    }
+
+    public void setCode(final Integer code) {
+        this.code = code;
+    }
 }

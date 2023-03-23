@@ -36,17 +36,6 @@ public class TargetEventTest extends AbstractRemoteEntityEventTest<Target> {
         assertAndCreateRemoteEvent(TargetUpdatedEvent.class);
     }
 
-    @Test
-    @Description("Verifies that cancel target assignment event works")
-    public void testCancelTargetAssignmentEvent() {
-        final Target target = createEntity();
-        final CancelTargetAssignmentEvent assignmentEvent = new CancelTargetAssignmentEvent(target, 1L, "node");
-        final CancelTargetAssignmentEvent underTest = (CancelTargetAssignmentEvent) assertEntity(target,
-                assignmentEvent);
-
-        assertThat(underTest.getActionId()).isNotNull();
-    }
-
     @Override
     protected Target createEntity() {
         return testdataFactory.createTarget("12345");

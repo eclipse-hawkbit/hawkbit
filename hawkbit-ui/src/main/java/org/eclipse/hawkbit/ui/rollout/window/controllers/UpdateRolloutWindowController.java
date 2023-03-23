@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.UpdateRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for populating and editing/saving data in Update Rollout Window.
@@ -98,7 +97,7 @@ public class UpdateRolloutWindowController
         proxyRolloutWindow.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
         final RolloutGroupToAdvancedDefinitionMapper groupsMapper = new RolloutGroupToAdvancedDefinitionMapper(
                 targetFilterQueryManagement);
-        final List<ProxyAdvancedRolloutGroup> advancedGroupDefinitions = groupsMapper.loadRolloutGroupssFromBackend(
+        final List<ProxyAdvancedRolloutGroup> advancedGroupDefinitions = groupsMapper.loadRolloutGroupsFromBackend(
                 proxyRolloutWindow.getId(), rolloutGroupManagement, quotaManagement.getMaxRolloutGroupsPerRollout());
         proxyRolloutWindow.setAdvancedRolloutGroupDefinitions(advancedGroupDefinitions);
     }
@@ -156,9 +155,9 @@ public class UpdateRolloutWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyRolloutWindow entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
+        final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> hasNamedChanged(trimmedName) && rolloutManagement.getByName(trimmedName).isPresent());
+                () -> hasNamedChanged(name) && rolloutManagement.getByName(name).isPresent());
     }
 
     private boolean hasNamedChanged(final String trimmedName) {

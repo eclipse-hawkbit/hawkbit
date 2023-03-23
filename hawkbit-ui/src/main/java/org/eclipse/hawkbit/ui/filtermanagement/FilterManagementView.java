@@ -16,7 +16,10 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.rsql.RsqlValidationOracle;
+import org.eclipse.hawkbit.security.SystemSecurityContext;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -32,6 +35,7 @@ import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState;
 import org.eclipse.hawkbit.ui.filtermanagement.state.FilterManagementUIState.FilterView;
 import org.eclipse.hawkbit.ui.utils.UINotification;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
@@ -62,14 +66,19 @@ public class FilterManagementView extends AbstractEventListenersAwareView {
             final TargetFilterQueryManagement targetFilterQueryManagement, final SpPermissionChecker permissionChecker,
             final UINotification notification, final UiProperties uiProperties, final EntityFactory entityFactory,
             final TargetManagement targetManagement, final DistributionSetManagement distributionSetManagement,
-            final TargetFilterStateDataSupplier targetFilterStateDataSupplier) {
+            final TargetFilterStateDataSupplier targetFilterStateDataSupplier,
+            final TenantConfigurationManagement tenantConfigurationManagement,
+            final SystemSecurityContext securityContext, final TenantAware tenantAware) {
         this.filterManagementUIState = filterManagementUIState;
 
         final CommonUiDependencies uiDependencies = new CommonUiDependencies(i18n, entityFactory, eventBus,
                 notification, permissionChecker);
 
+        final TenantConfigHelper tenantConfigHelper = TenantConfigHelper.usingContext(securityContext,
+                tenantConfigurationManagement);
+
         this.targetFilterGridLayout = new TargetFilterGridLayout(uiDependencies, targetFilterQueryManagement,
-                targetManagement, distributionSetManagement, filterManagementUIState);
+                targetManagement, distributionSetManagement, filterManagementUIState, tenantConfigHelper, tenantAware);
 
         this.targetFilterDetailsLayout = new TargetFilterDetailsLayout(uiDependencies, uiProperties,
                 rsqlValidationOracle, targetFilterQueryManagement, targetFilterStateDataSupplier,

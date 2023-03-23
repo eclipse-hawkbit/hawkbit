@@ -35,6 +35,7 @@ public class RolloutGroupToProxyRolloutGroupMapper
         proxyRolloutGroup.setFinishedPercentage(formatFinishedPercentage(rolloutGroup));
         proxyRolloutGroup.setTotalTargetsCount(String.valueOf(rolloutGroup.getTotalTargets()));
         proxyRolloutGroup.setTotalTargetCountStatus(rolloutGroup.getTotalTargetCountStatus());
+        proxyRolloutGroup.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
 
         return proxyRolloutGroup;
     }

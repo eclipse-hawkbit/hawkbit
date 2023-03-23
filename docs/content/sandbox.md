@@ -1,4 +1,4 @@
 ---
 title: Sandbox
-redirectURL: https://hawkbit.eclipse.org
+redirectURL: https://hawkbit.eclipseprojects.io
 ---

@@ -117,6 +117,9 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
 
     @Column(name = "target_percentage")
     private float targetPercentage = 100;
+    
+    @Column(name = "confirmation_required")
+    private boolean confirmationRequired;
 
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
@@ -251,6 +254,15 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return targetPercentage;
     }
 
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
+    }
+    
+    @Override
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
     public void setTargetPercentage(final float targetPercentage) {
         this.targetPercentage = targetPercentage;
     }
@@ -279,7 +291,8 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
         return "RolloutGroup [rollout=" + (rollout != null ? rollout.getId() : "") + ", status=" + status
                 + ", rolloutTargetGroup=" + rolloutTargetGroup + ", parent=" + parent + ", finishCondition="
                 + successCondition + ", finishExp=" + successConditionExp + ", errorCondition=" + errorCondition
-                + ", errorExp=" + errorConditionExp + ", getName()=" + getName() + ", getId()=" + getId() + "]";
+                + ", errorExp=" + errorConditionExp + ", getName()=" + getName() + ", getId()=" + getId()
+                + ", isConfirmationRequired()=" + isConfirmationRequired() + "]";
     }
 
     @Override

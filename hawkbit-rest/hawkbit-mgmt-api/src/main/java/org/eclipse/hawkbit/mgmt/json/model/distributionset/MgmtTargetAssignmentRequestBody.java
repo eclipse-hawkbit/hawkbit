@@ -26,6 +26,7 @@ public class MgmtTargetAssignmentRequestBody {
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
     private Integer weight;
+    private Boolean confirmationRequired;
 
     /**
      * JsonCreator Constructor
@@ -76,5 +77,13 @@ public class MgmtTargetAssignmentRequestBody {
 
     public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
         this.maintenanceWindow = maintenanceWindow;
+    }
+
+    public Boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

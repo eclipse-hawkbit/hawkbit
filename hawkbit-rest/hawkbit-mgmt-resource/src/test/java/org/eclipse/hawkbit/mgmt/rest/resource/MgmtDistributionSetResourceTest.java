@@ -12,6 +12,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,9 +28,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -39,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -48,12 +53,16 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
@@ -66,6 +75,9 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.util.Assert;
+
+import javax.validation.constraints.AssertTrue;
 
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Resource")
@@ -143,7 +155,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // create Targets
         final String[] knownTargetIds = new String[] { "1", "2" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign DisSet to target and test assignment
         assignDistributionSet(disSet.getId(), knownTargetIds[0]);
         mvc.perform(
@@ -257,7 +269,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -293,6 +305,44 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                         .contentType(MediaType.APPLICATION_JSON).content(list.toString()))
                 .andExpect(status().isOk());
         // we just need to make sure that no error 500 is returned
+    }
+
+    @Test
+    @Description("Trying to create a DS from already marked as deleted type - should get as response 400 Bad Request")
+    public void createDsFromAlreadyMarkedAsDeletedType() throws Exception {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("exampleKey");
+        final DistributionSetType type = testdataFactory.findOrCreateDistributionSetType(
+            "testKey", "testType", Collections.singletonList(softwareModule.getType()),
+            Collections.singletonList(softwareModule.getType()));
+        final DistributionSet ds = testdataFactory.createDistributionSet("dsName", "dsVersion", type, Collections.singletonList(softwareModule));
+        final Target target = testdataFactory.createTarget("exampleControllerId");
+
+        assignDistributionSet(ds, target);
+
+        //soft delete ds type
+        distributionSetTypeManagement.delete(type.getId());
+
+        // check if the ds type is marked as deleted
+        final Optional<DistributionSetType> opt = distributionSetTypeManagement.getByKey(type.getKey());
+        if (opt.isEmpty()) {
+            throw new AssertionError("The Optional object of distribution set type should not be empty!");
+        }
+        final DistributionSetType reloaded = opt.get();
+        Assert.isTrue(reloaded.isDeleted(), "Distribution Set Type not marked as deleted!");
+
+        //request for ds creation of type which is already marked as deleted - should return bad request
+        final DistributionSet generated = testdataFactory.generateDistributionSet(
+            "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
+        final MvcResult mvcResult = mvc
+            .perform(post("/rest/v1/distributionsets/")
+                .content(JsonBuilder.distributionSets(Arrays.asList(generated)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest()).andReturn();
+
+        final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
+        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertTrue(exceptionInfo.getMessage().contains("Distribution Set Type already deleted"));
     }
 
     @Test
@@ -378,7 +428,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(getTestSchedule(0), null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(getTestSchedule(0), null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -395,7 +445,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, getTestDuration(10), null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, getTestDuration(10), null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -413,7 +463,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = createTargetAndJsonArray(getTestSchedule(10), getTestDuration(10), getTestTimeZone(),
-                null, knownTargetIds);
+                null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -431,7 +481,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
         final JSONArray list = createTargetAndJsonArray(getTestSchedule(-30), getTestDuration(5), getTestTimeZone(),
-                null, knownTargetIds);
+                null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
@@ -474,7 +524,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
         final String[] knownTargetIds = new String[] { "1", "2", "3" };
-        final JSONArray assignTargetJson = createTargetAndJsonArray(null, null, null, "forced", knownTargetIds);
+        final JSONArray assignTargetJson = createTargetAndJsonArray(null, null, null, "forced", null, knownTargetIds);
         assignDistributionSet(createdDs.getId(), knownTargetIds[0]);
 
         assignTargetJson.put(new JSONObject().put("id", "notexistingtarget").put("type", "forced"));
@@ -487,7 +537,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     private JSONArray createTargetAndJsonArray(final String schedule, final String duration, final String timezone,
-            final String type, final String... targetIds) throws Exception {
+            final String type, final Boolean confirmationRequired, final String... targetIds) throws Exception {
         final JSONArray result = new JSONArray();
         for (final String targetId : targetIds) {
             testdataFactory.createTarget(targetId);
@@ -501,7 +551,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
             if (schedule != null || duration != null || timezone != null) {
                 final JSONObject maintenanceJsonObject = new JSONObject();
-                targetJsonObject.put("maintenanceWindow", maintenanceJsonObject);
                 if (schedule != null) {
                     maintenanceJsonObject.put("schedule", schedule);
                 }
@@ -511,6 +560,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 if (timezone != null) {
                     maintenanceJsonObject.put("timezone", timezone);
                 }
+                targetJsonObject.put("maintenanceWindow", maintenanceJsonObject);
+            }
+            if (confirmationRequired != null) {
+                targetJsonObject.put("confirmationRequired", confirmationRequired);
             }
         }
         return result;
@@ -758,7 +811,6 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Description("Ensures that multipe DS posted to API are created in the repository.")
     public void createDistributionSets() throws Exception {
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
-
         final SoftwareModule ah = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_APP);
         final SoftwareModule jvm = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_RT);
         final SoftwareModule os = testdataFactory.createSoftwareModule(TestdataFactory.SM_TYPE_OS);
@@ -1263,7 +1315,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // prepare targets
         final String[] knownTargetIds = new String[] { "1", "2", "3", "4", "5" };
-        final JSONArray list = createTargetAndJsonArray(null, null, null, null, knownTargetIds);
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, null, knownTargetIds);
         // assign already one target to DS
         assignDistributionSet(createdDs.getId(), knownTargetIds[0], Action.ActionType.DOWNLOAD_ONLY);
 
@@ -1275,6 +1327,41 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         assertThat(targetManagement.findByAssignedDistributionSet(PAGE, createdDs.getId()).getContent())
                 .as("Five targets in repository have DS assigned").hasSize(5);
+    }
+
+    @ParameterizedTest
+    @MethodSource("confirmationOptions")
+    @Description("Ensures that confirmation option is considered in assignment request.")
+    public void assignTargetsToDistributionSetWithConfirmationOptions(final boolean confirmationFlowActive,
+            final Boolean confirmationRequired) throws Exception {
+        final DistributionSet createdDs = testdataFactory.createDistributionSet();
+
+        if (confirmationFlowActive) {
+            enableConfirmationFlow();
+        }
+
+        // prepare targets
+        final String targetId = "1";
+        final JSONArray list = createTargetAndJsonArray(null, null, null, null, confirmationRequired, targetId);
+
+        mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", createdDs.getId())
+                .contentType(MediaType.APPLICATION_JSON).content(list.toString())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.assigned", equalTo(1))).andExpect(jsonPath("$.alreadyAssigned", equalTo(0)))
+                .andExpect(jsonPath("$.total", equalTo(1)));
+
+        assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(1)
+                .allMatch(action -> {
+                    if (!confirmationFlowActive) {
+                        return !action.isWaitingConfirmation();
+                    }
+                    return confirmationRequired == null ? action.isWaitingConfirmation()
+                            : confirmationRequired == action.isWaitingConfirmation();
+                });
+    }
+
+    private static Stream<Arguments> confirmationOptions() {
+        return Stream.of(Arguments.of(true, true), Arguments.of(true, false), Arguments.of(false, true),
+                Arguments.of(false, false), Arguments.of(true, null), Arguments.of(false, null));
     }
 
     @Test

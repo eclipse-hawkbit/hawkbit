@@ -67,7 +67,8 @@ public final class RolloutWindowLayoutComponentBuilder {
      * @return Layout to create simple group
      */
     public SimpleGroupsLayout createSimpleGroupsLayout() {
-        return new SimpleGroupsLayout(dependencies.getI18n(), dependencies.getQuotaManagement());
+        return new SimpleGroupsLayout(dependencies.getI18n(), dependencies.getQuotaManagement(),
+                dependencies.getTenantConfigHelper(), dependencies.getUiProperties());
     }
 
     /**
@@ -77,7 +78,8 @@ public final class RolloutWindowLayoutComponentBuilder {
      */
     public AdvancedGroupsLayout createAdvancedGroupsLayout() {
         return new AdvancedGroupsLayout(dependencies.getI18n(), dependencies.getEntityFactory(),
-                dependencies.getRolloutManagement(), dependencies.getQuotaManagement(), targetFilterQueryDataProvider);
+                dependencies.getRolloutManagement(), dependencies.getQuotaManagement(), targetFilterQueryDataProvider,
+                dependencies.getTenantConfigHelper());
     }
 
     /**
@@ -94,7 +96,7 @@ public final class RolloutWindowLayoutComponentBuilder {
             final Component advancedGroupDefinitionTab) {
         final TabSheet groupsDefinitionTabs = new TabSheet();
         groupsDefinitionTabs.setId(UIComponentIdProvider.ROLLOUT_GROUPS);
-        groupsDefinitionTabs.setWidth(850, Unit.PIXELS);
+        groupsDefinitionTabs.setWidth(900, Unit.PIXELS);
         groupsDefinitionTabs.setHeight(300, Unit.PIXELS);
         groupsDefinitionTabs.setStyleName(SPUIStyleDefinitions.ROLLOUT_GROUPS);
 

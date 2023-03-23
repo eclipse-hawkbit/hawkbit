@@ -46,6 +46,8 @@ import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
@@ -306,6 +308,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assignedModule = softwareModuleManagement.get(assignedModule.getId()).get();
         assertTrue(assignedModule.isDeleted(), "The module should be flagged as deleted");
         assertThat(softwareModuleManagement.findAll(PAGE)).isEmpty();
+        assertThat(softwareModuleManagement.findByRsql(PAGE, "name==*")).isEmpty();
+        assertThat(softwareModuleManagement.count()).isZero();
         assertThat(softwareModuleRepository.findAll()).hasSize(1);
 
         // verify: binary data is deleted
@@ -545,19 +549,28 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                         .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                                 new AssignedSoftwareModule(unassigned, false));
 
+        // with filter on name, version and module type, sorting defined by
+        // Pagerequest
+        assertThat(softwareModuleManagement.findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
+                PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")), set.getId(), "%found%", testType.getId())
+                .getContent()).as(
+                        "Found modules with given name, given module type, the assigned ones first, ordered by name DESC")
+                        .containsExactly(new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(one, true),
+                                new AssignedSoftwareModule(unassigned, false));
+
         // with filter on module type only
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, testType.getId())
                 .getContent()).as("Found modules with given module type and the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
-                        new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(unassigned, false));
+                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(unassigned, false));
 
         // without any filter
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, null)
                 .getContent()).as("Found modules with the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(one, true),
-                        new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(four, true),
+                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                        new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(four, true),
                         new AssignedSoftwareModule(unassigned, false));
     }
 

@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.ui.common.builder.FormComponentBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextAreaBuilder;
 import org.eclipse.hawkbit.ui.common.builder.TextFieldBuilder;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyMetaData;
+import org.eclipse.hawkbit.ui.utils.TrimmingStringConverter;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 import org.eclipse.hawkbit.ui.utils.VaadinMessageSource;
 
@@ -56,7 +57,8 @@ public class MetaDataAddUpdateWindowLayoutComponentBuilder {
                 .prompt(i18n.getMessage(TEXTFIELD_KEY)).buildTextComponent();
         keyField.setSizeFull();
 
-        binder.forField(keyField).asRequired(i18n.getMessage("message.metadata.key.required"))
+        binder.forField(keyField).withConverter(new TrimmingStringConverter())
+                .asRequired(i18n.getMessage("message.metadata.key.required"))
                 .bind(ProxyMetaData::getKey, ProxyMetaData::setKey);
 
         return keyField;

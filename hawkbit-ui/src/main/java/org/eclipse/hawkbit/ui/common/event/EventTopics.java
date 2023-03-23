@@ -22,6 +22,7 @@ public final class EventTopics {
     public static final String FILE_UPLOAD_CHANGED = "fileUploadChanged";
     public static final String BULK_UPLOAD_CHANGED = "bulkUploadChanged";
     public static final String ENTITY_DRAGGING_CHANGED = "entityDraggingChanged";
+    public static final String TENANT_CONFIG_CHANGED = "tenantConfigChanged";
 
     private EventTopics() {
     }

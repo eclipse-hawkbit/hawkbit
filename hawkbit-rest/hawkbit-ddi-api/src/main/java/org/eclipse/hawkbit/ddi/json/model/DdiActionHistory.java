@@ -19,8 +19,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Provide action history information to the controller as part of response to
- * {@link DdiRootControllerRestApi#getControllerBasedeploymentAction}: 1.
- * Current action status at the server; 2. List of messages from action history
+ * {@link DdiRootControllerRestApi#getControllerBasedeploymentAction} and
+ * {@link DdiRootControllerRestApi#getControllerBaseconfirmationAction}:
+ * 1. Current action status at the server; 2. List of messages from action history
  * that were sent to server earlier by the controller using
  * {@link DdiActionFeedback}.
  */

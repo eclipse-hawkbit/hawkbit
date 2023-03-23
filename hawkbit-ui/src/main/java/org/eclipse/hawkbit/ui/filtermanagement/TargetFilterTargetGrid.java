@@ -19,6 +19,8 @@ import org.eclipse.hawkbit.ui.common.grid.support.FilterSupport;
 import org.eclipse.hawkbit.ui.filtermanagement.state.TargetFilterDetailsLayoutUiState;
 import org.eclipse.hawkbit.ui.utils.UIComponentIdProvider;
 
+import com.vaadin.ui.Label;
+
 /**
  * Shows the targets as a result of the executed filter query.
  */
@@ -88,8 +90,10 @@ public class TargetFilterTargetGrid extends AbstractGrid<ProxyTarget, String> {
 
         GridComponentBuilder.addDescriptionColumn(this, i18n, TARGET_DESCRIPTION_ID);
 
-        GridComponentBuilder.addIconColumn(this, targetStatusIconSupplier::getLabel, TARGET_STATUS_ID,
+        final Column<ProxyTarget, Label> statusColumn = GridComponentBuilder.addIconColumn(this,
+                targetStatusIconSupplier::getLabel, TARGET_STATUS_ID,
                 i18n.getMessage("header.status"));
+        GridComponentBuilder.setColumnSortable(statusColumn, "updateStatus");
 
         GridComponentBuilder.addCreatedAndModifiedColumns(this, i18n);
 

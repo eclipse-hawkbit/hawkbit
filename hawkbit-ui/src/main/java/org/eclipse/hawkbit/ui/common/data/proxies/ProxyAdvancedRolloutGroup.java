@@ -25,6 +25,7 @@ public class ProxyAdvancedRolloutGroup implements Serializable, TargetFilterQuer
     private String triggerThresholdPercentage;
     private String errorThresholdPercentage;
     private Long targetsCount;
+    private boolean confirmationRequired = true;
 
     /**
      * Gets the name of the group
@@ -130,5 +131,13 @@ public class ProxyAdvancedRolloutGroup implements Serializable, TargetFilterQuer
 
     public void setTargetsCount(final Long targetsCount) {
         this.targetsCount = targetsCount;
+    }
+
+    public boolean isConfirmationRequired() {
+        return confirmationRequired;
+    }
+
+    public void setConfirmationRequired(boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
     }
 }

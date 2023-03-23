@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.ui.rollout.window.RolloutWindowDependencies;
 import org.eclipse.hawkbit.ui.rollout.window.components.AutoStartOptionGroupLayout.AutoStartOption;
 import org.eclipse.hawkbit.ui.rollout.window.layouts.AddRolloutWindowLayout;
 import org.eclipse.hawkbit.ui.utils.SPDateTimeUtil;
+import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.util.CollectionUtils;
@@ -37,7 +38,8 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
     private final TargetFilterQueryManagement targetFilterQueryManagement;
     private final RolloutGroupManagement rolloutGroupManagement;
     private final QuotaManagement quotaManagement;
-
+    private final TenantConfigHelper tenantConfigHelper;
+    
     /**
      * Constructor for CopyRolloutWindowController
      *
@@ -53,6 +55,7 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         this.targetFilterQueryManagement = dependencies.getTargetFilterQueryManagement();
         this.rolloutGroupManagement = dependencies.getRolloutGroupManagement();
         this.quotaManagement = dependencies.getQuotaManagement();
+        this.tenantConfigHelper = dependencies.getTenantConfigHelper();
     }
 
     @Override
@@ -107,8 +110,12 @@ public class CopyRolloutWindowController extends AddRolloutWindowController {
         proxyRolloutWindow.setGroupDefinitionMode(GroupDefinitionMode.ADVANCED);
         final RolloutGroupToAdvancedDefinitionMapper groupsMapper = new RolloutGroupToAdvancedDefinitionMapper(
                 targetFilterQueryManagement);
-        final List<ProxyAdvancedRolloutGroup> advancedGroupDefinitions = groupsMapper.loadRolloutGroupssFromBackend(
+        final List<ProxyAdvancedRolloutGroup> advancedGroupDefinitions = groupsMapper.loadRolloutGroupsFromBackend(
                 proxyRolloutWindow.getId(), rolloutGroupManagement, quotaManagement.getMaxRolloutGroupsPerRollout());
+        if (!tenantConfigHelper.isConfirmationFlowEnabled()) {
+            // do not require confirmation, since feature is not active and UI elements are not visible
+            advancedGroupDefinitions.forEach(def -> def.setConfirmationRequired(false));
+        }
         proxyRolloutWindow.setAdvancedRolloutGroupDefinitions(advancedGroupDefinitions);
     }
 

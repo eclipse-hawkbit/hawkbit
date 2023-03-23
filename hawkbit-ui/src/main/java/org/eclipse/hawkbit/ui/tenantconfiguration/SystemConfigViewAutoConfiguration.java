@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
+import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.MgmtUiConfiguration;
 import org.eclipse.hawkbit.ui.SpPermissionChecker;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -23,6 +24,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.vaadin.spring.events.EventBus;
 
 /**
  * Enables UI components for the Tenant Configuration view
@@ -68,6 +70,10 @@ public class SystemConfigViewAutoConfiguration {
      *            UiProperties
      * @param tenantConfigurationManagement
      *            TenantConfigurationManagement
+     * @param eventBus
+     *            EventBus.ApplicationEventBus
+     * @param tenantAware
+     *            TenantAware
      * @return RepositoryConfigurationView to be shown in the Tenant Configuration
      *         Page
      */
@@ -76,8 +82,10 @@ public class SystemConfigViewAutoConfiguration {
     @ViewScope
     @Order(value = 2)
     RepositoryConfigurationView repositoryConfigurationView(final VaadinMessageSource i18n,
-            final UiProperties uiProperties, final TenantConfigurationManagement tenantConfigurationManagement) {
-        return new RepositoryConfigurationView(i18n, uiProperties, tenantConfigurationManagement);
+            final UiProperties uiProperties, final TenantConfigurationManagement tenantConfigurationManagement,
+            final EventBus.ApplicationEventBus eventBus, final TenantAware tenantAware) {
+        return new RepositoryConfigurationView(i18n, uiProperties, tenantConfigurationManagement, eventBus,
+                tenantAware);
     }
 
     /**

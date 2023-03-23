@@ -19,11 +19,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -44,6 +46,7 @@ import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.Action;
+import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -644,7 +647,14 @@ public class TestdataFactory {
      */
     public Target createTarget(final String controllerId, final String targetName) {
         final Target target = targetManagement
-                .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+              .create(entityFactory.target().create().controllerId(controllerId).name(targetName));
+        assertTargetProperlyCreated(target);
+        return target;
+    }
+
+    public Target createTarget(final String controllerId, final String targetName, final String address) {
+        final Target target = targetManagement
+                .create(entityFactory.target().create().controllerId(controllerId).name(targetName).address(address));
         assertTargetProperlyCreated(target);
         return target;
     }
@@ -874,10 +884,14 @@ public class TestdataFactory {
      * @return {@link List} of {@link Target} entities
      */
     public List<Target> createTargets(final int number) {
+        return createTargets(DEFAULT_CONTROLLER_ID, number);
+    }
+
+    public List<Target> createTargets(final String prefix, final int number) {
 
         final List<TargetCreate> targets = Lists.newArrayListWithExpectedSize(number);
         for (int i = 0; i < number; i++) {
-            targets.add(entityFactory.target().create().controllerId(DEFAULT_CONTROLLER_ID + i));
+            targets.add(entityFactory.target().create().controllerId(prefix + i));
         }
 
         return createTargets(targets);
@@ -1137,7 +1151,14 @@ public class TestdataFactory {
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition) {
         return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
-                successCondition, errorCondition, Action.ActionType.FORCED, null);
+                successCondition, errorCondition, Action.ActionType.FORCED, null, false);
+    }
+
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition, final boolean confirmationRequired) {
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, Action.ActionType.FORCED, null, confirmationRequired);
     }
 
     /**
@@ -1161,12 +1182,15 @@ public class TestdataFactory {
      *            the type of the Rollout
      * @param weight
      *            weight of the Rollout
+     * @param confirmationRequired
+     *            if the confirmation is required (considered with confirmation flow
+     *            active)
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
-            final Integer weight) {
+            final Integer weight, final boolean confirmationRequired) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
@@ -1175,7 +1199,7 @@ public class TestdataFactory {
         final Rollout rollout = rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
                         .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight),
-                groupSize, conditions);
+                groupSize, confirmationRequired, conditions);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
@@ -1198,6 +1222,120 @@ public class TestdataFactory {
         return createRolloutByVariables(prefix, prefix + " description",
                 quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
                 createDistributionSet(prefix), "50", "5");
+    }
+
+    /**
+     * Create {@link Rollout} with a new {@link DistributionSet} and
+     * {@link Target}s.
+     *
+     * @return created {@link Rollout}
+     */
+    public Rollout createRollout() {
+        final String prefix = RandomStringUtils.randomAlphanumeric(5);
+        createTargets(quotaManagement.getMaxTargetsPerRolloutGroup() * quotaManagement.getMaxRolloutGroupsPerRollout(),
+                prefix);
+        return createRolloutByVariables(prefix, prefix + " description",
+                quotaManagement.getMaxRolloutGroupsPerRollout(), "controllerId==" + prefix + "*",
+                createDistributionSet(prefix), "50", "5");
+    }
+
+    /**
+     * Create {@link Rollout} with a new {@link DistributionSet} and
+     * {@link Target}s.
+     *
+     * @return created {@link Rollout}
+     */
+    public Rollout createAndStartRollout() {
+        return startAndReloadRollout(createRollout());
+    }
+
+    private Rollout startAndReloadRollout(final Rollout rollout) {
+        rolloutManagement.start(rollout.getId());
+
+        // Run here, because scheduler is disabled during tests
+        rolloutManagement.handleRollouts();
+
+        return reloadRollout(rollout);
+    }
+
+    private Rollout reloadRollout(final Rollout rollout) {
+        return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
+    }
+
+    /**
+     * Create the data for a simple rollout scenario
+     *
+     * @param amountTargetsForRollout
+     *            the amount of targets used for the rollout
+     * @param amountOtherTargets
+     *            amount of other targets not included in the rollout
+     * @param groupSize
+     *            the size of the rollout group
+     * @param successCondition
+     *            success condition
+     * @param errorCondition
+     *            error condition
+     * @return the created {@link Rollout}
+     */
+    public Rollout createAndStartRollout(final int amountTargetsForRollout, final int amountOtherTargets,
+            final int amountGroups, final String successCondition, final String errorCondition) {
+
+        final Rollout createdRollout = createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout,
+                amountOtherTargets, amountGroups, successCondition, errorCondition);
+        return startAndReloadRollout(createdRollout);
+    }
+
+    /**
+     * Create the data for a simple rollout scenario
+     *
+     * @param amountTargetsForRollout
+     *            the amount of targets used for the rollout
+     * @param amountOtherTargets
+     *            amount of other targets not included in the rollout
+     * @param amountOfGroups
+     *            the size of the rollout group
+     * @param successCondition
+     *            success condition
+     * @param errorCondition
+     *            error condition
+     * @return the created {@link Rollout}
+     */
+    public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int amountOtherTargets, final int amountOfGroups, final String successCondition,
+            final String errorCondition) {
+        return createSimpleTestRolloutWithTargetsAndDistributionSet(amountTargetsForRollout, amountOtherTargets,
+                amountOfGroups, successCondition, errorCondition, ActionType.FORCED, null);
+    }
+
+    /**
+     * Create the data for a simple rollout scenario
+     *
+     * @param amountTargetsForRollout
+     *            the amount of targets used for the rollout
+     * @param amountOtherTargets
+     *            amount of other targets not included in the rollout
+     * @param amountOfGroups
+     *            the size of the rollout group
+     * @param successCondition
+     *            success condition
+     * @param errorCondition
+     *            error condition
+     * @param actionType
+     *            action Type
+     * @param weight
+     *            weight
+     * @return the created {@link Rollout}
+     */
+    public Rollout createSimpleTestRolloutWithTargetsAndDistributionSet(final int amountTargetsForRollout,
+            final int amountOtherTargets, final int amountOfGroups, final String successCondition,
+            final String errorCondition, final ActionType actionType, final Integer weight) {
+        final String suffix = RandomStringUtils.randomAlphanumeric(5);
+        final DistributionSet rolloutDS = createDistributionSet("rolloutDS-" + suffix);
+        createTargets(amountTargetsForRollout, "rollout-" + suffix + "-", "rollout");
+        createTargets(amountOtherTargets, "others-" + suffix + "-", "rollout");
+        final String filterQuery = "controllerId==rollout-" + suffix + "-*";
+        return createRolloutByVariables("rollout-" + suffix, "test-rollout-description", amountOfGroups,
+                filterQuery, rolloutDS, successCondition, errorCondition, actionType, weight, false);
     }
 
     /**

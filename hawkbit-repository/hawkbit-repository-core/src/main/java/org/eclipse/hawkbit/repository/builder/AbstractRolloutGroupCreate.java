@@ -23,6 +23,7 @@ public abstract class AbstractRolloutGroupCreate<T> extends AbstractNamedEntityB
     protected String targetFilterQuery;
     protected Float targetPercentage;
     protected RolloutGroupConditions conditions;
+    protected boolean confirmationRequired;
 
     public T targetFilterQuery(final String targetFilterQuery) {
         this.targetFilterQuery = StringUtils.trimWhitespace(targetFilterQuery);
@@ -36,6 +37,11 @@ public abstract class AbstractRolloutGroupCreate<T> extends AbstractNamedEntityB
 
     public T conditions(final RolloutGroupConditions conditions) {
         this.conditions = conditions;
+        return (T) this;
+    }
+
+    public T confirmationRequired(final boolean confirmationRequired) {
+        this.confirmationRequired = confirmationRequired;
         return (T) this;
     }
 

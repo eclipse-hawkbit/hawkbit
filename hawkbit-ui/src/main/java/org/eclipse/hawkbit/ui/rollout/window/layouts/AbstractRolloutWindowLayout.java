@@ -54,7 +54,7 @@ public abstract class AbstractRolloutWindowLayout implements EntityWindowLayout<
         rootLayout.setColumns(4);
         rootLayout.setStyleName("marginTop");
         rootLayout.setColumnExpandRatio(3, 1);
-        rootLayout.setWidth(850, Unit.PIXELS);
+        rootLayout.setWidth(900, Unit.PIXELS);
 
         addComponents(rootLayout);
 

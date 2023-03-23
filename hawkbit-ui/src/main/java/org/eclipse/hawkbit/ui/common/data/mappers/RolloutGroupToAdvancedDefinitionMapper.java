@@ -67,6 +67,7 @@ public class RolloutGroupToAdvancedDefinitionMapper {
         advancedGroupRow.setTargetPercentage(rolloutGroup.getTargetPercentage());
         advancedGroupRow.setTriggerThresholdPercentage(rolloutGroup.getSuccessConditionExp());
         advancedGroupRow.setErrorThresholdPercentage(rolloutGroup.getErrorConditionExp());
+        advancedGroupRow.setConfirmationRequired(rolloutGroup.isConfirmationRequired());
 
         return advancedGroupRow;
     }
@@ -83,7 +84,7 @@ public class RolloutGroupToAdvancedDefinitionMapper {
      *
      * @return List of advance rollout group
      */
-    public List<ProxyAdvancedRolloutGroup> loadRolloutGroupssFromBackend(final Long rolloutId,
+    public List<ProxyAdvancedRolloutGroup> loadRolloutGroupsFromBackend(final Long rolloutId,
             final RolloutGroupManagement rolloutGroupManagement, final int pageCount) {
         return rolloutGroupManagement.findByRollout(PageRequest.of(0, pageCount), rolloutId).stream().map(this::map)
                 .collect(Collectors.toList());

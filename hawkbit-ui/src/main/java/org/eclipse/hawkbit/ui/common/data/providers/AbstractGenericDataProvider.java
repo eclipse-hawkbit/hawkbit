@@ -8,7 +8,9 @@
  */
 package org.eclipse.hawkbit.ui.common.data.providers;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -18,9 +20,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
+import org.springframework.util.CollectionUtils;
 
 import com.vaadin.data.provider.AbstractBackEndDataProvider;
 import com.vaadin.data.provider.Query;
+import com.vaadin.data.provider.QuerySortOrder;
 
 /**
  * Base class for loading a batch of entities from backend mapping them to UI
@@ -54,7 +59,38 @@ public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEnt
     @Override
     protected Stream<T> fetchFromBackEnd(final Query<T, F> query) {
         return getProxyEntities(
-                loadBackendEntities(convertToPageRequest(query, defaultSortOrder), query.getFilter().orElse(null)));
+                loadBackendEntities(
+                        convertToPageRequest(query, convertToSortCriteria(query.getSortOrders())),
+                        query.getFilter().orElse(null)));
+    }
+
+    private Sort convertToSortCriteria(final List<QuerySortOrder> querySortOrders) {
+        if (CollectionUtils.isEmpty(querySortOrders)) {
+            return defaultSortOrder;
+        } else {
+            return Sort.by(convertToListOfOrders(querySortOrders));
+        }
+    }
+
+    private List<Order> convertToListOfOrders(final List<QuerySortOrder> querySortOrders) {
+        return querySortOrders.stream()
+                .map(querySortOrder -> convertToOrderCriteria(querySortOrder))
+                .collect(Collectors.toList());
+    }
+
+    private Order convertToOrderCriteria(final QuerySortOrder querySortOrder) {
+        final Sort.Direction sortDirection;
+        switch (querySortOrder.getDirection()) {
+        case ASCENDING:
+            sortDirection = Sort.Direction.ASC;
+            break;
+        case DESCENDING:
+            // fall through intended to get default behavior
+        default:
+            sortDirection = Sort.Direction.DESC;
+            break;
+        }
+        return new Sort.Order(sortDirection, querySortOrder.getSorted());
     }
 
     private PageRequest convertToPageRequest(final Query<T, F> query, final Sort sort) {
@@ -67,7 +103,7 @@ public abstract class AbstractGenericDataProvider<T extends ProxyIdentifiableEnt
 
     @Override
     protected int sizeInBackEnd(final Query<T, F> query) {
-        final long size = sizeInBackEnd(convertToPageRequest(query, defaultSortOrder), query.getFilter().orElse(null));
+        final long size = sizeInBackEnd(convertToPageRequest(query, convertToSortCriteria(query.getSortOrders())), query.getFilter().orElse(null));
 
         try {
             return Math.toIntExact(size);

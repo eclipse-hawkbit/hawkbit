@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.eclipse.hawkbit.ddi.json.model.DdiResult;
+import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
@@ -45,7 +47,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -77,8 +78,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
-        postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
 
         // get installed base
         performGet(INSTALLED_BASE, MediaType.parseMediaType(DdiRestConstants.MEDIA_TYPE_CBOR), status().isOk(),
@@ -123,7 +124,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
 
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed", "success", "Closed"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
@@ -143,7 +145,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 actionId2, ds2.findFirstModuleByType(osType).get().getId(), Action.ActionType.FORCED);
 
         postDeploymentFeedback(target.getControllerId(), actionId2,
-                JsonBuilder.deploymentActionFeedback(actionId2.toString(), "closed", "success", "Closed"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Closed")),
                 status().isOk());
 
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds2, artifact2, artifactSignature2,
@@ -155,7 +158,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         startsWith(installedBaseLink(CONTROLLER_ID, actionId2.toString()))))
                 .andExpect(jsonPath("$._links.deploymentBase.href").doesNotExist());
 
-        // older installed action is still accessible, although not part of controller base
+        // older installed action is still accessible, although not part of controller
+        // base
         getAndVerifyInstalledBasePayload(CONTROLLER_ID, MediaType.APPLICATION_JSON, ds1, artifact1, artifactSignature1,
                 actionId1, ds1.findFirstModuleByType(osType).get().getId(), Action.ActionType.SOFT);
     }
@@ -177,20 +181,25 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId1);
         postCancelFeedback(target.getControllerId(), actionId1,
-                JsonBuilder.cancelActionFeedback(actionId1.toString(), "closed", "Canceled"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
+                status().isOk());
 
         // assign ds1, action2 - and provide cancel feedback
         final Long actionId2 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.FORCED));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                JsonBuilder.cancelActionFeedback(actionId2.toString(), "closed", "Canceled"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
+                status().isOk());
 
         // assign ds1, action 3 - and provide success feedback
         final Long actionId3 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId3,
-                JsonBuilder.deploymentActionFeedback(actionId3.toString(), "closed", "success", "Closed"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
                 status().isOk());
 
         // Test: latest succeeded action is returned in installedBase
@@ -228,7 +237,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed", "success", "Success"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Success")),
                 status().isOk());
 
         // assign ds2, action2 - assign ds1, action 3 - and cancel both
@@ -238,10 +248,14 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                JsonBuilder.cancelActionFeedback(actionId2.toString(), "closed", "Canceled"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
+                status().isOk());
         deploymentManagement.cancelAction(actionId3);
         postCancelFeedback(target.getControllerId(), actionId3,
-                JsonBuilder.cancelActionFeedback(actionId3.toString(), "closed", "Canceled"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
+                status().isOk());
 
         // Test: the succeeded action is returned in installedBase instead of the latest
         // cancelled action
@@ -279,7 +293,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Long actionId1 = getFirstAssignedActionId(
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         postDeploymentFeedback(target.getControllerId(), actionId1,
-                JsonBuilder.deploymentActionFeedback(actionId1.toString(), "closed", "success", "Success"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Success")),
                 status().isOk());
 
         // assign ds2, action2 - assign ds1, action 3 - and cancel action 2
@@ -289,7 +304,9 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds1.getId(), target.getControllerId(), Action.ActionType.SOFT));
         deploymentManagement.cancelAction(actionId2);
         postCancelFeedback(target.getControllerId(), actionId2,
-                JsonBuilder.cancelActionFeedback(actionId2.toString(), "closed", "Canceled"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Canceled")),
+                status().isOk());
 
         // Test: the succeeded action is returned in installedBase instead of the latest
         // cancelled action
@@ -338,8 +355,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(ds, target));
 
-        postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed"), status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonClosedDeploymentActionFeedback(),
+                status().isOk());
 
         final Long softwareModuleId = ds.getModules().stream().findAny().get().getId();
         performGet(SOFTWARE_MODULE_ARTIFACTS, MediaType.APPLICATION_JSON, status().isOk(),
@@ -385,7 +402,8 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 assignDistributionSet(ds.getId(), target.getControllerId(), actionType));
 
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "success", "Closed"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Closed")),
                 status().isOk());
 
         // Run test
@@ -433,10 +451,10 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         .andExpect(jsonPath("$._links.deploymentBase.href").exists())
                         .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
-        postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "download"), status().isOk());
-        postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "downloaded"), status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadDeploymentActionFeedback(),
+                status().isOk());
+        postDeploymentFeedback(target.getControllerId(), actionId, getJsonDownloadedDeploymentActionFeedback(),
+                status().isOk());
 
         // Test
         performGet(CONTROLLER_BASE, MediaType.APPLICATION_JSON, status().isOk(), tenantAware.getCurrentTenant(),
@@ -448,7 +466,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
     @ParameterizedTest
     @MethodSource("org.eclipse.hawkbit.ddi.rest.resource.DdiInstalledBaseTest#actionTypeForDeployment")
     @Description("Test a failed deployment to a controller. Checks that closed action is not represented as installedBase.")
-    public void deploymentActionFailedNotInInstalledBase(Action.ActionType actionType) throws Exception {
+    public void deploymentActionFailedNotInInstalledBase(final Action.ActionType actionType) throws Exception {
         // Prepare test data
         final Target target = testdataFactory.createTarget();
         final DistributionSet ds = testdataFactory.createDistributionSet("");
@@ -461,9 +479,11 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                         .andExpect(jsonPath("$._links.installedBase.href").doesNotExist());
 
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "proceeding"), status().isOk());
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE),
+                status().isOk());
         postDeploymentFeedback(target.getControllerId(), actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "failure", "Installation failed"),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE,
+                        Collections.singletonList("Installation failed")),
                 status().isOk());
 
         // Test
@@ -482,14 +502,20 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final Action savedAction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
 
-        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(), JsonBuilder.deploymentActionFeedback(
-                savedAction.getId().toString(), "scheduled", "Installation scheduled"), status().isOk());
+        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.SCHEDULED, DdiResult.FinalResult.NONE,
+                        Collections.singletonList("Installation scheduled")),
+                status().isOk());
 
-        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(), JsonBuilder.deploymentActionFeedback(
-                savedAction.getId().toString(), "proceeding", "Installation proceeding"), status().isOk());
+        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.PROCEEDING, DdiResult.FinalResult.NONE,
+                        Collections.singletonList("Installation proceeding")),
+                status().isOk());
         // only this feedback triggers the ActionUpdateEvent
-        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(), JsonBuilder.deploymentActionFeedback(
-                savedAction.getId().toString(), "closed", "success", "Installation completed"), status().isOk());
+        postDeploymentFeedback(savedTarget.getControllerId(), savedAction.getId(),
+                getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.SUCCESS,
+                        Collections.singletonList("Installation completed")),
+                status().isOk());
 
         // Test
         // for zero input no action history is returned
@@ -545,8 +571,7 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
         final DistributionSet savedSet = testdataFactory.createDistributionSet("");
 
         final Long actionId = getFirstAssignedActionId(assignDistributionSet(savedSet, toAssign));
-        postDeploymentFeedback(CONTROLLER_ID, actionId,
-                JsonBuilder.deploymentActionFeedback(actionId.toString(), "closed", "success"), status().isOk());
+        postDeploymentFeedback(CONTROLLER_ID, actionId, getJsonClosedCancelActionFeedback(), status().isOk());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
         mvc.perform(MockMvcRequestBuilders.get(INSTALLED_BASE, tenantAware.getCurrentTenant(), CONTROLLER_ID, actionId)

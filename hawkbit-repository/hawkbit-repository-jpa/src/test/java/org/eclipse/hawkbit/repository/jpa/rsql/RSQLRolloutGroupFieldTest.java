@@ -99,7 +99,7 @@ public class RSQLRolloutGroupFieldTest extends AbstractJpaIntegrationTest {
         return rolloutManagement.create(
                 entityFactory.rollout().create().set(distributionSetManagement.get(distributionSetId).get()).name(name)
                         .targetFilterQuery(targetFilterQuery),
-                amountGroups, new RolloutGroupConditionBuilder().withDefaults()
+                amountGroups, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
     }
 }

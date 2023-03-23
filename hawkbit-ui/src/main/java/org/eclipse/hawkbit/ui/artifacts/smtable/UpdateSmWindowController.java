@@ -17,7 +17,6 @@ import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxySoftwareModule;
 import org.eclipse.hawkbit.ui.utils.HawkbitCommonUtil;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for update software module window
@@ -106,11 +105,11 @@ public class UpdateSmWindowController
 
     @Override
     protected boolean isEntityValid(final ProxySoftwareModule entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        final String trimmedVersion = StringUtils.trimWhitespace(entity.getVersion());
+        final String name = entity.getName();
+        final String version = entity.getVersion();
         final Long typeId = entity.getTypeInfo().getId();
-        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(trimmedName, trimmedVersion)
-                && smManagement.getByNameAndVersionAndType(trimmedName, trimmedVersion, typeId).isPresent());
+        return validator.isEntityValid(entity, () -> hasNameOrVersionChanged(name, version)
+                && smManagement.getByNameAndVersionAndType(name, version, typeId).isPresent());
     }
 
     private boolean hasNameOrVersionChanged(final String trimmedName, final String trimmedVersion) {

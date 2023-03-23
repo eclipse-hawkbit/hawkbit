@@ -29,6 +29,9 @@ public class JpaActionStatusCreate extends AbstractActionStatusCreate<ActionStat
         if (messages != null) {
             messages.forEach(result::addMessage);
         }
+        if (code != null) {
+            result.setCode(code);
+        }
         return result;
     }
 }

@@ -128,6 +128,9 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
         // delete assigned
         softwareModuleTypeManagement.delete(type.getId());
         assertThat(softwareModuleTypeManagement.findAll(PAGE)).hasSize(3).contains(osType, runtimeType, appType);
+        assertThat(softwareModuleTypeManagement.findByRsql(PAGE, "name==*")).hasSize(3).contains(osType, runtimeType,
+                appType);
+        assertThat(softwareModuleTypeManagement.count()).isEqualTo(3);
 
         assertThat(softwareModuleTypeRepository.findAll()).hasSize(4).contains((JpaSoftwareModuleType) osType,
                 (JpaSoftwareModuleType) runtimeType, (JpaSoftwareModuleType) appType,

@@ -15,7 +15,6 @@ import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.EntityWindowLayout;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyIdentifiableEntity;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTargetFilterQuery;
-import org.springframework.util.StringUtils;
 
 /**
  * Controller for add target filter
@@ -97,7 +96,6 @@ public class AddTargetFilterController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetFilterQuery entity) {
-        final String trimmedName = StringUtils.trimWhitespace(entity.getName());
-        return validator.isEntityValid(entity, () -> targetFilterManagement.getByName(trimmedName).isPresent());
+        return validator.isEntityValid(entity, () -> targetFilterManagement.getByName(entity.getName()).isPresent());
     }
 }
