@@ -1,6 +1,6 @@
 #!/bin/bash
 #*******************************************************************************
-# Copyright (c) 2021, 2022 Contributors to the Eclipse Foundation
+# Copyright (c) 2021, 2023 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -27,12 +27,8 @@ fi
 HAWKBIT_MAVEN_DEPS=".3rd-party/hawkbit-maven.deps"
 DEPENDENCIES=".3rd-party/DEPENDENCIES"
 
-# The spotbugs artifacts are being used with scope "provided", i.e. they are not copied to the
-# container images and are not used/required during runtime and thus constitute something like
-# a "works-with" dependency. It therefore seems ok to simply exclude them from the license check
-# even though they are LGPL 2.1.
 mvn dependency:list \
-  -DexcludeGroupIds=org.eclipse,org.junit,com.github.spotbugs \
+  -DexcludeGroupIds=org.eclipse,org.junit \
   -pl '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' | \
   grep -Poh "\S+:(runtime|compile|provided)" | \
   sed -e 's/^\(.*\)\:.*$/\1/' | \
