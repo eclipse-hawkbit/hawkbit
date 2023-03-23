@@ -48,7 +48,7 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Long startAt;
 
     @JsonProperty
-    private Long forceTime;
+    private Long forcetime;
 
     @JsonProperty
     private boolean deleted;
@@ -115,12 +115,12 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
         return startAt;
     }
 
-    public void setForceTime(final Long forceTime) {
-        this.forceTime = forceTime;
+    public void setForcetime(final Long forcetime) {
+        this.forcetime = forcetime;
     }
 
-    public Long getForceTime() {
-        return forceTime;
+    public Long getForcetime() {
+        return forcetime;
     }
 
     public Map<String, Long> getTotalTargetsPerStatus() {

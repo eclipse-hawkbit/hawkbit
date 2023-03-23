@@ -137,7 +137,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .attributes(key("value").value("['forced','soft','timeforced','downloadonly']")));
         allFieldDescriptor.add(
                 fieldWithPath(arrayPrefix + "totalTargets").description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS));
-        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "forceTime").description(MgmtApiModelProperties.FORCETIME));
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "forcetime").description(MgmtApiModelProperties.FORCETIME));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.self").ignored());
         if (withDetails) {
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalTargetsPerStatus")
@@ -214,7 +214,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                 .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                                 .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
-                        requestFieldWithPath("forceTime").description(MgmtApiModelProperties.FORCETIME),
+                        optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                         optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ROLLOUT_TYPE)
                                 .attributes(key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),
                         optionalRequestFieldWithPath("startAt").description(MgmtApiModelProperties.ROLLOUT_START_AT)

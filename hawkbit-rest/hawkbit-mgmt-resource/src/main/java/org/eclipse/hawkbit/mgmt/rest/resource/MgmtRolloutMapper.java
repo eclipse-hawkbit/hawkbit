@@ -84,7 +84,7 @@ final class MgmtRolloutMapper {
         body.setTotalTargets(rollout.getTotalTargets());
         body.setDeleted(rollout.isDeleted());
         body.setType(MgmtRestModelMapper.convertActionType(rollout.getActionType()));
-        body.setForceTime(rollout.getForcedTime());
+        body.setForcetime(rollout.getForcedTime());
         rollout.getWeight().ifPresent(body::setWeight);
 
         if (withDetails) {
