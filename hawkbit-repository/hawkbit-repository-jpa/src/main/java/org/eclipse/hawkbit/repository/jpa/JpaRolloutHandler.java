@@ -22,15 +22,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link RolloutHandler}.
  */
-@Validated
-@Transactional(readOnly = true)
 public class JpaRolloutHandler implements RolloutHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutHandler.class);
 
@@ -65,8 +60,6 @@ public class JpaRolloutHandler implements RolloutHandler {
     }
 
     @Override
-    // No transaction. Instead, a transaction will be created per handled rollout.
-    @Transactional(propagation = Propagation.NEVER)
     public void handleAll() {
         final List<Long> rollouts = rolloutManagement.findActiveRollouts();
 
@@ -74,9 +67,7 @@ public class JpaRolloutHandler implements RolloutHandler {
             return;
         }
 
-        final String tenant = tenantAware.getCurrentTenant();
-
-        final String handlerId = createRolloutLockKey(tenant);
+        final String handlerId = createRolloutLockKey(tenantAware.getCurrentTenant());
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
             if (LOGGER.isTraceEnabled()) {
@@ -87,11 +78,7 @@ public class JpaRolloutHandler implements RolloutHandler {
 
         try {
             LOGGER.trace("Trigger handling {} rollouts.", rollouts.size());
-            rollouts.forEach(rolloutId -> DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId,
-                    status -> {
-                        handleRollout(rolloutId);
-                        return 0L;
-                    }));
+            rollouts.forEach(rolloutId -> handleRolloutInNewTransaction(rolloutId, handlerId));
         } finally {
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("Unlock lock {}", lock);
@@ -100,14 +87,18 @@ public class JpaRolloutHandler implements RolloutHandler {
         }
     }
 
-    public static String createRolloutLockKey(final String tenant) {
+    private static String createRolloutLockKey(final String tenant) {
         return tenant + "-rollout";
     }
 
-    private void handleRollout(final long rolloutId) {
-        rolloutManagement.get(rolloutId).ifPresentOrElse(
-                rollout -> runInUserContext(rollout, () -> rolloutExecutor.execute(rollout)), () -> LOGGER
-                        .error("Could not retrieve rollout with id {}. Will not continue with execution.", rolloutId));
+    private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
+        DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
+            rolloutManagement.get(rolloutId).ifPresentOrElse(
+                    rollout -> runInUserContext(rollout, () -> rolloutExecutor.execute(rollout)),
+                    () -> LOGGER.error("Could not retrieve rollout with id {}. Will not continue with execution.",
+                            rolloutId));
+            return 0L;
+        });
     }
 
     private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
