@@ -590,8 +590,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
-        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED, 21L, 45L);
-        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED, 21L, 45L);
+        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.TIMEFORCED, 21L, 45L);
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.TIMEFORCED, 21L, 45L);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
@@ -1375,7 +1375,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
             .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
             .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
-            .andExpect(jsonPath("content[0].forcetime").exists())
+            .andExpect(jsonPath("content[0].forcetime", equalTo(isStartTypeScheduled ? 45 : 0)))
             .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalTargetsPerStatus").exists()
                 : jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
             .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalGroups", equalTo(5))
