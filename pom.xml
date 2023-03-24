@@ -145,6 +145,8 @@
       <snakeyaml.version>1.33</snakeyaml.version>
       <!-- maintain compatibility with AWS Aurora for production setups -->
       <mariadb.version>2.7.8</mariadb.version>
+      <!-- CVE-2020-36518, CVE-2022-42003, CVE-2022-42004 -->
+      <jackson-bom.version>2.14.2</jackson-bom.version>
       <!-- Spring boot version overrides - END -->
 
       <!-- CVE-2022-31690 -->
@@ -196,8 +198,6 @@
 
       <!-- SONATYPE-2021-1175 -->
       <logback.version>1.2.9</logback.version>
-      <!-- CVE-2020-36518, CVE-2022-42003, CVE-2022-42004 -->
-      <jackson-bom.version>2.14.0</jackson-bom.version>
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->
