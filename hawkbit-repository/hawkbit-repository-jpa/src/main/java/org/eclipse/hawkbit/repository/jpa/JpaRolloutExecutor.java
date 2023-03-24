@@ -53,7 +53,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -420,7 +419,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
             evaluationManager.getErrorActionEvaluator(rolloutGroup.getErrorAction()).exec(rollout, rolloutGroup);
-        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+        } catch (final EvaluatorNotConfiguredException e) {
             LOGGER.error("Something bad happened when accessing the error action bean {}",
                     rolloutGroup.getErrorAction().name(), e);
         }
@@ -446,7 +445,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             return evaluationManager.getErrorConditionEvaluator(errorCondition).eval(rollout, rolloutGroup,
                     rolloutGroup.getErrorConditionExp());
-        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+        } catch (final EvaluatorNotConfiguredException e) {
             LOGGER.error("Something bad happened when accessing the error condition bean {}", errorCondition.name(), e);
             return false;
         }
@@ -465,7 +464,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
             }
             return isFinished;
-        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+        } catch (final EvaluatorNotConfiguredException e) {
             LOGGER.error("Something bad happened when accessing the finish condition or success action bean {}",
                     finishCondition.name(), e);
             return false;
