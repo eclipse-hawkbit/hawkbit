@@ -148,7 +148,7 @@
       <!-- Spring boot version overrides - END -->
 
       <!-- CVE-2022-31690 -->
-      <spring-security-oauth2-client.version>5.7.6</spring-security-oauth2-client.version>
+      <spring-security-oauth2-client.version>5.7.7</spring-security-oauth2-client.version>
 
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
 
