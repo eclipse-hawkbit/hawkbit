@@ -590,8 +590,8 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 
         testdataFactory.createTargets(20, "target", "rollout");
-        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED, 21L);
-        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED, 21L);
+        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED, 21L, 45L);
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED, 21L, 45L);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
@@ -1220,14 +1220,15 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
         final String targetFilterQuery, final int targets, final Action.ActionType type) throws Exception {
-        postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, null);
+        postRollout(name, groupSize, distributionSetId, targetFilterQuery, targets, type, null, null);
     }
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
-            final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime) throws Exception {
+            final String targetFilterQuery, final int targets, final Action.ActionType type, final Long startTime, final Long forceTime) throws Exception {
         final String actionType = MgmtRestModelMapper.convertActionType(type).getName();
         final String rollout = JsonBuilder.rollout(name, "desc", groupSize, distributionSetId, targetFilterQuery,
-                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime, null, null);
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, actionType, null, startTime,
+                forceTime, null);
 
         mvc.perform(post("/rest/v1/rollouts").content(rollout).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
@@ -1241,6 +1242,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo("bumlux")))
                 .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(0))))
                 .andExpect(jsonPath("$.totalTargets", equalTo(targets)))
+                .andExpect(startTime != null ?
+                            jsonPath("$.startAt", equalTo(startTime.intValue()))
+                            : jsonPath("$.startAt").doesNotExist())
+                .andExpect(forceTime != null ?
+                            jsonPath("$.forcetime", equalTo(forceTime.intValue()))
+                            : jsonPath("$.forcetime", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.running", equalTo(0)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.notstarted", equalTo(targets)))
                 .andExpect(jsonPath("$.totalTargetsPerStatus.scheduled", equalTo(0)))
