@@ -46,12 +46,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     }
 
     @Override
-    public boolean verifyExpression(final String expression) {
-        return true;
-    }
-
-    @Override
-    public void eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
+    public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
         systemSecurityContext.runAsSystem(() -> {
             startNextGroup(rollout, rolloutGroup);
             return null;

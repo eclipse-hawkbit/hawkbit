@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Manager class to collect all instances of
@@ -19,6 +21,8 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
  * corresponding instance can be fetched by providing the action/condition.
  */
 public class RolloutGroupEvaluationManager {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutGroupEvaluationManager.class);
 
     private final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition>> errorConditionEvaluators;
     private final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition>> successConditionEvaluators;
@@ -77,6 +81,7 @@ public class RolloutGroupEvaluationManager {
     private static <T extends Enum<T>> RolloutGroupActionEvaluator<T> findFirstActionEvaluator(
             final List<RolloutGroupActionEvaluator<T>> evaluators, final T action) {
         return evaluators.stream().filter(evaluator -> evaluator.getAction() == action).findFirst().orElseThrow(() -> {
+            LOGGER.warn("Could not find suitable evaluator for the '{}' action.", action.name());
             throw new EvaluatorNotConfiguredException(action.name());
         });
     }
@@ -85,6 +90,7 @@ public class RolloutGroupEvaluationManager {
             final List<RolloutGroupConditionEvaluator<T>> evaluators, final T condition) {
         return evaluators.stream().filter(evaluator -> evaluator.getCondition() == condition).findFirst()
                 .orElseThrow(() -> {
+                    LOGGER.warn("Could not find suitable evaluator for the '{}' condition.", condition.name());
                     throw new EvaluatorNotConfiguredException(condition.name());
                 });
     }

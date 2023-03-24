@@ -726,7 +726,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .filter(g -> RolloutGroupStatus.RUNNING.equals(g.getStatus())).findFirst()
                 .orElseThrow(() -> new RolloutIllegalStateException("No group is running"));
 
-        startNextRolloutGroupAction.eval(rollout, latestRunning, latestRunning.getSuccessActionExp());
+        startNextRolloutGroupAction.exec(rollout, latestRunning);
     }
 
 }

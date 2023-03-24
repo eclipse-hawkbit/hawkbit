@@ -18,7 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Evaluates if the {@link RolloutGroup#getErrorConditionExp()} is reached.
  */
 public class ThresholdRolloutGroupErrorCondition
         implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition> {

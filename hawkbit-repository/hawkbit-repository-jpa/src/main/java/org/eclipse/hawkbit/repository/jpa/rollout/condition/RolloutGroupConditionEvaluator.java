@@ -12,21 +12,11 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * Verifies {@link RolloutGroup#getErrorConditionExp()}.
+ * Interface for evaluate conditions define for a {@link RolloutGroup} based on a given expression
  */
 public interface RolloutGroupConditionEvaluator<T> {
 
     T getCondition();
-
-    default boolean verifyExpression(final String expression) {
-        // percentage value between 0 and 100
-        try {
-            final Integer value = Integer.valueOf(expression);
-            return value >= 0 && value <= 100;
-        } catch (final NumberFormatException e) {
-            return false;
-        }
-    }
 
     boolean eval(Rollout rollout, RolloutGroup rolloutGroup, final String expression);
 }

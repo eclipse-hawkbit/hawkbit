@@ -41,12 +41,7 @@ public class PauseRolloutGroupAction implements RolloutGroupActionEvaluator<Roll
     }
 
     @Override
-    public boolean verifyExpression(final String expression) {
-        return true;
-    }
-
-    @Override
-    public void eval(final Rollout rollout, final RolloutGroup rolloutG, final String expression) {
+    public void exec(final Rollout rollout, final RolloutGroup rolloutG) {
         final JpaRolloutGroup rolloutGroup = (JpaRolloutGroup) rolloutG;
 
         systemSecurityContext.runAsSystem(() -> {

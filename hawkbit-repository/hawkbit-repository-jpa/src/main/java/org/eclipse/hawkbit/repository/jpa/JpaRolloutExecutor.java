@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -418,11 +419,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     private void callErrorAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
         try {
-            evaluationManager.getErrorActionEvaluator(rolloutGroup.getErrorAction()).eval(rollout, rolloutGroup,
-                    rolloutGroup.getErrorActionExp());
-        } catch (final BeansException e) {
-            LOGGER.error("Something bad happend when accessing the error action bean {}",
-                    rolloutGroup.getErrorAction().getBeanName(), e);
+            evaluationManager.getErrorActionEvaluator(rolloutGroup.getErrorAction()).exec(rollout, rolloutGroup);
+        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+            LOGGER.error("Something bad happened when accessing the error action bean {}",
+                    rolloutGroup.getErrorAction().name(), e);
         }
     }
 
@@ -446,10 +446,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         try {
             return evaluationManager.getErrorConditionEvaluator(errorCondition).eval(rollout, rolloutGroup,
                     rolloutGroup.getErrorConditionExp());
-        } catch (final BeansException e) {
-            LOGGER.error(
-                    "Something bad happend when accessing the error condition bean {}",
-                    errorCondition.getBeanName(), e);
+        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+            LOGGER.error("Something bad happened when accessing the error condition bean {}", errorCondition.name(), e);
             return false;
         }
     }
@@ -467,16 +465,15 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 LOGGER.debug("Rolloutgroup {} is still running", rolloutGroup);
             }
             return isFinished;
-        } catch (final BeansException e) {
-            LOGGER.error("Something bad happend when accessing the finish condition bean {}",
-                    finishCondition.getBeanName(), e);
+        } catch (final BeansException | EvaluatorNotConfiguredException e) {
+            LOGGER.error("Something bad happened when accessing the finish condition or success action bean {}",
+                    finishCondition.name(), e);
             return false;
         }
     }
 
     private void executeRolloutGroupSuccessAction(final Rollout rollout, final RolloutGroup rolloutGroup) {
-        evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).eval(rollout, rolloutGroup,
-                rolloutGroup.getSuccessActionExp());
+        evaluationManager.getSuccessActionEvaluator(rolloutGroup.getSuccessAction()).exec(rollout, rolloutGroup);
     }
 
     private void startFirstRolloutGroup(final Rollout rollout) {
