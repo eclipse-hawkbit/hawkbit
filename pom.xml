@@ -766,14 +766,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <version>${spring.boot.version}</version>
-            <exclusions>
-               <exclusion>
-                  <!--   We don't support JUnit4 anymore  -->
-                  <!-- Can be removed with SpringBoot 2.4 -->
-                  <groupId>org.junit.vintage</groupId>
-                  <artifactId>junit-vintage-engine</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
          <dependency>
             <groupId>org.eclipse.persistence</groupId>
