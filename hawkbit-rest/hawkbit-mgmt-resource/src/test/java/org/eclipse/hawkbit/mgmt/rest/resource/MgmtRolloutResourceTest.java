@@ -27,6 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Timer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -588,16 +589,20 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     void retrieveRolloutWithStartAtAndForcedTimeResponseFields() throws Exception {
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Long startAt = 21L;
+        final Long forcetime = 45L;
 
         testdataFactory.createTargets(20, "target", "rollout");
-        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.TIMEFORCED, 21L, 45L);
-        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.TIMEFORCED, 21L, 45L);
+        postRollout("rollout1", 5, dsA.getId(), "id==target*", 20, Action.ActionType.TIMEFORCED,
+            startAt, forcetime);
+        postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.TIMEFORCED,
+            startAt, forcetime);
 
         // Run here, because Scheduler is disabled during tests
         rolloutManagement.handleRollouts();
 
-        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false, true);
-        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true, true);
+        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false, true, startAt, forcetime);
+        retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true, true, startAt, forcetime);
     }
 
     @Test
@@ -1358,11 +1363,11 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate,
             final boolean isFullRepresentation) throws Exception {
-        retrieveAndCompareRolloutsContent(dsA, urlTemplate, isFullRepresentation, false);
+        retrieveAndCompareRolloutsContent(dsA, urlTemplate, isFullRepresentation, false, null, null);
     }
 
     private void retrieveAndCompareRolloutsContent(final DistributionSet dsA, final String urlTemplate,
-        final boolean isFullRepresentation, final boolean isStartTypeScheduled) throws Exception {
+        final boolean isFullRepresentation, final boolean isStartTypeScheduled, final Long startAt, final Long forcetime) throws Exception {
         mvc.perform(get(urlTemplate).accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
             .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
             .andExpect(jsonPath("$.content", hasSize(2))).andExpect(jsonPath("$.total", equalTo(2)))
@@ -1375,12 +1380,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(jsonPath("content[0].lastModifiedBy", equalTo("bumlux")))
             .andExpect(jsonPath("content[0].lastModifiedAt", not(equalTo(0))))
             .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
-            .andExpect(jsonPath("content[0].forcetime", equalTo(isStartTypeScheduled ? 45 : 0)))
+            .andExpect(jsonPath("content[0].forcetime", equalTo(isStartTypeScheduled ? forcetime.intValue() : 0)))
             .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalTargetsPerStatus").exists()
                 : jsonPath("content[0].totalTargetsPerStatus").doesNotExist())
             .andExpect(isFullRepresentation ? jsonPath("$.content[0].totalGroups", equalTo(5))
                 : jsonPath("content[0].totalGroups").doesNotExist())
-            .andExpect(isFullRepresentation && isStartTypeScheduled ? jsonPath("$.content[0].startAt", equalTo(21))
+            .andExpect(isFullRepresentation && isStartTypeScheduled ? jsonPath("$.content[0].startAt", equalTo(startAt.intValue()))
                 : jsonPath("$.content[0].startAt").doesNotExist())
             .andExpect(isFullRepresentation
                 ? jsonPath("$.content[0]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
@@ -1417,12 +1422,12 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(jsonPath("content[1].lastModifiedBy", equalTo("bumlux")))
             .andExpect(jsonPath("content[1].lastModifiedAt", not(equalTo(0))))
             .andExpect(jsonPath("content[1].totalTargets", equalTo(10)))
-            .andExpect(jsonPath("content[1].forcetime").exists())
+            .andExpect(jsonPath("content[1].forcetime", equalTo(isStartTypeScheduled ? forcetime.intValue() : 0)))
             .andExpect(isFullRepresentation ? jsonPath("$.content[1].totalTargetsPerStatus").exists()
                 : jsonPath("content[1].totalTargetsPerStatus").doesNotExist())
             .andExpect(isFullRepresentation ? jsonPath("$.content[1].totalGroups", equalTo(5))
                 : jsonPath("content[1].totalGroups").doesNotExist())
-            .andExpect(isFullRepresentation && isStartTypeScheduled ? jsonPath("content[1].startAt", equalTo(21))
+            .andExpect(isFullRepresentation && isStartTypeScheduled ? jsonPath("content[1].startAt", equalTo(startAt.intValue()))
                 : jsonPath("content[1].startAt").doesNotExist())
             .andExpect(isFullRepresentation
                 ? jsonPath("$.content[1]._links.start.href", startsWith(HREF_ROLLOUT_PREFIX))
