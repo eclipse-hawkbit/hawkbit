@@ -19,13 +19,11 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * REST Resource for handling tenant specific configuration operations.
- *
  */
-@RequestMapping(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING)
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtTenantManagementRestApi {
 
     /**
@@ -34,7 +32,8 @@ public interface MgmtTenantManagementRestApi {
      * 
      * @return a map of all configuration values.
      */
-    @GetMapping(value = "/configs", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Map<String, MgmtSystemTenantConfigurationValue>> getTenantConfiguration();
 
     /**
@@ -47,8 +46,8 @@ public interface MgmtTenantManagementRestApi {
      *         OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
-    @DeleteMapping(value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @DeleteMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> deleteTenantConfigurationValue(@PathVariable("keyName") String keyName);
 
     /**
@@ -61,8 +60,8 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @GetMapping(value = "/configs/{keyName}", produces = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> getTenantConfigurationValue(
             @PathVariable("keyName") String keyName);
 
@@ -78,8 +77,8 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @PutMapping(value = "/configs/{keyName}", consumes = { MediaTypes.HAL_JSON_VALUE,
-            MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             @PathVariable("keyName") String keyName, MgmtSystemTenantConfigurationValueRequest configurationValueRest);

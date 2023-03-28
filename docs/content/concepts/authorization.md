@@ -59,7 +59,7 @@ An example configuration is given below.
 
 ### Delivered Permissions
 
-- READ_/UPDATE_/CREATE_/DELETE_TARGETS for:
+- READ_/UPDATE_/CREATE_/DELETE_TARGET for:
   - Target entities including metadata (that includes also the installed and assigned distribution sets)
   - Target tags
   - Target actions

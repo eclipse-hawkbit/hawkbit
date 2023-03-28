@@ -45,7 +45,7 @@ services:
   hawkbit:
     image: "hawkbit/hawkbit-update-server:latest-mysql"
     environment:
-      - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
+      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
       - 'SPRING_RABBITMQ_HOST=rabbitmq'
       - 'SPRING_RABBITMQ_USERNAME=guest'
       - 'SPRING_RABBITMQ_PASSWORD=guest'

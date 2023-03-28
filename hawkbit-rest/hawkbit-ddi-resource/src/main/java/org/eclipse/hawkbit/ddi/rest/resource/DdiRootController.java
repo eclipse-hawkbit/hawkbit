@@ -82,6 +82,7 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.WebApplicationContext;
@@ -210,7 +211,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
                         (length, shippedSinceLastEvent,
                                 total) -> eventPublisher.publishEvent(new DownloadProgressEvent(
                                         tenantAware.getCurrentTenant(), statusId, shippedSinceLastEvent,
-                                        serviceMatcher != null ? serviceMatcher.getServiceId() : bus.getId())));
+                                        serviceMatcher != null ? serviceMatcher.getBusId() : bus.getId())));
 
             }
         }

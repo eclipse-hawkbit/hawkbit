@@ -60,7 +60,8 @@ final class MgmtTagMapper {
 
         mapTag(response, targetTag);
 
-        response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withSelfRel());
+        response.add(
+                linkTo(methodOn(MgmtTargetTagRestApi.class).getTargetTag(targetTag.getId())).withSelfRel().expand());
 
         return response;
     }
@@ -68,8 +69,8 @@ final class MgmtTagMapper {
     static void addLinks(final TargetTag targetTag, final MgmtTag response) {
         response.add(linkTo(methodOn(MgmtTargetTagRestApi.class).getAssignedTargets(targetTag.getId(),
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
-                        .withRel("assignedTargets"));
+                MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("assignedTargets")
+                        .expand());
 
     }
 
@@ -97,7 +98,7 @@ final class MgmtTagMapper {
 
         response.add(
                 linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getDistributionSetTag(distributionSetTag.getId()))
-                        .withSelfRel());
+                        .withSelfRel().expand());
 
         return response;
     }
@@ -106,7 +107,7 @@ final class MgmtTagMapper {
         response.add(linkTo(methodOn(MgmtDistributionSetTagRestApi.class).getAssignedDistributionSets(
                 distributionSetTag.getId(), MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
                 MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null))
-                        .withRel("assignedDistributionSets"));
+                        .withRel("assignedDistributionSets").expand());
     }
 
     static List<TagCreate> mapTagFromRequest(final EntityFactory entityFactory,

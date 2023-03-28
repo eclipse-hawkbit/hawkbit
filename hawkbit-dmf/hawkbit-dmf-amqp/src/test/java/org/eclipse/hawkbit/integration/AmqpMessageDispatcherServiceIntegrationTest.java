@@ -539,7 +539,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
 
         final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         assertThat(message).isNotNull();
         final Map<String, Object> headers = message.getMessageProperties().getHeaders();

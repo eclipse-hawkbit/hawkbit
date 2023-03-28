@@ -588,7 +588,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$._links.assignedDS.href", equalTo(hrefPrefix + "assignedDS")))
                 .andExpect(jsonPath("$._links.installedDS.href", equalTo(hrefPrefix + "installedDS")))
                 .andExpect(jsonPath("$._links.actions.href",
-                        equalTo(hrefPrefix + "actions" + "?offset=0&limit=50&sort=id:DESC")));
+                        equalTo(hrefPrefix + "actions" + "?offset=0&limit=50&sort=id%3ADESC")));
     }
 
     @Test
@@ -1242,7 +1242,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     private String generateStatusreferenceLink(final String knownTargetId, final Long actionId) {
         return "http://localhost" + MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
                 + MgmtRestConstants.TARGET_V1_ACTIONS + "/" + actionId + "/" + MgmtRestConstants.TARGET_V1_ACTION_STATUS
-                + "?offset=0&limit=50&sort=id:DESC";
+                + "?offset=0&limit=50&sort=id%3ADESC";
     }
 
     private List<Action> generateTargetWithTwoUpdatesWithOneOverride(final String knownTargetId) {

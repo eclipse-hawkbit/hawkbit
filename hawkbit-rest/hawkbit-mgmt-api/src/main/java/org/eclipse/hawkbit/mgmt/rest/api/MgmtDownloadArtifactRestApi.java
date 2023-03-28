@@ -13,14 +13,13 @@ import java.io.InputStream;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- *
+ * API to download artifacts
  */
-@RequestMapping(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING)
 @FunctionalInterface
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtDownloadArtifactRestApi {
 
     /**
@@ -37,7 +36,8 @@ public interface MgmtDownloadArtifactRestApi {
      *
      * @return responseEntity with status ok if successful
      */
-    @GetMapping(value = "/{softwareModuleId}/artifacts/{artifactId}/download")
+    @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
+            + "/{softwareModuleId}/artifacts/{artifactId}/download")
     @ResponseBody
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("softwareModuleId") Long softwareModuleId,
             @PathVariable("artifactId") Long artifactId);

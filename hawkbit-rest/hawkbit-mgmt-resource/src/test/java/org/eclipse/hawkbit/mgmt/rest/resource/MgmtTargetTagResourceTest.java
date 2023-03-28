@@ -88,7 +88,7 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
                 .andExpect(applyTagMatcherOnSingleResult(assigned))
                 .andExpect(applySelfLinkMatcherOnSingleResult(TARGETTAGS_ROOT + assigned.getId()))
                 .andExpect(jsonPath("_links.assignedTargets.href",
-                        equalTo(TARGETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50{&sort,q}")));
+                        equalTo(TARGETTAGS_ROOT + assigned.getId() + "/assigned?offset=0&limit=50")));
 
     }
 

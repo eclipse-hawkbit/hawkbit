@@ -19,10 +19,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.cloud.bus.BusProperties;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.cloud.bus.ServiceMatcher;
 import org.springframework.cloud.bus.jackson.RemoteApplicationEventScan;
-import org.springframework.cloud.stream.annotation.StreamMessageConverter;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,6 +44,7 @@ import io.protostuff.Schema;
 @Configuration
 @RemoteApplicationEventScan(basePackages = "org.eclipse.hawkbit.repository.event.remote")
 @PropertySource("classpath:/hawkbit-eventbus-defaults.properties")
+@EnableConfigurationProperties(BusProperties.class)
 public class EventPublisherAutoConfiguration {
     /**
      * Server internal event publisher that allows parallel event processing if
@@ -138,7 +140,6 @@ public class EventPublisherAutoConfiguration {
          * @return the protostuff io message converter
          */
         @Bean
-        @StreamMessageConverter
         public MessageConverter busProtoBufConverter() {
             return new BusProtoStuffMessageConverter();
         }

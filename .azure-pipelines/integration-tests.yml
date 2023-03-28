@@ -78,7 +78,7 @@ jobs:
         displayName: "Setup MYSQL Database docker instance"
       - template: maven-template.yml
         parameters:
-          mavenGoals: "verify -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mysql://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
+          mavenGoals: "verify -Dspring.jpa.database=MYSQL -Dspring.datasource.driverClassName=org.mariadb.jdbc.Driver -Dspring.datasource.url=jdbc:mariadb://localhost:3306/hawkbit -Dspring.datasource.username=root -Dspring.datasource.password=8236472364"
   - job:
     dependsOn: JDK_8
     condition: succeeded()

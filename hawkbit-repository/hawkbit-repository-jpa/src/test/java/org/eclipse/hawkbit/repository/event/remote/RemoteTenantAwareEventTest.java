@@ -20,11 +20,11 @@ import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionProperties;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.junit.jupiter.api.Test;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
-import org.junit.jupiter.api.Test;
 
 @Feature("Component Tests - Repository")
 @Story("RemoteTenantAwareEvent Tests")
@@ -109,7 +109,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final Action action = actionRepository.save(generateAction);
 
         final TargetAssignDistributionSetEvent assignmentEvent = new TargetAssignDistributionSetEvent(
-                action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getServiceId(),
+                action.getTenant(), dsA.getId(), Arrays.asList(action), serviceMatcher.getBusId(),
                 action.isMaintenanceWindowAvailable());
 
         final TargetAssignDistributionSetEvent remoteEventProtoStuff = createProtoStuffEvent(assignmentEvent);
@@ -135,7 +135,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final Action action = actionRepository.save(generateAction);
 
         final CancelTargetAssignmentEvent cancelEvent = new CancelTargetAssignmentEvent(action,
-                serviceMatcher.getServiceId());
+                serviceMatcher.getBusId());
 
         final CancelTargetAssignmentEvent remoteEventProtoStuff = createProtoStuffEvent(cancelEvent);
         assertCancelTargetAssignmentEvent(action, remoteEventProtoStuff);

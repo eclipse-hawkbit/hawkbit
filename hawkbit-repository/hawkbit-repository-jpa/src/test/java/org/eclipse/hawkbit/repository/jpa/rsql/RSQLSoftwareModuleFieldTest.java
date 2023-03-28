@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -91,14 +92,20 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
         //wildcard entries
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*$*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*§*", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
-        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*@*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*/*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*&*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==***", 6);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*\\**", 1);
+    }
+
+    @Test
+    @Description("Test filter software module by name which contain mutated vowels ")
+    @Disabled("Temporarily disabled because test depends on collation settings of database")
+    public void testFilterByParameterNameWithUmlaut() {
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);
+        assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ü*", 1);
     }
 
     @Test
