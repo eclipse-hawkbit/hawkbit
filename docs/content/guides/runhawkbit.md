@@ -48,7 +48,7 @@ For this you can either edit the existing _application.properties_ or create a [
 
 ```properties
 spring.jpa.database=MYSQL
-spring.datasource.url=jdbc:mysql://localhost:3306/YOUR_SCHEMA
+spring.datasource.url=jdbc:mariadb://localhost:3306/YOUR_SCHEMA
 spring.datasource.username=YOUR_USER
 spring.datasource.password=YOUR_PWD
 spring.datasource.driverClassName=org.mariadb.jdbc.Driver

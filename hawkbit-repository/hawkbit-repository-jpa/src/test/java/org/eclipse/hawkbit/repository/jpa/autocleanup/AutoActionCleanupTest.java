@@ -117,7 +117,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);
-        assertThat(actionRepository.getById(action3)).isPresent();
+        assertThat(actionRepository.getActionById(action3)).isPresent();
 
     }
 
@@ -149,8 +149,8 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(2);
-        assertThat(actionRepository.getById(action2)).isPresent();
-        assertThat(actionRepository.getById(action3)).isPresent();
+        assertThat(actionRepository.getActionById(action2)).isPresent();
+        assertThat(actionRepository.getActionById(action3)).isPresent();
 
     }
 
@@ -189,7 +189,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);
-        assertThat(actionRepository.getById(action3)).isPresent();
+        assertThat(actionRepository.getActionById(action3)).isPresent();
 
     }
 
