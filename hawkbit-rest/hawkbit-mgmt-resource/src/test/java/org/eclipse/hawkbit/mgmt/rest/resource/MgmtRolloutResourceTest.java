@@ -598,7 +598,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             startAt, forcetime);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false, true, startAt, forcetime);
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true, true, startAt, forcetime);
