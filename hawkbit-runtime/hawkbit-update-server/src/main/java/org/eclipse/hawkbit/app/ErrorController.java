@@ -60,7 +60,7 @@ public class ErrorController extends BasicErrorController {
     }
 
     private Map<String, Object> getErrorAttributesWithoutPath(final HttpServletRequest request) {
-        final Map<String, Object> body = getErrorAttributes(request, isIncludeStackTrace(request, MediaType.ALL));
+        final Map<String, Object> body = getErrorAttributes(request, getErrorAttributeOptions(request, MediaType.ALL));
         if (body != null && body.containsKey(PATH)) {
             body.remove(PATH);
         }

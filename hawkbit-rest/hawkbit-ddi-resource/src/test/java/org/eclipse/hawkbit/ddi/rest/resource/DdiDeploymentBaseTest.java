@@ -738,9 +738,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
     }
 
     private static class ActionStatusCondition extends Condition<ActionStatus> {
-        private final Status status;
+        private final Action.Status status;
 
-        public ActionStatusCondition(final Status status) {
+        public ActionStatusCondition(final Action.Status status) {
             this.status = status;
         }
 

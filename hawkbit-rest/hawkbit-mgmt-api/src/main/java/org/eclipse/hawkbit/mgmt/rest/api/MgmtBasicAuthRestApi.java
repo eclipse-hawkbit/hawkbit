@@ -13,19 +13,19 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * Api for handling basic auth user validation
  */
-@RequestMapping(MgmtRestConstants.AUTH_V1_REQUEST_MAPPING)
 @SuppressWarnings("squid:S1609")
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {
     /**
      * Handles the GET request of basic auth.
      *
      * @return the userinfo with status OK.
      */
-    @GetMapping(produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.AUTH_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtUserInfo> validateBasicAuth();
 }

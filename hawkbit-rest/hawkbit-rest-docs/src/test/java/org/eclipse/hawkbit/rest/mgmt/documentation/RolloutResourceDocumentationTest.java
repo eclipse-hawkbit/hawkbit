@@ -137,12 +137,15 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .attributes(key("value").value("['forced','soft','timeforced','downloadonly']")));
         allFieldDescriptor.add(
                 fieldWithPath(arrayPrefix + "totalTargets").description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS));
+        allFieldDescriptor.add(fieldWithPath(arrayPrefix + "forcetime").description(MgmtApiModelProperties.FORCETIME));
         allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.self").ignored());
         if (withDetails) {
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalTargetsPerStatus")
                     .description(MgmtApiModelProperties.ROLLOUT_TOTAL_TARGETS_PER_STATUS));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "totalGroups")
                     .description(MgmtApiModelProperties.ROLLOUT_TOTAL_GROUPS));
+            allFieldDescriptor.add(fieldWithPath(arrayPrefix + "startAt")
+                .description(MgmtApiModelProperties.ROLLOUT_START_AT));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.start")
                     .description(MgmtApiModelProperties.ROLLOUT_LINKS_START_SYNC));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.pause")
@@ -200,8 +203,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
 
         mockMvc.perform(
                 post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING)
-                        .content(JsonBuilder.rollout(name, description, groupSize, dsId, targetFilter,
-                                rolloutGroupConditions, type))
+                        .content(JsonBuilder.rollout(name, description, groupSize, dsId, targetFilter, rolloutGroupConditions, null, type,
+                            null, System.currentTimeMillis() + 2000, System.currentTimeMillis() + 3000, false))
                         .contentType(MediaTypes.HAL_JSON).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
@@ -211,8 +214,11 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                 .description(MgmtApiModelProperties.RESULTING_ACTIONS_WEIGHT)
                                 .attributes(key("value").value("0 - 1000")),
                         requestFieldWithPath("name").description(ApiModelPropertiesGeneric.NAME),
+                        optionalRequestFieldWithPath("forcetime").description(MgmtApiModelProperties.FORCETIME),
                         optionalRequestFieldWithPath("type").description(MgmtApiModelProperties.ROLLOUT_TYPE)
                                 .attributes(key("value").value("['soft', 'forced', 'timeforced', 'downloadonly']")),
+                        optionalRequestFieldWithPath("startAt").description(MgmtApiModelProperties.ROLLOUT_START_AT)
+                            .type(JsonFieldType.NUMBER),
                         optionalRequestFieldWithPath("confirmationRequired")
                                 .description(MgmtApiModelProperties.ROLLOUT_CONFIRMATION_REQUIRED)
                                 .type(JsonFieldType.BOOLEAN.toString()),
@@ -311,6 +317,8 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                         .description(MgmtApiModelProperties.ROLLOUT_CONFIRMATION_REQUIRED),
                                 optionalRequestFieldWithPath("description")
                                         .description(ApiModelPropertiesGeneric.DESCRPTION),
+                                optionalRequestFieldWithPath("startAt").description(MgmtApiModelProperties.ROLLOUT_START_AT)
+                                    .type(JsonFieldType.NUMBER),
                                 optionalRequestFieldWithPath("successCondition")
                                         .description(MgmtApiModelProperties.ROLLOUT_SUCCESS_CONDITION),
                                 optionalRequestFieldWithPath("successCondition.condition")
@@ -679,6 +687,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         if (isMultiAssignmentsEnabled()) {
             rolloutCreate.weight(400);
         }
+        rolloutCreate.forcedTime(System.currentTimeMillis() + 12345);
         final Rollout rollout = rolloutManagement.create(rolloutCreate, 5, false, new RolloutGroupConditionBuilder()
                 .withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
@@ -686,7 +695,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         rolloutManagement.handleRollouts();
 
         return rolloutManagement
-                .update(entityFactory.rollout().update(rollout.getId()).description("exampleDescription"));
+                .update(entityFactory.rollout().update(rollout.getId()).startAt(System.currentTimeMillis() + 1000).description("exampleDescription"));
     }
 
 }

@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.dmf.json.model.DmfMultiActionRequest.DmfMultiActionEl
 import org.eclipse.hawkbit.dmf.json.model.DmfSoftwareModule;
 import org.eclipse.hawkbit.dmf.json.model.DmfTarget;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
+import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -48,7 +49,6 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
-import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
@@ -543,7 +543,7 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         final DistributionSet distributionSet = createTargetAndDistributionSetAndAssign(controllerId, DOWNLOAD_ONLY);
 
         final Message message = assertReplyMessageHeader(EventTopic.DOWNLOAD, controllerId);
-        Mockito.verifyZeroInteractions(getDeadletterListener());
+        Mockito.verifyNoInteractions(getDeadletterListener());
 
         assertThat(message).isNotNull();
         final Map<String, Object> headers = message.getMessageProperties().getHeaders();
@@ -680,14 +680,14 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
                                                      final List<String> controllerIds) {
         assertSoftwareModules(softwareModules, request.getSoftwareModules());
 
-        List<Object> tokens = controllerIds.stream().map(controllerId -> {
+        final List<Object> tokens = controllerIds.stream().map(controllerId -> {
             final Optional<Target> target = controllerManagement.getByControllerId(controllerId);
             assertThat(target).isPresent();
             return target.get().getSecurityToken();
         }).collect(Collectors.toList());
 
 
-        List<DmfTarget> requestTargets = request.getTargets();
+        final List<DmfTarget> requestTargets = request.getTargets();
 
         assertThat(requestTargets).hasSameSizeAs(controllerIds);
         requestTargets.forEach(requestTarget -> {

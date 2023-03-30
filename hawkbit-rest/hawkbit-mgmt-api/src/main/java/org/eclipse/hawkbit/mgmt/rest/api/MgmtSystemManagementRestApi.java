@@ -18,13 +18,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
  * System management capabilities by REST.
- *
  */
-@RequestMapping(MgmtRestConstants.SYSTEM_ADMIN_MAPPING)
+// no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtSystemManagementRestApi {
 
     /**
@@ -34,7 +32,7 @@ public interface MgmtSystemManagementRestApi {
      *            to delete
      * @return HttpStatus.OK
      */
-    @DeleteMapping(value = "/tenants/{tenant}")
+    @DeleteMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/tenants/{tenant}")
     ResponseEntity<Void> deleteTenant(@PathVariable("tenant") String tenant);
 
     /**
@@ -43,7 +41,8 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return system usage statistics
      */
-    @GetMapping(value = "/usage", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/usage", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemStatisticsRest> getSystemUsageStats();
 
     /**
@@ -51,7 +50,8 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of caches for all tenants
      */
-    @GetMapping(value = "/caches", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    @GetMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/caches", produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Collection<MgmtSystemCache>> getCaches();
 
     /**
@@ -59,7 +59,7 @@ public interface MgmtSystemManagementRestApi {
      *
      * @return a list of cache names which has been invalidated
      */
-    @DeleteMapping(value = "/caches")
+    @DeleteMapping(value = MgmtRestConstants.SYSTEM_ADMIN_MAPPING + "/caches")
     ResponseEntity<Collection<String>> invalidateCaches();
 
 }

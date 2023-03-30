@@ -8,6 +8,9 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,9 +26,6 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.rest.data.ResponseList;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -43,13 +43,15 @@ public final class MgmtTargetTypeMapper {
         if (targetTypesRest == null) {
             return Collections.emptyList();
         }
-        return targetTypesRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest)).collect(Collectors.toList());
+        return targetTypesRest.stream().map(targetRest -> fromRequest(entityFactory, targetRest))
+                .collect(Collectors.toList());
     }
 
     private static TargetTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return entityFactory.targetType().create().name(targetTypesRest.getName()).description(targetTypesRest.getDescription())
-                .colour(targetTypesRest.getColour()).compatible(getDistributionSets(targetTypesRest));
+        return entityFactory.targetType().create().name(targetTypesRest.getName())
+                .description(targetTypesRest.getDescription()).colour(targetTypesRest.getColour())
+                .compatible(getDistributionSets(targetTypesRest));
     }
 
     private static Collection<Long> getDistributionSets(final MgmtTargetTypeRequestBodyPost targetTypesRest) {
@@ -70,12 +72,13 @@ public final class MgmtTargetTypeMapper {
         MgmtRestModelMapper.mapNamedToNamed(result, type);
         result.setTypeId(type.getId());
         result.setColour(type.getColour());
-        result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(result.getTypeId())).withSelfRel());
+        result.add(
+                linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(result.getTypeId())).withSelfRel().expand());
         return result;
     }
 
     static void addLinks(final MgmtTargetType result) {
         result.add(linkTo(methodOn(MgmtTargetTypeRestApi.class).getCompatibleDistributionSets(result.getTypeId()))
-                .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES));
+                .withRel(MgmtRestConstants.TARGETTYPE_V1_DS_TYPES).expand());
     }
 }

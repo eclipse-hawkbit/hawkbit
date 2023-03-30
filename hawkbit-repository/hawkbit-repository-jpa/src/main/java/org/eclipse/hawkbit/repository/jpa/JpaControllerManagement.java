@@ -233,11 +233,11 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
          * Constructor.
          *
          * @param defaultEventInterval
-         *            default timer value to use for interval between events. This puts
-         *            an upper bound for the timer value
+         *            default timer value to use for interval between events.
+         *            This puts an upper bound for the timer value
          * @param minimumEventInterval
-         *            for loading {@link DistributionSet#getModules()}. This puts a
-         *            lower bound to the timer value
+         *            for loading {@link DistributionSet#getModules()}. This
+         *            puts a lower bound to the timer value
          * @param timeUnit
          *            representing the unit of time to be used for timer.
          */
@@ -252,15 +252,16 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         /**
-         * This method calculates the time interval until the next event based on the
-         * desired number of events before the time when interval is reset to default.
-         * The return value is bounded by {@link EventTimer#defaultEventInterval} and
+         * This method calculates the time interval until the next event based
+         * on the desired number of events before the time when interval is
+         * reset to default. The return value is bounded by
+         * {@link EventTimer#defaultEventInterval} and
          * {@link EventTimer#minimumEventInterval}.
          *
          * @param eventCount
-         *            number of events desired until the interval is reset to default.
-         *            This is not guaranteed as the interval between events cannot be
-         *            less than the minimum interval
+         *            number of events desired until the interval is reset to
+         *            default. This is not guaranteed as the interval between
+         *            events cannot be less than the minimum interval
          * @param timerResetTime
          *            time when exponential forwarding should reset to default
          *
@@ -345,8 +346,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     @Override
-    public List<Action> findActiveActionsWithHighestWeight(final String controllerId,
-            final int maxActionCount) {
+    public List<Action> findActiveActionsWithHighestWeight(final String controllerId, final int maxActionCount) {
         return findActiveActionsWithHighestWeightConsideringDefault(controllerId, maxActionCount);
     }
 
@@ -357,7 +357,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
-        return actionRepository.getById(actionId);
+        return actionRepository.getActionById(actionId);
     }
 
     @Override
@@ -394,8 +394,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private Target createTarget(final String controllerId, final URI address, final String name) {
 
         final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
-                .controllerId(controllerId).description("Plug and Play target: " + controllerId).name((StringUtils.hasText(name) ? name : controllerId))
-                .status(TargetUpdateStatus.REGISTERED).lastTargetQuery(System.currentTimeMillis())
+                .controllerId(controllerId).description("Plug and Play target: " + controllerId)
+                .name((StringUtils.hasText(name) ? name : controllerId)).status(TargetUpdateStatus.REGISTERED)
+                .lastTargetQuery(System.currentTimeMillis())
                 .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
 
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
@@ -457,8 +458,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     /**
      * Sets {@link Target#getLastTargetQuery()} by native SQL in order to avoid
-     * raising opt lock revision as this update is not mission critical and in fact
-     * only written by {@link ControllerManagement}, i.e. the target itself.
+     * raising opt lock revision as this update is not mission critical and in
+     * fact only written by {@link ControllerManagement}, i.e. the target
+     * itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
         final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
@@ -486,8 +488,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Stores target directly to DB in case either {@link Target#getAddress()} or
-     * {@link Target#getUpdateStatus()} or {@link Target#getName()} changes or the buffer queue is full.
+     * Stores target directly to DB in case either {@link Target#getAddress()}
+     * or {@link Target#getUpdateStatus()} or {@link Target#getName()} changes
+     * or the buffer queue is full.
      *
      */
     private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
@@ -601,12 +604,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     /**
      * Handles the case where the {@link Action.Status#DOWNLOADED} status is
-     * reported by the device. In case the update is finished, a controllerId will
-     * be returned to trigger a request for attributes.
+     * reported by the device. In case the update is finished, a controllerId
+     * will be returned to trigger a request for attributes.
      *
      * @param action
      *            updated action
-     * @return a present controllerId in case the attributes needs to be requested.
+     * @return a present controllerId in case the attributes needs to be
+     *         requested.
      */
     private Optional<String> handleDownloadedActionStatus(final JpaAction action) {
         if (!isDownloadOnly(action)) {
@@ -644,12 +648,13 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     /**
      * Handles the case where the {@link Action.Status#FINISHED} status is
-     * reported by the device. In case the update is finished, a controllerId will
-     * be returned to trigger a request for attributes.
+     * reported by the device. In case the update is finished, a controllerId
+     * will be returned to trigger a request for attributes.
      *
      * @param action
      *            updated action
-     * @return a present controllerId in case the attributes needs to be requested.
+     * @return a present controllerId in case the attributes needs to be
+     *         requested.
      */
     private Optional<String> handleFinishedAndStoreInTargetStatus(final JpaAction action) {
         final JpaTarget target = (JpaTarget) action.getTarget();
@@ -689,8 +694,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
             final UpdateMode mode) {
 
         /*
-         * Constraints on attribute keys & values are not validated by EclipseLink.
-         * Hence, they are validated here.
+         * Constraints on attribute keys & values are not validated by
+         * EclipseLink. Hence, they are validated here.
          */
         if (data.entrySet().stream().anyMatch(e -> !isAttributeEntryValid(e))) {
             throw new InvalidTargetAttributeException();
@@ -767,8 +772,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     /**
-     * Registers retrieved status for given {@link Target} and {@link Action} if it
-     * does not exist yet.
+     * Registers retrieved status for given {@link Target} and {@link Action} if
+     * it does not exist yet.
      *
      * @param actionId
      *            to the handle status for
@@ -1034,8 +1039,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     }
 
     private void cancelAssignDistributionSetEvent(final Action action) {
-        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
-                new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
+        afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
+                .publishEvent(new CancelTargetAssignmentEvent(action, eventPublisherHolder.getApplicationId())));
     }
 
     // for testing

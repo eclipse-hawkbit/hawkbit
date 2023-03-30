@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class MySqlTestDatabase extends AbstractSqlTestDatabase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySqlTestDatabase.class);
-    protected static final String MYSQL_URI_PATTERN = "jdbc:mysql://{host}:{port}/{db}*";
+    protected static final String MYSQL_URI_PATTERN = "jdbc:mariadb://{host}:{port}/{db}*";
 
     public MySqlTestDatabase(final DatasourceContext context) {
         super(context);

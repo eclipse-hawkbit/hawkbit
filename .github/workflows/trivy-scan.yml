@@ -1,0 +1,55 @@
+name: Vulnerability Scan
+
+on:
+  schedule:
+    # run every night at 4:00 AM (UTC)
+    - cron: '0 4 * * *'
+  # enable running the workflow manually
+  workflow_dispatch:
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.5
+        with:
+          maven-version: 3.8.6
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: "adopt"
+          java-version: "11"
+          cache: "maven"
+
+      - name: Create Hawkbit container images
+        run: |
+          mvn clean install -DskipTests -Pdocker
+
+      - name: Determine most recent Trivy version
+        run: |
+          echo "TRIVY_VERSION=$(wget -qO - 'https://api.github.com/repos/aquasecurity/trivy/releases/latest' | \
+            grep '\"tag_name\":' | sed -E 's/.*\"v([^\"]+)\".*/\1/')" >> $GITHUB_ENV
+
+      - name: Install Trivy
+        run: |
+          wget --no-verbose https://github.com/aquasecurity/trivy/releases/download/v${{ env.TRIVY_VERSION }}/trivy_${{ env.TRIVY_VERSION }}_Linux-64bit.tar.gz -O - | tar -zxvf -
+
+      - name: Scan Docker images
+        run: |
+          mkdir -p scans/eclipse/hawkbit
+          for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit-*:latest"); do
+            echo "Scanning image ${IMAGE} ..."
+            ./trivy image "${IMAGE}" --ignore-unfixed --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/hawkbit/$IMAGE.sarif" --format sarif
+          done
+
+      - name: Upload Docker image scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'scans/eclipse/hawkbit'
+          category: "Container Images"
