@@ -196,7 +196,7 @@ public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrati
 
             // start the rollout and handle it
             rolloutManagement.start(rollout.getId());
-            rolloutManagement.handleRollouts();
+            rolloutHandler.handleAll();
 
             updatedTargets = Collections.singletonList(savedTarget);
 

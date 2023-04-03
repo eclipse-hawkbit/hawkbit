@@ -12,11 +12,11 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 
 /**
- * 
+ * Interface to define a specific execution for an action
  */
-public interface RolloutGroupActionEvaluator {
+public interface RolloutGroupActionEvaluator<T> {
 
-    boolean verifyExpression(final String expression);
+    T getAction();
 
-    void eval(Rollout rollout, RolloutGroup rolloutGroup, final String expression);
+    void exec(Rollout rollout, RolloutGroup rolloutGroup);
 }

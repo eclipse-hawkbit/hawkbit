@@ -157,40 +157,14 @@ public interface RolloutGroup extends NamedEntity {
      * The condition to evaluate if an group is success state.
      */
     enum RolloutGroupSuccessCondition {
-        THRESHOLD("thresholdRolloutGroupSuccessCondition");
-
-        private final String beanName;
-
-        RolloutGroupSuccessCondition(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
+        THRESHOLD
     }
 
     /**
      * The condition to evaluate if an group is in error state.
      */
     enum RolloutGroupErrorCondition {
-        THRESHOLD("thresholdRolloutGroupErrorCondition");
-
-        private final String beanName;
-
-        RolloutGroupErrorCondition(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
+        THRESHOLD
     }
 
     /**
@@ -198,20 +172,7 @@ public interface RolloutGroup extends NamedEntity {
      * hit.
      */
     enum RolloutGroupErrorAction {
-        PAUSE("pauseRolloutGroupAction");
-
-        private final String beanName;
-
-        RolloutGroupErrorAction(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
+        PAUSE
     }
 
     /**
@@ -219,19 +180,6 @@ public interface RolloutGroup extends NamedEntity {
      * is hit.
      */
     enum RolloutGroupSuccessAction {
-        NEXTGROUP("startNextRolloutGroupAction");
-
-        private final String beanName;
-
-        RolloutGroupSuccessAction(final String beanName) {
-            this.beanName = beanName;
-        }
-
-        /**
-         * @return the beanName
-         */
-        public String getBeanName() {
-            return beanName;
-        }
+        NEXTGROUP
     }
 }

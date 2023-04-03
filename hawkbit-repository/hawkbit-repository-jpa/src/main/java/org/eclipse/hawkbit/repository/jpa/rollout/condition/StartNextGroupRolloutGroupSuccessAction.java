@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Success action which starts the next following {@link RolloutGroup}.
  */
-public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActionEvaluator {
+public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction> {
 
     private static final Logger logger = LoggerFactory.getLogger(StartNextGroupRolloutGroupSuccessAction.class);
 
@@ -41,12 +41,12 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
     }
 
     @Override
-    public boolean verifyExpression(final String expression) {
-        return true;
+    public RolloutGroup.RolloutGroupSuccessAction getAction() {
+        return RolloutGroup.RolloutGroupSuccessAction.NEXTGROUP;
     }
 
     @Override
-    public void eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
+    public void exec(final Rollout rollout, final RolloutGroup rolloutGroup) {
         systemSecurityContext.runAsSystem(() -> {
             startNextGroup(rollout, rolloutGroup);
             return null;

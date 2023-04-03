@@ -92,7 +92,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
                 .getContent();
         final RolloutGroup rolloutGroup = rolloutGroups.get(0);
         rolloutManagement.pauseRollout(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         final List<Target> targets = rolloutGroupManagement.findTargetsOfRolloutGroup(PAGE, rolloutGroup.getId())
                 .getContent();
         Target targetCancelled = targets.get(0);
@@ -195,7 +195,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         final Rollout rollout = testdataFactory.createRollout();
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(PAGE, rollout.getId())
                 .getContent();
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // check query when no actions exist
         final List<TargetWithActionStatus> targetsWithActionStatus = rolloutGroupManagement
@@ -208,7 +208,7 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
         assertTargetNotNullAndActionStatusNullAndActionStatusCode(targetsWithActionStatus, null);
 
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // check query when no action status code exist
         final List<Action> scheduledActions = findActionsByRolloutAndStatus(rollout, Status.SCHEDULED);

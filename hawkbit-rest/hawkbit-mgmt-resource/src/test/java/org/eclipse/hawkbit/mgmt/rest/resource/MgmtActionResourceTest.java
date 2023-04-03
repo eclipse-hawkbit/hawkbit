@@ -207,7 +207,7 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables("TestRollout", "TestDesc", 1,
                 "name==" + target1.getName(), ds, "50", "5");
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         final String rsqlRolloutName = "rollout.name==" + rollout.getName();
         final String rsqlRolloutId = "rollout.id==" + rollout.getId();

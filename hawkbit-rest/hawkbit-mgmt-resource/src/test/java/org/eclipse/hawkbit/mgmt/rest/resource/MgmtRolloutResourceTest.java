@@ -301,9 +301,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 4, false, new RolloutGroupConditionBuilder().withDefaults()
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // request the list of rollouts with full representation 
         mvc.perform(get("/rest/v1/rollouts?representation=full").accept(MediaType.APPLICATION_JSON))
@@ -458,7 +458,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Step
     private void retrieveAndVerifyRolloutInRunning(final Rollout rollout) throws Exception {
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mvc.perform(get("/rest/v1/rollouts/" + rollout.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -494,7 +494,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Step
     private void retrieveAndVerifyRolloutInReady(final Rollout rollout) throws Exception {
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mvc.perform(get("/rest/v1/rollouts/" + rollout.getId()).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -556,7 +556,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mvc.perform(get("/rest/v1/rollouts").accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk()).andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -598,7 +598,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             startAt, forcetime);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false, true, startAt, forcetime);
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true, true, startAt, forcetime);
@@ -616,7 +616,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         postRollout("rollout2", 5, dsA.getId(), "id==target-0001*", 10, Action.ActionType.FORCED);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts", false);
         retrieveAndCompareRolloutsContent(dsA, "/rest/v1/rollouts?representation=full", true);
@@ -634,7 +634,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         postRollout("rollout2", 5, dsA.getId(), "id==target*", 20, Action.ActionType.FORCED);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mvc.perform(get("/rest/v1/rollouts?limit=1").accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -707,7 +707,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("status", equalTo("starting")));
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // check rollout is in running state
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}", rollout.getId()).accept(MediaType.APPLICATION_JSON))
@@ -733,7 +733,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -763,7 +763,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // pausing rollout
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/pause", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -797,7 +797,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // starting rollout - already started should lead into bad request
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/start", rollout.getId())).andDo(MockMvcResultPrinter.print())
@@ -838,7 +838,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // retrieve rollout groups from created rollout - 2 groups exists
         // (amountTargets / groupSize = 2)
@@ -891,7 +891,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             final RolloutGroup firstGroup, final RolloutGroup secondGroup, final boolean confirmationFlowEnabled,
             final boolean confirmationRequired) throws Exception {
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -923,7 +923,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Step
     private void retrieveAndVerifyRolloutGroupInReady(final Rollout rollout, final RolloutGroup firstGroup)
             throws Exception {
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout.getId(), firstGroup.getId())
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -1034,7 +1034,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         rolloutManagement.start(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         final RolloutGroup firstGroup = rolloutGroupManagement
                 .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout.getId()).getContent().get(0);
@@ -1064,7 +1064,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isOk());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // check if running
         awaitRunningState(rollout.getId());
@@ -1280,7 +1280,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                         .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         return rolloutManagement.get(rollout.getId()).orElseThrow(NoSuchElementException::new);
     }
@@ -1295,7 +1295,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         final Rollout rollout = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*");
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mvc.perform(post("/rest/v1/rollouts/{rolloutId}/triggerNextGroup", rollout.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());
@@ -1318,7 +1318,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // READY state
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // STARTING state
@@ -1326,7 +1326,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
         // RUNNING state
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         triggerNextGroupAndExpect(rollout, status().isOk());
 
         // PAUSED state
@@ -1341,7 +1341,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // FINISHED state
         setTargetsStatus(targets, Status.FINISHED);
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         triggerNextGroupAndExpect(rollout, status().isBadRequest());
 
     }

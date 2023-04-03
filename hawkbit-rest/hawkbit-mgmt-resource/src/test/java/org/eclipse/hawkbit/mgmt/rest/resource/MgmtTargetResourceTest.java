@@ -2118,7 +2118,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Rollout rollout = testdataFactory.createRolloutByVariables("My Rollout", "My Rollout Description", 1,
                 "name==trg*", ds, "50", "5");
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         // get all actions for the first target
         final Target target = targets.get(0);

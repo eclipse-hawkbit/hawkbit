@@ -8,9 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import io.qameta.allure.Description;
-import io.qameta.allure.Feature;
-import io.qameta.allure.Story;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.mockito.AdditionalAnswers.delegatesTo;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+
 import org.awaitility.Awaitility;
 import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
@@ -32,14 +38,9 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.AdditionalAnswers.delegatesTo;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
+import io.qameta.allure.Description;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 
 /**
  * Test class testing the invalidation of a {@link DistributionSet} while the
@@ -87,7 +88,7 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
         // run in new Thread so that the invalidation can be executed in
         // parallel
         new Thread(() -> systemSecurityContext.runAsSystemAsTenant(() -> {
-            rolloutManagement.handleRollouts();
+            rolloutHandler.handleAll();
             return 0;
         }, tenant)).start();
 

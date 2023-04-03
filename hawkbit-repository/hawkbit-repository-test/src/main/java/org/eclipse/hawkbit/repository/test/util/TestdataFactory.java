@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
@@ -176,6 +177,9 @@ public class TestdataFactory {
 
     @Autowired
     private RolloutManagement rolloutManagement;
+
+    @Autowired
+    private RolloutHandler rolloutHandler;
 
     @Autowired
     private QuotaManagement quotaManagement;
@@ -1202,7 +1206,7 @@ public class TestdataFactory {
                 groupSize, confirmationRequired, conditions);
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         return rolloutManagement.get(rollout.getId()).get();
     }
@@ -1253,7 +1257,7 @@ public class TestdataFactory {
         rolloutManagement.start(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         return reloadRollout(rollout);
     }
@@ -1350,9 +1354,9 @@ public class TestdataFactory {
     public Rollout createSoftDeletedRollout(final String prefix) {
         final Rollout newRollout = createRollout(prefix);
         rolloutManagement.start(newRollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         rolloutManagement.delete(newRollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         return newRollout;
     }
 
