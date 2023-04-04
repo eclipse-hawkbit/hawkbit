@@ -685,6 +685,33 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("The relation between deploy group and rollout should be validated.")
+    void deployGroupsShouldValidateRelationWithRollout() throws Exception {
+        // setup
+        final int amountTargets = 8;
+        testdataFactory.createTargets(amountTargets, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create rollout including the created targets with prefix 'rollout'
+        final Rollout rollout1 = createRollout("rollout1", 4, dsA.getId(), "controllerId==rollout*",
+            false);
+
+        final Rollout rollout2 = createRollout("rollout2", 1, dsA.getId(), "controllerId==rollout*",
+            false);
+
+        rolloutManagement.start(rollout1.getId());
+        rolloutManagement.start(rollout2.getId());
+        rolloutHandler.handleAll();
+
+        final RolloutGroup firstGroup = rolloutGroupManagement
+            .findByRollout(PageRequest.of(0, 1, Direction.ASC, "id"), rollout1.getId()).getContent().get(0);
+
+        // make request for firstGroupId and the rolloutId of the second rollout (the one with no groups)
+        mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout2.getId(), firstGroup.getId())
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+    }
+
+    @Test
     @Description("Testing that starting the rollout switches the state to starting and then to running")
     void startingRolloutSwitchesIntoRunningState() throws Exception {
         // setup

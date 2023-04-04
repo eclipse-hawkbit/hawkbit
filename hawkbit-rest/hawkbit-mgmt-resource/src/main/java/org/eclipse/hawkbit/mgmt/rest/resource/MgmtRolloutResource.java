@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -263,6 +264,11 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
         final RolloutGroup rolloutGroup = rolloutGroupManagement.getWithDetailedStatus(groupId)
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
+
+        if (!Objects.equals(rolloutId, rolloutGroup.getRollout().getId())) {
+            throw new ValidationException("The provided rolloutId does not match with the rolloutId in the deployment group.");
+        }
+
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true,
                 tenantConfigHelper.isConfirmationFlowEnabled()));
     }
