@@ -60,7 +60,7 @@ public class EntityNotFoundException extends AbstractServerRtException {
      * @param message
      *            of the exception
      */
-    protected EntityNotFoundException(final String message) {
+    public EntityNotFoundException(final String message) {
         super(message, THIS_ERROR);
     }
 
