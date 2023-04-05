@@ -266,7 +266,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(RolloutGroup.class, rolloutId));
 
         if (!Objects.equals(rolloutId, rolloutGroup.getRollout().getId())) {
-            throw new ValidationException("The provided rolloutId does not match with the rolloutId in the deployment group.");
+            throw new EntityNotFoundException("The provided rolloutId does not match with the rolloutId in the deployment group.");
         }
 
         return ResponseEntity.ok(MgmtRolloutMapper.toResponseRolloutGroup(rolloutGroup, true,

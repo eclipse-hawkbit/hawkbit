@@ -708,7 +708,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
         // make request for firstGroupId and the rolloutId of the second rollout (the one with no groups)
         mvc.perform(get("/rest/v1/rollouts/{rolloutId}/deploygroups/{groupId}", rollout2.getId(), firstGroup.getId())
-                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotFound());
     }
 
     @Test
