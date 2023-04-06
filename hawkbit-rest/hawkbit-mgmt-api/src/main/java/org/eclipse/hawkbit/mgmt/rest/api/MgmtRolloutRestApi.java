@@ -180,6 +180,10 @@ public interface MgmtRolloutRestApi {
      * @param rsqlParam
      *            the search parameter in the request URL, syntax
      *            {@code q=name==abc}
+     * @param representationModeParam
+     *            the representation mode parameter specifying whether a compact
+     *            or a full representation shall be returned
+     * 
      * @return a list of all rollout groups referred to a rollout for a defined
      *         or default page request with status OK. The response is always
      *         paged. In any failure the JsonResponseExceptionHandler is
@@ -191,7 +195,8 @@ public interface MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
 
     /**
      * Handles the GET request for retrieving a single rollout group.
