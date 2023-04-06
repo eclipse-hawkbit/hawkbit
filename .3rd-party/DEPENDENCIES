@@ -29,7 +29,7 @@ maven/mavencentral/com.nimbusds/lang-tag/1.6, Apache-2.0, approved, clearlydefin
 maven/mavencentral/com.nimbusds/nimbus-jose-jwt/9.22, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.nimbusds/oauth2-oidc-sdk/9.35, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.rabbitmq/amqp-client/5.14.2, Apache-2.0 OR MPL-1.1 OR LGPL-2.0-or-later, approved, #2106
-maven/mavencentral/com.vaadin.external.atmosphere/atmosphere-runtime/2.4.30.vaadin4, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.vaadin.external.atmosphere/atmosphere-runtime/2.4.30.vaadin4, Apache-2.0 AND (Apache-2.0 AND CDDL-1.1 AND (GPL-2.0-only WITH Classpath-exception-2.0)), restricted, #7768
 maven/mavencentral/com.vaadin.external.flute/flute/1.3.0.gg2, W3C, approved, CQ11039
 maven/mavencentral/com.vaadin.external/gentyref/1.2.0.vaadin1, Apache-2.0, approved, CQ20645
 maven/mavencentral/com.vaadin.external.gwt/gwt-elemental/2.8.2.vaadin2, Apache-2.0, approved, clearlydefined
@@ -37,11 +37,11 @@ maven/mavencentral/com.vaadin.external.slf4j/vaadin-slf4j-jdk14/1.6.1, MIT, appr
 maven/mavencentral/com.vaadin/vaadin-client/8.14.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/vaadin-push/8.14.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/vaadin-sass-compiler/0.9.13, Apache-2.0 OR W3C, approved, CQ11041
-maven/mavencentral/com.vaadin/vaadin-server/8.14.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.vaadin/vaadin-server/8.14.3, Apache-2.0, approved, #7769
 maven/mavencentral/com.vaadin/vaadin-shared/8.14.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/vaadin-spring/3.2.1, Apache-2.0, approved, clearlydefined
 maven/mavencentral/com.vaadin/vaadin-spring-boot/3.2.1, Apache-2.0, approved, clearlydefined
-maven/mavencentral/com.vaadin/vaadin-themes/8.14.3, Apache-2.0, approved, clearlydefined
+maven/mavencentral/com.vaadin/vaadin-themes/8.14.3, Apache-2.0, approved, #7770
 maven/mavencentral/com.zaxxer/HikariCP/4.0.3, Apache-2.0, approved, clearlydefined
 maven/mavencentral/cz.jirutka.rsql/rsql-parser/2.1.0, MIT, approved, CQ12964
 maven/mavencentral/io.projectreactor/reactor-core/3.4.28, Apache-2.0, approved, #7517
@@ -52,7 +52,7 @@ maven/mavencentral/io.protostuff/protostuff-runtime/1.5.6, Apache-2.0, approved,
 maven/mavencentral/jakarta.annotation/jakarta.annotation-api/1.3.5, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.ca
 maven/mavencentral/jakarta.persistence/jakarta.persistence-api/2.2.3, EPL-2.0 OR BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/jakarta.servlet/jakarta.servlet-api/4.0.4, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.servlet
-maven/mavencentral/jakarta.transaction/jakarta.transaction-api/1.3.3, CDDL-1.0 AND EPL-2.0 AND (GPL-2.0-only WITH Classpath-exception-2.0) AND (EPL-2.0 AND (GPL-2.0-only WITH Classpath-exception-2.0)), restricted, #7701
+maven/mavencentral/jakarta.transaction/jakarta.transaction-api/1.3.3, EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0, approved, #7701
 maven/mavencentral/jakarta.validation/jakarta.validation-api/2.0.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/jakarta.websocket/jakarta.websocket-api/1.1.2, EPL-2.0 OR GPL-2.0-only with Classpath-exception-2.0, approved, ee4j.websocket
 maven/mavencentral/javax.activation/javax.activation-api/1.2.0, (CDDL-1.1 OR GPL-2.0 WITH Classpath-exception-2.0) AND Apache-2.0, approved, CQ18740
@@ -77,6 +77,7 @@ maven/mavencentral/org.hibernate.validator/hibernate-validator/6.2.5.Final, Apac
 maven/mavencentral/org.javassist/javassist/3.27.0-GA, Apache-2.0 OR LGPL-2.1-or-later OR MPL-1.1, approved, #2737
 maven/mavencentral/org.jboss.logging/jboss-logging/3.4.3.Final, Apache-2.0, approved, CQ21255
 maven/mavencentral/org.jsoup/jsoup/1.15.3, MIT, approved, #3272
+maven/mavencentral/org.mariadb.jdbc/mariadb-java-client/2.7.8, LGPL-2.1, restricted, clearlydefined
 maven/mavencentral/org.ow2.asm/asm/9.3, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.ow2.asm/asm/9.4, BSD-3-Clause, approved, clearlydefined
 maven/mavencentral/org.ow2.asm/asm-commons/9.4, BSD-3-Clause, approved, clearlydefined
