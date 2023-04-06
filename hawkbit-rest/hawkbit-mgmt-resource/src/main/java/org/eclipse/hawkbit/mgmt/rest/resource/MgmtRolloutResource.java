@@ -99,11 +99,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutSortParam(sortParam);
 
-        final boolean isFullMode = MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
-            // no need for a 400, just apply a safe fallback
-            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
-            return MgmtRepresentationMode.COMPACT;
-        }) == MgmtRepresentationMode.FULL;
+        final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
         final Slice<Rollout> rollouts;
@@ -237,23 +233,35 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) final int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) final int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) final String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam) {
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) final String rsqlParam,
+            final String representationModeParam) {
         final int sanitizedOffsetParam = PagingUtility.sanitizeOffsetParam(pagingOffsetParam);
         final int sanitizedLimitParam = PagingUtility.sanitizePageLimitParam(pagingLimitParam);
         final Sort sorting = PagingUtility.sanitizeRolloutGroupSortParam(sortParam);
 
+        final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
+
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
-        final Page<RolloutGroup> findRolloutGroupsAll;
+        final Page<RolloutGroup> rolloutGroups;
         if (rsqlParam != null) {
-            findRolloutGroupsAll = this.rolloutGroupManagement.findByRolloutAndRsql(pageable, rolloutId, rsqlParam);
+            if (isFullMode) {
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsqlWithDetailedStatus(pageable,
+                        rolloutId, rsqlParam);
+            } else {
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutAndRsql(pageable, rolloutId, rsqlParam);
+            }
         } else {
-            findRolloutGroupsAll = this.rolloutGroupManagement.findByRollout(pageable, rolloutId);
+            if (isFullMode) {
+                rolloutGroups = this.rolloutGroupManagement.findByRolloutWithDetailedStatus(pageable, rolloutId);
+            } else {
+                rolloutGroups = this.rolloutGroupManagement.findByRollout(pageable, rolloutId);
+            }
         }
 
         final List<MgmtRolloutGroupResponseBody> rest = MgmtRolloutMapper.toResponseRolloutGroup(
-                findRolloutGroupsAll.getContent(), tenantConfigHelper.isConfirmationFlowEnabled());
-        return ResponseEntity.ok(new PagedList<>(rest, findRolloutGroupsAll.getTotalElements()));
+                rolloutGroups.getContent(), tenantConfigHelper.isConfirmationFlowEnabled(), isFullMode);
+        return ResponseEntity.ok(new PagedList<>(rest, rolloutGroups.getTotalElements()));
     }
 
     @Override
@@ -304,4 +312,13 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         this.rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
     }
+
+    private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
+        return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
+            // no need for a 400, just apply a safe fallback
+            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            return MgmtRepresentationMode.COMPACT;
+        });
+    }
+
 }

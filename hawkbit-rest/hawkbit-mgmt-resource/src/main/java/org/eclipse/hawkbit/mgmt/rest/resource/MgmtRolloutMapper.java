@@ -105,7 +105,7 @@ final class MgmtRolloutMapper {
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).deny(rollout.getId(), null)).withRel("deny").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).getRolloutGroups(rollout.getId(),
                     MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET_VALUE,
-                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null)).withRel("groups")
+                    MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT_VALUE, null, null, null)).withRel("groups")
                             .expand());
 
             final DistributionSet distributionSet = rollout.getDistributionSet();
@@ -165,12 +165,12 @@ final class MgmtRolloutMapper {
     }
 
     static List<MgmtRolloutGroupResponseBody> toResponseRolloutGroup(final List<RolloutGroup> rollouts,
-            final boolean confirmationFlowEnabled) {
+            final boolean confirmationFlowEnabled, final boolean withDetails) {
         if (rollouts == null) {
             return Collections.emptyList();
         }
 
-        return rollouts.stream().map(group -> toResponseRolloutGroup(group, false, confirmationFlowEnabled))
+        return rollouts.stream().map(group -> toResponseRolloutGroup(group, withDetails, confirmationFlowEnabled))
                 .collect(Collectors.toList());
     }
 
