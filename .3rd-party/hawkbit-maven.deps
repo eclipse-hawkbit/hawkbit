@@ -78,7 +78,6 @@ org.hibernate.validator:hibernate-validator:jar:6.2.5.Final
 org.javassist:javassist:jar:3.27.0-GA
 org.jboss.logging:jboss-logging:jar:3.4.3.Final
 org.jsoup:jsoup:jar:1.15.3
-org.mariadb.jdbc:mariadb-java-client:jar:2.7.8
 org.ow2.asm:asm-commons:jar:9.4
 org.ow2.asm:asm:jar:9.3
 org.ow2.asm:asm:jar:9.4
