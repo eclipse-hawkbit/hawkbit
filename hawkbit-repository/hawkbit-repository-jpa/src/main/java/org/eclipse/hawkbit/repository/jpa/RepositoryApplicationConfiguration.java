@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
+import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
@@ -84,6 +85,9 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.rollout.RolloutScheduler;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.PauseRolloutGroupAction;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupActionEvaluator;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupConditionEvaluator;
+import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.StartNextGroupRolloutGroupSuccessAction;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupErrorCondition;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.ThresholdRolloutGroupSuccessCondition;
@@ -92,6 +96,7 @@ import org.eclipse.hawkbit.repository.jpa.rsql.RsqlParserValidationOracle;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -119,7 +124,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaBaseConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.boot.autoconfigure.transaction.TransactionManagerCustomizers;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -193,6 +197,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     ThresholdRolloutGroupSuccessCondition thresholdRolloutGroupSuccessCondition(
             final ActionRepository actionRepository) {
         return new ThresholdRolloutGroupSuccessCondition(actionRepository);
+    }
+
+    @Bean
+    RolloutGroupEvaluationManager evaluationManager(
+            final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupErrorCondition>> errorConditionEvaluators,
+            final List<RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition>> successConditionEvaluators,
+            final List<RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupErrorAction>> errorActionEvaluators,
+            final List<RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction>> successActionEvaluators) {
+        return new RolloutGroupEvaluationManager(errorConditionEvaluators, successConditionEvaluators,
+                errorActionEvaluators, successActionEvaluators);
     }
 
     @Bean
@@ -660,6 +674,14 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
                 virtualPropertyReplacer, softwareModuleRepository, properties.getDatabase());
     }
+    
+    @Bean
+    @ConditionalOnMissingBean
+    RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
+            final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
+            final PlatformTransactionManager txManager) {
+        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager);
+    }
 
     @Bean
     @ConditionalOnMissingBean
@@ -670,25 +692,25 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final RolloutGroupManagement rolloutGroupManagement, final QuotaManagement quotaManagement,
             final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
             final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
-            final RolloutApprovalStrategy rolloutApprovalStrategy, final ApplicationContext context) {
+            final RolloutApprovalStrategy rolloutApprovalStrategy,
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
         return new JpaRolloutExecutor(rolloutTargetGroupRepository, entityManager, rolloutRepository, actionRepository,
                 rolloutGroupRepository, afterCommit, tenantAware, rolloutGroupManagement, quotaManagement,
                 deploymentManagement, targetManagement, eventPublisherHolder, txManager, rolloutApprovalStrategy,
-                context);
+                evaluationManager, rolloutManagement);
     }
 
     @Bean
     @ConditionalOnMissingBean
     RolloutManagement rolloutManagement(final TargetManagement targetManagement,
             final DistributionSetManagement distributionSetManagement, final EventPublisherHolder eventPublisherHolder,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantAware tenantAware, final LockRegistry lockRegistry, final JpaProperties properties,
+            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final RolloutExecutor rolloutExecutor) {
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
-                virtualPropertyReplacer, txManager, tenantAware, lockRegistry, properties.getDatabase(),
-                rolloutApprovalStrategy, tenantConfigurationManagement, systemSecurityContext, rolloutExecutor);
+                virtualPropertyReplacer, properties.getDatabase(), rolloutApprovalStrategy,
+                tenantConfigurationManagement, systemSecurityContext);
     }
 
     /**
@@ -913,7 +935,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      *
      * @param systemManagement
      *            to find all tenants
-     * @param rolloutManagement
+     * @param rolloutHandler
      *            to run the rollout handler
      * @param systemSecurityContext
      *            to run as system
@@ -924,8 +946,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
     RolloutScheduler rolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
-            final RolloutManagement rolloutManagement, final SystemSecurityContext systemSecurityContext) {
-        return new RolloutScheduler(systemManagement, rolloutManagement, systemSecurityContext);
+            final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext) {
+        return new RolloutScheduler(systemManagement, rolloutHandler, systemSecurityContext);
     }
 
     /**

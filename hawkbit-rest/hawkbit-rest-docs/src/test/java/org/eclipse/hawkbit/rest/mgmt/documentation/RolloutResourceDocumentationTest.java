@@ -416,7 +416,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         rolloutManagement.start(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/pause", rollout.getId())
                 .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
@@ -431,7 +431,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         rolloutManagement.start(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         rolloutManagement.pauseRollout(rollout.getId());
         mockMvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/resume", rollout.getId())
@@ -471,7 +471,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         rolloutManagement.start(rollout.getId());
 
         // Run here, because scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         mockMvc.perform(
                 post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup", rollout.getId())
@@ -692,7 +692,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .withDefaults().successCondition(RolloutGroupSuccessCondition.THRESHOLD, "10").build());
 
         // Run here, because Scheduler is disabled during tests
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
 
         return rolloutManagement
                 .update(entityFactory.rollout().update(rollout.getId()).startAt(System.currentTimeMillis() + 1000).description("exampleDescription"));

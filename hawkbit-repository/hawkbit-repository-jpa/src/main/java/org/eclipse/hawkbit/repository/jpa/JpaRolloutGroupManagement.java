@@ -158,6 +158,33 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     }
 
     @Override
+    public Page<RolloutGroup> findByRolloutAndRsqlWithDetailedStatus(final Pageable pageable, final long rolloutId,
+            final String rsqlParam) {
+        throwEntityNotFoundExceptionIfRolloutDoesNotExist(rolloutId);
+
+        final Page<RolloutGroup> rolloutGroups = findByRolloutAndRsql(pageable, rolloutId, rsqlParam);
+        final List<Long> rolloutGroupIds = rolloutGroups.getContent().stream().map(RolloutGroup::getId)
+                .collect(Collectors.toList());
+
+        if (rolloutGroupIds.isEmpty()) {
+            // groups might already deleted, so return empty list.
+            return new PageImpl<>(Collections.emptyList());
+        }
+
+        final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRolloutGroup(
+                rolloutGroupIds);
+
+        for (final RolloutGroup rolloutGroup : rolloutGroups) {
+            final TotalTargetCountStatus totalTargetCountStatus = new TotalTargetCountStatus(
+                    allStatesForRollout.get(rolloutGroup.getId()), Long.valueOf(rolloutGroup.getTotalTargets()),
+                    rolloutGroup.getRollout().getActionType());
+            ((JpaRolloutGroup) rolloutGroup).setTotalTargetCountStatus(totalTargetCountStatus);
+        }
+
+        return JpaManagementHelper.convertPage(rolloutGroups, pageable);
+    }
+
+    @Override
     public Optional<RolloutGroup> getWithDetailedStatus(final long rolloutGroupId) {
         final Optional<RolloutGroup> rolloutGroup = get(rolloutGroupId);
 
@@ -265,15 +292,14 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         return new PageImpl<>(targetWithActionStatus, pageRequest, 0);
     }
 
-    private Predicate getRolloutGroupTargetWithRolloutGroupJoinCondition(final long rolloutGroupId, final CriteriaBuilder cb,
-            final Root<RolloutTargetGroup> targetRoot) {
+    private Predicate getRolloutGroupTargetWithRolloutGroupJoinCondition(final long rolloutGroupId,
+            final CriteriaBuilder cb, final Root<RolloutTargetGroup> targetRoot) {
         return cb.equal(targetRoot.get(RolloutTargetGroup_.rolloutGroup).get(JpaRolloutGroup_.id), //
                 rolloutGroupId);
     }
 
     private TargetWithActionStatus getTargetWithActionStatusFromQuery(final Object[] o) {
-        return new TargetWithActionStatus((Target) o[0], (Action.Status) o[1],
-                (Integer) o[2]);
+        return new TargetWithActionStatus((Target) o[0], (Action.Status) o[1], (Integer) o[2]);
     }
 
     private List<Order> getOrderBy(final Pageable pageRequest, final CriteriaBuilder cb,
@@ -283,7 +309,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         return pageRequest.getSort().get().flatMap(order -> {
             final List<Order> orders;
             final String property = order.getProperty();
-            // we consider status, last_action_status_code as property from JpaAction ...
+            // we consider status, last_action_status_code as property from
+            // JpaAction ...
             if ("status".equals(property) || "lastActionStatusCode".equals(property)) {
                 orders = QueryUtils.toOrders(Sort.by(order.getDirection(), property), actionJoin, cb);
             }
@@ -302,7 +329,8 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
         final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         final CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         final Root<RolloutTargetGroup> countQueryFrom = countQuery.from(RolloutTargetGroup.class);
-        countQuery.select(cb.count(countQueryFrom)).where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, countQueryFrom));
+        countQuery.select(cb.count(countQueryFrom))
+                .where(getRolloutGroupTargetWithRolloutGroupJoinCondition(rolloutGroupId, cb, countQueryFrom));
         return entityManager.createQuery(countQuery).getSingleResult();
     }
 

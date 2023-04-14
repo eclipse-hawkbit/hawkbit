@@ -16,16 +16,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Threshold to calculate if rollout group success condition is reached and the
+ * Threshold to calculate if the {@link RolloutGroup#getSuccessConditionExp()} is reached and the
  * next rollout group can get started.
  */
-public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupConditionEvaluator {
+public class ThresholdRolloutGroupSuccessCondition
+        implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
 
     private final ActionRepository actionRepository;
 
     public ThresholdRolloutGroupSuccessCondition(final ActionRepository actionRepository) {
         this.actionRepository = actionRepository;
+    }
+
+    @Override
+    public RolloutGroup.RolloutGroupSuccessCondition getCondition() {
+        return RolloutGroup.RolloutGroupSuccessCondition.THRESHOLD;
     }
 
     @Override
@@ -44,7 +50,7 @@ public class ThresholdRolloutGroupSuccessCondition implements RolloutGroupCondit
         final long finished = this.actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), completeActionStatus);
         try {
-            final Integer threshold = Integer.valueOf(expression);
+            final int threshold = Integer.parseInt(expression);
             // calculate threshold
             return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
 

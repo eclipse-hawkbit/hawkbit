@@ -460,15 +460,11 @@ public class AmqpMessageDispatcherServiceIntegrationTest extends AbstractAmqpSer
         return ds.getModules().stream().map(SoftwareModule::getId).collect(Collectors.toSet());
     }
 
-    private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery) {
-        return createAndStartRollout(ds, filterQuery, null);
-    }
-
     private Rollout createAndStartRollout(final DistributionSet ds, final String filterQuery, final Integer weight) {
         final Rollout rollout = testdataFactory.createRolloutByVariables(UUID.randomUUID().toString(), "", 1,
                 filterQuery, ds, "50", "5", ActionType.FORCED, weight, false);
         rolloutManagement.start(rollout.getId());
-        rolloutManagement.handleRollouts();
+        rolloutHandler.handleAll();
         return rollout;
     }
 
