@@ -153,10 +153,6 @@ public class EventTypeProvider {
         TYPES.put(46, TargetTypeDeletedEvent.class);
     }
 
-    public EventTypeProvider() {
-
-    }
-
     public Class<?> getTargetClass(final EventType type) {
         return TYPES.get(type.getValue());
     }
