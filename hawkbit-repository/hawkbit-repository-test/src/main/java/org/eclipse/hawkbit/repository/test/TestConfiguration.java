@@ -24,6 +24,7 @@ import org.eclipse.hawkbit.cache.DefaultDownloadIdCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
+import org.eclipse.hawkbit.event.EventTypeProvider;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
@@ -139,7 +140,7 @@ public class TestConfiguration implements AsyncConfigurer {
      * Bean for the download id cache.
      *
      * @param cacheManager
-     *              The {@link CacheManager}
+     *            The {@link CacheManager}
      * @return the cache
      */
     @Bean
@@ -225,6 +226,6 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     @ConditionalOnBusEnabled
     MessageConverter busProtoBufConverter() {
-        return new BusProtoStuffMessageConverter();
+        return new BusProtoStuffMessageConverter(new EventTypeProvider());
     }
 }
