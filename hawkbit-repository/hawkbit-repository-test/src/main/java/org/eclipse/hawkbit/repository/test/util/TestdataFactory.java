@@ -299,7 +299,7 @@ public class TestdataFactory {
 
         final SoftwareModule appMod = softwareModuleManagement.create(entityFactory.softwareModule().create()
                 .type(findOrCreateSoftwareModuleType(SM_TYPE_APP, Integer.MAX_VALUE)).name(prefix + SM_TYPE_APP)
-                .version(version + "." + new SecureRandom().nextInt(100)).description(randomText(200))
+                .version(version + "." + new SecureRandom().nextInt(100)).description(randomDescriptionLong())
                 .vendor(prefix + " vendor Limited, California"));
         final SoftwareModule runtimeMod = softwareModuleManagement
                 .create(entityFactory.softwareModule().create().type(findOrCreateSoftwareModuleType(SM_TYPE_RT))
