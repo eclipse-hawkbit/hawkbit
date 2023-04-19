@@ -106,7 +106,7 @@ public class TestdataFactory {
     /**
      * Default {@link NamedEntity#getDescription()}.
      */
-    public static final String DEFAULT_DESCRIPTION = "Desc: Dui suscipit gravida dui nam fames rutrum taciti curabitur conubia";
+    public static final String DEFAULT_DESCRIPTION = "Desc: " + randomDescriptionShort();
 
     /**
      * Key of test default {@link DistributionSetType}.
