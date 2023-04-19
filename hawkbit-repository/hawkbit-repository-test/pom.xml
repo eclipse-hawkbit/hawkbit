@@ -91,10 +91,6 @@
          <artifactId>spring-tx</artifactId>
       </dependency>
       <dependency>
-         <groupId>net._01001111</groupId>
-         <artifactId>jlorem</artifactId>
-      </dependency>
-      <dependency>
          <groupId>org.apache.commons</groupId>
          <artifactId>commons-lang3</artifactId>
       </dependency>
