@@ -1,4 +1,5 @@
-# 3rd party dependencies
+# Third-Party Dependencies
 
-Contains listing of all maven (transient) licenses of the project.
-Is primary used to identify all changes between Eclipse releases.
+This folder provides listings of all 3rd-party dependencies incl. their licenses. There is a dedicated subfolder for each release (and milestone) holding the release-specific information.
+
+The files are generated using the [check-dependencies.sh](https://github.com/eclipse/hawkbit/tree/master/check-dependencies.sh) script. The script makes use of the [Eclipse Dash License Tool](https://github.com/eclipse/dash-licenses) which identifies and vets the licenses of the project content.
