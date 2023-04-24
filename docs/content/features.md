@@ -23,7 +23,6 @@ weight: 40
 - Responsive to resolution.
 - Lazy loading of data.
 - All information on one page.
-- Optional integration with Bosch IoT Permissions service for full multi user support with fine granular permission based authorization.
 
 ## Artifact Content Delivery
 - Partial downloads supported.
