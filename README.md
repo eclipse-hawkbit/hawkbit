@@ -37,7 +37,7 @@ In addition the following vendors offer free trial accounts for their hawkBit co
 - [Bosch IoT Rollouts](https://developer.bosch-iot-suite.com/service/rollouts)
 - [Kynetics Update Factory](https://www.kynetics.com/iot-platform-update-factory)
 
-# Device Integration
+# Device Integration (Client libraries)
 
 hawkBit exposes HTTP/JSon based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) that allow any update client to integrate quite easily.
 
@@ -52,12 +52,16 @@ The hara-ddiclient library has [reached version 2.x](https://github.com/eclipse/
 
 Additionally, the hawkBit project has the long term goal to provide [Eclipse Hono](https://github.com/eclipse/hono) integration which will provide connectivity through various IoT protocols and as a result will allow a wide range of clients to connect to hawkBit.
 
+## Other open-source hawkBit Clients
+
 There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 - [SWupdate](https://github.com/sbabic/swupdate) which is a Linux Update agent with focus on a efficient and safe way to update embedded systems.
 - [rauc-hawkbit-updater](https://github.com/rauc/rauc-hawkbit-updater) which is a hawkBit client for the [RAUC](https://github.com/rauc/rauc) update framework written in C/glib.
 - [rauc-hawkbit](https://github.com/rauc/rauc-hawkbit) which is a python-based hawkBit client demo application and library for the [RAUC](https://github.com/rauc/rauc) update framework.
 - [hawkbit-rs](https://github.com/collabora/hawkbit-rs) provides a couple of [Rust](https://www.rust-lang.org) crates to help [implement](https://crates.io/crates/hawkbit) and [test](https://crates.io/crates/hawkbit_mock) hawkBit clients.
+- [Zephyr-RTOS](https://docs.zephyrproject.org/apidoc/latest/group__hawkbit.html#details):  The Zephyr OS is a small-footprint kernel designed for use on resource-constrained and embedded systems: from simple embedded environmental sensors and LED wearables to sophisticated embedded controllers, smart watches, and IoT wireless applications.
+- [ChirpStack](https://www.chirpstack.io/docs/chirpstack-gateway-os/use/software-update.html): ChirpStack Gateway OS uses [SWUpdate](https://github.com/sbabic/swupdate) for handling updates which can be integrated with Eclipse hawkBit. ChirpStack is an open-source LoRaWAN Network Server which can be used to to setup private or public LoRaWAN networks.
 
 # Runtime dependencies and support
 
