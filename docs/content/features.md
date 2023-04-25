@@ -6,12 +6,16 @@ weight: 40
 
 ## Device and Software Repository
 - Repository that holds the provisioning targets and assignable software distributions.
+- Targets to be logically grouped by Target Types.
 - That includes a full software update history for every device.
 - Support for pre-commission devices in the repository and plug and play, i.e. device is created if it is authenticated for the first time.
 
 ## Update Management
 - Directly deploy a defined software distribution to a device (by Management UI or API).
 - Update handling is independent of the device type, integration approach or connectivity.
+- Optional user consent flow, download and install updates only after respective end user has confirmed it. 
+- Mass cancel the distribution of an update by invalidating the distribution set.
+- Use action status codes for easier analysis. 
 
 ## Management UI
 - Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software).
@@ -23,7 +27,7 @@ weight: 40
 - Responsive to resolution.
 - Lazy loading of data.
 - All information on one page.
-- Optional integration with Bosch IoT Permissions service for full multi user support with fine granular permission based authorization.
+- Deep-linking for Targets to improve navigation.
 
 ## Artifact Content Delivery
 - Partial downloads supported.
@@ -32,12 +36,14 @@ weight: 40
 - Authorization based on software assignment, i.e. a device can only download what has been assigned to it in the first place.
 - Delta artifact hosting supported.
 - Artifact signature hosting supported.
+- Plug-point for artifact encryption allowing to encrypt artifacts on upload.
 
 ## Rollout/Campaign Management
 - Secure handling of large volumes of devices at rollout creation time.
 - Flexible deployment group definition as part of a rollout.
 - Monitoring of the rollout progress.
 - Emergency rollout shutdown in case of update failures.
+- Manually trigger next rollout group.
 
 ## Interfaces
 

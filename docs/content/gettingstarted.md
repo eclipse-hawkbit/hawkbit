@@ -16,7 +16,7 @@ any personal data.
 
 In addition, the following vendors offer free trial accounts for their Eclipse hawkBit compatible products:
 
-* [Bosch IoT Rollouts](https://www.bosch-iot-suite.com/rollouts/#plans) (by [Bosch.IO GmbH](https://bosch.io/))
+* [Bosch IoT Rollouts](https://bosch-iot-suite.com/service/rollouts/) (by [Bosch Digital](https://www.bosch-digital.com))
 * [Kynetics Update Factory](https://www.kynetics.com/update-factory) (by [Kynetics LLC](https://www.kynetics.com/))
 
 
