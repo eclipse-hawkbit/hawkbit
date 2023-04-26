@@ -18,7 +18,7 @@ see [hawkBit Documentation](https://www.eclipse.org/hawkbit/)
 # Contact us
 
 - Having questions about hawkBit? Check [Stack Overflow](https://stackoverflow.com/questions/tagged/eclipse-hawkbit)
-- Want to chat with the team behind hawkBit? [![Join the chat at https://gitter.im/eclipse/hawkbit](https://badges.gitter.im/eclipse/hawkbit.svg)](https://gitter.im/eclipse/hawkbit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+- Want to chat with the team behind hawkBit? [Join the chat at matrix.to](https://matrix.to/#/#eclipse_hawkbit:gitter.im) (migrated from gitter)
 - Having issues with hawkBit? Open a [GitHub issue](https://github.com/eclipse/hawkbit/issues).
 - You can also check out our [Project Homepage](https://www.eclipse.org/hawkbit) for further contact options.
 
