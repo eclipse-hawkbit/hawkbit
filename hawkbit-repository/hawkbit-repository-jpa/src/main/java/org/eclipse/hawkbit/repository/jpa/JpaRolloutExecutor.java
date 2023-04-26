@@ -12,12 +12,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -26,7 +26,6 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.event.remote.RolloutGroupDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.RolloutStoppedEvent;
-import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -64,19 +63,9 @@ import org.springframework.util.StringUtils;
 /**
  * A Jpa implementation of {@link RolloutExecutor}
  */
-public class JpaRolloutExecutor implements RolloutExecutor {
+public class JpaRolloutExecutor extends AbstractRolloutExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutExecutor.class);
-
-    /**
-     * Max amount of targets that are handled in one transaction.
-     */
-    private static final int TRANSACTION_TARGETS = 5_000;
-
-    /**
-     * Maximum amount of actions that are deleted in one transaction.
-     */
-    private static final int TRANSACTION_ACTIONS = 5_000;
 
     /**
      * Action statuses that result in a terminated action
@@ -105,7 +94,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final RolloutGroupEvaluationManager evaluationManager;
     private final RolloutManagement rolloutManagement;
-    
+
     /**
      * Constructor
      */
@@ -117,7 +106,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
             final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement,
+            final RepositoryProperties repositoryProperties) {
+        super(rolloutRepository, rolloutGroupRepository, actionRepository, afterCommit, entityManager,
+                eventPublisherHolder, repositoryProperties.getRollouts());
         this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
         this.entityManager = entityManager;
         this.rolloutRepository = rolloutRepository;
@@ -137,37 +129,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     @Override
-    public void execute(final Rollout rollout) {
-        LOGGER.debug("handle rollout {}", rollout.getId());
-
-        switch (rollout.getStatus()) {
-        case CREATING:
-            handleCreateRollout((JpaRollout) rollout);
-            break;
-        case DELETING:
-            handleDeleteRollout((JpaRollout) rollout);
-            break;
-        case READY:
-            handleReadyRollout(rollout);
-            break;
-        case STARTING:
-            handleStartingRollout(rollout);
-            break;
-        case RUNNING:
-            handleRunningRollout((JpaRollout) rollout);
-            break;
-        case STOPPING:
-            handleStopRollout((JpaRollout) rollout);
-            break;
-        default:
-            LOGGER.error("Rollout in status {} not supposed to be handled!", rollout.getStatus());
-            break;
-        }
-    }
-
-    private void handleCreateRollout(final JpaRollout rollout) {
+    protected void handleCreateRollout(final JpaRollout rollout) {
         LOGGER.debug("handleCreateRollout called for rollout {}", rollout.getId());
-
         final List<RolloutGroup> rolloutGroups = rolloutGroupManagement.findByRollout(
                 PageRequest.of(0, quotaManagement.getMaxRolloutGroupsPerRollout(), Sort.by(Direction.ASC, "id")),
                 rollout.getId()).getContent();
@@ -205,7 +168,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void handleDeleteRollout(final JpaRollout rollout) {
+    @Override
+    protected void handleDeleteRollout(final JpaRollout rollout) {
         LOGGER.debug("handleDeleteRollout called for {}", rollout.getId());
 
         // check if there are actions beyond schedule
@@ -217,8 +181,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             return;
         }
         // clean up all scheduled actions
-        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
-        deleteScheduledActions(rollout, scheduledActions);
+        deleteScheduledActions(rollout);
 
         // avoid another scheduler round and re-check if all scheduled actions
         // has been cleaned up. we flush first to ensure that the we include the
@@ -248,20 +211,12 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         sendRolloutGroupDeletedEvents(rollout);
     }
 
-    private void handleStopRollout(final JpaRollout rollout) {
+    @Override
+    protected void handleStopRollout(final JpaRollout rollout) {
         LOGGER.debug("handleStopRollout called for {}", rollout.getId());
-        // clean up all scheduled actions
-        final Slice<JpaAction> scheduledActions = findScheduledActionsByRollout(rollout);
-        deleteScheduledActions(rollout, scheduledActions);
 
-        // avoid another scheduler round and re-check if all scheduled actions
-        // has been cleaned up. we flush first to ensure that the we include the
-        // deletion above
-        entityManager.flush();
-        final boolean hasScheduledActionsLeft = actionRepository.countByRolloutIdAndStatus(rollout.getId(),
-                Status.SCHEDULED) > 0;
-
-        if (hasScheduledActionsLeft) {
+        if (!cleanupScheduledActions(rollout)) {
+            // could not clean up scheduled actions
             return;
         }
 
@@ -281,7 +236,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 tenantAware.getCurrentTenant(), eventPublisherHolder.getApplicationId(), rollout.getId(), groupIds)));
     }
 
-    private void handleReadyRollout(final Rollout rollout) {
+    @Override
+    protected void handleReadyRollout(final JpaRollout rollout) {
         if (rollout.getStartAt() != null && rollout.getStartAt() <= System.currentTimeMillis()) {
             LOGGER.debug(
                     "handleReadyRollout called for rollout {} with autostart beyond define time. Switch to STARTING",
@@ -290,7 +246,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void handleStartingRollout(final Rollout rollout) {
+    @Override
+    protected void handleStartingRollout(final JpaRollout rollout) {
         LOGGER.debug("handleStartingRollout called for rollout {}", rollout.getId());
 
         if (ensureAllGroupsAreScheduled(rollout)) {
@@ -298,7 +255,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void handleRunningRollout(final JpaRollout rollout) {
+    @Override
+    protected void handleRunningRollout(final JpaRollout rollout) {
         LOGGER.debug("handleRunningRollout called for rollout {}", rollout.getId());
 
         final List<JpaRolloutGroup> rolloutGroupsRunning = rolloutGroupRepository.findByRolloutAndStatus(rollout,
@@ -325,28 +283,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private void hardDeleteRollout(final JpaRollout rollout) {
         sendRolloutGroupDeletedEvents(rollout);
         rolloutRepository.delete(rollout);
-    }
-
-    private void deleteScheduledActions(final JpaRollout rollout, final Slice<JpaAction> scheduledActions) {
-        final boolean hasScheduledActions = scheduledActions.getNumberOfElements() > 0;
-
-        if (hasScheduledActions) {
-            try {
-                final Iterable<JpaAction> iterable = scheduledActions::iterator;
-                final List<Long> actionIds = StreamSupport.stream(iterable.spliterator(), false).map(Action::getId)
-                        .collect(Collectors.toList());
-                actionRepository.deleteByIdIn(actionIds);
-                afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
-                        .publishEvent(new RolloutUpdatedEvent(rollout, eventPublisherHolder.getApplicationId())));
-            } catch (final RuntimeException e) {
-                LOGGER.error("Exception during deletion of actions of rollout {}", rollout, e);
-            }
-        }
-    }
-
-    private Slice<JpaAction> findScheduledActionsByRollout(final JpaRollout rollout) {
-        return actionRepository.findByRolloutIdAndStatus(PageRequest.of(0, TRANSACTION_ACTIONS), rollout.getId(),
-                Status.SCHEDULED);
     }
 
     private void sendRolloutGroupDeletedEvents(final JpaRollout rollout) {
@@ -581,8 +517,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     /**
-     * Schedules a group of the rollout. Scheduled Actions are created to
-     * achieve this. The creation of those Actions is allowed to fail.
+     * Schedules a group of the rollout. Scheduled Actions are created to achieve
+     * this. The creation of those Actions is allowed to fail.
      */
     private boolean scheduleRolloutGroup(final JpaRollout rollout, final JpaRolloutGroup group) {
         final long targetsInGroup = rolloutTargetGroupRepository.countByRolloutGroup(group);
@@ -645,8 +581,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
     /**
      * Creates an action entry into the action repository. In case of existing
-     * scheduled actions the scheduled actions gets canceled. A scheduled action
-     * is created in-active.
+     * scheduled actions the scheduled actions gets canceled. A scheduled action is
+     * created in-active.
      */
     private void createScheduledAction(final Collection<Target> targets, final DistributionSet distributionSet,
             final ActionType actionType, final Long forcedTime, final Rollout rollout,
