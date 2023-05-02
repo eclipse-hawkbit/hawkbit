@@ -132,25 +132,33 @@ public abstract class AbstractRolloutExecutor implements RolloutExecutor {
     protected abstract void handleStopRollout(final JpaRollout rollout);
 
     protected void handleErrorCreating(final JpaRollout rollout) {
-        setRolloutErrorState(rollout);
+        setRolloutErrorState(rollout, Rollout.RolloutStatus.ERROR_CREATING);
     }
 
     protected void handleErrorStarting(final JpaRollout rollout) {
-        setRolloutErrorState(rollout);
+        setRolloutErrorState(rollout, Rollout.RolloutStatus.ERROR_STARTING);
     }
 
     protected void handleErrorDeleting(final JpaRollout rollout) {
-        setRolloutErrorState(rollout);
+        setRolloutErrorState(rollout, Rollout.RolloutStatus.ERROR_DELETING);
     }
 
-    private void setRolloutErrorState(final JpaRollout rollout) {
+    private void setRolloutErrorState(final JpaRollout rollout, final Rollout.RolloutStatus errorStatus) {
+        ensureIsErrorStatus(errorStatus);
         if (!cleanupScheduledActions(rollout)) {
             // could not clean up scheduled actions
             LOGGER.warn("Could not clean up scheduled actions for rollout with id {}", rollout.getId());
         }
         setErrorStateForRolloutGroups(rollout);
-        rollout.setStatus(Rollout.RolloutStatus.ERROR_STARTING);
+        rollout.setStatus(errorStatus);
         rolloutRepository.save(rollout);
+    }
+
+    private void ensureIsErrorStatus(final Rollout.RolloutStatus errorStatus) {
+        if (errorStatus != Rollout.RolloutStatus.ERROR_CREATING || errorStatus != Rollout.RolloutStatus.ERROR_STARTING
+                || errorStatus != Rollout.RolloutStatus.ERROR_DELETING) {
+            throw new IllegalArgumentException("Given rollout status is not an error one.");
+        }
     }
 
     /**
