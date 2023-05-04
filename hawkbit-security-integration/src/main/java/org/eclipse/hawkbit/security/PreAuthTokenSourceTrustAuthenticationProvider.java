@@ -8,9 +8,7 @@
  */
 package org.eclipse.hawkbit.security;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -23,7 +21,6 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
-import org.springframework.web.util.UriUtils;
 
 /**
  * An spring authentication provider which supports authentication tokens of
