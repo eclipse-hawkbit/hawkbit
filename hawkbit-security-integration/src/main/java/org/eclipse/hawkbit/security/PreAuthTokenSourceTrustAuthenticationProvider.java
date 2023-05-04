@@ -132,7 +132,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             final Object tokenDetails) {
         boolean successAuthentication = false;
         if (credentials instanceof Collection) {
-            final Collection<?> multiValueCredentials = (Collection<?>)credentials;
+            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
             if (multiValueCredentials.contains(principal)) {
                 successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
             }
