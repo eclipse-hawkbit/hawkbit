@@ -8,10 +8,13 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.hawkbit.security.util.DecodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -20,6 +23,7 @@ import org.springframework.security.authentication.InsufficientAuthenticationExc
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
+import org.springframework.web.util.UriUtils;
 
 /**
  * An spring authentication provider which supports authentication tokens of
@@ -132,7 +136,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             final Object tokenDetails) {
         boolean successAuthentication = false;
         if (credentials instanceof Collection) {
-            final Collection<?> multiValueCredentials = (Collection<?>) credentials;
+            final Collection<?> multiValueCredentials = DecodeUtil.decodeHeaderAuthenticationCollection((Collection<?>)credentials);
             if (multiValueCredentials.contains(principal)) {
                 successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
             }
