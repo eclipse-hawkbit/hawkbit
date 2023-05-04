@@ -797,9 +797,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                                     // auto-confirmation will perform the confirmation
                                     assertThat(actionStatus.getMessages())
                                             .contains("Assignment initiated by user 'bumlux'")
-                                            .contains("Assignment automatically confirmed by initiator 'not_bumlux'. \n"
-                                                    + "\n" + "Auto confirmation activated by system user: 'bumlux' \n"
-                                                    + "\n" + "Remark: my personal remark");
+                                            .contains("Assignment automatically confirmed by initiator 'not_bumlux'. \n\n"
+                                                    + "Auto confirmation activated by system user: 'bumlux' \n\n"
+                                                    + "Remark: my personal remark");
                                 } else {
                                     // assignment never required confirmation, auto-confirmation will not be
                                     // applied.
