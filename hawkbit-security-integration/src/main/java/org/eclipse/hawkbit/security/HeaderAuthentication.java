@@ -16,21 +16,13 @@ package org.eclipse.hawkbit.security;
  *
  *
  */
-public final class HeaderAuthentication {
+final class HeaderAuthentication {
     private final String controllerId;
     private final String headerAuth;
 
-    public HeaderAuthentication(final String controllerId, final String headerAuth) {
+    HeaderAuthentication(final String controllerId, final String headerAuth) {
         this.controllerId = controllerId;
         this.headerAuth = headerAuth;
-    }
-
-    public String getControllerId() {
-        return controllerId;
-    }
-
-    public String getHeaderAuth() {
-        return headerAuth;
     }
 
     @Override

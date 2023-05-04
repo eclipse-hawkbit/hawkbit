@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.hawkbit.security.util.DecodeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -133,7 +132,7 @@ public class PreAuthTokenSourceTrustAuthenticationProvider implements Authentica
             final Object tokenDetails) {
         boolean successAuthentication = false;
         if (credentials instanceof Collection) {
-            final Collection<?> multiValueCredentials = DecodeUtil.decodeHeaderAuthenticationCollection((Collection<?>)credentials);
+            final Collection<?> multiValueCredentials = (Collection<?>)credentials;
             if (multiValueCredentials.contains(principal)) {
                 successAuthentication = checkSourceIPAddressIfNeccessary(tokenDetails);
             }
