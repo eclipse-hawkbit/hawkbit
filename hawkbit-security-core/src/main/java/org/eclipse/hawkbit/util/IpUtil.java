@@ -10,14 +10,12 @@ package org.eclipse.hawkbit.util;
 
 import java.lang.annotation.Target;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
-import org.springframework.web.util.UriUtils;
 
 /**
  * A utility which determines the correct IP of a connected {@link Target}. E.g
@@ -194,10 +192,6 @@ public final class IpUtil {
      */
     public static boolean isIpAddresKnown(final URI uri) {
         return uri != null && !(AMQP_SCHEME.equals(uri.getScheme()) || HIDDEN_IP.equals(uri.getHost()));
-    }
-
-    public static String decodeUriValue(String value) {
-        return UriUtils.decode(value, StandardCharsets.UTF_8);
     }
 
 }
