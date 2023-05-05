@@ -132,7 +132,6 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
     protected DmfTenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request) {
         final String requestURI = request.getRequestURI();
 
-        // TODO : parse elements one by on, not the whole URI
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
             LOG.debug("retrieving principal from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor
