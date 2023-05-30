@@ -14,6 +14,10 @@ import java.nio.charset.StandardCharsets;
 
 public class UrlUtils {
 
+  private UrlUtils() {
+    // Util classes should not have public constructors
+  }
+
   public static String decodeUriValue(String value) {
     return UriUtils.decode(value, StandardCharsets.UTF_8);
   }
