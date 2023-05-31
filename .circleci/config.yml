@@ -14,7 +14,7 @@ jobs:
     working_directory: ~/hawkBit
 
     docker:
-    - image: circleci/openjdk:11.0.13-jdk-buster
+    - image: circleci/openjdk:17.0.1-jdk-buster
       auth:
         username: $DOCKERHUB_USER
         password: $DOCKERHUB_ACCESSTOKEN
