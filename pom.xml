@@ -130,7 +130,7 @@
 
       <java.version>17</java.version>
 
-      <spring.boot.version>2.7.10</spring.boot.version>
+      <spring.boot.version>2.7.12</spring.boot.version>
       <spring-framework.version>5.3.26</spring-framework.version>
       <spring.cloud.version>2021.0.5</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
@@ -151,9 +151,6 @@
 
       <!-- CVE-2022-31690 -->
       <spring-security-oauth2-client.version>5.7.7</spring-security-oauth2-client.version>
-
-      <!-- CVE-2023-20862 -->
-      <spring-security-core.version>5.7.8</spring-security-core.version>
 
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
 
