@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.util.UrlUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
@@ -135,8 +136,8 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             LOG.debug("retrieving principal from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor
                     .extractUriTemplateVariables(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI);
-            final String controllerId = extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER);
-            final String tenant = extractUriTemplateVariables.get(TENANT_PLACE_HOLDER);
+            final String controllerId = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER));
+            final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
                         requestURI);
@@ -146,7 +147,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             LOG.debug("retrieving path variables from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor.extractUriTemplateVariables(
                     request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI);
-            final String tenant = extractUriTemplateVariables.get(TENANT_PLACE_HOLDER);
+            final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Parsed tenant {} from path request {}", tenant, requestURI);
             }

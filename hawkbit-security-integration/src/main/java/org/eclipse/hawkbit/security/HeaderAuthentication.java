@@ -16,7 +16,7 @@ package org.eclipse.hawkbit.security;
  *
  *
  */
-public final class HeaderAuthentication {
+final class HeaderAuthentication {
     private final String controllerId;
     private final String headerAuth;
 
