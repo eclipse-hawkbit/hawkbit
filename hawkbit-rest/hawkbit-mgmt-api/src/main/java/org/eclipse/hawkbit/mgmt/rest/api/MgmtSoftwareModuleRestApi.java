@@ -98,9 +98,10 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    @ResponseBody
-    ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId);
+    @ResponseBody ResponseEntity<MgmtArtifact> getArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("artifactId") final Long artifactId,
+            @RequestParam(value = MgmtRestConstants.ARTIFACT_DOWNLOAD_URL_TYPE, required = false) final String artifactDownloadUrlType);
 
     /**
      * Handles the DELETE request for a single SoftwareModule.

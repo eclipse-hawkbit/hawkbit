@@ -271,6 +271,12 @@ public final class MgmtRestConstants {
      */
     public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
 
+    /**
+     * The artifact download URL type
+     */
+    public static final String ARTIFACT_DOWNLOAD_URL_TYPE = "downloadurltype";
+
+
     // constant class, private constructor.
     private MgmtRestConstants() {
 

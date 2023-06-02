@@ -104,7 +104,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
                         StringUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
             } else {
-                urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
+                if(entry.getValue() != null) {
+                    urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
+                }
             }
         }
         return urlPattern;
@@ -135,7 +137,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
         replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
         replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
-        replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
+        if(placeholder.getTargetId() != null) {
+            replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
+        }
         replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
         replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));

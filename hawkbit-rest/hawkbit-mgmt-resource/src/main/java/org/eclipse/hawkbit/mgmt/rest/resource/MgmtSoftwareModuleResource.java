@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -29,6 +30,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -68,13 +70,21 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    private final ArtifactUrlHandler artifactUrlHandler;
+
+    private final SystemManagement systemManagement;
+
     private final EntityFactory entityFactory;
 
     MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final EntityFactory entityFactory) {
         this.artifactManagement = artifactManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.artifactUrlHandler = artifactUrlHandler;
+        this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
     }
 
@@ -125,15 +135,21 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     // subroutine
     @SuppressWarnings("squid:S3655")
     public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId) {
+            @PathVariable("artifactId") final Long artifactId,
+            @RequestParam(value = MgmtRestConstants.ARTIFACT_DOWNLOAD_URL_TYPE, required = false) final String artifactDownloadUrlType) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
+        final MgmtArtifact response = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
         if (!module.isDeleted()) {
-            MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+            if(artifactDownloadUrlType == null || artifactDownloadUrlType == "default") {
+                MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), response);
+            } else {
+                MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), response, artifactUrlHandler,
+                        systemManagement);
+            }
         }
 
-        return ResponseEntity.ok(reponse);
+        return ResponseEntity.ok(response);
     }
 
     @Override
