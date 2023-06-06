@@ -368,7 +368,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         mockMvc.perform(
                 get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
-                        sm.getId(), artifact.getId()))
+                        sm.getId(), artifact.getId()).param("downloadurltype", "default"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -389,6 +389,27 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                                         .description(MgmtApiModelProperties.ARTIFACT_PROVIDED_FILENAME),
                                 fieldWithPath("_links.self").ignored(), fieldWithPath("_links.download")
                                         .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_LINK))));
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving a single Artifact meta data request. Required Permission: "
+            + SpPermission.READ_REPOSITORY)
+    public void getArtifactWithParameters() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte random[] = RandomStringUtils.random(5).getBytes();
+
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
+
+        mockMvc.perform(
+                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
+                                sm.getId(), artifact.getId()).param("downloadurltype", "default"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andDo(this.document.document(
+                        requestParameters(
+                                parameterWithName("downloadurltype").description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_URL_TYPE))));
     }
 
     @Test

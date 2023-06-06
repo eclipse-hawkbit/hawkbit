@@ -616,7 +616,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
-                .andExpect(jsonPath("$._links.cdn-download.href",
+                .andExpect(jsonPath("$._links.download.href",
                         equalTo("http://localhost:8080/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
                                 + artifact.getFilename())))
                 .andExpect(jsonPath("$._links.self.href", equalTo(

@@ -169,7 +169,7 @@ public final class MgmtSoftwareModuleMapper {
                         systemManagement.getTenantMetadata().getId(), null, null,
                         new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
                                 artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
-        response.add(Link.of(urls.get(0).getRef()).withRel("cdn-download").expand());
+        response.add(Link.of(urls.get(0).getRef()).withRel("download").expand());
     }
 
     static List<MgmtArtifact> artifactsToResponse(final Collection<Artifact> artifacts) {
