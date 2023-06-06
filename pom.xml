@@ -179,7 +179,7 @@
       <docker.jvm.args>${docker.memory.size} ${docker.gc.settings} -XX:+HeapDumpOnOutOfMemoryError
          -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom
       </docker.jvm.args>
-      <docker.jre.version>11.0.15_10-jre-alpine</docker.jre.version>
+      <docker.jre.version>17.0.7_7-jre-alpine</docker.jre.version>
       <!-- Docker image build - END -->
       <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
       <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
