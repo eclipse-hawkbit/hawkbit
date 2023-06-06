@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.7.10</version>
+      <version>2.7.12</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -128,9 +128,9 @@
 
    <properties>
 
-      <java.version>11</java.version>
+      <java.version>17</java.version>
 
-      <spring.boot.version>2.7.10</spring.boot.version>
+      <spring.boot.version>2.7.12</spring.boot.version>
       <spring-framework.version>5.3.26</spring-framework.version>
       <spring.cloud.version>2021.0.5</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
