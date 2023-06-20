@@ -164,12 +164,12 @@ public final class MgmtSoftwareModuleMapper {
     static void addLinks(final Artifact artifact, final MgmtArtifact response,
             final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
 
-        List<ArtifactUrl> urls = artifactUrlHandler.getUrls(
+        final List<ArtifactUrl> urls = artifactUrlHandler.getUrls(
                 new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
                         systemManagement.getTenantMetadata().getId(), null, null,
                         new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
                                 artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
-        response.add(Link.of(urls.get(0).getRef()).withRel("download").expand());
+        urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
     }
 
     static List<MgmtArtifact> artifactsToResponse(final Collection<Artifact> artifacts) {
