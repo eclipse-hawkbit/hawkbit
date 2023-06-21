@@ -368,7 +368,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         mockMvc.perform(
                 get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
-                        sm.getId(), artifact.getId()).param("downloadurltype", "default"))
+                        sm.getId(), artifact.getId()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
@@ -404,12 +404,12 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         mockMvc.perform(
                         get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
-                                sm.getId(), artifact.getId()).param("downloadurltype", "default"))
+                                sm.getId(), artifact.getId()).param("useartifacturlhandler", "true"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
                 .andDo(this.document.document(
                         requestParameters(
-                                parameterWithName("downloadurltype").description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_URL_TYPE))));
+                                parameterWithName("useartifacturlhandler").description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER))));
     }
 
     @Test

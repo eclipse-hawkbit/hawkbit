@@ -57,7 +57,7 @@ public final class MgmtApiModelProperties {
     public static final String ARTIFACT_HASHES_SHA256 = "SHA256 hash of the artifact.";
     public static final String ARTIFACT_DOWNLOAD_LINK = "Download link of the artifact based on the chosen download url type parameter.";
     public static final String ARTIFACT_LIST = "List of artifacts of given software module.";
-    public static final String ARTIFACT_DOWNLOAD_URL_TYPE = "Type of the artifact download url. (can be default or cdn)";
+    public static final String ARTIFACT_DOWNLOAD_USE_URL_HANDLER = "Indicates if the artifact URL handler should be used e.g. for external links.";
 
     // Distribution Set
     public static final String DS_OS = "Operating system or firmware software module - DEPRECATED (use modules).";

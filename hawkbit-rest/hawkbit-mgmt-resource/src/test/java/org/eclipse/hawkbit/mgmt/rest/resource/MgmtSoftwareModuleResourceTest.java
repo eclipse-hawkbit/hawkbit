@@ -604,10 +604,6 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
-        final MvcResult result = mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}?downloadurltype=cdn", sm.getId(), artifact.getId()).accept(
-                MediaType.APPLICATION_JSON))
-        .andDo(MockMvcResultPrinter.print()).andReturn();
-
         // perform test
         mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}?useartifacturlhandler=true", sm.getId(), artifact.getId()).accept(
                         MediaType.APPLICATION_JSON))
