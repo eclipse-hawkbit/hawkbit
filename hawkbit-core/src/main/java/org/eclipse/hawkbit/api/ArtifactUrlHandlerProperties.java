@@ -54,7 +54,7 @@ public class ArtifactUrlHandlerProperties {
          * artifactFileName,artifactSHA1,
          * artifactIdBase62,artifactId,tenant,softwareModuleId,
          * softwareModuleIdBase62.
-         * 
+         *
          * The update server itself supports
          */
         private String ref = "{protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}";
@@ -84,7 +84,7 @@ public class ArtifactUrlHandlerProperties {
         /**
          * Support for the following hawkBit API.
          */
-        private List<ApiType> supports = Arrays.asList(ApiType.DDI, ApiType.DMF);
+        private List<ApiType> supports = Arrays.asList(ApiType.DDI, ApiType.DMF, ApiType.MGMT);
 
         public boolean isEnabled() {
             return enabled;

@@ -22,5 +22,10 @@ public enum ApiType {
     /**
      * Support for Direct Device Integration API.
      */
-    DDI
+    DDI,
+
+    /**
+     * Support for Management API.
+     */
+    MGMT
 }

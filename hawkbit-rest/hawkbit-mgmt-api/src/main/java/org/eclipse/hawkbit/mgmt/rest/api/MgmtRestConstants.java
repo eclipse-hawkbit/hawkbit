@@ -271,6 +271,12 @@ public final class MgmtRestConstants {
      */
     public static final String AUTH_V1_REQUEST_MAPPING = BASE_V1_REQUEST_MAPPING + "/userinfo";
 
+    /**
+     * Request parameter if the artifact url handler should be used
+     */
+    public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
+
+
     // constant class, private constructor.
     private MgmtRestConstants() {
 

@@ -34,7 +34,7 @@ public class RSQLTargetFilterQueryFieldsTest extends AbstractJpaIntegrationTest 
     private TargetFilterQuery filter2;
 
     @BeforeEach
-    public void setupBeforeTest() throws InterruptedException {
+    public void setupBeforeTest() {
         final String filterName1 = "filter_a";
         final String filterName2 = "filter_b";
         final String filterName3 = "filter_c";

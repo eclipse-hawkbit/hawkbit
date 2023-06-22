@@ -52,7 +52,7 @@ public interface MgmtSoftwareModuleRestApi {
      *            checksum for uploaded content check
      * @param sha256Sum
      *            checksum for uploaded content check
-     * 
+     *
      * @return In case all sets could successful be created the ResponseEntity
      *         with status code 201 - Created but without ResponseBody. In any
      *         failure the JsonResponseExceptionHandler is handling the
@@ -98,9 +98,10 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    @ResponseBody
-    ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId);
+    @ResponseBody ResponseEntity<MgmtArtifact> getArtifact(
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @PathVariable("artifactId") final Long artifactId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler);
 
     /**
      * Handles the DELETE request for a single SoftwareModule.

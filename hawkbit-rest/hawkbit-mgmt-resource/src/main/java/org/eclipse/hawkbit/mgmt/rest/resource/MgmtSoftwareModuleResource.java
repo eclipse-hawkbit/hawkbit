@@ -15,6 +15,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.validation.ValidationException;
+
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -29,6 +32,7 @@ import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -51,8 +55,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.ValidationException;
-
 /**
  * REST Resource handling for {@link SoftwareModule} and related
  * {@link Artifact} CRUD operations.
@@ -68,13 +70,21 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
 
+    private final ArtifactUrlHandler artifactUrlHandler;
+
+    private final SystemManagement systemManagement;
+
     private final EntityFactory entityFactory;
 
     MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
-            final SoftwareModuleTypeManagement softwareModuleTypeManagement, final EntityFactory entityFactory) {
+            final SoftwareModuleTypeManagement softwareModuleTypeManagement,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement,
+            final EntityFactory entityFactory) {
         this.artifactManagement = artifactManagement;
         this.softwareModuleManagement = softwareModuleManagement;
         this.softwareModuleTypeManagement = softwareModuleTypeManagement;
+        this.artifactUrlHandler = artifactUrlHandler;
+        this.systemManagement = systemManagement;
         this.entityFactory = entityFactory;
     }
 
@@ -125,15 +135,21 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     // subroutine
     @SuppressWarnings("squid:S3655")
     public ResponseEntity<MgmtArtifact> getArtifact(@PathVariable("softwareModuleId") final Long softwareModuleId,
-            @PathVariable("artifactId") final Long artifactId) {
+            @PathVariable("artifactId") final Long artifactId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER, required = false) final Boolean useArtifactUrlHandler) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, artifactId);
 
-        final MgmtArtifact reponse = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
+        final MgmtArtifact response = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
         if (!module.isDeleted()) {
-            MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), reponse);
+            if(useArtifactUrlHandler != null && useArtifactUrlHandler) {
+                MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), response, artifactUrlHandler,
+                        systemManagement);
+            } else {
+                MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), response);
+            }
         }
 
-        return ResponseEntity.ok(reponse);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -192,7 +208,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         LOG.debug("creating {} softwareModules", softwareModules.size());
 
-        for (MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
+        for (final MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
             final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
             opt.ifPresent(smType -> {
                 if (smType.isDeleted()) {

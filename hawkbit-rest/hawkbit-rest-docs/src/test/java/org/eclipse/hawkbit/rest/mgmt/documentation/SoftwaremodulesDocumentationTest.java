@@ -392,6 +392,27 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     }
 
     @Test
+    @Description("Handles the GET request of retrieving a single Artifact meta data request. Required Permission: "
+            + SpPermission.READ_REPOSITORY)
+    public void getArtifactWithParameters() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte random[] = RandomStringUtils.random(5).getBytes();
+
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
+
+        mockMvc.perform(
+                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
+                                sm.getId(), artifact.getId()).param("useartifacturlhandler", "true"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andDo(this.document.document(
+                        requestParameters(
+                                parameterWithName("useartifacturlhandler").description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER))));
+    }
+
+    @Test
     @Description("Handles the GET request for downloading an artifact. Required Permission: "
             + SpPermission.READ_REPOSITORY)
     public void getDownloadArtifact() throws Exception {

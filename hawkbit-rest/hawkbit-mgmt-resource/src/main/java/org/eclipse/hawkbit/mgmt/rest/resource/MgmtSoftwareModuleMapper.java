@@ -16,6 +16,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.api.ApiType;
+import org.eclipse.hawkbit.api.ArtifactUrl;
+import org.eclipse.hawkbit.api.ArtifactUrlHandler;
+import org.eclipse.hawkbit.api.URLPlaceholder;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifactHash;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -25,12 +29,14 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleTypeRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
+import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.rest.data.ResponseList;
+import org.springframework.hateoas.Link;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -143,7 +149,7 @@ public final class MgmtSoftwareModuleMapper {
         MgmtRestModelMapper.mapBaseToBase(artifactRest, artifact);
 
         artifactRest.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class)
-                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withSelfRel().expand());
+                .getArtifact(artifact.getSoftwareModule().getId(), artifact.getId(), null)).withSelfRel().expand());
 
         return artifactRest;
     }
@@ -153,6 +159,17 @@ public final class MgmtSoftwareModuleMapper {
         response.add(linkTo(methodOn(MgmtDownloadArtifactResource.class)
                 .downloadArtifact(artifact.getSoftwareModule().getId(), artifact.getId())).withRel("download")
                         .expand());
+    }
+
+    static void addLinks(final Artifact artifact, final MgmtArtifact response,
+            final ArtifactUrlHandler artifactUrlHandler, final SystemManagement systemManagement) {
+
+        final List<ArtifactUrl> urls = artifactUrlHandler.getUrls(
+                new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
+                        systemManagement.getTenantMetadata().getId(), null, null,
+                        new URLPlaceholder.SoftwareData(artifact.getSoftwareModule().getId(), artifact.getFilename(),
+                                artifact.getId(), artifact.getSha1Hash())), ApiType.MGMT, null);
+        urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
     }
 
     static List<MgmtArtifact> artifactsToResponse(final Collection<Artifact> artifacts) {
