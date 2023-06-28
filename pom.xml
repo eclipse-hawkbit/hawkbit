@@ -785,10 +785,6 @@
             <version>${spring.boot.version}</version>
             <exclusions>
                <exclusion>
-                  <groupId>org.springframework.boot</groupId>
-                  <artifactId>spring-boot-starter-tomcat</artifactId>
-               </exclusion>
-               <exclusion>
                   <groupId>com.fasterxml.jackson.datatype</groupId>
                   <artifactId>jackson-datatype-jdk8</artifactId>
                </exclusion>

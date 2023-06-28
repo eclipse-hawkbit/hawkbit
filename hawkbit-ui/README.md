@@ -10,7 +10,6 @@ The SuperDevMode can be used to debug client side code without any browser plugi
 
 - Add required maven dependencies
 	- Add vaadin-client-compiler dependency
-	- Add jetty dependencies (version : 8.1x)
 - Set redirect property in the AppWidgetSet.gwt.xml module descriptor as follows
 	- < set-configuration-property name="devModeRedirectEnabled" value="true" />
 - Create launch configuration for the SuperDevMode 
