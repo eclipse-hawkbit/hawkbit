@@ -77,8 +77,8 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
         final String remarkMessage = StringUtils.hasText(remark) ? remark : "n/a";
         final String formattedInitiator = StringUtils.hasText(initiator) ? initiator : "n/a";
         final String createdByRolloutsUser = StringUtils.hasText(getCreatedBy()) ? getCreatedBy() : "n/a";
-        return String.format("Assignment automatically confirmed by initiator '%s'. %n%n" //
-                + "Auto confirmation activated by system user: '%s' %n%n" //
+        return String.format("Assignment automatically confirmed by initiator '%s'. \n\n" //
+                + "Auto confirmation activated by system user: '%s' \n\n" //
                 + "Remark: %s", formattedInitiator, createdByRolloutsUser, remarkMessage);
     }
 

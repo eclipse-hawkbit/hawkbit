@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -31,7 +32,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
@@ -1097,7 +1097,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     private void awaitRunningState(final Long rolloutId) {
-        Awaitility.await().atMost(Duration.ONE_MINUTE).pollInterval(Duration.ONE_HUNDRED_MILLISECONDS).with()
+        Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
                 .until(() -> WithSpringAuthorityRule
                         .runAsPrivileged(
                                 () -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))

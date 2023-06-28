@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.junit.jupiter.api.Test;
@@ -19,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+
+import java.time.Duration;
 
 @Feature("Unit Tests - Repository")
 @Story("Deployment Management")
@@ -37,7 +38,7 @@ public class ActionTest {
         assertThat(timeforcedAction.isForcedOrTimeForced()).isFalse();
 
         // wait until timeforce time is hit
-        Awaitility.await().atMost(Duration.TWO_SECONDS).pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+        Awaitility.await().atMost(Duration.ofSeconds(2)).pollInterval(Duration.ofMillis(100))
                 .until(timeforcedAction::isForcedOrTimeForced);
     }
 }

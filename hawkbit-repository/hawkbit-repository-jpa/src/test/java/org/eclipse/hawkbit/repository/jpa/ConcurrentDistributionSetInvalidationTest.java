@@ -14,11 +14,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -94,8 +94,8 @@ public class ConcurrentDistributionSetInvalidationTest extends AbstractJpaIntegr
 
         // wait until at least one RolloutGroup is created, as this means that
         // the thread has started and has acquired the lock
-        Awaitility.await().atMost(Duration.FIVE_SECONDS)
-                .pollInterval(Duration.ONE_HUNDRED_MILLISECONDS)
+        Awaitility.await().atMost(Duration.ofSeconds(5))
+                .pollInterval(Duration.ofMillis(100))
                 .until(() -> tenantAware.runAsTenant(tenant, () -> systemSecurityContext
                 .runAsSystem(() -> rolloutGroupManagement.findByRollout(PAGE, rollout.getId()).getSize() > 0)));
 
