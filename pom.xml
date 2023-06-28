@@ -147,12 +147,20 @@
       <mariadb.version>2.7.8</mariadb.version>
       <!-- CVE-2020-36518, CVE-2022-42003, CVE-2022-42004 -->
       <jackson-bom.version>2.14.2</jackson-bom.version>
-      <!-- Spring boot version overrides - END -->
+
+      <!-- SONATYPE-2021-1175 -->
+      <logback.version>1.2.9</logback.version>
 
       <!-- CVE-2022-31690 -->
       <spring-security-oauth2-client.version>5.7.7</spring-security-oauth2-client.version>
+      <!-- Spring boot version overrides - END -->
 
       <rabbitmq.http-client.version>3.12.1</rabbitmq.http-client.version>
+
+      <!-- Eclipselink - START -->
+      <eclipselink.version>2.7.11</eclipselink.version>
+      <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
+      <!-- Eclipselink - END -->
 
       <!-- Vaadin versions - START -->
       <!-- Vaadin version 8.14.3 is the last version running under an Apache 2.0 license -->
@@ -181,35 +189,32 @@
       </docker.jvm.args>
       <docker.jre.version>17.0.7_7-jre-alpine</docker.jre.version>
       <!-- Docker image build - END -->
-      <maven.processor.plugin.version>3.3.3</maven.processor.plugin.version>
-      <maven.scm.plugin.version>1.11.1</maven.scm.plugin.version>
-      <maven.site.plugin.version>3.9.1</maven.site.plugin.version>
-      <maven.surefire.plugin.version>3.0.0-M7</maven.surefire.plugin.version>
-      <maven.failsafe.plugin.version>3.0.0-M7</maven.failsafe.plugin.version>
-      <maven.enforcer.plugin.version>3.1.0</maven.enforcer.plugin.version>
+
+      <maven.scm.plugin.version>2.0.1</maven.scm.plugin.version>
+      <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
+      <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
+      <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
+      <maven.enforcer.plugin.version>3.3.0</maven.enforcer.plugin.version>
       <!-- ************************ -->
       <!-- Maven Surefire settings -->
       <!-- ************************ -->
       <surefire.forkcount>1</surefire.forkcount>
 
       <!-- Misc libraries versions - START -->
-      <cron-utils.version>9.1.6</cron-utils.version>
-      <jsoup.version>1.15.3</jsoup.version>
-      <allure.version>2.13.10</allure.version>
-      <eclipselink.version>2.7.11</eclipselink.version>
-      <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
+      <cron-utils.version>9.2.1</cron-utils.version>
+      <jsoup.version>1.16.1</jsoup.version>
       <jaxb-api.version>2.3.1</jaxb-api.version>
-      <gwtmockito.version>1.1.8</gwtmockito.version>
-      <guava.version>30.1.1-jre</guava.version>
-      <javax.el-api.version>2.2.4</javax.el-api.version>
-      <corn-cps.version>1.1.7</corn-cps.version>
-      <commons-io.version>2.11.0</commons-io.version>
+      <guava.version>32.0.1-jre</guava.version>
+      <javax.el-api.version>3.0.0</javax.el-api.version>
+      <corn-cps.version>1.1.10</corn-cps.version>
+      <commons-io.version>2.13.0</commons-io.version>
       <rsql-parser.version>2.1.0</rsql-parser.version>
-      <awaitility.version>3.1.2</awaitility.version>
-      <io-protostuff.version>1.5.6</io-protostuff.version>
+      <io-protostuff.version>1.8.0</io-protostuff.version>
 
-      <!-- SONATYPE-2021-1175 -->
-      <logback.version>1.2.9</logback.version>
+      <!-- test -->
+      <allure.version>2.22.2</allure.version>
+      <awaitility.version>4.2.0</awaitility.version>
+
       <!-- Misc libraries versions - END -->
 
       <!-- Release - START -->

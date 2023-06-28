@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,7 +32,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.Condition;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
@@ -2221,7 +2221,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
     }
 
     private void awaitRunningState(final Long myRolloutId) {
-        Awaitility.await().atMost(Duration.TEN_SECONDS).pollInterval(Duration.FIVE_HUNDRED_MILLISECONDS).with()
+        Awaitility.await().atMost(Duration.ofSeconds(10)).pollInterval(Duration.ofMillis(500)).with()
                 .until(() -> WithSpringAuthorityRule
                         .runAsPrivileged(
                                 () -> rolloutManagement.get(myRolloutId).orElseThrow(NoSuchElementException::new))

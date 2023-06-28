@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +39,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
-import org.awaitility.Duration;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
@@ -122,7 +122,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // ensures that we are not to fast so that last modified is not set correctly
         Awaitility.await()
-                .atMost(Duration.ONE_HUNDRED_MILLISECONDS)
+                .atMost(Duration.ofMillis(100))
                 .pollInterval(10L, TimeUnit.MILLISECONDS)
                 .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
@@ -162,7 +162,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
         // ensures that we are not to fast so that last modified is not set correctly
         Awaitility.await()
-                .atMost(Duration.ONE_HUNDRED_MILLISECONDS)
+                .atMost(Duration.ofMillis(100))
                 .pollInterval(10L, TimeUnit.MILLISECONDS)
                 .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
 
