@@ -38,7 +38,7 @@ public enum TargetTagFields implements FieldNameProvider {
   COLOUR("colour"),
 
   /**
-   *
+   * Target fields
    */
   TARGET("assignedToTargets",
       TargetFields.ID.getFieldName(), TargetFields.NAME.getFieldName());

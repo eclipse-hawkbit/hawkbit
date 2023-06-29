@@ -38,7 +38,7 @@ public enum DistributionSetTagFields implements FieldNameProvider {
   COLOUR("colour"),
 
   /**
-   *
+   * Distribution set fields
    */
   DISTRIBUTIONSET("assignedToDistributionSet",
       DistributionSetFields.ID.getFieldName(), DistributionSetFields.NAME.getFieldName());
