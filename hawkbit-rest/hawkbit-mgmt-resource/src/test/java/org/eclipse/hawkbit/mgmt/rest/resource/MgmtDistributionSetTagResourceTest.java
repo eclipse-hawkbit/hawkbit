@@ -74,6 +74,68 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
+    @Description("Verfies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.")
+    public void getDistributionSetTagsByDistributionSetId() throws Exception {
+        final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
+        final DistributionSetTag tag1 = tags.get(0);
+        final DistributionSetTag tag2 = tags.get(1);
+
+        final DistributionSet distributionSet1 = testdataFactory.createDistributionSet();
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
+        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getName());
+        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId()), tag2.getName());
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
+                .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "distributionset.id==" + distributionSet1.getId())
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
+            .andExpect(applyBaseEntityMatcherOnPagedResult(tag2))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, DISTRIBUTIONSETTAGS_ROOT + tag1.getId()))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag2, DISTRIBUTIONSETTAGS_ROOT + tag2.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING)
+                .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "distributionset.id==" + distributionSet2.getId())
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, DISTRIBUTIONSETTAGS_ROOT + tag1.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+    }
+
+    @Test
+    @Description("Verfies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id field AND tag field.")
+    public void getDistributionSetTagsByDistributionSetIdAndTagDescription() throws Exception {
+        final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
+        final DistributionSetTag tag1 = tags.get(0);
+        final DistributionSetTag tag2 = tags.get(1);
+
+        final DistributionSet distributionSet1 = testdataFactory.createDistributionSet();
+        final DistributionSet distributionSet2 = testdataFactory.createDistributionSet();
+        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getName());
+        distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId()), tag2.getName());
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
+                + "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH +
+                "=distributionset.id==" + distributionSet1.getId() + ";description==" + tag1.getDescription())
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyBaseEntityMatcherOnPagedResult(tag1))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, DISTRIBUTIONSETTAGS_ROOT + tag1.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+    }
+
+    @Test
     @Description("Verfies that a single result of a DS tag reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = DistributionSetTagCreatedEvent.class, count = 2) })
     public void getDistributionSetTag() throws Exception {

@@ -80,7 +80,7 @@ public class MgmtDistributionSetTagResource implements MgmtDistributionSetTagRes
             count = distributionSetTagManagement.count();
 
         } else {
-            final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsql(pageable, rsqlParam);
+            final Page<DistributionSetTag> page = distributionSetTagManagement.findByRsqlWithDistributionSetTagSpec(pageable, rsqlParam);
             distributionSetTags = page;
             count = page.getTotalElements();
 

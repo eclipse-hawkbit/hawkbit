@@ -8,12 +8,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.repository.DistributionSetFields;
+import org.eclipse.hawkbit.repository.DistributionSetTagFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
 import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
@@ -23,8 +26,10 @@ import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -144,6 +149,15 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
                 Collections.singletonList(TagSpecification.ofDistributionSet(setId)));
+    }
+
+    @Override
+    public Page<DistributionSetTag> findByRsqlWithDistributionSetTagSpec(Pageable pageable, String rsqlParam) {
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
+            virtualPropertyReplacer, database);
+
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
+            Collections.singletonList(spec));
     }
 
     @Override

@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
@@ -85,7 +87,8 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = this.tagManagement.findAll(pageable);
 
         } else {
-            findTargetsAll = this.tagManagement.findByRsql(pageable, rsqlParam);
+            findTargetsAll = this.tagManagement.findByRsqlWithTargetTagSpec(pageable, rsqlParam);
+
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponse(findTargetsAll.getContent());

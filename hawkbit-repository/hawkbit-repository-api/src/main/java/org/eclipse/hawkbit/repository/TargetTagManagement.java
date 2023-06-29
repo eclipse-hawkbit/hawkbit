@@ -135,6 +135,9 @@ public interface TargetTagManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Page<TargetTag> findByRsql(@NotNull Pageable pageable, @NotNull String rsqlParam);
 
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Page<TargetTag> findByRsqlWithTargetTagSpec(@NotNull Pageable pageable, @NotNull String rsqlParam);
+
     /**
      * Find {@link TargetTag} based on given Name.
      *
