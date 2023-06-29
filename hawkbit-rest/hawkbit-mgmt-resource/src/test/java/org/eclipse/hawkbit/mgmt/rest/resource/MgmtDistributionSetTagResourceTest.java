@@ -122,6 +122,8 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
         distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId(), distributionSet2.getId()), tag1.getName());
         distributionSetManagement.toggleTagAssignment(List.of(distributionSet1.getId()), tag2.getName());
 
+        // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
+        // which is logical OR, we want AND here
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
                 + "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH +
                 "=distributionset.id==" + distributionSet1.getId() + ";description==" + tag1.getDescription())
