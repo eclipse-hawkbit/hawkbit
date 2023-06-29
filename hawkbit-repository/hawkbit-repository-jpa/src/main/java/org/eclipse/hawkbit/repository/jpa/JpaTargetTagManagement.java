@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TagFields;
+import org.eclipse.hawkbit.repository.TargetTagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
@@ -105,7 +106,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, Collections.singletonList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TagFields.class, virtualPropertyReplacer, database)));
+                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTagFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override

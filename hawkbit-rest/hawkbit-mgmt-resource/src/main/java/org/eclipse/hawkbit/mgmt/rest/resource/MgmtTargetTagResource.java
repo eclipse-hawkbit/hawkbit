@@ -33,7 +33,6 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -86,6 +85,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
         } else {
             findTargetsAll = this.tagManagement.findByRsql(pageable, rsqlParam);
+
         }
 
         final List<MgmtTag> rest = MgmtTagMapper.toResponse(findTargetsAll.getContent());

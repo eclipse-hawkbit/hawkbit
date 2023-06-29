@@ -76,6 +76,74 @@ public class MgmtTargetTagResourceTest extends AbstractManagementApiIntegrationT
     }
 
     @Test
+    @Description("Verfies that a paged result list of target tags reflects on the content of assigned tags for specific controller/target ID")
+    public void getTargetTagsByTargetId() throws Exception {
+        final String controllerId1 = "controllerTestId1";
+        final String controllerId2 = "controllerTestId2";
+        testdataFactory.createTarget(controllerId1);
+        testdataFactory.createTarget(controllerId2);
+
+        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
+        final TargetTag tag1 = tags.get(0);
+        final TargetTag tag2 = tags.get(1);
+
+        targetManagement.toggleTagAssignment(List.of(controllerId1, controllerId2), tag1.getName());
+        targetManagement.toggleTagAssignment(List.of(controllerId2), tag2.getName());
+
+        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
+                .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "target.controllerId==" + controllerId2)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyTagMatcherOnPagedResult(tag1))
+            .andExpect(applyTagMatcherOnPagedResult(tag2))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, TARGETTAGS_ROOT + tag1.getId()))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag2, TARGETTAGS_ROOT + tag2.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING)
+                .queryParam(MgmtRestConstants.REQUEST_PARAMETER_SEARCH, "target.controllerId==" + controllerId1)
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyTagMatcherOnPagedResult(tag1))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, TARGETTAGS_ROOT + tag1.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+    }
+
+    @Test
+    @Description("Verifies that a page result when listing tags reflects on the content in the repository when filtered by 2 fields - one tag field and one target field")
+    public void getTargetTagsFilteredByColorAndTargetId() throws Exception {
+        final String controllerId1 = "controllerTestId1";
+        final String controllerId2 = "controllerTestId2";
+        testdataFactory.createTarget(controllerId1);
+        testdataFactory.createTarget(controllerId2);
+
+        final List<TargetTag> tags = testdataFactory.createTargetTags(2, "");
+        final TargetTag tag1 = tags.get(0);
+        final TargetTag tag2 = tags.get(1);
+
+        targetManagement.toggleTagAssignment(List.of(controllerId1, controllerId2), tag1.getName());
+        targetManagement.toggleTagAssignment(List.of(controllerId2), tag2.getName());
+
+        // pass here q directly as a pure string because .queryParam method delimiters the parameters in q with ,
+        // which is logical OR, we want AND here
+        mvc.perform(get(MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING +
+                "?" + MgmtRestConstants.REQUEST_PARAMETER_SEARCH + "=target.controllerId==" + controllerId2 + ";colour==" + tag1.getColour())
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(applyTagMatcherOnPagedResult(tag1))
+            .andExpect(applySelfLinkMatcherOnPagedResult(tag1, TARGETTAGS_ROOT + tag1.getId()))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_TOTAL, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_SIZE, equalTo(1)))
+            .andExpect(jsonPath(MgmtTargetResourceTest.JSON_PATH_PAGED_LIST_CONTENT, hasSize(1)));
+    }
+    @Test
     @Description("Verfies that a single result of a target tag reflects the content on the repository side.")
     @ExpectEvents({ @Expect(type = TargetTagCreatedEvent.class, count = 2) })
     public void getTargetTag() throws Exception {
