@@ -11,8 +11,6 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
@@ -35,7 +33,6 @@ import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
