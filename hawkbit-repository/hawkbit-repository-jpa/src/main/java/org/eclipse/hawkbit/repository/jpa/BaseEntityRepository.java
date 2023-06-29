@@ -15,6 +15,7 @@ import java.util.Optional;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 @NoRepositoryBean
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
-        extends PagingAndSortingRepository<T, I>, NoCountSliceRepository<T> {
+        extends PagingAndSortingRepository<T, I>, CrudRepository<T, I>, NoCountSliceRepository<T> {
 
     /**
      * Retrieves an {@link BaseEntity} by its id.

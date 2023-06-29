@@ -53,10 +53,11 @@ import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.jose.jws.JwsAlgorithms;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoderJwkSupport;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
@@ -261,8 +262,11 @@ class JwtAuthoritiesExtractor {
     Set<GrantedAuthority> extract(final ClientRegistration clientRegistration, final String tokenValue) {
         try {
             // Token is already verified by spring security
-            final JwtDecoder jwtDecoder = new NimbusJwtDecoderJwkSupport(
-                    clientRegistration.getProviderDetails().getJwkSetUri());
+            final NimbusJwtDecoder jwtDecoder =
+                NimbusJwtDecoder
+                    .withJwkSetUri(clientRegistration.getProviderDetails().getJwkSetUri())
+                    .jwsAlgorithm(SignatureAlgorithm.from(JwsAlgorithms.RS256))
+                    .build();
             final Jwt token = jwtDecoder.decode(tokenValue);
 
             return extract(clientRegistration.getClientId(), token.getClaims());

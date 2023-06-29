@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.jpa.model.DsMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.DistributionSetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface DistributionSetMetadataRepository
         extends PagingAndSortingRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
+        CrudRepository<JpaDistributionSetMetadata, DsMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaDistributionSetMetadata> {
 
     /**

@@ -71,7 +71,8 @@ import io.qameta.allure.Feature;
 @Feature("Documentation Verification - API")
 @ExtendWith(RestDocumentationExtension.class)
 @ContextConfiguration(classes = { DdiApiConfiguration.class, MgmtApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = { "classpath:/updateserver-restdocumentation-test.properties" })
 public abstract class AbstractApiRestDocumentation extends AbstractRestIntegrationTest {
 

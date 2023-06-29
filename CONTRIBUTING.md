@@ -35,8 +35,6 @@ So we kindly ask contributors:
   * use [Guava](https://github.com/google/guava) if feasible
   * use [Apache commons lang](https://commons.apache.org/proper/commons-lang/) if feasible
 
-Note that the guava project for instance often documents where they think that JDK is having a similar functionality (e.g. their thoughts on  [Throwables.propagate](https://github.com/google/guava/wiki/Why-we-deprecated-Throwables.propagate)).
-
 Examples:
 
 * Prefer `Arrays.asList(...)` from JDK over Guava's `Lists.newArrayList(...)`
