@@ -22,20 +22,20 @@ public enum DistributionSetTagFields implements FieldNameProvider {
   /**
    * The id field.
    */
-  ID("id"),
+  ID(TagFields.ID.getFieldName()),
 
   /**
    * The name field.
    */
-  NAME("name"),
+  NAME(TagFields.NAME.getFieldName()),
   /**
    * The description field.
    */
-  DESCRIPTION("description"),
+  DESCRIPTION(TagFields.DESCRIPTION.getFieldName()),
   /**
    * The controllerId field.
    */
-  COLOUR("colour"),
+  COLOUR(TagFields.COLOUR.getFieldName()),
 
   /**
    * Distribution set fields
