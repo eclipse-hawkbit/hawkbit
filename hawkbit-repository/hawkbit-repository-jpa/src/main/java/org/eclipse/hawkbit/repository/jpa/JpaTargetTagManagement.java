@@ -106,13 +106,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Override
     public Page<TargetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, Collections.singletonList(
-                RSQLUtility.buildRsqlSpecification(rsqlParam, TagFields.class, virtualPropertyReplacer, database)));
-    }
-
-    @Override
-    public Page<TargetTag> findByRsqlWithTargetTagSpec(Pageable pageable, String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetTagRepository, pageable, Collections.singletonList(
-            RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTagFields.class, virtualPropertyReplacer, database)));
+                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTagFields.class, virtualPropertyReplacer, database)));
     }
 
     @Override

@@ -70,7 +70,4 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<DistributionSetTag> findByDistributionSet(@NotNull Pageable pageable, long setId);
 
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetTag> findByRsqlWithDistributionSetTagSpec(@NotNull Pageable pageable, @NotNull String rsqlParam);
-
 }

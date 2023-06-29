@@ -84,7 +84,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
             findTargetsAll = this.tagManagement.findAll(pageable);
 
         } else {
-            findTargetsAll = this.tagManagement.findByRsqlWithTargetTagSpec(pageable, rsqlParam);
+            findTargetsAll = this.tagManagement.findByRsql(pageable, rsqlParam);
 
         }
 

@@ -130,7 +130,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Page<DistributionSetTag> findByRsql(final Pageable pageable, final String rsqlParam) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, TagFields.class,
+        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
                 virtualPropertyReplacer, database);
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
@@ -145,15 +145,6 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
                 Collections.singletonList(TagSpecification.ofDistributionSet(setId)));
-    }
-
-    @Override
-    public Page<DistributionSetTag> findByRsqlWithDistributionSetTagSpec(Pageable pageable, String rsqlParam) {
-        final Specification<JpaDistributionSetTag> spec = RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTagFields.class,
-            virtualPropertyReplacer, database);
-
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-            Collections.singletonList(spec));
     }
 
     @Override
