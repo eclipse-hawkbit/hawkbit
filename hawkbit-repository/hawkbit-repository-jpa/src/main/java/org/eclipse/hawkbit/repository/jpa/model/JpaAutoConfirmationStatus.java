@@ -77,9 +77,14 @@ public class JpaAutoConfirmationStatus extends AbstractJpaTenantAwareBaseEntity 
         final String remarkMessage = StringUtils.hasText(remark) ? remark : "n/a";
         final String formattedInitiator = StringUtils.hasText(initiator) ? initiator : "n/a";
         final String createdByRolloutsUser = StringUtils.hasText(getCreatedBy()) ? getCreatedBy() : "n/a";
-        return String.format("Assignment automatically confirmed by initiator '%s'. \n\n" //
-                + "Auto confirmation activated by system user: '%s' \n\n" //
-                + "Remark: %s", formattedInitiator, createdByRolloutsUser, remarkMessage);
+        // https://docs.oracle.com/en/java/javase/17/text-blocks/index.html#normalization-of-line-terminators
+        // nevertheless of the end of line of the file (\r\n, \n or \r) the result will contains \n
+        return """
+            Assignment automatically confirmed by initiator '%s'.\040
+            
+            Auto confirmation activated by system user: '%s'\040
+            
+            Remark: %s""".formatted(formattedInitiator, createdByRolloutsUser, remarkMessage);
     }
 
     @Override
