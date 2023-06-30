@@ -118,6 +118,7 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
      * if we find the hash in any the trusted CA chain to accept this request for
      * this tenant.
      */
+    @SuppressWarnings("java:S2629") // check if debug is enabled is maybe heavier then evaluation
     private String getIssuerHashHeader(final DmfTenantSecurityToken securityToken, final String knownIssuerHashes) {
         // there may be several knownIssuerHashes configured for the tenant
         final List<String> knownHashes = splitMultiHashBySemicolon(knownIssuerHashes);

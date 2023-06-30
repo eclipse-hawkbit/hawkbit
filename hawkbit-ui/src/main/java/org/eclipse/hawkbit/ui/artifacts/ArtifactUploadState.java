@@ -227,6 +227,7 @@ public class ArtifactUploadState implements Serializable {
         return inProgressCount;
     }
 
+    @SuppressWarnings("java:S2629") // error shall be enable almost every time and evaluation is light
     private static void assertFileStateConsistency(final int inProgressCount, final int overallUploadCount,
             final int succeededUploadCount, final int failedUploadCount) {
         if (inProgressCount < 0) {
