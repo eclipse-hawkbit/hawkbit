@@ -156,7 +156,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         Target updateTarget;
 
-        if (targetRest.getTargetType() == -1L) {
+        if (targetRest.getTargetType() != null && targetRest.getTargetType() == -1L) {
             // if targetType in request is -1 - unassign targetType from target
             this.targetManagement.unAssignType(targetId);
             // update target without targetType here ...

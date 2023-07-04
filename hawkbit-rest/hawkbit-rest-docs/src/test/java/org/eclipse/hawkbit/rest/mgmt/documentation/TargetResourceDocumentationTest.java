@@ -204,7 +204,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         enableConfirmationFlow();
 
         final Target target = createTargetByGivenNameWithAttributes(targetId, createDistributionSet());
-        final String targetAsJson = createJsonTarget(targetId, "newTargetName", "I've been updated");
+        final long targetTypeId = target.getTargetType().getId();
+
+        final String targetAsJson = createJsonTarget(targetId, "newTargetName", "I've been updated", targetTypeId);
 
         mockMvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", target.getControllerId())
                 .contentType(MediaType.APPLICATION_JSON).content(targetAsJson)).andExpect(status().isOk())
@@ -220,7 +222,9 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
                                 optionalRequestFieldWithPath("securityToken")
                                         .description(MgmtApiModelProperties.SECURITY_TOKEN),
                                 optionalRequestFieldWithPath("requestAttributes")
-                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES)),
+                                        .description(MgmtApiModelProperties.REQUEST_ATTRIBUTES),
+                                optionalRequestFieldWithPath("targetType").description(MgmtApiModelProperties.TARGETTYPE_ID
+                                    + ". If value of -1 provided the target type will be unassigned.")),
                         getResponseFieldTarget(false)));
     }
 
@@ -983,7 +987,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         return "[" + this.objectMapper.writeValueAsString(target) + "]";
     }
 
-    private String createJsonTarget(final String controllerId, final String name, final String description)
+    private String createJsonTarget(final String controllerId, final String name, final String description, final long targetTypeId)
             throws JsonProcessingException {
         final Map<String, Object> target = new HashMap<>();
         target.put("controllerId", controllerId);
@@ -992,6 +996,7 @@ public class TargetResourceDocumentationTest extends AbstractApiRestDocumentatio
         target.put("address", "https://192.168.0.1");
         target.put("securityToken", "2345678DGGDGFTDzztgf");
         target.put("requestAttributes", true);
+        target.put("targetType", targetTypeId);
         return this.objectMapper.writeValueAsString(target);
     }
 
