@@ -154,10 +154,23 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             }
         }
 
-        final Target updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
+        Target updateTarget;
+
+        if (targetRest.getTargetType() == -1L) {
+            // if targetType in request is -1 - unassign targetType from target
+            this.targetManagement.unAssignType(targetId);
+            // update target without targetType here ...
+            updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
-                .requestAttributes(targetRest.isRequestAttributes()));
+                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+
+        } else {
+            updateTarget = this.targetManagement.update(
+                entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
+                    .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
+                    .requestAttributes(targetRest.isRequestAttributes()));
+
+        }
 
         final MgmtTarget response = MgmtTargetMapper.toResponse(updateTarget, tenantConfigHelper);
         MgmtTargetMapper.addPollStatus(updateTarget, response);
