@@ -137,14 +137,14 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Test filter distribution set by complete property")
     public void testFilterByAttributeComplete() {
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 4);
+        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==true", 3);
         try {
             assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "==noExist*", 0);
             fail("Expected RSQLParameterSyntaxException");
         } catch (final RSQLParameterSyntaxException e) {
         }
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 4);
-        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 1);
+        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=in=(true)", 3);
+        assertRSQLQuery(DistributionSetFields.COMPLETE.name() + "=out=(true)", 2);
     }
 
     @Test
