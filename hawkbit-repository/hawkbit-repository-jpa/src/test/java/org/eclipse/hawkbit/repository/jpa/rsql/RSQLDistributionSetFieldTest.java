@@ -13,13 +13,16 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
+import org.eclipse.hawkbit.repository.SoftwareModuleFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,11 +39,14 @@ import io.qameta.allure.Story;
 public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
 
     private DistributionSet ds;
+    private SoftwareModule sm;
 
     @BeforeEach
     public void setupBeforeTest() {
 
-        ds = testdataFactory.createDistributionSet("DS");
+        sm = testdataFactory.createSoftwareModuleApp("SM");
+
+        ds = testdataFactory.createDistributionSet(Collections.singletonList(sm),"DS");
         ds = distributionSetManagement.update(entityFactory.distributionSet().update(ds.getId()).description("DS"));
         createDistributionSetMetadata(ds.getId(), entityFactory.generateDsMetadata("metaKey", "metaValue"));
 
@@ -90,6 +96,16 @@ public class RSQLDistributionSetFieldTest extends AbstractJpaIntegrationTest {
         assertRSQLQuery(DistributionSetFields.NAME.name() + "==noExist*", 0);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "=in=(DS,notexist)", 1);
         assertRSQLQuery(DistributionSetFields.NAME.name() + "=out=(DS,notexist)", 4);
+    }
+
+    @Test
+    @Description("Test filter distribution set by assigned software module")
+    public void testFilterBySoftwareModule() {
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==" + sm.getName(), 1);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "==" + sm.getId(), 1);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.NAME.name() + "==noExist", 0);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=in=(" + sm.getId() + ", noExist)", 1);
+        assertRSQLQuery(DistributionSetFields.MODULE.name() + "." + SoftwareModuleFields.ID.name() + "=out=(" + sm.getId() + ", noExist)", 4);
     }
 
     @Test
