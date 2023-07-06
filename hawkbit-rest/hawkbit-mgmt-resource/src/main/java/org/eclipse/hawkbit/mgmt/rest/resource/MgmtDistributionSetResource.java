@@ -26,6 +26,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetStatistics;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtInvalidateDistributionSetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
@@ -412,6 +413,32 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
                 distributionSetId);
         return ResponseEntity.ok(new PagedList<>(MgmtSoftwareModuleMapper.toResponse(softwaremodules.getContent()),
                 softwaremodules.getTotalElements()));
+    }
+
+    @Override
+    public ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(Long distributionSetId) {
+        MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
+        distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
+                statistics.addTotalRolloutPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+        return ResponseEntity.ok(statistics.build());
+    }
+
+    @Override
+    public ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(Long distributionSetId) {
+        MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
+        distributionSetManagement.countActionsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
+                statistics.addTotalActionPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+        return ResponseEntity.ok(statistics.build());
+    }
+
+    @Override
+    public ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(Long distributionSetId) {
+        MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
+        distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
+                statistics.addTotalRolloutPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+        distributionSetManagement.countActionsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
+                statistics.addTotalActionPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+        return ResponseEntity.ok(statistics.build());
     }
 
     @Override

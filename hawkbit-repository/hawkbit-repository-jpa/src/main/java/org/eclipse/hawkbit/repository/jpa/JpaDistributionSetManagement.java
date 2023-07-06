@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaStatistic;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -57,6 +58,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -158,6 +160,16 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         return distributionSetRepository.countByTypeId(typeId);
+    }
+
+    @Override
+    public List<Statistic> countRolloutsByStatusForDistributionSet(Long dsId) {
+        return distributionSetRepository.countRolloutsByStatusForDistributionSet(dsId).stream().map(Statistic.class::cast).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Statistic> countActionsByStatusForDistributionSet(Long aId) {
+        return distributionSetRepository.countActionsByStatusForDistributionSet(aId).stream().map(Statistic.class::cast).collect(Collectors.toList());
     }
 
     @Override
@@ -663,6 +675,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return JpaManagementHelper.convertPage(distributionSetRepository.findByTag(pageable, tagId), pageable);
 
     }
+
+
 
     private void throwEntityNotFoundExceptionIfDsTagDoesNotExist(final Long tagId) {
         if (!distributionSetTagRepository.existsById(tagId)) {

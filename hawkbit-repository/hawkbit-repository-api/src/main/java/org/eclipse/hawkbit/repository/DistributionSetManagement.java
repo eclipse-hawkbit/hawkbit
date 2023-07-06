@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.validation.constraints.NotEmpty;
@@ -34,6 +35,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.springframework.data.domain.Page;
@@ -516,6 +518,43 @@ public interface DistributionSetManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     long countByTypeId(long typeId);
+
+    /**
+     * Count all {@link org.eclipse.hawkbit.repository.model.Rollout}s by status for
+     * Distribution Set.
+     *
+     * @param dsId
+     *            to look for
+     *
+     * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Rollout}s status counts
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<Statistic> countRolloutsByStatusForDistributionSet(@NotNull Long dsId);
+
+    /**
+     * Count all {@link org.eclipse.hawkbit.repository.model.Action}s by status for
+     * Distribution Set.
+     *
+     * @param aId
+     *            to look for
+     *
+     * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Action}s status counts
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long aId);
+
+    /**
+     * Count all AutoAssignments by status for
+     * Distribution Set.
+     *
+     * @param aaId
+     *            to look for
+     *
+     * @return List of Statistics for AutoAssignments status counts
+     *
+     */
 
     /**
      * Sets the specified {@link DistributionSet} as invalidated.

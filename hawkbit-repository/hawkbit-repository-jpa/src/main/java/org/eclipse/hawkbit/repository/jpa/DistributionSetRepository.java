@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaStatistic;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -49,6 +51,46 @@ public interface DistributionSetRepository
      */
     @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag and ds.deleted = 0")
     Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") Long tagId);
+
+    /**
+     * Count {@link Rollout}s by Status for Distribution set.
+     *
+     * @param dsId
+     *            to be found
+     * @return map for {@link Rollout}s status counts
+     */
+    @Query(value = "SELECT ra.status, COUNT(ra.status) FROM JpaRollout ra WHERE ra.distributionSet.id = :dsId GROUP BY ra.status")
+    List<Object[]> selectRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
+
+    default List<JpaStatistic> countRolloutsByStatusForDistributionSet(Long dsId) {
+        List<Object[]> results = selectRolloutsByStatusForDistributionSet(dsId);
+        return mapToJpaStatistics(results);
+    }
+
+    /**
+     * Count {@link Action}s by Status for Distribution set.
+     *
+     * @param aId
+     *            to be found
+     * @return map for {@link Action}s status counts
+     */
+    @Query(value = "SELECT a.status, COUNT(a.status) FROM JpaAction a WHERE a.distributionSet.id = :aId GROUP BY a.status")
+    List<Object[]> selectActionsByStatusForDistributionSet(@Param("aId") Long aId);
+
+    default List<JpaStatistic> countActionsByStatusForDistributionSet(Long aId) {
+        List<Object[]> results = selectActionsByStatusForDistributionSet(aId);
+        return mapToJpaStatistics(results);
+    }
+
+    private List<JpaStatistic> mapToJpaStatistics(List<Object[]> results) {
+        List<JpaStatistic> statistics = new ArrayList<>();
+        for (Object[] result : results) {
+            String status = String.valueOf(result[0]);
+            JpaStatistic statistic = new JpaStatistic(status, result[1]);
+            statistics.add(statistic);
+        }
+        return statistics;
+    }
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

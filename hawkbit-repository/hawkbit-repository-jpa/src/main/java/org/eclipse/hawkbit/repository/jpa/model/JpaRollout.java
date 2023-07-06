@@ -98,7 +98,6 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Convert("rolloutstatus")
     @NotNull
     private RolloutStatus status = RolloutStatus.CREATING;
-
     @Column(name = "last_check")
     private long lastCheck;
 
