@@ -419,7 +419,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
         distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
-                statistics.addTotalRolloutPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+                statistics.addTotalRolloutPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
         return ResponseEntity.ok(statistics.build());
     }
 
@@ -427,7 +427,14 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
         distributionSetManagement.countActionsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
-                statistics.addTotalActionPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+                statistics.addTotalActionPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
+        return ResponseEntity.ok(statistics.build());
+    }
+
+    @Override
+    public ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(Long distributionSetId) {
+        MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
+        statistics.addTotalAutoAssignments(distributionSetManagement.countAutoAssignmentsForDistributionSet(distributionSetId));
         return ResponseEntity.ok(statistics.build());
     }
 
@@ -435,9 +442,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(Long distributionSetId) {
         MgmtDistributionSetStatistics.Builder statistics = new MgmtDistributionSetStatistics.Builder();
         distributionSetManagement.countRolloutsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
-                statistics.addTotalRolloutPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+                statistics.addTotalRolloutPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
         distributionSetManagement.countActionsByStatusForDistributionSet(distributionSetId).forEach(statistic ->
-                statistics.addTotalActionPerStatus(statistic.getName(), Long.parseLong(statistic.getValue().toString())));
+                statistics.addTotalActionPerStatus(String.valueOf(statistic.getName()), Long.parseLong(statistic.getData().toString())));
+        statistics.addTotalAutoAssignments(distributionSetManagement.countAutoAssignmentsForDistributionSet(distributionSetId));
         return ResponseEntity.ok(statistics.build());
     }
 

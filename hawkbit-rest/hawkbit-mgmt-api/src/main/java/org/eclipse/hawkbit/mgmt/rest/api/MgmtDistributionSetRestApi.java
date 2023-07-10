@@ -427,6 +427,20 @@ public interface MgmtDistributionSetRestApi {
     ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
+     * Handles the GET request of retrieving Auto Assignments count
+     * for Distribution Set.
+     *
+     * @param distributionSetId
+     *            the ID of the set to retrieve
+     *
+     * @return a DistributionSetStatistics with status OK.
+     *
+     */
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/autoassignments", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
+
+    /**
      * Handles the GET request of retrieving Rollouts, Actions and
      * Auto Assignments counts by Status for Distribution Set.
      *

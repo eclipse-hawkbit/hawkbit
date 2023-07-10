@@ -8,7 +8,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -59,38 +58,29 @@ public interface DistributionSetRepository
      *            to be found
      * @return map for {@link Rollout}s status counts
      */
-    @Query(value = "SELECT ra.status, COUNT(ra.status) FROM JpaRollout ra WHERE ra.distributionSet.id = :dsId GROUP BY ra.status")
-    List<Object[]> selectRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
+    @Query(value = "SELECT ra.status as name, COUNT(ra.status) as data FROM JpaRollout ra WHERE ra.distributionSet.id = :dsId GROUP BY ra.status")
+    List<JpaStatistic> countRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
 
-    default List<JpaStatistic> countRolloutsByStatusForDistributionSet(Long dsId) {
-        List<Object[]> results = selectRolloutsByStatusForDistributionSet(dsId);
-        return mapToJpaStatistics(results);
-    }
 
     /**
      * Count {@link Action}s by Status for Distribution set.
      *
-     * @param aId
+     * @param dsId
      *            to be found
      * @return map for {@link Action}s status counts
      */
-    @Query(value = "SELECT a.status, COUNT(a.status) FROM JpaAction a WHERE a.distributionSet.id = :aId GROUP BY a.status")
-    List<Object[]> selectActionsByStatusForDistributionSet(@Param("aId") Long aId);
+    @Query(value = "SELECT a.status as name, COUNT(a.status) as data FROM JpaAction a WHERE a.distributionSet.id = :dsId GROUP BY a.status")
+    List<JpaStatistic> countActionsByStatusForDistributionSet(@Param("dsId") Long dsId);
 
-    default List<JpaStatistic> countActionsByStatusForDistributionSet(Long aId) {
-        List<Object[]> results = selectActionsByStatusForDistributionSet(aId);
-        return mapToJpaStatistics(results);
-    }
-
-    private List<JpaStatistic> mapToJpaStatistics(List<Object[]> results) {
-        List<JpaStatistic> statistics = new ArrayList<>();
-        for (Object[] result : results) {
-            String status = String.valueOf(result[0]);
-            JpaStatistic statistic = new JpaStatistic(status, result[1]);
-            statistics.add(statistic);
-        }
-        return statistics;
-    }
+    /**
+     * Count total AutoAssignments for Distribution set.
+     *
+     * @param dsId
+     *            to be found
+     * @return number of Auto Assignments for Distribution set
+     */
+    @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
+    Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

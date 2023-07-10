@@ -535,14 +535,27 @@ public interface DistributionSetManagement
      * Count all {@link org.eclipse.hawkbit.repository.model.Action}s by status for
      * Distribution Set.
      *
-     * @param aId
+     * @param dsId
      *            to look for
      *
      * @return List of Statistics for {@link org.eclipse.hawkbit.repository.model.Action}s status counts
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long aId);
+    List<Statistic> countActionsByStatusForDistributionSet(@NotNull Long dsId);
+
+    /**
+     * Count all {@link org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate}s
+     * for Distribution Set.
+     *
+     * @param dsId
+     *            to look for
+     *
+     * @return number of {@link org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate}s
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
+    Long countAutoAssignmentsForDistributionSet(@NotNull Long dsId);
 
     /**
      * Count all AutoAssignments by status for

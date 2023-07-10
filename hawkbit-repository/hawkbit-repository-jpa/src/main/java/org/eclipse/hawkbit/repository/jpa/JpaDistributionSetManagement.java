@@ -44,7 +44,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
-import org.eclipse.hawkbit.repository.jpa.model.JpaStatistic;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
@@ -168,8 +167,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     @Override
-    public List<Statistic> countActionsByStatusForDistributionSet(Long aId) {
-        return distributionSetRepository.countActionsByStatusForDistributionSet(aId).stream().map(Statistic.class::cast).collect(Collectors.toList());
+    public List<Statistic> countActionsByStatusForDistributionSet(Long dsId) {
+        return distributionSetRepository.countActionsByStatusForDistributionSet(dsId).stream().map(Statistic.class::cast).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countAutoAssignmentsForDistributionSet(Long dsId) {
+        return distributionSetRepository.countAutoAssignmentsForDistributionSet(dsId);
     }
 
     @Override

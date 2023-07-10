@@ -12,24 +12,6 @@ package org.eclipse.hawkbit.repository.jpa.model;
 
 import org.eclipse.hawkbit.repository.model.Statistic;
 
-public class JpaStatistic implements Statistic {
+public interface JpaStatistic extends Statistic {
 
-  private final String name;
-
-  private final Object value;
-
-  public JpaStatistic(String name, Object value) {
-    this.name = name;
-    this.value = value;
-  }
-
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public Object getValue() {
-    return value;
-  }
 }

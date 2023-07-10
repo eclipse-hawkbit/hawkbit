@@ -27,6 +27,9 @@ public class MgmtDistributionSetStatistics {
   @JsonProperty
   private Map<String, Long> totalRolloutsPerStatus;
 
+  @JsonProperty
+  private Long totalAutoAssignments;
+
   private MgmtDistributionSetStatistics() {
     // Private constructor to enforce the use of the builder pattern
   }
@@ -39,9 +42,15 @@ public class MgmtDistributionSetStatistics {
     return totalRolloutsPerStatus;
   }
 
+  public Long getTotalAutoAssignments() {
+    return totalAutoAssignments;
+  }
+
   public static class Builder {
     private Map<String, Long> totalActionsPerStatus;
     private Map<String, Long> totalRolloutsPerStatus;
+
+    private Long totalAutoAssignments;
 
     public Builder() {
       totalActionsPerStatus = new HashMap<>();
@@ -58,10 +67,16 @@ public class MgmtDistributionSetStatistics {
       return this;
     }
 
+    public Builder addTotalAutoAssignments(Long count) {
+      totalAutoAssignments = count;
+      return this;
+    }
+
     public MgmtDistributionSetStatistics build() {
       MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
       statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
       statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
+      statistics.totalAutoAssignments = totalAutoAssignments;
       return statistics;
     }
 

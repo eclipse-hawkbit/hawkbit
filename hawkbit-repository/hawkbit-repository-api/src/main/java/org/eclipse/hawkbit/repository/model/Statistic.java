@@ -15,11 +15,11 @@ public interface Statistic {
    *
    * @return the key of the Statistic entity.
    */
-  String getName();
+  Object getName();
 
   /**
    *
    * @return the value of the Statistic entity.
    */
-  Object getValue();
+  Object getData();
 }
