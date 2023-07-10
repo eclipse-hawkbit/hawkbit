@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
@@ -55,8 +56,11 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.NamedVersionedEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
@@ -1155,6 +1159,67 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(InvalidDistributionSetException.class)
                 .as("Invalid distributionSet should throw an exception").isThrownBy(() -> distributionSetManagement
                         .updateMetaData(ds.getId(), entityFactory.generateDsMetadata(knownKey1, knownUpdateValue)));
+    }
+
+    @Test
+    @Description("Get the Rollouts count by status statistics for a specific Distribution Set")
+    void getRolloutsCountStatisticsForDistributionSet() {
+        DistributionSet ds1 = testdataFactory.createDistributionSet("DS1");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
+        DistributionSet ds3 = testdataFactory.createDistributionSet("DS3");
+        testdataFactory.createTargets("targets", 4);
+        Rollout rollout1 = testdataFactory.createRolloutByVariables("rollout1", "description",
+                1, "name==targets*", ds1, "50", "5", false);
+        Rollout rollout2 = testdataFactory.createRolloutByVariables("rollout2", "description",
+                1, "name==targets*", ds2, "50", "5", false);
+
+        rolloutManagement.start(rollout2.getId());
+
+        assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId())).hasSize(1);
+        assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId())).hasSize(1);
+        assertThat(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds3.getId())).isEmpty();
+
+        Optional<Rollout> rollout = rolloutManagement.get(rollout1.getId());
+        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds1.getId()).get(0).getName()))).isEqualTo(value.getStatus()));
+
+        rollout = rolloutManagement.get(rollout2.getId());
+        rollout.ifPresent(value -> assertThat(Rollout.RolloutStatus.valueOf(String.valueOf(distributionSetManagement.countRolloutsByStatusForDistributionSet(ds2.getId()).get(0).getName()))).isEqualTo(value.getStatus()));
+    }
+
+    @Test
+    @Description("Get the Rollouts count by status statistics for a specific Distribution Set")
+    void getActionsCountStatisticsForDistributionSet() {
+        DistributionSet ds = testdataFactory.createDistributionSet("DS");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
+        testdataFactory.createTargets("targets", 4);
+        Rollout rollout = testdataFactory.createRolloutByVariables("rollout", "description",
+                1, "name==targets*", ds, "50", "5", false);
+
+        rolloutManagement.start(rollout.getId());
+        rolloutHandler.handleAll();
+
+        List<Statistic> statistics = distributionSetManagement.countActionsByStatusForDistributionSet(ds.getId());
+
+        assertThat(statistics).hasSize(1);
+        assertThat(distributionSetManagement.countActionsByStatusForDistributionSet(ds2.getId())).isEmpty();
+
+        statistics.forEach(statistic -> assertThat(Status.valueOf(String.valueOf(statistic.getName()))).isEqualTo(Status.RUNNING));
+    }
+
+    @Test
+    @Description("Get the Rollouts count by status statistics for a specific Distribution Set")
+    void getAutoAssignmentsCountStatisticsForDistributionSet() {
+        DistributionSet ds = testdataFactory.createDistributionSet("DS");
+        DistributionSet ds2 = testdataFactory.createDistributionSet("DS2");
+        testdataFactory.createTargets("targets", 4);
+        targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("test filter 1").autoAssignDistributionSet(ds.getId()).query("name==targets*"));
+
+        targetFilterQueryManagement.create(
+                entityFactory.targetFilterQuery().create().name("test filter 2").autoAssignDistributionSet(ds.getId()).query("name==targets*"));
+
+        assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds.getId())).isEqualTo(2);
+        assertThat(distributionSetManagement.countAutoAssignmentsForDistributionSet(ds2.getId())).isNull();
     }
 
     // can be removed with java-11

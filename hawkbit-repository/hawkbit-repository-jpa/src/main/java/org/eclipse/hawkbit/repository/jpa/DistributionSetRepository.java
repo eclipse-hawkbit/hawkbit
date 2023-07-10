@@ -58,7 +58,7 @@ public interface DistributionSetRepository
      *            to be found
      * @return map for {@link Rollout}s status counts
      */
-    @Query(value = "SELECT ra.status as name, COUNT(ra.status) as data FROM JpaRollout ra WHERE ra.distributionSet.id = :dsId GROUP BY ra.status")
+    @Query(value = "SELECT r.status as name, COUNT(r.status) as data FROM JpaRollout r WHERE r.distributionSet.id = :dsId GROUP BY r.status")
     List<JpaStatistic> countRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
 
 

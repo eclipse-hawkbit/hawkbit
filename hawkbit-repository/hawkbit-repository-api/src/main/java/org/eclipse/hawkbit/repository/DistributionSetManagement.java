@@ -558,17 +558,6 @@ public interface DistributionSetManagement
     Long countAutoAssignmentsForDistributionSet(@NotNull Long dsId);
 
     /**
-     * Count all AutoAssignments by status for
-     * Distribution Set.
-     *
-     * @param aaId
-     *            to look for
-     *
-     * @return List of Statistics for AutoAssignments status counts
-     *
-     */
-
-    /**
      * Sets the specified {@link DistributionSet} as invalidated.
      *
      * @param set
