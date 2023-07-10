@@ -9,6 +9,9 @@
 package org.eclipse.hawkbit.repository;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 
@@ -49,22 +52,22 @@ public enum DistributionSetFields implements FieldNameProvider {
      * The id field.
      */
     ID("id"),
-
+    /**
+     * The module field.
+     */
+    MODULE("modules", SoftwareModuleFields.ID.getFieldName(), SoftwareModuleFields.NAME.getFieldName()),
     /**
      * The tags field.
      */
     TAG("tags.name"),
-
     /**
      * The sw type key field.
      */
     TYPE("type.key"),
-
     /**
      * The metadata.
      */
     METADATA("metadata", new SimpleImmutableEntry<>("key", "value")),
-
     /**
      * The valid field.
      */
@@ -74,19 +77,31 @@ public enum DistributionSetFields implements FieldNameProvider {
     private boolean mapField;
     private Entry<String, String> subEntityMapTuple;
 
+    private final List<String> subEntityAttributes;
+
     private DistributionSetFields(final String fieldName) {
-        this(fieldName, false, null);
+        this(fieldName, false, null, Collections.emptyList());
+    }
+
+    private DistributionSetFields(final String fieldName, final String... subEntityAttributes) {
+        this(fieldName, false, null, Arrays.asList(subEntityAttributes));
     }
 
     private DistributionSetFields(final String fieldName, final Entry<String, String> subEntityMapTuple) {
-        this(fieldName, true, subEntityMapTuple);
+        this(fieldName, true, subEntityMapTuple, Collections.emptyList());
     }
 
     private DistributionSetFields(final String fieldName, final boolean mapField,
-            final Entry<String, String> subEntityMapTuple) {
+            final Entry<String, String> subEntityMapTuple, List<String> subEntityAttributes) {
         this.fieldName = fieldName;
         this.mapField = mapField;
         this.subEntityMapTuple = subEntityMapTuple;
+        this.subEntityAttributes = subEntityAttributes;
+    }
+
+    @Override
+    public List<String> getSubEntityAttributes() {
+        return Collections.unmodifiableList(subEntityAttributes);
     }
 
     @Override
