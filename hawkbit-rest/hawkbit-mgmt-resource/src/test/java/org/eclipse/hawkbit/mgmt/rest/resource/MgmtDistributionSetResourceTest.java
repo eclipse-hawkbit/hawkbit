@@ -76,10 +76,8 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
-import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.Assert;
 
-import javax.validation.constraints.AssertTrue;
 
 @Feature("Component Tests - Management API")
 @Story("Distribution Set Resource")
