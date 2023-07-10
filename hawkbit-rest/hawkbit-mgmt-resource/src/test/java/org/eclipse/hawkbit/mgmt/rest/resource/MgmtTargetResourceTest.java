@@ -455,6 +455,75 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target.")
+    public void updateTargetAndUnnasignTargetType() throws Exception {
+        final String knownControllerId = "123";
+        final String knownNewAddress = "amqp://test123/foobar";
+        final String knownNameNotModify = "controllerName";
+        final Long unnasignTargetTypeValue = -1L;
+
+        final TargetType targetType = targetTypeManagement.create(
+            entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
+
+        final String body = new JSONObject().put("targetType", unnasignTargetTypeValue).toString();
+
+        // create a target with the created TargetType
+        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
+            .address(knownNewAddress).targetType(targetType.getId()));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+            .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
+            .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)))
+            .andExpect(jsonPath("$.targetType").exists());
+
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+            .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
+            .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)))
+            .andExpect(jsonPath("$.targetType").doesNotExist());
+
+    }
+
+    @Test
+    @Description("Ensures that when targetType value of -1 is provided the target type is unassigned from the target when updating multiple fields in target object.")
+    public void updateTargetNameAndUnnasignTargetType() throws Exception {
+        final String knownControllerId = "123";
+        final String knownNewAddress = "amqp://test123/foobar";
+        final String knownNameNotModify = "controllerName";
+        final Long unnasignTargetTypeValue = -1L;
+        final String controllerNewName = "controllerNewName";
+
+        final TargetType targetType = targetTypeManagement.create(
+            entityFactory.targetType().create().name("targettype1").description("targettypedes1"));
+
+        final String body = new JSONObject()
+        .put("targetType", unnasignTargetTypeValue).put("name", "controllerNewName")
+            .toString();
+
+        // create a target with the created TargetType
+        targetManagement.create(entityFactory.target().create().controllerId(knownControllerId).name(knownNameNotModify)
+            .address(knownNewAddress).targetType(targetType.getId()));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+            .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
+            .andExpect(jsonPath("$.name", equalTo(knownNameNotModify)))
+            .andExpect(jsonPath("$.targetType").exists());
+
+        //check if controller name is updated AND target type is missing (not assigned)
+        mvc.perform(put(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownControllerId).content(body)
+                .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+            .andExpect(jsonPath("$.controllerId", equalTo(knownControllerId)))
+            .andExpect(jsonPath("$.address", equalTo(knownNewAddress)))
+            .andExpect(jsonPath("$.name", equalTo(controllerNewName)))
+            .andExpect(jsonPath("$.targetType").doesNotExist());
+    }
+
+    @Test
     @Description("Ensures that target query returns list of targets in defined format.")
     void getTargetWithoutAdditionalRequestParameters() throws Exception {
         final int knownTargetAmount = 3;
