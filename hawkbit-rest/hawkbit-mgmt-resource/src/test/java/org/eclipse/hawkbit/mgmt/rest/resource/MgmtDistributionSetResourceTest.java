@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
-import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetStatistics;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -1456,7 +1455,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/rollouts", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/rollouts", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalRolloutsPerStatus.READY", equalTo(1)))
@@ -1465,7 +1464,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("totalActionsPerStatus").doesNotExist())
                 .andExpect(jsonPath("totalAutoAssignments").doesNotExist());
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/rollouts", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/rollouts", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
@@ -1486,7 +1485,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         rolloutManagement.start(rollout.getId());
         rolloutHandler.handleAll();
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/actions", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/actions", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalActionsPerStatus.RUNNING", equalTo(4)))
@@ -1494,7 +1493,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
                 .andExpect(jsonPath("totalAutoAssignments").doesNotExist());
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/actions", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/actions", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
@@ -1515,14 +1514,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         targetFilterQueryManagement.create(
                 entityFactory.targetFilterQuery().create().name("test filter 2").autoAssignDistributionSet(ds1.getId()).query("name==targets*"));
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/autoassignments", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/autoassignments", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalAutoAssignments", equalTo(2)))
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
                 .andExpect(jsonPath("totalActionsPerStatus").doesNotExist());
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/autoassignments", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/autoassignments", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
@@ -1547,7 +1546,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         rolloutHandler.handleAll();
 
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics", ds1.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalAutoAssignments", equalTo(1)))
@@ -1557,7 +1556,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("totalRolloutsPerStatus.total", equalTo(1)));
 
 
-        mvc.perform(get("/rest/v1/distributionsets/{ds}/statistics/autoassignments", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{ds}/statistics/autoassignments", ds2.getId()).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("totalRolloutsPerStatus").doesNotExist())
