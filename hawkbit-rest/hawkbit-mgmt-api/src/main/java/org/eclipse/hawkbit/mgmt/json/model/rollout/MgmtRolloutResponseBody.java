@@ -59,6 +59,12 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     @JsonProperty
     private Integer weight;
 
+    @JsonProperty
+    private String approvalRemark;
+
+    @JsonProperty
+    private String approveDecidedBy;
+
     public boolean isDeleted() {
         return deleted;
     }
@@ -157,5 +163,21 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     public Integer getTotalGroups() {
         return totalGroups;
+    }
+
+    public void setApprovalRemark(final String approvalRemark) {
+        this.approvalRemark = approvalRemark;
+    }
+
+    public String getApprovalRemark() {
+        return approvalRemark;
+    }
+
+    public void setApproveDecidedBy(final String approveDecidedBy) {
+        this.approveDecidedBy = approveDecidedBy;
+    }
+
+    public String getApproveDecidedBy(final String approveDecidedBy) {
+        return approveDecidedBy;
     }
 }

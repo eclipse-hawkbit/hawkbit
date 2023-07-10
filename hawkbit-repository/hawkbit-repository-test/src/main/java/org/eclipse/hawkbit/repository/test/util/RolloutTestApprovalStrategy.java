@@ -19,6 +19,8 @@ public class RolloutTestApprovalStrategy implements RolloutApprovalStrategy {
 
     private boolean approvalNeeded = false;
 
+    private String approvalDecidedBy;
+
     @Override
     public boolean isApprovalNeeded(Rollout rollout) {
         return approvalNeeded;
@@ -28,6 +30,10 @@ public class RolloutTestApprovalStrategy implements RolloutApprovalStrategy {
         this.approvalNeeded = approvalNeeded;
     }
 
+    public void setApproveDecidedBy(final String user) {
+        this.approvalDecidedBy = user;
+    }
+
     @Override
     public void onApprovalRequired(Rollout rollout) {
         // do nothing, as no action is needed when testing
@@ -35,6 +41,6 @@ public class RolloutTestApprovalStrategy implements RolloutApprovalStrategy {
 
     @Override
     public String getApprovalUser(Rollout rollout) {
-        return null;
+        return approvalDecidedBy;
     }
 }

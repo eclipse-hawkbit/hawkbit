@@ -87,7 +87,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING).accept(MediaTypes.HAL_JSON_VALUE))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andDo(this.document.document(getRolloutResponseFields(true, false,
+                .andDo(this.document.document(getRolloutResponseFields(true, false, false,
                         fieldWithPath("total").description(ApiModelPropertiesGeneric.TOTAL_ELEMENTS),
                         fieldWithPath("size").type(JsonFieldType.NUMBER).description(ApiModelPropertiesGeneric.SIZE),
                         fieldWithPath("content").description(MgmtApiModelProperties.ROLLOUT_LIST))));
@@ -106,7 +106,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                 .andDo(this.document.document(getFilterRequestParamter()));
     }
 
-    private Snippet getRolloutResponseFields(final boolean isArray, final boolean withDetails,
+    private Snippet getRolloutResponseFields(final boolean isArray, final boolean withDetails, final boolean isApproveRequired,
             final FieldDescriptor... descriptors) {
         final String arrayPrefix = getArrayPrefix(isArray);
         final List<FieldDescriptor> allFieldDescriptor = new ArrayList<>();
@@ -162,6 +162,12 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                     fieldWithPath(arrayPrefix + "_links.deny").description(MgmtApiModelProperties.ROLLOUT_LINKS_DENY));
             allFieldDescriptor.add(fieldWithPath(arrayPrefix + "_links.distributionset")
                     .description(MgmtApiModelProperties.LINK_TO_DS));
+            if (isApproveRequired) {
+                allFieldDescriptor.add(fieldWithPath(arrayPrefix + "approveDecidedBy")
+                    .description("Who Approved/Denied the rollout. Not present if the rollout is missing approval."));
+                allFieldDescriptor.add(fieldWithPath(arrayPrefix + "approvalRemark")
+                    .description("A user remark of the approve/denied decision. Not present if the rollout is missing approval."));
+            }
         }
 
         return new DocumenationResponseFieldsSnippet(allFieldDescriptor);
@@ -172,12 +178,16 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
             + SpPermission.READ_ROLLOUT)
     public void getRollout() throws Exception {
         enableMultiAssignments();
+        approvalStrategy.setApprovalNeeded(true);
+        approvalStrategy.setApproveDecidedBy("exampleUsername");
         final Rollout rollout = createRolloutEntity();
+
+        rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED, "Approved remark.");
 
         mockMvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", rollout.getId())
                 .accept(MediaTypes.HAL_JSON_VALUE)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andDo(this.document.document(getRolloutResponseFields(false, true),
+                .andDo(this.document.document(getRolloutResponseFields(false, true, true),
                         pathParameters(parameterWithName("rolloutId").description(ApiModelPropertiesGeneric.ITEM_ID))));
     }
 
@@ -256,7 +266,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                         optionalRequestFieldWithPath("errorAction.expression")
                                 .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP)),
 
-                        getRolloutResponseFields(false, true)));
+                        getRolloutResponseFields(false, true, false)));
 
     }
 
@@ -386,7 +396,7 @@ public class RolloutResourceDocumentationTest extends AbstractApiRestDocumentati
                                         .attributes(key("value").value("['pause']")),
                                 optionalRequestFieldWithPath("groups[].errorAction.expression")
                                         .description(MgmtApiModelProperties.ROLLOUT_ERROR_ACTION_EXP)),
-                        getRolloutResponseFields(false, true)));
+                        getRolloutResponseFields(false, true, false)));
     }
 
     @Test
