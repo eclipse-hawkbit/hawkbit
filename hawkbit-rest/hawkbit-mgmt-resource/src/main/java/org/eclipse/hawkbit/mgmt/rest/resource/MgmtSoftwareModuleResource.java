@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
+import org.eclipse.hawkbit.rest.data.ResponseList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -105,7 +106,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             fileName = file.getOriginalFilename();
         }
 
-        try (InputStream in = file.getInputStream()) {
+        try (final InputStream in = file.getInputStream()) {
             final Artifact result = artifactManagement.create(new ArtifactUpload(in, softwareModuleId, fileName,
                     md5Sum == null ? null : md5Sum.toLowerCase(), sha1Sum == null ? null : sha1Sum.toLowerCase(),
                     sha256Sum == null ? null : sha256Sum.toLowerCase(), false, file.getContentType(), file.getSize()));
@@ -122,10 +123,19 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     public ResponseEntity<List<MgmtArtifact>> getArtifacts(
-            @PathVariable("softwareModuleId") final Long softwareModuleId) {
+            @PathVariable("softwareModuleId") final Long softwareModuleId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_WITH_DOWNLOAD_URL, required = false) final Boolean withDownloadUrl) {
 
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
-        return ResponseEntity.ok(MgmtSoftwareModuleMapper.artifactsToResponse(module.getArtifacts()));
+
+        final List<MgmtArtifact> response = module.getArtifacts().stream().map(artifact -> {
+            final MgmtArtifact mgmtArtifact = MgmtSoftwareModuleMapper.toResponse(artifact);
+            if (!module.isDeleted() && Boolean.TRUE.equals(withDownloadUrl)) {
+                MgmtSoftwareModuleMapper.addLinks(artifact, mgmtArtifact, artifactUrlHandler, systemManagement);
+            }
+            return mgmtArtifact;
+        }).toList();
+        return ResponseEntity.ok(new ResponseList<>(response));
     }
 
     @Override
@@ -141,7 +151,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
         final MgmtArtifact response = MgmtSoftwareModuleMapper.toResponse(module.getArtifact(artifactId).get());
         if (!module.isDeleted()) {
-            if(useArtifactUrlHandler != null && useArtifactUrlHandler) {
+            if (Boolean.TRUE.equals(useArtifactUrlHandler)) {
                 MgmtSoftwareModuleMapper.addLinks(module.getArtifact(artifactId).get(), response, artifactUrlHandler,
                         systemManagement);
             } else {
@@ -177,7 +187,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
 
         final Slice<SoftwareModule> findModulesAll;
-        long countModulesAll;
+        final long countModulesAll;
         if (rsqlParam != null) {
             findModulesAll = softwareModuleManagement.findByRsql(pageable, rsqlParam);
             countModulesAll = ((Page<SoftwareModule>) findModulesAll).getTotalElements();

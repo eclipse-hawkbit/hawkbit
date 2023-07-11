@@ -249,7 +249,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     public void getArtifacts() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
 
         artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
@@ -279,12 +279,31 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     }
 
     @Test
+    @Description("Handles the GET request of retrieving all meta data of artifacts assigned to a software module (including a download URL by the artifact provider). Required Permission: "
+            + SpPermission.READ_REPOSITORY)
+    public void getArtifactsWithParameters() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte[] random = RandomStringUtils.random(5).getBytes();
+
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
+
+        mockMvc.perform(
+                get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
+                        .param("withdownloadurl", "true"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON))
+                .andDo(this.document.document(requestParameters(parameterWithName("withdownloadurl")
+                        .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER))));
+    }
+
+    @Test
     @Description("Handles POST request for artifact upload. Required Permission: " + SpPermission.CREATE_REPOSITORY)
     public void postArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         // create test file
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         mockMvc.perform(
@@ -320,7 +339,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
         final MockMultipartFile file = new MockMultipartFile("file", "origFilename", null, random);
 
         mockMvc.perform(
@@ -342,7 +361,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     public void deleteArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
 
         final Artifact artifact = artifactManagement
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
@@ -361,7 +380,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     public void getArtifact() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
 
         final Artifact artifact = artifactManagement
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
@@ -397,7 +416,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     public void getArtifactWithParameters() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
 
         final Artifact artifact = artifactManagement
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
@@ -419,7 +438,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
-        final byte random[] = RandomStringUtils.random(5).getBytes();
+        final byte[] random = RandomStringUtils.random(5).getBytes();
 
         final Artifact artifact = artifactManagement
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));

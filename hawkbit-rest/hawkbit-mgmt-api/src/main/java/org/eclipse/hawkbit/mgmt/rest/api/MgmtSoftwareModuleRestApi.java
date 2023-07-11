@@ -82,7 +82,8 @@ public interface MgmtSoftwareModuleRestApi {
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
-    ResponseEntity<List<MgmtArtifact>> getArtifacts(@PathVariable("softwareModuleId") final Long softwareModuleId);
+    ResponseEntity<List<MgmtArtifact>> getArtifacts(@PathVariable("softwareModuleId") final Long softwareModuleId,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_WITH_DOWNLOAD_URL, required = false) final Boolean withDownloadUrl);
 
     /**
      * Handles the GET request of retrieving a single Artifact meta data

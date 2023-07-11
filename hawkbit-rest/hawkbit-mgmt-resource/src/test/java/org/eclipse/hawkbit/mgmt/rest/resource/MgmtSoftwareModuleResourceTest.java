@@ -64,6 +64,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -570,14 +572,12 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         // perform test
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()).accept(
-                        MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
@@ -586,29 +586,30 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$._links.download.href",
-                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
-                                + artifact.getId() + "/download")))
-                .andExpect(jsonPath("$._links.self.href", equalTo(
-                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact.getId())));
+                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
+                                .formatted(sm.getId(), artifact.getId()))))
+                .andExpect(jsonPath("$._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(),
+                                artifact.getId()))));
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and cdn download links.")
-    void getArtifactWithCdnDownloadUrl() throws Exception {
+    void getArtifactWithCdnDownloadParameter(final boolean useArtifactUrlHandler) throws Exception {
         // prepare data for test
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
         final byte random[] = randomBytes(artifactSize);
 
-        final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
 
         // perform test
-        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}?useartifacturlhandler=true", sm.getId(), artifact.getId()).accept(
-                        MediaType.APPLICATION_JSON))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk())
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId())
+                .param("useartifacturlhandler", String.valueOf(useArtifactUrlHandler))
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
                 .andExpect(jsonPath("$.id", equalTo(artifact.getId().intValue())))
                 .andExpect(jsonPath("$.size", equalTo(random.length)))
@@ -616,11 +617,13 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.hashes.sha1", equalTo(artifact.getSha1Hash())))
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
-                .andExpect(jsonPath("$._links.download.href",
-                        equalTo("http://localhost:8080/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
-                                + artifact.getFilename())))
+                .andExpect(jsonPath("$._links.download.href", useArtifactUrlHandler
+                        ? equalTo("http://external-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
+                        : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
+                                .formatted(sm.getId(), artifact.getId()))))
                 .andExpect(jsonPath("$._links.self.href", equalTo(
-                        "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact.getId())));
+                        "http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(),
+                                artifact.getId()))));
     }
 
     @Test
@@ -651,7 +654,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
+    @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata.")
     void getArtifacts() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -683,6 +686,55 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
                 .andExpect(jsonPath("$.[1]._links.self.href", equalTo(
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
+    void getArtifactsWithCdnDownloadParameter(final boolean withDownloadUrl) throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final int artifactSize = 5 * 1024;
+        final byte[] random = randomBytes(artifactSize);
+
+        final Artifact artifact = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        final Artifact artifact2 = artifactManagement
+                .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+
+        mvc.perform(get("/rest/v1/softwaremodules/{smId}/artifacts", sm.getId())
+                .param("withdownloadurl", String.valueOf(withDownloadUrl))
+                .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.[0].id", equalTo(artifact.getId().intValue())))
+                .andExpect(jsonPath("$.[0].size", equalTo(random.length)))
+                .andExpect(jsonPath("$.[0].hashes.md5", equalTo(artifact.getMd5Hash())))
+                .andExpect(jsonPath("$.[0].hashes.sha1", equalTo(artifact.getSha1Hash())))
+                .andExpect(jsonPath("$.[0].hashes.sha256", equalTo(artifact.getSha256Hash())))
+                .andExpect(jsonPath("$.[0].providedFilename", equalTo("file1")))
+                .andExpect(
+                        withDownloadUrl
+                                ? jsonPath("$.[0]._links.download.href",
+                                        equalTo("http://external-cdn.com/artifacts/%s/download"
+                                                .formatted(artifact.getFilename())))
+                                : jsonPath("$.[0]._links", Matchers.not(Matchers.hasKey("download"))))
+                .andExpect(jsonPath("$.[0]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/"
+                                + artifact.getId())))
+                .andExpect(jsonPath("$.[1].id", equalTo(artifact2.getId().intValue())))
+                .andExpect(jsonPath("$.[1].hashes.md5", equalTo(artifact2.getMd5Hash())))
+                .andExpect(jsonPath("$.[1].hashes.sha1", equalTo(artifact2.getSha1Hash())))
+                .andExpect(jsonPath("$.[1].hashes.sha256", equalTo(artifact2.getSha256Hash())))
+                .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
+                .andExpect(
+                        withDownloadUrl
+                                ? jsonPath("$.[1]._links.download.href",
+                                        equalTo("http://external-cdn.com/artifacts/%s/download"
+                                                .formatted(artifact2.getFilename())))
+                                : jsonPath("$.[1]._links", Matchers.not(Matchers.hasKey("download"))))
+                .andExpect(jsonPath("$.[1]._links.self.href",
+                        equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s".formatted(sm.getId(),
+                                artifact2.getId()))));
     }
 
     @Test
