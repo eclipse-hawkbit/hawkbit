@@ -15,6 +15,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaStatistic;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
@@ -49,6 +50,37 @@ public interface DistributionSetRepository
      */
     @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag and ds.deleted = 0")
     Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") Long tagId);
+
+    /**
+     * Count {@link Rollout}s by Status for Distribution set.
+     *
+     * @param dsId
+     *            to be found
+     * @return map for {@link Rollout}s status counts
+     */
+    @Query(value = "SELECT r.status as name, COUNT(r.status) as data FROM JpaRollout r WHERE r.distributionSet.id = :dsId GROUP BY r.status")
+    List<JpaStatistic> countRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
+
+
+    /**
+     * Count {@link Action}s by Status for Distribution set.
+     *
+     * @param dsId
+     *            to be found
+     * @return map for {@link Action}s status counts
+     */
+    @Query(value = "SELECT a.status as name, COUNT(a.status) as data FROM JpaAction a WHERE a.distributionSet.id = :dsId GROUP BY a.status")
+    List<JpaStatistic> countActionsByStatusForDistributionSet(@Param("dsId") Long dsId);
+
+    /**
+     * Count total AutoAssignments for Distribution set.
+     *
+     * @param dsId
+     *            to be found
+     * @return number of Auto Assignments for Distribution set
+     */
+    @Query(value = "SELECT COUNT(f.autoAssignDistributionSet) FROM JpaTargetFilterQuery f WHERE f.autoAssignDistributionSet.id = :dsId GROUP BY f.autoAssignDistributionSet")
+    Long countAutoAssignmentsForDistributionSet(@Param("dsId") Long dsId);
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.

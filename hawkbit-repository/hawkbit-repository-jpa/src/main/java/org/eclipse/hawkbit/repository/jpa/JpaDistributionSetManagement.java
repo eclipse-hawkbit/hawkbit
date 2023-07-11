@@ -57,6 +57,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Statistic;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -158,6 +159,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         }
 
         return distributionSetRepository.countByTypeId(typeId);
+    }
+
+    @Override
+    public List<Statistic> countRolloutsByStatusForDistributionSet(Long dsId) {
+        return distributionSetRepository.countRolloutsByStatusForDistributionSet(dsId).stream().map(Statistic.class::cast).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Statistic> countActionsByStatusForDistributionSet(Long dsId) {
+        return distributionSetRepository.countActionsByStatusForDistributionSet(dsId).stream().map(Statistic.class::cast).collect(Collectors.toList());
+    }
+
+    @Override
+    public Long countAutoAssignmentsForDistributionSet(Long dsId) {
+        return distributionSetRepository.countAutoAssignmentsForDistributionSet(dsId);
     }
 
     @Override
@@ -663,6 +679,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return JpaManagementHelper.convertPage(distributionSetRepository.findByTag(pageable, tagId), pageable);
 
     }
+
+
 
     private void throwEntityNotFoundExceptionIfDsTagDoesNotExist(final Long tagId) {
         if (!distributionSetTagRepository.existsById(tagId)) {

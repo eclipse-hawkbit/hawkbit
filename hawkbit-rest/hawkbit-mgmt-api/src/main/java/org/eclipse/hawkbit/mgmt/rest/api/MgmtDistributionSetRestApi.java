@@ -18,6 +18,7 @@ import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSetStatistics;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtInvalidateDistributionSetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtTargetAssignmentResponseBody;
@@ -396,6 +397,62 @@ public interface MgmtDistributionSetRestApi {
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
             @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam);
+
+    /**
+     * Handles the GET request of retrieving Rollouts count by Status
+     * for Distribution Set.
+     *
+     * @param distributionSetId
+     *            the ID of the set to retrieve
+     *
+     * @return a DistributionSetStatistics with status OK.
+     *
+     */
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/rollouts", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtDistributionSetStatistics> getRolloutsCountByStatusForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
+
+    /**
+     * Handles the GET request of retrieving Actions count by Status
+     * for Distribution Set.
+     *
+     * @param distributionSetId
+     *            the ID of the set to retrieve
+     *
+     * @return a DistributionSetStatistics with status OK.
+     *
+     */
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/actions", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtDistributionSetStatistics> getActionsCountByStatusForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
+
+    /**
+     * Handles the GET request of retrieving Auto Assignments count
+     * for Distribution Set.
+     *
+     * @param distributionSetId
+     *            the ID of the set to retrieve
+     *
+     * @return a DistributionSetStatistics with status OK.
+     *
+     */
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics/autoassignments", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtDistributionSetStatistics> getAutoAssignmentsCountForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
+
+    /**
+     * Handles the GET request of retrieving Rollouts, Actions and
+     * Auto Assignments counts by Status for Distribution Set.
+     *
+     * @param distributionSetId
+     *            the ID of the set to retrieve
+     *
+     * @return a DistributionSetStatistics with status OK.
+     *
+     */
+    @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/statistics", produces = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<MgmtDistributionSetStatistics> getStatisticsForDistributionSet(@PathVariable("distributionSetId") Long distributionSetId);
 
     /**
      * Invalidates a distribution set
