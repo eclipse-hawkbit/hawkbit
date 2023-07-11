@@ -208,11 +208,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                         contains(artifact.getSha256Hash())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.download-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename())))
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
+                                + "/download")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[0]._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                                 + "/softwaremodules/" + osModuleId + "/artifacts/" + artifact.getFilename()
-                                + ".MD5SUM")))
+                                + "/download.MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].size", contains(ARTIFACT_SIZE)))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1].filename",
                         contains(artifactSignature.getFilename())))
@@ -224,11 +225,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                         contains(artifactSignature.getSha256Hash())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.download-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
-                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename())))
+                                + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
+                                + "/download")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='os')].artifacts[1]._links.md5sum-http.href",
                         contains(HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                                 + "/softwaremodules/" + osModuleId + "/artifacts/" + artifactSignature.getFilename()
-                                + ".MD5SUM")))
+                                + "/download.MD5SUM")))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].version",
                         contains(ds.findFirstModuleByType(appType).get().getVersion())))
                 .andExpect(jsonPath(prefix + ".chunks[?(@.part=='bApp')].metadata").doesNotExist())
