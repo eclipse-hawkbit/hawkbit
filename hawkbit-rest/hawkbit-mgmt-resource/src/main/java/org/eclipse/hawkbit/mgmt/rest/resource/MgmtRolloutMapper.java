@@ -95,6 +95,9 @@ final class MgmtRolloutMapper {
             body.setTotalGroups(rollout.getRolloutGroupsCreated());
             body.setStartAt(rollout.getStartAt());
 
+            body.setApproveDecidedBy(rollout.getApprovalDecidedBy());
+            body.setApprovalRemark(rollout.getApprovalRemark());
+
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).start(rollout.getId())).withRel("start").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).pause(rollout.getId())).withRel("pause").expand());
             body.add(linkTo(methodOn(MgmtRolloutRestApi.class).resume(rollout.getId())).withRel("resume").expand());

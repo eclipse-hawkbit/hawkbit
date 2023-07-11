@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupSuccessCond
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
@@ -82,6 +83,9 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Autowired
     private RolloutGroupManagement rolloutGroupManagement;
+
+    @Autowired
+    private RolloutTestApprovalStrategy approvalStrategy;
 
     @Test
     @Description("Testing that creating rollout with wrong body returns bad request")
@@ -1284,6 +1288,34 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
+    }
+
+    @Test
+    @Description("Check if approvalDecidedBy and approvalRemark are present when rollout is approved")
+    public void validateIfApprovalFieldsArePresentAfterApproval() throws Exception {
+        approvalStrategy.setApprovalNeeded(true);
+        approvalStrategy.setApproveDecidedBy("testUser");
+        final int amountTargets = 2;
+        final String remark = "Some remark";
+        final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+
+        rolloutHandler.handleAll();
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+            .andExpect(status().isOk()).andExpect(jsonPath("$.status", equalTo("waiting_for_approval")));
+
+        rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED, remark);
+
+        mvc.perform(get("/rest/v1/rollouts/{rolloutid}", rollout.getId())).andDo(MockMvcResultPrinter.print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.status", equalTo("ready")))
+            .andExpect(jsonPath("$.approvalRemark", equalTo(remark)))
+            .andExpect(jsonPath("$.approveDecidedBy", equalTo("testUser")));
+
+        // revert
+        approvalStrategy.setApprovalNeeded(false);
     }
 
     private void postRollout(final String name, final int groupSize, final Long distributionSetId,
