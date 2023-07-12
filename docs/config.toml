@@ -7,7 +7,7 @@
 # http://www.eclipse.org/legal/epl-v10.html
 #
 
-baseurl = "https://www.eclipse.org/hawkbit/"
+baseurl = "https://www.eclipse.dev/hawkbit/"
 languageCode = "en-us"
 title = "Eclipse hawkBit"
 theme = "hugo-material-docs"
