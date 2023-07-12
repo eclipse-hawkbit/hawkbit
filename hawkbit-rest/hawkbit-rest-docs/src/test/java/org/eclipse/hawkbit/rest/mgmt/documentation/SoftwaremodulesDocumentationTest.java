@@ -28,6 +28,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -279,7 +280,7 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
     }
 
     @Test
-    @Description("Handles the GET request of retrieving all meta data of artifacts assigned to a software module (including a download URL by the artifact provider). Required Permission: "
+    @Description("Handles the GET request of retrieving all meta data of artifacts assigned to a software module (in full representation mode including a download URL by the artifact provider). Required Permission: "
             + SpPermission.READ_REPOSITORY)
     public void getArtifactsWithParameters() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
@@ -290,11 +291,15 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
 
         mockMvc.perform(
                 get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
-                        .param("withdownloadurl", "true"))
+                        .param("representation", MgmtRepresentationMode.FULL.toString())
+                        .param("useartifacturlhandler", Boolean.TRUE.toString()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andDo(this.document.document(requestParameters(parameterWithName("withdownloadurl")
-                        .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER))));
+                .andDo(this.document.document(requestParameters(
+                        parameterWithName("representation").description(MgmtApiModelProperties.REPRESENTATION_MODE)
+                                .optional(),
+                        parameterWithName("useartifacturlhandler")
+                                .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER).optional())));
     }
 
     @Test
@@ -422,13 +427,12 @@ public class SoftwaremodulesDocumentationTest extends AbstractApiRestDocumentati
                 .create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
 
         mockMvc.perform(
-                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
-                                sm.getId(), artifact.getId()).param("useartifacturlhandler", "true"))
+                get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts/{artifactId}",
+                        sm.getId(), artifact.getId()).param("useartifacturlhandler", "true"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaTypes.HAL_JSON))
-                .andDo(this.document.document(
-                        requestParameters(
-                                parameterWithName("useartifacturlhandler").description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER))));
+                .andDo(this.document.document(requestParameters(parameterWithName("useartifacturlhandler")
+                        .description(MgmtApiModelProperties.ARTIFACT_DOWNLOAD_USE_URL_HANDLER).optional())));
     }
 
     @Test

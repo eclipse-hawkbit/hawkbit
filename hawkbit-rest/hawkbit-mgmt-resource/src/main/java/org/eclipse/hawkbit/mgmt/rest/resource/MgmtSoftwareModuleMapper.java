@@ -124,7 +124,7 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId(), null))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId(), null, null))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
 
         response.add(linkTo(

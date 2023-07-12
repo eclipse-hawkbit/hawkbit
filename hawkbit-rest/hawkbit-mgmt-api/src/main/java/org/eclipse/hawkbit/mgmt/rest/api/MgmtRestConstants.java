@@ -275,7 +275,6 @@ public final class MgmtRestConstants {
      * Request parameter if the artifact url handler should be used
      */
     public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
-    public static final String REQUEST_PARAMETER_WITH_DOWNLOAD_URL = "withdownloadurl";
 
     // constant class, private constructor.
     private MgmtRestConstants() {

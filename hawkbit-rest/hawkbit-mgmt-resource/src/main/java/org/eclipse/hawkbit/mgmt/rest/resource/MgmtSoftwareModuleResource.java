@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMeta
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModuleRequestBodyPut;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtSoftwareModuleRestApi;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
@@ -123,19 +124,30 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
     @Override
     public ResponseEntity<List<MgmtArtifact>> getArtifacts(
-            @PathVariable("softwareModuleId") final Long softwareModuleId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_WITH_DOWNLOAD_URL, required = false) final Boolean withDownloadUrl) {
-
+            @PathVariable("softwareModuleId") final Long softwareModuleId, final String representationModeParam,
+            final Boolean useArtifactUrlHandler) {
         final SoftwareModule module = findSoftwareModuleWithExceptionIfNotFound(softwareModuleId, null);
+
+        final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final List<MgmtArtifact> response = module.getArtifacts().stream().map(artifact -> {
             final MgmtArtifact mgmtArtifact = MgmtSoftwareModuleMapper.toResponse(artifact);
-            if (!module.isDeleted() && Boolean.TRUE.equals(withDownloadUrl)) {
+            if (isFullMode && !module.isDeleted() && Boolean.TRUE.equals(useArtifactUrlHandler)) {
                 MgmtSoftwareModuleMapper.addLinks(artifact, mgmtArtifact, artifactUrlHandler, systemManagement);
+            } else if (isFullMode && !module.isDeleted()) {
+                MgmtSoftwareModuleMapper.addLinks(artifact, mgmtArtifact);
             }
             return mgmtArtifact;
         }).toList();
         return ResponseEntity.ok(new ResponseList<>(response));
+    }
+
+    private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
+        return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
+            // no need for a 400, just apply a safe fallback
+            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            return MgmtRepresentationMode.COMPACT;
+        });
     }
 
     @Override
