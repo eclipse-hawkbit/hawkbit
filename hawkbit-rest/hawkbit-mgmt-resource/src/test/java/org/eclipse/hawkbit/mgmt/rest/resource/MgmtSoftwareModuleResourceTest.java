@@ -619,7 +619,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$._links.download.href", useArtifactUrlHandler
-                        ? equalTo("http://external-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
+                        ? equalTo("http://download-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
                         : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
                                 .formatted(sm.getId(), artifact.getId()))))
                 .andExpect(jsonPath("$._links.self.href", equalTo(
@@ -715,7 +715,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.[0].hashes.sha256", equalTo(artifact.getSha256Hash())))
                 .andExpect(jsonPath("$.[0].providedFilename", equalTo("file1")))
                 .andExpect(jsonPath("$.[0]._links.download.href", useArtifactUrlHandler
-                        ? equalTo("http://external-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
+                        ? equalTo("http://download-cdn.com/artifacts/%s/download".formatted(artifact.getFilename()))
                         : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
                                 .formatted(sm.getId(), artifact.getId()))))
                 .andExpect(jsonPath("$.[0]._links.self.href",
@@ -727,7 +727,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.[1].hashes.sha256", equalTo(artifact2.getSha256Hash())))
                 .andExpect(jsonPath("$.[1].providedFilename", equalTo("file2")))
                 .andExpect(jsonPath("$.[1]._links.download.href", useArtifactUrlHandler
-                        ? equalTo("http://external-cdn.com/artifacts/%s/download".formatted(artifact2.getFilename()))
+                        ? equalTo("http://download-cdn.com/artifacts/%s/download".formatted(artifact2.getFilename()))
                         : equalTo("http://localhost/rest/v1/softwaremodules/%s/artifacts/%s/download"
                                 .formatted(sm.getId(), artifact2.getId()))))
                 .andExpect(jsonPath("$.[1]._links.self.href",
