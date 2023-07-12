@@ -597,7 +597,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verifies the listing of one defined artifact assigned to a given software module. That includes the artifact metadata and cdn download links.")
-    void getArtifactWithCdnDownloadParameter(final boolean useArtifactUrlHandler) throws Exception {
+    void getArtifactWithUseArtifactUrlHandlerParameter(final boolean useArtifactUrlHandler) throws Exception {
         // prepare data for test
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
@@ -692,7 +692,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
-    void getArtifactsWithCdnDownloadParameter(final boolean useArtifactUrlHandler) throws Exception {
+    void getArtifactsWithUseArtifactUrlHandlerParameter(final boolean useArtifactUrlHandler) throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final int artifactSize = 5 * 1024;
