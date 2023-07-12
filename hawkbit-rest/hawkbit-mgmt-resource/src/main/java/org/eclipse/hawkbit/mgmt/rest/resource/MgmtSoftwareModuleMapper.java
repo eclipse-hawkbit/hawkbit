@@ -124,7 +124,7 @@ public final class MgmtSoftwareModuleMapper {
     }
 
     static void addLinks(final SoftwareModule softwareModule, final MgmtSoftwareModule response) {
-        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId()))
+        response.add(linkTo(methodOn(MgmtSoftwareModuleRestApi.class).getArtifacts(response.getModuleId(), null, null))
                 .withRel(MgmtRestConstants.SOFTWAREMODULE_V1_ARTIFACT).expand());
 
         response.add(linkTo(
@@ -172,12 +172,4 @@ public final class MgmtSoftwareModuleMapper {
         urls.forEach(entry -> response.add(Link.of(entry.getRef()).withRel(entry.getRel()).expand()));
     }
 
-    static List<MgmtArtifact> artifactsToResponse(final Collection<Artifact> artifacts) {
-        if (artifacts == null) {
-            return Collections.emptyList();
-        }
-
-        return new ResponseList<>(
-                artifacts.stream().map(MgmtSoftwareModuleMapper::toResponse).collect(Collectors.toList()));
-    }
 }

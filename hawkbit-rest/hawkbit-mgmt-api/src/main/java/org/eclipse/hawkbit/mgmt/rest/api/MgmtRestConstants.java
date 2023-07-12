@@ -276,7 +276,6 @@ public final class MgmtRestConstants {
      */
     public static final String REQUEST_PARAMETER_USE_ARTIFACT_URL_HANDLER = "useartifacturlhandler";
 
-
     // constant class, private constructor.
     private MgmtRestConstants() {
 
