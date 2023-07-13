@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -183,6 +184,8 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             default:
                 logAndThrowMessageError(message, "No handle method was found for the given message type.");
             }
+        } catch(AssignmentQuotaExceededException ex) {
+            throw new AmqpRejectAndDontRequeueException("Could not handle message due to quota violation!", ex);
         } catch (final IllegalArgumentException ex) {
             throw new AmqpRejectAndDontRequeueException("Invalid message!", ex);
         } finally {

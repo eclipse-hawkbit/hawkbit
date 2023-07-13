@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusBuilder;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
+import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusBuilder;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
@@ -490,6 +491,31 @@ public class AmqpMessageHandlerServiceTest {
 
         assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .as(FAIL_MESSAGE_AMQP_REJECT_REASON + "since no action id was set")
+                .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
+                        VIRTUAL_HOST));
+    }
+
+    @Test
+    @Description("Tests that messages which cause quota violations are not re-added to message queue so they would block other communication.")
+    public void quotaExceeded() {
+        final MessageProperties messageProperties = createMessageProperties(MessageType.EVENT);
+        messageProperties.setHeader(MessageHeaderKey.TOPIC, EventTopic.UPDATE_ACTION_STATUS.name());
+
+        final DmfActionUpdateStatus actionUpdateStatus = createActionUpdateStatus(DmfActionStatus.WARNING);
+        final Message message = createMessage(actionUpdateStatus, messageProperties);
+        final Action action = mock(Action.class);
+        when(action.getId()).thenReturn(2L);
+        final ActionStatusBuilder builder = mock(ActionStatusBuilder.class);
+        final ActionStatusCreate create = mock(ActionStatusCreate.class);
+        when(builder.create(2L)).thenReturn(create);
+        when(create.status(any())).thenReturn(create);
+        when(create.messages(any())).thenReturn(create);
+        when(entityFactoryMock.actionStatus()).thenReturn(builder);
+
+        when(controllerManagementMock.findActionWithDetails(anyLong())).thenReturn(Optional.of(action));
+        when(controllerManagementMock.addUpdateActionStatus(any())).thenThrow(new AssignmentQuotaExceededException());
+
+        assertThatExceptionOfType(AmqpRejectAndDontRequeueException.class)
                 .isThrownBy(() -> amqpMessageHandlerService.onMessage(message, MessageType.EVENT.name(), TENANT,
                         VIRTUAL_HOST));
     }
