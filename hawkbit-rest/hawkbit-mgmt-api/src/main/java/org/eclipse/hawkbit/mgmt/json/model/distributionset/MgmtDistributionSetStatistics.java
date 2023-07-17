@@ -81,11 +81,10 @@ public class MgmtDistributionSetStatistics {
     }
 
     private Map<String, Long> calculateTotalWithStatus(Map<String, Long> statusMap) {
-      if (!fullRepresentation) {
-        if (statusMap.isEmpty()) {
-          return statusMap;
-        }
+      if (!fullRepresentation && statusMap.isEmpty()) {
+        return statusMap;
       }
+
       long total = statusMap.values().stream().mapToLong(Long::longValue).sum();
       statusMap.put(TOTAL, total);
       return statusMap;
