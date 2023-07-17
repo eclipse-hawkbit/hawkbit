@@ -54,7 +54,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 
 @ContextConfiguration(classes = { DdiApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 

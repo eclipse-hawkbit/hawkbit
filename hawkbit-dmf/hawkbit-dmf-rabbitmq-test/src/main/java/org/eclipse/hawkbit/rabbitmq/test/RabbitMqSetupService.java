@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.rabbitmq.test;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.UUID;
 
 import javax.annotation.PreDestroy;
@@ -17,9 +18,8 @@ import javax.annotation.PreDestroy;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.junit.BrokerRunningSupport;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 
-import com.google.common.base.Throwables;
 import com.rabbitmq.http.client.Client;
 import com.rabbitmq.http.client.domain.UserPermissions;
 
@@ -39,9 +39,9 @@ public class RabbitMqSetupService {
 
     private final String hostname;
 
-    private String username;
+    private final String username;
 
-    private String password;
+    private final String password;
 
     public RabbitMqSetupService() {
 
@@ -52,12 +52,13 @@ public class RabbitMqSetupService {
         password = brokerSupport.getPassword();
     }
 
+    @SuppressWarnings("java:S112")
     private synchronized Client getRabbitmqHttpClient() {
         if (rabbitmqHttpClient == null) {
             try {
-                rabbitmqHttpClient = new Client(getHttpApiUrl(), getUsername(), getPassword());
-            } catch (MalformedURLException | URISyntaxException e) {
-                throw Throwables.propagate(e);
+                rabbitmqHttpClient = new Client(new URL(getHttpApiUrl()), getUsername(), getPassword());
+            } catch (final MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
             }
         }
         return rabbitmqHttpClient;
@@ -77,7 +78,7 @@ public class RabbitMqSetupService {
 
     @PreDestroy
     public void deleteVirtualHost() {
-        if (StringUtils.isEmpty(virtualHost)) {
+        if (ObjectUtils.isEmpty(virtualHost)) {
             return;
         }
         getRabbitmqHttpClient().deleteVhost(virtualHost);

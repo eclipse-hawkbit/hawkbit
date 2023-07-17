@@ -30,7 +30,8 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.ResultMatcher;
 
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
-        RepositoryApplicationConfiguration.class, TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class,
+        TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = "classpath:/mgmt-test.properties")
 public abstract class AbstractManagementApiIntegrationTest extends AbstractRestIntegrationTest {
 

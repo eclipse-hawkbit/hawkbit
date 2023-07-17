@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,10 +26,15 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
-@SpringBootTest(properties = { "hawkbit.dmf.rabbitmq.enabled=false", "hawkbit.server.security.cors.enabled=true",
-        "hawkbit.server.security.cors.allowedOrigins=" + CorsTest.ALLOWED_ORIGIN_FIRST + ","
+@SpringBootTest(properties = {
+        "hawkbit.dmf.rabbitmq.enabled=false",
+        "hawkbit.server.security.cors.enabled=true",
+        "hawkbit.server.security.cors.allowedOrigins="
+                + CorsTest.ALLOWED_ORIGIN_FIRST + ","
                 + CorsTest.ALLOWED_ORIGIN_SECOND,
-        "hawkbit.server.security.cors.exposedHeaders=Access-Control-Allow-Origin" })@Feature("Integration Test - Security")
+        "hawkbit.server.security.cors.exposedHeaders="
+                + HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN})
+@Feature("Integration Test - Security")
 @Story("CORS")
 public class CorsTest extends AbstractSecurityTest {
 

@@ -30,7 +30,8 @@ import org.springframework.lang.NonNull;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link PagingAndSortingRepository} for {@link JpaTargetType}.
+ * {@link PagingAndSortingRepository} and {@link org.springframework.data.repository.CrudRepository} for
+ * {@link JpaTargetType}.
  *
  */
 @Transactional(readOnly = true)

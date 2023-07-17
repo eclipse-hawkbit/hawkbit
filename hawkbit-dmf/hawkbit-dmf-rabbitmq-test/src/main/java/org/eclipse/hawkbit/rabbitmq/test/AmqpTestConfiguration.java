@@ -29,8 +29,6 @@ import org.springframework.scheduling.concurrent.ConcurrentTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 
-import com.google.common.base.Throwables;
-
 /**
  *
  */
@@ -62,13 +60,14 @@ public class AmqpTestConfiguration {
         return new ThreadPoolTaskScheduler();
     }
 
+    @SuppressWarnings("java:S112")
     @Bean
     HostnameResolver hostnameResolver(final HawkbitServerProperties serverProperties) {
         return () -> {
             try {
                 return new URL(serverProperties.getUrl());
             } catch (final MalformedURLException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         };
     }

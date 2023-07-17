@@ -27,7 +27,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link PagingAndSortingRepository} for {@link DistributionSetType}.
+ * {@link PagingAndSortingRepository} and {@link  org.springframework.data.repository.CrudRepository} for
+ * {@link DistributionSetType}.
  *
  */
 @Transactional(readOnly = true)

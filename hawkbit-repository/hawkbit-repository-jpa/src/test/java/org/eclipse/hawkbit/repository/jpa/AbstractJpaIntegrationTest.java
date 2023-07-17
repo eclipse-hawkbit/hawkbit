@@ -42,7 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
-@ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, TestConfiguration.class,
+@ContextConfiguration(classes = {
+        RepositoryApplicationConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {

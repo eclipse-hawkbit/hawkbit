@@ -14,6 +14,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTenantMetaData;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TenantMetaDataRepository extends PagingAndSortingRepository<JpaTenantMetaData, Long> {
+public interface TenantMetaDataRepository
+        extends PagingAndSortingRepository<JpaTenantMetaData, Long>,
+        CrudRepository<JpaTenantMetaData, Long> {
 
     /**
      * Search {@link TenantMetaData} by tenant name.

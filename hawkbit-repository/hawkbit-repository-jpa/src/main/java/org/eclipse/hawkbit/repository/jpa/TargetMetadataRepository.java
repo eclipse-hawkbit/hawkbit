@@ -12,6 +12,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.TargetMetadataCompositeKey;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TargetMetadataRepository
         extends PagingAndSortingRepository<JpaTargetMetadata, TargetMetadataCompositeKey>,
+        CrudRepository<JpaTargetMetadata, TargetMetadataCompositeKey>,
         JpaSpecificationExecutor<JpaTargetMetadata> {
 
     /**
