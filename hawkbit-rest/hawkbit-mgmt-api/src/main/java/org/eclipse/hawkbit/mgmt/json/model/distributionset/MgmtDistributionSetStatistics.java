@@ -76,7 +76,7 @@ public class MgmtDistributionSetStatistics {
       MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
       statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
       statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
-      statistics.totalAutoAssignments = fullRepresentation ? (totalAutoAssignments == null ?  Long.valueOf(0) : totalAutoAssignments) : totalAutoAssignments;
+      statistics.totalAutoAssignments = calculateTotalAutoAssignments();
       return statistics;
     }
 
@@ -88,6 +88,14 @@ public class MgmtDistributionSetStatistics {
       long total = statusMap.values().stream().mapToLong(Long::longValue).sum();
       statusMap.put(TOTAL, total);
       return statusMap;
+    }
+
+    private Long calculateTotalAutoAssignments() {
+      if (fullRepresentation) {
+        return totalAutoAssignments == null ?  Long.valueOf(0) : totalAutoAssignments;
+      }
+
+      return totalAutoAssignments;
     }
   }
 }
