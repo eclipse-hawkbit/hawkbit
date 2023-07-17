@@ -16,20 +16,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetStatistics {
   private static final String TOTAL = "total";
 
-  @JsonProperty
+  @JsonProperty("actions")
   private Map<String, Long> totalActionsPerStatus;
 
-  @JsonProperty
+  @JsonProperty("rollouts")
   private Map<String, Long> totalRolloutsPerStatus;
 
   @JsonProperty
   private Long totalAutoAssignments;
-
   private MgmtDistributionSetStatistics() {
     // Private constructor to enforce the use of the builder pattern
   }
@@ -47,14 +46,15 @@ public class MgmtDistributionSetStatistics {
   }
 
   public static class Builder {
-    private Map<String, Long> totalActionsPerStatus;
-    private Map<String, Long> totalRolloutsPerStatus;
-
+    private final Map<String, Long> totalActionsPerStatus;
+    private final Map<String, Long> totalRolloutsPerStatus;
     private Long totalAutoAssignments;
+    private final boolean fullRepresentation;
 
-    public Builder() {
+    public Builder(boolean fullRepresentation) {
       totalActionsPerStatus = new HashMap<>();
       totalRolloutsPerStatus = new HashMap<>();
+      this.fullRepresentation = fullRepresentation;
     }
 
     public Builder addTotalActionPerStatus(String status, Long count) {
@@ -76,15 +76,16 @@ public class MgmtDistributionSetStatistics {
       MgmtDistributionSetStatistics statistics = new MgmtDistributionSetStatistics();
       statistics.totalActionsPerStatus = calculateTotalWithStatus(totalActionsPerStatus);
       statistics.totalRolloutsPerStatus = calculateTotalWithStatus(totalRolloutsPerStatus);
-      statistics.totalAutoAssignments = totalAutoAssignments;
+      statistics.totalAutoAssignments = fullRepresentation ? (totalAutoAssignments == null ?  Long.valueOf(0) : totalAutoAssignments) : totalAutoAssignments;
       return statistics;
     }
 
     private Map<String, Long> calculateTotalWithStatus(Map<String, Long> statusMap) {
-      if (statusMap.isEmpty()) {
-        return null;
+      if (!fullRepresentation) {
+        if (statusMap.isEmpty()) {
+          return statusMap;
+        }
       }
-
       long total = statusMap.values().stream().mapToLong(Long::longValue).sum();
       statusMap.put(TOTAL, total);
       return statusMap;
