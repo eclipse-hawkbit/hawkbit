@@ -22,8 +22,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSystemTenantConfigurationValueRequest {
 
+    @JsonProperty
+    private String name;
     @JsonProperty(required = true)
     private Serializable value;
+
+    /**
+     *
+     * @return the name of the MgmtSystemTenantConfigurationValueRequest
+     */
+    public String getName() {
+        return name;
+    }
 
     /**
      * 
@@ -34,15 +44,24 @@ public class MgmtSystemTenantConfigurationValueRequest {
     }
 
     /**
-     * Sets the MgmtSystemTenantConfigurationValueRequest
+     * Sets the value of the MgmtSystemTenantConfigurationValueRequest
      * 
      * @param value
      */
     public void setValue(final Object value) {
         if (!(value instanceof Serializable)) {
-            throw new IllegalArgumentException("The value muste be a instance of " + Serializable.class.getName());
+            throw new IllegalArgumentException("The value must be a instance of " + Serializable.class.getName());
         }
         this.value = (Serializable) value;
+    }
+
+    /**
+     * Sets the name of the MgmtSystemTenantConfigurationValueRequest
+     *
+     * @param name
+     */
+    public void setName(final String name) {
+        this.name = name;
     }
 
 }

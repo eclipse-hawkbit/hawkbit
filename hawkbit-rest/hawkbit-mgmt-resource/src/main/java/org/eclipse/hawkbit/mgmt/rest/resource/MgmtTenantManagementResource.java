@@ -9,7 +9,9 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
@@ -74,6 +76,23 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         final TenantConfigurationValue<? extends Serializable> updatedValue = tenantConfigurationManagement
                 .addOrUpdateConfiguration(keyName, configurationValueRest.getValue());
         return ResponseEntity.ok(MgmtTenantManagementMapper.toResponse(keyName, updatedValue));
+    }
+
+    @Override
+    public ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
+            List<MgmtSystemTenantConfigurationValueRequest> configurationValueList) {
+
+        boolean containsNull = configurationValueList.stream()
+                        .anyMatch(configurationValue -> configurationValue.getName() == null);
+
+        if (containsNull) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        return ResponseEntity.ok(configurationValueList.stream().map(configurationValue -> MgmtTenantManagementMapper.toResponse(configurationValue.getName(),
+                tenantConfigurationManagement
+                        .addOrUpdateConfiguration(configurationValue.getName(), configurationValue.getValue())))
+               .collect(Collectors.toList()));
     }
 
 }
