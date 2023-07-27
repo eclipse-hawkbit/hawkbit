@@ -89,10 +89,13 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
             return ResponseEntity.badRequest().build();
         }
 
-        return ResponseEntity.ok(configurationValueList.stream().map(configurationValue -> MgmtTenantManagementMapper.toResponse(configurationValue.getName(),
-                tenantConfigurationManagement
-                        .addOrUpdateConfiguration(configurationValue.getName(), configurationValue.getValue())))
-               .collect(Collectors.toList()));
+        Map<String, TenantConfigurationValue<Serializable>> tenantConfigurationValues = tenantConfigurationManagement.addOrUpdateConfiguration(configurationValueList.stream()
+                .collect(Collectors.toMap(
+                        MgmtSystemTenantConfigurationValueRequest::getName,
+                        MgmtSystemTenantConfigurationValueRequest::getValue)));
+
+        return ResponseEntity.ok(tenantConfigurationValues.entrySet().stream().map(entry ->
+                MgmtTenantManagementMapper.toResponse(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
     }
 
 }
