@@ -65,5 +65,5 @@ maven.properties
 docs/themes/**
 docs/public/**
 docs/content/rest-api/*.html
-.gitmodules
 docs/.hugo_build.lock
+.gitmodules
