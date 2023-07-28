@@ -32,4 +32,4 @@ SCHEDULED                   | This can be used by the target to inform that it s
 RESUMED                     | This can be used by the target to inform that it continued to work on the action.                                                                                                                                                        | RUNNING
 
 
-<iframe width="100%" height="800px" frameborder="0" src="../../rest-api/rootcontroller-api-guide/"></iframe>
+<iframe width="100%" height="800px" frameborder="0" src="../../rest-api/rootcontroller-api-guide.html"></iframe>
