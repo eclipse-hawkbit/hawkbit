@@ -37,6 +37,7 @@ Available Management APIs resources are:
 - [Target tag](/hawkbit/apis/mgmt/targettag/)
 - [Distribution set tag](/hawkbit/apis/mgmt/distributionsettag/)
 - [Rollouts](/hawkbit/apis/mgmt/rollouts/)
+- [Actions](/hawkbit/apis/mgmt/actions/)
 - [Target filters](/hawkbit/apis/mgmt/targetfilters/)
 - [System configuration](/hawkbit/apis/mgmt/tenant/)
 
