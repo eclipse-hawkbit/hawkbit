@@ -73,7 +73,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
 
     @Test
     @Description("Tests that the tenant specific configuration can be updated")
-    public void updateTenantSpecifcConfiguration() {
+    public void updateTenantSpecificConfiguration() {
         final String configKey = TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY;
         final String value1 = "firstValue";
         final String value2 = "secondValue";
@@ -87,6 +87,22 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         tenantConfigurationManagement.addOrUpdateConfiguration(configKey, value2);
         assertThat(tenantConfigurationManagement.getConfigurationValue(configKey, String.class).getValue())
                 .isEqualTo(value2);
+    }
+
+    @Test
+    @Description("Tests that the tenant specific configuration can be batch updated")
+    public void batchUpdateTenantSpecificConfiguration() {
+        Map<String, Serializable> configuration = new HashMap<>() {{
+            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
+            put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
+        }};
+
+        // add value first
+        tenantConfigurationManagement.addOrUpdateConfiguration(configuration);
+        assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+                .isEqualTo("token_123");
+        assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
+                .isEqualTo(true);
     }
 
     @Test
@@ -115,6 +131,26 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
             fail("should not have worked as string is not a boolean");
         } catch (final TenantConfigurationValidatorException e) {
 
+        }
+    }
+
+    @Test
+    @Description("Tests that the get configuration throws exception in case the value is the wrong type")
+    public void batchWrongTenantConfigurationValueTypeThrowsException() {
+        Map<String, Serializable> configuration = new HashMap<>() {{
+            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, "token_123");
+            put(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, true);
+            put(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, "wrong");
+        }};
+
+        try {
+            tenantConfigurationManagement.addOrUpdateConfiguration(configuration);
+            fail("should not have worked as type is wrong");
+        } catch (final TenantConfigurationValidatorException e) {
+            assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
+                    .isNotEqualTo("token_123");
+            assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
+                    .isNotEqualTo(true);
         }
     }
 

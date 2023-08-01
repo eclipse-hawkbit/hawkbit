@@ -143,6 +143,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
         return addOrUpdateConfiguration(Collections.singletonMap(configurationKeyName, value)).values().iterator().next();
@@ -156,9 +159,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
         //@CacheEvict
         Cache cache = cacheManager.getCache("tenantConfiguration");
-        if (cache != null) {
-            configurations.keySet().forEach(cache::evict);
-        }
 
         List<JpaTenantConfiguration> configurationList = new ArrayList<>();
         configurations.forEach((configurationKeyName, value) -> {
@@ -188,9 +188,14 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         List<JpaTenantConfiguration> jpaTenantConfigurations = tenantConfigurationRepository
                 .saveAll(configurationList);
 
+        if (cache != null) {
+            configurations.keySet().forEach(cache::evict);
+        }
+
         return jpaTenantConfigurations.stream().collect(Collectors.toMap(
                 JpaTenantConfiguration::getKey,
                 updatedTenantConfiguration -> {
+
                     @SuppressWarnings("unchecked")
                     final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass();
 
