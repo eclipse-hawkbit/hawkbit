@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -42,8 +43,6 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -66,6 +65,9 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     @Autowired
     private CacheManager cacheManager;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommitExecutor;
 
     private static final ConfigurableConversionService conversionService = new DefaultConversionService();
 
@@ -164,13 +166,10 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
 
         // Register a callback to be invoked after the transaction is committed - for cache eviction
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-            @Override
-            public void afterCommit() {
-                Cache cache = cacheManager.getCache("tenantConfiguration");
-                if (cache != null) {
-                    configurations.keySet().forEach(cache::evict);
-                }
+        afterCommitExecutor.afterCommit(() -> {
+            Cache cache = cacheManager.getCache("tenantConfiguration");
+            if (cache != null) {
+                configurations.keySet().forEach(cache::evict);
             }
         });
 
