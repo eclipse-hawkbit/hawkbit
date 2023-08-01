@@ -42,6 +42,8 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.validation.annotation.Validated;
 
 /**
@@ -148,7 +150,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
-        return addOrUpdateConfiguration(Collections.singletonMap(configurationKeyName, value)).values().iterator().next();
+        return addOrUpdateConfiguration0(Collections.singletonMap(configurationKeyName, value)).values().iterator().next();
     }
 
     @Override
@@ -156,9 +158,22 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations) {
+        return addOrUpdateConfiguration0(configurations);
+    }
 
-        //@CacheEvict
-        Cache cache = cacheManager.getCache("tenantConfiguration");
+    private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
+
+        // Register a callback to be invoked after the transaction is committed - for cache eviction
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                TransactionSynchronization.super.afterCommit();
+                Cache cache = cacheManager.getCache("tenantConfiguration");
+                if (cache != null) {
+                    configurations.keySet().forEach(cache::evict);
+                }
+            }
+        });
 
         List<JpaTenantConfiguration> configurationList = new ArrayList<>();
         configurations.forEach((configurationKeyName, value) -> {
@@ -188,17 +203,12 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         List<JpaTenantConfiguration> jpaTenantConfigurations = tenantConfigurationRepository
                 .saveAll(configurationList);
 
-        if (cache != null) {
-            configurations.keySet().forEach(cache::evict);
-        }
-
         return jpaTenantConfigurations.stream().collect(Collectors.toMap(
                 JpaTenantConfiguration::getKey,
                 updatedTenantConfiguration -> {
 
                     @SuppressWarnings("unchecked")
                     final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass();
-
                     return TenantConfigurationValue.<T>builder().global(false)
                             .createdBy(updatedTenantConfiguration.getCreatedBy())
                             .createdAt(updatedTenantConfiguration.getCreatedAt())
