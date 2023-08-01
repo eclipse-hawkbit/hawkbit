@@ -167,7 +167,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override
             public void afterCommit() {
-                TransactionSynchronization.super.afterCommit();
                 Cache cache = cacheManager.getCache("tenantConfiguration");
                 if (cache != null) {
                     configurations.keySet().forEach(cache::evict);
