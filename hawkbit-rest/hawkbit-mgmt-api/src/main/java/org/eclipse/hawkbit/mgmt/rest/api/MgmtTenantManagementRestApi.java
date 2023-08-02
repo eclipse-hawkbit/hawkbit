@@ -8,6 +8,8 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 /**
  * REST Resource for handling tenant specific configuration operations.
@@ -82,5 +85,21 @@ public interface MgmtTenantManagementRestApi {
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSystemTenantConfigurationValue> updateTenantConfigurationValue(
             @PathVariable("keyName") String keyName, MgmtSystemTenantConfigurationValueRequest configurationValueRest);
+
+    /**
+     * Handles the PUT request for updating a batch of tenant specific configurations
+     *
+     * @param configurationValueMap
+     *           a Map of name - value pairs for the configurations
+     *
+     * @return if the given configurations values exists and could be get HTTP OK.
+     *         In any failure the JsonResponseExceptionHandler is handling the
+     *         response.
+     */
+    @PutMapping(value = MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs", consumes = {
+            MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
+            MediaType.APPLICATION_JSON_VALUE })
+    ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
+            @RequestBody Map<String, Serializable> configurationValueMap);
 
 }

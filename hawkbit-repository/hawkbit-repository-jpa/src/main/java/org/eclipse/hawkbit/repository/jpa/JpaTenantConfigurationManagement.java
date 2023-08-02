@@ -13,10 +13,16 @@ import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationPrope
 import static org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey.REPOSITORY_ACTIONS_AUTOCLOSE_ENABLED;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNotAllowedException;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
@@ -26,6 +32,8 @@ import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationVa
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
@@ -54,6 +62,12 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private CacheManager cacheManager;
+
+    @Autowired
+    private AfterTransactionCommitExecutor afterCommitExecutor;
 
     private static final ConfigurableConversionService conversionService = new DefaultConversionService();
 
@@ -139,39 +153,68 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(
             final String configurationKeyName, final T value) {
+        return addOrUpdateConfiguration0(Collections.singletonMap(configurationKeyName, value)).values().iterator().next();
+    }
 
-        final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations) {
+        // Register a callback to be invoked after the transaction is committed - for cache eviction
+        afterCommitExecutor.afterCommit(() -> {
+            Cache cache = cacheManager.getCache("tenantConfiguration");
+            if (cache != null) {
+                configurations.keySet().forEach(cache::evict);
+            }
+        });
 
-        if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
-            throw new TenantConfigurationValidatorException(String.format(
-                    "Cannot parse the value %s of type %s into the type %s defined by the configuration key.", value,
-                    value.getClass(), configurationKey.getDataType()));
-        }
+        return addOrUpdateConfiguration0(configurations);
+    }
 
-        configurationKey.validate(applicationContext, value);
+    private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
+        List<JpaTenantConfiguration> configurationList = new ArrayList<>();
+        configurations.forEach((configurationKeyName, value) -> {
+            final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);
 
-        JpaTenantConfiguration tenantConfiguration = tenantConfigurationRepository
-                .findByKey(configurationKey.getKeyName());
+            if (!configurationKey.getDataType().isAssignableFrom(value.getClass())) {
+                throw new TenantConfigurationValidatorException(String.format(
+                        "Cannot parse the value %s of type %s into the type %s defined by the configuration key.", value,
+                        value.getClass(), configurationKey.getDataType()));
+            }
 
-        if (tenantConfiguration == null) {
-            tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), value.toString());
-        } else {
-            tenantConfiguration.setValue(value.toString());
-        }
+            configurationKey.validate(applicationContext, value);
 
-        assertValueChangeIsAllowed(configurationKeyName, tenantConfiguration);
+            JpaTenantConfiguration tenantConfiguration = tenantConfigurationRepository
+                    .findByKey(configurationKey.getKeyName());
 
-        final JpaTenantConfiguration updatedTenantConfiguration = tenantConfigurationRepository
-                .save(tenantConfiguration);
+            if (tenantConfiguration == null) {
+                tenantConfiguration = new JpaTenantConfiguration(configurationKey.getKeyName(), value.toString());
+            } else {
+                tenantConfiguration.setValue(value.toString());
+            }
 
-        @SuppressWarnings("unchecked")
-        final Class<T> clazzT = (Class<T>) value.getClass();
+            assertValueChangeIsAllowed(configurationKeyName, tenantConfiguration);
+            configurationList.add(tenantConfiguration);
+        });
 
-        return TenantConfigurationValue.<T> builder().global(false).createdBy(updatedTenantConfiguration.getCreatedBy())
-                .createdAt(updatedTenantConfiguration.getCreatedAt())
-                .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
-                .lastModifiedBy(updatedTenantConfiguration.getLastModifiedBy())
-                .value(conversionService.convert(updatedTenantConfiguration.getValue(), clazzT)).build();
+        List<JpaTenantConfiguration> jpaTenantConfigurations = tenantConfigurationRepository
+                .saveAll(configurationList);
+
+        return jpaTenantConfigurations.stream().collect(Collectors.toMap(
+                JpaTenantConfiguration::getKey,
+                updatedTenantConfiguration -> {
+
+                    @SuppressWarnings("unchecked")
+                    final Class<T> clazzT = (Class<T>) configurations.get(updatedTenantConfiguration.getKey()).getClass();
+                    return TenantConfigurationValue.<T>builder().global(false)
+                            .createdBy(updatedTenantConfiguration.getCreatedBy())
+                            .createdAt(updatedTenantConfiguration.getCreatedAt())
+                            .lastModifiedAt(updatedTenantConfiguration.getLastModifiedAt())
+                            .lastModifiedBy(updatedTenantConfiguration.getLastModifiedBy())
+                            .value(conversionService.convert(updatedTenantConfiguration.getValue(), clazzT))
+                            .build();
+                }));
     }
 
     /**

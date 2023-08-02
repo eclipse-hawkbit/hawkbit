@@ -32,6 +32,14 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     private static final String KEY_MULTI_ASSIGNMENTS = "multi.assignments.enabled";
 
     private static final String KEY_AUTO_CLOSE = "repository.actions.autoclose.enabled";
+    private static final String ROLLOUT_APPROVAL_ENABLED = "rollout.approval.enabled";
+
+    private static final String AUTHENTICATION_GATEWAYTOKEN_ENABLED = "authentication.gatewaytoken.enabled";
+
+    private static final String AUTHENTICATION_GATEWAYTOKEN_KEY = "authentication.gatewaytoken.key";
+
+
+
 
     @Test
     @Description("The 'multi.assignments.enabled' property must not be changed to false.")
@@ -46,6 +54,36 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}", KEY_MULTI_ASSIGNMENTS)
                 .content(bodyDeactivate).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @Description("The Batch configuration should be applied")
+    public void changeBatchConfiguration() throws Exception {
+        JSONObject configuration = new JSONObject();
+        configuration.put(ROLLOUT_APPROVAL_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_KEY, "1234");
+
+        String body = configuration.toString();
+
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
+                        .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("The Batch configuration should not be applied")
+    public void changeBatchConfigurationFail() throws Exception {
+        JSONObject configuration = new JSONObject();
+        configuration.put(ROLLOUT_APPROVAL_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_ENABLED, "wrong");
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_KEY, "1234");
+
+        String body = configuration.toString();
+
+        mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
+                        .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isBadRequest());
     }
 
     @Test

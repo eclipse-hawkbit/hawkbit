@@ -9,6 +9,7 @@
 package org.eclipse.hawkbit.repository;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
@@ -43,6 +44,22 @@ public interface TenantConfigurationManagement {
      */
     @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
     <T extends Serializable> TenantConfigurationValue<T> addOrUpdateConfiguration(String configurationKeyName, T value);
+
+    /**
+     * Adds or updates a specific configuration for a specific tenant.
+     *
+     *
+     * @param configurations
+     *            map containing the key - value of the configuration
+     * @return map of all configuration values which were written into the database.
+     * @throws TenantConfigurationValidatorException
+     *             if the {@code propertyType} and the value in general does not
+     *             match the expected type and format defined by the Key
+     * @throws ConversionFailedException
+     *             if the property cannot be converted to the given
+     */
+    @PreAuthorize(value = SpringEvalExpressions.HAS_AUTH_TENANT_CONFIGURATION)
+    <T extends Serializable> Map<String, TenantConfigurationValue<T>>  addOrUpdateConfiguration(Map<String, T> configurations);
 
     /**
      * Build the tenant configuration by the given key
