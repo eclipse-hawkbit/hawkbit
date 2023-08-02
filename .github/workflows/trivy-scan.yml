@@ -23,11 +23,11 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: "adopt"
-          java-version: "11"
+          distribution: "temurin"
+          java-version: "17"
           cache: "maven"
 
-      - name: Create Hawkbit container images
+      - name: Create hawkBit container images
         run: |
           mvn clean install -DskipTests -Pdocker
 

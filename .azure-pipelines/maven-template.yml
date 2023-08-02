@@ -5,7 +5,7 @@ parameters:
   - name: jdkVersionOption
     displayName: JDK Version
     type: string
-    default: "1.8"
+    default: "1.17"
   - name: sonarQubeRunAnalysis
     displayName: Enable SonarQube analysis
     type: boolean
