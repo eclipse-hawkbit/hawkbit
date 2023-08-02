@@ -147,6 +147,7 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     }
 
     @Override
+    @CacheEvict(value = "tenantConfiguration", key = "#configurationKeyName")
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
@@ -160,11 +161,6 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration(Map<String, T> configurations) {
-        return addOrUpdateConfiguration0(configurations);
-    }
-
-    private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
-
         // Register a callback to be invoked after the transaction is committed - for cache eviction
         afterCommitExecutor.afterCommit(() -> {
             Cache cache = cacheManager.getCache("tenantConfiguration");
@@ -173,6 +169,10 @@ public class JpaTenantConfigurationManagement implements TenantConfigurationMana
             }
         });
 
+        return addOrUpdateConfiguration0(configurations);
+    }
+
+    private <T extends Serializable> Map<String, TenantConfigurationValue<T>> addOrUpdateConfiguration0(Map<String, T> configurations) {
         List<JpaTenantConfiguration> configurationList = new ArrayList<>();
         configurations.forEach((configurationKeyName, value) -> {
             final TenantConfigurationKey configurationKey = tenantConfigurationProperties.fromKeyName(configurationKeyName);

@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
@@ -80,22 +80,20 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
     @Override
     public ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
-            List<MgmtSystemTenantConfigurationValueRequest> configurationValueList) {
+            Map<String, Serializable> configurationValueMap) {
 
-        boolean containsNull = configurationValueList.stream()
-                        .anyMatch(configurationValue -> configurationValue.getName() == null);
+        boolean containsNull = configurationValueMap.keySet().stream()
+                        .anyMatch(Objects::isNull);
 
         if (containsNull) {
             return ResponseEntity.badRequest().build();
         }
 
-        Map<String, TenantConfigurationValue<Serializable>> tenantConfigurationValues = tenantConfigurationManagement.addOrUpdateConfiguration(configurationValueList.stream()
-                .collect(Collectors.toMap(
-                        MgmtSystemTenantConfigurationValueRequest::getName,
-                        MgmtSystemTenantConfigurationValueRequest::getValue)));
+        Map<String, TenantConfigurationValue<Serializable>> tenantConfigurationValues = tenantConfigurationManagement
+                .addOrUpdateConfiguration(configurationValueMap);
 
         return ResponseEntity.ok(tenantConfigurationValues.entrySet().stream().map(entry ->
-                MgmtTenantManagementMapper.toResponse(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
+                MgmtTenantManagementMapper.toResponse(entry.getKey(), entry.getValue())).toList());
     }
 
 }

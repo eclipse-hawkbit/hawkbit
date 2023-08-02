@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -88,8 +89,8 @@ public interface MgmtTenantManagementRestApi {
     /**
      * Handles the PUT request for updating a batch of tenant specific configurations
      *
-     * @param configurationValueList
-     *           a list of name - value pairs for the configurations
+     * @param configurationValueMap
+     *           a Map of name - value pairs for the configurations
      *
      * @return if the given configurations values exists and could be get HTTP OK.
      *         In any failure the JsonResponseExceptionHandler is handling the
@@ -99,6 +100,6 @@ public interface MgmtTenantManagementRestApi {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
-            @RequestBody List<MgmtSystemTenantConfigurationValueRequest> configurationValueList);
+            @RequestBody Map<String, Serializable> configurationValueMap);
 
 }

@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -37,6 +36,10 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
     private static final String AUTHENTICATION_GATEWAYTOKEN_ENABLED = "authentication.gatewaytoken.enabled";
 
+    private static final String AUTHENTICATION_GATEWAYTOKEN_KEY = "authentication.gatewaytoken.key";
+
+
+
 
     @Test
     @Description("The 'multi.assignments.enabled' property must not be changed to false.")
@@ -56,19 +59,12 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     @Description("The Batch configuration should be applied")
     public void changeBatchConfiguration() throws Exception {
-        JSONObject rolloutApprovalConfiguration = new JSONObject();
-        rolloutApprovalConfiguration.put("name", ROLLOUT_APPROVAL_ENABLED);
-        rolloutApprovalConfiguration.put("value", true);
+        JSONObject configuration = new JSONObject();
+        configuration.put(ROLLOUT_APPROVAL_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_KEY, "1234");
 
-        JSONObject tokenEnabledConfiguration = new JSONObject();
-        tokenEnabledConfiguration.put("name", AUTHENTICATION_GATEWAYTOKEN_ENABLED);
-        tokenEnabledConfiguration.put("value", true);
-
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.put(rolloutApprovalConfiguration);
-        jsonArray.put(tokenEnabledConfiguration);
-
-        String body = jsonArray.toString();
+        String body = configuration.toString();
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
                         .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -78,19 +74,12 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     @Description("The Batch configuration should not be applied")
     public void changeBatchConfigurationFail() throws Exception {
-        JSONObject rolloutApprovalConfiguration = new JSONObject();
-        rolloutApprovalConfiguration.put("name", ROLLOUT_APPROVAL_ENABLED);
-        rolloutApprovalConfiguration.put("value", true);
+        JSONObject configuration = new JSONObject();
+        configuration.put(ROLLOUT_APPROVAL_ENABLED, true);
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_ENABLED, "wrong");
+        configuration.put(AUTHENTICATION_GATEWAYTOKEN_KEY, "1234");
 
-        JSONObject tokenEnabledConfiguration = new JSONObject();
-        tokenEnabledConfiguration.put("name", AUTHENTICATION_GATEWAYTOKEN_ENABLED);
-        tokenEnabledConfiguration.put("value", "fail");
-
-        JSONArray jsonArray = new JSONArray();
-        jsonArray.put(rolloutApprovalConfiguration);
-        jsonArray.put(tokenEnabledConfiguration);
-
-        String body = jsonArray.toString();
+        String body = configuration.toString();
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
                         .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())

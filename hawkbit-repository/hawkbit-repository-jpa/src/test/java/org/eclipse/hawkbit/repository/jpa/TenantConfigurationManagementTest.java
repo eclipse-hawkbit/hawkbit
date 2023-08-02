@@ -102,7 +102,7 @@ public class TenantConfigurationManagementTest extends AbstractJpaIntegrationTes
         assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, String.class).getValue())
                 .isEqualTo("token_123");
         assertThat(tenantConfigurationManagement.getConfigurationValue(TenantConfigurationKey.ROLLOUT_APPROVAL_ENABLED, Boolean.class).getValue())
-                .isEqualTo(true);
+                .isTrue();
     }
 
     @Test
