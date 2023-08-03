@@ -24,6 +24,35 @@
       <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
    </properties>
 
+   <profiles>
+      <profile>
+         <id>unix</id>
+         <activation>
+            <os>
+               <family>!windows</family>
+            </os>
+         </activation>
+         <properties>
+            <shell>/bin/bash</shell>
+            <shell.option/>
+            <batch.ext>sh</batch.ext>
+         </properties>
+      </profile>
+      <profile>
+         <id>windows</id>
+         <activation>
+            <os>
+               <family>windows</family>
+            </os>
+         </activation>
+         <properties>
+            <shell>cmd</shell>
+            <shell.option>/c</shell.option>
+            <batch.ext>bat</batch.ext>
+         </properties>
+      </profile>
+   </profiles>
+
    <build>
       <plugins>
          <plugin>
@@ -64,10 +93,11 @@
                   </goals>
                   <phase>install</phase>
                   <configuration>
-                     <executable>/bin/bash</executable>
+                     <executable>${shell}</executable>
                      <workingDirectory>${project.basedir}</workingDirectory>
                      <arguments>
-                        <argument>install-theme.sh</argument>
+                        <argument>${shell.option}</argument>
+                        <argument>install-theme.${batch.ext}</argument>
                      </arguments>
                   </configuration>
                </execution>
@@ -92,10 +122,11 @@
                   </goals>
                   <phase>clean</phase>
                   <configuration>
-                     <executable>/bin/bash</executable>
+                     <executable>${shell}</executable>
                      <workingDirectory>${project.basedir}</workingDirectory>
                      <arguments>
-                        <argument>cleanup.sh</argument>
+                        <argument>${shell.option}</argument>
+                        <argument>cleanup.${batch.ext}</argument>
                      </arguments>
                   </configuration>
                </execution>
