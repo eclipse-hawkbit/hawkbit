@@ -28,17 +28,17 @@ public class ControllerPreAuthenticatedAnonymousFilter implements PreAuthenticat
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+        return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+        return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
-    public boolean isEnable(final DmfTenantSecurityToken secruityToken) {
+    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
         return ddiSecurityConfiguration.getAuthentication().getAnonymous().isEnabled();
     }
 

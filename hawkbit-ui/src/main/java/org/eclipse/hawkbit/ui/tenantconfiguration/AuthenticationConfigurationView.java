@@ -165,17 +165,17 @@ public class AuthenticationConfigurationView extends BaseConfigurationView<Proxy
 
     @Override
     public void save() {
+        if (getBinderBean().isGatewaySecToken()) {
+            writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
+                    getBinderBean().getGatewaySecurityToken());
+        }
+
         writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED,
                 getBinderBean().isTargetSecToken());
         writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED,
                 getBinderBean().isGatewaySecToken());
         writeConfigOption(TenantConfigurationKey.ANONYMOUS_DOWNLOAD_MODE_ENABLED,
                 getBinderBean().isDownloadAnonymous());
-
-        if (getBinderBean().isGatewaySecToken()) {
-            writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY,
-                    getBinderBean().getGatewaySecurityToken());
-        }
 
         writeConfigOption(TenantConfigurationKey.AUTHENTICATION_MODE_HEADER_ENABLED,
                 getBinderBean().isCertificateAuth());

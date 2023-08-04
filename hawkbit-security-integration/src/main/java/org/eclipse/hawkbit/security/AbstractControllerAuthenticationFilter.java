@@ -43,8 +43,8 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
     protected abstract String getTenantConfigurationKey();
 
     @Override
-    public boolean isEnable(final DmfTenantSecurityToken secruityToken) {
-        return tenantAware.runAsTenant(secruityToken.getTenant(), configurationKeyTenantRunner);
+    public boolean isEnable(final DmfTenantSecurityToken securityToken) {
+        return tenantAware.runAsTenant(securityToken.getTenant(), configurationKeyTenantRunner);
     }
 
     private final class SecurityConfigurationKeyTenantRunner implements TenantAware.TenantRunner<Boolean> {

@@ -22,26 +22,26 @@ public interface PreAuthenticationFilter {
     /**
      * Check if the filter is enabled.
      *
-     * @param secruityToken the secruity info
+     * @param securityToken the secruity info
      * @return <code>true</code> is enabled <code>false</code> diabled
      */
-    boolean isEnable(DmfTenantSecurityToken secruityToken);
+    boolean isEnable(DmfTenantSecurityToken securityToken);
 
     /**
-     * Extract the principal information from the current secruityToken.
+     * Extract the principal information from the current securityToken.
      *
-     * @param secruityToken the secruityToken
+     * @param securityToken the securityToken
      * @return the extracted tenant and controller id
      */
-    HeaderAuthentication getPreAuthenticatedPrincipal(DmfTenantSecurityToken secruityToken);
+    HeaderAuthentication getPreAuthenticatedPrincipal(DmfTenantSecurityToken securityToken);
 
     /**
-     * Extract the principal credentials from the current secruityToken.
+     * Extract the principal credentials from the current securityToken.
      *
-     * @param secruityToken the secruityToken
+     * @param securityToken the securityToken
      * @return the extracted tenant and controller id
      */
-    Object getPreAuthenticatedCredentials(DmfTenantSecurityToken secruityToken);
+    Object getPreAuthenticatedCredentials(DmfTenantSecurityToken securityToken);
 
     /**
      * Allows to add additional authorities to the successful authenticated token.

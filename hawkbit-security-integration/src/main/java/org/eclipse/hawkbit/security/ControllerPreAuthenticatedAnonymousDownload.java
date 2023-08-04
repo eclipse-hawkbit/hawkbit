@@ -41,13 +41,13 @@ public class ControllerPreAuthenticatedAnonymousDownload extends AbstractControl
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+        return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
-        return new HeaderAuthentication(secruityToken.getControllerId(), secruityToken.getControllerId());
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+        return new HeaderAuthentication(securityToken.getControllerId(), securityToken.getControllerId());
     }
 
     @Override
