@@ -103,26 +103,17 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final Slice<Rollout> rollouts;
         final long totalElements;
+        final Page<Rollout> rollouts;
         if (rsqlParam != null) {
-            if (isFullMode) {
-                rollouts = this.rolloutManagement.findByFiltersWithDetailedStatus(pageable, rsqlParam, false);
-                totalElements = this.rolloutManagement.countByFilters(rsqlParam);
-            } else {
-                final Page<Rollout> findRolloutsAll = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
-                totalElements = findRolloutsAll.getTotalElements();
-                rollouts = findRolloutsAll;
-            }
+            rollouts = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
         } else {
-            if (isFullMode) {
-                rollouts = this.rolloutManagement.findAllWithDetailedStatus(pageable, false);
-                totalElements = this.rolloutManagement.count();
-            } else {
-                final Page<Rollout> findRolloutsAll = this.rolloutManagement.findAll(pageable, false);
-                totalElements = findRolloutsAll.getTotalElements();
-                rollouts = findRolloutsAll;
-            }
+            rollouts = this.rolloutManagement.findAll(pageable, false);
+        }
+        totalElements = rollouts.getTotalElements();
+
+        if (isFullMode) {
+            this.rolloutManagement.setRolloutStatusDetails(rollouts);
         }
 
         final List<MgmtRolloutResponseBody> rest = MgmtRolloutMapper.toResponseRollout(rollouts.getContent(),

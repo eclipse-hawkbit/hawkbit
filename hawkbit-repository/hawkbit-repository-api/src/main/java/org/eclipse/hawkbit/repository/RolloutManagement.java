@@ -458,4 +458,14 @@ public interface RolloutManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
     void triggerNextGroup(long rolloutId);
 
+    /**
+     * Enrich the rollouts Slice with additional details
+     *
+     * @param rollouts
+     *            the rollouts to be enriched.
+     *
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_UPDATE)
+    void setRolloutStatusDetails(final Slice<Rollout> rollouts);
+
 }

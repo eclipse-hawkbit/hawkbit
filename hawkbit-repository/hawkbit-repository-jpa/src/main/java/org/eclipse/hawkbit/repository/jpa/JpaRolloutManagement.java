@@ -575,8 +575,8 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return fromCache;
     }
-
-    private void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
+    @Override
+    public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());
         final Map<Long, List<TotalTargetCountActionStatus>> allStatesForRollout = getStatusCountItemForRollout(
                 rolloutIds);
