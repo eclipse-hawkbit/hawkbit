@@ -332,6 +332,52 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
     }
 
+    @Test
+    @Description("Retrieves the list of rollouts with representation mode 'full'.")
+    void retrieveRolloutListFullRepresentationWithFilter() throws Exception {
+        testdataFactory.createTargets(20, "rollout", "rollout");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+
+        // create a running rollout for the created targets
+        final Rollout rollout = rolloutManagement.create(
+                entityFactory.rollout().create().name("rollout1").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+        rolloutManagement.create(
+                entityFactory.rollout().create().name("rollout2").set(dsA.getId())
+                        .targetFilterQuery("controllerId==rollout*"),
+                4, false, new RolloutGroupConditionBuilder().withDefaults()
+                        .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+        rolloutHandler.handleAll();
+        rolloutManagement.start(rollout.getId());
+        rolloutHandler.handleAll();
+
+        // request the list of rollouts with full representation
+        mvc.perform(get("/rest/v1/rollouts?q=name==rollout1&representation=full").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+                .andExpect(jsonPath("content[0].id", equalTo(rollout.getId().intValue())))
+                .andExpect(jsonPath("content[0].name", equalTo("rollout1")))
+                .andExpect(jsonPath("content[0].status", equalTo("running")))
+                .andExpect(jsonPath("content[0].targetFilterQuery", equalTo("controllerId==rollout*")))
+                .andExpect(jsonPath("content[0].distributionSetId", equalTo(dsA.getId().intValue())))
+                .andExpect(jsonPath("content[0].totalTargets", equalTo(20)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus").exists())
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.running", equalTo(5)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.notstarted", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.scheduled", equalTo(15)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.cancelled", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.finished", equalTo(0)))
+                .andExpect(jsonPath("content[0].totalTargetsPerStatus.error", equalTo(0)))
+                .andExpect(jsonPath("content[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("content[0].totalGroups", equalTo(4)))
+                .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verify the confirmation required flag is not part of the rollout parent entity")
