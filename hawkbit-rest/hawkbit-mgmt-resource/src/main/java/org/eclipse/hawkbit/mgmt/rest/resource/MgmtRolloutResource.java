@@ -103,14 +103,14 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         final boolean isFullMode = parseRepresentationMode(representationModeParam) == MgmtRepresentationMode.FULL;
 
         final Pageable pageable = new OffsetBasedPageRequest(sanitizedOffsetParam, sanitizedLimitParam, sorting);
-        final long totalElements;
         final Page<Rollout> rollouts;
         if (rsqlParam != null) {
             rollouts = this.rolloutManagement.findByRsql(pageable, rsqlParam, false);
         } else {
             rollouts = this.rolloutManagement.findAll(pageable, false);
         }
-        totalElements = rollouts.getTotalElements();
+
+        final long totalElements = rollouts.getTotalElements();
 
         if (isFullMode) {
             this.rolloutManagement.setRolloutStatusDetails(rollouts);
