@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * configuration) the possibility to authenticate a target based through a
  * gateway security token. This is commonly used for targets connected
  * indirectly via a gateway. This gateway controls multiple targets under the
- * gateway security token which can be set via the {@code TenantSecruityToken}
+ * gateway security token which can be set via the {@code TenantsecurityToken}
  * header. {@code Example Header: Authorization: GatewayToken
  * 5d8fSD54fdsFG98DDsa.}
  * 
@@ -55,25 +55,27 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
-        final String authHeader = secruityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
-        if ((authHeader != null) && authHeader.startsWith(GATEWAY_SECURITY_TOKEN_AUTH_SCHEME)) {
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+        final String authHeader = securityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
+        if (authHeader != null &&
+                authHeader.startsWith(GATEWAY_SECURITY_TOKEN_AUTH_SCHEME) &&
+                authHeader.length() > OFFSET_GATEWAY_TOKEN) { // disables empty string token
             LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
                     GATEWAY_SECURITY_TOKEN_AUTH_SCHEME);
-            return new HeaderAuthentication(secruityToken.getControllerId(),
+            return new HeaderAuthentication(securityToken.getControllerId(),
                     authHeader.substring(OFFSET_GATEWAY_TOKEN));
         }
         LOGGER.debug(
-                "security token filter is enabled but request does not contain either the necessary secruity token {} or the authorization header with scheme {}",
-                secruityToken, GATEWAY_SECURITY_TOKEN_AUTH_SCHEME);
+                "security token filter is enabled but request does not contain either the necessary security token {} or the authorization header with scheme {}",
+                securityToken, GATEWAY_SECURITY_TOKEN_AUTH_SCHEME);
         return null;
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken secruityToken) {
-        final String gatewayToken = tenantAware.runAsTenant(secruityToken.getTenant(),
+    public HeaderAuthentication getPreAuthenticatedCredentials(final DmfTenantSecurityToken securityToken) {
+        final String gatewayToken = tenantAware.runAsTenant(securityToken.getTenant(),
                 gatewaySecurityTokenKeyConfigRunner);
-        return new HeaderAuthentication(secruityToken.getControllerId(), gatewayToken);
+        return new HeaderAuthentication(securityToken.getControllerId(), gatewayToken);
     }
 
     @Override

@@ -92,13 +92,13 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             return;
         }
 
-        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables((HttpServletRequest) request);
-        if (secruityToken == null) {
+        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables((HttpServletRequest) request);
+        if (securityToken == null) {
             chain.doFilter(request, response);
             return;
         }
         abstractControllerAuthenticationFilter = createControllerAuthenticationFilter();
-        if (abstractControllerAuthenticationFilter.isEnable(secruityToken)
+        if (abstractControllerAuthenticationFilter.isEnable(securityToken)
                 && SecurityContextHolder.getContext().getAuthentication() == null) {
             super.doFilter(request, response, chain);
         } else {
@@ -129,7 +129,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
      *         request does not match the pattern and no variables could be
      *         extracted
      */
-    protected DmfTenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request) {
+    protected DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request) {
         final String requestURI = request.getRequestURI();
 
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
@@ -142,7 +142,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
                 LOG.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
                         requestURI);
             }
-            return createTenantSecruityTokenVariables(request, tenant, controllerId);
+            return createTenantSecurityTokenVariables(request, tenant, controllerId);
         } else if (pathExtractor.match(request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI)) {
             LOG.debug("retrieving path variables from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor.extractUriTemplateVariables(
@@ -151,7 +151,7 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Parsed tenant {} from path request {}", tenant, requestURI);
             }
-            return createTenantSecruityTokenVariables(request, tenant, "anonymous");
+            return createTenantSecurityTokenVariables(request, tenant, "anonymous");
         } else {
             if (LOG.isTraceEnabled()) {
                 LOG.trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
@@ -161,33 +161,33 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         }
     }
 
-    private DmfTenantSecurityToken createTenantSecruityTokenVariables(final HttpServletRequest request,
-            final String tenant, final String controllerId) {
-        final DmfTenantSecurityToken secruityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null,
+    private DmfTenantSecurityToken createTenantSecurityTokenVariables(final HttpServletRequest request,
+                                                                      final String tenant, final String controllerId) {
+        final DmfTenantSecurityToken securityToken = new DmfTenantSecurityToken(tenant, null, controllerId, null,
                 FileResource.createFileResourceBySha1(""));
 
         Collections.list(request.getHeaderNames())
-                .forEach(header -> secruityToken.putHeader(header, request.getHeader(header)));
+                .forEach(header -> securityToken.putHeader(header, request.getHeader(header)));
 
-        return secruityToken;
+        return securityToken;
     }
 
     @Override
     protected Object getPreAuthenticatedPrincipal(final HttpServletRequest request) {
-        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
-        if (secruityToken == null) {
+        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        if (securityToken == null) {
             return null;
         }
-        return abstractControllerAuthenticationFilter.getPreAuthenticatedPrincipal(secruityToken);
+        return abstractControllerAuthenticationFilter.getPreAuthenticatedPrincipal(securityToken);
     }
 
     @Override
     protected Object getPreAuthenticatedCredentials(final HttpServletRequest request) {
-        final DmfTenantSecurityToken secruityToken = createTenantSecruityTokenVariables(request);
-        if (secruityToken == null) {
+        final DmfTenantSecurityToken securityToken = createTenantSecurityTokenVariables(request);
+        if (securityToken == null) {
             return null;
         }
-        return abstractControllerAuthenticationFilter.getPreAuthenticatedCredentials(secruityToken);
+        return abstractControllerAuthenticationFilter.getPreAuthenticatedCredentials(securityToken);
     }
 
 }

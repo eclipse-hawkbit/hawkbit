@@ -145,14 +145,14 @@ public class AmqpControllerAuthentication {
     }
 
     private static PreAuthenticatedAuthenticationToken createAuthentication(final PreAuthenticationFilter filter,
-            final DmfTenantSecurityToken secruityToken) {
+            final DmfTenantSecurityToken securityToken) {
 
-        if (!filter.isEnable(secruityToken)) {
+        if (!filter.isEnable(securityToken)) {
             return null;
         }
 
-        final Object principal = filter.getPreAuthenticatedPrincipal(secruityToken);
-        final Object credentials = filter.getPreAuthenticatedCredentials(secruityToken);
+        final Object principal = filter.getPreAuthenticatedPrincipal(securityToken);
+        final Object credentials = filter.getPreAuthenticatedCredentials(securityToken);
 
         if (principal == null) {
             LOGGER.debug("No pre-authenticated principal found in message");

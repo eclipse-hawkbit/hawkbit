@@ -119,18 +119,18 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
      * this file because it's not assigned to an action and not assigned to this
      * controller. Otherwise no controllerId is set = anonymous download
      * 
-     * @param secruityToken
+     * @param securityToken
      *            the security token which holds the target ID to check on
      * @param sha1Hash
      *            of the artifact to verify if the given target is allowed to
      *            download it
      */
-    private void checkIfArtifactIsAssignedToTarget(final DmfTenantSecurityToken secruityToken, final String sha1Hash) {
+    private void checkIfArtifactIsAssignedToTarget(final DmfTenantSecurityToken securityToken, final String sha1Hash) {
 
-        if (secruityToken.getControllerId() != null) {
-            checkByControllerId(sha1Hash, secruityToken.getControllerId());
-        } else if (secruityToken.getTargetId() != null) {
-            checkByTargetId(sha1Hash, secruityToken.getTargetId());
+        if (securityToken.getControllerId() != null) {
+            checkByControllerId(sha1Hash, securityToken.getControllerId());
+        } else if (securityToken.getTargetId() != null) {
+            checkByTargetId(sha1Hash, securityToken.getTargetId());
         } else {
             LOG.info("anonymous download no authentication check for artifact {}", sha1Hash);
         }
@@ -198,15 +198,15 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
     @SuppressWarnings("squid:S1166")
     private Message handleAuthenticationMessage(final Message message) {
         final DmfDownloadResponse authenticationResponse = new DmfDownloadResponse();
-        final DmfTenantSecurityToken secruityToken = convertMessage(message, DmfTenantSecurityToken.class);
-        final FileResource fileResource = secruityToken.getFileResource();
+        final DmfTenantSecurityToken securityToken = convertMessage(message, DmfTenantSecurityToken.class);
+        final FileResource fileResource = securityToken.getFileResource();
         try {
-            SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(secruityToken));
+            SecurityContextHolder.getContext().setAuthentication(authenticationManager.doAuthenticate(securityToken));
 
             final Artifact artifact = findArtifactByFileResource(fileResource)
                     .orElseThrow(EntityNotFoundException::new);
 
-            checkIfArtifactIsAssignedToTarget(secruityToken, artifact.getSha1Hash());
+            checkIfArtifactIsAssignedToTarget(securityToken, artifact.getSha1Hash());
 
             final DmfArtifact dmfArtifact = convertDbArtifact(artifact);
 

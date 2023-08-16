@@ -61,9 +61,9 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
     }
 
     @Override
-    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken secruityToken) {
-        final String controllerId = resolveControllerId(secruityToken);
-        final String authHeader = secruityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
+    public HeaderAuthentication getPreAuthenticatedPrincipal(final DmfTenantSecurityToken securityToken) {
+        final String controllerId = resolveControllerId(securityToken);
+        final String authHeader = securityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
             LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
@@ -71,7 +71,7 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         }
         LOGGER.debug(
                 "security token filter is enabled but requst does not contain either the necessary path variables {} or the authorization header with scheme {}",
-                secruityToken, TARGET_SECURITY_TOKEN_AUTH_SCHEME);
+                securityToken, TARGET_SECURITY_TOKEN_AUTH_SCHEME);
         return null;
     }
 
