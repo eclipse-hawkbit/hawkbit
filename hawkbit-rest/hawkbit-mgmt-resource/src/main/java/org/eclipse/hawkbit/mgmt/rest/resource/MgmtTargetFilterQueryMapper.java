@@ -18,6 +18,9 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtDistributionSetRestApi;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
+import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
 import org.eclipse.hawkbit.repository.EntityFactory;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
@@ -25,6 +28,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.springframework.hateoas.Link;
 import org.springframework.util.CollectionUtils;
 
 /**
@@ -39,14 +43,15 @@ public final class MgmtTargetFilterQueryMapper {
     }
 
     static List<MgmtTargetFilterQuery> toResponse(final List<TargetFilterQuery> filters,
-            final boolean confirmationFlowEnabled) {
+            final boolean confirmationFlowEnabled, final boolean isRepresentationFull) {
         if (CollectionUtils.isEmpty(filters)) {
             return Collections.emptyList();
         }
-        return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled)).collect(Collectors.toList());
+        return filters.stream().map(filter -> toResponse(filter, confirmationFlowEnabled, isRepresentationFull)).collect(Collectors.toList());
     }
 
-    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled) {
+    static MgmtTargetFilterQuery toResponse(final TargetFilterQuery filter, final boolean confirmationFlowEnabled,
+        final boolean isReprentationFull) {
         final MgmtTargetFilterQuery targetRest = new MgmtTargetFilterQuery();
         targetRest.setFilterId(filter.getId());
         targetRest.setName(filter.getName());
@@ -70,6 +75,12 @@ public final class MgmtTargetFilterQueryMapper {
 
         targetRest.add(
                 linkTo(methodOn(MgmtTargetFilterQueryRestApi.class).getFilter(filter.getId())).withSelfRel().expand());
+        if (isReprentationFull && distributionSet != null) {
+            targetRest.add(
+                linkTo(methodOn(MgmtDistributionSetRestApi.class).getDistributionSets(Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET),
+                    Integer.parseInt(MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT), null,
+                    "name==" + distributionSet.getName() + ";version==" + distributionSet.getVersion())).withRel("DS").expand());
+        }
 
         return targetRest;
     }

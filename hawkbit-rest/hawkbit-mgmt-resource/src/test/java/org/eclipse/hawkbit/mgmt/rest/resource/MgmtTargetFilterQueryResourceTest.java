@@ -9,8 +9,10 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.filter;
 import static org.eclipse.hawkbit.rest.util.MockMvcResultPrinter.print;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -20,6 +22,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,11 +40,13 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.json.JSONObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.platform.commons.util.StringUtils;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -49,6 +54,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.web.util.UriUtils;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
@@ -221,6 +227,47 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    public void checkIfFullRepresentationInTargetFilterReturnsDistributionSetHrefWithFilter() throws Exception {
+        final String testQuery = "name==test";
+
+        final DistributionSet set = testdataFactory.createDistributionSet();
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("a", testQuery);
+        final String hrefPrefix = "http://localhost" + MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/"
+            + filterQuery.getId();
+        final String distributionsetHrefPrefix = "http://localhost" + MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING;
+
+        final String dsQuery = "?offset=0&limit=50&q=name==" + set.getName() + ";" + "version==" + set.getVersion();
+
+        mvc.perform(
+                post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
+                    .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
+            .andDo(print()).andExpect(status().isOk());
+
+        final String result = mvc.perform(
+                get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId()))
+            .andExpect(jsonPath("$._links.autoAssignDS.href", equalTo(hrefPrefix + "/autoAssignDS")))
+            .andExpect(jsonPath("$._links.DS.href", startsWith(distributionsetHrefPrefix)))
+            .andReturn().getResponse().getContentAsString();
+
+        final String multipleResult = mvc.perform(
+                get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?representation=full"))
+            .andExpect(jsonPath("$.content", hasSize(1))).andExpect(jsonPath("$.total", equalTo(1)))
+            .andExpect(jsonPath("$.content[0]._links.DS.href", startsWith(distributionsetHrefPrefix)))
+            .andReturn().getResponse().getContentAsString();
+
+        final JSONObject singleJson = new JSONObject(result);
+        final JSONObject multipleJson = new JSONObject(multipleResult);
+
+        final String resultDSURI = singleJson.getJSONObject("_links").getJSONObject("DS").getString("href");
+        final String resultDSURIFromMultipleJson = multipleJson.getJSONArray("content").getJSONObject(0)
+            .getJSONObject("_links").getJSONObject("DS").getString("href");
+
+        Assertions.assertEquals(distributionsetHrefPrefix + dsQuery, UriUtils.decode(resultDSURI, StandardCharsets.UTF_8));
+        Assertions.assertEquals(distributionsetHrefPrefix + dsQuery,
+            UriUtils.decode(resultDSURIFromMultipleJson, StandardCharsets.UTF_8));
+    }
+
+    @Test
     @Description("Ensures that request returns list of filters in defined format in size reduced by given limit and offset parameter.")
     public void getTargetWithPagingLimitAndOffsetRequestParameter() throws Exception {
         final int knownTargetAmount = 5;
@@ -332,6 +379,7 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
         // create the filter query and the distribution set
         final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target*");
+
 
         mvc.perform(
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")

@@ -250,7 +250,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                 fieldWithPath(arrayPrefix + "lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY),
                 fieldWithPath(arrayPrefix + "_links.self").ignored(), fieldWithPath(arrayPrefix + "_links.autoAssignDS")
-                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS));
+                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS),
+                optionalRequestFieldWithPath(arrayPrefix + "_links.DS").ignored());
     }
 
     private String createTargetFilterQueryJson(final String name, final String query)
