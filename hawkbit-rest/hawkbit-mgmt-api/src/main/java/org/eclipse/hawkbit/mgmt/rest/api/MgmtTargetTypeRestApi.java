@@ -158,7 +158,7 @@ public interface MgmtTargetTypeRestApi {
      *         ResponseBody. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @Operation(summary = "Update target type by id", description = "Handles the POST request for creating new target types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
+    @Operation(summary = "Create target types", description = "Handles the POST request for creating new target types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
