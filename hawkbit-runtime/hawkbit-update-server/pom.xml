@@ -77,6 +77,16 @@
           <artifactId>postgresql</artifactId>
       </dependency>
 
+      <!-- Swagger Support -->
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-ui</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-security</artifactId>
+      </dependency>
+
       <!-- Test -->
       <dependency>
          <groupId>io.qameta.allure</groupId>
@@ -96,7 +106,7 @@
       <dependency>
          <groupId>org.mariadb.jdbc</groupId>
          <artifactId>mariadb-java-client</artifactId>
-         <scope>test</scope>
+<!--         <scope>test</scope>-->
       </dependency>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>

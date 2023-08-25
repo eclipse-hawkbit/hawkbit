@@ -138,6 +138,9 @@
       <!-- CVE-2022-31690 Remove after Spring 3.0.0 migration-->
       <spring.security.oauth2.client.version>5.7.10</spring.security.oauth2.client.version>
 
+      <!-- Swagger Support -->
+      <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
+
       <!-- Spring boot version overrides (should be reviewed with every boot upgrade) - START -->
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
@@ -840,6 +843,19 @@
             <artifactId>spring-plugin-core</artifactId>
             <version>${spring.plugin.core.version}</version>
          </dependency>
+
+         <!-- Swagger Support -->
+         <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>${springdoc-openapi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-security</artifactId>
+            <version>${springdoc-openapi.version}</version>
+         </dependency>
+
          <!-- CVE-2022-31690 Remove after Spring 3.0.0 migration-->
          <dependency>
             <groupId>org.springframework.security</groupId>
