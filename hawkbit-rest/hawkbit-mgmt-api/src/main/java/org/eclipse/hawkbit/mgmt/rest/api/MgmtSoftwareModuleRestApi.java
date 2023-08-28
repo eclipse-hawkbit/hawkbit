@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -58,6 +61,18 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
+    @Operation(summary = "Upload artifact", description = "Handles POST request for artifact upload. Required Permission: CREATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found"),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = {
                     MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -79,6 +94,17 @@ public interface MgmtSoftwareModuleRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
+    @Operation(summary = "Return all meta data of artifacts assigned to a software module", description = "Handles the GET request of retrieving all meta data of artifacts assigned to a software module. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found "),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -97,6 +123,17 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return responseEntity with status ok if successful
      */
+    @Operation(summary = "Return single Artifact meta data", description = "Handles the GET request of retrieving a single Artifact meta data request. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts/{artifactId}", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -115,6 +152,17 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return status OK if delete as successful.
      */
+    @Operation(summary = "Delete artifact by Id", description = "Handles the DELETE request for a single Artifact assigned to a SoftwareModule. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/artifacts/{artifactId}")
     @ResponseBody
@@ -141,6 +189,16 @@ public interface MgmtSoftwareModuleRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
+    @Operation(summary = "Return all Software modules", description = "Handles the GET request of retrieving all softwaremodules. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModule>> getSoftwareModules(
@@ -157,6 +215,17 @@ public interface MgmtSoftwareModuleRestApi {
      *
      * @return a single softwareModule with status OK.
      */
+    @Operation(summary = "Return Software Module by id", description = "Handles the GET request of retrieving a single softwaremodule. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found "),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModule> getSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
@@ -172,6 +241,17 @@ public interface MgmtSoftwareModuleRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
+    @Operation(summary = "Create Software Module(s)", description = "Handles the POST request of creating new software modules. The request body must always be a list of modules. Required Permission: CREATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING, consumes = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -187,6 +267,19 @@ public interface MgmtSoftwareModuleRestApi {
      *            the modules to be updated.
      * @return status OK if update was successful
      */
+    @Operation(summary = "Update Software Module", description = "Handles the PUT request for a single softwaremodule within Hawkbit. Required Permission: UPDATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}", consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -202,6 +295,17 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if delete was successful.
      *
      */
+    @Operation(summary = "Delete Software Module by Id", description = "Handles the DELETE request for a single softwaremodule within Hawkbit. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}")
     ResponseEntity<Void> deleteSoftwareModule(@PathVariable("softwareModuleId") final Long softwareModuleId);
 
@@ -225,6 +329,17 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if get request is successful with the paged list of
      *         meta data
      */
+    @Operation(summary = "Return meta data for a Software Module", description = "Get a paged list of meta data for a software module. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found "),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/metadata", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -245,6 +360,17 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if get request is successful with the value of the meta
      *         data
      */
+    @Operation(summary = "Return single meta data value for a specific key of a Software Module", description = "Get a single meta data value for a meta data key. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found "),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -264,6 +390,17 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status OK if the update request is successful and the updated
      *         meta data result
      */
+    @Operation(summary = "Update a single meta data value of a Software Module", description = "Update a single meta data value for speficic key. Required Permission: UPDATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PutMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/metadata/{metadataKey}", produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -280,6 +417,17 @@ public interface MgmtSoftwareModuleRestApi {
      *            the key of the meta data to delete
      * @return status OK if the delete request is successful
      */
+    @Operation(summary = "Delete single meta data entry from the software module", description = "Delete a single meta data. Required Permission: UPDATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/metadata/{metadataKey}")
     ResponseEntity<Void> deleteMetadata(@PathVariable("softwareModuleId") final Long softwareModuleId,
@@ -295,6 +443,19 @@ public interface MgmtSoftwareModuleRestApi {
      * @return status created if post request is successful with the value of
      *         the created meta data
      */
+    @Operation(summary = "Creates a list of meta data for a specific Software Module", description = "Create a list of meta data entries Required Permission: UPDATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Software Module not found"),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING
             + "/{softwareModuleId}/metadata", consumes = { MediaType.APPLICATION_JSON_VALUE,
                     MediaTypes.HAL_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
