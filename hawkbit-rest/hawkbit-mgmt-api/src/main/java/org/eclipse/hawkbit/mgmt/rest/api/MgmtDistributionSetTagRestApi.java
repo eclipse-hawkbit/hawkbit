@@ -10,6 +10,9 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedDistributionSetRequestBody;
@@ -52,6 +55,16 @@ public interface MgmtDistributionSetTagRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
+    @Operation(summary = "Return all Distribution Set Tags", description = "Handles the GET request of retrieving all distribution set tags.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING, produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getDistributionSetTags(
@@ -68,6 +81,17 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return a single distribution set tag with status OK.
      */
+    @Operation(summary = "Return single Distribution Set Tag", description = "Handles the GET request of retrieving a single distribution set tag.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + "/{distributionsetTagId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTag> getDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
@@ -82,6 +106,18 @@ public interface MgmtDistributionSetTagRestApi {
      *         with status code 201 - Created. The Response Body contains the
      *         created distribution set tags but without details.
      */
+    @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating new distribution set tag. The request body must always be a list of distribution set tags.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
@@ -98,6 +134,19 @@ public interface MgmtDistributionSetTagRestApi {
      * @return status OK if update is successful and the updated distribution
      *         set tag.
      */
+    @Operation(summary = "Update Distribution Set Tag", description = "Handles the PUT request of updating a distribution set tag.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PutMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + "/{distributionsetTagId}", consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
@@ -113,6 +162,19 @@ public interface MgmtDistributionSetTagRestApi {
      * @return status OK if delete as successfully.
      *
      */
+    @Operation(summary = "Delete a single distribution set tag", description = "Handles the DELETE request of deleting a single distribution set tag.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING + "/{distributionsetTagId}")
     ResponseEntity<Void> deleteDistributionSetTag(@PathVariable("distributionsetTagId") Long distributionsetTagId);
 
@@ -137,6 +199,17 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution sets.
      */
+    @Operation(summary = "Return all assigned distribution sets by given tag Id", description = "Handles the GET request of retrieving a list of assigned distributions.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found"),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @GetMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, produces = {
                     MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
@@ -159,6 +232,18 @@ public interface MgmtDistributionSetTagRestApi {
      * @return the list of assigned distribution sets and unassigned
      *         distribution sets.
      */
+    @Operation(summary = "Toggle the assignment of distribution sets by the given tag id", description = "Handles the POST request of toggle distribution assignment. The request body must always be a list of distribution set ids.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/toggleTagAssignment")
     ResponseEntity<MgmtDistributionSetTagAssigmentResult> toggleTagAssignment(
@@ -175,6 +260,18 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution set.
      */
+    @Operation(summary = "Assign distribution sets to the given tag id", description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @PostMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING, consumes = {
                     MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = {
@@ -193,6 +290,17 @@ public interface MgmtDistributionSetTagRestApi {
      *            the ID of the distribution set to unassign
      * @return http status code
      */
+    @Operation(summary = "Unassign one distribution set from the given tag id", description = "Handles the DELETE request of unassign the given distribution.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found."),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
+    })
     @DeleteMapping(value = MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
             + MgmtRestConstants.DISTRIBUTIONSET_TAG_DISTRIBUTIONSETS_REQUEST_MAPPING + "/{distributionsetId}")
     ResponseEntity<Void> unassignDistributionSet(@PathVariable("distributionsetTagId") Long distributionsetTagId,
