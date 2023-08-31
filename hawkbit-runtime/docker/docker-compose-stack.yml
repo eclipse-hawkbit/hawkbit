@@ -11,65 +11,10 @@ version: '3.7'
 services:
 
   # ---------------------
-  # hawkBit service
-  # ---------------------
-  hawkbit:
-    image: "hawkbit/hawkbit-update-server:latest-mysql"
-    networks:
-    - hawknet
-    ports:
-    - "8080:8080"
-    deploy:
-      restart_policy:
-        condition: on-failure
-    environment:
-    - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
-    - 'SPRING_DATASOURCE_USERNAME=root'
-    - 'SPRING_RABBITMQ_HOST=rabbitmq'
-    - 'SPRING_RABBITMQ_USERNAME=guest'
-    - 'SPRING_RABBITMQ_PASSWORD=guest'
-
-  # ---------------------
-  # hawkBit simulator
-  # ---------------------
-  simulator:
-    image: "hawkbit/hawkbit-device-simulator:latest"
-    networks:
-    - hawknet
-    ports:
-    - "8083:8083"
-    deploy:
-      restart_policy:
-        condition: on-failure
-    environment:
-    - 'HAWKBIT_DEVICE_SIMULATOR_AUTOSTARTS_[0]_TENANT=DEFAULT'
-    - 'SPRING_RABBITMQ_VIRTUALHOST=/'
-    - 'SPRING_RABBITMQ_HOST=rabbitmq'
-    - 'SPRING_RABBITMQ_PORT=5672'
-    - 'SPRING_RABBITMQ_USERNAME=guest'
-    - 'SPRING_RABBITMQ_PASSWORD=guest'
-
-  # ---------------------
-  # RabbitMQ service
-  # ---------------------
-  rabbitmq:
-    image: "rabbitmq:3-management"
-    networks:
-    - hawknet
-    ports:
-    - "15672:15672"
-    - "5672:5672"
-    deploy:
-      restart_policy:
-        condition: on-failure
-    environment:
-      RABBITMQ_DEFAULT_VHOST: "/"
-
-  # ---------------------
   # MySQL service
   # ---------------------
   mysql:
-    image: "mysql:5.7"
+    image: "mysql:8.0"
     networks:
     - hawknet
     ports:
@@ -79,9 +24,63 @@ services:
         condition: on-failure
     environment:
       MYSQL_DATABASE: "hawkbit"
-      # MYSQL_USER: "root" is created by default in the container for mysql 5.7+
+      # MYSQL_USER: "root" is created by default in the container for mysql 8.0+
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
 
+  # ---------------------
+  # hawkBit service
+  # ---------------------
+  hawkbit:
+    image: "hawkbit/hawkbit-update-server:latest-mysql"
+    networks:
+      - hawknet
+    ports:
+      - "8080:8080"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hawkbit'
+      - 'SPRING_DATASOURCE_USERNAME=root'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+
+  # ---------------------
+  # hawkBit simulator
+  # ---------------------
+  simulator:
+    image: "hawkbit/hawkbit-device-simulator:latest"
+    networks:
+      - hawknet
+    ports:
+      - "8083:8083"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      - 'HAWKBIT_DEVICE_SIMULATOR_AUTOSTARTS_[0]_TENANT=DEFAULT'
+      - 'SPRING_RABBITMQ_VIRTUALHOST=/'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_PORT=5672'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+
+  # ---------------------
+  # RabbitMQ service
+  # ---------------------
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    networks:
+      - hawknet
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    deploy:
+      restart_policy:
+        condition: on-failure
+    environment:
+      RABBITMQ_DEFAULT_VHOST: "/"
 
 networks:
   hawknet:
