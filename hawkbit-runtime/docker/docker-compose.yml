@@ -31,7 +31,7 @@ services:
     image: "mysql:8.0"
     environment:
       MYSQL_DATABASE: "hawkbit"
-      # MYSQL_USER: "root" is created by default in the container for mysql 5.7+
+      # MYSQL_USER: "root" is created by default in the container for mysql 8.0+
       MYSQL_ALLOW_EMPTY_PASSWORD: "true"
     restart: always
     ports:

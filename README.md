@@ -39,7 +39,7 @@ In addition the following vendors offer free trial accounts for their hawkBit co
 
 # Device Integration (Client libraries)
 
-hawkBit exposes HTTP/JSon based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) that allow any update client to integrate quite easily.
+hawkBit exposes HTTP/JSON based [Direct Device Integration (API) API](https://www.eclipse.org/hawkbit/apis/ddi_api/) that allow any update client to integrate quite easily.
 
 The [Eclipse Hara subproject](https://projects.eclipse.org/projects/iot.hawkbit.hara) aims to provide a reference agent software implementation of the Eclipse hawkBit device API. The [hara-ddiclient repository](https://github.com/eclipse/hara-ddiclient) provides:
 
@@ -65,7 +65,7 @@ There are clients outside of the Eclipse IoT eco system as well, e.g.:
 
 # Runtime dependencies and support
 
-## Java Runtime Environment: 1.8,11
+## Java Runtime Environment: 17
 
 ## SQL database
 
@@ -94,6 +94,8 @@ Open the update server in your browser:
 [localhost:8080](http://localhost:8080)
 
 See below for how to build and run the update server on your own. In addition we have a [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) for setting up a complete landscape.
+
+**Note**: this docker image supports both DDI and DMF APIs. However, in order to have DMF API working you shall have started additionally RabbitMQ on localhost:5672 with user guest/guest. Then the DMF will use / vhost. See more at [guide](https://www.eclipse.org/hawkbit/guides/runhawkbit/) -> _Configure RabbitMQ connection settings_.
 
 # hawkBit (Spring boot) starters
 
