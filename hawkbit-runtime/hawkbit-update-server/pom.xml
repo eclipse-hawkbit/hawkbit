@@ -77,16 +77,6 @@
           <artifactId>postgresql</artifactId>
       </dependency>
 
-      <!-- Swagger Support -->
-      <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-ui</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>org.springdoc</groupId>
-         <artifactId>springdoc-openapi-security</artifactId>
-      </dependency>
-
       <!-- Test -->
       <dependency>
          <groupId>io.qameta.allure</groupId>
