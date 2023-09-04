@@ -217,13 +217,13 @@ The location of the config file is `/etc/swupdate/swupdate.conf`
 ```yml
 suricatta :
 {
-	tenant = "default";
-	id = "[ID]";
-	url = "[URL]";
-	nocheckcert = false;
-	cafile = "[CAFile]";
-	sslkey = "/etc/ssl/certs/[ID].key";
-	sslcert = "/etc/ssl/certs/[ID].crt";
+tenant = "default";
+id = "[ID]";
+url = "[URL]";
+nocheckcert = false;
+cafile = "[CAFile]";
+sslkey = "/etc/ssl/certs/[ID].key";
+sslcert = "/etc/ssl/certs/[ID].crt";
 };
 ```
 
