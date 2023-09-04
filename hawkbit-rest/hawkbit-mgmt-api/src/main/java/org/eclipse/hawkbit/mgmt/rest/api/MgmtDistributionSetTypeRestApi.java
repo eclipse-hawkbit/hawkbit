@@ -13,6 +13,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
@@ -30,9 +31,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * REST Resource handling for DistributionSet CRUD operations.
+ * REST Resource handling for DistributionSetType CRUD operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Distribution Set Types", description = "REST Resource handling for DistributionSetType CRUD operations.")
 public interface MgmtDistributionSetTypeRestApi {
 
     /**

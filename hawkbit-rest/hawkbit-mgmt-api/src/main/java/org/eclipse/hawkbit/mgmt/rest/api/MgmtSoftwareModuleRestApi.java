@@ -13,6 +13,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
@@ -38,6 +39,7 @@ import org.springframework.web.multipart.MultipartFile;
  * operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Software Modules", description = "REST API for SoftwareModule and related Artifact CRUD operations.")
 public interface MgmtSoftwareModuleRestApi {
 
     /**

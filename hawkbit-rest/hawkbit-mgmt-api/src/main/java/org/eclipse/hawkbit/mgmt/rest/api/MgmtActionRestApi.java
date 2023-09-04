@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.springframework.hateoas.MediaTypes;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST API providing (read-only) access to actions.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Actions", description = "REST API providing (read-only) access to actions.")
 public interface MgmtActionRestApi {
 
     /**

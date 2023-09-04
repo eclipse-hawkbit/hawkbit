@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST Resource handling for DistributionSet CRUD operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Distribution Sets", description = "REST Resource handling for DistributionSet CRUD operations.")
 public interface MgmtDistributionSetRestApi {
 
     /**

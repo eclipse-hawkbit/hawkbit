@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST Resource handling rollout CRUD operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Rollouts", description = "REST API for Rollout CRUD operations.")
 public interface MgmtRolloutRestApi {
 
     /**
