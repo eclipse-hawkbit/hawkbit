@@ -193,7 +193,7 @@ services:
 
 #### Swupdate Suricatta Configurations
 
-If the client is utilizing the SWUpdate Suricatta service, the configurations on the device or client side should also be adjusted as follows:
+If the client is utilizing the SWUpdate Suricatta service, the configurations on the device or client side should also be adjusted as follows. Remember to change id, url and certificate names to your needs.
 
 The location of the config file is `/etc/swupdate/swupdate.conf`
 
@@ -201,12 +201,12 @@ The location of the config file is `/etc/swupdate/swupdate.conf`
 suricatta :
 {
 tenant = "default";
-id = "[device_id]";
-url = "[https://hawkbit.dev.example.com]";
+id = "device_id";
+url = "https://hawkbit.dev.example.com";
 nocheckcert = false;
-cafile = "[server_ca.crt]";
-sslkey = "/etc/ssl/certs/[device_id].key";
-sslcert = "/etc/ssl/certs/[device_id].crt";
+cafile = "server_ca.crt";
+sslkey = "/etc/ssl/certs/client.key";
+sslcert = "/etc/ssl/certs/client.crt";
 };
 ```
 
