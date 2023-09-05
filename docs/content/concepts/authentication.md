@@ -76,9 +76,9 @@ Initially, you'll need to obtain certificates for these components, which is not
 
 Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. 
 
-![Example Reverse Proxy Architecutre](../../images/security/exampleReverseProxyArchitecture.png)
+![Example Reverse Proxy Architecture](../../images/security/exampleReverseProxyArchitecture.png)
 
-#### Nginx Reverse Proxy Configurations
+#### Example Nginx Reverse Proxy Configurations
 After placing your certificates, you need to deploy your proxy server and apply the provided configurations. You can apply Mutual TLS specifically to the URL given below to implement the process only for devices using the Device Integration API:
 
 `hawkbit.dev.example.com/default/controller/`
