@@ -71,10 +71,10 @@ Initially, you'll need to obtain certificates for these components, which is not
 - client_ca.crt signs client.crt
 - server_ca.crt signs server.crt
 
-- Client has the client.crt, client.key and client_ca.crt
-- Server has the server.crt, server.key and server_ca.crt 
+- Client has the client.crt, client.key and server_ca.crt
+- Server has the server.crt, server.key and client_ca.crt
 
-Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. 
+Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client.
 
 ![Example Reverse Proxy Architecture](../../images/security/exampleReverseProxyArchitecture.png)
 
