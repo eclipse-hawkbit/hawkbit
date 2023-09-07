@@ -20,6 +20,13 @@
    <name>hawkBit :: REST :: Management API</name>
 
    <dependencies>
+
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+
       <dependency>
          <groupId>org.springframework.hateoas</groupId>
          <artifactId>spring-hateoas</artifactId>

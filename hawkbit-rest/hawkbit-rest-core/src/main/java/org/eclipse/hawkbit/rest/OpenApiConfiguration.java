@@ -16,7 +16,6 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.springframework.context.annotation.Bean;
 
 public class OpenApiConfiguration {
@@ -68,6 +67,6 @@ public class OpenApiConfiguration {
                         .type(SecurityScheme.Type.HTTP)
                         .bearerFormat("JWT")
                         .scheme("bearer")))
-        .info(new Info().title(apiTitle).description(DESCRIPTION).version(MgmtRestConstants.API_VERSION));
+        .info(new Info().title(apiTitle).description(DESCRIPTION).version("v1"));
   }
 }

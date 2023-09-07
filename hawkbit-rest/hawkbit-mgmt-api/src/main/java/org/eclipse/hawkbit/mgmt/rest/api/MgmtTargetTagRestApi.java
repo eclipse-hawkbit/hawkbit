@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTagRequestBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTargetTagAssigmentResult;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -59,7 +62,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return all target tags", description = "Handles the GET request of retrieving all target tags.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -85,10 +88,10 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return target tag by id", description = "Handles the GET request of retrieving a single target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target tag not found."),
+        @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
         @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
@@ -110,7 +113,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Create target tag(s)", description = "Handles the POST request of creating new target tag. The request body must always be a list of target tags.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -137,10 +140,10 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Update target tag by id", description = "Handles the PUT request of updating a target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target tag not found."),
+        @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
         @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request."),
@@ -164,10 +167,10 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Delete target tag by id", description = "Handles the DELETE request of deleting a single target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target tag not found."),
+        @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
         @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
@@ -199,10 +202,10 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return assigned targets for tag", description = "Handles the GET request of retrieving a list of assigned targets.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target tag not found"),
+        @ApiResponse(responseCode = "404", description = "Target tag not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
         @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
@@ -230,7 +233,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Toggles target tag assignment", description = "Handles the POST request of toggle target assignment. The request body must always be a list of controller ids.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -259,7 +262,7 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId", description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -287,10 +290,10 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Unassign target from a given tagId", description = "Handles the DELETE request to unassign the given target.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
-        @ApiResponse(responseCode = "404", description = "Target not found."),
+        @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json."),
         @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.")
