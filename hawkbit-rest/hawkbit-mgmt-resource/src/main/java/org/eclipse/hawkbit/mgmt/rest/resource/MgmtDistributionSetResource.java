@@ -281,7 +281,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         return ResponseEntity
                 .ok(new PagedList<>(MgmtTargetFilterQueryMapper.toResponse(targetFilterQueries.getContent(),
-                        tenantConfigHelper.isConfirmationFlowEnabled()), targetFilterQueries.getTotalElements()));
+                        tenantConfigHelper.isConfirmationFlowEnabled(), false), targetFilterQueries.getTotalElements()));
     }
 
     @Override
