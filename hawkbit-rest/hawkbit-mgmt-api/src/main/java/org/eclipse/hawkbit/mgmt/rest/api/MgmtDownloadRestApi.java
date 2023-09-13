@@ -10,6 +10,7 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.io.InputStream;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * A resource for download artifacts.
  */
 @FunctionalInterface
+@Tag(name = "Download artifact by ID", description = "API to download artifacts by download Id.")
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtDownloadRestApi {
 

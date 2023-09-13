@@ -10,10 +10,17 @@ package org.eclipse.hawkbit.mgmt.rest.api;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleType;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeRequestBodyPut;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +36,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * operations.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Software Module Types", description = "REST API for SoftwareModuleTypes CRUD operations.")
 public interface MgmtSoftwareModuleTypeRestApi {
 
     /**
@@ -51,6 +59,16 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
+    @Operation(summary = "Return all Software Module Types", description = "Handles the GET request of retrieving all software module types. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtSoftwareModuleType>> getTypes(
@@ -67,6 +85,17 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *
      * @return a single softwareModule with status OK.
      */
+    @Operation(summary = "Return single Software Module Type", description = "Handles the GET request of retrieving a single software module type. Required Permission: READ_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING
             + "/{softwareModuleTypeId}", produces = { MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtSoftwareModuleType> getSoftwareModuleType(
@@ -80,6 +109,17 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if delete as successfully.
      *
      */
+    @Operation(summary = "Delete Software Module Type by Id", description = "Handles the DELETE request for a single software module type. Required Permission: DELETE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @DeleteMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "/{softwareModuleTypeId}")
     ResponseEntity<Void> deleteSoftwareModuleType(@PathVariable("softwareModuleTypeId") Long softwareModuleTypeId);
 
@@ -92,6 +132,19 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *            the module type to be updated.
      * @return status OK if update is successful
      */
+    @Operation(summary = "Update Software Module Type", description = "Handles the PUT request for a single software module type. Required Permission: UPDATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PutMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING
             + "/{softwareModuleTypeId}", consumes = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
@@ -111,6 +164,19 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
+    @Operation(summary = "Creates new Software Module Types", description = "Handles the POST request of creating new software module types. The request body must always be a list of module types. Required Permission: CREATE_REPOSITORY")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "409", description = "E.g. in case an entity is created or modified by another user in another request at the same time. You may retry your modification request.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "415", description = "The request was attempt with a media-type which is not supported by the server for this resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @PostMapping(value = MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING, consumes = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })

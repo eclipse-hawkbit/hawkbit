@@ -8,8 +8,15 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
+import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * REST API providing (read-only) access to actions.
  */
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
+@Tag(name = "Actions", description = "REST API providing (read-only) access to actions.")
 public interface MgmtActionRestApi {
 
     /**
@@ -46,6 +54,16 @@ public interface MgmtActionRestApi {
      *         JsonResponseExceptionHandler is handling the response.
      */
 
+    @Operation(summary = "Return all actions", description = "Handles the GET request of retrieving all actions.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActions(
@@ -64,6 +82,15 @@ public interface MgmtActionRestApi {
      *
      * @return the {@link MgmtAction}
      */
+    @Operation(summary = "Return action by id", description = "Handles the GET request of retrieving a single action by actionId.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);

@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import org.eclipse.hawkbit.rest.OpenApiConfiguration;
 import org.eclipse.hawkbit.rest.RestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Controller;
  */
 @Configuration
 @ComponentScan
-@Import(RestConfiguration.class)
+@Import({RestConfiguration.class, OpenApiConfiguration.class})
 @PropertySource("classpath:/hawkbit-mgmt-api-defaults.properties")
 public class MgmtApiConfiguration {
 

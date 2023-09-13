@@ -20,10 +20,29 @@
    <name>hawkBit :: REST :: Management API</name>
 
    <dependencies>
+
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+
       <dependency>
          <groupId>org.springframework.hateoas</groupId>
          <artifactId>spring-hateoas</artifactId>
       </dependency>
+      <!-- Swagger Support -->
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-ui</artifactId>
+         <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-security</artifactId>
+         <version>${springdoc-openapi.version}</version>
+      </dependency>
+
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-webmvc</artifactId>

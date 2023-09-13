@@ -8,6 +8,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.api;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.eclipse.hawkbit.mgmt.json.model.auth.MgmtUserInfo;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
  * Api for handling basic auth user validation
  */
 @SuppressWarnings("squid:S1609")
+@Tag(name = "Basic Authentication", description = "API for basic auth user validation.")
 // no request mapping specified here to avoid CVE-2021-22044 in Feign client
 public interface MgmtBasicAuthRestApi {
     /**
