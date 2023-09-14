@@ -64,26 +64,59 @@ The activation for the individual tenant:
 
 ### Certificate Authentication by Reverse Proxy
 
-hawkBit offers a certificate-based authentication mechanism, referred to as Mutual TLS, which eliminates the need to share a security token with the server. To implement this, you'll require a reverse proxy deployed before the hawkBit server to handle authentication. This process involves obtaining certificates for both the client and the reverse proxy and configuring hawkBit accordingly.
+hawkBit offers a certificate-based authentication mechanism, also known as mutual TLS (mTLS), which eliminates the need to share a security token with the server. To implement this, you'll require a reverse proxy deployed in front of the hawkBit server to handle authentication. This process involves obtaining certificates (and keys) for both the client and the reverse proxy and configuring hawkBit accordingly.
 
-Initially, you'll need to obtain certificates for these components, which is not covered in this description. Once you have acquired certificates for both the client and the Hawkbit server, whether from the same or different Certificate Authorities (CAs), you'll need to place these certificates in their respective locations.
+Initially, you'll need to obtain certificates (and keys) for these components from the same or different Certificate Authorities (CAs). Once you have acquired certificates you have to set them up to both the client and the hawkBit server.
+
+Then you shall enable *Allow targets to authenticate via a certificate authenticated by a reverse proxy* and set the fingerprint of the client certificate issuer(s) (as a comma separated list).
+
+To authenticate the request to hawBit the following condition shall be met:
+- the common name of the client certificate shall match the controller/client id
+- the SSL Issuer(s) hash of the presented client certificate shall be set for the tenant. For that, in Hawkbit's UI section, under system configuration, you shall enable 'Allow targets to authenticate via a certificate by an reverse proxy' and set the hash of the client certificate issuer(s) (as a comma separated list).
+
+![Example Reverse Proxy Settings](../../images/security/exampleReverseProxySettings.png)
+
+You can use the following command to get the issuer hash:
+
+```shell
+openssl x509 -in client_certificate.crt -issuer_hash -noout`
+```
+
+Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client. For the sake of simplification we assume that there are not intermediate certificates and the certificate and key are as follows:
 
 - client_ca.crt signs client.crt
 - server_ca.crt signs server.crt
 
-- Client has the client.crt, client.key and server_ca.crt
-- Server has the server.crt, server.key and client_ca.crt
-
-Here is an example diagram that shows all the communication between the hawkBit, reverse proxy and client.
+- client has the client.crt, client.key and server_ca.crt
+- server (in this case reverse proxy) has the server.crt, server.key and client_ca.crt
 
 ![Example Reverse Proxy Architecture](../../images/security/exampleReverseProxyArchitecture.png)
 
-#### Example Nginx Reverse Proxy Configurations
-After placing your certificates, you need to deploy your proxy server and apply the provided configurations. You can apply Mutual TLS specifically to the URL given below to implement the process only for devices using the Device Integration API:
+#### Example - Nginx Reverse Proxy Configurations
 
-`hawkbit.dev.example.com/default/controller/`
+Nginx doesn't support obtaining the issuer hash without addons. Therefore, in this example we bypass sending real SSL Issuer hash to hawhBit but do certificate issuer validation at Nginx and then supply shared (between Nginx and hawkBit) fixed hash "Hawkbit". You could use any value here as long as it is matched with the *Allow targets to authenticate via a certificate authenticated by a reverse proxy* setting in the hawkBit UI. Note that for multi-tenant scenarios with different trusted CAs this example won't work.
 
-This ensures that other clients, like UI users, can connect to Hawkbit without requiring client certificates. They can use Username and Password in the Management API, eliminating the need for authentication and making it more user-friendly.
+1. Hawkbit Configurations
+
+   There are also some configurations that you need update when you deployed your hawkbit service.
+
+   You need to add the given download settings to your hawkBit configurations so that hawkBit can generate the URLs according to the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these configurations as environmental values in the docker-compose.yml file. Don't forget to replace "hostname" with your actual hostname.
+
+```
+hawkbit.artifact.url.protocols.download-http.rel=download-http
+hawkbit.artifact.url.protocols.download-http.hostname=hawkbit.dev.example
+hawkbit.artifact.url.protocols.download-http.protocol=https
+hawkbit.artifact.url.protocols.download-http.supports=DMF,DDI
+hawkbit.artifact.url.protocols.download-http.ref={protocol}://{hostnameRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
+```
+
+2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whetever you have configured in the nginx configuration in `proxy_set_header X-Ssl-Issuer-Hash-1` below.
+
+3. After placing your certificates and keys, you need to deploy your proxy server and apply the provided configurations. You can apply mutual TLS specifically to the URL given below to implement the process only for devices using the Device Integration API:
+
+    `hawkbit.dev.example.com/default/controller/`
+
+    This ensures that other clients, like UI users, can connect to hawkBit without requiring client certificates. They can use Username and Password in the Management API, eliminating the need for authentication and making it more user-friendly.
 
 ```nginx
 # Nginx Hawkbit Configurations
@@ -157,15 +190,8 @@ server {
    }   
 }
 ```
-To authenticate the request to Hawkbit itself, the common name and issuer hash of the presented client certificate are required. The issuer hash of a certificate is the hash of the certificate that signed the client certificate, which in our case is the CA.
-
-You can use the following command to get the issuer hash:
-
-`openssl x509 -in client_certificate.crt -issuer_hash -noout`
-
-However, in the Nginx configuration, obtaining the issuer hash is not possible without addons. Therefore, this header is manually entered as Hawkbit. You can enter any value here as long as it is matched with the *Allow targets to authenticate via a certificate authenticated by a reverse proxy* setting in the hawkbit UI. 
-
-When deploying Nginx, you will need a `.yml` file. Here's an example `docker-compose.yml` file for Nginx Docker.
+ 
+4. To deploy Nginx, you could use a `.yml` file. Here's an example `docker-compose.yml` file for Nginx Docker.
 
 ```yml
 version: '3'
@@ -191,7 +217,10 @@ services:
 ```
 `/client-cer/:/etc/nginx/client-cer/` is the designated location for the certificate authority that has signed the client certificate. The presented client certificate will be verified against this CA.
 
-#### Swupdate Suricatta Configurations
+5. After successfully generating your certificates with the correct chain, deploying your Nginx and Hawkbit services with appropriate configurations, and updating the settings on the device side, you will be able to establish a certificate-based authentication mechanism. This will eliminate the necessity of sharing a security token with the server.
+   
+&nbsp;
+##### Swupdate Suricatta Configurations
 
 If the client is utilizing the SWUpdate Suricatta service, the configurations on the device or client side should also be adjusted as follows. Remember to change id, url and certificate names to your needs.
 
@@ -212,37 +241,24 @@ sslcert = "/etc/ssl/certs/client.crt";
 
 If your client service is a linux, you can use the command bellow to see the logs produced by the swupdate.
 
-`journalctl --follow -u swupdate`
-
-#### Hawkbit Configurations
-
-There are also some configurations that you need update when you deployed your hawkbit service.
-
-You need to add the given download settings to your hawkBit configurations so that hawkBit can generate the URLs according to the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these configurations as environmental values in the docker-compose.yml file. Don't forget to replace "hostname" with your actual hostname.
-
-```
-hawkbit.artifact.url.protocols.download-http.rel=download-http
-hawkbit.artifact.url.protocols.download-http.hostname=hawkbit.dev.example
-hawkbit.artifact.url.protocols.download-http.protocol=https
-hawkbit.artifact.url.protocols.download-http.supports=DMF,DDI
-hawkbit.artifact.url.protocols.download-http.ref={protocol}://{hostnameRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
+```shell
+journalctl --follow -u swupdate
 ```
 
-In Hawkbit's UI section, under system configuration, make sure to select Allow targets to authenticate via a certificate authenticated by a reverse proxy and input the issuer hash as "Hawkbit". This can be whetever you have configured in the nginx configuration in `proxy_set_header X-Ssl-Issuer-Hash-1`
+&nbsp;
+##### Testing
 
-![Example Reverse Proxy Settings](../../images/security/exampleReverseProxySettings.png)
+You can test the communication by using the Curl command below to see if you successfully implemented mutual TLS:
 
-After successfully generating your certificates with the correct chain, deploying your Nginx and Hawkbit services with appropriate configurations, and updating the settings on the device side, you will be able to establish a certificate-based authentication mechanism. This will eliminate the necessity of sharing a security token with the server.
-
-#### Testing
-
-You can test the communication by using the Curl command below to see if you successfully implemented Mutual TLS:
-
-`curl -L -v --cert client.crt --key client.key --cacert server_ca.crt https://hawkbit.dev.example.com/default/controller/v1/{device-id}`
+```shell
+curl -L -v --cert client.crt --key client.key --cacert server_ca.crt https://hawkbit.dev.example.com/default/controller/v1/{device-id}
+```
 
 In the UI, after uploading an SWU package and requesting a firmware update, you can use the link below to attempt to install the software package.
 
-`curl -L -v --cert client.crt --key client.key --cacert server_ca.crt https://hawkbit.dev.example.com/default/controller/v1/{device-id}/softwaremodules/{artifact-id}/artifacts/hawkbit_updated_5.swu --output outputfile`
+```
+curl -L -v --cert client.crt --key client.key --cacert server_ca.crt https://hawkbit.dev.example.com/default/controller/v1/{device-id}/softwaremodules/{artifact-id}/artifacts/hawkbit_updated_5.swu --output outputfile
+```
 
 ## DMF API
 Authentication is provided by _RabbitMQ_ [vhost and user credentials](https://www.rabbitmq.com/access-control.html) that is used for the integration.
