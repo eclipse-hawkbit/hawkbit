@@ -62,6 +62,11 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.DefaultControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -80,6 +85,8 @@ import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactio
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -132,6 +139,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.AuditorAware;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -266,8 +274,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param dsTypeManagement
-     *            for loading
-     *            {@link TargetType#getCompatibleDistributionSetTypes()}
+     *            for loading {@link TargetType#getCompatibleDistributionSetTypes()}
      * @return TargetTypeBuilder bean
      */
     @Bean
@@ -283,9 +290,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @param softwareManagement
-     *            for loading
-     *            {@link DistributionSetType#getMandatoryModuleTypes()} and
-     *            {@link DistributionSetType#getOptionalModuleTypes()}
+     *            for loading {@link DistributionSetType#getMandatoryModuleTypes()}
+     *            and {@link DistributionSetType#getOptionalModuleTypes()}
      * @return DistributionSetTypeBuilder bean
      */
     @Bean
@@ -327,8 +333,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemSecurityContext} singleton bean which make it
-     *         accessible in beans which cannot access the service directly,
-     *         e.g. JPA entities.
+     *         accessible in beans which cannot access the service directly, e.g.
+     *         JPA entities.
      */
     @Bean
     SystemSecurityContextHolder systemSecurityContextHolder() {
@@ -336,9 +342,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantConfigurationManagement} singleton bean which
-     *         make it accessible in beans which cannot access the service
-     *         directly, e.g. JPA entities.
+     * @return the {@link TenantConfigurationManagement} singleton bean which make
+     *         it accessible in beans which cannot access the service directly, e.g.
+     *         JPA entities.
      */
     @Bean
     TenantConfigurationManagementHolder tenantConfigurationManagementHolder() {
@@ -347,9 +353,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * @return the {@link SystemManagementHolder} singleton bean which holds the
-     *         current {@link SystemManagement} service and make it accessible
-     *         in beans which cannot access the service directly, e.g. JPA
-     *         entities.
+     *         current {@link SystemManagement} service and make it accessible in
+     *         beans which cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     SystemManagementHolder systemManagementHolder() {
@@ -357,10 +362,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link TenantAwareHolder} singleton bean which holds the
-     *         current {@link TenantAware} service and make it accessible in
-     *         beans which cannot access the service directly, e.g. JPA
-     *         entities.
+     * @return the {@link TenantAwareHolder} singleton bean which holds the current
+     *         {@link TenantAware} service and make it accessible in beans which
+     *         cannot access the service directly, e.g. JPA entities.
      */
     @Bean
     TenantAwareHolder tenantAwareHolder() {
@@ -368,10 +372,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     }
 
     /**
-     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which
-     *         holds the current {@link SecurityTokenGenerator} service and make
-     *         it accessible in beans which cannot access the service via
-     *         injection
+     * @return the {@link SecurityTokenGeneratorHolder} singleton bean which holds
+     *         the current {@link SecurityTokenGenerator} service and make it
+     *         accessible in beans which cannot access the service via injection
      */
     @Bean
     SecurityTokenGeneratorHolder securityTokenGeneratorHolder() {
@@ -531,9 +534,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final QuotaManagement quotaManagement) {
+            final QuotaManagement quotaManagement,
+            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
         return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository,
-                virtualPropertyReplacer, properties.getDatabase(), quotaManagement);
+                virtualPropertyReplacer, properties.getDatabase(), quotaManagement, targetTypeAccessControlManager);
     }
 
     /**
@@ -572,11 +576,59 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
-            final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
+            final JpaProperties properties, final DistributionSetManagement distributionSetManagement,
+            final TargetAccessControlManager targetAccessControlManager,
+            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
-                properties.getDatabase());
+                properties.getDatabase(), targetAccessControlManager, targetTypeAccessControlManager);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TargetAccessControlManager targetAccessControlManager() {
+        final DefaultControlManager<JpaTarget> defaultControlManager = new DefaultControlManager<>();
+        return new TargetAccessControlManager() {
+            @Override
+            public Specification<JpaTarget> getAccessRules() {
+                return defaultControlManager.getAccessRules();
+            }
+
+            @Override
+            public Specification<JpaTarget> appendAccessRules(Specification<JpaTarget> specification) {
+                return defaultControlManager.appendAccessRules(specification);
+            }
+
+            @Override
+            public void assertModificationAllowed(List<JpaTarget> entities, Operation operation)
+                    throws InsufficientPermissionException {
+                defaultControlManager.assertModificationAllowed(entities, operation);
+            }
+        };
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    TargetTypeAccessControlManager targetTypeAccessControlManager() {
+        final DefaultControlManager<JpaTargetType> defaultControlManager = new DefaultControlManager<>();
+        return new TargetTypeAccessControlManager() {
+            @Override
+            public Specification<JpaTargetType> getAccessRules() {
+                return defaultControlManager.getAccessRules();
+            }
+
+            @Override
+            public Specification<JpaTargetType> appendAccessRules(Specification<JpaTargetType> specification) {
+                return defaultControlManager.appendAccessRules(specification);
+            }
+
+            @Override
+            public void assertModificationAllowed(List<JpaTargetType> entities, Operation operation)
+                    throws InsufficientPermissionException {
+                defaultControlManager.assertModificationAllowed(entities, operation);
+            }
+        };
     }
 
     /**
@@ -675,7 +727,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
                 virtualPropertyReplacer, softwareModuleRepository, properties.getDatabase());
     }
-    
+
     @Bean
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
@@ -864,13 +916,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * Note: does not activate in test profile, otherwise it is hard to test the
      * auto assign functionality.
      *
-     * @param tenantAware
-     *            to run as specific tenant
      * @param systemManagement
      *            to find all tenants
      * @param systemSecurityContext
      *            to run as system
-     * @param autoAssignChecker
+     * @param autoAssignExecutor
      *            to run a check as tenant
      * @param lockRegistry
      *            to lock the tenant for auto assignment
@@ -1005,8 +1055,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * Default artifact encryption service bean that internally uses
-     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore}
-     * beans for {@link SoftwareModule} artifacts encryption/decryption
+     * {@link ArtifactEncryption} and {@link ArtifactEncryptionSecretsStore} beans
+     * for {@link SoftwareModule} artifacts encryption/decryption
      *
      * @return a {@link ArtifactEncryptionService} bean
      */
