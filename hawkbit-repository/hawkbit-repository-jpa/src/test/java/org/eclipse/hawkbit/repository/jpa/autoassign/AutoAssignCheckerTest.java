@@ -24,6 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -56,13 +57,15 @@ class AutoAssignCheckerTest {
     private PlatformTransactionManager transactionManager;
     @Mock
     private TenantAware tenantAware;
+    @Mock
+    private TargetAccessControlManager targetAccessControlManager;
 
     private AutoAssignChecker sut;
 
     @BeforeEach
     void before() {
         sut = new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware);
+                transactionManager, tenantAware, targetAccessControlManager);
     }
 
     @Test
@@ -78,8 +81,8 @@ class AutoAssignCheckerTest {
 
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, matching.getQuery()))
                 .thenReturn(true);
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds,
-                notMatching.getQuery())).thenReturn(false);
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, notMatching.getQuery()))
+                .thenReturn(false);
 
         sut.checkSingleTarget(target);
 

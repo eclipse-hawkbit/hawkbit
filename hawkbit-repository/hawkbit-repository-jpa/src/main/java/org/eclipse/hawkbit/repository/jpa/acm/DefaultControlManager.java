@@ -23,6 +23,18 @@ import java.util.List;
  */
 public class DefaultControlManager<T> implements AccessControlManager<T> {
 
+    @Override
+    public String serializeContext() {
+        // nothing to serialize
+        return null;
+    }
+
+    @Override
+    public void runAsContext(String serializedContext, Runnable runnable) {
+        // serializedContext will not set
+        runnable.run();
+    }
+
     /**
      * The default specification without limitation.
      * 

@@ -11,7 +11,6 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.persistence.PersistenceException;
 
@@ -19,6 +18,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -59,8 +59,10 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
-        super(targetFilterQueryManagement, deploymentManagement, transactionManager, tenantAware);
+            final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
+            final TargetAccessControlManager targetAccessControlManager) {
+        super(targetFilterQueryManagement, deploymentManagement, transactionManager, tenantAware,
+                targetAccessControlManager);
         this.targetManagement = targetManagement;
     }
 
@@ -99,7 +101,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
                         .findByTargetFilterQueryAndNonDSAndCompatible(
                                 PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
                                 targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
-                        .getContent().stream().map(Target::getControllerId).collect(Collectors.toList());
+                        .getContent().stream().map(Target::getControllerId).toList();
                 LOGGER.debug(
                         "Retrieved {} auto assign targets for tenant {} and target filter query id {}, starting with assignment",
                         controllerIds.size(), getTenantAware().getCurrentTenant(), targetFilterQuery.getId());

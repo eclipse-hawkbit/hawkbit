@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Collections;
@@ -24,8 +26,30 @@ import java.util.List;
 public interface AccessControlManager<T> {
 
     /**
-     * Introduce a new specification to limit the access to a specific entity.
+     * Serialize the current context to be able to reset it again with
+     * {@link AccessControlManager#runAsContext(String, Runnable)}. Needed for
+     * scheduled background operations like auto assignments. See
+     * {@link JpaTargetFilterQuery#getAcmContext()} and
+     * {@link AutoAssignChecker#checkAllTargets()}
      * 
+     * @return null if there is nothing to serialize. Context will not be restored
+     *         in background tasks without user context.
+     */
+    String serializeContext();
+
+    /**
+     * Wrap a specific execution in a known and pre-serialized context.
+     * 
+     * @param serializedContext
+     *            created by {@link AccessControlManager#serializeContext()}
+     * @param runnable
+     *            operation to execute in the reconstructed context
+     */
+    void runAsContext(String serializedContext, Runnable runnable);
+
+    /**
+     * Introduce a new specification to limit the access to a specific entity.
+     *
      * @return a new specification limiting the access
      */
     Specification<T> getAccessRules();

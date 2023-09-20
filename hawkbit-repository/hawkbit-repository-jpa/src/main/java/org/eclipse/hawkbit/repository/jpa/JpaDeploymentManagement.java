@@ -50,6 +50,8 @@ import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedExcepti
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -150,6 +152,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantAware tenantAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
+    private final TargetAccessControlManager targetAccessControlManager;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement,
@@ -159,7 +162,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties) {
+            final RepositoryProperties repositoryProperties,
+            final TargetAccessControlManager targetAccessControlManager) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -178,6 +182,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;
+        this.targetAccessControlManager = targetAccessControlManager;
         this.retryTemplate = createRetryTemplate();
     }
 
@@ -185,13 +190,12 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public List<DistributionSetAssignmentResult> offlineAssignedDistributionSets(
             final Collection<Entry<String, Long>> assignments) {
-        final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct()
-                .collect(Collectors.toList());
+        final Collection<Entry<String, Long>> distinctAssignments = assignments.stream().distinct().toList();
 
         enforceMaxAssignmentsPerRequest(distinctAssignments.size());
         final List<DeploymentRequest> deploymentRequests = distinctAssignments.stream()
                 .map(entry -> DeploymentManagement.deploymentRequest(entry.getKey(), entry.getValue()).build())
-                .collect(Collectors.toList());
+                .toList();
 
         return assignDistributionSets(tenantAware.getCurrentUsername(), deploymentRequests, null,
                 offlineDsAssignmentStrategy);
@@ -222,26 +226,27 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<DistributionSetAssignmentResult> results = assignmentsByDsIds.entrySet().stream()
                 .map(entry -> assignDistributionSetToTargetsWithRetry(initiatedBy, entry.getKey(), entry.getValue(),
                         actionMessage, strategy))
-                .collect(Collectors.toList());
+                .toList();
         strategy.sendDeploymentEvents(results);
         return results;
     }
 
     private List<DeploymentRequest> validateRequestForAssignments(List<DeploymentRequest> deploymentRequests) {
         if (!isMultiAssignmentsEnabled()) {
-            deploymentRequests = deploymentRequests.stream().distinct().collect(Collectors.toList());
+            deploymentRequests = deploymentRequests.stream().distinct().toList();
             checkIfRequiresMultiAssignment(deploymentRequests);
         }
         checkForTargetTypeCompatibility(deploymentRequests);
         checkQuotaForAssignment(deploymentRequests);
+        checkAssignmentPermitted(deploymentRequests);
         return deploymentRequests;
     }
 
     private void checkForTargetTypeCompatibility(final List<DeploymentRequest> deploymentRequests) {
         final List<String> controllerIds = deploymentRequests.stream().map(DeploymentRequest::getControllerId)
-                .distinct().collect(Collectors.toList());
+                .distinct().toList();
         final List<Long> distSetIds = deploymentRequests.stream().map(DeploymentRequest::getDistributionSetId)
-                .distinct().collect(Collectors.toList());
+                .distinct().toList();
 
         if (controllerIds.size() > 1 && distSetIds.size() > 1) {
             throw new IllegalStateException(
@@ -310,8 +315,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * method assigns the {@link DistributionSet} to all {@link Target}s by
-     * their IDs with a specific {@link ActionType} and {@code forcetime}.
+     * method assigns the {@link DistributionSet} to all {@link Target}s by their
+     * IDs with a specific {@link ActionType} and {@code forcetime}.
      *
      *
      * In case the update was executed offline (i.e. not managed by hawkBit) the
@@ -319,8 +324,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * A. it ignores targets completely that are in
      * {@link TargetUpdateStatus#PENDING}.<br/>
      * B. it created completed actions.<br/>
-     * C. sets both installed and assigned DS on the target and switches the
-     * status to {@link TargetUpdateStatus#IN_SYNC} <br/>
+     * C. sets both installed and assigned DS on the target and switches the status
+     * to {@link TargetUpdateStatus#IN_SYNC} <br/>
      * D. does not send a {@link TargetAssignDistributionSetEvent}.<br/>
      *
      * @param initiatedBy
@@ -346,11 +351,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final JpaDistributionSet distributionSetEntity = (JpaDistributionSet) distributionSetManagement
                 .getValidAndComplete(dsID);
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
-                .distinct().collect(Collectors.toList());
+                .distinct().toList();
 
         final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream().map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)))
-                .flatMap(List::stream).map(JpaTarget::getControllerId).collect(Collectors.toList());
+                .flatMap(List::stream).map(JpaTarget::getControllerId).toList();
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());
@@ -360,7 +365,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
 
         final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
-                .filter(target -> existingTargetIds.contains(target.getControllerId())).collect(Collectors.toList());
+                .filter(target -> existingTargetIds.contains(target.getControllerId())).toList();
 
         final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(initiatedBy,
                 existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSetEntity,
@@ -405,9 +410,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     /**
-     * split tIDs length into max entries in-statement because many database
-     * have constraint of max entries in in-statements e.g. Oracle with maximum
-     * 1000 elements, so we need to split the entries here and execute multiple
+     * split tIDs length into max entries in-statement because many database have
+     * constraint of max entries in in-statements e.g. Oracle with maximum 1000
+     * elements, so we need to split the entries here and execute multiple
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
@@ -426,6 +431,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         if (!deploymentRequests.isEmpty()) {
             enforceMaxAssignmentsPerRequest(deploymentRequests.size());
             enforceMaxActionsPerTarget(deploymentRequests);
+        }
+    }
+
+    private void checkAssignmentPermitted(final Collection<DeploymentRequest> deploymentRequests) {
+        if (!deploymentRequests.isEmpty()) {
+            final Specification<JpaTarget> specification = targetAccessControlManager
+                    .appendAccessRules(TargetSpecifications.hasControllerIdIn(
+                            deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList()));
+            final List<JpaTarget> accessibleTargets = targetRepository.findAll(specification);
+            if (deploymentRequests.size() != accessibleTargets.size()) {
+                throw new IllegalStateException("");
+            }
+            targetAccessControlManager.assertModificationAllowed(accessibleTargets,
+                    AccessControlManager.Operation.UPDATE);
         }
     }
 
@@ -953,10 +972,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             return 0;
         }
         /*
-         * We use a native query here because Spring JPA does not support to
-         * specify a LIMIT clause on a DELETE statement. However, for this
-         * specific use case (action cleanup), we must specify a row limit to
-         * reduce the overall load on the database.
+         * We use a native query here because Spring JPA does not support to specify a
+         * LIMIT clause on a DELETE statement. However, for this specific use case
+         * (action cleanup), we must specify a row limit to reduce the overall load on
+         * the database.
          */
 
         final int statusCount = status.size();

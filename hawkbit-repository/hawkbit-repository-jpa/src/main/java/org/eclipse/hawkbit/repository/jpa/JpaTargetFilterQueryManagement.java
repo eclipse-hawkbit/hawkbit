@@ -29,6 +29,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -83,6 +84,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
+    private final TargetAccessControlManager targetAccessControlManager;
 
     private final Database database;
 
@@ -90,7 +92,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final TargetAccessControlManager targetAccessControlManager) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -100,6 +103,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
+        this.targetAccessControlManager = targetAccessControlManager;
     }
 
     @Override
@@ -263,6 +267,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(
                 update.getTargetFilterId());
         if (update.getDsId() == null) {
+            targetFilterQuery.setAcmContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
@@ -275,6 +280,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAcmContext(targetAccessControlManager.serializeContext());
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());

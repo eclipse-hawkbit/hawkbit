@@ -591,6 +591,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         final DefaultControlManager<JpaTarget> defaultControlManager = new DefaultControlManager<>();
         return new TargetAccessControlManager() {
             @Override
+            public String serializeContext() {
+                return defaultControlManager.serializeContext();
+            }
+
+            @Override
+            public void runAsContext(String serializedContext, Runnable runnable) {
+                defaultControlManager.runAsContext(serializedContext, runnable);
+            }
+
+            @Override
             public Specification<JpaTarget> getAccessRules() {
                 return defaultControlManager.getAccessRules();
             }
@@ -613,6 +623,16 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetTypeAccessControlManager targetTypeAccessControlManager() {
         final DefaultControlManager<JpaTargetType> defaultControlManager = new DefaultControlManager<>();
         return new TargetTypeAccessControlManager() {
+            @Override
+            public String serializeContext() {
+                return defaultControlManager.serializeContext();
+            }
+
+            @Override
+            public void runAsContext(String serializedContext, Runnable runnable) {
+                defaultControlManager.runAsContext(serializedContext, runnable);
+            }
+
             @Override
             public Specification<JpaTargetType> getAccessRules() {
                 return defaultControlManager.getAccessRules();
@@ -658,10 +678,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware) {
+            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
+            final TargetAccessControlManager targetAccessControlManager) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, systemSecurityContext, tenantAware);
+                tenantConfigurationManagement, systemSecurityContext, tenantAware, targetAccessControlManager);
     }
 
     /**
@@ -811,11 +832,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final JpaProperties properties, final RepositoryProperties repositoryProperties) {
+            final JpaProperties properties, final RepositoryProperties repositoryProperties,
+            final TargetAccessControlManager targetAccessControlManager) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
                 distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
-                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties);
+                quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties,
+                targetAccessControlManager);
     }
 
     @Bean
@@ -905,9 +928,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final TenantAware tenantAware) {
+            final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
+            final TargetAccessControlManager targetAccessControlManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware);
+                transactionManager, tenantAware, targetAccessControlManager);
     }
 
     /**

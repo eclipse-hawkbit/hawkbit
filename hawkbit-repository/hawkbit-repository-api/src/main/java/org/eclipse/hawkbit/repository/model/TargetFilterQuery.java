@@ -73,8 +73,7 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
     ActionType getAutoAssignActionType();
 
     /**
-     * @return the weight of the {@link Action}s created during an auto
-     *         assignment.
+     * @return the weight of the {@link Action}s created during an auto assignment.
      */
     Optional<Integer> getAutoAssignWeight();
 
@@ -88,4 +87,10 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
      *         (considered with confirmation flow active)
      */
     boolean isConfirmationRequired();
+
+    /**
+     * Defining a serialized access control context which needs to be set when
+     * performing the auto-assignment vie the scheduler
+     */
+    Optional<String> getAcmContext();
 }
