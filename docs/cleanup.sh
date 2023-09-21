@@ -20,6 +20,7 @@ echo "[INFO] ... done"
 echo "[INFO] "
 
 echo "[INFO] Remove generated REST docs"
+rm -f content/rest-api/*.json
 rm -f content/rest-api/*.html
 echo "[INFO] ... done"
 
