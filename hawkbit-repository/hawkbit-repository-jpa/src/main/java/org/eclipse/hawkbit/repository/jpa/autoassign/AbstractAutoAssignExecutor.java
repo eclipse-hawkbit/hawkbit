@@ -96,6 +96,9 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     protected TenantAware getTenantAware() {
         return tenantAware;
     }
+    protected TargetAccessControlManager getTargetAccessControlManager() {
+        return targetAccessControlManager;
+    }
 
     protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
         Slice<TargetFilterQuery> filterQueries;

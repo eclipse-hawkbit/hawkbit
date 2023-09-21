@@ -18,8 +18,11 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -84,8 +87,8 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
     }
 
     /**
-     * Fetches the distribution set, gets all controllerIds and assigns the DS
-     * to them. Catches PersistenceException and own exceptions derived from
+     * Fetches the distribution set, gets all controllerIds and assigns the DS to
+     * them. Catches PersistenceException and own exceptions derived from
      * AbstractServerRtException
      *
      * @param targetFilterQuery
@@ -101,7 +104,8 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
                         .findByTargetFilterQueryAndNonDSAndCompatible(
                                 PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
                                 targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
-                        .getContent().stream().map(Target::getControllerId).toList();
+                        .getContent().stream().filter(this::isAssignmentPermitted).map(Target::getControllerId)
+                        .toList();
                 LOGGER.debug(
                         "Retrieved {} auto assign targets for tenant {} and target filter query id {}, starting with assignment",
                         controllerIds.size(), getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
@@ -116,6 +120,17 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
         }
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} finished",
                 getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+    }
+
+    private boolean isAssignmentPermitted(final Target target) {
+        try {
+            getTargetAccessControlManager().assertModificationAllowed(Collections.singletonList((JpaTarget) target),
+                    AccessControlManager.Operation.UPDATE);
+            return true;
+        } catch (final InsufficientPermissionException e) {
+            LOGGER.trace("Assignment is not permitted for target {} due to insufficient permissions.", target.getId());
+            return false;
+        }
     }
 
     private void checkForDevice(final String controllerId, final TargetFilterQuery targetFilterQuery) {
