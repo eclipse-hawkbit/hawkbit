@@ -31,5 +31,6 @@ PROCEEDING                  | This can be used by the target to inform that it i
 SCHEDULED                   | This can be used by the target to inform that it scheduled on the action.                                                                                                                                                                | RUNNING
 RESUMED                     | This can be used by the target to inform that it continued to work on the action.                                                                                                                                                        | RUNNING
 
+## DDI APIs
 
-<iframe width="100%" height="800px" frameborder="0" src="../../rest-api/rootcontroller-api-guide.html"></iframe>
+<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/openapi.html"></iframe>

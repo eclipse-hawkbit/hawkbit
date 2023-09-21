@@ -70,12 +70,12 @@
                      <artifactItems>
                         <artifactItem>
                            <groupId>org.eclipse.hawkbit</groupId>
-                           <artifactId>hawkbit-rest-docs</artifactId>
+                           <artifactId>hawkbit-update-server</artifactId>
                            <version>${project.version}</version>
                            <type>jar</type>
                            <overWrite>true</overWrite>
-                           <outputDirectory>${basedir}/content/</outputDirectory>
-                           <includes>**/*.html</includes>
+                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
+                           <includes>**/openapi.json</includes>
                         </artifactItem>
                      </artifactItems>
                   </configuration>
