@@ -74,10 +74,29 @@
                            <version>${project.version}</version>
                            <type>jar</type>
                            <overWrite>true</overWrite>
-                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
-                           <includes>**/openapi.json</includes>
+                           <outputDirectory>${project.build.directory}/temp-unpack</outputDirectory>
                         </artifactItem>
                      </artifactItems>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <artifactId>maven-antrun-plugin</artifactId>
+            <version>3.1.0</version>
+            <executions>
+               <execution>
+                  <id>copy-specific-file</id>
+                  <phase>prepare-package</phase>
+                  <goals>
+                     <goal>run</goal>
+                  </goals>
+                  <configuration>
+                     <target>
+                        <copy file="${project.build.directory}/temp-unpack/BOOT-INF/classes/rest-api/openapi.json"
+                              todir="${basedir}/content/rest-api" />
+                        <delete dir="${project.build.directory}/temp-unpack" />
+                     </target>
                   </configuration>
                </execution>
             </executions>

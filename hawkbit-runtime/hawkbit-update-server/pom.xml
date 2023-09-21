@@ -37,27 +37,6 @@
         <plugins>
             <!-- Adding the generated rest doc after integration tests -->
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- Update the JAR with the generated rest doc -->
-                                <jar destfile="${project.build.directory}/${project.build.finalName}.jar" update="true">
-                                    <zipfileset dir="${basedir}/target/classes/rest-api" includes="openapi.json" prefix=""/>
-                                </jar>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-maven-plugin</artifactId>
                 <version>1.4</version>
@@ -98,7 +77,6 @@
                         </goals>
                     </execution>
                     <execution>
-                        <phase>post-integration-test</phase>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
@@ -106,6 +84,27 @@
                             <outputDirectory>${baseDir}</outputDirectory>
                             <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
                             <layout>JAR</layout>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <!-- Calling Maven 'package' goal -->
+                                <exec executable="mvn" spawn="false">
+                                    <arg value="package"/>
+                                </exec>
+                            </target>
                         </configuration>
                     </execution>
                 </executions>
