@@ -63,10 +63,10 @@ import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.DefaultControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.DefaultAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -518,10 +518,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final QuotaManagement quotaManagement) {
+            final QuotaManagement quotaManagement,
+            final DistributionSetTypeAccessController distributionSetTypeAccessControlManager) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
                 distributionSetRepository, targetTypeRepository, virtualPropertyReplacer, properties.getDatabase(),
-                quotaManagement);
+                quotaManagement, distributionSetTypeAccessControlManager);
     }
 
     /**
@@ -534,8 +535,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final QuotaManagement quotaManagement,
-            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
+            final QuotaManagement quotaManagement, final TargetTypeAccessController targetTypeAccessControlManager) {
         return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository,
                 virtualPropertyReplacer, properties.getDatabase(), quotaManagement, targetTypeAccessControlManager);
     }
@@ -577,8 +577,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties, final DistributionSetManagement distributionSetManagement,
-            final TargetAccessControlManager targetAccessControlManager,
-            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
+            final TargetAccessController targetAccessControlManager,
+            final TargetTypeAccessController targetTypeAccessControlManager) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
@@ -587,66 +587,58 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    TargetAccessControlManager targetAccessControlManager() {
-        final DefaultControlManager<JpaTarget> defaultControlManager = new DefaultControlManager<>();
-        return new TargetAccessControlManager() {
+    TargetAccessController targetAccessControlManager() {
+        final DefaultAccessController<JpaTarget> defaultControlManager = new DefaultAccessController<>();
+        return new TargetAccessController() {
+
             @Override
-            public String serializeContext() {
-                return defaultControlManager.serializeContext();
+            public String getContext() {
+                return defaultControlManager.getContext();
             }
 
             @Override
-            public void runAsContext(String serializedContext, Runnable runnable) {
-                defaultControlManager.runAsContext(serializedContext, runnable);
+            public void runInContext(final String serializedContext, final Runnable runnable) {
+                defaultControlManager.runInContext(serializedContext, runnable);
             }
 
             @Override
-            public Specification<JpaTarget> getAccessRules() {
-                return defaultControlManager.getAccessRules();
+            public Specification<JpaTarget> getAccessRules(final Operation operation) {
+                return defaultControlManager.getAccessRules(operation);
             }
 
             @Override
-            public Specification<JpaTarget> appendAccessRules(Specification<JpaTarget> specification) {
-                return defaultControlManager.appendAccessRules(specification);
-            }
-
-            @Override
-            public void assertModificationAllowed(List<JpaTarget> entities, Operation operation)
+            public void assertOperationAllowed(final Operation operation, final List<JpaTarget> entities)
                     throws InsufficientPermissionException {
-                defaultControlManager.assertModificationAllowed(entities, operation);
+                defaultControlManager.assertOperationAllowed(operation, entities);
             }
         };
     }
 
     @Bean
     @ConditionalOnMissingBean
-    TargetTypeAccessControlManager targetTypeAccessControlManager() {
-        final DefaultControlManager<JpaTargetType> defaultControlManager = new DefaultControlManager<>();
-        return new TargetTypeAccessControlManager() {
+    TargetTypeAccessController targetTypeAccessControlManager() {
+        final DefaultAccessController<JpaTargetType> defaultControlManager = new DefaultAccessController<>();
+        return new TargetTypeAccessController() {
+
             @Override
-            public String serializeContext() {
-                return defaultControlManager.serializeContext();
+            public String getContext() {
+                return defaultControlManager.getContext();
             }
 
             @Override
-            public void runAsContext(String serializedContext, Runnable runnable) {
-                defaultControlManager.runAsContext(serializedContext, runnable);
+            public void runInContext(final String serializedContext, final Runnable runnable) {
+                defaultControlManager.runInContext(serializedContext, runnable);
             }
 
             @Override
-            public Specification<JpaTargetType> getAccessRules() {
-                return defaultControlManager.getAccessRules();
+            public Specification<JpaTargetType> getAccessRules(final Operation operation) {
+                return defaultControlManager.getAccessRules(operation);
             }
 
             @Override
-            public Specification<JpaTargetType> appendAccessRules(Specification<JpaTargetType> specification) {
-                return defaultControlManager.appendAccessRules(specification);
-            }
-
-            @Override
-            public void assertModificationAllowed(List<JpaTargetType> entities, Operation operation)
+            public void assertOperationAllowed(final Operation operation, final List<JpaTargetType> entities)
                     throws InsufficientPermissionException {
-                defaultControlManager.assertModificationAllowed(entities, operation);
+                defaultControlManager.assertOperationAllowed(operation, entities);
             }
         };
     }
@@ -679,7 +671,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final TargetAccessControlManager targetAccessControlManager) {
+            final TargetAccessController targetAccessControlManager) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
                 tenantConfigurationManagement, systemSecurityContext, tenantAware, targetAccessControlManager);
@@ -833,7 +825,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final JpaProperties properties, final RepositoryProperties repositoryProperties,
-            final TargetAccessControlManager targetAccessControlManager) {
+            final TargetAccessController targetAccessControlManager) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
                 distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
@@ -929,7 +921,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
-            final TargetAccessControlManager targetAccessControlManager) {
+            final TargetAccessController targetAccessControlManager) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
                 transactionManager, tenantAware, targetAccessControlManager);
     }

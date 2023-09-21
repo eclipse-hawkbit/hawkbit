@@ -12,8 +12,8 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 
 /**
- * Defining an interface for the {@link AccessControlManager<JpaTargetType>}
+ * Defining an interface for the {@link AccessController <JpaTargetType>}
  */
-public interface TargetTypeAccessControlManager extends AccessControlManager<JpaTargetType> {
+public interface TargetTypeAccessController extends AccessController<JpaTargetType> {
 
 }

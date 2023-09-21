@@ -24,8 +24,8 @@ import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -63,7 +63,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private final Database database;
     private final QuotaManagement quotaManagement;
-    private final TargetTypeAccessControlManager targetTypeAccessControlManager;
+    private final TargetTypeAccessController targetTypeAccessControlManager;
 
     /**
      * Constructor
@@ -80,8 +80,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final QuotaManagement quotaManagement,
-            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
+            final QuotaManagement quotaManagement, final TargetTypeAccessController targetTypeAccessControlManager) {
         this.targetTypeRepository = targetTypeRepository;
         this.targetRepository = targetRepository;
         this.distributionSetTypeRepository = distributionSetTypeRepository;
@@ -94,20 +93,21 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     @Override
     public Optional<TargetType> getByName(final String name) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasName(name));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasName(name));
 
         return targetTypeRepository.findOne(specification).map(TargetType.class::cast);
     }
 
     @Override
     public long count() {
-        return targetTypeRepository.count(targetTypeAccessControlManager.getAccessRules());
+        return targetTypeRepository
+                .count(targetTypeAccessControlManager.getAccessRules(AccessController.Operation.READ));
     }
 
     @Override
     public long countByName(final String name) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasName(name));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasName(name));
         return targetTypeRepository.count(specification);
     }
 
@@ -116,8 +116,8 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType create(final TargetTypeCreate create) {
-        final JpaTargetType typeCreate = JpaTargetTypeCreate.class.cast(create).build();
-        targetTypeAccessControlManager.assertModificationAllowed(typeCreate, AccessControlManager.Operation.CREATE);
+        final JpaTargetType typeCreate = ((JpaTargetTypeCreate) create).build();
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.CREATE, typeCreate);
         return targetTypeRepository.save(typeCreate);
     }
 
@@ -128,7 +128,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     public List<TargetType> create(final Collection<TargetTypeCreate> creates) {
         final List<JpaTargetType> typeCreate = creates.stream().map(create -> ((JpaTargetTypeCreate) create).build())
                 .toList();
-        targetTypeAccessControlManager.assertModificationAllowed(typeCreate, AccessControlManager.Operation.CREATE);
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.CREATE, typeCreate);
         return Collections.unmodifiableList(targetTypeRepository.saveAll(typeCreate));
     }
 
@@ -139,7 +139,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     public void delete(final Long targetTypeId) {
         final JpaTargetType targetType = getByIdAndThrowIfNotFound(targetTypeId);
 
-        targetTypeAccessControlManager.assertModificationAllowed(targetType, AccessControlManager.Operation.DELETE);
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.DELETE, targetType);
 
         // We cannot limit the access here, since we have to verify the type is not in
         // use at all.
@@ -152,30 +152,30 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Slice<TargetType> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable,
-                Collections.singletonList(targetTypeAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable, Collections
+                .singletonList(targetTypeAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Page<TargetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper
-                .findAllWithCountBySpec(targetTypeRepository, pageable,
-                        Arrays.asList(
-                                RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTypeFields.class,
-                                        virtualPropertyReplacer, database),
-                                targetTypeAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithCountBySpec(targetTypeRepository, pageable,
+                Arrays.asList(
+                        RSQLUtility.buildRsqlSpecification(rsqlParam, TargetTypeFields.class, virtualPropertyReplacer,
+                                database),
+                        targetTypeAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Slice<TargetType> findByName(final Pageable pageable, final String name) {
         return JpaManagementHelper.findAllWithoutCountBySpec(targetTypeRepository, pageable,
-                Arrays.asList(TargetTypeSpecification.likeName(name), targetTypeAccessControlManager.getAccessRules()));
+                Arrays.asList(TargetTypeSpecification.likeName(name),
+                        targetTypeAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Optional<TargetType> get(final long id) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasId(id));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasId(id));
         return targetTypeRepository.findOne(specification).map(targetType -> targetType);
     }
 
@@ -186,31 +186,31 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public List<TargetType> findByTargetIds(final Collection<Long> targetIds) {
-        return targetTypeRepository
-                .findAll(targetTypeAccessControlManager.appendAccessRules(TargetTypeSpecification.hasTarget(targetIds)))
+        return targetTypeRepository.findAll(targetTypeAccessControlManager
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasTarget(targetIds)))
                 .stream().map(TargetType.class::cast).toList();
     }
 
     @Override
     public Optional<TargetType> findByTargetControllerId(final String controllerId) {
         return targetTypeRepository
-                .findOne(targetTypeAccessControlManager
-                        .appendAccessRules(TargetTypeSpecification.hasTargetControllerId(controllerId)))
+                .findOne(targetTypeAccessControlManager.appendAccessRules(AccessController.Operation.READ,
+                        TargetTypeSpecification.hasTargetControllerId(controllerId)))
                 .map(TargetType.class::cast);
     }
 
     @Override
     public List<TargetType> findByTargetControllerIds(final Collection<String> controllerIds) {
         return targetTypeRepository
-                .findAll(targetTypeAccessControlManager
-                        .appendAccessRules(TargetTypeSpecification.hasTargetControllerIdIn(controllerIds)))
+                .findAll(targetTypeAccessControlManager.appendAccessRules(AccessController.Operation.READ,
+                        TargetTypeSpecification.hasTargetControllerIdIn(controllerIds)))
                 .stream().map(TargetType.class::cast).toList();
     }
 
     @Override
     public List<TargetType> get(final Collection<Long> ids) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasIdIn(ids));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasIdIn(ids));
         return Collections.unmodifiableList(targetTypeRepository.findAll(specification));
     }
 
@@ -227,7 +227,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         typeUpdate.getDescription().ifPresent(type::setDescription);
         typeUpdate.getColour().ifPresent(type::setColour);
 
-        targetTypeAccessControlManager.assertModificationAllowed(type, AccessControlManager.Operation.UPDATE);
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, type);
 
         return targetTypeRepository.save(type);
     }
@@ -248,7 +248,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
         final JpaTargetType type = getByIdAndThrowIfNotFound(targetTypeId);
 
-        targetTypeAccessControlManager.assertModificationAllowed(type, AccessControlManager.Operation.UPDATE);
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, type);
 
         assertDistributionSetTypeQuota(targetTypeId, distributionSetTypeIds.size());
 
@@ -265,7 +265,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         final JpaTargetType type = getByIdAndThrowIfNotFound(targetTypeId);
         findDsTypeAndThrowExceptionIfNotFound(distributionSetTypeId);
 
-        targetTypeAccessControlManager.assertModificationAllowed(type, AccessControlManager.Operation.UPDATE);
+        targetTypeAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, type);
 
         type.removeDistributionSetType(distributionSetTypeId);
 
@@ -279,7 +279,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     private JpaTargetType getByIdAndThrowIfNotFound(final Long typeId) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasId(typeId));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasId(typeId));
         return targetTypeRepository.findOne(specification).orElseThrow(() -> {
             throw new EntityNotFoundException(TargetType.class, typeId);
         });

@@ -23,11 +23,11 @@ import java.util.List;
  * 
  * @param <T>
  */
-public interface AccessControlManager<T> {
+public interface AccessController<T> {
 
     /**
      * Serialize the current context to be able to reset it again with
-     * {@link AccessControlManager#runAsContext(String, Runnable)}. Needed for
+     * {@link AccessController#runInContext(String, Runnable)}. Needed for
      * scheduled background operations like auto assignments. See
      * {@link JpaTargetFilterQuery#getAcmContext()} and
      * {@link AutoAssignChecker#checkAllTargets()}
@@ -35,24 +35,24 @@ public interface AccessControlManager<T> {
      * @return null if there is nothing to serialize. Context will not be restored
      *         in background tasks without user context.
      */
-    String serializeContext();
+    String getContext();
 
     /**
      * Wrap a specific execution in a known and pre-serialized context.
      * 
      * @param serializedContext
-     *            created by {@link AccessControlManager#serializeContext()}
+     *            created by {@link AccessController#getContext()}
      * @param runnable
      *            operation to execute in the reconstructed context
      */
-    void runAsContext(String serializedContext, Runnable runnable);
+    void runInContext(String serializedContext, Runnable runnable);
 
     /**
      * Introduce a new specification to limit the access to a specific entity.
      *
      * @return a new specification limiting the access
      */
-    Specification<T> getAccessRules();
+    Specification<T> getAccessRules(Operation operation);
 
     /**
      * Append the resource limitation on an already existing specification.
@@ -62,16 +62,18 @@ public interface AccessControlManager<T> {
      *            resource limitation
      * @return a new appended specification
      */
-    Specification<T> appendAccessRules(Specification<T> specification);
+    default Specification<T> appendAccessRules(Operation operation, Specification<T> specification) {
+        return specification.and(getAccessRules(operation));
+    }
 
     /**
      * Default implementation pointing to
-     * {@link AccessControlManager#assertModificationAllowed(T, Operation)}
+     * {@link AccessController#assertOperationAllowed(Operation, Object)}
      *
      * @throws InsufficientPermissionException
      */
-    default void assertModificationAllowed(T entity, Operation operation) throws InsufficientPermissionException {
-        assertModificationAllowed(Collections.singletonList(entity), operation);
+    default void assertOperationAllowed(Operation operation, T entity) throws InsufficientPermissionException {
+        assertOperationAllowed(operation, Collections.singletonList(entity));
     }
 
     /**
@@ -81,7 +83,7 @@ public interface AccessControlManager<T> {
      * @param operation
      * @throws InsufficientPermissionException
      */
-    void assertModificationAllowed(List<T> entities, Operation operation) throws InsufficientPermissionException;
+    void assertOperationAllowed(Operation operation, List<T> entities) throws InsufficientPermissionException;
 
     /**
      * Enum to define the perform operation to verify
@@ -92,6 +94,11 @@ public interface AccessControlManager<T> {
          * Entity creation
          */
         CREATE,
+
+        /**
+         * Read entities
+         */
+        READ,
 
         /**
          * Entity modification (e.g. name/description change, tag/type assignment, etc.)

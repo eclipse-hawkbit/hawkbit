@@ -324,7 +324,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         if (modules.size() < moduleIds.size()) {
             throw new EntityNotFoundException(SoftwareModule.class, moduleIds,
-                    modules.stream().map(SoftwareModule::getId).collect(Collectors.toList()));
+                    modules.stream().map(SoftwareModule::getId).toList());
         }
 
         assertDistributionSetIsNotAssignedToTargets(setId);

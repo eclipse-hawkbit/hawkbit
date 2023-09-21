@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 
 /**
- * Defining an interface for the {@link AccessControlManager<JpaTarget>}
+ * Defining an interface for the {@link AccessController <JpaTarget>}
  */
-public interface TargetAccessControlManager extends AccessControlManager<JpaTarget> {
+public interface DistributionSetTypeAccessController extends AccessController<JpaDistributionSetType> {
 
 }

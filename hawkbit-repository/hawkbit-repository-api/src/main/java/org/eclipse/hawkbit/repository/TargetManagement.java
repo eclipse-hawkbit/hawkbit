@@ -221,9 +221,9 @@ public interface TargetManagement {
     void deleteByControllerID(@NotEmpty String controllerID);
 
     /**
-     * Finds all targets for all the given parameter {@link TargetFilterQuery}
-     * and that don't have the specified distribution set in their action
-     * history and are compatible with the passed {@link DistributionSetType}.
+     * Finds all targets for all the given parameter {@link TargetFilterQuery} and
+     * that don't have the specified distribution set in their action history and
+     * are compatible with the passed {@link DistributionSetType}.
      *
      * @param pageRequest
      *            the pageRequest to enhance the query for paging and sorting
@@ -237,8 +237,8 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatible(@NotNull Pageable pageRequest, long distributionSetId,
-            @NotNull String rsqlParam);
+    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(@NotNull Pageable pageRequest,
+            long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -255,7 +255,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDSAndCompatible(long distributionSetId, @NotNull String rsqlParam);
+    long countByRsqlAndNonDSAndCompatibleAndModifiable(long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}

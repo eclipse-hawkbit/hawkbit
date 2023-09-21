@@ -718,7 +718,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(assignedSet, assignedTargets);
 
         final List<Target> result = targetManagement
-                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, assignedSet.getId(), tfq.getQuery()).getContent();
+                .findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(PAGE, assignedSet.getId(), tfq.getQuery()).getContent();
         assertThat(result).as("count of targets").hasSize(unassignedTargets.size()).as("contains all targets")
                 .containsAll(unassignedTargets);
 
@@ -760,7 +760,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
                 targetType);
 
         final List<Target> result = targetManagement
-                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
+                .findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(PAGE, testDs.getId(), tfq.getQuery()).getContent();
 
         assertThat(result).as("count of targets").hasSize(targets.size() + targetWithCompatibleTypes.size())
                 .as("contains all targets").containsAll(targetWithCompatibleTypes).containsAll(targets);
@@ -790,7 +790,7 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         testTargets.addAll(targetsWithCompatibleType);
 
         final List<Target> result = targetManagement
-                .findByTargetFilterQueryAndNonDSAndCompatible(PAGE, testDs.getId(), tfq.getQuery()).getContent();
+                .findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(PAGE, testDs.getId(), tfq.getQuery()).getContent();
 
         assertThat(result).as("count of targets").hasSize(testTargets.size()).as("contains all compatible targets")
                 .containsExactlyInAnyOrderElementsOf(testTargets).as("does not contain incompatible targets")

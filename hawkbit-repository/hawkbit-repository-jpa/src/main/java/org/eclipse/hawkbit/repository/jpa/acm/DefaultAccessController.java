@@ -15,22 +15,22 @@ import org.springframework.data.jpa.domain.Specification;
 import java.util.List;
 
 /**
- * Default implementation of the {@link AccessControlManager} permitting every
- * kind of request.
+ * Default implementation of the {@link AccessController} permitting every kind
+ * of request.
  * 
  * @param <T>
  *            the entity type to manage
  */
-public class DefaultControlManager<T> implements AccessControlManager<T> {
+public class DefaultAccessController<T> implements AccessController<T> {
 
     @Override
-    public String serializeContext() {
+    public String getContext() {
         // nothing to serialize
         return null;
     }
 
     @Override
-    public void runAsContext(String serializedContext, Runnable runnable) {
+    public void runInContext(String serializedContext, Runnable runnable) {
         // serializedContext will not set
         runnable.run();
     }
@@ -41,7 +41,7 @@ public class DefaultControlManager<T> implements AccessControlManager<T> {
      * @return a new instance of {@link Specification} without limitations.
      */
     @Override
-    public Specification<T> getAccessRules() {
+    public Specification<T> getAccessRules(final Operation operation) {
         return Specification.where(null);
     }
 
@@ -54,12 +54,12 @@ public class DefaultControlManager<T> implements AccessControlManager<T> {
      * @return the unmodified specification
      */
     @Override
-    public Specification<T> appendAccessRules(final Specification<T> specification) {
+    public Specification<T> appendAccessRules(final Operation operation, final Specification<T> specification) {
         return specification;
     }
 
     @Override
-    public void assertModificationAllowed(final List<T> entities, final Operation operation)
+    public void assertOperationAllowed(final Operation operation, final List<T> entities)
             throws InsufficientPermissionException {
         // Every request is allowed
     }

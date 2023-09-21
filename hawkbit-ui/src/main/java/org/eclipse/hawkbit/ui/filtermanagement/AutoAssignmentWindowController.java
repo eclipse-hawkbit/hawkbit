@@ -106,7 +106,7 @@ public class AutoAssignmentWindowController extends
         // store/show dialog
         if (entity.isAutoAssignmentEnabled() && entity.getDistributionSetInfo() != null) {
             final Long autoAssignDsId = entity.getDistributionSetInfo().getId();
-            final Long targetsForAutoAssignmentCount = targetManagement.countByRsqlAndNonDSAndCompatible(autoAssignDsId,
+            final long targetsForAutoAssignmentCount = targetManagement.countByRsqlAndNonDSAndCompatibleAndModifiable(autoAssignDsId,
                     entity.getQuery());
 
             final String confirmationCaption = getI18n()

@@ -43,9 +43,9 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -128,9 +128,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final Database database;
 
-    private final TargetAccessControlManager targetAccessControlManager;
+    private final TargetAccessController targetAccessControlManager;
 
-    private final TargetTypeAccessControlManager targetTypeAccessControlManager;
+    private final TargetTypeAccessController targetTypeAccessControlManager;
 
     public JpaTargetManagement(final EntityManager entityManager,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
@@ -141,8 +141,8 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final TargetAccessControlManager targetAccessControlManager,
-            final TargetTypeAccessControlManager targetTypeAccessControlManager) {
+            final TargetAccessController targetAccessControlManager,
+            final TargetTypeAccessController targetTypeAccessControlManager) {
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
@@ -164,13 +164,13 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Optional<Target> getByControllerID(final String controllerId) {
         final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasControllerId(controllerId));
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerId(controllerId));
         return targetRepository.findOne(specification).map(Target.class::cast);
     }
 
     private JpaTarget getByControllerIdAndThrowIfNotFound(final String controllerId) {
         final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasControllerId(controllerId));
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerId(controllerId));
         return targetRepository.findOne(specification)
                 .orElseThrow(() -> new EntityNotFoundException(Target.class, controllerId));
     }
@@ -181,14 +181,15 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public List<Target> getByControllerID(final Collection<String> controllerIDs) {
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ,
+                TargetSpecifications.byControllerIdWithAssignedDsInJoin(controllerIDs));
         return Collections.unmodifiableList(targetRepository.findAll(specification));
     }
 
     @Override
     public long count() {
-        return targetRepository.count(targetAccessControlManager.getAccessRules());
+        return targetRepository.count(targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
     }
 
     @Override
@@ -198,7 +199,7 @@ public class JpaTargetManagement implements TargetManagement {
     public List<TargetMetadata> createMetaData(final String controllerId, final Collection<MetaData> md) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         md.forEach(meta -> checkAndThrowIfTargetMetadataAlreadyExists(
                 new TargetMetadataCompositeKey(target.getId(), meta.getKey())));
@@ -248,7 +249,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
                 getByControllerIdAndThrowIfNotFound(controllerId));
 
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         final JpaTargetMetadata metadata = targetMetadataRepository.save(updatedMetadata);
         // target update event is set to ignore "lastModifiedAt" field so it is
@@ -269,7 +270,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = JpaManagementHelper.touch(entityManager, targetRepository,
                 getByControllerIdAndThrowIfNotFound(controllerId));
 
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         targetMetadataRepository.deleteById(metadata.getId());
         // target update event is set to ignore "lastModifiedAt" field, so it is
@@ -320,7 +321,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Slice<Target> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageable,
-                List.of(targetAccessControlManager.getAccessRules()));
+                List.of(targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -328,22 +329,20 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryRepository.findById(targetFilterQueryId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetFilterQuery.class, targetFilterQueryId));
 
-        return JpaManagementHelper
-                .findAllWithoutCountBySpec(targetRepository, pageable,
-                        Arrays.asList(
-                                RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class,
-                                        virtualPropertyReplacer, database),
-                                targetAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageable,
+                Arrays.asList(
+                        RSQLUtility.buildRsqlSpecification(targetFilterQuery.getQuery(), TargetFields.class,
+                                virtualPropertyReplacer, database),
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Slice<Target> findByRsql(final Pageable pageable, final String targetFilterQuery) {
-        return JpaManagementHelper
-                .findAllWithoutCountBySpec(targetRepository, pageable,
-                        Arrays.asList(
-                                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
-                                        virtualPropertyReplacer, database),
-                                targetAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageable,
+                Arrays.asList(
+                        RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
+                                virtualPropertyReplacer, database),
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -364,7 +363,7 @@ public class JpaTargetManagement implements TargetManagement {
             target.setTargetType(targetType);
         }
 
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         return targetRepository.save(target);
     }
@@ -375,7 +374,7 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> targetIDs) {
         final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasIdIn(targetIDs));
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasIdIn(targetIDs));
         final List<JpaTarget> targets = targetRepository.findAll(specification);
 
         if (targets.size() < targetIDs.size()) {
@@ -383,7 +382,7 @@ public class JpaTargetManagement implements TargetManagement {
                     targets.stream().map(Target::getId).filter(id -> !targetIDs.contains(id)).toList());
         }
 
-        targetAccessControlManager.assertModificationAllowed(targets, AccessControlManager.Operation.DELETE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.DELETE, targets);
 
         targetRepository.deleteByIdIn(targetIDs);
 
@@ -401,7 +400,7 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteByControllerID(final String controllerID) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.DELETE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.DELETE, target);
         targetRepository.deleteById(target.getId());
     }
 
@@ -411,7 +410,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 Arrays.asList(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()),
-                        targetAccessControlManager.getAccessRules()));
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -422,7 +421,7 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq, specList);
     }
@@ -433,7 +432,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 Arrays.asList(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()),
-                        targetAccessControlManager.getAccessRules()));
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -444,15 +443,16 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, specList);
     }
 
     @Override
     public Page<Target> findByUpdateStatus(final Pageable pageable, final TargetUpdateStatus status) {
-        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, Arrays.asList(
-                TargetSpecifications.hasTargetUpdateStatus(status), targetAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable,
+                Arrays.asList(TargetSpecifications.hasTargetUpdateStatus(status),
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -495,7 +495,7 @@ public class JpaTargetManagement implements TargetManagement {
             specList.add(TargetSpecifications.hasNoTargetType());
         }
 
-        specList.add(targetAccessControlManager.getAccessRules());
+        specList.add(targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return specList;
     }
@@ -523,15 +523,15 @@ public class JpaTargetManagement implements TargetManagement {
     public TargetTagAssignmentResult toggleTagAssignment(final Collection<String> controllerIds, final String tagName) {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
-        final List<JpaTarget> allTargets = targetRepository.findAll(targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds)));
+        final List<JpaTarget> allTargets = targetRepository.findAll(targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ, TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds)));
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
                     allTargets.stream().map(Target::getControllerId).toList());
         }
 
-        targetAccessControlManager.assertModificationAllowed(allTargets, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets);
 
         final List<JpaTarget> alreadyAssignedTargets = targetRepository.findAll(
                 TargetSpecifications.hasTagName(tagName).and(TargetSpecifications.hasControllerIdIn(controllerIds)));
@@ -562,21 +562,22 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTypeAssignmentResult assignType(final Collection<String> controllerIds, final Long typeId) {
         final Specification<JpaTargetType> specification = targetTypeAccessControlManager
-                .appendAccessRules(TargetTypeSpecification.hasId(typeId));
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasId(typeId));
         final JpaTargetType type = targetTypeRepository.findOne(specification)
                 .orElseThrow(() -> new EntityNotFoundException(TargetType.class, typeId));
 
         final List<JpaTarget> targetsWithSameType = findTargetsByInSpecification(controllerIds,
-                targetAccessControlManager.appendAccessRules(TargetSpecifications.hasTargetType(typeId)));
+                targetAccessControlManager.appendAccessRules(AccessController.Operation.READ,
+                        TargetSpecifications.hasTargetType(typeId)));
 
         final List<JpaTarget> targetsWithoutSameType = findTargetsByInSpecification(controllerIds,
-                targetAccessControlManager.appendAccessRules(TargetSpecifications.hasTargetTypeNot(typeId)));
+                targetAccessControlManager.appendAccessRules(AccessController.Operation.READ,
+                        TargetSpecifications.hasTargetTypeNot(typeId)));
 
         // set new target type to all targets without that type
         targetsWithoutSameType.forEach(target -> target.setTargetType(type));
 
-        targetAccessControlManager.assertModificationAllowed(targetsWithSameType,
-                AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, targetsWithSameType);
 
         final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(targetsWithSameType.size(),
                 targetsWithoutSameType.stream().map(targetRepository::save).toList(), Collections.emptyList(), type);
@@ -592,20 +593,19 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetTypeAssignmentResult unAssignType(final Collection<String> controllerIds) {
         final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds,
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
-                    allTargets.stream().map(Target::getControllerId).collect(Collectors.toList()));
+                    allTargets.stream().map(Target::getControllerId).toList());
         }
 
         // set new target type to null for all targets
         allTargets.forEach(target -> target.setTargetType(null));
 
-        targetAccessControlManager.assertModificationAllowed(allTargets, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets);
 
-        return new TargetTypeAssignmentResult(0, Collections.emptyList(), Collections
-                .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())), null);
+        return new TargetTypeAssignmentResult(0, Collections.emptyList(), targetRepository.saveAll(allTargets), null);
     }
 
     private List<JpaTarget> findTargetsByInSpecification(final Collection<String> controllerIds,
@@ -621,8 +621,8 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final long tagId) {
 
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ, TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
 
         final List<JpaTarget> allTargets = targetRepository.findAll(specification);
 
@@ -631,7 +631,7 @@ public class JpaTargetManagement implements TargetManagement {
                     allTargets.stream().map(Target::getControllerId).toList());
         }
 
-        targetAccessControlManager.assertModificationAllowed(allTargets, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets);
 
         final JpaTargetTag tag = targetTagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
@@ -671,7 +671,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Target unAssignType(final String controllerID) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
         target.setTargetType(null);
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
         return targetRepository.save(target);
     }
 
@@ -683,7 +683,7 @@ public class JpaTargetManagement implements TargetManagement {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
         target.setTargetType(targetType);
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
         return targetRepository.save(target);
     }
 
@@ -704,8 +704,8 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByAssignedDistributionSet(final long distId) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
 
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ, TargetSpecifications.hasAssignedDistributionSet(validDistSet.getId()));
         return targetRepository.count(specification);
     }
 
@@ -713,22 +713,24 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByInstalledDistributionSet(final long distId) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
 
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ,
+                TargetSpecifications.hasInstalledDistributionSet(validDistSet.getId()));
         return targetRepository.count(specification);
     }
 
     @Override
     public boolean existsByInstalledOrAssignedDistributionSet(final long distId) {
         final DistributionSet validDistSet = distributionSetManagement.getOrElseThrowException((distId));
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasInstalledOrAssignedDistributionSet(validDistSet.getId()));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ,
+                TargetSpecifications.hasInstalledOrAssignedDistributionSet(validDistSet.getId()));
         return targetRepository.exists(specification);
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatible(final Pageable pageRequest,
-            final long distributionSetId, final String targetFilterQuery) {
+    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(final Pageable pageRequest,
+                                                                                   final long distributionSetId, final String targetFilterQuery) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
@@ -737,7 +739,7 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.UPDATE));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageRequest, specList);
     }
@@ -750,7 +752,7 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageRequest, specList);
     }
@@ -761,8 +763,9 @@ public class JpaTargetManagement implements TargetManagement {
             throw new EntityNotFoundException(RolloutGroup.class, group);
         }
 
-        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageRequest, Arrays.asList(
-                TargetSpecifications.hasNoActionInRolloutGroup(group), targetAccessControlManager.getAccessRules()));
+        return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageRequest,
+                Arrays.asList(TargetSpecifications.hasNoActionInRolloutGroup(group),
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
@@ -773,13 +776,14 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
 
     @Override
-    public long countByRsqlAndNonDSAndCompatible(final long distributionSetId, final String targetFilterQuery) {
+    public long countByRsqlAndNonDSAndCompatibleAndModifiable(final long distributionSetId,
+            final String targetFilterQuery) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
@@ -788,7 +792,7 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.UPDATE));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
@@ -798,8 +802,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target create(final TargetCreate c) {
-        final JpaTarget create = JpaTargetCreate.class.cast(c).build();
-        targetAccessControlManager.assertModificationAllowed(create, AccessControlManager.Operation.CREATE);
+        final JpaTarget create = ((JpaTargetCreate) c).build();
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.CREATE, create);
         return targetRepository.save(create);
     }
 
@@ -810,7 +814,7 @@ public class JpaTargetManagement implements TargetManagement {
     public List<Target> create(final Collection<TargetCreate> targets) {
         final List<JpaTarget> targetList = targets.stream().map(JpaTargetCreate.class::cast).map(JpaTargetCreate::build)
                 .toList();
-        targetAccessControlManager.assertModificationAllowed(targetList, AccessControlManager.Operation.CREATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.CREATE, targetList);
 
         return Collections.unmodifiableList(targetRepository.saveAll(targetList));
     }
@@ -820,7 +824,8 @@ public class JpaTargetManagement implements TargetManagement {
         throwEntityNotFoundExceptionIfTagDoesNotExist(tagId);
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable,
-                Arrays.asList(TargetSpecifications.hasTag(tagId), targetAccessControlManager.getAccessRules()));
+                Arrays.asList(TargetSpecifications.hasTag(tagId),
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
     private void throwEntityNotFoundExceptionIfTagDoesNotExist(final Long tagId) {
@@ -835,7 +840,8 @@ public class JpaTargetManagement implements TargetManagement {
 
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, TargetFields.class, virtualPropertyReplacer, database),
-                TargetSpecifications.hasTag(tagId), targetAccessControlManager.getAccessRules());
+                TargetSpecifications.hasTag(tagId),
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageable, specList);
     }
@@ -850,8 +856,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByRsql(final String targetFilterQuery) {
-        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(RSQLUtility
-                .buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database));
+        final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                AccessController.Operation.READ, RSQLUtility.buildRsqlSpecification(targetFilterQuery,
+                        TargetFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.countBySpec(targetRepository, Collections.singletonList(specification));
     }
 
@@ -861,7 +868,7 @@ public class JpaTargetManagement implements TargetManagement {
                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
                         database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId),
-                targetAccessControlManager.getAccessRules());
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
@@ -869,14 +876,14 @@ public class JpaTargetManagement implements TargetManagement {
     @Override
     public Optional<Target> get(final long id) {
         final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(TargetSpecifications.hasId(id));
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasId(id));
         return targetRepository.findOne(specification).map(t -> t);
     }
 
     @Override
     public List<Target> get(final Collection<Long> ids) {
-        return Collections.unmodifiableList(targetRepository
-                .findAll(targetAccessControlManager.appendAccessRules(TargetSpecifications.hasIdIn(ids))));
+        return Collections.unmodifiableList(targetRepository.findAll(targetAccessControlManager
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasIdIn(ids))));
     }
 
     @Override
@@ -905,7 +912,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         target.setRequestControllerAttributes(true);
 
-        targetAccessControlManager.assertModificationAllowed(target, AccessControlManager.Operation.UPDATE);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetAttributesRequestedEvent(tenantAware.getCurrentTenant(), target.getId(),
@@ -922,8 +929,8 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public boolean existsByControllerId(final String controllerId) {
-        return targetRepository.exists(
-                targetAccessControlManager.appendAccessRules(TargetSpecifications.hasControllerId(controllerId)));
+        return targetRepository.exists(targetAccessControlManager.appendAccessRules(AccessController.Operation.READ,
+                TargetSpecifications.hasControllerId(controllerId)));
     }
 
     @Override
@@ -938,7 +945,8 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distSetTypeId),
-                TargetSpecifications.hasControllerId(controllerId), targetAccessControlManager.getAccessRules());
+                TargetSpecifications.hasControllerId(controllerId),
+                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
 
         final Specification<JpaTarget> combinedSpecification = Objects
                 .requireNonNull(SpecificationsBuilder.combineWithAnd(specList));
@@ -949,7 +957,7 @@ public class JpaTargetManagement implements TargetManagement {
     public Page<Target> findByControllerAttributesRequested(final Pageable pageReq) {
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 Arrays.asList(TargetSpecifications.hasRequestControllerAttributesTrue(),
-                        targetAccessControlManager.getAccessRules()));
+                        targetAccessControlManager.getAccessRules(AccessController.Operation.READ)));
     }
 
 }

@@ -50,8 +50,8 @@ import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedExcepti
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlManager;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -152,7 +152,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantAware tenantAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
-    private final TargetAccessControlManager targetAccessControlManager;
+    private final TargetAccessController targetAccessControlManager;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
             final DistributionSetManagement distributionSetManagement,
@@ -162,8 +162,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties,
-            final TargetAccessControlManager targetAccessControlManager) {
+            final RepositoryProperties repositoryProperties, final TargetAccessController targetAccessControlManager) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -437,14 +436,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private void checkAssignmentPermitted(final Collection<DeploymentRequest> deploymentRequests) {
         if (!deploymentRequests.isEmpty()) {
             final Specification<JpaTarget> specification = targetAccessControlManager
-                    .appendAccessRules(TargetSpecifications.hasControllerIdIn(
+                    .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerIdIn(
                             deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList()));
             final List<JpaTarget> accessibleTargets = targetRepository.findAll(specification);
             if (deploymentRequests.size() != accessibleTargets.size()) {
-                throw new IllegalStateException("");
+                throw new EntityNotFoundException(JpaTarget.class,
+                        deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList(),
+                        accessibleTargets.stream().map(JpaTarget::getControllerId).toList());
             }
-            targetAccessControlManager.assertModificationAllowed(accessibleTargets,
-                    AccessControlManager.Operation.UPDATE);
+            targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, accessibleTargets);
         }
     }
 

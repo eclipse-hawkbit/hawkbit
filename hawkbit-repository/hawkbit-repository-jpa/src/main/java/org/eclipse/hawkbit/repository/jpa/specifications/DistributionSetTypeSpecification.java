@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import java.util.Collection;
+
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -48,7 +50,11 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byId(final Long distid) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Long> get(JpaDistributionSetType_.id), distid);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.id), distid);
+    }
+
+    public static Specification<JpaDistributionSetType> byIds(final Collection<Long> distIds) {
+        return (targetRoot, query, cb) -> targetRoot.get(JpaDistributionSetType_.id).in(distIds);
     }
 
     /**
@@ -61,7 +67,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byName(final String name) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(JpaDistributionSetType_.name), name);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.name), name);
     }
 
     /**
@@ -74,7 +80,7 @@ public final class DistributionSetTypeSpecification {
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSetType> byKey(final String key) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<String> get(JpaDistributionSetType_.key), key);
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.key), key);
     }
 
 }

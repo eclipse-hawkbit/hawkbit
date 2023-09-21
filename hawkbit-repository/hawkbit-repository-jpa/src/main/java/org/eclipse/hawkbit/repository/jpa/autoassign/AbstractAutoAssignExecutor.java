@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessControlManager;
+import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -55,7 +55,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private final DeploymentManagement deploymentManagement;
 
     private final PlatformTransactionManager transactionManager;
-    private final TargetAccessControlManager targetAccessControlManager;
+    private final TargetAccessController targetAccessControlManager;
 
     private final TenantAware tenantAware;
 
@@ -73,7 +73,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      */
     protected AbstractAutoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
-            final TenantAware tenantAware, final TargetAccessControlManager targetAccessControlManager) {
+            final TenantAware tenantAware, final TargetAccessController targetAccessControlManager) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
@@ -96,7 +96,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     protected TenantAware getTenantAware() {
         return tenantAware;
     }
-    protected TargetAccessControlManager getTargetAccessControlManager() {
+    protected TargetAccessController getTargetAccessControlManager() {
         return targetAccessControlManager;
     }
 
@@ -112,7 +112,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                     runInUserContext(filterQuery, () -> {
                         filterQuery.getAcmContext().ifPresentOrElse(acmContext -> {
                             // set existing context for target filter check
-                            targetAccessControlManager.runAsContext(acmContext, () -> {
+                            targetAccessControlManager.runInContext(acmContext, () -> {
                                 consumer.accept(filterQuery);
                             });
                         }, () -> consumer.accept(filterQuery));
