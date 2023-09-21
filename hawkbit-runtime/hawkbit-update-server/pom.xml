@@ -35,13 +35,12 @@
     </profiles>
     <build>
         <plugins>
-            <!-- Adding the generated rest doc after integration tests -->
+            <!-- Generating the rest doc during integration tests -->
             <plugin>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-maven-plugin</artifactId>
                 <version>1.4</version>
                 <configuration>
-                    <outputDir>${project.basedir}/target/classes/rest-api</outputDir>
                     <outputFileName>openapi.json</outputFileName>
                 </configuration>
                 <executions>
@@ -51,6 +50,9 @@
                         <goals>
                             <goal>generate</goal>
                         </goals>
+                        <configuration>
+                            <attachArtifact>true</attachArtifact>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -84,27 +86,6 @@
                             <outputDirectory>${baseDir}</outputDirectory>
                             <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
                             <layout>JAR</layout>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <!-- Calling Maven 'package' goal -->
-                                <exec executable="mvn" spawn="false">
-                                    <arg value="package"/>
-                                </exec>
-                            </target>
                         </configuration>
                     </execution>
                 </executions>

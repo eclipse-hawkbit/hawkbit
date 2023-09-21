@@ -61,10 +61,10 @@
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
                <execution>
-                  <id>unpack-api-docs</id>
+                  <id>copy-openapi</id>
                   <phase>prepare-package</phase>
                   <goals>
-                     <goal>unpack</goal>
+                     <goal>copy</goal>
                   </goals>
                   <configuration>
                      <artifactItems>
@@ -72,31 +72,13 @@
                            <groupId>org.eclipse.hawkbit</groupId>
                            <artifactId>hawkbit-update-server</artifactId>
                            <version>${project.version}</version>
-                           <type>jar</type>
+                           <classifier>openapi</classifier>
+                           <type>json</type>
                            <overWrite>true</overWrite>
-                           <outputDirectory>${project.build.directory}/temp-unpack</outputDirectory>
+                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
+                           <destFileName>openapi.json</destFileName>
                         </artifactItem>
                      </artifactItems>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
-         <plugin>
-            <artifactId>maven-antrun-plugin</artifactId>
-            <version>3.1.0</version>
-            <executions>
-               <execution>
-                  <id>copy-specific-file</id>
-                  <phase>prepare-package</phase>
-                  <goals>
-                     <goal>run</goal>
-                  </goals>
-                  <configuration>
-                     <target>
-                        <copy file="${project.build.directory}/temp-unpack/BOOT-INF/classes/rest-api/openapi.json"
-                              todir="${basedir}/content/rest-api" />
-                        <delete dir="${project.build.directory}/temp-unpack" />
-                     </target>
                   </configuration>
                </execution>
             </executions>
