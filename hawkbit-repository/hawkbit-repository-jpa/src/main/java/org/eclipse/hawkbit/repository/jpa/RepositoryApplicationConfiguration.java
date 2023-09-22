@@ -62,8 +62,8 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
-import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.acm.DefaultAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.DefaultAccessControllingConfiguration;
+import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
@@ -85,8 +85,6 @@ import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactio
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.model.helper.AfterTransactionCommitExecutorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.EntityInterceptorHolder;
 import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHolder;
@@ -139,7 +137,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.domain.AuditorAware;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.support.locks.LockRegistry;
@@ -170,7 +167,7 @@ import com.google.common.collect.Maps;
 @EntityScan("org.eclipse.hawkbit.repository.jpa.model")
 @PropertySource("classpath:/hawkbit-jpa-defaults.properties")
 @Import({ RepositoryDefaultConfiguration.class, DataSourceAutoConfiguration.class,
-        SystemManagementCacheKeyGenerator.class })
+        SystemManagementCacheKeyGenerator.class, DefaultAccessControllingConfiguration.class })
 @AutoConfigureAfter(DataSourceAutoConfiguration.class)
 public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
@@ -497,12 +494,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit, final JpaProperties properties) {
+            final AfterTransactionCommitExecutor afterCommit,
+            final DistributionSetAccessController distributionSetAccessController, final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
                 targetFilterQueryRepository, actionRepository, eventPublisherHolder, tenantAware,
                 virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
-                properties.getDatabase());
+                distributionSetAccessController, properties.getDatabase());
 
     }
 
@@ -583,64 +581,6 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
                 properties.getDatabase(), targetAccessControlManager, targetTypeAccessControlManager);
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    TargetAccessController targetAccessControlManager() {
-        final DefaultAccessController<JpaTarget> defaultControlManager = new DefaultAccessController<>();
-        return new TargetAccessController() {
-
-            @Override
-            public String getContext() {
-                return defaultControlManager.getContext();
-            }
-
-            @Override
-            public void runInContext(final String serializedContext, final Runnable runnable) {
-                defaultControlManager.runInContext(serializedContext, runnable);
-            }
-
-            @Override
-            public Specification<JpaTarget> getAccessRules(final Operation operation) {
-                return defaultControlManager.getAccessRules(operation);
-            }
-
-            @Override
-            public void assertOperationAllowed(final Operation operation, final List<JpaTarget> entities)
-                    throws InsufficientPermissionException {
-                defaultControlManager.assertOperationAllowed(operation, entities);
-            }
-        };
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    TargetTypeAccessController targetTypeAccessControlManager() {
-        final DefaultAccessController<JpaTargetType> defaultControlManager = new DefaultAccessController<>();
-        return new TargetTypeAccessController() {
-
-            @Override
-            public String getContext() {
-                return defaultControlManager.getContext();
-            }
-
-            @Override
-            public void runInContext(final String serializedContext, final Runnable runnable) {
-                defaultControlManager.runInContext(serializedContext, runnable);
-            }
-
-            @Override
-            public Specification<JpaTargetType> getAccessRules(final Operation operation) {
-                return defaultControlManager.getAccessRules(operation);
-            }
-
-            @Override
-            public void assertOperationAllowed(final Operation operation, final List<JpaTargetType> entities)
-                    throws InsufficientPermissionException {
-                defaultControlManager.assertOperationAllowed(operation, entities);
-            }
-        };
     }
 
     /**

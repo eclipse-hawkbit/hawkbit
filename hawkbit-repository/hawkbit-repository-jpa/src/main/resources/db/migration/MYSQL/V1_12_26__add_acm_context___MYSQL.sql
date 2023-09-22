@@ -1,1 +1,1 @@
-ALTER TABLE sp_target_filter_query ADD COLUMN acm_context CHAR(255);
+ALTER TABLE sp_target_filter_query ADD COLUMN access_control_context VARCHAR(512);

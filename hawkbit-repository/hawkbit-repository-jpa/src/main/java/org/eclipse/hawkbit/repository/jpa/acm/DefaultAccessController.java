@@ -10,6 +10,10 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
@@ -64,4 +68,47 @@ public class DefaultAccessController<T> implements AccessController<T> {
         // Every request is allowed
     }
 
+    public static TargetAccessController targetAccessController() {
+        return new DefaultTargetAccessController();
+    }
+
+    public static TargetTypeAccessController targetTypeAccessController() {
+        return new DefaultTargetTypeAccessController();
+    }
+
+    public static DistributionSetAccessController distributionSetAccessController() {
+        return new DefaultDistributionSetAccessController();
+    }
+
+    public static DistributionSetTypeAccessController distributionSetTypeAccessController() {
+        return new DefaultDistributionSetTypeAccessController();
+    }
+
+    /**
+     * Default implementation of the {@link TargetAccessController}
+     */
+    private static class DefaultTargetAccessController extends DefaultAccessController<JpaTarget>
+            implements TargetAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link TargetTypeAccessController}
+     */
+    private static class DefaultTargetTypeAccessController extends DefaultAccessController<JpaTargetType>
+            implements TargetTypeAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link DistributionSetAccessController}
+     */
+    private static class DefaultDistributionSetAccessController extends DefaultAccessController<JpaDistributionSet>
+            implements DistributionSetAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link DistributionSetTypeAccessController}
+     */
+    private static class DefaultDistributionSetTypeAccessController
+            extends DefaultAccessController<JpaDistributionSetType> implements DistributionSetTypeAccessController {
+    }
 }

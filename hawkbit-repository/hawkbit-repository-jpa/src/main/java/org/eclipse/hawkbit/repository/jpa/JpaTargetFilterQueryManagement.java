@@ -267,7 +267,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(
                 update.getTargetFilterId());
         if (update.getDsId() == null) {
-            targetFilterQuery.setAcmContext(null);
+            targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
             targetFilterQuery.setAutoAssignWeight(null);
@@ -280,7 +280,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
-            targetFilterQuery.setAcmContext(targetAccessControlManager.getContext());
+            targetFilterQuery.setAccessControlContext(targetAccessControlManager.getContext());
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());

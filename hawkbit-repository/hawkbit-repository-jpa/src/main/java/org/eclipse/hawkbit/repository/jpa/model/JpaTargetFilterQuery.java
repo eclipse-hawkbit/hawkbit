@@ -84,8 +84,8 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
     @Column(name = "confirmation_required")
     private boolean confirmationRequired;
 
-    @Column(name = "acm_context", nullable = true)
-    private String acmContext;
+    @Column(name = "access_control_context", nullable = true)
+    private String accessControlContext;
 
     public JpaTargetFilterQuery() {
         // Default constructor for JPA.
@@ -179,13 +179,12 @@ public class JpaTargetFilterQuery extends AbstractJpaTenantAwareBaseEntity
         this.confirmationRequired = confirmationRequired;
     }
 
-    @Override
-    public Optional<String> getAcmContext() {
-        return Optional.ofNullable(acmContext);
+    public Optional<String> getAccessControlContext() {
+        return Optional.ofNullable(accessControlContext);
     }
 
-    public void setAcmContext(String acmContext) {
-        this.acmContext = acmContext;
+    public void setAccessControlContext(final String accessControlContext) {
+        this.accessControlContext = accessControlContext;
     }
 
     @Override

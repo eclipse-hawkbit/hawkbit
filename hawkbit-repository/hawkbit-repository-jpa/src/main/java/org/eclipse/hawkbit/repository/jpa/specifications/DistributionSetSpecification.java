@@ -47,8 +47,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by its
-     * DELETED attribute.
+     * {@link Specification} for retrieving {@link DistributionSet}s by its DELETED
+     * attribute.
      *
      * @param isDeleted
      *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
@@ -65,8 +65,8 @@ public final class DistributionSetSpecification {
      * COMPLETED attribute.
      *
      * @param isCompleted
-     *            TRUE/FALSE are compared to the attribute COMPLETED. If NULL
-     *            the attribute is ignored
+     *            TRUE/FALSE are compared to the attribute COMPLETED. If NULL the
+     *            attribute is ignored
      * @return the {@link DistributionSet} {@link Specification}
      */
     public static Specification<JpaDistributionSet> isCompleted(final Boolean isCompleted) {
@@ -75,8 +75,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by its
-     * VALID attribute.
+     * {@link Specification} for retrieving {@link DistributionSet}s by its VALID
+     * attribute.
      *
      * @param isValid
      *            TRUE/FALSE are compared to the attribute VALID. If NULL the
@@ -127,8 +127,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by "like
-     * name and like version".
+     * {@link Specification} for retrieving {@link DistributionSet}s by "like name
+     * and like version".
      *
      * @param name
      *            to be filtered on
@@ -188,8 +188,8 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * returns query criteria {@link Specification} comparing case insensitive
-     * "NAME == AND VERSION ==".
+     * returns query criteria {@link Specification} comparing case insensitive "NAME
+     * == AND VERSION ==".
      *
      * @param name
      *            to be filtered on
@@ -216,15 +216,27 @@ public final class DistributionSetSpecification {
     public static Specification<JpaDistributionSet> byType(final Long typeId) {
         return (dsRoot, query, cb) -> cb.equal(dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id),
                 typeId);
+    }
 
+    /**
+     * {@link Specification} for retrieving {@link DistributionSet} for given id
+     * collection of {@link DistributionSet#getType()}.
+     * 
+     * 
+     * @param typeIds
+     *            id collection of distribution set type to search
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> hasType(final Collection<Long> typeIds) {
+        return (dsRoot, query, cb) -> dsRoot.get(JpaDistributionSet_.type).get(JpaDistributionSetType_.id).in(typeIds);
     }
 
     /**
      * @param installedTargetId
-     *            the targetID which is installed to a distribution set to
-     *            search for.
-     * @return the specification to search for a distribution set which is
-     *         installed to the given targetId
+     *            the targetID which is installed to a distribution set to search
+     *            for.
+     * @return the specification to search for a distribution set which is installed
+     *         to the given targetId
      */
     public static Specification<JpaDistributionSet> installedTarget(final String installedTargetId) {
         return (dsRoot, query, cb) -> {
@@ -238,8 +250,8 @@ public final class DistributionSetSpecification {
      * @param assignedTargetId
      *            the targetID which is assigned to a distribution set to search
      *            for.
-     * @return the specification to search for a distribution set which is
-     *         assigned to the given targetId
+     * @return the specification to search for a distribution set which is assigned
+     *         to the given targetId
      */
     public static Specification<JpaDistributionSet> assignedTarget(final String assignedTargetId) {
         return (dsRoot, query, cb) -> {
@@ -269,12 +281,11 @@ public final class DistributionSetSpecification {
      * Can be added to specification chain to order result by provided target
      *
      * Order: 1. Distribution set installed on target, 2. Distribution set(s)
-     * assigned to target, 3. Based on requested sorting or id if
-     * <code>null</code>.
+     * assigned to target, 3. Based on requested sorting or id if <code>null</code>.
      *
-     * NOTE: Other specs, pagables and sort objects may alter the queries
-     * orderBy entry too, possibly invalidating the applied order, keep in mind
-     * when using this
+     * NOTE: Other specs, pagables and sort objects may alter the queries orderBy
+     * entry too, possibly invalidating the applied order, keep in mind when using
+     * this
      *
      * @param linkedControllerId
      *            controller id to get installed/assigned DS for

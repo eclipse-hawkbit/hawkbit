@@ -96,6 +96,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     protected TenantAware getTenantAware() {
         return tenantAware;
     }
+
     protected TargetAccessController getTargetAccessControlManager() {
         return targetAccessControlManager;
     }
@@ -110,9 +111,9 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
             filterQueries.forEach(filterQuery -> {
                 try {
                     runInUserContext(filterQuery, () -> {
-                        filterQuery.getAcmContext().ifPresentOrElse(acmContext -> {
+                        filterQuery.getAccessControlContext().ifPresentOrElse(context -> {
                             // set existing context for target filter check
-                            targetAccessControlManager.runInContext(acmContext, () -> {
+                            targetAccessControlManager.runInContext(context, () -> {
                                 consumer.accept(filterQuery);
                             });
                         }, () -> consumer.accept(filterQuery));

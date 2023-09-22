@@ -29,7 +29,7 @@ public interface AccessController<T> {
      * Serialize the current context to be able to reset it again with
      * {@link AccessController#runInContext(String, Runnable)}. Needed for
      * scheduled background operations like auto assignments. See
-     * {@link JpaTargetFilterQuery#getAcmContext()} and
+     * {@link JpaTargetFilterQuery#getAccessControlContext()} and
      * {@link AutoAssignChecker#checkAllTargets()}
      * 
      * @return null if there is nothing to serialize. Context will not be restored
