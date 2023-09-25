@@ -66,4 +66,4 @@ A _Distribution Set_ entity may have for example URIs to artifacts, _Software Mo
 ## Management APIs
 
 
-<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/openapi.html"></iframe>
+<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/mgmt.html"></iframe>

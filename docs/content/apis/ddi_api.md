@@ -33,4 +33,4 @@ RESUMED                     | This can be used by the target to inform that it c
 
 ## DDI APIs
 
-<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/openapi.html"></iframe>
+<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/ddi.html"></iframe>

@@ -40,17 +40,30 @@
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-maven-plugin</artifactId>
                 <version>1.4</version>
-                <configuration>
-                    <outputFileName>openapi.json</outputFileName>
-                </configuration>
                 <executions>
+                    <!-- Execution for JSON -->
                     <execution>
+                        <id>generate-json</id>
                         <phase>integration-test</phase>
-                        <id>generate-api-docs</id>
                         <goals>
                             <goal>generate</goal>
                         </goals>
                         <configuration>
+                            <outputFileName>openapi.json</outputFileName>
+                            <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>
+                            <attachArtifact>true</attachArtifact>
+                        </configuration>
+                    </execution>
+                    <!-- Execution for YAML -->
+                    <execution>
+                        <id>generate-yaml</id>
+                        <phase>integration-test</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <outputFileName>openapi.yaml</outputFileName>
+                            <apiDocsUrl>http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
                             <attachArtifact>true</attachArtifact>
                         </configuration>
                     </execution>

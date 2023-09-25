@@ -10,36 +10,6 @@
 
 #!/bin/bash
 
-CURRENT_DIR=$(pwd)
-
-# Checking for Redoc CLI and npm
-redoc-cli --version > /dev/null 2>&1
-
-if [ $? != 0 ]; then
-    echo "[ERROR] Redoc CLI is not installed! Please make suer to install it before trying again."
-    exit 1
-
-    npm --version > /dev/null 2>&1
-    if [ $? != 0 ]; then
-        echo "[ERROR] npm not installed! Please ensure Node.js and npm are properly installed before trying again."
-        exit 1
-    else
-        echo "[INFO] npm is already installed."
-    fi
-else
-    echo "[INFO] Redoc CLI is already installed."
-fi
-
-# Execute the npx command
-npx @redocly/cli build-docs ${CURRENT_DIR}/content/rest-api/openapi.json -o ${CURRENT_DIR}/content/rest-api/openapi.html --theme.openapi.hideDownloadButton=true
-
-if [ $? != 0 ]; then
-    echo "[ERROR] Failed to execute the Redoc CLI command."
-    exit 1
-else
-    echo "[INFO] Successfully executed the Redoc CLI command."
-fi
-
 # This script checks if 'hugo' is installed. Afterwards, the Hugo theme is downloaded.
 hugo version
 if [ $? != 0 ]
