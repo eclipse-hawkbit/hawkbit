@@ -16,6 +16,7 @@ import io.swagger.v3.oas.models.security.OAuthFlows;
 import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springdoc.core.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 
 public class OpenApiConfiguration {
@@ -68,5 +69,21 @@ public class OpenApiConfiguration {
                         .bearerFormat("JWT")
                         .scheme("bearer")))
         .info(new Info().title(apiTitle).description(DESCRIPTION).version("v1"));
+  }
+
+  @Bean
+  public GroupedOpenApi mgmtApi() {
+    return GroupedOpenApi.builder()
+        .group("Management API")
+        .pathsToMatch("/rest/v1/**")
+        .build();
+  }
+
+  @Bean
+  public GroupedOpenApi ddiApi() {
+    return GroupedOpenApi.builder()
+        .group("Direct Device Integration API")
+        .pathsToMatch("/{tenant}/controller/**")
+        .build();
   }
 }
