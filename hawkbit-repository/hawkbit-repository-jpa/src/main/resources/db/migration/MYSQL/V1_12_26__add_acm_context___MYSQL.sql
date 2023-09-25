@@ -1,1 +1,0 @@
-ALTER TABLE sp_target_filter_query ADD COLUMN access_control_context VARCHAR(512);

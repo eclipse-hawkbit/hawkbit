@@ -37,8 +37,9 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -132,8 +133,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit,
-            final DistributionSetAccessController distributionSetAccessController, final Database database) {
+            final AfterTransactionCommitExecutor afterCommit, final AccessControlService accessControlService,
+            final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
         this.distributionSetTagManagement = distributionSetTagManagement;
@@ -149,7 +150,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
-        this.distributionSetAccessController = distributionSetAccessController;
+        this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
         this.database = database;
     }
 
@@ -174,7 +175,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public List<Statistic> countRolloutsByStatusForDistributionSet(Long dsId) {
         // TODO: how limiting access here?
         return distributionSetRepository.countRolloutsByStatusForDistributionSet(dsId).stream()
-                .map(Statistic.class::cast).collect(Collectors.toList());
+                .map(Statistic.class::cast).toList();
     }
 
     @Override

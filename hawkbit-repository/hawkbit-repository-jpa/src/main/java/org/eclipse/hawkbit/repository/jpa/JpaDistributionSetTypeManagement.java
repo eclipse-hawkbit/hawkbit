@@ -29,8 +29,9 @@ import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -82,8 +83,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final QuotaManagement quotaManagement,
-            final DistributionSetTypeAccessController distributionSetTypeAccessController) {
+            final QuotaManagement quotaManagement, final AccessControlService accessControlService) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -91,7 +91,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
         this.quotaManagement = quotaManagement;
-        this.distributionSetTypeAccessController = distributionSetTypeAccessController;
+        this.distributionSetTypeAccessController = accessControlService.getDistributionSetTypeAccessController();
     }
 
     @Override

@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.acm;
+package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 

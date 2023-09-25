@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -58,14 +58,14 @@ class AutoAssignCheckerTest {
     @Mock
     private TenantAware tenantAware;
     @Mock
-    private TargetAccessController targetAccessControlManager;
+    private AccessControlService accessControlService;
 
     private AutoAssignChecker sut;
 
     @BeforeEach
     void before() {
         sut = new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware, targetAccessControlManager);
+                transactionManager, tenantAware, accessControlService);
     }
 
     @Test

@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
@@ -29,7 +30,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -84,7 +85,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
-    private final TargetAccessController targetAccessControlManager;
+    private final ContextRunner contextRunner;
 
     private final Database database;
 
@@ -93,7 +94,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final TargetAccessController targetAccessControlManager) {
+            final AccessControlService accessControlService) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -103,7 +104,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
-        this.targetAccessControlManager = targetAccessControlManager;
+        this.contextRunner = accessControlService.getContextRunner();
     }
 
     @Override
@@ -280,7 +281,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
-            targetFilterQuery.setAccessControlContext(targetAccessControlManager.getContext());
+            targetFilterQuery.setAccessControlContext(contextRunner.getCurrentContext());
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
@@ -331,7 +332,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     }
 
     private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
-        QuotaHelper.assertAssignmentQuota(filterName, targetManagement.countByRsqlAndNonDSAndCompatibleAndModifiable(dsId, query),
+        QuotaHelper.assertAssignmentQuota(filterName,
+                targetManagement.countByRsqlAndNonDSAndCompatibleAndModifiable(dsId, query),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class, null);
     }
 

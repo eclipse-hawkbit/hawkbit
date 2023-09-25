@@ -33,6 +33,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -41,6 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -132,6 +134,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final EventPublisherHolder eventPublisherHolder;
+    private final ContextRunner contextRunner;
     private final Database database;
 
     public JpaRolloutManagement(final TargetManagement targetManagement,
@@ -139,7 +142,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final AccessControlService accessControlService) {
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -147,14 +150,14 @@ public class JpaRolloutManagement implements RolloutManagement {
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.eventPublisherHolder = eventPublisherHolder;
+        this.contextRunner = accessControlService.getContextRunner();
         this.database = database;
     }
 
     @Override
     public Page<Rollout> findAll(final Pageable pageable, final boolean deleted) {
-        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable,
-                Collections
-                        .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
+        return JpaManagementHelper.findAllWithCountBySpec(rolloutRepository, pageable, Collections
+                .singletonList(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort())));
     }
 
     @Override
@@ -202,6 +205,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
+        rollout.setAccessControlContext(contextRunner.getCurrentContext());
         return rolloutRepository.save(rollout);
     }
 
@@ -291,8 +295,8 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     /**
-     * In case the given group is missing conditions or actions, they will be
-     * set from the supplied default conditions.
+     * In case the given group is missing conditions or actions, they will be set
+     * from the supplied default conditions.
      *
      * @param create
      *            group to check
@@ -490,7 +494,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         update.getActionType().ifPresent(rollout::setActionType);
         update.getForcedTime().ifPresent(rollout::setForcedTime);
         update.getWeight().ifPresent(rollout::setWeight);
-        // reseting back to manual start is done by setting start at time to
+        // resetting back to manual start is done by setting start at time to
         // null
         rollout.setStartAt(update.getStartAt().orElse(null));
         update.getSet().ifPresent(setId -> {
@@ -576,6 +580,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return fromCache;
     }
+
     @Override
     public void setRolloutStatusDetails(final Slice<Rollout> rollouts) {
         final List<Long> rolloutIds = rollouts.getContent().stream().map(Rollout::getId).collect(Collectors.toList());

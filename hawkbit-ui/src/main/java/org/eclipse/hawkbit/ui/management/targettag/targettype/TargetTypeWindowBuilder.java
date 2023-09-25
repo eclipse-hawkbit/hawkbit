@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import com.vaadin.ui.Window;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -25,23 +26,28 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
 
     private final TargetTypeManagement targetTypeManagement;
     private final DistributionSetTypeManagement dsTypeManagement;
+    private final ContextRunner contextRunner;
 
     /**
      * Constructor for TargetTypeWindowBuilder
      *
      * @param uiDependencies
      *            {@link CommonUiDependencies}
-     * @param dsTypeManagement
-     *            DistributionSetTypeManagement
      * @param targetTypeManagement
      *            TargetTypeManagement
+     * @param dsTypeManagement
+     *            DistributionSetTypeManagement
+     * @param contextRunner
+     *            ContextRunner
      */
-    public TargetTypeWindowBuilder(final CommonUiDependencies uiDependencies, final TargetTypeManagement targetTypeManagement,
-                                    final DistributionSetTypeManagement dsTypeManagement) {
+    public TargetTypeWindowBuilder(final CommonUiDependencies uiDependencies,
+            final TargetTypeManagement targetTypeManagement, final DistributionSetTypeManagement dsTypeManagement,
+            final ContextRunner contextRunner) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
         this.dsTypeManagement = dsTypeManagement;
+        this.contextRunner = contextRunner;
     }
 
     @Override
@@ -51,16 +57,16 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
 
     @Override
     public Window getWindowForAdd() {
-        CommonDialogWindow window = getWindowForNewEntity(new AddTargetTypeWindowController(uiDependencies, targetTypeManagement,
-                new TargetTypeWindowLayout(uiDependencies, dsTypeManagement)));
+        CommonDialogWindow window = getWindowForNewEntity(new AddTargetTypeWindowController(uiDependencies,
+                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextRunner));
         window.hideMandatoryExplanation();
         return window;
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTargetType proxyType) {
-        CommonDialogWindow window = getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies, targetTypeManagement,
-                new TargetTypeWindowLayout(uiDependencies, dsTypeManagement)));
+        CommonDialogWindow window = getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies,
+                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextRunner));
         window.hideMandatoryExplanation();
         return window;
     }

@@ -50,8 +50,9 @@ import org.eclipse.hawkbit.repository.exception.ForceQuitActionNotAllowedExcepti
 import org.eclipse.hawkbit.repository.exception.IncompatibleTargetTypeException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -162,7 +163,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties, final TargetAccessController targetAccessControlManager) {
+            final RepositoryProperties repositoryProperties, final AccessControlService accessControlService) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -181,7 +182,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;
-        this.targetAccessControlManager = targetAccessControlManager;
+        this.targetAccessControlManager = accessControlService.getTargetAccessController();
         this.retryTemplate = createRetryTemplate();
     }
 
@@ -513,7 +514,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             final JpaActionStatus actionStatus = assignmentStrategy.createActionStatus(action, actionMessage);
             verifyAndAddConfirmationStatus(action, actionStatus, entry.getKey().isConfirmationRequired());
             return actionStatus;
-        }).collect(Collectors.toList()));
+        }).toList());
     }
 
     private void setInitialActionStatusOfRolloutGroup(final List<JpaAction> actions) {

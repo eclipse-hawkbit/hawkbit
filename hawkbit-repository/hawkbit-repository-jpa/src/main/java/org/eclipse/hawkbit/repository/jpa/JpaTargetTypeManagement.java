@@ -24,8 +24,9 @@ import org.eclipse.hawkbit.repository.builder.TargetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -80,14 +81,14 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     public JpaTargetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final QuotaManagement quotaManagement, final TargetTypeAccessController targetTypeAccessControlManager) {
+            final QuotaManagement quotaManagement, final AccessControlService accessControlService) {
         this.targetTypeRepository = targetTypeRepository;
         this.targetRepository = targetRepository;
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
         this.quotaManagement = quotaManagement;
-        this.targetTypeAccessControlManager = targetTypeAccessControlManager;
+        this.targetTypeAccessControlManager = accessControlService.getTargetTypeAccessController();
     }
 
     @Override

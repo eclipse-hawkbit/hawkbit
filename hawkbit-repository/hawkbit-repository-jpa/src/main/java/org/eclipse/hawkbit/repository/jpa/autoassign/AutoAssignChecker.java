@@ -18,7 +18,7 @@ import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
@@ -60,9 +60,9 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
-            final TargetAccessController targetAccessControlManager) {
+            final AccessControlService accessControlService) {
         super(targetFilterQueryManagement, deploymentManagement, transactionManager, tenantAware,
-                targetAccessControlManager);
+                accessControlService);
         this.targetManagement = targetManagement;
     }
 

@@ -10,14 +10,12 @@
 package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -40,8 +38,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAutoAssignExecutor.class);
 
     /**
-     * The message which is added to the action status when a distribution set
-     * is assigned to an target. First %s is the name of the target filter.
+     * The message which is added to the action status when a distribution set is
+     * assigned to an target. First %s is the name of the target filter.
      */
     private static final String ACTION_MESSAGE = "Auto assignment by target filter: %s";
 
@@ -55,8 +53,7 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private final DeploymentManagement deploymentManagement;
 
     private final PlatformTransactionManager transactionManager;
-    private final TargetAccessController targetAccessControlManager;
-
+    private final AccessControlService accessControlService;
     private final TenantAware tenantAware;
 
     /**
@@ -73,12 +70,12 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      */
     protected AbstractAutoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
-            final TenantAware tenantAware, final TargetAccessController targetAccessControlManager) {
+            final TenantAware tenantAware, final AccessControlService accessControlService) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
         this.tenantAware = tenantAware;
-        this.targetAccessControlManager = targetAccessControlManager;
+        this.accessControlService = accessControlService;
     }
 
     protected TargetFilterQueryManagement getTargetFilterQueryManagement() {
@@ -97,10 +94,6 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         return tenantAware;
     }
 
-    protected TargetAccessController getTargetAccessControlManager() {
-        return targetAccessControlManager;
-    }
-
     protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
         Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
@@ -110,14 +103,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
 
             filterQueries.forEach(filterQuery -> {
                 try {
-                    runInUserContext(filterQuery, () -> {
-                        filterQuery.getAccessControlContext().ifPresentOrElse(context -> {
-                            // set existing context for target filter check
-                            targetAccessControlManager.runInContext(context, () -> {
-                                consumer.accept(filterQuery);
-                            });
-                        }, () -> consumer.accept(filterQuery));
-                    });
+                    final String initiator = getAutoAssignmentInitiatedBy(filterQuery);
+                    accessControlService.runningAutoAssignContext(filterQuery, initiator, consumer);
                 } catch (final RuntimeException ex) {
                     LOGGER.debug(
                             "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {}. Continue with next filter query.",
@@ -132,8 +119,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     /**
-     * Runs target assignments within a dedicated transaction for a given list
-     * of controllerIDs
+     * Runs target assignments within a dedicated transaction for a given list of
+     * controllerIDs
      * 
      * @param targetFilterQuery
      *            the target filter query
@@ -161,8 +148,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     }
 
     /**
-     * Creates a list of {@link DeploymentRequest} for given list of
-     * controllerIds and {@link TargetFilterQuery}
+     * Creates a list of {@link DeploymentRequest} for given list of controllerIds
+     * and {@link TargetFilterQuery}
      *
      * @param controllerIds
      *            list of controllerIds
@@ -183,16 +170,12 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                         .deploymentRequest(controllerId, filterQuery.getAutoAssignDistributionSet().getId())
                         .setActionType(autoAssignActionType).setWeight(filterQuery.getAutoAssignWeight().orElse(null))
                         .setConfirmationRequired(filterQuery.isConfirmationRequired()).build())
-                .collect(Collectors.toList());
-    }
-
-    protected void runInUserContext(final TargetFilterQuery targetFilterQuery, final Runnable handler) {
-        DeploymentHelper.runInNonSystemContext(handler,
-                () -> Objects.requireNonNull(getAutoAssignmentInitiatedBy(targetFilterQuery)), tenantAware);
+                .toList();
     }
 
     protected static String getAutoAssignmentInitiatedBy(final TargetFilterQuery targetFilterQuery) {
-        return StringUtils.isEmpty(targetFilterQuery.getAutoAssignInitiatedBy()) ? targetFilterQuery.getCreatedBy()
-                : targetFilterQuery.getAutoAssignInitiatedBy();
+        return StringUtils.hasText(targetFilterQuery.getAutoAssignInitiatedBy())
+                ? targetFilterQuery.getAutoAssignInitiatedBy()
+                : targetFilterQuery.getCreatedBy();
     }
 }

@@ -7,11 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.acm;
+package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Collections;
@@ -24,28 +22,6 @@ import java.util.List;
  * @param <T>
  */
 public interface AccessController<T> {
-
-    /**
-     * Serialize the current context to be able to reset it again with
-     * {@link AccessController#runInContext(String, Runnable)}. Needed for
-     * scheduled background operations like auto assignments. See
-     * {@link JpaTargetFilterQuery#getAccessControlContext()} and
-     * {@link AutoAssignChecker#checkAllTargets()}
-     * 
-     * @return null if there is nothing to serialize. Context will not be restored
-     *         in background tasks without user context.
-     */
-    String getContext();
-
-    /**
-     * Wrap a specific execution in a known and pre-serialized context.
-     * 
-     * @param serializedContext
-     *            created by {@link AccessController#getContext()}
-     * @param runnable
-     *            operation to execute in the reconstructed context
-     */
-    void runInContext(String serializedContext, Runnable runnable);
 
     /**
      * Introduce a new specification to limit the access to a specific entity.
@@ -71,6 +47,7 @@ public interface AccessController<T> {
      * {@link AccessController#assertOperationAllowed(Operation, Object)}
      *
      * @throws InsufficientPermissionException
+     *             if operation is not permitted for given entities
      */
     default void assertOperationAllowed(Operation operation, T entity) throws InsufficientPermissionException {
         assertOperationAllowed(operation, Collections.singletonList(entity));
@@ -78,10 +55,9 @@ public interface AccessController<T> {
 
     /**
      * Verify if given {@link Operation} is permitted for provided entities.
-     * 
-     * @param entities
-     * @param operation
+     *
      * @throws InsufficientPermissionException
+     *             if operation is not permitted for given entities
      */
     void assertOperationAllowed(Operation operation, List<T> entities) throws InsufficientPermissionException;
 

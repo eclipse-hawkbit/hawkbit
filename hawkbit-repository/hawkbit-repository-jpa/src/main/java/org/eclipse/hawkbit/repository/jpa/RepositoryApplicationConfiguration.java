@@ -62,11 +62,8 @@ import org.eclipse.hawkbit.repository.event.ApplicationEventFilter;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManagerHolder;
 import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.DefaultAccessControllingConfiguration;
-import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.DistributionSetTypeAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.aspects.ExceptionMappingAspectHandler;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignScheduler;
@@ -494,13 +491,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit,
-            final DistributionSetAccessController distributionSetAccessController, final JpaProperties properties) {
+            final AfterTransactionCommitExecutor afterCommit, final AccessControlService accessControlService,
+            final JpaProperties properties) {
         return new JpaDistributionSetManagement(entityManager, distributionSetRepository, distributionSetTagManagement,
                 systemManagement, distributionSetTypeManagement, quotaManagement, distributionSetMetadataRepository,
                 targetFilterQueryRepository, actionRepository, eventPublisherHolder, tenantAware,
                 virtualPropertyReplacer, softwareModuleRepository, distributionSetTagRepository, afterCommit,
-                distributionSetAccessController, properties.getDatabase());
+                accessControlService, properties.getDatabase());
 
     }
 
@@ -516,11 +513,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final QuotaManagement quotaManagement,
-            final DistributionSetTypeAccessController distributionSetTypeAccessControlManager) {
+            final QuotaManagement quotaManagement, final AccessControlService accessControlService) {
         return new JpaDistributionSetTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
                 distributionSetRepository, targetTypeRepository, virtualPropertyReplacer, properties.getDatabase(),
-                quotaManagement, distributionSetTypeAccessControlManager);
+                quotaManagement, accessControlService);
     }
 
     /**
@@ -533,9 +529,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     TargetTypeManagement targetTypeManagement(final TargetTypeRepository targetTypeRepository,
             final TargetRepository targetRepository, final DistributionSetTypeRepository distributionSetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
-            final QuotaManagement quotaManagement, final TargetTypeAccessController targetTypeAccessControlManager) {
+            final QuotaManagement quotaManagement, final AccessControlService accessControlService) {
         return new JpaTargetTypeManagement(targetTypeRepository, targetRepository, distributionSetTypeRepository,
-                virtualPropertyReplacer, properties.getDatabase(), quotaManagement, targetTypeAccessControlManager);
+                virtualPropertyReplacer, properties.getDatabase(), quotaManagement, accessControlService);
     }
 
     /**
@@ -575,12 +571,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
             final JpaProperties properties, final DistributionSetManagement distributionSetManagement,
-            final TargetAccessController targetAccessControlManager,
-            final TargetTypeAccessController targetTypeAccessControlManager) {
+            final AccessControlService accessControlService) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
                 targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
-                properties.getDatabase(), targetAccessControlManager, targetTypeAccessControlManager);
+                properties.getDatabase(), accessControlService);
     }
 
     /**
@@ -611,10 +606,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final TargetAccessController targetAccessControlManager) {
+            final AccessControlService accessControlService) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, systemSecurityContext, tenantAware, targetAccessControlManager);
+                tenantConfigurationManagement, systemSecurityContext, tenantAware, accessControlService);
     }
 
     /**
@@ -685,8 +680,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     RolloutHandler rolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
-            final PlatformTransactionManager txManager) {
-        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager);
+            final PlatformTransactionManager txManager, final AccessControlService accessControlService) {
+        return new JpaRolloutHandler(tenantAware, rolloutManagement, rolloutExecutor, lockRegistry, txManager,
+                accessControlService);
     }
 
     @Bean
@@ -713,10 +709,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext) {
+            final SystemSecurityContext systemSecurityContext, final AccessControlService accessControlService) {
         return new JpaRolloutManagement(targetManagement, distributionSetManagement, eventPublisherHolder,
                 virtualPropertyReplacer, properties.getDatabase(), rolloutApprovalStrategy,
-                tenantConfigurationManagement, systemSecurityContext);
+                tenantConfigurationManagement, systemSecurityContext, accessControlService);
     }
 
     /**
@@ -765,12 +761,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
             final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
             final JpaProperties properties, final RepositoryProperties repositoryProperties,
-            final TargetAccessController targetAccessControlManager) {
+            final AccessControlService accessControlService) {
         return new JpaDeploymentManagement(entityManager, actionRepository, distributionSetManagement,
                 distributionSetRepository, targetRepository, actionStatusRepository, auditorProvider,
                 eventPublisherHolder, afterCommit, virtualPropertyReplacer, txManager, tenantConfigurationManagement,
                 quotaManagement, systemSecurityContext, tenantAware, properties.getDatabase(), repositoryProperties,
-                targetAccessControlManager);
+                accessControlService);
     }
 
     @Bean
@@ -861,9 +857,9 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     AutoAssignExecutor autoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
             final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
-            final TargetAccessController targetAccessControlManager) {
+            final AccessControlService accessControlService) {
         return new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware, targetAccessControlManager);
+                transactionManager, tenantAware, accessControlService);
     }
 
     /**

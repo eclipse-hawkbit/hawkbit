@@ -7,13 +7,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.acm;
+package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 
 /**
- * Defining an interface for the {@link AccessController <JpaDistributionSet>}
+ * Defining an interface for the {@link AccessController <JpaTarget>}
  */
-public interface DistributionSetAccessController extends AccessController<JpaDistributionSet> {
+public interface TargetAccessController extends AccessController<JpaTarget> {
 
 }

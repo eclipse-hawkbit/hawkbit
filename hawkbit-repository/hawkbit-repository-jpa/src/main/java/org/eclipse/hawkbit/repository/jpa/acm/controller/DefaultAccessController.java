@@ -7,7 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.acm;
+package org.eclipse.hawkbit.repository.jpa.acm.controller;
+
+import java.util.List;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -15,8 +17,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.springframework.data.jpa.domain.Specification;
-
-import java.util.List;
 
 /**
  * Default implementation of the {@link AccessController} permitting every kind
@@ -26,18 +26,6 @@ import java.util.List;
  *            the entity type to manage
  */
 public class DefaultAccessController<T> implements AccessController<T> {
-
-    @Override
-    public String getContext() {
-        // nothing to serialize
-        return null;
-    }
-
-    @Override
-    public void runInContext(String serializedContext, Runnable runnable) {
-        // serializedContext will not set
-        runnable.run();
-    }
 
     /**
      * The default specification without limitation.
