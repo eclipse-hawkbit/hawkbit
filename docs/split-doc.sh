@@ -20,7 +20,7 @@ jq '
     select(
       reduce .value[] as $item (
         false;
-        . or ($item.tags? | index("ddi-root-controller")) == null
+        . or ($item.tags? | index("DDI Root Controller")) == null
       )
     )
   )
@@ -32,7 +32,7 @@ jq '
     select(
       reduce .value[] as $item (
         false;
-        . or ($item.tags? | index("ddi-root-controller")) != null
+        . or ($item.tags? | index("DDI Root Controller")) != null
       )
     )
   )
