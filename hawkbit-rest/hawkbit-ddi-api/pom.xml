@@ -38,6 +38,22 @@
          <groupId>javax.validation</groupId>
          <artifactId>validation-api</artifactId>
       </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-rest-core</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+      <!-- Swagger Support -->
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-ui</artifactId>
+         <version>${springdoc-openapi.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>org.springdoc</groupId>
+         <artifactId>springdoc-openapi-security</artifactId>
+         <version>${springdoc-openapi.version}</version>
+      </dependency>
 
       <!-- TEST -->
       <dependency>
