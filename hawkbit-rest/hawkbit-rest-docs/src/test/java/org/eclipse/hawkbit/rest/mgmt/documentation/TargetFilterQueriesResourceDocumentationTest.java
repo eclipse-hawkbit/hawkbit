@@ -1,10 +1,11 @@
 /**
- * Copyright (c) 2018 Bosch Software Innovations GmbH and others.
+ * Copyright (c) 2018 Bosch Software Innovations GmbH and others
  *
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+ * This program and the accompanying materials are made
+ * available under the terms of the Eclipse Public License 2.0
+ * which is available at https://www.eclipse.org/legal/epl-2.0/
+ *
+ * SPDX-License-Identifier: EPL-2.0
  */
 package org.eclipse.hawkbit.rest.mgmt.documentation;
 
@@ -250,7 +251,8 @@ public class TargetFilterQueriesResourceDocumentationTest extends AbstractApiRes
                 fieldWithPath(arrayPrefix + "lastModifiedAt").description(ApiModelPropertiesGeneric.LAST_MODIFIED_AT),
                 fieldWithPath(arrayPrefix + "lastModifiedBy").description(ApiModelPropertiesGeneric.LAST_MODIFIED_BY),
                 fieldWithPath(arrayPrefix + "_links.self").ignored(), fieldWithPath(arrayPrefix + "_links.autoAssignDS")
-                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS));
+                        .description(MgmtApiModelProperties.TARGET_FILTER_QUERY_LINK_AUTO_ASSIGN_DS),
+                optionalRequestFieldWithPath(arrayPrefix + "_links.DS").ignored());
     }
 
     private String createTargetFilterQueryJson(final String name, final String query)
