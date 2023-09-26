@@ -65,8 +65,8 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String TENANT_PLACEHOLDER = "tenant";
     private static final String TENANT_ID_BASE10_PLACEHOLDER = "tenantId";
     private static final String TENANT_ID_BASE62_PLACEHOLDER = "tenantIdBase62";
-    private static final String SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER = "softwareModuleId";
-    private static final String SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER = "softwareModuleIdBase62";
+    private static final String SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER = "softwareModuleId";
+    private static final String SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER = "softwareModuleIdBase62";
 
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
 
@@ -144,9 +144,9 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
         replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER,
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER,
                 String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER,
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
         return replaceMap;
     }
