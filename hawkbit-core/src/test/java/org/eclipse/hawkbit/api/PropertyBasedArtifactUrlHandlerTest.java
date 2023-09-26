@@ -62,7 +62,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
     @BeforeEach
     public void setup() {
         properties = new ArtifactUrlHandlerProperties();
-        urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties);
+        urlHandlerUnderTest = new PropertyBasedArtifactUrlHandler(properties, "");
 
     }
 
@@ -88,7 +88,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Arrays.asList(ApiType.DMF));
+        proto.setSupports(List.of(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fw/{tenant}/{controllerId}/sha1/{artifactSHA1}");
         properties.getProtocols().put(TEST_PROTO, proto);
 
@@ -109,7 +109,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Arrays.asList(ApiType.DMF));
+        proto.setSupports(List.of(ApiType.DMF));
         proto.setRef("{protocol}://{ip}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
         properties.getProtocols().put("ftp", proto);
 
@@ -132,7 +132,7 @@ public class PropertyBasedArtifactUrlHandlerTest {
         proto.setPort(5683);
         proto.setProtocol(TEST_PROTO);
         proto.setRel(TEST_REL);
-        proto.setSupports(Arrays.asList(ApiType.DDI));
+        proto.setSupports(List.of(ApiType.DDI));
         proto.setRef("{protocol}://{hostnameRequest}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
         properties.getProtocols().put("ftp", proto);
 

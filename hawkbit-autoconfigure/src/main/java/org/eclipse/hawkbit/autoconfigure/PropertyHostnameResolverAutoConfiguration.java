@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.api.PropertyBasedArtifactUrlHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -58,8 +59,9 @@ public class PropertyHostnameResolverAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean(ArtifactUrlHandler.class)
     PropertyBasedArtifactUrlHandler propertyBasedArtifactUrlHandler(
-            final ArtifactUrlHandlerProperties urlHandlerProperties) {
-        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
+            final ArtifactUrlHandlerProperties urlHandlerProperties,
+            @Value("${server.servlet.context-path:}") final String contextPath) {
+        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, contextPath);
     }
 
 }

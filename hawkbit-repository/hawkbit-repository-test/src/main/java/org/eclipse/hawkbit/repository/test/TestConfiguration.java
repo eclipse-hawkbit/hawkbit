@@ -118,7 +118,7 @@ public class TestConfiguration implements AsyncConfigurer {
     @Bean
     PropertyBasedArtifactUrlHandler testPropertyBasedArtifactUrlHandler(
             final ArtifactUrlHandlerProperties urlHandlerProperties) {
-        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties);
+        return new PropertyBasedArtifactUrlHandler(urlHandlerProperties, "");
     }
 
     @Bean
