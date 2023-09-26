@@ -23,10 +23,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnProperty(
-    value="hawkbit.server.swagger.enabled",
-    havingValue = "true",
-    matchIfMissing = true)
 public class OpenApiConfiguration {
 
   private static final String DESCRIPTION = """
@@ -42,8 +38,8 @@ public class OpenApiConfiguration {
     final String apiTitle = "hawkBit Management REST API";
 
     final String basiAuthSecSchemeName = "basicAuth";
-    final String oauth2SecSchemeName = "OAuth2";
-    final String bearerAuthenticationSchemeName = "Bearer Authentication";
+    final String oauth2SecSchemeName = "OAuth2"; // remove
+    final String bearerAuthenticationSchemeName = "Bearer Authentication"; // check for ddi
 
     return new OpenAPI()
         .addSecurityItem(new SecurityRequirement().addList(basiAuthSecSchemeName))
@@ -80,6 +76,10 @@ public class OpenApiConfiguration {
   }
 
   @Bean
+  @ConditionalOnProperty(
+      value="hawkbit.server.swagger.mgmt.api.group.enabled",
+      havingValue = "true",
+      matchIfMissing = true)
   public GroupedOpenApi mgmtApi() {
     return GroupedOpenApi.builder()
         .group("Management API")
@@ -88,6 +88,10 @@ public class OpenApiConfiguration {
   }
 
   @Bean
+  @ConditionalOnProperty(
+      value="hawkbit.server.swagger.ddi.api.group.enabled",
+      havingValue = "true",
+      matchIfMissing = true)
   public GroupedOpenApi ddiApi() {
     return GroupedOpenApi.builder()
         .group("Direct Device Integration API")
