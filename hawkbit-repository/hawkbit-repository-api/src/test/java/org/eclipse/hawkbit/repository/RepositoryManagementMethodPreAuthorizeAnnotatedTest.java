@@ -41,7 +41,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
     }
 
     @Test
-    @Description("Verfies that repository methods are @PreAuthorize annotated")
+    @Description("Verifies that repository methods are @PreAuthorize annotated")
     public void repositoryManagementMethodsArePreAuthorizedAnnotated()
             throws ClassNotFoundException, URISyntaxException, IOException {
         final List<Class<?>> findInterfacesInPackage = findInterfacesInPackage(getClass().getPackage(),
