@@ -52,7 +52,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
             assertDeclaredMethodsContainsPreAuthorizeAnnotations(interfaceToCheck);
         }
 
-        // all exclusion should be used, otherwise the method exlusion should be
+        // all exclusion should be used, otherwise the method exclusion should be
         // cleaned up again
         assertThat(METHOD_SECURITY_EXCLUSION).isEmpty();
     }
