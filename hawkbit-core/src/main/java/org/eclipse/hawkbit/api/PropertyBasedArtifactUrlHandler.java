@@ -65,7 +65,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER = "softwareModuleId";
     private static final String SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER = "softwareModuleIdBase62";
 
-    final static String DEFAULT_URL_PROTOCOL_REF = "{" + PROTOCOL_PLACEHOLDER + "}://{" + HOSTNAME_PLACEHOLDER + "}:{" + PORT_PLACEHOLDER + "}{" + CONTEXT_PATH + "}/{" + TENANT_PLACEHOLDER + "}/controller/v1/{" + CONTROLLER_ID_PLACEHOLDER + "}/softwaremodules/{" + SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER + "}/artifacts/{" + ARTIFACT_FILENAME_PLACEHOLDER + "}";
+    final static String DEFAULT_URL_PROTOCOL_REF = "{" + PROTOCOL_PLACEHOLDER + "}://{" + HOSTNAME_PLACEHOLDER + "}:{" + PORT_PLACEHOLDER + "}{" + CONTEXT_PATH + "}/{" + TENANT_PLACEHOLDER + "}/controller/v1/{" + CONTROLLER_ID_PLACEHOLDER + "}/softwaremodules/{" + SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER + "}/artifacts/{" + ARTIFACT_FILENAME_PLACEHOLDER + "}";
 
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
     private final String contextPath;
