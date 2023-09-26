@@ -18,8 +18,15 @@ import io.swagger.v3.oas.models.security.Scopes;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springdoc.core.GroupedOpenApi;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
+@ConditionalOnProperty(
+    value="hawkbit.server.swagger.enabled",
+    havingValue = "true",
+    matchIfMissing = true)
 public class OpenApiConfiguration {
 
   private static final String DESCRIPTION = """
