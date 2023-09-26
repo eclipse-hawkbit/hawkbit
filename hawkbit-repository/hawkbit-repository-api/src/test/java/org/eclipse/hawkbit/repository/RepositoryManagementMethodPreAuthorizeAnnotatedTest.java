@@ -49,7 +49,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
         assertThat(findInterfacesInPackage).isNotEmpty();
         for (final Class<?> interfaceToCheck : findInterfacesInPackage) {
-            assertDeclaredMethodsContainsPreAuthorizeAnnotaions(interfaceToCheck);
+            assertDeclaredMethodsContainsPreAuthorizeAnnotations(interfaceToCheck);
         }
 
         // all exclusion should be used, otherwise the method exlusion should be
@@ -66,7 +66,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
      * @param clazz
      *            the class to retrieve the public declared methods
      */
-    private static void assertDeclaredMethodsContainsPreAuthorizeAnnotaions(final Class<?> clazz) {
+    private static void assertDeclaredMethodsContainsPreAuthorizeAnnotations(final Class<?> clazz) {
         final Method[] declaredMethods = clazz.getDeclaredMethods();
         for (final Method method : declaredMethods) {
             final boolean methodExcluded = METHOD_SECURITY_EXCLUSION.contains(method);
