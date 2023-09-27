@@ -16,8 +16,6 @@ services:
   # ---------------------
   rabbitmq:
     image: "rabbitmq:3-management"
-    environment:
-      RABBITMQ_DEFAULT_VHOST: "/"
     restart: always
     ports:
       - "15672:15672"
