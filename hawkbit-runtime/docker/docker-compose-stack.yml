@@ -41,8 +41,6 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    environment:
-      RABBITMQ_DEFAULT_VHOST: "/"
 
   # ---------------------
   # hawkBit service
