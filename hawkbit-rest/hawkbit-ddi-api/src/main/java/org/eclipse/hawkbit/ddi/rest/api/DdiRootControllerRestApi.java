@@ -126,6 +126,17 @@ public interface DdiRootControllerRestApi {
      *         {@link HttpStatus#OK} or in case of partial download
      *         {@link HttpStatus#PARTIAL_CONTENT}.
      */
+    @Operation(summary = "Artifact download", description = "Handles GET DdiArtifact download request. This could be full or partial (as specified by RFC7233 (Range Requests)) download request.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target or Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
             + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}")
     ResponseEntity<InputStream> downloadArtifact(@PathVariable("tenant") final String tenant,
@@ -148,6 +159,17 @@ public interface DdiRootControllerRestApi {
      * @return {@link ResponseEntity} with status {@link HttpStatus#OK} if
      *         successful
      */
+    @Operation(summary = "MD5 checksum download", description = "Handles GET {@link DdiArtifact} MD5 checksum file download request.")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target or Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
     @GetMapping(value = DdiRestConstants.BASE_V1_REQUEST_MAPPING
             + "/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{fileName}"
             + DdiRestConstants.ARTIFACT_MD5_DWNL_SUFFIX, produces = MediaType.TEXT_PLAIN_VALUE)
