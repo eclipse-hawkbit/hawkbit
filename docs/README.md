@@ -4,7 +4,7 @@ theme. Compiling the documentation is not included within the regular Maven buil
 
 ## Prerequisites
 1. **Install Hugo**: see [installing Hugo](https://gohugo.io/getting-started/installing/) documentation on how to install Hugo.
-2. **INSTALL JQ**: see [installing jq](https://jqlang.github.io/jq/download/) documentation on how to install jq.
+2. **Install JQ**: see [installing jq](https://jqlang.github.io/jq/download/) documentation on how to install jq.
 3. **Install NODE.js and npm** see [installing Node.js and npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) documentation on how to install Node.js and npm
 4. **Install Redocly CLI** see [installing Redocly CLI](https://redocly.com/docs/cli/installation/) documentation on how to install Redocly CLI
 5. **Install hawkBit**: run `mvn install` in the parent directory to generate the latest REST docs for hawkBit.

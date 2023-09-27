@@ -1,0 +1,12 @@
+# rest api doc
+content/rest-api/*.json
+content/rest-api/*.html
+# npm leftover
+node_modules
+package.json
+package-lock.json
+# themse
+themes
+# hugo
+public
+.hugo_build.lock

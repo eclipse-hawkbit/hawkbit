@@ -62,8 +62,4 @@ maven.properties
 *.tmp
 
 # Documentation
-docs/themes/**
-docs/public/**
-docs/content/rest-api/*.html
-docs/.hugo_build.lock
 .gitmodules
