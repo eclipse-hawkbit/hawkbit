@@ -1,10 +1,10 @@
---- 
+---
 title: Management API
 parent: API
 weight: 81
 ---
 
-The Management API is a RESTful API that enables to perform Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software). 
+The Management API is a RESTful API that enables to perform Create/Read/Update/Delete operations for provisioning targets (i.e. devices) and repository content (i.e. software).
 <!--more-->
 
 Based on the Management API you can manage and monitor software update operations via HTTP/HTTPS. The _Management API_ supports JSON payload with hypermedia as well as filtering, sorting and paging. Furthermore the Management API provides permission based access control and standard roles as well as custom role creation.  
@@ -25,22 +25,6 @@ Supported HTTP-methods are:
 - POST
 - PUT
 - DELETE
-
-Available Management APIs resources are:
-
-- [Targets](/hawkbit/apis/mgmt/targets/)
-- [Target types](/hawkbit/apis/mgmt/targettypes/)
-- [Distribution sets](/hawkbit/apis/mgmt/distributionsets/)
-- [Distribution set types](/hawkbit/apis/mgmt/distributionsettypes/)
-- [Software modules](/hawkbit/apis/mgmt/softwaremodules/)
-- [Software module types](/hawkbit/apis/mgmt/softwaremoduletypes/)
-- [Target tag](/hawkbit/apis/mgmt/targettag/)
-- [Distribution set tag](/hawkbit/apis/mgmt/distributionsettag/)
-- [Rollouts](/hawkbit/apis/mgmt/rollouts/)
-- [Actions](/hawkbit/apis/mgmt/actions/)
-- [Target filters](/hawkbit/apis/mgmt/targetfilters/)
-- [System configuration](/hawkbit/apis/mgmt/tenant/)
-
 
 ## Headers
 
@@ -77,4 +61,9 @@ A _Distribution Set_ entity may have for example URIs to artifacts, _Software Mo
     "metadata": {
         "href": "http://localhost:8080/rest/v1/softwaremodules/83/metadata?offset=0&limit=50"
     }
-``` 
+```
+
+## Management APIs
+
+
+<iframe style="padding-top: 20px;" width="100%" height="900px" frameborder="0" src="../../rest-api/mgmt.html"></iframe>

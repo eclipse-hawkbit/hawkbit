@@ -61,21 +61,22 @@
             <artifactId>maven-dependency-plugin</artifactId>
             <executions>
                <execution>
-                  <id>unpack-api-docs</id>
+                  <id>copy-openapi</id>
                   <phase>prepare-package</phase>
                   <goals>
-                     <goal>unpack</goal>
+                     <goal>copy</goal>
                   </goals>
                   <configuration>
                      <artifactItems>
                         <artifactItem>
                            <groupId>org.eclipse.hawkbit</groupId>
-                           <artifactId>hawkbit-rest-docs</artifactId>
+                           <artifactId>hawkbit-update-server</artifactId>
                            <version>${project.version}</version>
-                           <type>jar</type>
+                           <classifier>openapi</classifier>
+                           <type>json</type>
                            <overWrite>true</overWrite>
-                           <outputDirectory>${basedir}/content/</outputDirectory>
-                           <includes>**/*.html</includes>
+                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
+                           <destFileName>openapi.json</destFileName>
                         </artifactItem>
                      </artifactItems>
                   </configuration>
@@ -87,6 +88,36 @@
             <artifactId>exec-maven-plugin</artifactId>
             <version>${exec-maven-plugin.version}</version>
             <executions>
+               <execution>
+                  <id>split-docs</id>
+                  <goals>
+                     <goal>exec</goal>
+                  </goals>
+                  <phase>install</phase>
+                  <configuration>
+                     <executable>${shell}</executable>
+                     <workingDirectory>${project.basedir}</workingDirectory>
+                     <arguments>
+                        <argument>${shell.option}</argument>
+                        <argument>split-doc.${batch.ext}</argument>
+                     </arguments>
+                  </configuration>
+               </execution>
+               <execution>
+                  <id>build-htmls</id>
+                  <goals>
+                     <goal>exec</goal>
+                  </goals>
+                  <phase>install</phase>
+                  <configuration>
+                     <executable>${shell}</executable>
+                     <workingDirectory>${project.basedir}</workingDirectory>
+                     <arguments>
+                        <argument>${shell.option}</argument>
+                        <argument>build-htmls.${batch.ext}</argument>
+                     </arguments>
+                  </configuration>
+               </execution>
                <execution>
                   <id>install-hugo-theme</id>
                   <goals>
