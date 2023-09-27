@@ -31,7 +31,7 @@ public class OpenApiConfiguration {
     final String apiTitle = "hawkBit REST APIs";
 
     final String basiAuthSecSchemeName = "basicAuth";
-    final String bearerAuthenticationSchemeName = "Bearer Authentication"; // check for ddi
+    final String bearerAuthenticationSchemeName = "Bearer Authentication";
 
     return new OpenAPI()
         .addSecurityItem(new SecurityRequirement().addList(basiAuthSecSchemeName))
