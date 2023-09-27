@@ -25,6 +25,7 @@ jq '
     )
   )
   | .tags |= map(select(.name | contains("DDI") | not))
+  | .components.schemas = (.components.schemas | with_entries(select(.key | startswith("Ddi") | not)))
 ' "$input_file" > "$mgmt_file"
 
 jq '
@@ -37,5 +38,15 @@ jq '
     )
   )
   | .tags |= map(select(.name | contains("DDI")))
+  | .components.schemas = (
+        .components.schemas
+        | with_entries(
+            select(
+                (.key | startswith("Ddi"))
+                or (.key | . == "Link")
+                or (.key | . == "ExceptionInfo")
+            )
+        )
+    )
 ' "$input_file" > "$ddi_file"
 
