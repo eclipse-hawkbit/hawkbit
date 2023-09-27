@@ -14,7 +14,7 @@
 CURRENT_DIR=$(pwd)
 
 # Checking for Redoc CLI and npm
-redoc-cli --version > /dev/null 2>&1
+npx @redocly/cli --version > /dev/null 2>&1
 
 if [ $? != 0 ]; then
     echo "[ERROR] Redoc CLI is not installed! Please make suer to install it before trying again."
