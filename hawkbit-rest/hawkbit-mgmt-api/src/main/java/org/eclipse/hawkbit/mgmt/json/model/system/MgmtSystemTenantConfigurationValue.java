@@ -10,6 +10,7 @@
 
 package org.eclipse.hawkbit.mgmt.json.model.system;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,14 +27,22 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class MgmtSystemTenantConfigurationValue extends RepresentationModel<MgmtSystemTenantConfigurationValue> {
 
     @JsonInclude(Include.ALWAYS)
+    @Schema(example = "true")
     private Object value;
 
     @JsonInclude(Include.ALWAYS)
+    @Schema(example = "true")
     private boolean isGlobal = true;
 
+    @Schema(example = "1623085150")
     private Long lastModifiedAt;
+
+    @Schema(example = "example user")
     private String lastModifiedBy;
+
+    @Schema(example = "1523085150")
     private Long createdAt;
+    @Schema(example = "example user")
     private String createdBy;
 
     public Object getValue() {

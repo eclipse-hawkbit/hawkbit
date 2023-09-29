@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for SoftwareModule PUT.
@@ -18,9 +19,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSoftwareModuleRequestBodyPut {
 
     @JsonProperty
+    @Schema(example = "SM Description")
     private String description;
 
     @JsonProperty
+    @Schema(example = "SM Vendor Name")
     private String vendor;
 
     /**

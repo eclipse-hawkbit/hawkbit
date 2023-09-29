@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Additional metadata to be provided for the target/device.
@@ -23,10 +24,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DdiMetadata {
     @JsonProperty
     @NotNull
+    @Schema(example = "aMetadataKey")
     private final String key;
 
     @JsonProperty
     @NotNull
+    @Schema(example = "Metadata value as defined in software module")
     private final String value;
 
     @JsonCreator

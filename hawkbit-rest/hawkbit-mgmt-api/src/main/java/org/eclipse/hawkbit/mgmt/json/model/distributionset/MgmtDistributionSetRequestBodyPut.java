@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A json annotated rest model for DistributionSet for PUT/POST.
@@ -23,15 +24,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetRequestBodyPut {
 
     @JsonProperty
+    @Schema(example = "dsOne")
     private String name;
 
     @JsonProperty
+    @Schema(example = "Description of the distribution set.")
     private String description;
 
     @JsonProperty
+    @Schema(example = "1.0.0")
     private String version;
 
     @JsonProperty
+    @Schema(example = "false")
     private Boolean requiredMigrationStep;
 
     /**

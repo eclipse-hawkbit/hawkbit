@@ -12,14 +12,17 @@ package org.eclipse.hawkbit.ddi.json.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActivateAutoConfirmation {
 
     @JsonProperty(required = false)
+    @Schema(example = "exampleUser")
     private final String initiator;
 
     @JsonProperty(required = false)
+    @Schema(example = "exampleRemark")
     private final String remark;
 
     /**

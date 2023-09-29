@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * The representation of an meta data in the REST API for POST/Create.
@@ -23,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtMetadata {
 
     @JsonProperty(required = true)
+    @Schema(example = "someKnownKey")
     private String key;
     @JsonProperty
+    @Schema(example = "someKnownKeyValue")
     private String value;
 
     public String getKey() {

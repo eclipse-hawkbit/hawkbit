@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Details status information concerning the action processing.
@@ -34,6 +35,7 @@ public class DdiStatus {
     @Valid
     private final DdiResult result;
 
+    @Schema(example = "200")
     private final Integer code;
 
     private final List<String> details;

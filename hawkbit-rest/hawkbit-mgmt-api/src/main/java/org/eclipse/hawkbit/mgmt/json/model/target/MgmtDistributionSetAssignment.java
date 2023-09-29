@@ -3,6 +3,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -16,10 +17,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MgmtDistributionSetAssignment extends MgmtId {
 
+    @Schema(example = "1691065930359")
     private long forcetime;
     @JsonProperty(required = false)
+    @Schema(example = "23")
     private Integer weight;
     @JsonProperty(required = false)
+    @Schema(example = "false")
     private Boolean confirmationRequired;
     private MgmtActionType type;
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;

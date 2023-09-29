@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class DdiConfirmationBaseAction extends RepresentationModel<DdiConfirmati
 
     @JsonProperty("id")
     @NotNull
+    @Schema(example = "6")
     private String id;
 
     @JsonProperty("confirmation")

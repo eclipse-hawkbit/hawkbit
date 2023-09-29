@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.tag;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -26,9 +27,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtTag extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "2")
     private Long tagId;
 
     @JsonProperty
+    @Schema(example = "rgb(255,0,0)")
     private String colour;
 
     @JsonIgnore

@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A json annotated rest model for ActionStatus to RESTful API representation.
@@ -25,18 +26,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtActionStatus {
 
     @JsonProperty("id")
+    @Schema(example = "21")
     private Long statusId;
 
     @JsonProperty
+    @Schema(example = "running")
     private String type;
 
     @JsonProperty
     private List<String> messages;
 
     @JsonProperty
+    @Schema(example = "1691065929524")
     private Long reportedAt;    
     
     @JsonProperty
+    @Schema(example = "200")
     private Integer code;
 
     /**

@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * The action that has to be stopped by the target.
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DdiCancelActionToStop {
 
     @NotNull
+    @Schema(example = "11")
     private final String stopId;
 
     /**

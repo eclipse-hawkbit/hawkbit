@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for SoftwareModuleType POST.
@@ -18,12 +19,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSoftwareModuleTypeRequestBodyPost extends MgmtSoftwareModuleTypeRequestBodyPut {
 
     @JsonProperty(required = true)
+    @Schema(example = "Example name")
     private String name;
 
     @JsonProperty(required = true)
+    @Schema(example = "Example key")
     private String key;
 
     @JsonProperty
+    @Schema(example = "1")
     private int maxAssignments;
 
     @Override

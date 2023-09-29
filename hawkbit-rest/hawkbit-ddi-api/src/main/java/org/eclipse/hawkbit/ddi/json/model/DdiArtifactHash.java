@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Hashes for given Artifact.
@@ -21,13 +22,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DdiArtifactHash {
 
     @JsonProperty
+    @Schema(example = "2d86c2a659e364e9abba49ea6ffcd53dd5559f05")
     private String sha1;
 
     @JsonProperty
+    @Schema(example = "0d1b08c34858921bc7c662b228acb7ba")
     private String md5;
 
     @JsonProperty
     @JsonInclude(Include.NON_NULL)
+    @Schema(example = "a03b221c6c6eae7122ca51695d456d5222e524889136394944b2f9763b483615")
     private String sha256;
 
     /**

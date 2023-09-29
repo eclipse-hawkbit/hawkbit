@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A json annotated rest model for invalidate DistributionSet requests.
@@ -23,6 +24,7 @@ public class MgmtInvalidateDistributionSetRequestBody {
     @JsonProperty
     private MgmtCancelationType actionCancelationType;
     @JsonProperty
+    @Schema(example = "true")
     private boolean cancelRollouts;
 
     public MgmtCancelationType getActionCancelationType() {

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -32,6 +33,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class DdiActionHistory {
 
     @JsonProperty("status")
+    @Schema(example = "RUNNING")
     private final String actionStatus;
 
     @JsonProperty("messages")

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
@@ -27,24 +28,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "2")
     private Long filterId;
 
     @JsonProperty
+    @Schema(example = "filterName")
     private String name;
 
     @JsonProperty
+    @Schema(example = "name==*")
     private String query;
 
     @JsonProperty
+    @Schema(example = "15")
     private Long autoAssignDistributionSet;
 
     @JsonProperty
     private MgmtActionType autoAssignActionType;
 
     @JsonProperty
+    @Schema(example = "")
     private Integer autoAssignWeight;
 
     @JsonProperty
+    @Schema(example = "false")
     private Boolean confirmationRequired;
 
     public Long getFilterId() {

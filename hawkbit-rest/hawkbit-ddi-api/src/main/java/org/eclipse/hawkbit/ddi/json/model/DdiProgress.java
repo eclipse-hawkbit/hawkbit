@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Action fulfillment progress by means of gives the achieved amount of maximal
@@ -23,8 +24,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DdiProgress {
 
     @NotNull
+    @Schema(example = "2")
     private final Integer cnt;
 
+    @Schema(example = "5")
     private final Integer of;
 
     /**

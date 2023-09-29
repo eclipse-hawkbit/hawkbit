@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -21,8 +22,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
 
+    @Schema(example = "controllerId==exampleTarget*")
     private String targetFilterQuery;
+    @Schema(example = "20.0")
     private Float targetPercentage;
+    @Schema(example = "false")
     private Boolean confirmationRequired;
 
     public String getTargetFilterQuery() {

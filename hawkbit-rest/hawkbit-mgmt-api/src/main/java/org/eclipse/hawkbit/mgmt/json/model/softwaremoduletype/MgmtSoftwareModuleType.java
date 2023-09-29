@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -26,18 +27,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSoftwareModuleType extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "83")
     private Long moduleId;
 
     @JsonProperty(required = true)
+    @Schema(example = "OS")
     private String key;
 
     @JsonProperty
+    @Schema(example = "1")
     private int maxAssignments;
 
     @JsonProperty
+    @Schema(example = "false")
     private boolean deleted;
 
     @JsonProperty
+    @Schema(example = "brown")
     private String colour;
 
     public boolean isDeleted() {

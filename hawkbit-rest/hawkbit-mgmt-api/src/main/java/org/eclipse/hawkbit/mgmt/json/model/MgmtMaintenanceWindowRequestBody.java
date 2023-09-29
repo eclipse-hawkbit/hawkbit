@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request body for maintenance window PUT/POST commands, based on a schedule
@@ -24,12 +25,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMaintenanceWindowRequestBody {
     @JsonProperty
+    @Schema(example = "10 12 14 3 8 ? 2023")
     private String schedule;
 
     @JsonProperty
+    @Schema(example = "00:10:00")
     private String duration;
 
     @JsonProperty
+    @Schema(example = "+00:00")
     private String timezone;
 
     public String getSchedule() {

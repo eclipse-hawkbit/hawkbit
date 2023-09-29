@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.targettype;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 /**
@@ -24,9 +25,11 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 public class MgmtTargetType extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "26")
     private Long typeId;
 
     @JsonProperty
+    @Schema(example = "rgb(255,255,255")
     private String colour;
 
     /**
