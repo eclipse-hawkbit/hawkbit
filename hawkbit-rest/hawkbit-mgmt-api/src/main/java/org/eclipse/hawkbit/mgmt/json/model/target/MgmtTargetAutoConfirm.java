@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 import javax.validation.constraints.NotNull;
@@ -24,9 +25,13 @@ import javax.validation.constraints.NotNull;
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
 public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoConfirm> {
     @NotNull
+    @Schema(example = "true")
     private boolean active;
+    @Schema(example = "custom_initiator_value")
     private String initiator;
+    @Schema(example = "custom_remark")
     private String remark;
+    @Schema(example = "1691065938576")
     private Long activatedAt;
 
     /**

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.softwaremodule;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,23 +26,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModule extends MgmtNamedEntity {
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "6")
     private Long moduleId;
 
     @JsonProperty(required = true)
+    @Schema(example = "1.0.0")
     private String version;
 
     @JsonProperty(required = true)
+    @Schema(example = "os")
     private String type;
 
+    @Schema(example = "OS")
     private String typeName;
 
     @JsonProperty
+    @Schema(example = "Vendor Limited, California")
     private String vendor;
 
     @JsonProperty
+    @Schema(example = "false")
     private boolean deleted;
 
     @JsonProperty
+    @Schema(example = "false")
     private boolean encrypted;
 
     public void setDeleted(final boolean deleted) {

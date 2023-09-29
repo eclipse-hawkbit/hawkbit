@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A json annotated rest model for NamedEntity to RESTful API representation.
@@ -18,9 +19,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class MgmtNamedEntity extends MgmtBaseEntity {
 
     @JsonProperty(required = true)
+    @Schema(example = "Name of entity")
     private String name;
 
     @JsonProperty
+    @Schema(example = "Description of entity")
     private String description;
 
     /**

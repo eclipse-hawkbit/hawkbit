@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import java.util.List;
 import java.util.Optional;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.rolloutgroup.MgmtRolloutGroup;
 
@@ -28,19 +29,26 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEntity {
 
+    @Schema(example = "id==targets-*")
     private String targetFilterQuery;
+    @Schema(example = "6")
     private long distributionSetId;
 
+    @Schema(example = "5")
     private Integer amountGroups;
 
+    @Schema(example = "1691065781929")
     private Long forcetime;
 
+    @Schema(example = "1691065780929")
     private Long startAt;
 
     @JsonProperty(required = false)
+    @Schema(example = "400")
     private Integer weight;
 
     @JsonProperty(required = false)
+    @Schema(example = "false")
     private Boolean confirmationRequired;
 
     private MgmtActionType type;

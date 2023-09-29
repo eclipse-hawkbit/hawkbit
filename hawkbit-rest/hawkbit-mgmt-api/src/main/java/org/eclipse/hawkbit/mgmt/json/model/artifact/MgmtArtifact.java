@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.artifact;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,15 +26,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtArtifact extends MgmtBaseEntity {
 
     @JsonProperty("id")
+    @Schema(example = "3")
     private Long artifactId;
 
     @JsonProperty
     private MgmtArtifactHash hashes;
 
     @JsonProperty
+    @Schema(example = "file1")
     private String providedFilename;
 
     @JsonProperty
+    @Schema(example = "3")
     private Long size;
 
     public MgmtArtifact() {

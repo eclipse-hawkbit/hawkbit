@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -22,9 +23,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
+    @Schema(example = "Example type name")
     private String name;
 
     @JsonProperty(required = true)
+    @Schema(example = "Example key")
     private String key;
 
     @JsonProperty

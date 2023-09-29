@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -27,6 +28,7 @@ public class DdiDeploymentBase extends RepresentationModel<DdiDeploymentBase> {
 
     @JsonProperty("id")
     @NotNull
+    @Schema(example = "8")
     private String id;
 
     @JsonProperty("deployment")

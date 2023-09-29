@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 
@@ -27,43 +28,55 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
+    @Schema(example = "controllerId==exampleTarget*")
     private String targetFilterQuery;
+    @Schema(example = "2")
     private Long distributionSetId;
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "2")
     private Long rolloutId;
 
     @JsonProperty(required = true)
+    @Schema(example = "ready")
     private String status;
 
     @JsonProperty(required = true)
+    @Schema(example = "20")
     private Long totalTargets;
 
     @JsonProperty
     private Map<String, Long> totalTargetsPerStatus;
 
     @JsonProperty
+    @Schema(example = "5")
     private Integer totalGroups;
 
     @JsonProperty
+    @Schema(example = "1691065753136")
     private Long startAt;
 
     @JsonProperty
+    @Schema(example = "1691065762496")
     private Long forcetime;
 
     @JsonProperty
+    @Schema(example = "false")
     private boolean deleted;
 
     @JsonProperty
     private MgmtActionType type;
 
     @JsonProperty
+    @Schema(example = "400")
     private Integer weight;
 
     @JsonProperty
+    @Schema(example = "Approved remark.")
     private String approvalRemark;
 
     @JsonProperty
+    @Schema(example = "exampleUsername")
     private String approveDecidedBy;
 
     public boolean isDeleted() {

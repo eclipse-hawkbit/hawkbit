@@ -14,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,10 +23,14 @@ import org.springframework.hateoas.RepresentationModel;
 public class DdiAutoConfirmationState extends RepresentationModel<DdiAutoConfirmationState> {
 
     @NotNull
+    @Schema(example = "true")
     private boolean active;
+    @Schema(example = "exampleUserId")
     private String initiator;
+    @Schema(example = "exampleRemark")
     private String remark;
 
+    @Schema(example = "1691065895439")
     private Long activatedAt;
 
     /**

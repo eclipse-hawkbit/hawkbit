@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Model for the rollout group annotated with json-annotations for easier
@@ -26,11 +27,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "63")
     private Long rolloutGroupId;
 
     @JsonProperty(required = true)
+    @Schema(example = "ready")
     private String status;
 
+    @Schema(example = "4")
     private int totalTargets;
 
     private Map<String, Long> totalTargetsPerStatus;

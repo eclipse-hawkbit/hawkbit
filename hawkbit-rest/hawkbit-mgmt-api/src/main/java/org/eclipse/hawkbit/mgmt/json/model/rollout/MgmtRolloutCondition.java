@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  *
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class MgmtRolloutCondition {
 
     private Condition condition = Condition.THRESHOLD;
+    @Schema(example = "50")
     private String expression = "100";
 
     /**

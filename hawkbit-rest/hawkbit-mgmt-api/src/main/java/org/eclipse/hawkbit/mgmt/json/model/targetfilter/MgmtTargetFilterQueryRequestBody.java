@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.targetfilter;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request body for target PUT/POST commands.
@@ -17,9 +18,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class MgmtTargetFilterQueryRequestBody {
     @JsonProperty(required = true)
+    @Schema(example = "filterName")
     private String name;
 
     @JsonProperty(required = true)
+    @Schema(example = "controllerId==example-target-*")
     private String query;
 
     public String getName() {

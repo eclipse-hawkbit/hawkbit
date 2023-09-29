@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A generic abstract rest model which contains only a ID for use-case e.g.
@@ -20,6 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtId {
+    @Schema(example = "108")
     private Long id;
     
     /**

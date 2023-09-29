@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.ddi.json.model;
 
 import javax.validation.constraints.NotNull;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,12 +26,14 @@ public class DdiArtifact extends RepresentationModel<DdiArtifact> {
 
     @NotNull
     @JsonProperty
+    @Schema(example = "binary.tgz")
     private String filename;
 
     @JsonProperty
     private DdiArtifactHash hashes;
 
     @JsonProperty
+    @Schema(example = "3")
     private Long size;
 
     public DdiArtifactHash getHashes() {

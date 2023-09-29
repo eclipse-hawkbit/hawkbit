@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.action;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindow;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
@@ -47,36 +48,46 @@ public class MgmtAction extends MgmtBaseEntity {
     public static final String ACTION_PENDING = "pending";
 
     @JsonProperty("id")
+    @Schema(example = "7")
     private Long actionId;
 
     @JsonProperty
+    @Schema(example = "update")
     private String type;
 
     @JsonProperty
+    @Schema(example = "finished")
     private String status;
 
     @JsonProperty
+    @Schema(example = "finished")
     private String detailStatus;
 
     @JsonProperty
+    @Schema(example = "1691065903238")
     private Long forceTime;
 
     @JsonProperty(value = "forceType")
     private MgmtActionType actionType;
 
     @JsonProperty
+    @Schema(example = "600")
     private Integer weight;
 
     @JsonProperty
+    @Schema(hidden = true)
     private MgmtMaintenanceWindow maintenanceWindow;
 
     @JsonProperty
+    @Schema(example = "1")
     private Long rollout;
 
     @JsonProperty
+    @Schema(example = "rollout")
     private String rolloutName;
 
     @JsonProperty
+    @Schema(example = "200")
     private Integer lastStatusCode;
 
     public MgmtMaintenanceWindow getMaintenanceWindow() {

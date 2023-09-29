@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for DistributionSetType PUT, i.e. update.
@@ -18,9 +19,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty
+    @Schema(example = "Example description")
     private String description;
 
     @JsonProperty
+    @Schema(example = "rgb(86,37,99)")
     private String colour;
 
     public String getDescription() {

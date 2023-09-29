@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for PUT/POST.
@@ -23,12 +24,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtTagRequestBodyPut {
 
     @JsonProperty
+    @Schema(example = "rgb(0,255,0)")
     private String colour;
 
     @JsonProperty
+    @Schema(example = "Example name")
     private String name;
 
     @JsonProperty
+    @Schema(example = "Example description")
     private String description;
 
     public String getName() {

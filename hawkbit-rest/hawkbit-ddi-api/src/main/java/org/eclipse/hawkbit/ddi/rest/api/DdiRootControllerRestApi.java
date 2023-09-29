@@ -449,8 +449,9 @@ public interface DdiRootControllerRestApi {
         """)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = """
-            
-            """, content = @Content(schema = @Schema(oneOf = {}))), //TODO: 2 RESPONSES WHEN AUTO CONFIRMATION IS ACTIVE OR NOT
+            The response body in case auto-confirmation is active is richer - it contains additional information
+            such as initiator, remark and when the auto-confirmation had been activated.
+            """),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),

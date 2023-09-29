@@ -13,6 +13,10 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+import com.fasterxml.jackson.annotation.JsonValue;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Polling interval for the SP target.
@@ -22,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DdiPolling {
 
     @JsonProperty
+    @Schema(example = "12:00:00")
     private String sleep;
 
     /**

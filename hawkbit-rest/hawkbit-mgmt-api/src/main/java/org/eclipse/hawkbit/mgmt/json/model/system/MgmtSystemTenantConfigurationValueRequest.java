@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * A json annotated rest model for System Configuration for PUT.
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSystemTenantConfigurationValueRequest {
 
     @JsonProperty(required = true)
+    @Schema(example = "exampleToken")
     private Serializable value;
 
     /**

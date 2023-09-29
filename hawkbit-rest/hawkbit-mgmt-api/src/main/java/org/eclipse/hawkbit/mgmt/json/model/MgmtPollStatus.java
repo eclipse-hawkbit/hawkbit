@@ -13,6 +13,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+import static org.checkerframework.checker.units.qual.Prefix.exa;
 
 /**
  * A json annotated rest model for PollStatus to RESTful API representation.
@@ -26,12 +29,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtPollStatus {
 
     @JsonProperty
+    @Schema(example = "1691065941102")
     private Long lastRequestAt;
 
     @JsonProperty
+    @Schema(example = "1691109141102")
     private Long nextExpectedRequestAt;
 
     @JsonProperty
+    @Schema(example = "false")
     private boolean overdue;
 
     /**

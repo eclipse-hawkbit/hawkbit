@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -22,15 +23,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
 
     @JsonProperty
+    @Schema(example = "bumlux")
     private String createdBy;
 
     @JsonProperty
+    @Schema(example = "1691065905897")
     private Long createdAt;
 
     @JsonProperty
+    @Schema(example = "bumlux")
     private String lastModifiedBy;
 
     @JsonProperty
+    @Schema(example = "1691065906407")
     private Long lastModifiedAt;
 
     /**

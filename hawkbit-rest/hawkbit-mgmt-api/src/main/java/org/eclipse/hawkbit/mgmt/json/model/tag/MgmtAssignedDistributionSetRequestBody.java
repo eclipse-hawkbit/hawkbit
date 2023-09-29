@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for PUT.
@@ -23,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtAssignedDistributionSetRequestBody {
 
     @JsonProperty(value = "id", required = true)
+    @Schema(example = "24")
     private Long distributionSetId;
 
     public Long getDistributionSetId() {

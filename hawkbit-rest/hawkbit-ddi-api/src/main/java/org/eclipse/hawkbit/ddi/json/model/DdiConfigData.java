@@ -7,8 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.ddi.json.model;
+    package org.eclipse.hawkbit.ddi.json.model;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.NotEmpty;
@@ -16,6 +17,7 @@ import javax.validation.constraints.NotEmpty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Feedback channel for ConfigData action.
@@ -26,6 +28,7 @@ public class DdiConfigData {
     @NotEmpty
     private final Map<String, String> data;
 
+    @Schema(example = "merge")
     private final DdiUpdateMode mode;
 
     /**

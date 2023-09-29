@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Deployment chunks.
@@ -26,14 +27,17 @@ public class DdiChunk {
 
     @JsonProperty("part")
     @NotNull
+    @Schema(example = "bApp")
     private String part;
 
     @JsonProperty("version")
     @NotNull
+    @Schema(example = "1.2.0")
     private String version;
 
     @JsonProperty("name")
     @NotNull
+    @Schema(example = "oneApp")
     private String name;
 
     @JsonProperty("encrypted")

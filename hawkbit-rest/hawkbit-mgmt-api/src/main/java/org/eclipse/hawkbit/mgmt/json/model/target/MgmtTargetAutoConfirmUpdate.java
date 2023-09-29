@@ -11,15 +11,18 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Payload to activate the auto-confirmation by given initiator and remark.
  */
 public class MgmtTargetAutoConfirmUpdate {
     @JsonProperty(required = false)
+    @Schema(example = "custom_initiator_value")
     private final String initiator;
 
     @JsonProperty(required = false)
+    @Schema(example = "custom_remark")
     private final String remark;
 
     /**

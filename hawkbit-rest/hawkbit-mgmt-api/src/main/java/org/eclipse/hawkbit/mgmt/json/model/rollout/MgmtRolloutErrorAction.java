@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * An action that runs when the error condition is met
@@ -21,6 +22,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class MgmtRolloutErrorAction {
 
     private ErrorAction action = ErrorAction.PAUSE;
+    @Schema(example = "80")
     private String expression;
 
     /**

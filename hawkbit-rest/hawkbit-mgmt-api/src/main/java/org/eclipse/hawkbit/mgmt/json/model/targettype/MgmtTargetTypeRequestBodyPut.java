@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.targettype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * Request Body for TargetType PUT.
@@ -18,12 +19,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
+    @Schema(example = "updatedTypeName")
     private String name;
 
     @JsonProperty
+    @Schema(example = "an updated description")
     private String description;
 
     @JsonProperty
+    @Schema(example = "#aaafff")
     private String colour;
 
     /**
