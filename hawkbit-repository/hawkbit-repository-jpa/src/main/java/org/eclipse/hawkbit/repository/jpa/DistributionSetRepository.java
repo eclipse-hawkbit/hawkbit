@@ -164,19 +164,6 @@ public interface DistributionSetRepository
      */
     long countByTypeId(Long typeId);
 
-    /**
-     * Counts {@link DistributionSet} with given
-     * {@link DistributionSet#getName()} and
-     * {@link DistributionSet#getVersion()}.
-     *
-     * @param name
-     *            to search for
-     * @param version
-     *            to search for
-     * @return number of found {@link DistributionSet}s
-     */
-    long countByNameAndVersion(String name, String version);
-
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
     @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")

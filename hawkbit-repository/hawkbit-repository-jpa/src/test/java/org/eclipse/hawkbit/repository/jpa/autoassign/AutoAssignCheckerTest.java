@@ -57,15 +57,13 @@ class AutoAssignCheckerTest {
     private PlatformTransactionManager transactionManager;
     @Mock
     private TenantAware tenantAware;
-    @Mock
-    private AccessControlService accessControlService;
 
     private AutoAssignChecker sut;
 
     @BeforeEach
     void before() {
         sut = new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware, accessControlService);
+                transactionManager, tenantAware, AccessControlService.withDefaultOptions(tenantAware));
     }
 
     @Test

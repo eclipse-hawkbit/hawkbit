@@ -654,10 +654,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final JpaProperties properties) {
+            final VirtualPropertyReplacer virtualPropertyReplacer, final AccessControlService accessControlService,
+            final JpaProperties properties) {
         return new JpaSoftwareModuleManagement(entityManager, distributionSetRepository, softwareModuleRepository,
                 softwareModuleMetadataRepository, softwareModuleTypeRepository, auditorProvider, artifactManagement,
-                quotaManagement, virtualPropertyReplacer, properties.getDatabase());
+                quotaManagement, virtualPropertyReplacer, accessControlService, properties.getDatabase());
     }
 
     /**
@@ -671,9 +672,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final JpaProperties properties) {
+            final SoftwareModuleRepository softwareModuleRepository, final AccessControlService accessControlService,
+            final JpaProperties properties) {
         return new JpaSoftwareModuleTypeManagement(distributionSetTypeRepository, softwareModuleTypeRepository,
-                virtualPropertyReplacer, softwareModuleRepository, properties.getDatabase());
+                virtualPropertyReplacer, softwareModuleRepository, accessControlService, properties.getDatabase());
     }
 
     @Bean
@@ -797,9 +799,10 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     ArtifactManagement artifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
-            final QuotaManagement quotaManagement, final TenantAware tenantAware) {
+            final QuotaManagement quotaManagement, final TenantAware tenantAware,
+            final AccessControlService accessControlService) {
         return new JpaArtifactManagement(localArtifactRepository, softwareModuleRepository, artifactRepository,
-                quotaManagement, tenantAware);
+                quotaManagement, tenantAware, accessControlService);
     }
 
     /**

@@ -546,31 +546,31 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         // with filter on name, version and module type
         assertThat(softwareModuleManagement.findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE,
                 set.getId(), "%found%", testType.getId()).getContent())
-                        .as("Found modules with given name, given module type and the assigned ones first")
-                        .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
-                                new AssignedSoftwareModule(unassigned, false));
+                .as("Found modules with given name, given module type and the assigned ones first")
+                .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                        new AssignedSoftwareModule(unassigned, false));
 
         // with filter on name, version and module type, sorting defined by
         // Pagerequest
         assertThat(softwareModuleManagement.findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
                 PageRequest.of(0, 500, Sort.by(Direction.DESC, "name")), set.getId(), "%found%", testType.getId())
-                .getContent()).as(
-                        "Found modules with given name, given module type, the assigned ones first, ordered by name DESC")
-                        .containsExactly(new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(one, true),
-                                new AssignedSoftwareModule(unassigned, false));
+                .getContent())
+                .as("Found modules with given name, given module type, the assigned ones first, ordered by name DESC")
+                .containsExactly(new AssignedSoftwareModule(two, true), new AssignedSoftwareModule(one, true),
+                        new AssignedSoftwareModule(unassigned, false));
 
         // with filter on module type only
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, testType.getId())
-                .getContent()).as("Found modules with given module type and the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                .getContent()).as("Found modules with given module type and the assigned ones first")
+                .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                         new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(unassigned, false));
 
         // without any filter
         assertThat(softwareModuleManagement
                 .findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(PAGE, set.getId(), null, null)
-                .getContent()).as("Found modules with the assigned ones first").containsExactly(
-                        new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
+                .getContent()).as("Found modules with the assigned ones first")
+                .containsExactly(new AssignedSoftwareModule(one, true), new AssignedSoftwareModule(two, true),
                         new AssignedSoftwareModule(differentName, true), new AssignedSoftwareModule(four, true),
                         new AssignedSoftwareModule(unassigned, false));
     }
@@ -797,22 +797,21 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final String knownKey1 = "myKnownKey1";
         final String knownValue1 = "myKnownValue1";
 
-        SoftwareModule ah = testdataFactory.createSoftwareModuleApp();
+        final SoftwareModule swModule = testdataFactory.createSoftwareModuleApp();
 
         softwareModuleManagement.createMetaData(
-                entityFactory.softwareModuleMetadata().create(ah.getId()).key(knownKey1).value(knownValue1));
+                entityFactory.softwareModuleMetadata().create(swModule.getId()).key(knownKey1).value(knownValue1));
 
-        ah = softwareModuleManagement.get(ah.getId()).get();
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), swModule.getId())
+                .getContent()).as("Contains the created metadata element").allSatisfy(metadata -> {
+                    assertThat(metadata.getSoftwareModule().getId()).isEqualTo(swModule.getId());
+                    assertThat(metadata.getKey()).isEqualTo(knownKey1);
+                    assertThat(metadata.getValue()).isEqualTo(knownValue1);
+                });
 
-        assertThat(
-                softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), ah.getId()).getContent())
-                        .as("Contains the created metadata element")
-                        .containsExactly(new JpaSoftwareModuleMetadata(knownKey1, ah, knownValue1));
-
-        softwareModuleManagement.deleteMetaData(ah.getId(), knownKey1);
-        assertThat(
-                softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), ah.getId()).getContent())
-                        .as("Metadata elements are").isEmpty();
+        softwareModuleManagement.deleteMetaData(swModule.getId(), knownKey1);
+        assertThat(softwareModuleManagement.findMetaDataBySoftwareModuleId(PageRequest.of(0, 10), swModule.getId())
+                .getContent()).as("Metadata elements are").isEmpty();
     }
 
     @Test

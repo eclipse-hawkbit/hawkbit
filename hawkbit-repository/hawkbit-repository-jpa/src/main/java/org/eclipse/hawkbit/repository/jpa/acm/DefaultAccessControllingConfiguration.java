@@ -11,9 +11,12 @@ package org.eclipse.hawkbit.repository.jpa.acm;
 
 import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
 import org.eclipse.hawkbit.repository.jpa.acm.context.DefaultContextRunner;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.ArtifactAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DefaultAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetTypeAccessController;
 import org.eclipse.hawkbit.tenancy.TenantAware;
@@ -35,9 +38,13 @@ public class DefaultAccessControllingConfiguration {
             final TargetAccessController targetAccessController,
             final TargetTypeAccessController targetTypeAccessController,
             final DistributionSetAccessController distributionSetAccessController,
-            final DistributionSetTypeAccessController distributionSetTypeAccessController) {
+            final DistributionSetTypeAccessController distributionSetTypeAccessController,
+            final SoftwareModuleAccessController softwareModuleAccessController,
+            final SoftwareModuleTypeAccessController softwareModuleTypeAccessController,
+            final ArtifactAccessController artifactAccessController) {
         return new AccessControlService(tenantAware, contextRunner, targetAccessController, targetTypeAccessController,
-                distributionSetAccessController, distributionSetTypeAccessController);
+                distributionSetAccessController, distributionSetTypeAccessController, softwareModuleAccessController,
+                softwareModuleTypeAccessController, artifactAccessController);
     }
 
     @Bean
@@ -68,6 +75,24 @@ public class DefaultAccessControllingConfiguration {
     @ConditionalOnMissingBean
     DistributionSetTypeAccessController distributionSetTypeAccessController() {
         return DefaultAccessController.distributionSetTypeAccessController();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    SoftwareModuleAccessController softwareModuleAccessController() {
+        return DefaultAccessController.softwareModuleAccessController();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    SoftwareModuleTypeAccessController softwareModuleTypeAccessController() {
+        return DefaultAccessController.softwareModuleTypeAccessController();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    ArtifactAccessController artifactAccessController() {
+        return DefaultAccessController.artifactAccessController();
     }
 
 }

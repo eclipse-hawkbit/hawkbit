@@ -17,6 +17,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +27,8 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifact, Long> {
+public interface LocalArtifactRepository
+        extends BaseEntityRepository<JpaArtifact, Long>, JpaSpecificationExecutor<JpaArtifact> {
 
     /**
      * Counts artifacts size where the related software module is not
@@ -57,8 +59,8 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
     List<Artifact> findBySha1Hash(String sha1Hash);
 
     /**
-     * Counts current elements based on the sha1 and tenant, as well as having
-     * the {@link SoftwareModule} property 'deleted' with value 'false
+     * Counts current elements based on the sha1 and tenant, as well as having the
+     * {@link SoftwareModule} property 'deleted' with value 'false
      *
      * @param sha1
      *            the sha1 of the {@link Artifact}
@@ -106,14 +108,13 @@ public interface LocalArtifactRepository extends BaseEntityRepository<JpaArtifac
      * @param softwareModuleId
      *            software module ID
      * 
-     * @return the current number of artifacts associated with the software
-     *         module.
+     * @return the current number of artifacts associated with the software module.
      */
     long countBySoftwareModuleId(Long softwareModuleId);
 
     /**
-     * Searches for a {@link Artifact} based user provided filename at upload
-     * and selected software module id.
+     * Searches for a {@link Artifact} based user provided filename at upload and
+     * selected software module id.
      *
      * @param filename
      *            to search

@@ -193,14 +193,4 @@ public interface TargetTypeRepository
         return this.findOne(Specification.where(TargetTypeSpecification.hasName(name)));
     }
 
-    /**
-     * Count number of {@link TargetType}s in the repository by name.
-     *
-     * @param name
-     *            target type name
-     * @return number of targetTypes in the repository by name
-     */
-    default long countByName(final String name) {
-        return this.count(TargetTypeSpecification.hasName(name));
-    }
 }

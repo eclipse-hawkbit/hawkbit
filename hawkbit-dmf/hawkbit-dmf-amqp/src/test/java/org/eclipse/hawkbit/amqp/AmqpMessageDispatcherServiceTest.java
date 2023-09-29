@@ -149,9 +149,10 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
             assertThat(softwareModule.getArtifacts().isEmpty()).as("Artifact list for softwaremodule should be empty")
                     .isTrue();
 
-            assertThat(softwareModule.getMetadata()).containsExactly(
-                    new DmfMetadata(TestdataFactory.VISIBLE_SM_MD_KEY, TestdataFactory.VISIBLE_SM_MD_VALUE));
-
+            assertThat(softwareModule.getMetadata()).allSatisfy(metadata -> {
+                assertThat(metadata.getKey()).isEqualTo(TestdataFactory.VISIBLE_SM_MD_KEY);
+                assertThat(metadata.getValue()).isEqualTo(TestdataFactory.VISIBLE_SM_MD_VALUE);
+            });
             for (final SoftwareModule softwareModule2 : action.getDistributionSet().getModules()) {
                 if (!softwareModule.getModuleId().equals(softwareModule2.getId())) {
                     continue;

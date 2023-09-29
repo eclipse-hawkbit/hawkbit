@@ -440,11 +440,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerIdIn(
                             deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList()));
             final List<JpaTarget> accessibleTargets = targetRepository.findAll(specification);
-            if (deploymentRequests.size() != accessibleTargets.size()) {
-                throw new EntityNotFoundException(JpaTarget.class,
-                        deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList(),
-                        accessibleTargets.stream().map(JpaTarget::getControllerId).toList());
-            }
             targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, accessibleTargets);
         }
     }

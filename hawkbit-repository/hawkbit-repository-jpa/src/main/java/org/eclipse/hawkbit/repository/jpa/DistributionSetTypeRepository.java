@@ -37,27 +37,6 @@ public interface DistributionSetTypeRepository
         extends BaseEntityRepository<JpaDistributionSetType, Long>, JpaSpecificationExecutor<JpaDistributionSetType> {
 
     /**
-     *
-     * @param pageable
-     *            page parameters
-     * @param isDeleted
-     *            to <code>true</code> if only soft deleted entries of
-     *            <code>false</code> if undeleted ones
-     * 
-     * @return list of found {@link DistributionSetType}s
-     */
-    Page<JpaDistributionSetType> findByDeleted(Pageable pageable, boolean isDeleted);
-
-    /**
-     * @param isDeleted
-     *            to <code>true</code> if only marked as deleted have to be
-     *            counted or all undeleted.
-     * 
-     * @return number of {@link DistributionSetType}s in the repository.
-     */
-    long countByDeleted(boolean isDeleted);
-
-    /**
      * Counts all distribution set type where a specific software module type is
      * assigned to.
      * 

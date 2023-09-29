@@ -12,8 +12,11 @@ package org.eclipse.hawkbit.repository.jpa.acm.controller;
 import java.util.List;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.springframework.data.jpa.domain.Specification;
@@ -72,6 +75,18 @@ public class DefaultAccessController<T> implements AccessController<T> {
         return new DefaultDistributionSetTypeAccessController();
     }
 
+    public static SoftwareModuleAccessController softwareModuleAccessController() {
+        return new DefaultSoftwareModuleAccessController();
+    }
+
+    public static SoftwareModuleTypeAccessController softwareModuleTypeAccessController() {
+        return new DefaultSoftwareModuleTypeAccessController();
+    }
+
+    public static ArtifactAccessController artifactAccessController() {
+        return new DefaultArtifactAccessController();
+    }
+
     /**
      * Default implementation of the {@link TargetAccessController}
      */
@@ -98,5 +113,26 @@ public class DefaultAccessController<T> implements AccessController<T> {
      */
     private static class DefaultDistributionSetTypeAccessController
             extends DefaultAccessController<JpaDistributionSetType> implements DistributionSetTypeAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link SoftwareModuleAccessController}
+     */
+    private static class DefaultSoftwareModuleAccessController extends DefaultAccessController<JpaSoftwareModule>
+            implements SoftwareModuleAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link SoftwareModuleTypeAccessController}
+     */
+    private static class DefaultSoftwareModuleTypeAccessController
+            extends DefaultAccessController<JpaSoftwareModuleType> implements SoftwareModuleTypeAccessController {
+    }
+
+    /**
+     * Default implementation of the {@link ArtifactAccessController}
+     */
+    private static class DefaultArtifactAccessController extends DefaultAccessController<JpaArtifact>
+            implements ArtifactAccessController {
     }
 }

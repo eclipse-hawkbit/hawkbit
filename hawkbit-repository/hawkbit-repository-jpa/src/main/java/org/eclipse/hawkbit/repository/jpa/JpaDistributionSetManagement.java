@@ -40,6 +40,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -51,6 +52,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -121,6 +123,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final DistributionSetAccessController distributionSetAccessController;
 
+    private final SoftwareModuleAccessController softwareModuleAccessController;
+
     private final Database database;
 
     JpaDistributionSetManagement(final EntityManager entityManager,
@@ -151,6 +155,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
         this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
+        this.softwareModuleAccessController = accessControlService.getSoftwareModuleAccessController();
         this.database = database;
     }
 
@@ -158,7 +163,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Optional<DistributionSet> getWithDetails(final long distid) {
         final Specification<JpaDistributionSet> specification = distributionSetAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byId(distid));
-        return distributionSetRepository.findOne(specification).map(DistributionSet.class::cast);
+        return distributionSetRepository.findOne(specification).map(x -> x);
     }
 
     @Override
@@ -268,8 +273,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long moduleId) {
-        // TODO: check access
-        return softwareModuleRepository.findById(moduleId)
+        final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
+                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byId(moduleId));
+        return softwareModuleRepository.findOne(specification)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
     }
 
@@ -294,7 +300,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!assigned.isEmpty()) {
             final Long[] dsIds = assigned.toArray(new Long[assigned.size()]);
             distributionSetRepository.deleteDistributionSet(dsIds);
-            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(dsIds);
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(dsIds);
         }
 
         // mark the rest as hard delete
@@ -302,8 +308,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
         // hard delete the rest if exists
         if (!toHardDelete.isEmpty()) {
-            targetFilterQueryRepository
-                    .unsetAutoAssignDistributionSetAndActionType(toHardDelete.toArray(new Long[toHardDelete.size()]));
+            targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(
+                    toHardDelete.toArray(new Long[toHardDelete.size()]));
             // don't give the delete statement an empty list, JPA/Oracle cannot
             // handle the empty list
             distributionSetRepository.deleteByIdIn(toHardDelete);
@@ -352,7 +358,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet assignSoftwareModules(final long setId, final Collection<Long> moduleIds) {
 
-        final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findByIdIn(moduleIds);
+        final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
+                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byIds(moduleIds));
+        final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findAll(specification);
 
         if (modules.size() < moduleIds.size()) {
             throw new EntityNotFoundException(SoftwareModule.class, moduleIds,
@@ -474,10 +482,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSet set = JpaManagementHelper.touch(entityManager, distributionSetRepository,
                 (JpaDistributionSet) getValid(dsId));
 
-        return Collections.unmodifiableList(md.stream()
+        return md.stream()
                 .map(meta -> distributionSetMetadataRepository
                         .save(new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue())))
-                .collect(Collectors.toList()));
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private void assertMetaDataQuota(final Long dsId, final int requested) {
@@ -559,8 +567,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public Optional<DistributionSetMetadata> getMetaDataByDistributionSetId(final long setId, final String key) {
         getDistributionSetOrThrowExceptionIfNotFound(setId);
 
-        return distributionSetMetadataRepository.findById(new DsMetadataCompositeKey(setId, key))
-                .map(DistributionSetMetadata.class::cast);
+        return distributionSetMetadataRepository.findById(new DsMetadataCompositeKey(setId, key)).map(x -> x);
     }
 
     @Override

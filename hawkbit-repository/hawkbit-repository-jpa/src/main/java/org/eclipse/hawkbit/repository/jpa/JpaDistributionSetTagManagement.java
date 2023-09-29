@@ -170,7 +170,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Optional<DistributionSetTag> get(final long id) {
-        return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
+        return distributionSetTagRepository.findById(id).map(x -> x);
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -39,6 +40,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -79,6 +81,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private final DistributionSetTypeAccessController distributionSetTypeAccessController;
 
+    private final SoftwareModuleTypeAccessController softwareModuleTypeAccessController;
+
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
@@ -92,6 +96,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         this.database = database;
         this.quotaManagement = quotaManagement;
         this.distributionSetTypeAccessController = accessControlService.getDistributionSetTypeAccessController();
+        this.softwareModuleTypeAccessController = accessControlService.getSoftwareModuleTypeAccessController();
     }
 
     @Override
@@ -159,14 +164,14 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignMandatorySoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
-        // TODO: Software Module type check with access control
+        final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController.appendAccessRules(
+                AccessController.Operation.READ, SoftwareModuleTypeSpecification.byIds(softwareModulesTypeIds));
 
-        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
-                .findAllById(softwareModulesTypeIds);
+        final Collection<JpaSoftwareModuleType> foundModules = softwareModuleTypeRepository.findAll(specification);
 
-        if (modules.size() < softwareModulesTypeIds.size()) {
+        if (foundModules.size() < softwareModulesTypeIds.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
-                    modules.stream().map(SoftwareModuleType::getId).toList());
+                    foundModules.stream().map(SoftwareModuleType::getId).toList());
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
@@ -175,7 +180,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
         assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
-        modules.forEach(type::addMandatoryModuleType);
+        foundModules.forEach(type::addMandatoryModuleType);
 
         return distributionSetTypeRepository.save(type);
     }
@@ -186,15 +191,14 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType assignOptionalSoftwareModuleTypes(final long dsTypeId,
             final Collection<Long> softwareModulesTypeIds) {
+        final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController.appendAccessRules(
+                AccessController.Operation.READ, SoftwareModuleTypeSpecification.byIds(softwareModulesTypeIds));
 
-        final Collection<JpaSoftwareModuleType> modules = softwareModuleTypeRepository
-                .findAllById(softwareModulesTypeIds);
+        final Collection<JpaSoftwareModuleType> foundModules = softwareModuleTypeRepository.findAll(specification);
 
-        // TODO: Software Module type check with access control
-
-        if (modules.size() < softwareModulesTypeIds.size()) {
+        if (foundModules.size() < softwareModulesTypeIds.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
-                    modules.stream().map(SoftwareModuleType::getId).toList());
+                    foundModules.stream().map(SoftwareModuleType::getId).toList());
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
@@ -203,7 +207,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
         assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
-        modules.forEach(type::addOptionalModuleType);
+        foundModules.forEach(type::addOptionalModuleType);
 
         return distributionSetTypeRepository.save(type);
     }

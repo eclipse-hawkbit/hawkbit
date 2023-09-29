@@ -38,28 +38,13 @@ public interface SoftwareModuleRepository
         extends BaseEntityRepository<JpaSoftwareModule, Long>, JpaSpecificationExecutor<JpaSoftwareModule> {
 
     /**
-     * Counts all {@link SoftwareModule}s based on the given {@link Type}.
+     * Counts all {@link SoftwareModule}s based on the given {@link JpaSoftwareModuleType}.
      *
      * @param type
      *            to count for
      * @return number of {@link SoftwareModule}s
      */
     Long countByType(JpaSoftwareModuleType type);
-
-    /**
-     * Retrieves {@link SoftwareModule} by filtering on name AND version AND
-     * type (which is unique per tenant.
-     * 
-     * @param name
-     *            to be filtered on
-     * @param version
-     *            to be filtered on
-     * @param typeId
-     *            to be filtered on
-     * @return the found {@link SoftwareModule} with the given name AND version
-     *         AND type
-     */
-    Optional<SoftwareModule> findOneByNameAndVersionAndTypeId(String name, String version, Long typeId);
 
     /**
      * deletes the {@link SoftwareModule}s with the given IDs.
@@ -78,15 +63,6 @@ public interface SoftwareModuleRepository
     void deleteSoftwareModule(@Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
             @Param("ids") Long... ids);
 
-    /**
-     * @param pageable
-     *            the page request to page the result set
-     * @param setId
-     *            to search for
-     * @return all {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet}.
-     */
-    Page<SoftwareModule> findByAssignedToId(Pageable pageable, Long setId);
 
     /**
      * Count the software modules which are assigned to the distribution set
@@ -111,18 +87,6 @@ public interface SoftwareModuleRepository
      *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
      */
     Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, SoftwareModuleType type);
-
-    /**
-     * retrieves all software modules with a given
-     * {@link SoftwareModule#getId()}.
-     *
-     * @param ids
-     *            to search for
-     * @return {@link List} of found {@link SoftwareModule}s
-     */
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT sm FROM JpaSoftwareModule sm WHERE sm.id IN ?1")
-    List<JpaSoftwareModule> findByIdIn(Iterable<Long> ids);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

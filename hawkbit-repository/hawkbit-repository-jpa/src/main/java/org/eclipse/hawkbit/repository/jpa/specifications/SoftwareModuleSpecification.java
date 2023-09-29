@@ -9,12 +9,18 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule_;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.ListJoin;
+import java.util.Collection;
 
 /**
  * Specifications class for {@link SoftwareModule}s. The class provides Spring
@@ -24,6 +30,29 @@ import org.springframework.data.jpa.domain.Specification;
 public final class SoftwareModuleSpecification {
     private SoftwareModuleSpecification() {
         // utility class
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link SoftwareModule} with given
+     * {@link DistributionSet#getId()}.
+     *
+     * @param swModuleId
+     *            to search
+     * @return the {@link SoftwareModule} {@link Specification}
+     */
+    public static Specification<JpaSoftwareModule> byId(final Long swModuleId) {
+        return (swRoot, query, cb) -> cb.equal(swRoot.get(JpaSoftwareModule_.id), swModuleId);
+    }
+
+    public static Specification<JpaSoftwareModule> byIds(final Collection<Long> swModuleIds) {
+        return (swRoot, query, cb) -> swRoot.get(JpaSoftwareModule_.id).in(swModuleIds);
+    }
+
+    public static Specification<JpaSoftwareModule> byAssignedToDs(final Long dsId) {
+        return (swRoot, query, cb) -> {
+            final ListJoin<JpaSoftwareModule, JpaDistributionSet> join = swRoot.join(JpaSoftwareModule_.assignedTo);
+            return cb.equal(join.get(JpaDistributionSet_.ID), dsId);
+        };
     }
 
     /**

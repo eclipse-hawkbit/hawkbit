@@ -340,7 +340,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     @Transactional
     public void cancelAutoAssignmentForDistributionSet(final long setId) {
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionType(setId);
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(setId);
         LOGGER.debug("Auto assignments for distribution sets {} deactivated", setId);
     }
 }

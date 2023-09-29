@@ -54,8 +54,8 @@ public interface TargetFilterQueryRepository
      */
     @Modifying
     @Transactional
-    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL where d.autoAssignDistributionSet in :ids")
-    void unsetAutoAssignDistributionSetAndActionType(@Param("ids") Long... dsIds);
+    @Query("update JpaTargetFilterQuery d set d.autoAssignDistributionSet = NULL, d.autoAssignActionType = NULL, d.accessControlContext = NULL where d.autoAssignDistributionSet in :ids")
+    void unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(@Param("ids") Long... dsIds);
 
     /**
      * Counts all target filters that have a given auto assign distribution set
