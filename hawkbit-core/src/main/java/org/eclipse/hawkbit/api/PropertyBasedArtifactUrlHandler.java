@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.api;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties.UrlProtocol;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -36,25 +34,24 @@ import org.springframework.util.StringUtils;
  * well in the following {@link UrlProtocol#getRef()} patterns:
  * 
  * Default:
- * {protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/
+ * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
  * 
  * Default (MD5SUM files):
- * {protocol}://{hostname}:{port}/{tenant}/controller/v1/{controllerId}/
+ * {protocol}://{hostname}:{port}{contextPath}/{tenant}/controller/v1/{controllerId}/
  * softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}.MD5SUM
  * 
  */
 public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PropertyBasedArtifactUrlHandler.class);
-
     private static final String PROTOCOL_PLACEHOLDER = "protocol";
+    private static final String HOSTNAME_PLACEHOLDER = "hostname";
+    private static final String IP_PLACEHOLDER = "ip";
+    private static final String PORT_PLACEHOLDER = "port";
+    private static final String CONTEXT_PATH = "contextPath";
     private static final String CONTROLLER_ID_PLACEHOLDER = "controllerId";
     private static final String TARGET_ID_BASE10_PLACEHOLDER = "targetId";
     private static final String TARGET_ID_BASE62_PLACEHOLDER = "targetIdBase62";
-    private static final String IP_PLACEHOLDER = "ip";
-    private static final String PORT_PLACEHOLDER = "port";
-    private static final String HOSTNAME_PLACEHOLDER = "hostname";
     private static final String HOSTNAME_REQUEST_PLACEHOLDER = "hostnameRequest";
     private static final String PORT_REQUEST_PLACEHOLDER = "portRequest";
     private static final String HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER = "domainRequest";
@@ -65,17 +62,21 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String TENANT_PLACEHOLDER = "tenant";
     private static final String TENANT_ID_BASE10_PLACEHOLDER = "tenantId";
     private static final String TENANT_ID_BASE62_PLACEHOLDER = "tenantIdBase62";
-    private static final String SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER = "softwareModuleId";
-    private static final String SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER = "softwareModuleIdBase62";
+    private static final String SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER = "softwareModuleId";
+    private static final String SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER = "softwareModuleIdBase62";
+
+    final static String DEFAULT_URL_PROTOCOL_REF = "{" + PROTOCOL_PLACEHOLDER + "}://{" + HOSTNAME_PLACEHOLDER + "}:{" + PORT_PLACEHOLDER + "}{" + CONTEXT_PATH + "}/{" + TENANT_PLACEHOLDER + "}/controller/v1/{" + CONTROLLER_ID_PLACEHOLDER + "}/softwaremodules/{" + SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER + "}/artifacts/{" + ARTIFACT_FILENAME_PLACEHOLDER + "}";
 
     private final ArtifactUrlHandlerProperties urlHandlerProperties;
+    private final String contextPath;
 
     /**
      * @param urlHandlerProperties
      *            for URL generation configuration
      */
-    public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties) {
+    public PropertyBasedArtifactUrlHandler(final ArtifactUrlHandlerProperties urlHandlerProperties, final String contextPath) {
         this.urlHandlerProperties = urlHandlerProperties;
+        this.contextPath = contextPath == null || "/".equals(contextPath) ? "" : contextPath; // normalize
     }
 
     @Override
@@ -85,7 +86,6 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     @Override
     public List<ArtifactUrl> getUrls(final URLPlaceholder placeholder, final ApiType api, final URI requestUri) {
-
         return urlHandlerProperties.getProtocols().values().stream()
                 .filter(urlProtocol -> urlProtocol.getSupports().contains(api) && urlProtocol.isEnabled())
                 .map(urlProtocol -> new ArtifactUrl(urlProtocol.getProtocol().toUpperCase(), urlProtocol.getRel(),
@@ -94,7 +94,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
 
     }
 
-    private static String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder,
+    private String generateUrl(final UrlProtocol protocol, final URLPlaceholder placeholder,
             final URI requestUri) {
         final Set<Entry<String, String>> entrySet = getReplaceMap(protocol, placeholder, requestUri).entrySet();
 
@@ -103,17 +103,18 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         for (final Entry<String, String> entry : entrySet) {
             if (entry.getKey().equals(PORT_PLACEHOLDER)) {
                 urlPattern = urlPattern.replace(":{" + entry.getKey() + "}",
-                        StringUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
+                        ObjectUtils.isEmpty(entry.getValue()) ? "" : (":" + entry.getValue()));
             } else {
                 if(entry.getValue() != null) {
                     urlPattern = urlPattern.replace("{" + entry.getKey() + "}", entry.getValue());
                 }
             }
         }
+
         return urlPattern;
     }
 
-    private static Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
+    private Map<String, String> getReplaceMap(final UrlProtocol protocol, final URLPlaceholder placeholder,
             final URI requestUri) {
         final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
@@ -123,12 +124,10 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
         replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
 
-        try {
-            replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
-                    URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8.toString()));
-        } catch (final UnsupportedEncodingException e) {
-            LOG.error("Could not encode {}", placeholder.getSoftwareData().getFilename(), e);
-        }
+        replaceMap.put(CONTEXT_PATH, contextPath);
+
+        replaceMap.put(ARTIFACT_FILENAME_PLACEHOLDER,
+                URLEncoder.encode(placeholder.getSoftwareData().getFilename(), StandardCharsets.UTF_8));
 
         replaceMap.put(ARTIFACT_SHA1_PLACEHOLDER, placeholder.getSoftwareData().getSha1Hash());
         replaceMap.put(PROTOCOL_PLACEHOLDER, protocol.getProtocol());
@@ -138,15 +137,15 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         replaceMap.put(TENANT_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTenantId()));
         replaceMap.put(CONTROLLER_ID_PLACEHOLDER, placeholder.getControllerId());
         replaceMap.put(TARGET_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getTargetId()));
-        if(placeholder.getTargetId() != null) {
+        if (placeholder.getTargetId() != null) {
             replaceMap.put(TARGET_ID_BASE62_PLACEHOLDER, Base62Util.fromBase10(placeholder.getTargetId()));
         }
         replaceMap.put(ARTIFACT_ID_BASE62_PLACEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getArtifactId()));
         replaceMap.put(ARTIFACT_ID_BASE10_PLACEHOLDER, String.valueOf(placeholder.getSoftwareData().getArtifactId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACDEHOLDER,
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE10_PLACEHOLDER,
                 String.valueOf(placeholder.getSoftwareData().getSoftwareModuleId()));
-        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACDEHOLDER,
+        replaceMap.put(SOFTWARE_MODULE_ID_BASE62_PLACEHOLDER,
                 Base62Util.fromBase10(placeholder.getSoftwareData().getSoftwareModuleId()));
         return replaceMap;
     }
@@ -168,7 +167,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     }
 
     private static String getPort(final UrlProtocol protocol) {
-        return protocol.getPort() == null ? null : String.valueOf(protocol.getPort());
+        return ObjectUtils.isEmpty(protocol.getPort()) ? null : String.valueOf(protocol.getPort());
     }
 
     private static String computeHostWithRequestDomain(final UrlProtocol protocol, final URI requestUri) {
@@ -188,7 +187,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         final String domain = StringUtils.collectionToDelimitedString(domainElements.subList(1, domainElements.size()),
                 ".");
 
-        if (StringUtils.isEmpty(domain)) {
+        if (ObjectUtils.isEmpty(domain)) {
             return protocol.getHostname();
         }
 

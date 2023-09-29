@@ -8,11 +8,9 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-# This script checks if 'hugo' is installed. Afterwards, the Hugo theme is downloaded.
-
 #!/bin/bash
 
-
+# This script checks if 'hugo' is installed. Afterwards, the Hugo theme is downloaded.
 hugo version
 if [ $? != 0 ]
 then
@@ -23,6 +21,7 @@ fi
 echo "[INFO] "
 echo "[INFO] Install Hugo Theme"
 HUGO_THEMES=themes/hugo-material-docs
+CSS_FILE=themes/hugo-material-docs/static/stylesheets/application.css
 
 if [ ! -d ${HUGO_THEMES} ]
 then
@@ -31,6 +30,16 @@ then
 else
     echo "[INFO] ... theme already installed in: ${HUGO_THEMES}"
 fi
+
+ # This script uses 'awk' to replace 1200px with 1500px in the application.css file from 'hugo'
+if [ -f ${CSS_FILE} ]
+then
+    awk '{gsub(/max-width:1200px/, "max-width:1500px"); print}' "${CSS_FILE}" > tmp && mv tmp "${CSS_FILE}"
+    echo "[INFO] Updated CSS content successfully!"
+else
+    echo "[ERROR] CSS file not found!"
+fi
+
 
 echo "[INFO] "
 echo "[INFO] Launch the documentation locally by running 'mvn site' (or 'hugo server' in the docs directory),"
