@@ -37,12 +37,14 @@ public interface Target extends NamedEntity {
     int ADDRESS_MAX_SIZE = 512;
 
     /**
-     * Maximum length of key of controller attribute
+     * Maximum length of key of controller attribute.
+     * The maximum controller attribute key size is 128.
      */
     int CONTROLLER_ATTRIBUTE_KEY_SIZE = 128;
 
     /**
      * Maximum length of value of controller attribute
+     * The maximum controller attribute  value size is 128.
      */
     int CONTROLLER_ATTRIBUTE_VALUE_SIZE = 128;
 
