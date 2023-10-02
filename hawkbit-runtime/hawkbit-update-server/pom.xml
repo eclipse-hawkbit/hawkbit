@@ -32,65 +32,63 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>attach-artifacts-profile</id>
+            <!-- This profile activates when -DskipTests is not provided -->
+            <activation>
+                <property>
+                    <name>!skipTests</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/rest-api/mgmt-openapi.json</file>
+                                            <type>json</type>
+                                            <classifier>mgmt-openapi</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/rest-api/mgmt-openapi.yaml</file>
+                                            <type>yaml</type>
+                                            <classifier>mgmt-openapi</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/rest-api/ddi-openapi.json</file>
+                                            <type>json</type>
+                                            <classifier>ddi-openapi</classifier>
+                                        </artifact>
+                                        <artifact>
+                                            <file>${project.build.directory}/rest-api/ddi-openapi.yaml</file>
+                                            <type>yaml</type>
+                                            <classifier>ddi-openapi</classifier>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
     <build>
         <plugins>
-            <!-- Generating the rest doc during integration tests -->
-            <plugin>
-                <groupId>org.springdoc</groupId>
-                <artifactId>springdoc-openapi-maven-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <!-- Execution for JSON -->
-                    <execution>
-                        <id>generate-json</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <outputFileName>openapi.json</outputFileName>
-                            <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>
-                            <attachArtifact>true</attachArtifact>
-                        </configuration>
-                    </execution>
-                    <!-- Execution for YAML -->
-                    <execution>
-                        <id>generate-yaml</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <outputFileName>openapi.yaml</outputFileName>
-                            <apiDocsUrl>http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
-                            <attachArtifact>true</attachArtifact>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <jvmArguments>-Dspring.application.admin.enabled=true</jvmArguments>
-                    <mainClass>org.eclipse.hawkbit.app.Start</mainClass>
-                </configuration>
                 <executions>
-                    <execution>
-                        <phase>pre-integration-test</phase>
-                        <id>pre-api-docs-generation</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-api-docs-generation</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
                     <execution>
                         <goals>
                             <goal>repackage</goal>

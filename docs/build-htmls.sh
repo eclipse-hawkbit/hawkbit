@@ -24,7 +24,7 @@ else
 fi
 
 # Execute the npx command
-npx @redocly/cli build-docs ${CURRENT_DIR}/content/rest-api/mgmt.json -o ${CURRENT_DIR}/content/rest-api/mgmt.html
+npx @redocly/cli build-docs ${CURRENT_DIR}/content/rest-api/mgmt.yaml -o ${CURRENT_DIR}/content/rest-api/mgmt.html
 
 if [ $? != 0 ]; then
     echo "[ERROR] Failed to execute the Redoc CLI command form MGMT API."
@@ -34,7 +34,7 @@ else
 fi
 
 # Execute the npx command
-npx @redocly/cli build-docs ${CURRENT_DIR}/content/rest-api/ddi.json -o ${CURRENT_DIR}/content/rest-api/ddi.html
+npx @redocly/cli build-docs ${CURRENT_DIR}/content/rest-api/ddi.yaml -o ${CURRENT_DIR}/content/rest-api/ddi.html
 
 if [ $? != 0 ]; then
     echo "[ERROR] Failed to execute the Redoc CLI command form DDI API."
