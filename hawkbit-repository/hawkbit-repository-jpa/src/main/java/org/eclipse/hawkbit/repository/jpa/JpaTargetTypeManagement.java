@@ -182,7 +182,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
 
     @Override
     public Optional<TargetType> findByTargetId(final long targetId) {
-        return targetTypeRepository.findOne(TargetTypeSpecification.hasTarget(targetId)).map(TargetType.class::cast);
+        final Specification<JpaTargetType> specification = targetTypeAccessControlManager
+                .appendAccessRules(AccessController.Operation.READ, TargetTypeSpecification.hasTarget(targetId));
+        return targetTypeRepository.findOne(specification).map(TargetType.class::cast);
     }
 
     @Override
