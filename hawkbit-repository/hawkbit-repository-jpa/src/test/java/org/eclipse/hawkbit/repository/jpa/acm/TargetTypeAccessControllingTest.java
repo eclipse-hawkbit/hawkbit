@@ -10,10 +10,13 @@
 package org.eclipse.hawkbit.repository.jpa.acm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 
 import org.eclipse.hawkbit.repository.Identifiable;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
@@ -33,15 +36,17 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
     @Test
     @Description("Verifies read access rules for target types")
     void verifyTargetTypeReadOperations() {
+        permitTypeCreation();
+
         final TargetType permittedTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
 
-        final TargetType unseeableTargetType = targetTypeManagement
+        final TargetType hiddenTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type2"));
 
-        // create target and assign with unseeable target type
-        final Target targetWithUnseeableTargetType = targetManagement.create(entityFactory.target().create()
-                .controllerId("targetWithUnseeableTargetType").targetType(unseeableTargetType.getId()));
+        // create target and assign with hidden target type
+        final Target targetWithHiddenTargetType = targetManagement.create(entityFactory.target().create()
+                .controllerId("targetWithUnseeableTargetType").targetType(hiddenTargetType.getId()));
 
         // create target and assign with permitted target type
         final Target targetWithPermittedTargetType = targetManagement.create(entityFactory.target().create()
@@ -62,26 +67,26 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
         // verify targetTypeManagement#findByTargetControllerId
         assertThat(targetTypeManagement.findByTargetControllerId(targetWithPermittedTargetType.getControllerId()))
                 .hasValueSatisfying(foundType -> assertThat(foundType.getId()).isEqualTo(permittedTargetType.getId()));
-        assertThat(targetTypeManagement.findByTargetControllerId(targetWithUnseeableTargetType.getControllerId()))
+        assertThat(targetTypeManagement.findByTargetControllerId(targetWithHiddenTargetType.getControllerId()))
                 .isEmpty();
 
         // verify targetTypeManagement#findByTargetControllerIds
         assertThat(
                 targetTypeManagement
                         .findByTargetControllerIds(Arrays.asList(targetWithPermittedTargetType.getControllerId(),
-                                targetWithUnseeableTargetType.getControllerId()))
+                                targetWithHiddenTargetType.getControllerId()))
                         .stream().map(Identifiable::getId).toList())
                 .hasSize(1).containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByTargetId
         assertThat(targetTypeManagement.findByTargetId(targetWithPermittedTargetType.getId()))
                 .hasValueSatisfying(foundType -> assertThat(foundType.getId()).isEqualTo(permittedTargetType.getId()));
-        assertThat(targetTypeManagement.findByTargetId(targetWithUnseeableTargetType.getId())).isEmpty();
+        assertThat(targetTypeManagement.findByTargetId(targetWithHiddenTargetType.getId())).isEmpty();
 
         // verify targetTypeManagement#findByTargetIds
         assertThat(targetTypeManagement
                 .findByTargetIds(
-                        Arrays.asList(targetWithPermittedTargetType.getId(), targetWithUnseeableTargetType.getId()))
+                        Arrays.asList(targetWithPermittedTargetType.getId(), targetWithHiddenTargetType.getId()))
                 .stream().map(Identifiable::getId).toList()).hasSize(1).containsOnly(permittedTargetType.getId());
 
         // verify targetTypeManagement#findByName
@@ -89,30 +94,111 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
                 .hasSize(1).satisfies(results -> {
                     assertThat(results.get(0).getId()).isEqualTo(permittedTargetType.getId());
                 });
-        assertThat(targetTypeManagement.findByName(Pageable.unpaged(), unseeableTargetType.getName())).isEmpty();
+        assertThat(targetTypeManagement.findByName(Pageable.unpaged(), hiddenTargetType.getName())).isEmpty();
 
         // verify targetTypeManagement#count
         assertThat(targetTypeManagement.count()).isEqualTo(1);
 
         // verify targetTypeManagement#countByName
         assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-        assertThat(targetTypeManagement.countByName(unseeableTargetType.getName())).isZero();
+        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
 
         // verify targetTypeManagement#countByName
         assertThat(targetTypeManagement.countByName(permittedTargetType.getName())).isEqualTo(1);
-        assertThat(targetTypeManagement.countByName(unseeableTargetType.getName())).isZero();
+        assertThat(targetTypeManagement.countByName(hiddenTargetType.getName())).isZero();
 
         // verify targetTypeManagement#get by id
         assertThat(targetTypeManagement.get(permittedTargetType.getId())).isPresent();
-        assertThat(targetTypeManagement.get(unseeableTargetType.getId())).isEmpty();
+        assertThat(targetTypeManagement.get(hiddenTargetType.getId())).isEmpty();
 
         // verify targetTypeManagement#getByName
         assertThat(targetTypeManagement.getByName(permittedTargetType.getName())).isPresent();
-        assertThat(targetTypeManagement.getByName(unseeableTargetType.getName())).isEmpty();
+        assertThat(targetTypeManagement.getByName(hiddenTargetType.getName())).isEmpty();
 
         // verify targetTypeManagement#get by ids
-        assertThat(targetTypeManagement.get(Arrays.asList(permittedTargetType.getId(), unseeableTargetType.getId()))
+        assertThat(targetTypeManagement.get(Arrays.asList(permittedTargetType.getId(), hiddenTargetType.getId()))
                 .stream().map(Identifiable::getId).toList()).containsOnly(permittedTargetType.getId());
+
+        // verify targetTypeManagement#update is not possible. Assert exception thrown.
+        assertThatThrownBy(() -> targetTypeManagement.update(entityFactory.targetType().update(hiddenTargetType.getId())
+                .name(hiddenTargetType.getName() + "/new").description("newDesc")))
+                .as("Target type update shouldn't be allowed since the target type is not visible.")
+                .isInstanceOf(EntityNotFoundException.class);
+
+        // verify targetTypeManagement#delete is not possible. Assert exception thrown.
+        assertThatThrownBy(() -> targetTypeManagement.delete(hiddenTargetType.getId()))
+                .as("Target type delete shouldn't be allowed since the target type is not visible.")
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
+    @Test
+    @Description("Verifies delete access rules for target types")
+    void verifyTargetTypeDeleteOperations() {
+        permitTypeCreation();
+        final TargetType manageableTargetType = targetTypeManagement
+                .create(entityFactory.targetType().create().name("type1"));
+
+        final TargetType readOnlyTargetType = targetTypeManagement
+                .create(entityFactory.targetType().create().name("type2"));
+
+        // define access controlling rule to allow reading both types
+        testAccessControlManger.defineAccessRule(JpaTargetType.class, AccessController.Operation.READ,
+                TargetTypeSpecification
+                        .hasIdIn(Arrays.asList(manageableTargetType.getId(), readOnlyTargetType.getId())));
+
+        // permit operation to delete permittedTargetType
+        testAccessControlManger.permitOperation(JpaTargetType.class, AccessController.Operation.DELETE,
+                type -> type.getId().equals(manageableTargetType.getId()));
+
+        // delete the manageableTargetType
+        targetTypeManagement.delete(manageableTargetType.getId());
+
+        // verify targetTypeManagement#delete for readOnlyTargetType is not possible
+        assertThatThrownBy(() -> {
+            targetTypeManagement.delete(readOnlyTargetType.getId());
+        }).isInstanceOf(InsufficientPermissionException.class);
+    }
+
+    @Test
+    @Description("Verifies update operation for target types")
+    void verifyTargetTypeUpdateOperations() {
+        permitTypeCreation();
+        final TargetType manageableTargetType = targetTypeManagement
+                .create(entityFactory.targetType().create().name("type1"));
+
+        final TargetType readOnlyTargetType = targetTypeManagement
+                .create(entityFactory.targetType().create().name("type2"));
+
+        // define access controlling rule to allow reading both types
+        testAccessControlManger.defineAccessRule(JpaTargetType.class, AccessController.Operation.READ,
+                TargetTypeSpecification
+                        .hasIdIn(Arrays.asList(manageableTargetType.getId(), readOnlyTargetType.getId())));
+
+        // permit updating the manageableTargetType
+        testAccessControlManger.permitOperation(JpaTargetType.class, AccessController.Operation.UPDATE,
+                type -> type.getId().equals(manageableTargetType.getId()));
+
+        // update the manageableTargetType
+        targetTypeManagement.update(entityFactory.targetType().update(manageableTargetType.getId())
+                .name(manageableTargetType.getName() + "/new").description("newDesc"));
+
+        // verify targetTypeManagement#update for readOnlyTargetType is not possible
+        assertThatThrownBy(() -> {
+            targetTypeManagement.update(entityFactory.targetType().update(readOnlyTargetType.getId())
+                    .name(readOnlyTargetType.getName() + "/new").description("newDesc"));
+        }).isInstanceOf(InsufficientPermissionException.class);
+    }
+
+    @Test
+    @Description("Verifies create operation blocked by controller")
+    void verifyTargetTypeCreationBlockedByAccessController() {
+        // verify targetTypeManagement#create for any type
+        assertThatThrownBy(() -> targetTypeManagement.create(entityFactory.targetType().create().name("type1")))
+                .as("Target type create shouldn't be allowed since the target type is not visible.")
+                .isInstanceOf(InsufficientPermissionException.class);
+    }
+
+    private void permitTypeCreation() {
+        testAccessControlManger.permitOperation(JpaTargetType.class, AccessController.Operation.CREATE, type -> true);
+    }
 }

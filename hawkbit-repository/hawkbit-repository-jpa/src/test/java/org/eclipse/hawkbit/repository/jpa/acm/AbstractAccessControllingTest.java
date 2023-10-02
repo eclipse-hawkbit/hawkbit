@@ -15,6 +15,7 @@ import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,6 +26,11 @@ public abstract class AbstractAccessControllingTest extends AbstractJpaIntegrati
 
     @Autowired
     protected TestAccessControlManger testAccessControlManger;
+
+    @AfterEach
+    void cleanup() {
+        testAccessControlManger.deleteAllRules();
+    }
 
     public static class AccessControlTestConfig {
 
@@ -45,7 +51,7 @@ public abstract class AbstractAccessControllingTest extends AbstractJpaIntegrati
                 @Override
                 public void assertOperationAllowed(final Operation operation, final List<JpaTargetType> entities)
                         throws InsufficientPermissionException {
-
+                    testAccessControlManger.assertOperation(operation, entities);
                 }
             };
         }

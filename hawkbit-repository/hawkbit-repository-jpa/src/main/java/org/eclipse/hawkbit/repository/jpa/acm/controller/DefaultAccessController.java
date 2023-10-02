@@ -37,6 +37,9 @@ public class DefaultAccessController<T> implements AccessController<T> {
      */
     @Override
     public Specification<T> getAccessRules(final Operation operation) {
+        // TODO: Verify if it's okay to specify this kind of specification when
+        // initializing a list of specs which is then combined in
+        // 'org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder.combineWithAnd'
         return Specification.where(null);
     }
 

@@ -26,12 +26,14 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.TargetTypeInUseException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetTypeAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -65,6 +67,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     private final Database database;
     private final QuotaManagement quotaManagement;
     private final TargetTypeAccessController targetTypeAccessControlManager;
+    private final DistributionSetTypeAccessController distributionSetTypeAccessController;
 
     /**
      * Constructor
@@ -89,6 +92,7 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
         this.database = database;
         this.quotaManagement = quotaManagement;
         this.targetTypeAccessControlManager = accessControlService.getTargetTypeAccessController();
+        this.distributionSetTypeAccessController = accessControlService.getDistributionSetTypeAccessController();
     }
 
     @Override
@@ -241,8 +245,12 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public TargetType assignCompatibleDistributionSetTypes(final long targetTypeId,
             final Collection<Long> distributionSetTypeIds) {
+        final Specification<JpaDistributionSetType> distributionSetTypeSpecification = distributionSetTypeAccessController
+                .appendAccessRules(AccessController.Operation.READ,
+                        DistributionSetTypeSpecification.byIds(distributionSetTypeIds));
+
         final Collection<JpaDistributionSetType> dsTypes = distributionSetTypeRepository
-                .findAllById(distributionSetTypeIds);
+                .findAll(distributionSetTypeSpecification);
 
         if (dsTypes.size() < distributionSetTypeIds.size()) {
             throw new EntityNotFoundException(DistributionSetType.class, distributionSetTypeIds,
@@ -276,7 +284,9 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     private JpaDistributionSetType findDsTypeAndThrowExceptionIfNotFound(final Long typeId) {
-        return distributionSetTypeRepository.findById(typeId)
+        return distributionSetTypeRepository
+                .findOne(distributionSetTypeAccessController.appendAccessRules(AccessController.Operation.READ,
+                        DistributionSetTypeSpecification.byId(typeId)))
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
     }
 

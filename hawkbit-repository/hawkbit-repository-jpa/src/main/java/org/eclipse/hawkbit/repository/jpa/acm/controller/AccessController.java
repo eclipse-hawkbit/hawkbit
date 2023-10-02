@@ -9,11 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
-import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.springframework.data.jpa.domain.Specification;
-
 import java.util.Collections;
 import java.util.List;
+
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.springframework.data.jpa.domain.Specification;
 
 /**
  * Interface of an access control manager. Used by management layer to verify
@@ -38,7 +38,7 @@ public interface AccessController<T> {
      *            resource limitation
      * @return a new appended specification
      */
-    default Specification<T> appendAccessRules(Operation operation, Specification<T> specification) {
+    default Specification<T> appendAccessRules(final Operation operation, final Specification<T> specification) {
         return specification.and(getAccessRules(operation));
     }
 
@@ -49,7 +49,7 @@ public interface AccessController<T> {
      * @throws InsufficientPermissionException
      *             if operation is not permitted for given entities
      */
-    default void assertOperationAllowed(Operation operation, T entity) throws InsufficientPermissionException {
+    default void assertOperationAllowed(final Operation operation, final T entity) throws InsufficientPermissionException {
         assertOperationAllowed(operation, Collections.singletonList(entity));
     }
 

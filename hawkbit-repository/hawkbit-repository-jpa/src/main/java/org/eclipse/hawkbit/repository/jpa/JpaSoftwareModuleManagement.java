@@ -324,8 +324,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         final List<Specification<JpaSoftwareModule>> specList = Lists.newArrayListWithExpectedSize(3);
         specList.add(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleFields.class, virtualPropertyReplacer,
                 database));
-        specList.add(SoftwareModuleSpecification.isDeletedFalse());
-        specList.add(softwareModuleAccessController.getAccessRules(AccessController.Operation.READ));
+        specList.add(softwareModuleAccessController.appendAccessRules(AccessController.Operation.READ,
+                SoftwareModuleSpecification.isDeletedFalse()));
 
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleRepository, pageable, specList);
     }
