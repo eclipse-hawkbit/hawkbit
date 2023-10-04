@@ -35,7 +35,7 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
     @Test
     @Description("Verifies read access rules for target types")
     void verifyTargetTypeReadOperations() {
-        permitTypeCreation();
+        permitAllOperations(AccessController.Operation.CREATE);
 
         final TargetType permittedTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
@@ -133,7 +133,7 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
     @Test
     @Description("Verifies delete access rules for target types")
     void verifyTargetTypeDeleteOperations() {
-        permitTypeCreation();
+        permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
 
@@ -161,7 +161,7 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
     @Test
     @Description("Verifies update operation for target types")
     void verifyTargetTypeUpdateOperations() {
-        permitTypeCreation();
+        permitAllOperations(AccessController.Operation.CREATE);
         final TargetType manageableTargetType = targetTypeManagement
                 .create(entityFactory.targetType().create().name("type1"));
 
@@ -197,7 +197,4 @@ class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 
-    private void permitTypeCreation() {
-        testAccessControlManger.permitOperation(JpaTargetType.class, AccessController.Operation.CREATE, type -> true);
-    }
 }

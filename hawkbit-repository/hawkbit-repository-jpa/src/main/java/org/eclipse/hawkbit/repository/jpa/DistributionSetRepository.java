@@ -139,16 +139,6 @@ public interface DistributionSetRepository
     @Query("select ra.distributionSet.id from JpaRollout ra where ra.distributionSet.id in :ids")
     List<Long> findAssignedToRolloutDistributionSetsById(@Param("ids") Collection<Long> ids);
 
-    /**
-     * Finds the distribution set for a specific action.
-     * 
-     * @param action
-     *            the action associated with the distribution set to find
-     * @return the distribution set associated with the given action
-     */
-    @Query("select DISTINCT d from JpaDistributionSet d join fetch d.modules m join d.actions a where a.id = :action")
-    JpaDistributionSet findByActionId(@Param("action") Long action);
-
     @Query("select DISTINCT ds from JpaDistributionSet ds join fetch ds.modules join ds.assignedToTargets t where t.controllerId = :controllerId")
     Optional<DistributionSet> findAssignedToTarget(@Param("controllerId") String controllerId);
 

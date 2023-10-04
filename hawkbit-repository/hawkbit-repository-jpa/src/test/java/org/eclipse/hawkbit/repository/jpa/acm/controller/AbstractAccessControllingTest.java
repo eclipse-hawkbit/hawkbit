@@ -13,9 +13,10 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.domain.Specification;
@@ -27,9 +28,15 @@ public abstract class AbstractAccessControllingTest extends AbstractJpaIntegrati
     @Autowired
     protected TestAccessControlManger testAccessControlManger;
 
-    @AfterEach
+    @BeforeEach
     void cleanup() {
         testAccessControlManger.deleteAllRules();
+    }
+
+    protected void permitAllOperations(final AccessController.Operation operation) {
+        testAccessControlManger.permitOperation(JpaTarget.class, operation, type -> true);
+        testAccessControlManger.permitOperation(JpaTargetType.class, operation, type -> true);
+        testAccessControlManger.permitOperation(JpaDistributionSet.class, operation, type -> true);
     }
 
     public static class AccessControlTestConfig {
@@ -66,6 +73,23 @@ public abstract class AbstractAccessControllingTest extends AbstractJpaIntegrati
 
                 @Override
                 public void assertOperationAllowed(final Operation operation, final List<JpaTargetType> entities)
+                        throws InsufficientPermissionException {
+                    testAccessControlManger.assertOperation(operation, entities);
+                }
+            };
+        }
+
+        @Bean
+        public DistributionSetAccessController distributionSetAccessController(
+                final TestAccessControlManger testAccessControlManger) {
+            return new DistributionSetAccessController() {
+                @Override
+                public Specification<JpaDistributionSet> getAccessRules(final Operation operation) {
+                    return testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation);
+                }
+
+                @Override
+                public void assertOperationAllowed(final Operation operation, final List<JpaDistributionSet> entities)
                         throws InsufficientPermissionException {
                     testAccessControlManger.assertOperation(operation, entities);
                 }

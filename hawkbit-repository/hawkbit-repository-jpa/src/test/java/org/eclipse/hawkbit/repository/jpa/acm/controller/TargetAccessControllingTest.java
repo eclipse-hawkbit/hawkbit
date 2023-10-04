@@ -35,7 +35,7 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
-@Story("Test Target Type Access Controlling")
+@Story("Test Target Access Controlling")
 class TargetAccessControllingTest extends AbstractAccessControllingTest {
 
     @Test
@@ -269,7 +269,4 @@ class TargetAccessControllingTest extends AbstractAccessControllingTest {
                 .isInstanceOf(InsufficientPermissionException.class);
     }
 
-    private void permitAllOperations(final AccessController.Operation operation) {
-        testAccessControlManger.permitOperation(JpaTarget.class, operation, type -> true);
-    }
 }

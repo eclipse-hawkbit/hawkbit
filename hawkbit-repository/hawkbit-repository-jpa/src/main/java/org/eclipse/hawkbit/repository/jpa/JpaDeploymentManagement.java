@@ -826,7 +826,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
-        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
+        final Specification<JpaTarget> specification = targetAccessControlManager
+                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerId(controllerId));
+        if (!targetRepository.exists(specification)) {
             throw new EntityNotFoundException(Target.class, controllerId);
         }
     }
@@ -960,7 +962,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<DistributionSet> getInstalledDistributionSet(final String controllerId) {
-        throwExceptionIfTargetDoesNotExist(controllerId);
         return distributionSetRepository.findInstalledAtTarget(controllerId);
     }
 
@@ -995,6 +996,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public boolean hasPendingCancellations(final String controllerId) {
+        throwExceptionIfTargetDoesNotExist(controllerId);
         return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(controllerId,
                 Action.Status.CANCELING);
     }

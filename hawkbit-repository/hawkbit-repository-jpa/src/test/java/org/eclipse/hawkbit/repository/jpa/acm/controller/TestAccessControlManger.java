@@ -36,10 +36,6 @@ public class TestAccessControlManger {
 
     public <T> void defineAccessRule(final Class<T> ruleClass, final AccessController.Operation operation,
             final Specification<T> specification) {
-        final List<AccessRule<?>> list = accessRules.stream().filter(
-                rule -> rule.getRuleClass().isAssignableFrom(ruleClass) && rule.getOperation().equals(operation))
-                .toList();
-        list.forEach(accessRules::remove);
         accessRules.add(new AccessRule<T>(ruleClass, operation, specification));
     }
 
@@ -56,9 +52,6 @@ public class TestAccessControlManger {
 
     public <T> void permitOperation(final Class<T> ruleClass, final AccessController.Operation operation,
             final Predicate<T> entityIdentifier) {
-        final List<OperationDescriber<?>> list = operationDescribers.stream()
-                .filter(rule -> rule.getOperation().equals(operation)).toList();
-        list.forEach(operationDescribers::remove);
         operationDescribers.add(new OperationDescriber<T>(ruleClass, entityIdentifier, operation));
     }
 

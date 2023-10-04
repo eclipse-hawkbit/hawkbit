@@ -23,6 +23,8 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import javax.persistence.criteria.SetJoin;
 
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag_;
@@ -71,7 +73,6 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> isCompleted(final Boolean isCompleted) {
         return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.complete), isCompleted);
-
     }
 
     /**
@@ -85,7 +86,6 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> isValid(final Boolean isValid) {
         return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.valid), isValid);
-
     }
 
     /**
@@ -104,6 +104,15 @@ public final class DistributionSetSpecification {
             query.distinct(true);
 
             return predicate;
+        };
+    }
+
+    public static Specification<JpaDistributionSet> byActionId(final Long actionId) {
+        return (dsRoot, query, cb) -> {
+            final ListJoin<JpaDistributionSet, JpaAction> join = dsRoot.join(JpaDistributionSet_.actions,
+                    JoinType.LEFT);
+            query.distinct(true);
+            return cb.equal(join.get(JpaAction_.id), actionId);
         };
     }
 
