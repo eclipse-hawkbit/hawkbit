@@ -1,3 +1,0 @@
-| `429 Too Many Request`
-| Too many requests. The server will refuse further attempts and the client has to wait another second.
-|

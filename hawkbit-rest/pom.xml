@@ -27,6 +27,5 @@
       <module>hawkbit-mgmt-resource</module>
       <module>hawkbit-ddi-api</module>
       <module>hawkbit-ddi-resource</module>
-      <module>hawkbit-rest-docs</module>
    </modules>
 </project>

@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.json.model.ExceptionInfo;
+import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -61,7 +62,7 @@ import org.springframework.web.util.UriUtils;
  */
 @Feature("Component Tests - Management API")
 @Story("Target Filter Query Resource")
-public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
+public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiIntegrationTest {
 
     private static final String JSON_PATH_ROOT = "$";
 
@@ -94,6 +95,39 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
             + JSON_PATH_FIELD_AUTO_ASSIGN_ACTION_TYPE;
     private static final String JSON_PATH_EXCEPTION_CLASS = JSON_PATH_ROOT + JSON_PATH_FIELD_EXCEPTION_CLASS;
     private static final String JSON_PATH_ERROR_CODE = JSON_PATH_ROOT + JSON_PATH_FIELD_ERROR_CODE;
+
+    @Test
+    @Description("Handles the GET request of retrieving all target filter queries within SP.")
+    public void getTargetFilterQueries() throws Exception {
+        final String filterName = "filter_01";
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
+
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING))
+                .andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print());
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving all target filter queries within SP based by parameter. Required Permission: READ_TARGET.")
+    public void getTargetFilterQueriesWithParameters() throws Exception {
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==*1"))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print());
+    }
+
+    @Test
+    @Description("Handles the POST request of creating a new target filter query within SP.")
+    public void createTargetFilterQuery() throws Exception {
+        final String name = "test_02";
+        final String filterQuery = "name==test_02";
+        final String body = new JSONObject()
+                .put("name", name)
+                .put("query", filterQuery).toString();
+
+        mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING)
+                        .contentType(MediaType.APPLICATION_JSON).content(body))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isCreated());
+    }
 
     @Test
     @Description("Ensures that deletion is executed if permitted.")
@@ -594,6 +628,53 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     }
 
     @Test
+    @Description("Handles the GET request of retrieving a the auto assign distribution set of a target filter query within SP.")
+    public void getAssignDS() throws Exception {
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("filter_01", "name==test_01");
+        final DistributionSet ds = testdataFactory.createDistributionSet("ds");
+        targetFilterQueryManagement
+                .updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(filterQuery.getId()).ds(ds.getId()));
+
+        mvc.perform(get(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                        filterQuery.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Handles the POST request of setting a distribution set for auto assignment within SP.")
+    public void createAutoAssignDS() throws Exception {
+        enableMultiAssignments();
+        enableConfirmationFlow();
+
+        final String filterName = "filter_01";
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
+        final String autoAssignBody = new JSONObject().put("id", distributionSet.getId())
+                .put("type", MgmtActionType.SOFT.getName()).put("weight", 200).toString();
+
+        mvc
+                .perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                                filterQuery.getId()).contentType(MediaType.APPLICATION_JSON).content(autoAssignBody.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Handles the DELETE request of deleting the auto assign distribution set from a target filter query within SP.")
+    public void deleteAutoAssignDS() throws Exception {
+        final String filterName = "filter_01";
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery(filterName, "name==test_01");
+        mvc
+                .perform(delete(
+                        MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
+                        filterQuery.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
     @Description("Ensures that the deletion of auto-assignment distribution set works as intended, deleting the auto-assignment action type as well")
     public void deleteAutoAssignDistributionSetOfTargetFilterQuery() throws Exception {
 
@@ -658,5 +739,4 @@ public class MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInte
     private TargetFilterQuery createSingleTargetFilterQuery(final String name, final String query) {
         return targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name(name).query(query));
     }
-
 }

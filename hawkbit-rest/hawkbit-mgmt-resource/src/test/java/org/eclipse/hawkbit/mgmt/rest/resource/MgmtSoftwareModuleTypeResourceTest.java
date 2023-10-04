@@ -95,6 +95,20 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                 .andExpect(jsonPath("$.total", equalTo(4)));
     }
 
+    @Test
+    @WithUser(principal = "uploadTester", allSpPermissions = true)
+    @Description("Handles the GET request of retrieving all software module types within SP with parameters. In this case the first 10 result in ascending order by name where the name starts with 'a'.")
+    public void getSoftwareModuleTypesWithParameters() throws Exception {
+        final SoftwareModuleType testType = testdataFactory.findOrCreateSoftwareModuleType("test123");
+        softwareModuleTypeManagement
+                .update(entityFactory.softwareModuleType().update(testType.getId()).description("Desc1234").colour("rgb(106,178,83)"));
+
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULETYPE_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==a")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
     private SoftwareModuleType createTestType() {
         SoftwareModuleType testType = softwareModuleTypeManagement.create(entityFactory.softwareModuleType().create()
                 .key("test123").name("TestName123").description("Desc123").colour("colour").maxAssignments(5));

@@ -65,6 +65,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -84,13 +85,25 @@ import org.springframework.util.Assert;
 public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
-    @Description("This test verifies the call of all Software Modules that are assiged to a Distribution Set through the RESTful API.")
-    public void getSoftwaremodules() throws Exception {
+    @Description("This test verifies the call of all Software Modules that are assigned to a Distribution Set through the RESTful API.")
+    public void getSoftwareModules() throws Exception {
         // Create DistributionSet with three software modules
         final DistributionSet set = testdataFactory.createDistributionSet("SMTest");
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.size", equalTo(set.getModules().size())));
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving assigned software modules of a single distribution set within SP with given page size and offset including sorting by version descending and filter down to all sets which name starts with 'one'.")
+    public void getSoftwareModulesWithParameters() throws Exception {
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+
+        // post assignment
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedSM")
+                        .param("offset", "1").param("limit", "2").param("sort", "version:DESC").param("q", "name==one*")
+                        .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
@@ -179,7 +192,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     @Test
     @Description("This test verifies the assignment of Software Modules to a Distribution Set through the RESTful API.")
-    public void assignSoftwaremoduleToDistributionSet() throws Exception {
+    public void assignSoftwareModuleToDistributionSet() throws Exception {
 
         // create DisSet
         final DistributionSet disSet = testdataFactory.createDistributionSetWithNoSoftwareModules("Jupiter", "398,88");
@@ -242,7 +255,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     @Test
     @Description("This test verifies the removal of Software Modules of a Distribution Set through the RESTful API.")
-    public void unassignSoftwaremoduleFromDistributionSet() throws Exception {
+    public void unassignSoftwareModuleFromDistributionSet() throws Exception {
 
         // Create DistributionSet with three software modules
         final DistributionSet set = testdataFactory.createDistributionSet("Venus");
@@ -578,10 +591,26 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         testdataFactory.createTarget(knownTargetId);
         assignDistributionSet(createdDs.getId(), knownTargetId);
 
-        mvc.perform(get(
-                MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets"))
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId() + "/assignedTargets"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.content[0].controllerId", equalTo(knownTargetId)));
+    }
+
+    @Test
+    @Description("Handles the GET request for retrieving assigned targets of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets which controllerID starts with 'target'.")
+    public void getAssignedTargetsOfDistributionSetWithParameters() throws Exception {
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+
+        assignDistributionSet(set, testdataFactory.createTargets(5, "targetMisc", "Test targets for query"))
+                .getAssignedEntity();
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/assignedTargets")
+                            .param("offset", "1").param("limit", "2").param("sort", "name:DESC")
+                            .param("q", "controllerId==target*").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
     }
 
     @Test
@@ -617,6 +646,24 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Handles the GET request for retrieving installed targets of a single distribution set with a defined page size and offset, sortet by name in descending order and filtered down to all targets which controllerID starts with 'target'.")
+    public void getInstalledTargetsOfDistributionSetWithParameters() throws Exception {
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+
+        final List<Target> targets = assignDistributionSet(set,
+                testdataFactory.createTargets(5, "targetMisc", "Test targets for query")).getAssignedEntity().stream()
+                .map(Action::getTarget).collect(Collectors.toList());
+        testdataFactory.sendUpdateActionStatusToTargets(targets, Status.FINISHED, "some message");
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/installedTargets")
+                        .param("offset", "1").param("limit", "2").param("sort", "name:DESC")
+                        .param("q", "controllerId==target*").accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+    }
+
+    @Test
     @Description("Ensures that target filters with auto assign DS are returned as persisted in the repository.")
     public void getAutoAssignTargetFiltersOfDistributionSet() throws Exception {
         // prepare distribution set
@@ -633,6 +680,22 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + createdDs.getId()
                 + "/autoAssignTargetFilters")).andExpect(status().isOk()).andExpect(jsonPath("$.size", equalTo(1)))
                 .andExpect(jsonPath("$.content[0].name", equalTo(knownFilterName)));
+    }
+
+    @Test
+    @Description("Handles the GET request for retrieving assigned target filter queries of a single distribution set with a defined page size and offset, sorted by name in descending order and filtered down to all targets with a name that ends with '1'.")
+    public void ggetAutoAssignTargetFiltersOfDistributionSetWithParameters() throws Exception {
+        final DistributionSet set = testdataFactory.createUpdatedDistributionSet();
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filter1").query("name==a")
+                .autoAssignDistributionSet(set));
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/" + set.getId() + "/autoAssignTargetFilters")
+                        .param("offset", "1").param("limit", "2").param("sort", "name:DESC").param("q", "name==*1")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
     }
 
     @Test
@@ -692,7 +755,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     @Test
     @Description("Ensures that DS in repository are listed with proper paging properties.")
-    public void getDistributionSetsWithoutAddtionalRequestParameters() throws Exception {
+    public void getDistributionSetsWithoutAdditionalRequestParameters() throws Exception {
         final int sets = 5;
         createDistributionSetsAlphabetical(sets);
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING)).andDo(MockMvcResultPrinter.print())
@@ -1184,8 +1247,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
-    @Description("Ensures that a metadata entry selection through API reflectes the repository content.")
-    public void getSingleMetadata() throws Exception {
+    @Description("Ensures that a metadata entry selection through API reflects the repository content.")
+    public void geteMetadataKey() throws Exception {
         // prepare and create metadata
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";
@@ -1198,8 +1261,27 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     }
 
     @Test
+    @Description("Get a paged list of meta data for a distribution set with standard page size.")
+    public void getMetadata() throws Exception {
+        final int totalMetadata = 4;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final DistributionSet testDS = testdataFactory.createDistributionSet("one");
+        for (int index = 0; index < totalMetadata; index++) {
+            distributionSetManagement.createMetaData(testDS.getId(), Lists
+                    .newArrayList(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+        }
+
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
+                        testDS.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
+    }
+
+    @Test
     @Description("Ensures that a metadata entry paged list selection through API reflectes the repository content.")
-    public void getPagedListofMetadata() throws Exception {
+    public void getPagedListOfMetadata() throws Exception {
 
         final int totalMetadata = 10;
         final int limitParam = 5;
@@ -1366,7 +1448,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     @Test
     @Description("A request for assigning a target multiple times results in a Bad Request when multiassignment is disabled.")
-    public void multiassignmentRequestNotAllowedIfDisabled() throws Exception {
+    public void multiAssignmentRequestNotAllowedIfDisabled() throws Exception {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 

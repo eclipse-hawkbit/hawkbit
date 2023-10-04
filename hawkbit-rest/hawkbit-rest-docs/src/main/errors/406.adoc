@@ -1,3 +1,0 @@
-| `406 Not Acceptable`
-|  In case accept header is specified and not application/json.
-|

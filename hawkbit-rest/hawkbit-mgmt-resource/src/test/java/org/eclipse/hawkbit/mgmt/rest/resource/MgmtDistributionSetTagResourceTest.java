@@ -75,7 +75,19 @@ public class MgmtDistributionSetTagResourceTest extends AbstractManagementApiInt
     }
 
     @Test
-    @Description("Verfies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.")
+    @Description("Handles the GET request of retrieving all distribution set tags based by parameter")
+    public void getDistributionSetTagsWithParameters() throws Exception {
+        final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
+        final DistributionSetTag assigned = tags.get(0);
+        final DistributionSetTag unassigned = tags.get(1);
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_TAG_V1_REQUEST_MAPPING
+                        + "?limit=10&sort=name:ASC&offset=0&q=name==DsTag"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Verifies that a paged result list of DS tags reflects the content on the repository side when filtered by distribution set id.")
     public void getDistributionSetTagsByDistributionSetId() throws Exception {
         final List<DistributionSetTag> tags = testdataFactory.createDistributionSetTags(2);
         final DistributionSetTag tag1 = tags.get(0);
