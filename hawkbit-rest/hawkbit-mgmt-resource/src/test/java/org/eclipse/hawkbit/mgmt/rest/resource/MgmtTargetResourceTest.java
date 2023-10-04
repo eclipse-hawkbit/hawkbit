@@ -10,7 +10,7 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.TARGET_V1_AUTO_CONFIRM;
+import static org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -43,11 +43,14 @@ import java.util.stream.Stream;
 
 import javax.validation.ConstraintViolationException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
+import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetAutoConfirmUpdate;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.Identifiable;
@@ -134,6 +137,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     private static final String JSON_PATH_LAST_REQUEST_AT = JSON_PATH_ROOT + JSON_PATH_FIELD_LAST_REQUEST_AT;
     private static final String JSON_PATH_TYPE = JSON_PATH_ROOT + JSON_PATH_FIELD_TARGET_TYPE;
 
+    @Autowired
+    private ObjectMapper objectMapper;
     @Autowired
     private JpaProperties jpaProperties;
 
@@ -1081,8 +1086,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that the expected response of geting actions of a target is returned.")
-    void getMultipleActions() throws Exception {
+    @Description("Ensures that the expected response of getting actions of a target is returned.")
+    void getActions() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
@@ -1106,7 +1111,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Ensures that the expected response of getting actions with maintenance window of a target is returned.")
-    void getMultipleActionsWithMaintenanceWindow() throws Exception {
+    void getActionsWithMaintenanceWindow() throws Exception {
         final String knownTargetId = "targetId";
         final String schedule = getTestSchedule(10);
         final String duration = getTestDuration(10);
@@ -1144,7 +1149,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies that the API returns the status list with expected content.")
-    void getMultipleActionStatus() throws Exception {
+    void getActionsStatus() throws Exception {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         // retrieve list in default descending order for actionstaus entries
@@ -1172,7 +1177,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies that the API returns the status list with expected content sorted by reportedAt field.")
-    void getMultipleActionStatusSortedByReportedAt() throws Exception {
+    void getActionsStatusSortedByReportedAt() throws Exception {
         final String knownTargetId = "targetId";
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
         final List<ActionStatus> actionStatus = deploymentManagement.findActionStatusByAction(PAGE, action.getId())
@@ -1218,7 +1223,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies that the API returns the status list with expected content split into two pages.")
-    void getMultipleActionStatusWithPagingLimitRequestParameter() throws Exception {
+    void getActionsStatusWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
 
         final Action action = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId).get(0);
@@ -1258,7 +1263,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     @Description("Verifies getting multiple actions with the paging request parameter.")
-    void getMultipleActionsWithPagingLimitRequestParameter() throws Exception {
+    void getActionsWithPagingLimitRequestParameter() throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
@@ -1708,7 +1713,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    void getControllerAttributesViaTargetResourceReturnsAttributesWithOk() throws Exception {
+    void getControllerAttributesReturnsAttributesWithOk() throws Exception {
         // create target with attributes
         final String knownTargetId = "targetIdWithAttributes";
         final Map<String, String> knownControllerAttrs = new HashMap<>();
@@ -1782,6 +1787,21 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(status().isBadRequest());
 
         assertThat(targetManagement.isControllerAttributesRequested(knownTargetId)).isTrue();
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving all targets within SP..")
+    public void getTargets() throws Exception {
+        enableConfirmationFlow();
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING)).andExpect(status().isOk())
+                .andDo(MockMvcResultPrinter.print());
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving all targets within SP based by parameter.")
+    public void getTargetsWithParameters() throws Exception {
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
+                .andExpect(status().isOk()).andDo(MockMvcResultPrinter.print());
     }
 
     @Test
@@ -1964,8 +1984,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Ensures that a metadata entry selection through API reflectes the repository content.")
-    void getSingleMetadata() throws Exception {
+    @Description("Ensures that a metadata entry selection through API reflects the repository content.")
+    void getMetadataKey() throws Exception {
         final String knownControllerId = "targetIdWithMetadata";
 
         // prepare and create metadata for deletion
@@ -1977,6 +1997,24 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get("/rest/v1/targets/{targetId}/metadata/{key}", knownControllerId, knownKey))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("key", equalTo(knownKey))).andExpect(jsonPath("value", equalTo(knownValue)));
+    }
+
+    @Test
+    @Description("Get a paged list of meta data for a target with standard page size.")
+    public void getMetadata() throws Exception {
+        final int totalMetadata = 4;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final Target testTarget = testdataFactory.createTarget("targetId");
+        for (int index = 0; index < totalMetadata; index++) {
+            targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
+                    entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+        }
+
+        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/metadata", testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
     }
 
     @Test
@@ -2524,6 +2562,33 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}", knownTargetId))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("autoConfirmActive").exists()).andExpect(jsonPath("_links.autoConfirm").exists());
+    }
+
+    @Test
+    @Description("Handles the POST request to activate auto-confirm on a target. Payload can be provided to specify more details about the operation.")
+    public void postActivateAutoConfirm() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("targetId");
+
+        final MgmtTargetAutoConfirmUpdate body = new MgmtTargetAutoConfirmUpdate("custom_initiator_value",
+                "custom_remark_value");
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/"
+                        + TARGET_V1_ACTIVATE_AUTO_CONFIRM, testTarget.getControllerId())
+                        .content(objectMapper.writeValueAsString(body)).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @Description("Handles the POST request to deactivate auto-confirm on a target.")
+    public void postDeactivateAutoConfirm() throws Exception {
+        final Target testTarget = testdataFactory.createTarget("targetId");
+        confirmationManagement.activateAutoConfirmation(testTarget.getControllerId(), null, null);
+
+        mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/{targetId}/" + TARGET_V1_AUTO_CONFIRM + "/"
+                        + TARGET_V1_DEACTIVATE_AUTO_CONFIRM, testTarget.getControllerId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
     }
 
     @Test

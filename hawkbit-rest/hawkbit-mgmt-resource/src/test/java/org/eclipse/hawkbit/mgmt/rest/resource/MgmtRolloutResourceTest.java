@@ -34,6 +34,7 @@ import java.util.stream.Stream;
 
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
+import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.RolloutGroupManagement;
 import org.eclipse.hawkbit.repository.RolloutManagement;
@@ -62,6 +63,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
+import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.ResultMatcher;
 
@@ -377,6 +379,41 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("content[0].deleted", equalTo(false)))
                 .andExpect(jsonPath("content[0].totalGroups", equalTo(4)))
                 .andExpect(jsonPath("content[0]._links.self.href", startsWith(HREF_ROLLOUT_PREFIX)));
+    }
+
+    @Test
+    @Description("Handles the GET request of retrieving a single rollout.")
+    public void getRollout() throws Exception {
+        enableMultiAssignments();
+        approvalStrategy.setApprovalNeeded(true);
+        try {
+            approvalStrategy.setApproveDecidedBy("exampleUsername");
+
+            testdataFactory.createTargets(4, "rollout", "description");
+            final DistributionSet dsA = testdataFactory.createDistributionSet("");
+            // create a running rollout for the created targets
+            final Rollout rollout = rolloutManagement.create(
+                    entityFactory
+                            .rollout()
+                            .create()
+                            .name("rollout1")
+                            .set(dsA.getId())
+                            .targetFilterQuery("controllerId==rollout*"),
+                    4, false, new RolloutGroupConditionBuilder().withDefaults()
+                            .successCondition(RolloutGroupSuccessCondition.THRESHOLD, "100").build());
+
+            rolloutHandler.handleAll();
+
+            rolloutManagement.approveOrDeny(rollout.getId(), Rollout.ApprovalDecision.APPROVED, "Approved remark.");
+
+            mvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}", rollout.getId())
+                            .accept(MediaTypes.HAL_JSON_VALUE))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaTypes.HAL_JSON));
+        } finally {
+            approvalStrategy.setApprovalNeeded(false);
+        }
     }
 
     @ParameterizedTest
@@ -1072,6 +1109,24 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Handles the GET request of retrieving a all targets of a specific deploy group of a rollout.")
+    public void getRolloutDeployGroupTargetsWithParameters() throws Exception {
+        testdataFactory.createTargets(4, "rollout", "description");
+        final DistributionSet dsA = testdataFactory.createDistributionSet("");
+        final Rollout rollout = createRollout("rollout1", 2, dsA.getId(), "controllerId==rollout*");
+        final RolloutGroup firstRolloutGroup = rolloutGroupManagement
+                .findByRollout(PageRequest.of(0, 1), rollout.getId()).getContent().get(0);
+
+        mvc.perform(get(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deploygroups/{deployGroupId}/targets",
+                                rollout.getId(), firstRolloutGroup.getId()).param("offset", "0").param("limit", "2")
+                                .param("sort", "name:ASC").param("q", "controllerId==exampleTarget0")
+                                .accept(MediaTypes.HAL_JSON_VALUE))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
+    }
+
+    @Test
     @Description("Testing that the targets of rollout group can be retrieved with rsql query param")
     void retrieveTargetsFromRolloutGroupWithQuery() throws Exception {
         // setup
@@ -1335,6 +1390,40 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
         assertThat(rollouts).hasSize(1);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
+    }
+
+    @Test
+    @Description("Handles the POST request of approving a rollout.")
+    public void approveRollout() throws Exception {
+        approvalStrategy.setApprovalNeeded(true);
+        try {
+            testdataFactory.createTargets(4, "rollout", "description");
+            final DistributionSet dsA = testdataFactory.createDistributionSet("");
+            final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+            mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/approve", rollout.getId())
+                            .accept(MediaTypes.HAL_JSON_VALUE))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+        } finally {
+            approvalStrategy.setApprovalNeeded(false);
+        }
+    }
+
+    @Test
+    @Description("Handles the POST request of denying a rollout. Required Permission: " + SpPermission.APPROVE_ROLLOUT)
+    public void denyRollout() throws Exception {
+        approvalStrategy.setApprovalNeeded(true);
+        try {
+            testdataFactory.createTargets(4, "rollout", "description");
+            final DistributionSet dsA = testdataFactory.createDistributionSet("");
+            final Rollout rollout = createRollout("rollout1", 3, dsA.getId(), "controllerId==rollout*", false);
+            mvc.perform(post(MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/deny", rollout.getId())
+                            .accept(MediaTypes.HAL_JSON_VALUE))
+                    .andDo(MockMvcResultPrinter.print())
+                    .andExpect(status().isOk());
+        } finally {
+            approvalStrategy.setApprovalNeeded(false);
+        }
     }
 
     @Test

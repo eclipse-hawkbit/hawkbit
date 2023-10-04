@@ -433,6 +433,15 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     }
 
     @Test
+    @Description("Handles the GET request of retrieving all distribution set types within SP based on parameter.")
+    public void getDistributionSetTypesWithParameter() throws Exception {
+        mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING
+                        + "?limit=10&sort=name:ASC&offset=0&q=name==a"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @WithUser(principal = "uploadTester", allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/DistributionSetTypes/{ID} DELETE requests (hard delete scenario).")
     public void deleteDistributionSetTypeUnused() throws Exception {
@@ -496,6 +505,22 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
                 .andExpect(jsonPath("$.description", equalTo("foobardesc")))
                 .andExpect(jsonPath("$.colour", equalTo("updatedColour")))
                 .andExpect(jsonPath("$.name", equalTo("TestName123"))).andReturn();
+    }
+
+    @Test
+    @Description("Handles the PUT request for a single distribution set type within SP.")
+    public void updateDistributionSetTypeDescriptionAndColor() throws Exception {
+        final DistributionSetType testType = distributionSetTypeManagement.update(entityFactory.distributionSetType()
+                .update(testdataFactory.createDistributionSet().getType().getId()).description("Desc1234"));
+        final String body = new JSONObject()
+                .put("description", "an updated description")
+                .put("colour", "rgb(106,178,83)").toString();
+
+        mvc
+                .perform(put(MgmtRestConstants.DISTRIBUTIONSETTYPE_V1_REQUEST_MAPPING + "/{distributionSetTypeId}",
+                        testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print());
+
     }
 
     @Test

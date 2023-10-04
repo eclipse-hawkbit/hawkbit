@@ -690,6 +690,24 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                         "http://localhost/rest/v1/softwaremodules/" + sm.getId() + "/artifacts/" + artifact2.getId())));
     }
 
+    @Test
+    @Description("Handles the GET request of retrieving all meta data of artifacts assigned to a software module (in full representation mode including a download URL by the artifact provider).")
+    public void getArtifactsWithParameters() throws Exception {
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final byte[] random = RandomStringUtils.random(5).getBytes();
+
+        artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, 0));
+
+        mvc.perform(
+                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/artifacts", sm.getId())
+                                .param("representation", MgmtRepresentationMode.FULL.toString())
+                                .param("useartifacturlhandler", Boolean.TRUE.toString()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
+    }
+
     @ParameterizedTest
     @ValueSource(booleans = { true, false })
     @Description("Verifies the listing of all artifacts assigned to a software module. That includes the artifact metadata and download links.")
@@ -784,8 +802,42 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description("Tests the deletion of an artifact including verification that the artifact is actually erased in the repository and removed from the software module.")
+    void deleteArtifact() throws Exception {
+        // Create 1 SM
+        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
+
+        final int artifactSize = 5 * 1024;
+        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
+
+        // Create 2 artifacts
+        final Artifact artifact = artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
+
+        // check repo before delete
+        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
+
+        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(2);
+        assertThat(artifactManagement.count()).isEqualTo(2);
+
+        // delete
+        mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+
+        // check that only one artifact is still alive and still assigned
+        assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted").hasSize(1);
+        assertThat(artifactManagement.count()).isEqualTo(1);
+        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts())
+                .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
+
+    }
+
+    @Test
     @Description("Verifies that the system refuses unsupported request types and answers as defined to them, e.g. NOT FOUND on a non existing resource. Or a HTTP POST for updating a resource results in METHOD NOT ALLOWED etc.")
-    void invalidRequestsOnSoftwaremodulesResource() throws Exception {
+    void invalidRequestsOnSoftwareModulesResource() throws Exception {
         final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
 
         final List<SoftwareModule> modules = Arrays.asList(sm);
@@ -844,7 +896,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
 
     @Test
     @Description("Test of modules retrieval without any parameters. Will return all modules in the system as defined by standard page size.")
-    void getSoftwareModulesWithoutAddtionalRequestParameters() throws Exception {
+    void getSoftwareModulesWithoutAdditionalRequestParameters() throws Exception {
         final int modules = 5;
         createSoftwareModulesAlphabetical(modules);
         mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING))
@@ -1155,40 +1207,6 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Tests the deletion of an artifact including verification that the artifact is actually erased in the repository and removed from the software module.")
-    void deleteArtifact() throws Exception {
-        // Create 1 SM
-        final SoftwareModule sm = testdataFactory.createSoftwareModuleOs();
-
-        final int artifactSize = 5 * 1024;
-        final byte random[] = RandomStringUtils.random(artifactSize).getBytes();
-
-        // Create 2 artifacts
-        final Artifact artifact = artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file1", false, artifactSize));
-        artifactManagement.create(
-                new ArtifactUpload(new ByteArrayInputStream(random), sm.getId(), "file2", false, artifactSize));
-
-        // check repo before delete
-        assertThat(softwareModuleManagement.findAll(PAGE)).hasSize(1);
-
-        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts()).hasSize(2);
-        assertThat(artifactManagement.count()).isEqualTo(2);
-
-        // delete
-        mvc.perform(delete("/rest/v1/softwaremodules/{smId}/artifacts/{artId}", sm.getId(), artifact.getId()))
-                .andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isOk());
-
-        // check that only one artifact is still alive and still assigned
-        assertThat(softwareModuleManagement.findAll(PAGE)).as("After the sm should be marked as deleted").hasSize(1);
-        assertThat(artifactManagement.count()).isEqualTo(1);
-        assertThat(softwareModuleManagement.get(sm.getId()).get().getArtifacts())
-                .as("After delete artifact should available for marked as deleted sm's").hasSize(1);
-
-    }
-
-    @Test
     @Description("Verifies the successful creation of metadata and the enforcement of the meta data quota.")
     void createMetadata() throws Exception {
 
@@ -1240,8 +1258,66 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
+    @Description(" Get a paged list of meta data for a software module.")
+    public void getMetadata() throws Exception {
+        final int totalMetadata = 4;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+
+        for (int index = 0; index < totalMetadata; index++) {
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                    .key(knownKeyPrefix + index).value(knownValuePrefix + index));
+        }
+
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+                        module.getId())).andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
+    }
+
+    @Test
+    @Description(" Get a paged list of meta data for a software module with defined page size and sorting by name descending and key starting with 'known'.")
+    public void getMetadataWithParameters() throws Exception {
+        final int totalMetadata = 4;
+        final String knownKeyPrefix = "knownKey";
+        final String knownValuePrefix = "knownValue";
+        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+
+        for (int index = 0; index < totalMetadata; index++) {
+            softwareModuleManagement.createMetaData(entityFactory.softwareModuleMetadata().create(module.getId())
+                    .key(knownKeyPrefix + index).value(knownValuePrefix + index));
+        }
+
+        mvc.perform(get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata",
+                        module.getId()).param("offset", "1").param("limit", "2").param("sort", "key:DESC").param("q",
+                        "key==known*"))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaTypes.HAL_JSON));
+    }
+
+    @Test
+    @Description(" Get a single meta data value for a meta data key." )
+    public void getMetadataValue() throws Exception {
+
+        // prepare and create metadata
+        final String knownKey = "knownKey";
+        final String knownValue = "knownValue";
+        final SoftwareModule module = testdataFactory.createDistributionSet("one").findFirstModuleByType(osType).get();
+        softwareModuleManagement.createMetaData(
+                entityFactory.softwareModuleMetadata().create(module.getId()).key(knownKey).value(knownValue));
+
+        mvc.perform(
+                        get(MgmtRestConstants.SOFTWAREMODULE_V1_REQUEST_MAPPING + "/{softwareModuleId}/metadata/{metadataKey}",
+                                module.getId(), knownKey))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk());
+    }
+
+    @Test
     @Description("Verifies the successful update of metadata based on given key.")
-    void updateMetadata() throws Exception {
+    void updateMetadataKey() throws Exception {
         // prepare and create metadata for update
         final String knownKey = "knownKey";
         final String knownValue = "knownValue";

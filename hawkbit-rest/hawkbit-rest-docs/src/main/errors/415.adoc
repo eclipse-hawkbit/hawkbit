@@ -1,3 +1,0 @@
-| `415 Unsupported Media Type`
-| The request was attempt with a media-type which is not supported by the server for this resource.
-|
