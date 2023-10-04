@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -71,6 +72,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -154,6 +156,9 @@ public class TestdataFactory {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
     private TargetTypeManagement targetTypeManagement;
@@ -1143,6 +1148,17 @@ public class TestdataFactory {
             }
         }
         return result;
+    }
+
+    public TargetFilterQuery createTargetFilterWithActiveAutoAssignment() {
+        createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
+
+        createDistributionSet();
+
+        return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
     }
 
     /**

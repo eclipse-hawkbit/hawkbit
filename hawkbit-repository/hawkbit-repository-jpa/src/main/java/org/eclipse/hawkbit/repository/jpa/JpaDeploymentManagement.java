@@ -354,8 +354,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .distinct().toList();
 
         final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
-                .stream().map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)))
-                .flatMap(List::stream).map(JpaTarget::getControllerId).toList();
+                .stream().map(ids -> {
+                    final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
+                            AccessController.Operation.READ, TargetSpecifications.hasControllerIdIn(ids));
+                    return targetRepository.findAll(specification);
+                }).flatMap(List::stream).map(JpaTarget::getControllerId).toList();
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());

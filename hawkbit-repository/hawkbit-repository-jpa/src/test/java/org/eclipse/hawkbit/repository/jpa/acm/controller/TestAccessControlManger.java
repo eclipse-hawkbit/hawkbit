@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2022 Bosch.IO GmbH and others
+ * Copyright (c) 2023 Bosch.IO GmbH and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -7,14 +7,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa.acm;
+package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TestAccessControlManger {

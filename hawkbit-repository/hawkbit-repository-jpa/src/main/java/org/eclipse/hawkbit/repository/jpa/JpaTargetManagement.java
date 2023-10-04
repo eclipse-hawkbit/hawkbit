@@ -651,6 +651,7 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unAssignTag(final String controllerID, final long targetTagId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
+        targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagId));
@@ -670,8 +671,8 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target unAssignType(final String controllerID) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
-        target.setTargetType(null);
         targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
+        target.setTargetType(null);
         return targetRepository.save(target);
     }
 
@@ -682,8 +683,8 @@ public class JpaTargetManagement implements TargetManagement {
     public Target assignType(final String controllerID, final Long targetTypeId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerID);
         final JpaTargetType targetType = getTargetTypeByIdAndThrowIfNotFound(targetTypeId);
-        target.setTargetType(targetType);
         targetAccessControlManager.assertOperationAllowed(AccessController.Operation.UPDATE, target);
+        target.setTargetType(targetType);
         return targetRepository.save(target);
     }
 
