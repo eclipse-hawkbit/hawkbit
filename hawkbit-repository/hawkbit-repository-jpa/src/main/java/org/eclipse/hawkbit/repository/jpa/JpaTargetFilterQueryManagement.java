@@ -31,6 +31,8 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -86,6 +88,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final SystemSecurityContext systemSecurityContext;
     private final TenantAware tenantAware;
     private final ContextRunner contextRunner;
+    private final DistributionSetAccessController distributionSetAccessController;
 
     private final Database database;
 
@@ -105,6 +108,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.contextRunner = accessControlService.getContextRunner();
+        this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
     }
 
     @Override
@@ -267,7 +271,13 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     public TargetFilterQuery updateAutoAssignDS(final AutoAssignDistributionSetUpdate update) {
         final JpaTargetFilterQuery targetFilterQuery = findTargetFilterQueryOrThrowExceptionIfNotFound(
                 update.getTargetFilterId());
+
         if (update.getDsId() == null) {
+            // verify the current auto assignment can be deactivated
+            if (targetFilterQuery.getAutoAssignDistributionSet() != null) {
+                distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE,
+                        (JpaDistributionSet) targetFilterQuery.getAutoAssignDistributionSet());
+            }
             targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
@@ -280,6 +290,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
+            distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
             targetFilterQuery.setAccessControlContext(contextRunner.getCurrentContext());
             targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
@@ -340,6 +351,9 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Override
     @Transactional
     public void cancelAutoAssignmentForDistributionSet(final long setId) {
+        distributionSetManagement.get(setId).ifPresent(ds -> distributionSetAccessController
+                .assertOperationAllowed(AccessController.Operation.UPDATE, (JpaDistributionSet) ds));
+
         targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(setId);
         LOGGER.debug("Auto assignments for distribution sets {} deactivated", setId);
     }

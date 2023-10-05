@@ -68,7 +68,7 @@ class ContextRunnerTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies acm context is persisted when activating auto assignment")
     void verifyContextIsPersistedInActiveAutoAssignment() {
-        final TargetFilterQuery targetFilterQuery = testdataFactory.createTargetFilterWithActiveAutoAssignment();
+        final TargetFilterQuery targetFilterQuery = testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
 
         assertThat(targetFilterQuery.getAccessControlContext())
                 .hasValueSatisfying(ctx -> assertThat(ctx).isEqualTo(EXAMPLE_CONTEXT));
@@ -77,7 +77,7 @@ class ContextRunnerTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies acm context is used when performing auto assign check on all target")
     void verifyContextIsReusedWhenCheckingForAutoAssignmentAllTargets() {
-        testdataFactory.createTargetFilterWithActiveAutoAssignment();
+        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
 
         autoAssignExecutor.checkAllTargets();
 
@@ -87,7 +87,7 @@ class ContextRunnerTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies acm context is used when performing auto assign check on single target")
     void verifyContextIsReusedWhenCheckingForAutoAssignmentSingleTarget() {
-        testdataFactory.createTargetFilterWithActiveAutoAssignment();
+        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
 
         autoAssignExecutor
                 .checkSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());

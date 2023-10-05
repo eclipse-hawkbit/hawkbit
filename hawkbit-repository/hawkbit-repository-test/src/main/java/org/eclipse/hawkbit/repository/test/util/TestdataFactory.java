@@ -1150,12 +1150,10 @@ public class TestdataFactory {
         return result;
     }
 
-    public TargetFilterQuery createTargetFilterWithActiveAutoAssignment() {
+    public TargetFilterQuery createTargetFilterWithTargetsAndActiveAutoAssignment() {
         createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
-
-        createDistributionSet();
 
         return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(createDistributionSet().getId()));

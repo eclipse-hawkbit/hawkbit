@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetAccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -50,6 +51,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
@@ -125,6 +127,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final SoftwareModuleAccessController softwareModuleAccessController;
 
+    private final TargetAccessController targetAccessController;
+
     private final Database database;
 
     JpaDistributionSetManagement(final EntityManager entityManager,
@@ -156,6 +160,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.afterCommit = afterCommit;
         this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
         this.softwareModuleAccessController = accessControlService.getSoftwareModuleAccessController();
+        this.targetAccessController = accessControlService.getTargetAccessController();
         this.database = database;
     }
 
@@ -472,18 +477,19 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createMetaData(final long dsId, final Collection<MetaData> md) {
+        final JpaDistributionSet distributionSet = getDistributionSetOrThrowExceptionIfNotFound(dsId);
+        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
 
         md.forEach(meta -> checkAndThrowIfDistributionSetMetadataAlreadyExists(
                 new DsMetadataCompositeKey(dsId, meta.getKey())));
 
         assertMetaDataQuota(dsId, md.size());
 
-        final JpaDistributionSet set = JpaManagementHelper.touch(entityManager, distributionSetRepository,
-                (JpaDistributionSet) getValid(dsId));
+        JpaManagementHelper.touch(entityManager, distributionSetRepository, distributionSet);
 
         return md.stream()
                 .map(meta -> distributionSetMetadataRepository
-                        .save(new JpaDistributionSetMetadata(meta.getKey(), set, meta.getValue())))
+                        .save(new JpaDistributionSetMetadata(meta.getKey(), distributionSet, meta.getValue())))
                 .collect(Collectors.toUnmodifiableList());
     }
 
@@ -503,6 +509,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetMetadata updateMetaData(final long dsId, final MetaData md) {
+        final JpaDistributionSet distributionSet = getDistributionSetOrThrowExceptionIfNotFound(dsId);
+        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
 
         // check if exists otherwise throw entity not found exception
         final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(dsId,
@@ -520,6 +528,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetaData(final long distributionSetId, final String key) {
+        final JpaDistributionSet distributionSet = getDistributionSetOrThrowExceptionIfNotFound(distributionSetId);
+        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
+
         final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(
                 distributionSetId, key)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, distributionSetId, key));
@@ -571,11 +582,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> getByAction(final long actionId) {
-        // TODO: Access controlling is needed here. Action is only accessible when
         // corresponding target read permissions are given.
-        if (!actionRepository.existsById(actionId)) {
+        actionRepository.findById(actionId).ifPresentOrElse(action -> {
+            targetAccessController.assertOperationAllowed(AccessController.Operation.READ,
+                    (JpaTarget) action.getTarget());
+        }, () -> {
             throw new EntityNotFoundException(Action.class, actionId);
-        }
+        });
 
         final Specification<JpaDistributionSet> specification = distributionSetAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byActionId(actionId));

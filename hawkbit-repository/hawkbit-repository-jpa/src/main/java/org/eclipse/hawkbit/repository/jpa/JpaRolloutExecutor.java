@@ -527,8 +527,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatible(readyGroups, groupTargetFilter,
-                        rollout.getDistributionSet().getType()));
+                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(readyGroups,
+                        groupTargetFilter, rollout.getDistributionSet().getType()));
         final long expectedInGroup = Math
                 .round((double) (group.getTargetPercentage() / 100) * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
@@ -572,7 +572,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
+            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                     pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
 
             createAssignmentOfTargetsToGroup(targets, group);

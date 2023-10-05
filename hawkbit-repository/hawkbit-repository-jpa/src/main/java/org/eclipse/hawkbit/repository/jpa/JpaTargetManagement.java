@@ -746,14 +746,15 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(final Pageable pageRequest,
-            final Collection<Long> groups, final String targetFilterQuery, final DistributionSetType dsType) {
+    public Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            final Pageable pageRequest, final Collection<Long> groups, final String targetFilterQuery,
+            final DistributionSetType dsType) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()),
-                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
+                targetAccessControlManager.getAccessRules(AccessController.Operation.UPDATE));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(targetRepository, pageRequest, specList);
     }
@@ -770,14 +771,14 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNotInRolloutGroupsAndCompatible(final Collection<Long> groups,
-            final String targetFilterQuery, final DistributionSetType dsType) {
+    public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(final Collection<Long> groups,
+                                                                          final String targetFilterQuery, final DistributionSetType dsType) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer,
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()),
-                targetAccessControlManager.getAccessRules(AccessController.Operation.READ));
+                targetAccessControlManager.getAccessRules(AccessController.Operation.UPDATE));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }

@@ -14,20 +14,25 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 
 import io.qameta.allure.Description;
@@ -37,6 +42,9 @@ import io.qameta.allure.Story;
 @Feature("Component Tests - Access Control")
 @Story("Test Target Access Controlling")
 class TargetAccessControllingTest extends AbstractAccessControllingTest {
+
+    @Autowired
+    AutoAssignChecker autoAssignChecker;
 
     @Test
     @Description("Verifies read access rules for targets")
@@ -117,7 +125,7 @@ class TargetAccessControllingTest extends AbstractAccessControllingTest {
 
         final TargetTag myTag = targetTagManagement.create(entityFactory.tag().create().name("myTag"));
 
-        // define permitted tag assignment before setting access rules
+        // perform tag assignment before setting access rules
         targetManagement.assignTag(Arrays.asList(permittedTarget.getControllerId(), readOnlyTarget.getControllerId(),
                 hiddenTarget.getControllerId()), myTag.getId());
 
@@ -267,6 +275,83 @@ class TargetAccessControllingTest extends AbstractAccessControllingTest {
                     Action.ActionType.FORCED).getAssigned()).isZero();
         }).as("Target type delete shouldn't be allowed since the target type is not visible.")
                 .isInstanceOf(InsufficientPermissionException.class);
+    }
+
+    @Test
+    @Description("Verifies only manageable targets are part of the rollout")
+    void verifyRolloutTargetScope() {
+        permitAllOperations(AccessController.Operation.CREATE);
+
+        final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
+        final List<Target> readTargets = testdataFactory.createTargets("read1", "read2", "read3", "read4");
+        final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4",
+                "hidden5");
+
+        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.UPDATE,
+                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
+        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
+                TargetSpecifications.hasIdIn(readTargets.stream().map(Identifiable::getId).toList()));
+
+        final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "description",
+                updateTargets.size(), "id==*", testdataFactory.createDistributionSet(), "50", "5");
+
+        assertThat(rollout.getTotalTargets()).isEqualTo(updateTargets.size());
+
+        final List<RolloutGroup> content = rolloutGroupManagement.findByRollout(Pageable.unpaged(), rollout.getId())
+                .getContent();
+        assertThat(content).hasSize(updateTargets.size());
+
+        final List<Target> rolloutTargets = content.stream().flatMap(
+                group -> rolloutGroupManagement.findTargetsOfRolloutGroup(Pageable.unpaged(), group.getId()).get())
+                .toList();
+
+        assertThat(rolloutTargets).hasSize(updateTargets.size()).allMatch(
+                target -> updateTargets.stream().anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
+                .noneMatch(target -> readTargets.stream()
+                        .anyMatch(readTarget -> readTarget.getId().equals(target.getId())))
+                .noneMatch(target -> hiddenTargets.stream()
+                        .anyMatch(readTarget -> readTarget.getId().equals(target.getId())));
+    }
+
+    @Test
+    @Description("Verifies only manageable targets are part of an auto assignment.")
+    void verifyAutoAssignmentTargetScope() {
+        permitAllOperations(AccessController.Operation.CREATE);
+
+        final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
+        final List<Target> readTargets = testdataFactory.createTargets("read1", "read2", "read3", "read4");
+        final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4",
+                "hidden5");
+
+        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.UPDATE,
+                target -> updateTargets.stream().map(Identifiable::getId).anyMatch(id -> target.getId().equals(id)));
+
+        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.UPDATE,
+                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
+        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
+                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
+        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
+                TargetSpecifications.hasIdIn(readTargets.stream().map(Identifiable::getId).toList()));
+
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
+
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+
+        targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
+
+        autoAssignChecker.checkAllTargets();
+
+        assertThat(targetManagement.findByAssignedDistributionSet(Pageable.unpaged(), distributionSet.getId())
+                .getContent())
+                .hasSize(updateTargets.size())
+                .allMatch(assignedTarget -> updateTargets.stream()
+                        .anyMatch(updateTarget -> updateTarget.getId().equals(assignedTarget.getId())))
+                .noneMatch(assignedTarget -> readTargets.stream()
+                        .anyMatch(updateTarget -> updateTarget.getId().equals(assignedTarget.getId())))
+                .noneMatch(assignedTarget -> hiddenTargets.stream()
+                        .anyMatch(updateTarget -> updateTarget.getId().equals(assignedTarget.getId())));
     }
 
 }

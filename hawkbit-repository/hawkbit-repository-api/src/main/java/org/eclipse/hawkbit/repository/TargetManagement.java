@@ -274,27 +274,27 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
+    Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
             @NotNull DistributionSetType distributionSetType);
 
     /**
-     * Counts all targets for all the given parameter {@link TargetFilterQuery}
-     * and that are not assigned to one of the {@link RolloutGroup}s and are
-     * compatible with the passed {@link DistributionSetType}.
+     * Counts all targets for all the given parameter {@link TargetFilterQuery} and
+     * that are not assigned to one of the {@link RolloutGroup}s and are compatible
+     * with the passed {@link DistributionSetType}.
      *
      * @param groups
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
      * @param distributionSetType
-     *            type of the {@link DistributionSet} the targets must be
-     *            compatible with
+     *            type of the {@link DistributionSet} the targets must be compatible
+     *            with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNotInRolloutGroupsAndCompatible(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
-            @NotNull DistributionSetType distributionSetType);
+    long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotEmpty Collection<Long> groups,
+            @NotNull String rsqlParam, @NotNull DistributionSetType distributionSetType);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no
