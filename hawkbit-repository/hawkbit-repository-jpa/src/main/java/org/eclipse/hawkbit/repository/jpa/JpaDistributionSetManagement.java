@@ -36,6 +36,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
@@ -582,18 +583,27 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> getByAction(final long actionId) {
-        // corresponding target read permissions are given.
-        actionRepository.findById(actionId).ifPresentOrElse(action -> {
-            targetAccessController.assertOperationAllowed(AccessController.Operation.READ,
-                    (JpaTarget) action.getTarget());
-        }, () -> {
-            throw new EntityNotFoundException(Action.class, actionId);
-        });
+        verifyActionTargetIsAccessible(actionId);
 
         final Specification<JpaDistributionSet> specification = distributionSetAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byActionId(actionId));
 
         return distributionSetRepository.findOne(specification).map(x -> x);
+    }
+
+    private void verifyActionTargetIsAccessible(final long actionId) {
+        actionRepository.findById(actionId).ifPresentOrElse(action -> {
+            try {
+                // check if target read operation is allowed
+                targetAccessController.assertOperationAllowed(AccessController.Operation.READ,
+                        (JpaTarget) action.getTarget());
+            } catch (final InsufficientPermissionException e) {
+                // map to entity not found
+                throw new EntityNotFoundException(Action.class, actionId);
+            }
+        }, () -> {
+            throw new EntityNotFoundException(Action.class, actionId);
+        });
     }
 
     @Override

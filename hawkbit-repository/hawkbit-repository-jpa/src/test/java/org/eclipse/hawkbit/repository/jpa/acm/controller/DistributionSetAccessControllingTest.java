@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -55,6 +56,8 @@ class DistributionSetAccessControllingTest extends AbstractAccessControllingTest
         // define access controlling rule
         testAccessControlManger.defineAccessRule(JpaDistributionSet.class, AccessController.Operation.READ,
                 DistributionSetSpecification.byId(permitted.getId()));
+        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.READ,
+                target -> target.getId().equals(permittedAction.getTarget().getId()));
 
         // verify distributionSetManagement#findAll
         assertThat(distributionSetManagement.findAll(Pageable.unpaged()).get().map(Identifiable::getId).toList())
@@ -99,7 +102,9 @@ class DistributionSetAccessControllingTest extends AbstractAccessControllingTest
 
         // verify distributionSetManagement#getByAction
         assertThat(distributionSetManagement.getByAction(permittedAction.getId())).isPresent();
-        assertThat(distributionSetManagement.getByAction(hiddenAction.getId())).isEmpty();
+        assertThatThrownBy(() -> {
+            distributionSetManagement.getByAction(hiddenAction.getId());
+        }).as("Action is hidden.").isInstanceOf(EntityNotFoundException.class);
     }
 
     @Test

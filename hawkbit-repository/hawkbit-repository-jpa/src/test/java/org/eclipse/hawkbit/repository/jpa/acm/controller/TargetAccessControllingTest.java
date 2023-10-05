@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -337,6 +338,8 @@ class TargetAccessControllingTest extends AbstractAccessControllingTest {
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
+                ds -> ds.getId().equals(distributionSet.getId()));
 
         targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
