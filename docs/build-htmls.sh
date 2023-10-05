@@ -10,7 +10,6 @@
 
 #!/bin/bash
 
-
 CURRENT_DIR=$(pwd)
 
 # Checking for Redoc CLI and npm
@@ -19,8 +18,6 @@ npx @redocly/cli --version > /dev/null 2>&1
 if [ $? != 0 ]; then
     echo "[ERROR] Redoc CLI is not installed! Please make suer to install it before trying again."
     exit 1
-else
-    echo "[INFO] Redoc CLI is already installed."
 fi
 
 # Execute the npx command
