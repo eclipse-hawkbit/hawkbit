@@ -31,15 +31,14 @@ else
     echo "[INFO] ... theme already installed in: ${HUGO_THEMES}"
 fi
 
- # This script uses 'awk' to replace 1200px with 1500px in the application.css file from 'hugo'
+# This script uses 'awk' to replace 1200px with 1500px in the application.css file from 'hugo'
 if [ -f ${CSS_FILE} ]
 then
-    awk '{gsub(/max-width:1200px/, "max-width:1500px"); print}' "${CSS_FILE}" > tmp && mv tmp "${CSS_FILE}"
-    echo "[INFO] Updated CSS content successfully!"
+    awk '{gsub(/max-width:1200px/, "max-width:1500px"); print}' "${CSS_FILE}" > tmp_hawkbit_doc && mv tmp_hawkbit_doc "${CSS_FILE}"
+    echo "[INFO] CSS updated content successfully!"
 else
-    echo "[ERROR] CSS file not found!"
+    echo "[WARN] CSS file not found!"
 fi
-
 
 echo "[INFO] "
 echo "[INFO] Launch the documentation locally by running 'mvn site' (or 'hugo server' in the docs directory),"
