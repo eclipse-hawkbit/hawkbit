@@ -54,6 +54,7 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
     private static final String TARGET_ID_BASE62_PLACEHOLDER = "targetIdBase62";
     private static final String HOSTNAME_REQUEST_PLACEHOLDER = "hostnameRequest";
     private static final String PORT_REQUEST_PLACEHOLDER = "portRequest";
+    private static final String PROTOCOL_REQUEST_PLACEHOLDER = "protocolRequest";
     private static final String HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER = "domainRequest";
     private static final String ARTIFACT_FILENAME_PLACEHOLDER = "artifactFileName";
     private static final String ARTIFACT_SHA1_PLACEHOLDER = "artifactSHA1";
@@ -118,11 +119,13 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
             final URI requestUri) {
         final Map<String, String> replaceMap = new HashMap<>();
         replaceMap.put(IP_PLACEHOLDER, protocol.getIp());
+
         replaceMap.put(HOSTNAME_PLACEHOLDER, protocol.getHostname());
 
         replaceMap.put(HOSTNAME_REQUEST_PLACEHOLDER, getRequestHost(protocol, requestUri));
         replaceMap.put(PORT_REQUEST_PLACEHOLDER, getRequestPort(protocol, requestUri));
         replaceMap.put(HOSTNAME_WITH_DOMAIN_REQUEST_PLACEHOLDER, computeHostWithRequestDomain(protocol, requestUri));
+        replaceMap.put(PROTOCOL_REQUEST_PLACEHOLDER, getRequestProtocol(protocol, requestUri));
 
         replaceMap.put(CONTEXT_PATH, contextPath);
 
@@ -164,6 +167,14 @@ public class PropertyBasedArtifactUrlHandler implements ArtifactUrlHandler {
         }
 
         return Optional.ofNullable(requestUri.getHost()).orElse(protocol.getHostname());
+    }
+
+    private static String getRequestProtocol(final UrlProtocol protocol, final URI requestUri) {
+        if (requestUri == null) {
+            return protocol.getProtocol();
+        }
+
+        return Optional.ofNullable(requestUri.getScheme()).orElse(protocol.getProtocol());
     }
 
     private static String getPort(final UrlProtocol protocol) {
