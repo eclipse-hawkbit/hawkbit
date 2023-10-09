@@ -344,7 +344,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     private void assertMaxTargetsQuota(final String query, final String filterName, final long dsId) {
         QuotaHelper.assertAssignmentQuota(filterName,
-                targetManagement.countByRsqlAndNonDSAndCompatibleAndModifiable(dsId, query),
+                targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(dsId, query),
                 quotaManagement.getMaxTargetsPerAutoAssignment(), Target.class, TargetFilterQuery.class, null);
     }
 

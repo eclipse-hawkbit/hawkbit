@@ -730,8 +730,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(final Pageable pageRequest,
-            final long distributionSetId, final String targetFilterQuery) {
+    public Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(final Pageable pageRequest,
+                                                                                  final long distributionSetId, final String targetFilterQuery) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
@@ -784,8 +784,8 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByRsqlAndNonDSAndCompatibleAndModifiable(final long distributionSetId,
-            final String targetFilterQuery) {
+    public long countByRsqlAndNonDSAndCompatibleAndUpdatable(final long distributionSetId,
+                                                             final String targetFilterQuery) {
         final DistributionSet jpaDistributionSet = distributionSetManagement.getOrElseThrowException(distributionSetId);
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 

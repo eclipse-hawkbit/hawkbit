@@ -124,14 +124,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.countByTargetFilterQuery(NOT_EXIST_IDL), "TargetFilterQuery");
-        verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndModifiable(NOT_EXIST_IDL, "name==*"),
+        verifyThrownExceptionBy(() -> targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
 
         verifyThrownExceptionBy(() -> targetManagement.deleteByControllerID(NOT_EXIST_ID), "Target");
         verifyThrownExceptionBy(() -> targetManagement.delete(Collections.singletonList(NOT_EXIST_IDL)), "Target");
 
         verifyThrownExceptionBy(
-                () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(PAGE, NOT_EXIST_IDL, "name==*"),
+                () -> targetManagement.findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(PAGE, NOT_EXIST_IDL, "name==*"),
                 "DistributionSet");
         verifyThrownExceptionBy(() -> targetManagement.findByInRolloutGroupWithoutAction(PAGE, NOT_EXIST_IDL),
                 "RolloutGroup");

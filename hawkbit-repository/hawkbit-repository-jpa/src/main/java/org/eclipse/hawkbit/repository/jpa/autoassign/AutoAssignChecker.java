@@ -98,7 +98,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             int count;
             do {
                 final List<String> controllerIds = targetManagement
-                        .findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(
+                        .findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(
                                 PageRequest.of(0, Constants.MAX_ENTRIES_IN_STATEMENT),
                                 targetFilterQuery.getAutoAssignDistributionSet().getId(), targetFilterQuery.getQuery())
                         .getContent().stream().map(Target::getControllerId).toList();

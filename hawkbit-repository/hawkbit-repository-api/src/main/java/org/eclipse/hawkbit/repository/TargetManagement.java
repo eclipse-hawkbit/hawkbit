@@ -236,9 +236,9 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndModifiable(@NotNull Pageable pageRequest,
-            long distributionSetId, @NotNull String rsqlParam);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Slice<Target> findByTargetFilterQueryAndNonDSAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
+                                                                           long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -254,8 +254,8 @@ public interface TargetManagement {
      * @throws EntityNotFoundException
      *             if distribution set with given ID does not exist
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndNonDSAndCompatibleAndModifiable(long distributionSetId, @NotNull String rsqlParam);
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    long countByRsqlAndNonDSAndCompatibleAndUpdatable(long distributionSetId, @NotNull String rsqlParam);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery}
@@ -270,10 +270,10 @@ public interface TargetManagement {
      *            filter definition in RSQL syntax
      * @param distributionSetType
      *            type of the {@link DistributionSet} the targets must be
-     *            compatible with
+     *            compatible withs
      * @return a page of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
             @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
             @NotNull DistributionSetType distributionSetType);
@@ -287,12 +287,12 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
-     * @param distributionSetType
+     * @param distributionSetTypes
      *            type of the {@link DistributionSet} the targets must be compatible
      *            with
      * @return count of the found {@link Target}s
      */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotEmpty Collection<Long> groups,
             @NotNull String rsqlParam, @NotNull DistributionSetType distributionSetType);
 

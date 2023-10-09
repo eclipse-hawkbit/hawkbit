@@ -16,10 +16,13 @@ import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.springframework.data.jpa.domain.Specification;
 
 /**
- * Interface of an access control manager. Used by management layer to verify
+ * Interface of an extended access control. Used by management layer to verify
  * the permission for CRUD operations based on some access criteria.
+ *
+ * After the basic service based access control is applied some additional restrictions
+ * (e.g. entity based) could be applied.
  * 
- * @param <T>
+ * @param <T> the repository types
  */
 public interface AccessController<T> {
 
@@ -44,7 +47,7 @@ public interface AccessController<T> {
 
     /**
      * Default implementation pointing to
-     * {@link AccessController#assertOperationAllowed(Operation, Object)}
+     * {@link #assertOperationAllowed(Operation, List)}
      *
      * @throws InsufficientPermissionException
      *             if operation is not permitted for given entities
