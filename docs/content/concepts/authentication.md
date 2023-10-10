@@ -100,14 +100,10 @@ Nginx doesn't support obtaining the issuer hash without addons. Therefore, in th
 
    There are also some configurations that you need update when you deployed your hawkbit service.
 
-   You need to add the given download settings to your hawkBit configurations so that hawkBit can generate the URLs according to the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these configurations as environmental values in the docker-compose.yml file. Don't forget to replace "hostname" with your actual hostname.
+   You need to add the given setting to your hawkBit configurations so that hawkBit can generate the URLs according to the https that the client will use to download. If you're deploying hawkBit as a Docker container, add these configurations as environmental values in the docker-compose.yml file.
 
 ```
-hawkbit.artifact.url.protocols.download-http.rel=download-http
-hawkbit.artifact.url.protocols.download-http.hostname=hawkbit.dev.example
-hawkbit.artifact.url.protocols.download-http.protocol=https
-hawkbit.artifact.url.protocols.download-http.supports=DMF,DDI
-hawkbit.artifact.url.protocols.download-http.ref={protocol}://{hostnameRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}
+server.forward-headers-strategy=NATIVE
 ```
 
 2. In Hawkbit's UI section, under system configuration, make sure to select *Allow targets to authenticate via a certificate authenticated by a reverse proxy* and input the fixed issuer hash as "Hawkbit". This can be whetever you have configured in the nginx configuration in `proxy_set_header X-Ssl-Issuer-Hash-1` below.
