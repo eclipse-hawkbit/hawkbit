@@ -12,8 +12,12 @@ package org.eclipse.hawkbit.security;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
@@ -24,21 +28,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextImpl;
 
 /**
- * A {@link TenantAware} implementation which retrieves the ID of the tenant
+ * A {@link ContextAware} (hence of {@link TenantAware}) that uses spring security context propagation
+ * mechanisms and  which retrieves the ID of the tenant
  * from the {@link SecurityContext#getAuthentication()}
  * {@link Authentication#getDetails()} which holds the
  * {@link TenantAwareAuthenticationDetails} object.
  *
  */
-public class SecurityContextTenantAware implements TenantAware {
+public class SecurityContextTenantAware implements ContextAware {
 
     public static final String SYSTEM_USER = "system";
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections
             .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
+    private final SecurityContextSerializer securityContextSerializer;
     private final UserAuthoritiesResolver authoritiesResolver;
 
     /**
@@ -48,9 +53,36 @@ public class SecurityContextTenantAware implements TenantAware {
      * @param authoritiesResolver
      *            Resolver to retrieve the authorities for a given user. Must
      *            not be <code>null</code>.
+     * @param  securityContextSerializer
+     *            Serializer that is used to serialize / deserizlize {@link SecurityContext}s.
      */
-    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver) {
+    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
+        this.securityContextSerializer = securityContextSerializer;
         this.authoritiesResolver = authoritiesResolver;
+    }
+
+    @Override
+    public Optional<String> getCurrentContext() {
+        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
+    }
+
+    @Override
+    public <T, R> R runInContext(final String serializedContext, final Function<T, R> function, final T t) {
+        return runInContext(securityContextSerializer.deserialize(serializedContext), function, t);
+    }
+    private <T, R> R runInContext(final SecurityContext securityContext, final Function<T, R> function, final T t) {
+        Objects.requireNonNull(securityContext);
+        final SecurityContext originalContext = SecurityContextHolder.getContext();
+        if (Objects.equals(securityContext, originalContext)) {
+            return function.apply(t);
+        } else {
+            SecurityContextHolder.setContext(securityContext);
+            try {
+                return function.apply(t);
+            } finally {
+                SecurityContextHolder.setContext(originalContext);
+            }
+        }
     }
 
     @Override
@@ -86,6 +118,8 @@ public class SecurityContextTenantAware implements TenantAware {
 
     @Override
     public <T> T runAsTenantAsUser(final String tenant, final String username, final TenantRunner<T> tenantRunner) {
+        Objects.requireNonNull(tenant);
+        Objects.requireNonNull(username);
         final List<SimpleGrantedAuthority> authorities = runAsSystem(
                 () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList()));
@@ -118,7 +152,7 @@ public class SecurityContextTenantAware implements TenantAware {
 
     private static SecurityContext buildUserSecurityContext(final String tenant, final String username,
             final Collection<? extends GrantedAuthority> authorities) {
-        final SecurityContextImpl securityContext = new SecurityContextImpl();
+        final SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
         securityContext.setAuthentication(new AuthenticationDelegate(
                 SecurityContextHolder.getContext().getAuthentication(), tenant, username, authorities));
         return securityContext;

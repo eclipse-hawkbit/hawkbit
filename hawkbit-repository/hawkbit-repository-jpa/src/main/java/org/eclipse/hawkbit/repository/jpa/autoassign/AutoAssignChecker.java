@@ -14,15 +14,14 @@ import java.util.List;
 
 import javax.persistence.PersistenceException;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -54,32 +53,30 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      *            to assign distribution sets to targets
      * @param transactionManager
      *            to run transactions
-     * @param tenantAware
-     *            to handle the tenant context
+     * @param contextAware
+     *            to handle the context
      */
     public AutoAssignChecker(final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetManagement targetManagement, final DeploymentManagement deploymentManagement,
-            final PlatformTransactionManager transactionManager, final TenantAware tenantAware,
-            final AccessControlService accessControlService) {
-        super(targetFilterQueryManagement, deploymentManagement, transactionManager, tenantAware,
-                accessControlService);
+            final PlatformTransactionManager transactionManager, final ContextAware contextAware) {
+        super(targetFilterQueryManagement, deploymentManagement, transactionManager, contextAware);
         this.targetManagement = targetManagement;
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void checkAllTargets() {
-        LOGGER.debug("Auto assign check call for tenant {} started", getTenantAware().getCurrentTenant());
+        LOGGER.debug("Auto assign check call for tenant {} started", getContextAware().getCurrentTenant());
         forEachFilterWithAutoAssignDS(this::checkByTargetFilterQueryAndAssignDS);
-        LOGGER.debug("Auto assign check call for tenant {} finished", getTenantAware().getCurrentTenant());
+        LOGGER.debug("Auto assign check call for tenant {} finished", getContextAware().getCurrentTenant());
     }
 
     @Override
     public void checkSingleTarget(String controllerId) {
-        LOGGER.debug("Auto assign check call for tenant {} and device {} started", getTenantAware().getCurrentTenant(),
+        LOGGER.debug("Auto assign check call for tenant {} and device {} started", getContextAware().getCurrentTenant(),
                 controllerId);
         forEachFilterWithAutoAssignDS(filter -> checkForDevice(controllerId, filter));
-        LOGGER.debug("Auto assign check call for tenant {} and device {} finished", getTenantAware().getCurrentTenant(),
+        LOGGER.debug("Auto assign check call for tenant {} and device {} finished", getContextAware().getCurrentTenant(),
                 controllerId);
     }
 
@@ -93,7 +90,7 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
      */
     private void checkByTargetFilterQueryAndAssignDS(final TargetFilterQuery targetFilterQuery) {
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} started",
-                getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId());
         try {
             int count;
             do {
@@ -104,23 +101,23 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
                         .getContent().stream().map(Target::getControllerId).toList();
                 LOGGER.debug(
                         "Retrieved {} auto assign targets for tenant {} and target filter query id {}, starting with assignment",
-                        controllerIds.size(), getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+                        controllerIds.size(), getContextAware().getCurrentTenant(), targetFilterQuery.getId());
 
                 count = runTransactionalAssignment(targetFilterQuery, controllerIds);
                 LOGGER.debug(
                         "Assignment for {} auto assign targets for tenant {} and target filter query id {} finished",
-                        controllerIds.size(), getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+                        controllerIds.size(), getContextAware().getCurrentTenant(), targetFilterQuery.getId());
             } while (count == Constants.MAX_ENTRIES_IN_STATEMENT);
         } catch (final PersistenceException | AbstractServerRtException e) {
             LOGGER.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
         }
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} finished",
-                getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId());
     }
 
     private void checkForDevice(final String controllerId, final TargetFilterQuery targetFilterQuery) {
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} for device {} started",
-                getTenantAware().getCurrentTenant(), targetFilterQuery.getId(), controllerId);
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId(), controllerId);
         try {
             final boolean controllerIdMatches = targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(
                     controllerId, targetFilterQuery.getAutoAssignDistributionSet().getId(),
@@ -134,6 +131,6 @@ public class AutoAssignChecker extends AbstractAutoAssignExecutor {
             LOGGER.error("Error during auto assign check of target filter query id {}", targetFilterQuery.getId(), e);
         }
         LOGGER.debug("Auto assign check call for tenant {} and target filter query id {} finished",
-                getTenantAware().getCurrentTenant(), targetFilterQuery.getId());
+                getContextAware().getCurrentTenant(), targetFilterQuery.getId());
     }
 }

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetTypeSpecification;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -29,8 +30,8 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
-@Story("Test Target Type Access Controlling")
-class TargetTypeAccessControllingTest extends AbstractAccessControllingTest {
+@Story("Test Target Type Access Controller")
+class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
 
     @Test
     @Description("Verifies read access rules for target types")

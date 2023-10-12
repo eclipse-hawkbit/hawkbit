@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -41,8 +42,8 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
-@Story("Test Target Access Controlling")
-class TargetAccessControllingTest extends AbstractAccessControllingTest {
+@Story("Test Target Access Controller")
+class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
     @Autowired
     AutoAssignChecker autoAssignChecker;
@@ -225,7 +226,8 @@ class TargetAccessControllingTest extends AbstractAccessControllingTest {
                 target -> target.getId().equals(permittedTarget.getId()));
 
         assertThat(assignDistributionSet(ds.getId(), permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
-        assertThat(assignDistributionSet(ds.getId(), hiddenTarget.getControllerId()).getAssigned()).isZero();
+        // assigning of non allowed target throws exception
+        assertThatThrownBy(() -> assignDistributionSet(ds.getId(), hiddenTarget.getControllerId())).isExactlyInstanceOf(InsufficientPermissionException.class);
 
         // verify targetManagement#findByUpdateStatus(REGISTERED) after assignment
         assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED)

@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -32,7 +32,7 @@ public class AddTargetTypeWindowController
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
     private final TargetTypeManagement targetTypeManagement;
-    private final ContextRunner contextRunner;
+    private final ContextAware contextRunner;
 
     /**
      * Constructor for AddTargetTypeWindowController
@@ -48,7 +48,7 @@ public class AddTargetTypeWindowController
      */
     public AddTargetTypeWindowController(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
-            final ContextRunner contextRunner) {
+            final ContextAware contextRunner) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
@@ -87,9 +87,9 @@ public class AddTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         return validator.isEntityValid(entity, () -> {
-            return contextRunner.runInAdminContext(() -> {
+//            return contextRunner.runInAdminContext(() -> {
                 return targetTypeManagement.getByName(entity.getName()).isPresent();
-            });
+//            });
         });
     }
 }

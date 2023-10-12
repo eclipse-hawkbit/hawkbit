@@ -14,11 +14,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.autoconfigure.security.MultiUserProperties.User;
 import org.eclipse.hawkbit.im.authentication.PermissionService;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.InMemoryUserAuthoritiesResolver;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
@@ -49,20 +51,20 @@ import org.springframework.util.CollectionUtils;
 public class SecurityAutoConfiguration {
 
     /**
-     * Creates a {@link TenantAware} bean based on the given
-     * {@link UserAuthoritiesResolver}.
-     * 
+     * Creates a {@link ContextAware} (hence {@link TenantAware}) bean based on the given
+     * {@link UserAuthoritiesResolver} and {@link SecurityContextSerializer}.
+     *
      * @param authoritiesResolver
      *            The user authorities/roles resolver
-     * 
-     * @return the {@link TenantAware} singleton bean which holds the current
-     *         {@link TenantAware} service and make it accessible in beans which
-     *         cannot access the service directly, e.g. JPA entities.
+     * @param securityContextSerializer
+     *            The security context serializer.
+     *
+     * @return the {@link ContextAware} singleton bean.
      */
     @Bean
     @ConditionalOnMissingBean
-    public TenantAware tenantAware(final UserAuthoritiesResolver authoritiesResolver) {
-        return new SecurityContextTenantAware(authoritiesResolver);
+    public ContextAware contextAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
+        return new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
     }
 
     /**
@@ -89,6 +91,18 @@ public class SecurityAutoConfiguration {
                     securityProperties.getUser().getRoles());
         }
         return new InMemoryUserAuthoritiesResolver(usersToPermissions);
+    }
+
+    /**
+     * Creates default {@link SecurityContextSerializer} bean that is responsible serializing / deserializing
+     * the security context.
+     *
+     * @return an {@link InMemoryUserAuthoritiesResolver} bean
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public SecurityContextSerializer securityContextSerializer() {
+        return new SecurityContextSerializer.JavaSerialization();
     }
 
     /**

@@ -63,6 +63,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -148,6 +149,9 @@ public class AmqpMessageHandlerServiceTest {
     @Mock
     private UserAuthoritiesResolver authoritiesResolver;
 
+    @Mock
+    private SecurityContextSerializer securityContextSerializer;
+
     @Captor
     private ArgumentCaptor<Map<String, String>> attributesCaptor;
 
@@ -179,7 +183,7 @@ public class AmqpMessageHandlerServiceTest {
         lenient().when(tenantConfigurationManagement.getConfigurationValue(MULTI_ASSIGNMENTS_ENABLED, Boolean.class))
                 .thenReturn(multiAssignmentConfig);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         amqpMessageHandlerService = new AmqpMessageHandlerService(rabbitTemplate, amqpMessageDispatcherServiceMock,

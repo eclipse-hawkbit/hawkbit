@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -104,7 +104,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor,
             final TenantAware tenantAware, final ConfirmationManagement confirmationManagement,
-            final ContextRunner contextRunner) {
+            final ContextAware contextRunner) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 

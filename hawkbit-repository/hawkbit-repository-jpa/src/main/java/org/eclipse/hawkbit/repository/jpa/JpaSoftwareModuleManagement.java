@@ -48,11 +48,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -122,11 +118,11 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
-    private final DistributionSetAccessController distributionSetAccessController;
+    private final AccessController<JpaDistributionSet> distributionSetAccessController;
 
-    private final SoftwareModuleAccessController softwareModuleAccessController;
+    private final AccessController<JpaSoftwareModule> softwareModuleAccessController;
 
-    private final SoftwareModuleTypeAccessController softwareModuleTypeAccessController;
+    private final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController;
 
     private final Database database;
 
@@ -136,7 +132,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final SoftwareModuleMetadataRepository softwareModuleMetadataRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository, final AuditorAware<String> auditorProvider,
             final ArtifactManagement artifactManagement, final QuotaManagement quotaManagement,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final AccessControlService accessControlService,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
+            final AccessController<JpaDistributionSet> distributionSetAccessController,
+            final AccessController<JpaSoftwareModule> softwareModuleAccessController,
+            final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
             final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -147,9 +146,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         this.artifactManagement = artifactManagement;
         this.quotaManagement = quotaManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
-        this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
-        this.softwareModuleAccessController = accessControlService.getSoftwareModuleAccessController();
-        this.softwareModuleTypeAccessController = accessControlService.getSoftwareModuleTypeAccessController();
+        this.distributionSetAccessController = distributionSetAccessController;
+        this.softwareModuleAccessController = softwareModuleAccessController;
+        this.softwareModuleTypeAccessController = softwareModuleTypeAccessController;
         this.database = database;
     }
 

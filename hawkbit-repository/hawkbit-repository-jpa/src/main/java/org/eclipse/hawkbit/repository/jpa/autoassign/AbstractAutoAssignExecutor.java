@@ -12,10 +12,10 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import java.util.List;
 import java.util.function.Consumer;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
@@ -53,8 +53,8 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
     private final DeploymentManagement deploymentManagement;
 
     private final PlatformTransactionManager transactionManager;
-    private final AccessControlService accessControlService;
-    private final TenantAware tenantAware;
+
+    private final ContextAware contextAware;
 
     /**
      * Constructor
@@ -65,21 +65,16 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
      *            to assign distribution sets to targets
      * @param transactionManager
      *            to run transactions
-     * @param tenantAware
-     *            to handle the tenant context
+     * @param contextAware
+     *            to handle the context
      */
     protected AbstractAutoAssignExecutor(final TargetFilterQueryManagement targetFilterQueryManagement,
             final DeploymentManagement deploymentManagement, final PlatformTransactionManager transactionManager,
-            final TenantAware tenantAware, final AccessControlService accessControlService) {
+            final ContextAware contextAware) {
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.deploymentManagement = deploymentManagement;
         this.transactionManager = transactionManager;
-        this.tenantAware = tenantAware;
-        this.accessControlService = accessControlService;
-    }
-
-    protected TargetFilterQueryManagement getTargetFilterQueryManagement() {
-        return targetFilterQueryManagement;
+        this.contextAware = contextAware;
     }
 
     protected DeploymentManagement getDeploymentManagement() {
@@ -90,10 +85,12 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         return transactionManager;
     }
 
-    protected TenantAware getTenantAware() {
-        return tenantAware;
+    protected TenantAware getContextAware() {
+        return contextAware;
     }
 
+    // run in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
+    // the auto assignment is made for
     protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
         Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);
@@ -103,8 +100,19 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
 
             filterQueries.forEach(filterQuery -> {
                 try {
-                    final String initiator = getAutoAssignmentInitiatedBy(filterQuery);
-                    accessControlService.runningAutoAssignContext(filterQuery, initiator, consumer);
+                    filterQuery.getAccessControlContext().ifPresentOrElse(
+                        context -> // has stored context - executes it with it
+                            contextAware.runInContext(
+                                context,
+                                () -> consumer.accept(filterQuery)),
+                        () -> // has no stored context - executes it in the tenant & user scope
+                            contextAware.runAsTenantAsUser(
+                                contextAware.getCurrentTenant(),
+                                getAutoAssignmentInitiatedBy(filterQuery), () -> {
+                                    consumer.accept(filterQuery);
+                                    return null;
+                                })
+                    );
                 } catch (final RuntimeException ex) {
                     LOGGER.debug(
                             "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {}. Continue with next filter query.",

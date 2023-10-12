@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.data.proxies.ProxyTarget;
@@ -30,7 +30,7 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
     private final TargetTypeManagement targetTypeManagement;
 
     private final EventView view;
-    private final ContextRunner contextRunner;
+    private final ContextAware contextRunner;
 
     /**
      * Constructor for TargetWindowBuilder
@@ -47,7 +47,7 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
      *            ContextRunner
      */
     public TargetWindowBuilder(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final TargetTypeManagement targetTypeManagement, final EventView view, final ContextRunner contextRunner) {
+            final TargetTypeManagement targetTypeManagement, final EventView view, final ContextAware contextRunner) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;

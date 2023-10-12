@@ -33,7 +33,7 @@ import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.RolloutStatusCache;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.builder.GenericRolloutUpdate;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
@@ -42,7 +42,6 @@ import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEve
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.RolloutIllegalStateException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -134,7 +133,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final EventPublisherHolder eventPublisherHolder;
-    private final ContextRunner contextRunner;
+    private final ContextAware contextAware;
     private final Database database;
 
     public JpaRolloutManagement(final TargetManagement targetManagement,
@@ -142,16 +141,17 @@ public class JpaRolloutManagement implements RolloutManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
             final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final AccessControlService accessControlService) {
+            final SystemSecurityContext systemSecurityContext,
+            final ContextAware contextAware) {
         this.targetManagement = targetManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
+        this.database = database;
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.eventPublisherHolder = eventPublisherHolder;
-        this.contextRunner = accessControlService.getContextRunner();
-        this.database = database;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -199,13 +199,13 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
-        final Long totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
+        final long totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
                 rollout.getDistributionSet().getType().getId());
         if (totalTargets == 0) {
             throw new ValidationException("Rollout does not match any existing targets");
         }
         rollout.setTotalTargets(totalTargets);
-        rollout.setAccessControlContext(contextRunner.getCurrentContext());
+        contextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
         return rolloutRepository.save(rollout);
     }
 

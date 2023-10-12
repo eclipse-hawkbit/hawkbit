@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericTargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.builder.TargetFilterQueryCreate;
@@ -30,9 +30,7 @@ import org.eclipse.hawkbit.repository.builder.TargetFilterQueryUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -47,7 +45,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +57,7 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
@@ -86,9 +83,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
-    private final TenantAware tenantAware;
-    private final ContextRunner contextRunner;
-    private final DistributionSetAccessController distributionSetAccessController;
+    private final ContextAware contextAware;
+    private final AccessController<JpaDistributionSet> distributionSetAccessController;
 
     private final Database database;
 
@@ -96,8 +92,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware,
-            final AccessControlService accessControlService) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
+            final AccessController<JpaDistributionSet> distributionSetAccessController) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -106,9 +102,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.database = database;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
-        this.tenantAware = tenantAware;
-        this.contextRunner = accessControlService.getContextRunner();
-        this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
+        this.contextAware = contextAware;
+        this.distributionSetAccessController = distributionSetAccessController;
     }
 
     @Override
@@ -163,7 +158,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Slice<TargetFilterQuery> findByName(final Pageable pageable, final String name) {
-        if (StringUtils.isEmpty(name)) {
+        if (ObjectUtils.isEmpty(name)) {
             return findAll(pageable);
         }
 
@@ -173,7 +168,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public long countByName(final String name) {
-        if (StringUtils.isEmpty(name)) {
+        if (ObjectUtils.isEmpty(name)) {
             return count();
         }
 
@@ -183,7 +178,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Page<TargetFilterQuery> findByRsql(final Pageable pageable, final String rsqlFilter) {
-        final List<Specification<JpaTargetFilterQuery>> specList = !StringUtils.isEmpty(rsqlFilter)
+        final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(rsqlFilter)
                 ? Collections.singletonList(RSQLUtility.buildRsqlSpecification(rsqlFilter,
                         TargetFilterQueryFields.class, virtualPropertyReplacer, database))
                 : Collections.emptyList();
@@ -193,7 +188,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Slice<TargetFilterQuery> findByQuery(final Pageable pageable, final String query) {
-        final List<Specification<JpaTargetFilterQuery>> specList = !StringUtils.isEmpty(query)
+        final List<Specification<JpaTargetFilterQuery>> specList = !ObjectUtils.isEmpty(query)
                 ? Collections.singletonList(TargetFilterQuerySpecification.equalsQuery(query))
                 : Collections.emptyList();
 
@@ -216,7 +211,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
         final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
-        if (!StringUtils.isEmpty(rsqlFilter)) {
+        if (!ObjectUtils.isEmpty(rsqlFilter)) {
             specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,
                     virtualPropertyReplacer, database));
         }
@@ -292,8 +287,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
             distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, ds);
             targetFilterQuery.setAutoAssignDistributionSet(ds);
-            targetFilterQuery.setAccessControlContext(contextRunner.getCurrentContext());
-            targetFilterQuery.setAutoAssignInitiatedBy(tenantAware.getCurrentUsername());
+            contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
+            targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
             targetFilterQuery.setAutoAssignWeight(update.getWeight());
             final boolean confirmationRequired = update.isConfirmationRequired() == null ? isConfirmationFlowEnabled()

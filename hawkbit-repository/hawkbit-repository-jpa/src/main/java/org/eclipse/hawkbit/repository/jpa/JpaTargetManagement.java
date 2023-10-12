@@ -43,10 +43,7 @@ import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -129,9 +126,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final Database database;
 
-    private final TargetAccessController targetAccessControlManager;
+    private final AccessController<JpaTarget> targetAccessControlManager;
 
-    private final TargetTypeAccessController targetTypeAccessControlManager;
+    private final AccessController<JpaTargetType> targetTypeAccessControlManager;
 
     public JpaTargetManagement(final EntityManager entityManager,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
@@ -142,7 +139,8 @@ public class JpaTargetManagement implements TargetManagement {
             final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
             final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final AccessControlService accessControlService) {
+            final AccessController<JpaTarget> targetAccessControlManager,
+            final AccessController<JpaTargetType> targetTypeAccessControlManager) {
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
         this.quotaManagement = quotaManagement;
@@ -157,8 +155,8 @@ public class JpaTargetManagement implements TargetManagement {
         this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
-        this.targetAccessControlManager = accessControlService.getTargetAccessController();
-        this.targetTypeAccessControlManager = accessControlService.getTargetTypeAccessController();
+        this.targetAccessControlManager = targetAccessControlManager;
+        this.targetTypeAccessControlManager = targetTypeAccessControlManager;
     }
 
     @Override

@@ -29,10 +29,7 @@ import org.eclipse.hawkbit.repository.builder.GenericDistributionSetTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetTypeAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -79,15 +76,17 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     private final QuotaManagement quotaManagement;
 
-    private final DistributionSetTypeAccessController distributionSetTypeAccessController;
+    private final AccessController<JpaDistributionSetType> distributionSetTypeAccessController;
 
-    private final SoftwareModuleTypeAccessController softwareModuleTypeAccessController;
+    private final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController;
 
     JpaDistributionSetTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final DistributionSetRepository distributionSetRepository, final TargetTypeRepository targetTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database,
-            final QuotaManagement quotaManagement, final AccessControlService accessControlService) {
+            final QuotaManagement quotaManagement,
+            final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
+            final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.distributionSetRepository = distributionSetRepository;
@@ -95,8 +94,8 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
         this.quotaManagement = quotaManagement;
-        this.distributionSetTypeAccessController = accessControlService.getDistributionSetTypeAccessController();
-        this.softwareModuleTypeAccessController = accessControlService.getSoftwareModuleTypeAccessController();
+        this.distributionSetTypeAccessController = distributionSetTypeAccessController;
+        this.softwareModuleTypeAccessController = softwareModuleTypeAccessController;
     }
 
     @Override

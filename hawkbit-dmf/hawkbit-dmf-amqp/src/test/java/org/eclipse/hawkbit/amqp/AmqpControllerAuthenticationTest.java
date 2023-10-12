@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.security.DdiSecurityProperties.Authentication.Anonymo
 import org.eclipse.hawkbit.security.DdiSecurityProperties.Rp;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
@@ -114,6 +115,9 @@ public class AmqpControllerAuthenticationTest {
     private UserAuthoritiesResolver authoritiesResolver;
 
     @Mock
+    private SecurityContextSerializer securityContextSerializer;
+
+    @Mock
     private RabbitTemplate rabbitTemplate;
 
     @Mock
@@ -147,7 +151,7 @@ public class AmqpControllerAuthenticationTest {
         when(tenantConfigurationManagementMock.getConfigurationValue(any(), eq(Boolean.class)))
                 .thenReturn(CONFIG_VALUE_FALSE);
 
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
         final SystemSecurityContext systemSecurityContext = new SystemSecurityContext(tenantAware);
 
         authenticationManager = new AmqpControllerAuthentication(systemManagement, controllerManagement,

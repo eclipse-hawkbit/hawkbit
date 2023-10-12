@@ -40,8 +40,6 @@ public interface TenantAware {
      *            the runner which is implemented to run this specific code
      *            under the given tenant
      * @return the return type of the {@link TenantRunner}
-     * @throws any
-     *             kind of {@link RuntimeException}
      */
     <T> T runAsTenant(String tenant, TenantRunner<T> tenantRunner);
 
@@ -60,8 +58,6 @@ public interface TenantAware {
      *            the runner which is implemented to run this specific code
      *            under the given tenant
      * @return the return type of the {@link TenantRunner}
-     * @throws any
-     *             kind of {@link RuntimeException}
      */
     <T> T runAsTenantAsUser(String tenant, String username, TenantRunner<T> tenantRunner);
 

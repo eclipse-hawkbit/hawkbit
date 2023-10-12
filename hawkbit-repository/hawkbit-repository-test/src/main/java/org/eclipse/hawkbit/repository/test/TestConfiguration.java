@@ -14,6 +14,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ControllerPollProperties;
 import org.eclipse.hawkbit.HawkbitServerProperties;
 import org.eclipse.hawkbit.api.ArtifactUrlHandlerProperties;
@@ -35,6 +36,7 @@ import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.security.SecurityTokenGenerator;
 import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
@@ -127,8 +129,14 @@ public class TestConfiguration implements AsyncConfigurer {
     }
 
     @Bean
-    TenantAware tenantAware(final UserAuthoritiesResolver authoritiesResolver) {
-        return new SecurityContextTenantAware(authoritiesResolver);
+    SecurityContextSerializer securityContextSerializer() {
+        return new SecurityContextSerializer.JavaSerialization();
+    }
+
+    @Bean
+    ContextAware contextAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
+        // allow spying the security context
+        return org.mockito.Mockito.spy(new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer));
     }
 
     @Bean

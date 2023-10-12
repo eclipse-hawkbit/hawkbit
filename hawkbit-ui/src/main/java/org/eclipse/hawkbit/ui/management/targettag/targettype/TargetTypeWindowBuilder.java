@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import com.vaadin.ui.Window;
 import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowBuilder;
 import org.eclipse.hawkbit.ui.common.CommonDialogWindow;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -26,7 +26,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
 
     private final TargetTypeManagement targetTypeManagement;
     private final DistributionSetTypeManagement dsTypeManagement;
-    private final ContextRunner contextRunner;
+    private final ContextAware contextRunner;
 
     /**
      * Constructor for TargetTypeWindowBuilder
@@ -42,7 +42,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
      */
     public TargetTypeWindowBuilder(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final DistributionSetTypeManagement dsTypeManagement,
-            final ContextRunner contextRunner) {
+            final ContextAware contextRunner) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;

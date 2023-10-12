@@ -19,6 +19,7 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
@@ -37,8 +38,8 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
 @Feature("Component Tests - Access Control")
-@Story("Test Distribution Set Access Controlling")
-class DistributionSetAccessControllingTest extends AbstractAccessControllingTest {
+@Story("Test Distribution Set Access Controller")
+class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
 
     @Test
     @Description("Verifies read access rules for distribution sets")

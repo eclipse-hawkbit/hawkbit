@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.springframework.data.jpa.domain.Specification;
 
 public class TestAccessControlManger {
@@ -40,11 +41,10 @@ public class TestAccessControlManger {
     }
 
     public <T> void assertOperation(final AccessController.Operation operation, final List<T> entities) {
-        final boolean verificationResult = entities.stream().allMatch(entity -> {
-            return operationDescribers.stream().filter(rule -> rule.getOperation().equals(operation))
+        final boolean verificationResult = entities.stream().allMatch(entity ->
+            operationDescribers.stream().filter(rule -> rule.getOperation().equals(operation))
                     .filter(rule -> rule.getEntity().isAssignableFrom(entity.getClass()))
-                    .anyMatch(rule -> ((Predicate<T>) rule.getEntityIdentifier()).test(entity));
-        });
+                    .anyMatch(rule -> ((Predicate<T>) rule.getEntityIdentifier()).test(entity)));
         if (!verificationResult) {
             throw new InsufficientPermissionException();
         }

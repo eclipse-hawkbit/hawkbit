@@ -38,11 +38,7 @@ import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.DistributionSetAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.TargetAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaDistributionSetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -124,11 +120,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final AfterTransactionCommitExecutor afterCommit;
 
-    private final DistributionSetAccessController distributionSetAccessController;
+    private final AccessController<JpaDistributionSet> distributionSetAccessController;
 
-    private final SoftwareModuleAccessController softwareModuleAccessController;
+    private final AccessController<JpaSoftwareModule> softwareModuleAccessController;
 
-    private final TargetAccessController targetAccessController;
+    private final AccessController<JpaTarget> targetAccessController;
 
     private final Database database;
 
@@ -142,7 +138,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
-            final AfterTransactionCommitExecutor afterCommit, final AccessControlService accessControlService,
+            final AfterTransactionCommitExecutor afterCommit,
+            final AccessController<JpaDistributionSet> distributionSetAccessController,
+            final AccessController<JpaSoftwareModule> softwareModuleAccessController,
+            final AccessController<JpaTarget> targetAccessController,
             final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -159,9 +158,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
-        this.distributionSetAccessController = accessControlService.getDistributionSetAccessController();
-        this.softwareModuleAccessController = accessControlService.getSoftwareModuleAccessController();
-        this.targetAccessController = accessControlService.getTargetAccessController();
+        this.distributionSetAccessController = distributionSetAccessController;
+        this.softwareModuleAccessController = softwareModuleAccessController;
+        this.targetAccessController = targetAccessController;
         this.database = database;
     }
 
@@ -478,7 +477,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createMetaData(final long dsId, final Collection<MetaData> md) {
-        final JpaDistributionSet distributionSet = getDistributionSetOrThrowExceptionIfNotFound(dsId);
+        final JpaDistributionSet distributionSet = (JpaDistributionSet)getValid(dsId);
         distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
 
         md.forEach(meta -> checkAndThrowIfDistributionSetMetadataAlreadyExists(

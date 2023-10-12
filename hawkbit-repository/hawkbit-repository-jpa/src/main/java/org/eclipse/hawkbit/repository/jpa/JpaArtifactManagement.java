@@ -27,13 +27,11 @@ import org.eclipse.hawkbit.repository.exception.ArtifactDeleteFailedException;
 import org.eclipse.hawkbit.repository.exception.ArtifactUploadFailedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.exception.InvalidMD5HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA1HashException;
 import org.eclipse.hawkbit.repository.exception.InvalidSHA256HashException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.ArtifactAccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
@@ -76,44 +74,25 @@ public class JpaArtifactManagement implements ArtifactManagement {
     private final TenantAware tenantAware;
 
     private final QuotaManagement quotaManagement;
-    private final ArtifactAccessController artifactAccessController;
-    private final SoftwareModuleAccessController softwareModuleAccessController;
+    private final AccessController<JpaArtifact> artifactAccessController;
+    private final AccessController<JpaSoftwareModule> softwareModuleAccessController;
 
     JpaArtifactManagement(final LocalArtifactRepository localArtifactRepository,
             final SoftwareModuleRepository softwareModuleRepository, final ArtifactRepository artifactRepository,
             final QuotaManagement quotaManagement, final TenantAware tenantAware,
-            final AccessControlService accessControlService) {
+            final AccessController<JpaArtifact> artifactAccessController,
+            final AccessController<JpaSoftwareModule> softwareModuleAccessController) {
         this.localArtifactRepository = localArtifactRepository;
         this.softwareModuleRepository = softwareModuleRepository;
         this.artifactRepository = artifactRepository;
         this.quotaManagement = quotaManagement;
         this.tenantAware = tenantAware;
-        this.artifactAccessController = accessControlService.getArtifactAccessController();
-        this.softwareModuleAccessController = accessControlService.getSoftwareModuleAccessController();
-    }
-
-    @Override
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Artifact create(final ArtifactUpload artifactUpload) {
-        final String filename = artifactUpload.getFilename();
-        final long moduleId = artifactUpload.getModuleId();
-
-        final JpaSoftwareModule softwareModule = getModuleAndThrowExceptionIfNotFound(moduleId);
-
-        softwareModuleAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, softwareModule);
-
-        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
-
-        assertArtifactQuota(moduleId, 1);
-
-        final AbstractDbArtifact artifact = storeArtifact(artifactUpload, softwareModule.isEncrypted());
-        return storeArtifactMetadata(softwareModule, filename, artifact, existing);
+        this.artifactAccessController = artifactAccessController;
+        this.softwareModuleAccessController = softwareModuleAccessController;
     }
 
     private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
-            final SoftwareModule softwareModule) {
+                                                     final SoftwareModule softwareModule) {
         final Optional<Artifact> artifact = softwareModule.getArtifactByFilename(filename);
 
         if (artifact.isPresent()) {
@@ -125,6 +104,34 @@ public class JpaArtifactManagement implements ArtifactManagement {
             }
         }
         return null;
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public Artifact create(final ArtifactUpload artifactUpload) {
+        final long moduleId = artifactUpload.getModuleId();
+        final JpaSoftwareModule softwareModule =
+                softwareModuleRepository
+                        .findOne(softwareModuleAccessController.appendAccessRules(
+                                        AccessController.Operation.READ, SoftwareModuleSpecification.byId(moduleId)))
+                        .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
+
+        softwareModuleAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, softwareModule);
+
+        assertArtifactQuota(moduleId, 1);
+
+        final String filename = artifactUpload.getFilename();
+        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
+
+        final AbstractDbArtifact artifact = storeArtifact(artifactUpload, softwareModule.isEncrypted());
+        try {
+            return storeArtifactMetadata(softwareModule, filename, artifact, existing);
+        } catch (final InsufficientPermissionException e) {
+            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), artifact.getHashes().getSha1());
+            throw e;
+        }
     }
 
     private AbstractDbArtifact storeArtifact(final ArtifactUpload artifactUpload, final boolean isSmEncrypted) {
@@ -177,27 +184,40 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public boolean clearArtifactBinary(final String sha1Hash, final long moduleId) {
-        verifyModuleAccess(moduleId, AccessController.Operation.DELETE);
+    public boolean clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
+        // unconditional check of software module id access is essential, used by #delete(int)
+        verifyModuleAccess(AccessController.Operation.DELETE, softwareModuleId);
 
-        final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(sha1Hash,
-                tenantAware.getCurrentTenant());
-        if (count > 1) {
+        final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
+            sha1Hash,
+            tenantAware.getCurrentTenant());
+        if (count > 1) { // 1 artifact is the one being deleted!
             // there are still other artifacts that need the binary
             return false;
         }
-        try {
-            LOG.debug("deleting artifact from repository {}", sha1Hash);
-            artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
-            return true;
-        } catch (final ArtifactStoreException e) {
-            throw new ArtifactDeleteFailedException(e);
-        }
-    }
 
-    private void verifyModuleAccess(final long moduleId, final AccessController.Operation operation) {
-        final JpaSoftwareModule softwareModule = getModuleAndThrowExceptionIfNotFound(moduleId);
-        softwareModuleAccessController.assertOperationAllowed(operation, softwareModule);
+        // test if the one meta that remains is for that software module,
+        // and have access oon check access
+        if (artifactAccessController.isOperationAllowed(
+                AccessController.Operation.DELETE,
+                () -> findFirstBySHA1(sha1Hash)
+                        .map(JpaArtifact.class::cast)
+                        // else there is no artifact for that software module,
+                        // throws InsufficientPermissionException in order to
+                        // make result of the test false -> won't remove
+                        .orElseThrow(InsufficientPermissionException::new))) {
+            try {
+                LOG.debug("deleting artifact from repository {}", sha1Hash);
+                // TODO - if the transaction fail the artifact will, anyway, be deleted,
+                // TODO - could be thought about moving it after the root transaction
+                artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
+                return true;
+            } catch (final ArtifactStoreException e) {
+                throw new ArtifactDeleteFailedException(e);
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -208,9 +228,10 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final JpaArtifact existing = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
-        verifyModuleAccess(existing.getSoftwareModule().getId(), AccessController.Operation.DELETE);
-
+        // clearArtifactBinary checks (unconditionally) software module DELETE access
         clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
+        // validate artifact access, check could have been skipped in the clearArtifactBinary
+        artifactAccessController.assertOperationAllowed(AccessController.Operation.DELETE, existing);
 
         ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
         softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
@@ -221,28 +242,31 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Optional<Artifact> get(final long id) {
         final Specification<JpaArtifact> specification = artifactAccessController
                 .appendAccessRules(AccessController.Operation.READ, ArtifactSpecification.byId(id));
-        return localArtifactRepository.findOne(specification).map(x -> x);
+
+        return localArtifactRepository.findOne(specification).map(Artifact.class::cast);
     }
 
     @Override
     public Optional<Artifact> getByFilenameAndSoftwareModule(final String filename, final long softwareModuleId) {
+        // verifies the software module access
         throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId);
+        return localArtifactRepository.findFirstByFilenameAndSoftwareModuleId(filename, softwareModuleId)
+                .filter(artifact ->
+                        artifactAccessController
+                                .isOperationAllowed(AccessController.Operation.READ, (JpaArtifact)artifact));
     }
 
     @Override
     public Optional<Artifact> findFirstBySHA1(final String sha1Hash) {
+        // validate artifact access
         final Specification<JpaArtifact> specification = artifactAccessController
                 .appendAccessRules(AccessController.Operation.READ, ArtifactSpecification.bySha1(sha1Hash));
 
         // find first entity matching sha1
         final List<JpaArtifact> content = localArtifactRepository
                 .findAllWithoutCount(specification, PageRequest.of(0, 1)).getContent();
-        if (content.size() == 1) {
-            return Optional.of(content.get(0));
-        }
-        return Optional.empty();
+        return firstWithReadPermissions(content);
     }
 
     @Override
@@ -253,42 +277,45 @@ public class JpaArtifactManagement implements ArtifactManagement {
         // find first entity matching sha1
         final List<JpaArtifact> content = localArtifactRepository
                 .findAllWithoutCount(specification, PageRequest.of(0, 1)).getContent();
-        if (content.size() == 1) {
-            return Optional.of(content.get(0));
-        }
-        return Optional.empty();
+        return firstWithReadPermissions(content);
     }
 
     @Override
-    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final long swId) {
-        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+    public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        return localArtifactRepository.findBySoftwareModuleId(pageReq, swId);
+        // TODO AC - apply AC for artifacts
+        return localArtifactRepository.findBySoftwareModuleId(pageReq, softwareModuleId);
     }
 
     @Override
-    public long countBySoftwareModule(final long swId) {
-        throwExceptionIfSoftwareModuleDoesNotExist(swId);
+    public long countBySoftwareModule(final long softwareModuleId) {
+        throwExceptionIfSoftwareModuleDoesNotExist(softwareModuleId);
 
-        return localArtifactRepository.countBySoftwareModuleId(swId);
+        // TODO AC - apply AC for artifacts, or remove any checks for AC
+        return localArtifactRepository.countBySoftwareModuleId(softwareModuleId);
     }
 
-    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long swId) {
-        final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byId(swId));
-
-        if (!softwareModuleRepository.exists(specification)) {
-            throw new EntityNotFoundException(SoftwareModule.class, swId);
-        }
+    @Override
+    public long count() {
+        // TODO AC - apply AC for artifacts & software modules, or remove any checks for AC
+        return localArtifactRepository.count(artifactAccessController.getAccessRules(AccessController.Operation.READ));
     }
 
     @Override
     public Optional<DbArtifact> loadArtifactBinary(final String sha1Hash, final long softwareModuleId,
             final boolean isEncrypted) {
-        verifyModuleAccess(softwareModuleId, AccessController.Operation.READ);
+        verifyModuleAccess(AccessController.Operation.READ, softwareModuleId);
 
         final String tenant = tenantAware.getCurrentTenant();
         if (artifactRepository.existsByTenantAndSha1(tenant, sha1Hash)) {
+            artifactAccessController.assertOperationAllowed(
+                    AccessController.Operation.READ,
+                    () -> findFirstBySHA1(sha1Hash)
+                            .map(JpaArtifact.class::cast)
+                            .filter(artifact -> softwareModuleId == artifact.getSoftwareModule().getId())
+                            // if not found no assertOperationAllowed shall fail
+                            .orElseThrow(InsufficientPermissionException::new));
             final DbArtifact dbArtifact = artifactRepository.getArtifactBySha1(tenant, sha1Hash);
             return Optional.ofNullable(
                     isEncrypted ? wrapInEncryptionAwareDbArtifact(softwareModuleId, dbArtifact) : dbArtifact);
@@ -297,42 +324,64 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return Optional.empty();
     }
 
-    private DbArtifact wrapInEncryptionAwareDbArtifact(final long smId, final DbArtifact dbArtifact) {
+    private DbArtifact wrapInEncryptionAwareDbArtifact(final long softwareModuleId, final DbArtifact dbArtifact) {
         if (dbArtifact == null) {
             return null;
         }
         final ArtifactEncryptionService encryptionService = ArtifactEncryptionService.getInstance();
         return new EncryptionAwareDbArtifact(dbArtifact,
-                stream -> encryptionService.decryptSoftwareModuleArtifact(smId, stream),
+                stream -> encryptionService.decryptSoftwareModuleArtifact(softwareModuleId, stream),
                 encryptionService.encryptionSizeOverhead());
     }
 
     private Artifact storeArtifactMetadata(final SoftwareModule softwareModule, final String providedFilename,
             final AbstractDbArtifact result, final Artifact existing) {
-        JpaArtifact artifact = (JpaArtifact) existing;
+        final JpaArtifact artifact;
         if (existing == null) {
             artifact = new JpaArtifact(result.getHashes().getSha1(), providedFilename, softwareModule);
+        } else {
+            artifact = (JpaArtifact) existing;
+            artifact.setSha1Hash(result.getHashes().getSha1());
         }
         artifact.setMd5Hash(result.getHashes().getMd5());
         artifact.setSha256Hash(result.getHashes().getSha256());
-        artifact.setSha1Hash(result.getHashes().getSha1());
         artifact.setSize(result.getSize());
+        artifactAccessController.assertOperationAllowed(AccessController.Operation.CREATE, artifact);
 
         LOG.debug("storing new artifact into repository {}", artifact);
         return localArtifactRepository.save(artifact);
     }
 
-    @Override
-    public long count() {
-        return localArtifactRepository.count(artifactAccessController.getAccessRules(AccessController.Operation.READ));
-    }
-
-    private JpaSoftwareModule getModuleAndThrowExceptionIfNotFound(final Long moduleId) {
+    private void throwExceptionIfSoftwareModuleDoesNotExist(final Long softwareModuleId) {
         final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byId(moduleId));
+                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byId(softwareModuleId));
 
-        return softwareModuleRepository.findOne(specification)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
+        if (!softwareModuleRepository.exists(specification)) {
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
+        }
     }
 
+    private void verifyModuleAccess(final AccessController.Operation operation, final long moduleId) {
+        softwareModuleAccessController.assertOperationAllowed(
+                operation,
+                () -> softwareModuleRepository
+                        .findById(moduleId)
+                        .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId)));
+    }
+
+    private Optional<Artifact> firstWithReadPermissions(final List<JpaArtifact> artifactList) {
+        if (!artifactList.isEmpty()) {
+            for (final JpaArtifact artifact : artifactList) {
+                try {
+                    // check access to the software module the found artefact belongs to
+                    softwareModuleAccessController.assertOperationAllowed(
+                            AccessController.Operation.READ, (JpaSoftwareModule) artifact.getSoftwareModule());
+                    return Optional.of(artifact);
+                } catch (final InsufficientPermissionException e) {
+                    // no access to software module - so not to artifact, returns empty
+                }
+            }
+        }
+        return Optional.empty();
+    }
 }

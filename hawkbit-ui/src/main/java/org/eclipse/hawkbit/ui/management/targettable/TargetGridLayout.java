@@ -22,7 +22,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -131,7 +131,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState, final TenantAware tenantAware,
-            final ConfirmationManagement confirmationManagement, final ContextRunner contextRunner) {
+            final ConfirmationManagement confirmationManagement, final ContextAware contextRunner) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
                 targetTypeManagement, EventView.DEPLOYMENT, contextRunner);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,

@@ -36,6 +36,10 @@ public final class ActionSpecifications {
         // utility class
     }
 
+    public static Specification<JpaAction> byControllerId(final String controllerId) {
+        return (root, query, cb) -> cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId);
+    }
+
     /**
      * Specification which joins all necessary tables to retrieve the dependency
      * between a target and a local file assignment through the assigned action

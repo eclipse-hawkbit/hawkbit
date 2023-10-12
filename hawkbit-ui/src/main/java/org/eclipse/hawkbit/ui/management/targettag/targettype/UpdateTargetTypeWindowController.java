@@ -15,7 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
@@ -38,7 +38,7 @@ public class UpdateTargetTypeWindowController
     private final TypeToProxyTypeMapper<DistributionSetType> dsTypeToProxyTypeMapper;
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
-    private final ContextRunner contextRunner;
+    private final ContextAware contextRunner;
 
     private String nameBeforeEdit;
 
@@ -56,7 +56,7 @@ public class UpdateTargetTypeWindowController
      */
     public UpdateTargetTypeWindowController(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
-            final ContextRunner contextRunner) {
+            final ContextAware contextRunner) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
@@ -130,9 +130,9 @@ public class UpdateTargetTypeWindowController
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String name = entity.getName();
         return validator.isEntityValid(entity, () -> {
-            return contextRunner.runInAdminContext(() -> {
+//            return contextRunner.runInAdminContext(() -> {
                 return hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent();
-            });
+//            });
         });
     }
 

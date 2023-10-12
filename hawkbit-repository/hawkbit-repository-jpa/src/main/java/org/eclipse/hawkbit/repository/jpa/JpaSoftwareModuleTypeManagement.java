@@ -21,9 +21,7 @@ import org.eclipse.hawkbit.repository.builder.GenericSoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleTypeUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
-import org.eclipse.hawkbit.repository.jpa.acm.AccessControlService;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.AccessController;
-import org.eclipse.hawkbit.repository.jpa.acm.controller.SoftwareModuleTypeAccessController;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleTypeCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
@@ -58,20 +56,21 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
 
     private final SoftwareModuleRepository softwareModuleRepository;
 
-    private final SoftwareModuleTypeAccessController softwareModuleTypeAccessController;
+    private final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController;
 
     private final Database database;
 
     public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
             final SoftwareModuleTypeRepository softwareModuleTypeRepository,
             final VirtualPropertyReplacer virtualPropertyReplacer,
-            final SoftwareModuleRepository softwareModuleRepository, final AccessControlService accessControlService,
+            final SoftwareModuleRepository softwareModuleRepository,
+            final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
             final Database database) {
         this.distributionSetTypeRepository = distributionSetTypeRepository;
         this.softwareModuleTypeRepository = softwareModuleTypeRepository;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.softwareModuleRepository = softwareModuleRepository;
-        this.softwareModuleTypeAccessController = accessControlService.getSoftwareModuleTypeAccessController();
+        this.softwareModuleTypeAccessController = softwareModuleTypeAccessController;
         this.database = database;
     }
 

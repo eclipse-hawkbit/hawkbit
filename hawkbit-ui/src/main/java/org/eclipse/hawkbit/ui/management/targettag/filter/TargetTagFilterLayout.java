@@ -14,7 +14,7 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
 import org.eclipse.hawkbit.ui.common.event.EventTopics;
 import org.eclipse.hawkbit.ui.common.event.TargetFilterTabChangedEventPayload;
@@ -58,7 +58,7 @@ public class TargetTagFilterLayout extends AbstractFilterLayout {
             final TargetFilterQueryManagement targetFilterQueryManagement,
             final TargetTypeManagement targetTypeManagement, final TargetTagManagement targetTagManagement,
             final TargetManagement targetManagement, final TargetTagFilterLayoutUiState targetTagFilterLayoutUiState,
-            final DistributionSetTypeManagement distributionSetTypeManagement, final ContextRunner contextRunner) {
+            final DistributionSetTypeManagement distributionSetTypeManagement, final ContextAware contextRunner) {
         final TargetTagWindowBuilder targetTagWindowBuilder = new TargetTagWindowBuilder(uiDependencies,
                 targetTagManagement);
 

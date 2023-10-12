@@ -12,85 +12,101 @@ package org.eclipse.hawkbit.repository.jpa.acm.context;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import org.eclipse.hawkbit.repository.acm.context.ContextRunner;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.autoassign.AutoAssignExecutor;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
+import org.eclipse.hawkbit.security.SecurityContextSerializer;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Feature("Component Tests - Context runner")
 @Story("Test Context Runner")
-class ContextRunnerTest extends AbstractJpaIntegrationTest {
-
-    @MockBean
-    ContextRunner testContextRunner;
+class ContextAwareTest extends AbstractJpaIntegrationTest {
 
     @Autowired
     AutoAssignExecutor autoAssignExecutor;
 
-    private static final String EXAMPLE_CONTEXT = "example_context";
+    @Autowired
+    ContextAware contextAware;
+
+    private static final SecurityContextSerializer SECURITY_CONTEXT_SERIALIZER =
+            new SecurityContextSerializer.JavaSerialization();
 
     @BeforeEach
-    void setContext() {
-        when(testContextRunner.getCurrentContext()).thenReturn(EXAMPLE_CONTEXT);
+    @AfterEach
+    void before() {
+        reset(contextAware);
     }
 
     @Test
     @Description("Verifies acm context is persisted when creating Rollout")
     void verifyAcmContextIsPersistedInCreatedRollout() {
-        final Rollout exampleRollout = testdataFactory.createRollout();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        assertThat(securityContext).isNotNull();
 
+        final Rollout exampleRollout = testdataFactory.createRollout();
         assertThat(exampleRollout.getAccessControlContext())
-                .hasValueSatisfying(ctx -> assertThat(ctx).isEqualTo(EXAMPLE_CONTEXT));
+                .hasValueSatisfying(ctx ->
+                        assertThat(SECURITY_CONTEXT_SERIALIZER.deserialize(ctx)).isEqualTo(securityContext));
     }
 
     @Test
     @Description("Verifies acm context is reused when handling a rollout")
     void verifyContextIsReusedWhenHandlingRollout() {
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        assertThat(securityContext).isNotNull();
+
         // testdataFactory#createRollout will trigger a rollout handling
         testdataFactory.createRollout();
-
-        verify(testContextRunner).runInContext(eq(EXAMPLE_CONTEXT), any(Runnable.class));
+        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
     }
 
     @Test
     @Description("Verifies acm context is persisted when activating auto assignment")
     void verifyContextIsPersistedInActiveAutoAssignment() {
-        final TargetFilterQuery targetFilterQuery = testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        assertThat(securityContext).isNotNull();
 
+        final TargetFilterQuery targetFilterQuery = testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
         assertThat(targetFilterQuery.getAccessControlContext())
-                .hasValueSatisfying(ctx -> assertThat(ctx).isEqualTo(EXAMPLE_CONTEXT));
+                .hasValueSatisfying(ctx ->
+                        assertThat(SECURITY_CONTEXT_SERIALIZER.deserialize(ctx)).isEqualTo(securityContext));
     }
 
     @Test
     @Description("Verifies acm context is used when performing auto assign check on all target")
     void verifyContextIsReusedWhenCheckingForAutoAssignmentAllTargets() {
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        assertThat(securityContext).isNotNull();
+
         testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
-
         autoAssignExecutor.checkAllTargets();
-
-        verify(testContextRunner).runInContext(eq(EXAMPLE_CONTEXT), any(Runnable.class));
+        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
     }
 
     @Test
     @Description("Verifies acm context is used when performing auto assign check on single target")
     void verifyContextIsReusedWhenCheckingForAutoAssignmentSingleTarget() {
-        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
+        final SecurityContext securityContext = SecurityContextHolder.getContext();
+        assertThat(securityContext).isNotNull();
 
+        testdataFactory.createTargetFilterWithTargetsAndActiveAutoAssignment();
         autoAssignExecutor
                 .checkSingleTarget(targetManagement.findAll(Pageable.ofSize(1)).getContent().get(0).getControllerId());
-        verify(testContextRunner).runInContext(eq(EXAMPLE_CONTEXT), any(Runnable.class));
+        verify(contextAware).runInContext(eq(SECURITY_CONTEXT_SERIALIZER.serialize(securityContext)), any(Runnable.class));
     }
 }
