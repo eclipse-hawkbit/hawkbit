@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.DistributionSetTagFields;
 import org.eclipse.hawkbit.repository.DistributionSetTagManagement;
-import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
@@ -139,13 +138,13 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     }
 
     @Override
-    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long setId) {
-        if (!distributionSetRepository.existsById(setId)) {
-            throw new EntityNotFoundException(DistributionSet.class, setId);
+    public Page<DistributionSetTag> findByDistributionSet(final Pageable pageable, final long distributionSetId) {
+        if (!distributionSetRepository.existsById(distributionSetId)) {
+            throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
         }
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetTagRepository, pageable,
-                Collections.singletonList(TagSpecification.ofDistributionSet(setId)));
+                Collections.singletonList(TagSpecification.ofDistributionSet(distributionSetId)));
     }
 
     @Override
@@ -170,7 +169,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
 
     @Override
     public Optional<DistributionSetTag> get(final long id) {
-        return distributionSetTagRepository.findById(id).map(x -> x);
+        return distributionSetTagRepository.findById(id).map(DistributionSetTag.class::cast);
     }
 
     @Override

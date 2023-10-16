@@ -56,13 +56,13 @@ public final class SoftwareModuleSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModule}s where its
-     * DELETED attribute is false.
+     * {@link Specification} for retrieving {@link SoftwareModule}s with
+     * DELETED attribute <code>false</code> - i.e. is not deleted.
      * 
      * @return the {@link SoftwareModule} {@link Specification}
      */
-    public static Specification<JpaSoftwareModule> isDeletedFalse() {
-        return (swRoot, query, cb) -> cb.equal(swRoot.<Boolean> get(JpaSoftwareModule_.deleted), Boolean.FALSE);
+    public static Specification<JpaSoftwareModule> isNotDeleted() {
+        return (swRoot, query, cb) -> cb.equal(swRoot.<Boolean> get(JpaSoftwareModule_.deleted), false);
     }
 
     /**

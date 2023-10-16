@@ -43,15 +43,12 @@ public class SoftwareModuleTypeSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link SoftwareModuleType}s by its
-     * DELETED attribute.
-     * 
-     * @param isDeleted
-     *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
-     *            attribute is ignored
+     * {@link Specification} for retrieving {@link SoftwareModuleType}s with
+     * DELETED attribute <code>false</code> - i.e. is not deleted.
+     *
      * @return the {@link SoftwareModuleType} {@link Specification}
      */
-    public static Specification<JpaSoftwareModuleType> isDeleted(final Boolean isDeleted) {
-        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleType_.deleted), isDeleted);
+    public static Specification<JpaSoftwareModuleType> isNotDeleted() {
+        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleType_.deleted), false);
     }
 }

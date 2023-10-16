@@ -42,17 +42,18 @@ public class TestAccessControlManger {
 
     public <T> void assertOperation(final AccessController.Operation operation, final List<T> entities) {
         final boolean verificationResult = entities.stream().allMatch(entity ->
-            operationDescribers.stream().filter(rule -> rule.getOperation().equals(operation))
-                    .filter(rule -> rule.getEntity().isAssignableFrom(entity.getClass()))
-                    .anyMatch(rule -> ((Predicate<T>) rule.getEntityIdentifier()).test(entity)));
+            operationDescribers.stream().filter(rule -> rule.operation().equals(operation))
+                    .filter(rule -> rule.entity().isAssignableFrom(entity.getClass()))
+                    .anyMatch(rule -> ((Predicate<T>) rule.entityIdentifier()).test(entity)));
         if (!verificationResult) {
+            System.out.println(">> " + entities + " /// " + operationDescribers);
             throw new InsufficientPermissionException();
         }
     }
 
     public <T> void permitOperation(final Class<T> ruleClass, final AccessController.Operation operation,
             final Predicate<T> entityIdentifier) {
-        operationDescribers.add(new OperationDescriber<T>(ruleClass, entityIdentifier, operation));
+        operationDescribers.add(new OperationDescriber<>(ruleClass, entityIdentifier, operation));
     }
 
     public static class AccessRule<T> {
@@ -80,30 +81,5 @@ public class TestAccessControlManger {
         }
     }
 
-    public static class OperationDescriber<T> {
-        private final Class<T> entity;
-        private final Predicate<T> entityIdentifier;
-        private final AccessController.Operation operation;
-
-        public OperationDescriber(final Class<T> entity, final Predicate<T> entityIdentifier,
-                final AccessController.Operation operation) {
-            this.entity = entity;
-            this.entityIdentifier = entityIdentifier;
-            this.operation = operation;
-        }
-
-        public Class<T> getEntity() {
-            return entity;
-        }
-
-        public Predicate<T> getEntityIdentifier() {
-            return entityIdentifier;
-        }
-
-        public AccessController.Operation getOperation() {
-            return operation;
-        }
-
-    }
-
+    public record OperationDescriber<T>(Class<T> entity, Predicate<T> entityIdentifier, AccessController.Operation operation) {}
 }

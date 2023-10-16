@@ -93,8 +93,9 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         }).as("Distribution set should not be found.").isInstanceOf(EntityNotFoundException.class);
 
         // verify distributionSetManagement#get
-        assertThat(distributionSetManagement.get(Arrays.asList(permitted.getId(), hidden.getId())).stream()
-                .map(Identifiable::getId).toList()).containsOnly(permitted.getId());
+        assertThatThrownBy(() -> {
+            distributionSetManagement.get(Arrays.asList(permitted.getId(), hidden.getId()));
+        }).as("Fail if request hidden.").isInstanceOf(EntityNotFoundException.class);
 
         // verify distributionSetManagement#getByNameAndVersion
         assertThat(distributionSetManagement.getByNameAndVersion(permitted.getName(), permitted.getVersion()))
@@ -128,6 +129,8 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 DistributionSetSpecification.byIds(Arrays.asList(permitted.getId(), readOnly.getId())));
 
         // allow updating the permitted distributionSet
+        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.READ,
+                ds -> ds.getId().equals(permitted.getId()));
         testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
                 ds -> ds.getId().equals(permitted.getId()));
 

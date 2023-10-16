@@ -185,7 +185,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public boolean clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
-        // unconditional check of software module id access is essential, used by #delete(int)
+        // unconditional check of software module id access is essential, used by #delete(int) and JpaSoftwareModuleManagement#delete
         verifyModuleAccess(AccessController.Operation.DELETE, softwareModuleId);
 
         final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(

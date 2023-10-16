@@ -27,17 +27,13 @@ public final class DistributionSetTypeSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSetType}s by its
-     * DELETED attribute.
-     * 
-     * @param isDeleted
-     *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
-     *            attribute is ignored
+     * {@link Specification} for retrieving {@link DistributionSetType}s with
+     * DELETED attribute <code>false</code> - i.e. is not deleted.
+     *
      * @return the {@link DistributionSetType} {@link Specification}
      */
-    public static Specification<JpaDistributionSetType> isDeleted(final Boolean isDeleted) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSetType_.deleted),
-                isDeleted);
+    public static Specification<JpaDistributionSetType> isNotDeleted() {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.<Boolean> get(JpaDistributionSetType_.deleted), false);
     }
 
     /**

@@ -49,8 +49,19 @@ public final class DistributionSetSpecification {
     }
 
     /**
-     * {@link Specification} for retrieving {@link DistributionSet}s by its DELETED
-     * attribute.
+     * {@link Specification} for retrieving {@link DistributionSet}s with
+     * DELETED attribute <code>false</code> - i.e. is not deleted.
+     *
+     * @return the {@link DistributionSet} {@link Specification}
+     */
+    public static Specification<JpaDistributionSet> isNotDeleted() {
+        return isDeleted(false);
+
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link DistributionSet}s by its
+     * DELETED attribute.
      *
      * @param isDeleted
      *            TRUE/FALSE are compared to the attribute DELETED. If NULL the
@@ -59,8 +70,8 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> isDeleted(final Boolean isDeleted) {
         return (dsRoot, query, cb) -> cb.equal(dsRoot.<Boolean> get(JpaDistributionSet_.deleted), isDeleted);
-
     }
+
 
     /**
      * {@link Specification} for retrieving {@link DistributionSet}s by its

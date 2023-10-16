@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -95,24 +94,25 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Override
     public Page<SoftwareModuleType> findByRsql(final Pageable pageable, final String rsqlParam) {
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleTypeRepository, pageable,
-                Arrays.asList(
+                List.of(
                         RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleTypeFields.class,
                                 virtualPropertyReplacer, database),
-                        SoftwareModuleTypeSpecification.isDeleted(false),
+                        SoftwareModuleTypeSpecification.isNotDeleted(),
                         softwareModuleTypeAccessController.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Slice<SoftwareModuleType> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(softwareModuleTypeRepository, pageable,
-                Arrays.asList(SoftwareModuleTypeSpecification.isDeleted(false),
+                List.of(SoftwareModuleTypeSpecification.isNotDeleted(),
                         softwareModuleTypeAccessController.getAccessRules(AccessController.Operation.READ)));
     }
 
+    // TODO AC - should count be restricted?
     @Override
     public long count() {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.isDeleted(false));
+                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.isNotDeleted());
         return softwareModuleTypeRepository.count(specification);
     }
 
@@ -120,14 +120,14 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public Optional<SoftwareModuleType> getByKey(final String key) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byKey(key));
-        return softwareModuleTypeRepository.findOne(specification).map(x -> x);
+        return softwareModuleTypeRepository.findOne(specification).map(SoftwareModuleType.class::cast);
     }
 
     @Override
     public Optional<SoftwareModuleType> getByName(final String name) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byName(name));
-        return softwareModuleTypeRepository.findOne(specification).map(x -> x);
+        return softwareModuleTypeRepository.findOne(specification).map(SoftwareModuleType.class::cast);
     }
 
     @Override
@@ -136,7 +136,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public SoftwareModuleType create(final SoftwareModuleTypeCreate c) {
         final JpaSoftwareModuleType typeToCreate = ((JpaSoftwareModuleTypeCreate) c).build();
-
         softwareModuleTypeAccessController.assertOperationAllowed(AccessController.Operation.CREATE, typeToCreate);
 
         return softwareModuleTypeRepository.save(typeToCreate);
@@ -146,13 +145,11 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long typeId) {
+    public void delete(final long id) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byId(typeId));
-
+                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byId(id));
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findOne(specification)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, typeId));
-
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, id));
         softwareModuleTypeAccessController.assertOperationAllowed(AccessController.Operation.DELETE, toDelete);
 
         if (softwareModuleRepository.countByType(toDelete) > 0
@@ -168,13 +165,12 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public List<SoftwareModuleType> create(final Collection<SoftwareModuleTypeCreate> creates) {
-        final List<JpaSoftwareModuleType> typesToCreate = creates.stream().map(JpaSoftwareModuleTypeCreate.class::cast)
+    public List<SoftwareModuleType> create(final Collection<SoftwareModuleTypeCreate> c) {
+        final List<JpaSoftwareModuleType> creates = c.stream().map(JpaSoftwareModuleTypeCreate.class::cast)
                 .map(JpaSoftwareModuleTypeCreate::build).toList();
+        softwareModuleTypeAccessController.assertOperationAllowed(AccessController.Operation.CREATE, creates);
 
-        softwareModuleTypeAccessController.assertOperationAllowed(AccessController.Operation.CREATE, typesToCreate);
-
-        return Collections.unmodifiableList(softwareModuleTypeRepository.saveAll(typesToCreate));
+        return Collections.unmodifiableList(softwareModuleTypeRepository.saveAll(creates));
     }
 
     @Override
@@ -184,14 +180,11 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public void delete(final Collection<Long> ids) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byIds(ids));
-
         final List<JpaSoftwareModuleType> setsFound = softwareModuleTypeRepository.findAll(specification);
-
         if (setsFound.size() < ids.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, ids,
                     setsFound.stream().map(SoftwareModuleType::getId).toList());
         }
-
         softwareModuleTypeAccessController.assertOperationAllowed(AccessController.Operation.DELETE, setsFound);
 
         softwareModuleTypeRepository.deleteAll(setsFound);
@@ -209,14 +202,15 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     public Optional<SoftwareModuleType> get(final long id) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byId(id));
-        return softwareModuleTypeRepository.findOne(specification).map(smt -> smt);
+
+        return softwareModuleTypeRepository.findOne(specification).map(SoftwareModuleType.class::cast);
     }
 
     @Override
     public boolean exists(final long id) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, SoftwareModuleTypeSpecification.byId(id));
+
         return softwareModuleTypeRepository.exists(specification);
     }
-
 }

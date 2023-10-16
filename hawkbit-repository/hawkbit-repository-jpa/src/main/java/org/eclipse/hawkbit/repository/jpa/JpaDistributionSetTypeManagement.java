@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -161,35 +160,22 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignMandatorySoftwareModuleTypes(final long dsTypeId,
-            final Collection<Long> softwareModulesTypeIds) {
-        final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController.appendAccessRules(
-                AccessController.Operation.READ, SoftwareModuleTypeSpecification.byIds(softwareModulesTypeIds));
-
-        final Collection<JpaSoftwareModuleType> foundModules = softwareModuleTypeRepository.findAll(specification);
-
-        if (foundModules.size() < softwareModulesTypeIds.size()) {
-            throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
-                    foundModules.stream().map(SoftwareModuleType::getId).toList());
-        }
-
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
-
-        distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, type);
-        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
-        assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
-
-        foundModules.forEach(type::addMandatoryModuleType);
-
-        return distributionSetTypeRepository.save(type);
+    public DistributionSetType assignMandatorySoftwareModuleTypes(final long id,
+            final Collection<Long> softwareModuleTypeIds) {
+        return assignSoftwareModuleTypes(id, softwareModuleTypeIds, true);
     }
 
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType assignOptionalSoftwareModuleTypes(final long dsTypeId,
+    public DistributionSetType assignOptionalSoftwareModuleTypes(final long id,
             final Collection<Long> softwareModulesTypeIds) {
+        return assignSoftwareModuleTypes(id, softwareModulesTypeIds, false);
+    }
+
+    private DistributionSetType assignSoftwareModuleTypes(
+            final long dsTypeId, final Collection<Long> softwareModulesTypeIds, final boolean mandatory) {
         final Specification<JpaSoftwareModuleType> specification = softwareModuleTypeAccessController.appendAccessRules(
                 AccessController.Operation.READ, SoftwareModuleTypeSpecification.byIds(softwareModulesTypeIds));
 
@@ -201,12 +187,12 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
         }
 
         final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
-
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, type);
+
         checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
         assertSoftwareModuleTypeQuota(dsTypeId, softwareModulesTypeIds.size());
 
-        foundModules.forEach(type::addOptionalModuleType);
+        foundModules.forEach(mandatory ? type::addMandatoryModuleType : type::addOptionalModuleType);
 
         return distributionSetTypeRepository.save(type);
     }
@@ -233,11 +219,11 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSetType unassignSoftwareModuleType(final long dsTypeId, final long softwareModuleTypeId) {
-        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(dsTypeId);
+    public DistributionSetType unassignSoftwareModuleType(final long id, final long softwareModuleTypeId) {
+        final JpaDistributionSetType type = findDistributionSetTypeAndThrowExceptionIfNotFound(id);
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, type);
 
-        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(dsTypeId);
+        checkDistributionSetTypeSoftwareModuleTypesIsAllowedToModify(id);
 
         type.removeModuleType(softwareModuleTypeId);
 
@@ -246,25 +232,24 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Page<DistributionSetType> findByRsql(final Pageable pageable, final String rsqlParam) {
-        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, pageable,
-                Arrays.asList(
-                        RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class,
-                                virtualPropertyReplacer, database),
-                        DistributionSetTypeSpecification.isDeleted(false),
-                        distributionSetTypeAccessController.getAccessRules(AccessController.Operation.READ)));
+        return JpaManagementHelper.findAllWithCountBySpec(distributionSetTypeRepository, pageable, List.of(
+                RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetTypeFields.class, virtualPropertyReplacer,
+                        database),
+                DistributionSetTypeSpecification.isNotDeleted(),
+                distributionSetTypeAccessController.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public Slice<DistributionSetType> findAll(final Pageable pageable) {
-        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, pageable,
-                Arrays.asList(DistributionSetTypeSpecification.isDeleted(false),
-                        distributionSetTypeAccessController.getAccessRules(AccessController.Operation.READ)));
+        return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetTypeRepository, pageable, List.of(
+                DistributionSetTypeSpecification.isNotDeleted(),
+                distributionSetTypeAccessController.getAccessRules(AccessController.Operation.READ)));
     }
 
     @Override
     public long count() {
         final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.isDeleted(false));
+                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.isNotDeleted());
         return distributionSetTypeRepository.count(specification);
     }
 
@@ -272,14 +257,14 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     public Optional<DistributionSetType> getByName(final String name) {
         final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byName(name));
-        return distributionSetTypeRepository.findOne(specification).map(dst -> dst);
+        return distributionSetTypeRepository.findOne(specification).map(DistributionSetType.class::cast);
     }
 
     @Override
     public Optional<DistributionSetType> getByKey(final String key) {
         final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byKey(key));
-        return distributionSetTypeRepository.findOne(specification).map(dst -> dst);
+        return distributionSetTypeRepository.findOne(specification).map(DistributionSetType.class::cast);
     }
 
     @Override
@@ -288,7 +273,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetType create(final DistributionSetTypeCreate c) {
         final JpaDistributionSetType distributionSetType = ((JpaDistributionSetTypeCreate) c).build();
-
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.CREATE,
                 distributionSetType);
 
@@ -299,22 +283,18 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long typeId) {
-        final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byId(typeId));
-
-        final JpaDistributionSetType toDelete = distributionSetTypeRepository.findOne(specification)
-                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, typeId));
-
+    public void delete(final long id) {
+        final JpaDistributionSetType toDelete = distributionSetTypeRepository.findOne(getById(id))
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetType.class, id));
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.DELETE, toDelete);
 
-        unassignDsTypeFromTargetTypes(typeId);
+        unassignDsTypeFromTargetTypes(id);
 
-        if (distributionSetRepository.countByTypeId(typeId) > 0) {
+        if (distributionSetRepository.countByTypeId(id) > 0) {
             toDelete.setDeleted(true);
             distributionSetTypeRepository.save(toDelete);
         } else {
-            distributionSetTypeRepository.deleteById(typeId);
+            distributionSetTypeRepository.deleteById(id);
         }
     }
 
@@ -333,7 +313,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     public List<DistributionSetType> create(final Collection<DistributionSetTypeCreate> types) {
         final List<JpaDistributionSetType> typesToCreate = types.stream().map(JpaDistributionSetTypeCreate.class::cast)
                 .map(JpaDistributionSetTypeCreate::build).toList();
-
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.CREATE, typesToCreate);
 
         return Collections.unmodifiableList(distributionSetTypeRepository.saveAll(typesToCreate));
@@ -362,9 +341,7 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     public void delete(final Collection<Long> ids) {
         final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
                 .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byIds(ids));
-
         final List<JpaDistributionSetType> setsFound = distributionSetTypeRepository.findAll(specification);
-
         distributionSetTypeAccessController.assertOperationAllowed(AccessController.Operation.DELETE, setsFound);
 
         if (setsFound.size() < ids.size()) {
@@ -384,16 +361,16 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
 
     @Override
     public Optional<DistributionSetType> get(final long id) {
-        final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byId(id));
-        return distributionSetTypeRepository.findOne(specification).map(dst -> dst);
+        return distributionSetTypeRepository.findOne(getById(id)).map(DistributionSetType.class::cast);
     }
 
     @Override
     public boolean exists(final long id) {
-        final Specification<JpaDistributionSetType> specification = distributionSetTypeAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byId(id));
-        return distributionSetTypeRepository.exists(specification);
+        return distributionSetTypeRepository.exists(getById(id));
     }
 
+    private Specification<JpaDistributionSetType> getById(final long id) {
+        return distributionSetTypeAccessController
+                .appendAccessRules(AccessController.Operation.READ, DistributionSetTypeSpecification.byId(id));
+    }
 }
