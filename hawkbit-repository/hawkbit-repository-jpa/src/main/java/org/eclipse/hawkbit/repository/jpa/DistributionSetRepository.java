@@ -25,7 +25,6 @@ import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface DistributionSetRepository
-        extends BaseEntityRepository<JpaDistributionSet, Long>, JpaSpecificationExecutor<JpaDistributionSet> {
+        extends BaseEntityRepository<JpaDistributionSet> {
 
     /**
      * Finds {@link DistributionSet}s by assigned {@link Tag}.

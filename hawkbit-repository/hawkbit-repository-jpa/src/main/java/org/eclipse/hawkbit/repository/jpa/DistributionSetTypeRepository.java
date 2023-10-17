@@ -18,9 +18,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -34,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface DistributionSetTypeRepository
-        extends BaseEntityRepository<JpaDistributionSetType, Long>, JpaSpecificationExecutor<JpaDistributionSetType> {
+        extends BaseEntityRepository<JpaDistributionSetType> {
 
     /**
      * Counts all distribution set type where a specific software module type is

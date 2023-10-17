@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface RolloutGroupRepository
-        extends BaseEntityRepository<JpaRolloutGroup, Long>, JpaSpecificationExecutor<JpaRolloutGroup> {
+        extends BaseEntityRepository<JpaRolloutGroup> {
 
     /**
      * Retrieves all {@link RolloutGroup} referring a specific rollout in the

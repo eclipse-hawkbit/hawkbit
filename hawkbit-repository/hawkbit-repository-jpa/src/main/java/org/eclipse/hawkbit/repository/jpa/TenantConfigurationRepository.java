@@ -24,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration, Long> {
+public interface TenantConfigurationRepository extends BaseEntityRepository<JpaTenantConfiguration> {
 
     /**
      * Finds a specific {@link TenantConfiguration} by the configuration key.

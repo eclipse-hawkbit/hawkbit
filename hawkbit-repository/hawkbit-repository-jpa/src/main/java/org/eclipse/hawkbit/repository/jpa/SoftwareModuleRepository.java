@@ -23,7 +23,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -35,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface SoftwareModuleRepository
-        extends BaseEntityRepository<JpaSoftwareModule, Long>, JpaSpecificationExecutor<JpaSoftwareModule> {
+        extends BaseEntityRepository<JpaSoftwareModule> {
 
     /**
      * Counts all {@link SoftwareModule}s based on the given {@link JpaSoftwareModuleType}.

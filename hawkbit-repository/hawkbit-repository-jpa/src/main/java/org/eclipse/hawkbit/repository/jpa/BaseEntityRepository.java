@@ -9,13 +9,13 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -26,13 +26,12 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @param <T>
  *            type if the entity type
- * @param <I>
- *            of the entity type
  */
 @NoRepositoryBean
 @Transactional(readOnly = true)
-public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity, I extends Serializable>
-        extends PagingAndSortingRepository<T, I>, CrudRepository<T, I>, NoCountSliceRepository<T> {
+public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
+        extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>,
+                JpaSpecificationExecutor<T>, NoCountSliceRepository<T> {
 
     /**
      * Retrieves an {@link BaseEntity} by its id.
@@ -41,7 +40,8 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      *            to search for
      * @return {@link BaseEntity}
      */
-    Optional<T> findById(I id);
+    @Override
+    Optional<T> findById(Long id);
 
     /**
      * Overrides
