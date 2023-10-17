@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -37,9 +38,12 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
     }
 
     protected void permitAllOperations(final AccessController.Operation operation) {
-        testAccessControlManger.permitOperation(JpaTarget.class, operation, type -> true);
-        testAccessControlManger.permitOperation(JpaTargetType.class, operation, type -> true);
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, operation, type -> true);
+        testAccessControlManger.defineAccessRule(
+                JpaTarget.class, operation, Specification.where(null), type -> true);
+        testAccessControlManger.defineAccessRule(
+                JpaTargetType.class, operation, Specification.where(null), type -> true);
+        testAccessControlManger.defineAccessRule(
+                JpaDistributionSet.class, operation, Specification.where(null), type -> true);
     }
 
     public static class AccessControlTestConfig {
@@ -53,6 +57,12 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         @Primary
         public AccessController<JpaTarget> targetAccessController(final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
+
+                @Override
+                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
+                  // TODO
+                }
+
                 @Override
                 public Specification<JpaTarget> getAccessRules(final Operation operation) {
                     return testAccessControlManger.getAccessRule(JpaTarget.class, operation);
@@ -61,7 +71,7 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 @Override
                 public void assertOperationAllowed(final Operation operation, final Supplier<JpaTarget> entitySupplier)
                         throws InsufficientPermissionException {
-                    testAccessControlManger.assertOperation(operation, List.of(entitySupplier.get()));
+                    testAccessControlManger.assertOperation(JpaTarget.class, operation, List.of(entitySupplier.get()));
                 }
             };
         }
@@ -72,6 +82,11 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
                 @Override
+                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
+                    // TODO
+                }
+
+                @Override
                 public Specification<JpaTargetType> getAccessRules(final Operation operation) {
                     return testAccessControlManger.getAccessRule(JpaTargetType.class, operation);
                 }
@@ -79,7 +94,7 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 @Override
                 public void assertOperationAllowed(final Operation operation, final Supplier<JpaTargetType> entitySupplier)
                         throws InsufficientPermissionException {
-                    testAccessControlManger.assertOperation(operation, List.of(entitySupplier.get()));
+                    testAccessControlManger.assertOperation(JpaTargetType.class, operation, List.of(entitySupplier.get()));
                 }
             };
         }
@@ -90,6 +105,11 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
                 @Override
+                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
+                    // TODO
+                }
+
+                @Override
                 public Specification<JpaDistributionSet> getAccessRules(final Operation operation) {
                     return testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation);
                 }
@@ -97,9 +117,15 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 @Override
                 public void assertOperationAllowed(final Operation operation, final Supplier<JpaDistributionSet> entitySupplier)
                         throws InsufficientPermissionException {
-                    testAccessControlManger.assertOperation(operation, List.of(entitySupplier.get()));
+                    testAccessControlManger.assertOperation(JpaDistributionSet.class, operation, List.of(entitySupplier.get()));
                 }
             };
         }
+    }
+
+    protected static <T> List<T> merge(final List<T> lists0, final List<T> list1) {
+        final List<T> merge = new ArrayList<>(lists0);
+        merge.addAll(list1);
+        return merge;
     }
 }

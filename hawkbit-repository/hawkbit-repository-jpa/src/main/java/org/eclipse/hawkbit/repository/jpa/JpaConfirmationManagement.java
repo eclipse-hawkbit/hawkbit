@@ -31,6 +31,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAutoConfirmationStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -65,9 +68,9 @@ public class JpaConfirmationManagement extends JpaActionManagement implements Co
      * Constructor
      */
     protected JpaConfirmationManagement(final TargetRepository targetRepository,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
-            final EntityFactory entityFactory) {
+                                        final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+                                        final RepositoryProperties repositoryProperties, final QuotaManagement quotaManagement,
+                                        final EntityFactory entityFactory) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.targetRepository = targetRepository;
         this.entityFactory = entityFactory;

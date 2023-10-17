@@ -14,8 +14,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType_;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.util.Collection;
-
 /**
  * Specifications class for {@link SoftwareModuleType}s. The class provides
  * Spring Data JPQL Specifications.
@@ -24,22 +22,6 @@ public class SoftwareModuleTypeSpecification {
 
     private SoftwareModuleTypeSpecification() {
         // utility class
-    }
-
-    public static Specification<JpaSoftwareModuleType> byId(final Long typeId) {
-        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleType_.id), typeId);
-    }
-
-    public static Specification<JpaSoftwareModuleType> byIds(final Collection<Long> typeIds) {
-        return (root, query, cb) -> root.get(JpaSoftwareModuleType_.id).in(typeIds);
-    }
-
-    public static Specification<JpaSoftwareModuleType> byKey(final String key) {
-        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleType_.key), key);
-    }
-
-    public static Specification<JpaSoftwareModuleType> byName(final String name) {
-        return (root, query, cb) -> cb.equal(root.get(JpaSoftwareModuleType_.name), name);
     }
 
     /**

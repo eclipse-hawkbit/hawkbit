@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.AutoAssignDistributionSetUpdate;
@@ -24,11 +25,13 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetFilter;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
+import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Pageable;
@@ -44,6 +47,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     @Description("Verifies read access rules for distribution sets")
     void verifyDistributionSetReadOperations() {
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
 
@@ -54,10 +58,12 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         final Action hiddenAction = testdataFactory.performAssignment(hidden);
 
         testAccessControlManger.deleteAllRules();
+
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaDistributionSet.class, AccessController.Operation.READ,
-                DistributionSetSpecification.byId(permitted.getId()));
-        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.READ,
+        defineAccess(AccessController.Operation.READ, permitted);
+        testAccessControlManger.defineAccessRule(
+                JpaTarget.class, AccessController.Operation.READ,
+                TargetSpecifications.hasId(permittedAction.getTarget().getId()),
                 target -> target.getId().equals(permittedAction.getTarget().getId()));
 
         // verify distributionSetManagement#findAll
@@ -106,7 +112,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThat(distributionSetManagement.getByAction(permittedAction.getId())).isPresent();
         assertThatThrownBy(() -> {
             distributionSetManagement.getByAction(hiddenAction.getId());
-        }).as("Action is hidden.").isInstanceOf(EntityNotFoundException.class);
+        }).as("Action is hidden.").isInstanceOf(InsufficientPermissionException.class);
     }
 
     @Test
@@ -125,14 +131,11 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // entities created - reset rules
         testAccessControlManger.deleteAllRules();
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaDistributionSet.class, AccessController.Operation.READ,
-                DistributionSetSpecification.byIds(Arrays.asList(permitted.getId(), readOnly.getId())));
+        defineAccess(AccessController.Operation.READ, permitted, readOnly);
 
         // allow updating the permitted distributionSet
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.READ,
-                ds -> ds.getId().equals(permitted.getId()));
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
-                ds -> ds.getId().equals(permitted.getId()));
+        defineAccess(AccessController.Operation.READ, permitted);
+        defineAccess(AccessController.Operation.UPDATE, permitted);
 
         // verify distributionSetManagement#assignSoftwareModules
         assertThat(distributionSetManagement.assignSoftwareModules(permitted.getId(),
@@ -142,7 +145,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         assertThatThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(readOnly.getId(),
                     Collections.singletonList(swModule.getId()));
-        }).as("Distribution set not allowed to me modified.").isInstanceOf(InsufficientPermissionException.class);
+        }).as("Distribution set not allowed to me modified.").isInstanceOf(EntityNotFoundException.class);
         assertThatThrownBy(() -> {
             distributionSetManagement.assignSoftwareModules(hidden.getId(),
                     Collections.singletonList(swModule.getId()));
@@ -154,7 +157,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         distributionSetManagement.createMetaData(permitted.getId(), Collections.singletonList(metadata));
         assertThatThrownBy(() -> {
             distributionSetManagement.createMetaData(readOnly.getId(), Collections.singletonList(metadata));
-        }).as("Distribution set not allowed to me modified.").isInstanceOf(InsufficientPermissionException.class);
+        }).as("Distribution set not allowed to me modified.").isInstanceOf(EntityNotFoundException.class);
         assertThatThrownBy(() -> {
             distributionSetManagement.createMetaData(hidden.getId(), Collections.singletonList(metadata));
         }).as("Distribution set should not be visible.").isInstanceOf(EntityNotFoundException.class);
@@ -163,7 +166,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         distributionSetManagement.updateMetaData(permitted.getId(), metadata);
         assertThatThrownBy(() -> {
             distributionSetManagement.updateMetaData(readOnly.getId(), metadata);
-        }).as("Distribution set not allowed to me modified.").isInstanceOf(InsufficientPermissionException.class);
+        }).as("Distribution set not allowed to me modified.").isInstanceOf(EntityNotFoundException.class);
         assertThatThrownBy(() -> {
             distributionSetManagement.updateMetaData(hidden.getId(), metadata);
         }).as("Distribution set should not be visible.").isInstanceOf(EntityNotFoundException.class);
@@ -172,7 +175,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         distributionSetManagement.deleteMetaData(permitted.getId(), metadata.getKey());
         assertThatThrownBy(() -> {
             distributionSetManagement.deleteMetaData(readOnly.getId(), metadata.getKey());
-        }).as("Distribution set not allowed to me modified.").isInstanceOf(InsufficientPermissionException.class);
+        }).as("Distribution set not allowed to me modified.").isInstanceOf(EntityNotFoundException.class);
         assertThatThrownBy(() -> {
             distributionSetManagement.deleteMetaData(hidden.getId(), metadata.getKey());
         }).as("Distribution set should not be visible.").isInstanceOf(EntityNotFoundException.class);
@@ -181,29 +184,26 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     void verifyTagFilteringAndManagement() {
         // permit all operations first to prepare test setup
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
 
         final DistributionSet permitted = testdataFactory.createDistributionSet();
         final DistributionSet readOnly = testdataFactory.createDistributionSet();
         final DistributionSet hidden = testdataFactory.createDistributionSet();
-
-        final DistributionSetTag dsTag = distributionSetTagManagement
-                .create(entityFactory.tag().create().name("dsTag"));
+        final DistributionSetTag dsTag = distributionSetTagManagement.create(entityFactory.tag().create().name("dsTag"));
 
         // perform tag assignment before setting access rules
         distributionSetManagement.assignTag(Arrays.asList(permitted.getId(), readOnly.getId(), hidden.getId()),
                 dsTag.getId());
-
         // entities created - reset rules
         testAccessControlManger.deleteAllRules();
+
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaDistributionSet.class, AccessController.Operation.READ,
-                DistributionSetSpecification.byIds(Arrays.asList(permitted.getId(), readOnly.getId())));
+        defineAccess(AccessController.Operation.READ, permitted, readOnly);
 
         // allow updating the permitted distributionSet
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
-                ds -> ds.getId().equals(permitted.getId()));
+        defineAccess(AccessController.Operation.UPDATE, permitted);
 
         assertThat(distributionSetManagement.findByTag(Pageable.unpaged(), dsTag.getId()).get().map(Identifiable::getId)
                 .toList()).containsOnly(permitted.getId(), readOnly.getId());
@@ -274,11 +274,9 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // entities created - reset rules
         testAccessControlManger.deleteAllRules();
         // define read access
-        testAccessControlManger.defineAccessRule(JpaDistributionSet.class, AccessController.Operation.READ,
-                DistributionSetSpecification.byIds(Arrays.asList(permitted.getId(), readOnly.getId())));
+        defineAccess(AccessController.Operation.READ, permitted, readOnly);
         // permit update operation
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
-                ds -> ds.getId().equals(permitted.getId()));
+        defineAccess(AccessController.Operation.UPDATE, permitted);
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("test").query("id==*"));
@@ -287,12 +285,10 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
                 .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId()).ds(permitted.getId())
                         .actionType(Action.ActionType.FORCED).confirmationRequired(false))
                 .getAutoAssignDistributionSet().getId()).isEqualTo(permitted.getId());
-        assertThatThrownBy(() -> {
-            targetFilterQueryManagement
-                    .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
-                            .ds(readOnly.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
-                    .getAutoAssignDistributionSet().getId();
-        }).isInstanceOf(InsufficientPermissionException.class);
+        targetFilterQueryManagement
+                .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
+                        .ds(readOnly.getId()).actionType(Action.ActionType.FORCED).confirmationRequired(false))
+                .getAutoAssignDistributionSet().getId();
         assertThatThrownBy(() -> {
             targetFilterQueryManagement
                     .updateAutoAssignDS(new AutoAssignDistributionSetUpdate(targetFilterQuery.getId())
@@ -301,4 +297,16 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         }).isInstanceOf(EntityNotFoundException.class);
     }
 
+
+    private void defineAccess(final AccessController.Operation operation, final DistributionSet... distributionSets) {
+        defineAccess(operation, List.of(distributionSets));
+    }
+
+    private void defineAccess(final AccessController.Operation operation, final List<DistributionSet> targets) {
+        final List<Long> ids = targets.stream().map(DistributionSet::getId).toList();
+        testAccessControlManger.defineAccessRule(
+                JpaDistributionSet.class, operation,
+                DistributionSetSpecification.byIds(ids),
+                distributionSet -> ids.contains(distributionSet.getId()));
+    }
 }

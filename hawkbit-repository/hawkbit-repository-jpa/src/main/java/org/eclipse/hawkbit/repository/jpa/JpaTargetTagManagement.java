@@ -15,16 +15,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.eclipse.hawkbit.repository.TagFields;
 import org.eclipse.hawkbit.repository.TargetTagFields;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
+import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
@@ -76,7 +80,7 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     public TargetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
 
-        return targetTagRepository.save(create.buildTargetTag());
+        return targetTagRepository.save(AccessController.Operation.CREATE, create.buildTargetTag());
     }
 
     @Override
@@ -84,11 +88,10 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<TargetTag> create(final Collection<TagCreate> tt) {
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        final Collection<JpaTagCreate> targetTags = (Collection) tt;
-
-        return Collections.unmodifiableList(targetTags.stream()
-                .map(ttc -> targetTagRepository.save(ttc.buildTargetTag())).collect(Collectors.toList()));
+        final List<JpaTargetTag> targetTagList = tt.stream().map(JpaTagCreate.class::cast)
+                .map(JpaTagCreate::buildTargetTag).toList();
+        return Collections.unmodifiableList(
+                targetTagRepository.saveAll(AccessController.Operation.CREATE, targetTagList));
     }
 
     @Override

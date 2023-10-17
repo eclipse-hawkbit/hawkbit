@@ -28,6 +28,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -47,10 +50,10 @@ import com.google.common.collect.Lists;
 public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
 
     OnlineDsAssignmentStrategy(final TargetRepository targetRepository,
-            final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-            final BooleanSupplier confirmationFlowConfig) {
+                               final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
+                               final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+                               final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
+                               final BooleanSupplier confirmationFlowConfig) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
                 quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
     }

@@ -53,7 +53,15 @@ public interface AccessController<T extends Identifiable<Long>> {
     }
 
     /**
-     * Verify if the given {@link Operation} is permitted for the provided by the entity supplier.
+     * Verify if the given {@link Operation} is permitted for ALL entities.
+     *
+     * @throws InsufficientPermissionException
+     *             if operation is not permitted for given entities
+     */
+    void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException;
+
+    /**
+     * Verify if the given {@link Operation} is permitted for the entities provided by the entity supplier.
      *
      * @throws InsufficientPermissionException
      *             if operation is not permitted for given entities
@@ -98,6 +106,18 @@ public interface AccessController<T extends Identifiable<Long>> {
             idToEntity.put(entity.getId(), entity);
         }
         assertOperationAllowed(operation, entityIds, idToEntity::get);
+    }
+
+    /**
+     * Returns if the given {@link Operation} is permitted for ALL entities.
+     */
+    default boolean isOperationAllowed(final Operation operation) {
+        try {
+            assertOperationAllowed(operation);
+            return true;
+        } catch (final InsufficientPermissionException e) {
+            return false;
+        }
     }
 
     /**
@@ -191,6 +211,11 @@ public interface AccessController<T extends Identifiable<Long>> {
         }
 
         @Override
+        public void assertOperationAllowed(final Operation operation) {
+            // permit all
+        }
+
+        @Override
         public void assertOperationAllowed(final Operation operation, final Supplier<T> entitySupplier) throws InsufficientPermissionException {
             // permit all
         }
@@ -208,6 +233,11 @@ public interface AccessController<T extends Identifiable<Long>> {
         @Override
         public void assertOperationAllowed(final Operation operation, final Iterable<? extends T> entities) throws InsufficientPermissionException {
             // permit all
+        }
+
+        @Override
+        public boolean isOperationAllowed(final Operation operation) {
+            return true;
         }
 
         @Override

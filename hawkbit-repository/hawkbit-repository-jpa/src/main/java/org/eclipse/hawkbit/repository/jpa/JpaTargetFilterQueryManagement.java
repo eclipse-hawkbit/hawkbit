@@ -35,6 +35,7 @@ import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetFilterQueryCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetFilterQuery;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetFilterQuerySpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -53,6 +54,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -84,7 +86,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
-    private final AccessController<JpaDistributionSet> distributionSetAccessController;
 
     private final Database database;
 
@@ -92,8 +93,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
-            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware,
-            final AccessController<JpaDistributionSet> distributionSetAccessController) {
+            final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
@@ -103,7 +103,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
-        this.distributionSetAccessController = distributionSetAccessController;
     }
 
     @Override
@@ -126,7 +125,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             });
         });
 
-        return targetFilterQueryRepository.save(create.build());
+        return targetFilterQueryRepository.save(AccessController.Operation.CREATE, create.build());
     }
 
     @Override
@@ -232,7 +231,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     public Optional<TargetFilterQuery> get(final long targetFilterQueryId) {
-        return targetFilterQueryRepository.findById(targetFilterQueryId).map(tfq -> (TargetFilterQuery) tfq);
+        return targetFilterQueryRepository.findById(targetFilterQueryId).map(TargetFilterQuery.class::cast);
     }
 
     @Override
@@ -268,11 +267,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
                 update.getTargetFilterId());
 
         if (update.getDsId() == null) {
-            // verify the current auto assignment can be deactivated
-            if (targetFilterQuery.getAutoAssignDistributionSet() != null) {
-                distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE,
-                        (JpaDistributionSet) targetFilterQuery.getAutoAssignDistributionSet());
-            }
             targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
@@ -285,7 +279,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
             verifyDistributionSetAndThrowExceptionIfDeleted(ds);
-            distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, ds);
+
             targetFilterQuery.setAutoAssignDistributionSet(ds);
             contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
@@ -345,11 +339,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
 
     @Override
     @Transactional
-    public void cancelAutoAssignmentForDistributionSet(final long setId) {
-        distributionSetManagement.get(setId).ifPresent(ds -> distributionSetAccessController
-                .assertOperationAllowed(AccessController.Operation.UPDATE, (JpaDistributionSet) ds));
-
-        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(setId);
-        LOGGER.debug("Auto assignments for distribution sets {} deactivated", setId);
+    public void cancelAutoAssignmentForDistributionSet(final long distributionSetId) {
+        targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetId);
+        LOGGER.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
     }
 }

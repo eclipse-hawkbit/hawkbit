@@ -40,6 +40,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -86,10 +90,10 @@ public class JpaRolloutGroupManagement implements RolloutGroupManagement {
     private final Database database;
 
     JpaRolloutGroupManagement(final RolloutGroupRepository rolloutGroupRepository,
-            final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
-            final TargetRepository targetRepository, final EntityManager entityManager,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
-            final Database database) {
+                              final RolloutRepository rolloutRepository, final ActionRepository actionRepository,
+                              final TargetRepository targetRepository, final EntityManager entityManager,
+                              final VirtualPropertyReplacer virtualPropertyReplacer, final RolloutStatusCache rolloutStatusCache,
+                              final Database database) {
 
         this.rolloutGroupRepository = rolloutGroupRepository;
         this.rolloutRepository = rolloutRepository;

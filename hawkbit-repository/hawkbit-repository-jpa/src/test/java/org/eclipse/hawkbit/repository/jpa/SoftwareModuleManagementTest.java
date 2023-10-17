@@ -205,9 +205,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .first().isEqualTo(ah);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(2);
 
-        // no we search with on entity marked as deleted
-        softwareModuleManagement.delete(
-                softwareModuleRepository.findByAssignedToAndType(PAGE, ds, appType).getContent().get(0).getId());
+        softwareModuleManagement.delete(ah2.getId());
 
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent()).hasSize(1);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0", appType.getId()).getContent().get(0))

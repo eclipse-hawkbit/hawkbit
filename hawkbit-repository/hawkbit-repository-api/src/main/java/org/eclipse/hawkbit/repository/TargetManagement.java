@@ -69,13 +69,13 @@ public interface TargetManagement {
     /**
      * Counts number of targets with the given distribution set assigned.
      *
-     * @param distId to search for
+     * @param distributionSetId to search for
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByAssignedDistributionSet(long distId);
+    long countByAssignedDistributionSet(long distributionSetId);
 
     /**
      * Count {@link Target}s for all the given filter parameters.
@@ -95,25 +95,25 @@ public interface TargetManagement {
     /**
      * Get the count of targets with the given distribution set id.
      *
-     * @param distId to search for
+     * @param distributionSetId to search for
      * @return number of found {@link Target}s.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByInstalledDistributionSet(long distId);
+    long countByInstalledDistributionSet(long distributionSetId);
 
     /**
      * Checks if there is already a {@link Target} that has the given
      * distribution set Id assigned or installed.
      *
-     * @param distId to search for
+     * @param distributionSetId to search for
      * @return <code>true</code> if a {@link Target} exists.
      * @throws EntityNotFoundException if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET + SpringEvalExpressions.HAS_AUTH_OR
             + SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    boolean existsByInstalledOrAssignedDistributionSet(long distId);
+    boolean existsByInstalledOrAssignedDistributionSet(long distributionSetId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.
@@ -131,13 +131,13 @@ public interface TargetManagement {
      *
      * @param rsqlParam
      *            filter definition in RSQL syntax
-     * @param dsTypeId
+     * @param distributionSetId
      *            ID of the {@link DistributionSetType} the targets need to be
      *            compatible with
      * @return the found number of{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long dsTypeId);
+    long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long distributionSetId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.
@@ -199,26 +199,26 @@ public interface TargetManagement {
     /**
      * Deletes all targets with the given IDs.
      *
-     * @param targetIDs
+     * @param ids
      *            the IDs of the targets to be deleted
      * 
      * @throws EntityNotFoundException
      *             if (at least one) of the given target IDs does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void delete(@NotEmpty Collection<Long> targetIDs);
+    void delete(@NotEmpty Collection<Long> ids);
 
     /**
      * Deletes target with the given controller ID.
      *
-     * @param controllerID
+     * @param controllerId
      *            the controller ID of the target to be deleted
      * 
      * @throws EntityNotFoundException
      *             if target with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_TARGET)
-    void deleteByControllerID(@NotEmpty String controllerID);
+    void deleteByControllerID(@NotEmpty String controllerId);
 
     /**
      * Finds all targets for all the given parameter {@link TargetFilterQuery} and
@@ -287,7 +287,7 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rsqlParam
      *            filter definition in RSQL syntax
-     * @param distributionSetTypes
+     * @param distributionSetType
      *            type of the {@link DistributionSet} the targets must be compatible
      *            with
      * @return count of the found {@link Target}s
@@ -317,7 +317,7 @@ public interface TargetManagement {
      * 
      * @param pageReq
      *            page parameter
-     * @param distributionSetID
+     * @param distributionSetId
      *            the ID of the {@link DistributionSet}
      *
      *
@@ -327,7 +327,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
+    Page<Target> findByAssignedDistributionSet(@NotNull Pageable pageReq, long distributionSetId);
 
     /**
      * Retrieves {@link Target}s by the assigned {@link DistributionSet}
@@ -335,7 +335,7 @@ public interface TargetManagement {
      * 
      * @param pageReq
      *            page parameter
-     * @param distributionSetID
+     * @param distributionSetId
      *            the ID of the {@link DistributionSet}
      * @param rsqlParam
      *            the specification to filter the result set
@@ -350,7 +350,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetID,
+    Page<Target> findByAssignedDistributionSetAndRsql(@NotNull Pageable pageReq, long distributionSetId,
             @NotNull String rsqlParam);
 
     /**
@@ -396,7 +396,7 @@ public interface TargetManagement {
      * 
      * @param pageReq
      *            page parameter
-     * @param distributionSetID
+     * @param distributionSetId
      *            the ID of the {@link DistributionSet}
      *
      * @return the found {@link Target}s
@@ -405,7 +405,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_READ_TARGET)
-    Page<Target> findByInstalledDistributionSet(@NotNull Pageable pageReq, long distributionSetID);
+    Page<Target> findByInstalledDistributionSet(@NotNull Pageable pageReq, long distributionSetId);
 
     /**
      * retrieves {@link Target}s by the installed {@link DistributionSet}
@@ -511,7 +511,7 @@ public interface TargetManagement {
      *
      * @param pageable
      *            the page request to page the result set
-     * @param orderByDistributionId
+     * @param orderByDistributionSetId
      *            {@link DistributionSet#getId()} to be ordered by
      * @param filterParams
      *            the filters to apply; only filters are enabled that have non-null
@@ -523,7 +523,7 @@ public interface TargetManagement {
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionId,
+    Slice<Target> findByFilterOrderByLinkedDistributionSet(@NotNull Pageable pageable, long orderByDistributionSetId,
             @NotNull FilterParams filterParams);
 
     /**
@@ -615,7 +615,7 @@ public interface TargetManagement {
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
      *
-     * @param controllerID
+     * @param controllerId
      *            to un-assign for
      * @param targetTagId
      *            to un-assign
@@ -625,23 +625,23 @@ public interface TargetManagement {
      *             if TAG with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unAssignTag(@NotEmpty String controllerID, long targetTagId);
+    Target unAssignTag(@NotEmpty String controllerId, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
      *
-     * @param controllerID
+     * @param controllerId
      *            to un-assign for
      * @return the unassigned target
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unAssignType(@NotEmpty String controllerID);
+    Target unAssignType(@NotEmpty String controllerId);
 
     /**
      * Assign a {@link TargetType} assignment to given {@link Target}.
      *
-     * @param controllerID
+     * @param controllerId
      *            to un-assign for
      * @param targetTypeId
      *            Target type id
@@ -651,7 +651,7 @@ public interface TargetManagement {
      *             if TargetType with given target ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target assignType(@NotEmpty String controllerID, @NotNull Long targetTypeId);
+    Target assignType(@NotEmpty String controllerId, @NotNull Long targetTypeId);
 
     /**
      * updates the {@link Target}.
@@ -894,5 +894,4 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
     TargetMetadata updateMetadata(@NotEmpty String controllerId, @NotNull MetaData metadata);
-
 }

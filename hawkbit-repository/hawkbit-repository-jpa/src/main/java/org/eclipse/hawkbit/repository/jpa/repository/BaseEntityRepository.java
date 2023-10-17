@@ -7,19 +7,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
 
 /**
  * Command repository operations for all {@link TenantAwareBaseEntity}s.
@@ -31,17 +31,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity>
         extends PagingAndSortingRepository<T, Long>, CrudRepository<T, Long>,
-                JpaSpecificationExecutor<T>, NoCountSliceRepository<T> {
+                JpaSpecificationExecutor<T>, NoCountSliceRepository<T>, ACMRepository<T> {
 
-    /**
-     * Retrieves an {@link BaseEntity} by its id.
-     * 
-     * @param id
-     *            to search for
-     * @return {@link BaseEntity}
-     */
     @Override
-    Optional<T> findById(Long id);
+    List<T> findAllById(final Iterable<Long> ids);
 
     /**
      * Overrides
@@ -50,11 +43,20 @@ public interface BaseEntityRepository<T extends AbstractJpaTenantAwareBaseEntity
      * {@link Iterable} to be able to work with it directly in further code
      * processing instead of converting the {@link Iterable}.
      *
-     * @param entities
-     *            to persist in the database
+     * @param entities to persist in the database
      * @return the created entities
      */
     @Override
     @Transactional
     <S extends T> List<S> saveAll(Iterable<S> entities);
+
+    /**
+     * Deletes all entities of a given tenant from this repository . For safety
+     * reasons (this is a "delete everything" query after all) we add the tenant
+     * manually to query even if this will be done by {@link EntityManager}
+     * anyhow. The DB should take care of optimizing this away.
+     *
+     * @param tenant to delete data from
+     */
+    void deleteByTenant(String tenant);
 }

@@ -69,22 +69,6 @@ public interface ArtifactManagement {
     Artifact create(@NotNull @Valid ArtifactUpload artifactUpload);
 
     /**
-     * Garbage collects artifact binaries if only referenced by given
-     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
-     * marked as deleted.
-     * 
-     *
-     * @param artifactSha1Hash
-     *            no longer needed
-     * @param softwareModuleId
-     *            the garbage collection call is made for
-     * 
-     * @return <code>true</code> if an binary was actually garbage collected
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, long softwareModuleId);
-
-    /**
      * Deletes {@link Artifact} based on given id.
      *
      * @param id

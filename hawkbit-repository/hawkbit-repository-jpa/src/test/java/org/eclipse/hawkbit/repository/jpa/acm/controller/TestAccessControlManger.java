@@ -9,77 +9,62 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.springframework.data.jpa.domain.Specification;
+
+import javax.persistence.criteria.CriteriaQuery;
 
 public class TestAccessControlManger {
 
-    final List<AccessRule<?>> accessRules = new ArrayList<>();
-    final List<OperationDescriber<?>> operationDescribers = new ArrayList<>();
+    private final Map<AccessRuleId<?>, AccessRule<?>> accessRules = new HashMap<>();
 
     public void deleteAllRules() {
         accessRules.clear();
-        operationDescribers.clear();
     }
 
-    public <T> Specification<T> getAccessRule(final Class<T> ruleClass, final AccessController.Operation operation) {
-        return accessRules.stream()
-                .filter(rule -> rule.getRuleClass().isAssignableFrom(ruleClass)
-                        && rule.getOperation().equals(operation))
-                .map(AccessRule::getSpecification).map(s -> (Specification<T>) s).findFirst()
-                .orElseGet(() -> Specification.where(null));
+    public <T> void defineAccessRule(
+            final Class<T> ruleClass, final AccessController.Operation operation,
+            final Specification<T> specification, final Predicate<T> check) {
+        accessRules.put(new AccessRuleId<T>(ruleClass, operation), new AccessRule<T>(specification, check));
     }
 
-    public <T> void defineAccessRule(final Class<T> ruleClass, final AccessController.Operation operation,
-            final Specification<T> specification) {
-        accessRules.add(new AccessRule<T>(ruleClass, operation, specification));
+    public <T extends AbstractJpaBaseEntity> Specification<T> getAccessRule(final Class<T> ruleClass, final AccessController.Operation operation) {
+        @SuppressWarnings("unchecked")
+        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<T>(ruleClass, operation), null);
+        if (accessRule == null) {
+            return nop();
+        } else {
+            return accessRule.specification();
+        }
+    }
+    private static <T extends AbstractJpaBaseEntity> Specification<T> nop() {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(AbstractJpaBaseEntity_.id), -1);
     }
 
-    public <T> void assertOperation(final AccessController.Operation operation, final List<T> entities) {
-        final boolean verificationResult = entities.stream().allMatch(entity ->
-            operationDescribers.stream().filter(rule -> rule.operation().equals(operation))
-                    .filter(rule -> rule.entity().isAssignableFrom(entity.getClass()))
-                    .anyMatch(rule -> ((Predicate<T>) rule.entityIdentifier()).test(entity)));
-        if (!verificationResult) {
-            System.out.println(">> " + entities + " /// " + operationDescribers);
-            throw new InsufficientPermissionException();
+    public <T> void assertOperation(final Class<T> ruleClass, final AccessController.Operation operation, final List<T> entities) {
+        @SuppressWarnings("unchecked")
+        final AccessRule<T> accessRule = (AccessRule<T>) accessRules.getOrDefault(new AccessRuleId<T>(ruleClass, operation), null);
+        if (accessRule == null) {
+            throw new InsufficientPermissionException("No access define - reject all");
+        } else {
+            for (final T entity : entities) {
+                if (!accessRule.checker.test(entity)) {
+                    throw new InsufficientPermissionException(
+                            "Access to " + ruleClass.getName() + "/" + entity + " not allowed by checker!");
+                }
+            }
+            return;
         }
     }
 
-    public <T> void permitOperation(final Class<T> ruleClass, final AccessController.Operation operation,
-            final Predicate<T> entityIdentifier) {
-        operationDescribers.add(new OperationDescriber<>(ruleClass, entityIdentifier, operation));
-    }
-
-    public static class AccessRule<T> {
-        private final Class<T> ruleClass;
-        private final AccessController.Operation operation;
-        private final Specification<T> specification;
-
-        public AccessRule(final Class<T> ruleClass, final AccessController.Operation operation,
-                final Specification<T> specification) {
-            this.ruleClass = ruleClass;
-            this.operation = operation;
-            this.specification = specification;
-        }
-
-        public Class<T> getRuleClass() {
-            return ruleClass;
-        }
-
-        public AccessController.Operation getOperation() {
-            return operation;
-        }
-
-        public Specification<T> getSpecification() {
-            return specification;
-        }
-    }
-
-    public record OperationDescriber<T>(Class<T> entity, Predicate<T> entityIdentifier, AccessController.Operation operation) {}
+    private record AccessRuleId<T>(Class<T> ruleClass, AccessController.Operation operation) {}
+    private record AccessRule<T> (Specification<T> specification, Predicate<T> checker) {}
 }

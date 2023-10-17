@@ -20,6 +20,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
+import javax.swing.text.html.Option;
 import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetFields;
@@ -51,9 +52,16 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetFilterQueryRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
-import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
+import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -74,6 +82,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -105,6 +114,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     private final QuotaManagement quotaManagement;
 
     private final DistributionSetMetadataRepository distributionSetMetadataRepository;
+    private final TargetRepository targetRepository;
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
 
@@ -122,12 +132,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private final AfterTransactionCommitExecutor afterCommit;
 
-    private final AccessController<JpaDistributionSet> distributionSetAccessController;
-
-    private final AccessController<JpaSoftwareModule> softwareModuleAccessController;
-
-    private final AccessController<JpaTarget> targetAccessController;
-
     private final Database database;
 
     JpaDistributionSetManagement(final EntityManager entityManager,
@@ -135,15 +139,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetTagManagement distributionSetTagManagement, final SystemManagement systemManagement,
             final DistributionSetTypeManagement distributionSetTypeManagement, final QuotaManagement quotaManagement,
             final DistributionSetMetadataRepository distributionSetMetadataRepository,
+            final TargetRepository targetRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository, final ActionRepository actionRepository,
             final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final SoftwareModuleRepository softwareModuleRepository,
             final DistributionSetTagRepository distributionSetTagRepository,
             final AfterTransactionCommitExecutor afterCommit,
-            final AccessController<JpaDistributionSet> distributionSetAccessController,
-            final AccessController<JpaSoftwareModule> softwareModuleAccessController,
-            final AccessController<JpaTarget> targetAccessController,
             final Database database) {
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -152,6 +154,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.distributionSetTypeManagement = distributionSetTypeManagement;
         this.quotaManagement = quotaManagement;
         this.distributionSetMetadataRepository = distributionSetMetadataRepository;
+        this.targetRepository = targetRepository;
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.actionRepository = actionRepository;
         this.eventPublisherHolder = eventPublisherHolder;
@@ -160,15 +163,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         this.softwareModuleRepository = softwareModuleRepository;
         this.distributionSetTagRepository = distributionSetTagRepository;
         this.afterCommit = afterCommit;
-        this.distributionSetAccessController = distributionSetAccessController;
-        this.softwareModuleAccessController = softwareModuleAccessController;
-        this.targetAccessController = targetAccessController;
         this.database = database;
     }
 
     @Override
     public Optional<DistributionSet> getWithDetails(final long id) {
-        return distributionSetRepository.findOne(getByIdSpec(id)).map(DistributionSet.class::cast);
+        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
     }
 
     @Override
@@ -177,9 +177,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException(DistributionSetType.class, typeId);
         }
 
-        final Specification<JpaDistributionSet> specification = distributionSetAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byType(typeId));
-        return distributionSetRepository.count(specification);
+        return distributionSetRepository.count(DistributionSetSpecification.byType(typeId));
     }
 
     @Override
@@ -264,7 +262,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException(DistributionSet.class, dsIds,
                     allDs.stream().map(DistributionSet::getId).toList());
         }
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, allDs);
 
         final DistributionSetTag distributionSetTag = tagSupplier.get();
         try {
@@ -276,9 +273,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private List<JpaDistributionSet> findDistributionSetListWithDetails(final Collection<Long> distributionIdSet) {
-        final Specification<JpaDistributionSet> specification = distributionSetAccessController.appendAccessRules(
-                AccessController.Operation.READ, DistributionSetSpecification.byIds(distributionIdSet));
-        return distributionSetRepository.findAll(specification);
+        return distributionSetRepository.findAll(DistributionSetSpecification.byIds(distributionIdSet));
     }
 
     @Override
@@ -289,7 +284,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final GenericDistributionSetUpdate update = (GenericDistributionSetUpdate) u;
 
         final JpaDistributionSet set = (JpaDistributionSet) getValid(update.getId());
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, set);
 
         update.getName().ifPresent(set::setName);
         update.getDescription().ifPresent(set::setDescription);
@@ -304,12 +298,9 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return distributionSetRepository.save(set);
     }
 
-    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long moduleId) {
-        // TODO AC - why don't use SoftwareModuleManagement directly and to delegte check to it?
-        final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byId(moduleId));
-        return softwareModuleRepository.findOne(specification)
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
+    private JpaSoftwareModule findSoftwareModuleAndThrowExceptionIfNotFound(final Long softwareModuleId) {
+        return softwareModuleRepository.findById(softwareModuleId)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
     }
 
     @Override
@@ -322,7 +313,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetIDs,
                     setsFound.stream().map(DistributionSet::getId).toList());
         }
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.DELETE, setsFound);
 
         final List<Long> assigned = distributionSetRepository
                 .findAssignedToTargetDistributionSetsById(distributionSetIDs);
@@ -331,6 +321,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         // soft delete assigned
         if (!assigned.isEmpty()) {
             final Long[] dsIds = assigned.toArray(new Long[0]);
+            // TODO AC - shall we check delete ?
             distributionSetRepository.deleteDistributionSet(dsIds);
             targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(dsIds);
         }
@@ -360,9 +351,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final JpaDistributionSetCreate create = (JpaDistributionSetCreate) c;
         setDefaultTypeIfMissing(create);
 
-        final JpaDistributionSet toCreateDs = create.build();
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.CREATE, toCreateDs);
-        return distributionSetRepository.save(toCreateDs);
+        return distributionSetRepository.save(AccessController.Operation.CREATE, create.build());
     }
 
     @Override
@@ -372,9 +361,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public List<DistributionSet> create(final Collection<DistributionSetCreate> creates) {
         final List<JpaDistributionSet> toCreate = creates.stream().map(JpaDistributionSetCreate.class::cast)
                 .map(this::setDefaultTypeIfMissing).map(JpaDistributionSetCreate::build).toList();
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.CREATE, toCreate);
 
-        return Collections.unmodifiableList(distributionSetRepository.saveAll(toCreate));
+        return Collections.unmodifiableList(distributionSetRepository.saveAll(AccessController.Operation.CREATE, toCreate));
     }
 
     private JpaDistributionSetCreate setDefaultTypeIfMissing(final JpaDistributionSetCreate create) {
@@ -388,17 +376,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public DistributionSet assignSoftwareModules(final long id, final Collection<Long> moduleIds) {
+    public DistributionSet assignSoftwareModules(final long id, final Collection<Long> softwareModuleId) {
         final JpaDistributionSet set = (JpaDistributionSet) getValid(id);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, set);
         assertDistributionSetIsNotAssignedToTargets(id);
-        assertSoftwareModuleQuota(id, moduleIds.size());
+        assertSoftwareModuleQuota(id, softwareModuleId.size());
 
-        final Specification<JpaSoftwareModule> specification = softwareModuleAccessController
-                .appendAccessRules(AccessController.Operation.READ, SoftwareModuleSpecification.byIds(moduleIds));
-        final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findAll(specification);
-        if (modules.size() < moduleIds.size()) {
-            throw new EntityNotFoundException(SoftwareModule.class, moduleIds,
+        final Collection<JpaSoftwareModule> modules = softwareModuleRepository.findAllById(softwareModuleId);
+        if (modules.size() < softwareModuleId.size()) {
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId,
                     modules.stream().map(SoftwareModule::getId).toList());
         }
 
@@ -413,7 +398,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSet unassignSoftwareModule(final long id, final long moduleId) {
         final JpaDistributionSet set = (JpaDistributionSet) getValid(id);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, set);
         assertDistributionSetIsNotAssignedToTargets(id);
 
         final JpaSoftwareModule module = findSoftwareModuleAndThrowExceptionIfNotFound(moduleId);
@@ -427,7 +411,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        specList.add(distributionSetAccessController.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, specList);
     }
@@ -436,21 +419,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public long countByDistributionSetFilter(@NotNull final DistributionSetFilter distributionSetFilter) {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
-        specList.add(distributionSetAccessController.getAccessRules(AccessController.Operation.READ));
+
         return JpaManagementHelper.countBySpec(distributionSetRepository, specList);
     }
 
     @Override
     public Slice<DistributionSet> findByCompleted(final Pageable pageReq, final Boolean complete) {
         final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
-        specifications.add(distributionSetAccessController.getAccessRules(AccessController.Operation.READ));
+
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageReq, specifications);
     }
 
     @Override
     public long countByCompleted(final Boolean complete) {
         final List<Specification<JpaDistributionSet>> specifications = buildSpecsByComplete(complete);
-        specifications.add(distributionSetAccessController.getAccessRules(AccessController.Operation.READ));
+
         return JpaManagementHelper.countBySpec(distributionSetRepository, specifications);
     }
 
@@ -473,25 +456,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         final List<Specification<JpaDistributionSet>> specList = buildDistributionSetSpecifications(
                 distributionSetFilter);
         specList.add(DistributionSetSpecification.orderedByLinkedTarget(assignedOrInstalled, pageable.getSort()));
-        specList.add(distributionSetAccessController.getAccessRules(AccessController.Operation.READ));
 
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, unsortedPage, specList);
     }
 
     @Override
     public Optional<DistributionSet> getByNameAndVersion(final String distributionName, final String version) {
-        final Specification<JpaDistributionSet> spec = distributionSetAccessController.appendAccessRules(
-                AccessController.Operation.READ,
-                DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version));
-        return distributionSetRepository.findOne(spec).map(DistributionSet.class::cast);
+        return distributionSetRepository
+                .findOne(DistributionSetSpecification.equalsNameAndVersionIgnoreCase(distributionName, version))
+                .map(DistributionSet.class::cast);
 
     }
 
     @Override
     public long count() {
-        final Specification<JpaDistributionSet> spec = distributionSetAccessController.appendAccessRules(
-                AccessController.Operation.READ, DistributionSetSpecification.isNotDeleted());
-        return distributionSetRepository.count(spec);
+        return distributionSetRepository.count(DistributionSetSpecification.isNotDeleted());
     }
 
     @Override
@@ -500,7 +479,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetMetadata> createMetaData(final long id, final Collection<MetaData> md) {
         final JpaDistributionSet distributionSet = (JpaDistributionSet)getValid(id);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
         assertMetaDataQuota(id, md.size());
 
         md.forEach(meta -> checkAndThrowIfDistributionSetMetadataAlreadyExists(
@@ -530,16 +508,14 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetMetadata updateMetaData(final long id, final MetaData md) {
-        final JpaDistributionSet distributionSet = getById(id);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
-
         // check if exists otherwise throw entity not found exception
         final JpaDistributionSetMetadata toUpdate = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(id,
                 md.getKey())
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, id, md.getKey()));
         toUpdate.setValue(md.getValue());
+
         // touch it to update the lock revision because we are modifying the
-        // DS indirectly
+        // DS indirectly, it will, also check UPDATE access
         JpaManagementHelper.touch(entityManager, distributionSetRepository, (JpaDistributionSet) getValid(id));
         return distributionSetMetadataRepository.save(toUpdate);
     }
@@ -549,13 +525,12 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void deleteMetaData(final long id, final String key) {
-        final JpaDistributionSet distributionSet = getById(id);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, distributionSet);
-
         final JpaDistributionSetMetadata metadata = (JpaDistributionSetMetadata) getMetaDataByDistributionSetId(
                 id, key)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetMetadata.class, id, key));
 
+        // touch it to update the lock revision because we are modifying the
+        // DS indirectly, it will, also check UPDATE access
         JpaManagementHelper.touch(entityManager, distributionSetRepository,
                 (JpaDistributionSet) metadata.getDistributionSet());
         distributionSetMetadataRepository.deleteById(metadata.getId());
@@ -605,26 +580,21 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     @Override
     public Optional<DistributionSet> getByAction(final long actionId) {
-        verifyActionTargetIsAccessible(actionId);
-
-        final Specification<JpaDistributionSet> specification = distributionSetAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byActionId(actionId));
-        return distributionSetRepository.findOne(specification).map(DistributionSet.class::cast);
-    }
-
-    private void verifyActionTargetIsAccessible(final long actionId) {
-        actionRepository.findById(actionId).ifPresentOrElse(action -> {
-            try {
-                // check if target read operation is allowed
-                targetAccessController.assertOperationAllowed(AccessController.Operation.READ,
-                        (JpaTarget) action.getTarget());
-            } catch (final InsufficientPermissionException e) {
-                // map to entity not found
-                throw new EntityNotFoundException(Action.class, actionId);
-            }
-        }, () -> {
-            throw new EntityNotFoundException(Action.class, actionId);
-        });
+        return actionRepository
+                .findById(actionId)
+                .map(action -> {
+                    if (!targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId()))) {
+                        throw new InsufficientPermissionException("Target not accessible (or not found)!");
+                    }
+                    return distributionSetRepository
+                            .findOne(DistributionSetSpecification.byActionId(actionId))
+                            .orElseThrow(() ->
+                                    new InsufficientPermissionException("DistributionSet not accessible (or not found)!"));
+                })
+                .map(DistributionSet.class::cast)
+                .or(() -> {
+                    throw new EntityNotFoundException(Action.class, actionId);
+                });
     }
 
     @Override
@@ -712,7 +682,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public DistributionSet unAssignTag(final long id, final long dsTagId) {
         final JpaDistributionSet set = (JpaDistributionSet) getWithDetails(id)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, set);
 
         final DistributionSetTag distributionSetTag = distributionSetTagManagement.get(dsTagId)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, dsTagId));
@@ -729,11 +698,8 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void delete(final long setId) {
-        final JpaDistributionSet ds = getById(setId);
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, ds);
-
-        delete(Collections.singletonList(setId));
+    public void delete(final long id) {
+        delete(List.of(id));
     }
 
     @Override
@@ -742,11 +708,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     }
 
     private List<JpaDistributionSet> getDistributionSets(final Collection<Long> ids) {
-        final Specification<JpaDistributionSet> specification = distributionSetAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byIds(ids));
-        final List<JpaDistributionSet> foundDs = distributionSetRepository.findAll(specification);
+        final List<JpaDistributionSet> foundDs = distributionSetRepository.findAllById(ids);
         if (foundDs.size() != ids.size()) {
-            throw new EntityNotFoundException(DistributionSet.class, ids, foundDs.stream().map(JpaDistributionSet::getId).toList());
+            throw new EntityNotFoundException(
+                    DistributionSet.class, ids, foundDs.stream().map(JpaDistributionSet::getId).toList());
         }
         return foundDs;
     }
@@ -756,8 +721,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         assertDsTagExists(tagId);
 
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.hasTag(tagId),
-                distributionSetAccessController.getAccessRules(AccessController.Operation.READ)));
+                DistributionSetSpecification.hasTag(tagId)));
     }
 
     @Override
@@ -767,15 +731,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
-                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted(),
-                distributionSetAccessController.getAccessRules(AccessController.Operation.READ)));
+                DistributionSetSpecification.hasTag(tagId), DistributionSetSpecification.isNotDeleted()));
     }
 
     @Override
     public Slice<DistributionSet> findAll(final Pageable pageable) {
         return JpaManagementHelper.findAllWithoutCountBySpec(distributionSetRepository, pageable, List.of(
-                DistributionSetSpecification.isNotDeleted(),
-                distributionSetAccessController.getAccessRules(AccessController.Operation.READ)));
+                DistributionSetSpecification.isNotDeleted()));
     }
 
     @Override
@@ -783,18 +745,17 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         return JpaManagementHelper.findAllWithCountBySpec(distributionSetRepository, pageable, List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, DistributionSetFields.class, virtualPropertyReplacer,
                         database),
-                DistributionSetSpecification.isNotDeleted(),
-                distributionSetAccessController.getAccessRules(AccessController.Operation.READ)));
+                DistributionSetSpecification.isNotDeleted()));
     }
 
     @Override
     public Optional<DistributionSet> get(final long id) {
-        return distributionSetRepository.findOne(getByIdSpec(id)).map(DistributionSet.class::cast);
+        return distributionSetRepository.findById(id).map(DistributionSet.class::cast);
     }
 
     @Override
     public boolean exists(final long id) {
-        return distributionSetRepository.exists(getByIdSpec(id));
+        return distributionSetRepository.existsById(id);
     }
 
     @Override
@@ -830,28 +791,20 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Transactional
     public void invalidate(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaSet = (JpaDistributionSet) distributionSet;
-        distributionSetAccessController.assertOperationAllowed(AccessController.Operation.UPDATE, jpaSet);
         jpaSet.invalidate();
         distributionSetRepository.save(jpaSet);
     }
 
-    private Specification<JpaDistributionSet> getByIdSpec(long id) {
-        return distributionSetAccessController
-                .appendAccessRules(AccessController.Operation.READ, DistributionSetSpecification.byId(id));
-    }
-
     private JpaDistributionSet getById(final long id) {
         return distributionSetRepository
-                .findOne(getByIdSpec(id))
+                .findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id));
     }
 
     private void assertDistributionSetExists(final long id) {
-        distributionSetAccessController.assertOperationAllowed(
-                AccessController.Operation.READ,
-                distributionSetRepository
-                        .findOne(DistributionSetSpecification.byId(id))
-                        .orElseThrow(() -> new EntityNotFoundException(DistributionSet.class, id)));
+        if (!distributionSetRepository.existsById(id)) {
+          throw new EntityNotFoundException(DistributionSet.class, id);
+        }
     }
 
     private void assertDsTagExists(final Long tagId) {

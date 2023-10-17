@@ -7,14 +7,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.model.DistributionSet;
+import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,12 +29,11 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TargetTagRepository
-        extends BaseEntityRepository<JpaTargetTag> {
-
+public interface DistributionSetTagRepository
+        extends BaseEntityRepository<JpaDistributionSetTag> {
     /**
-     * deletes the {@link TargetTag}s with the given tag names.
-     *
+     * deletes the {@link DistributionSet} with the given name.
+     * 
      * @param tagName
      *            to be deleted
      * @return 1 if tag was deleted
@@ -42,13 +43,13 @@ public interface TargetTagRepository
     Long deleteByName(String tagName);
 
     /**
-     * find {@link TargetTag} by its name.
-     *
+     * find {@link DistributionSetTag} by its name.
+     * 
      * @param tagName
      *            to filter on
-     * @return the {@link TargetTag} if found, otherwise null
+     * @return the {@link DistributionSetTag} if found, otherwise null
      */
-    Optional<TargetTag> findByNameEquals(String tagName);
+    Optional<DistributionSetTag> findByNameEquals(String tagName);
 
     /**
      * Checks if tag with given name exists.
@@ -57,7 +58,7 @@ public interface TargetTagRepository
      *            to check for
      * @return <code>true</code> is tag with given name exists
      */
-    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTargetTag t WHERE t.name=:tagName")
+    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaDistributionSetTag t WHERE t.name=:tagName")
     boolean existsByName(@Param("tagName") String tagName);
 
     /**
@@ -66,7 +67,7 @@ public interface TargetTagRepository
      * @return all entities
      */
     @Override
-    List<JpaTargetTag> findAll();
+    List<JpaDistributionSetTag> findAll();
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
@@ -79,11 +80,11 @@ public interface TargetTagRepository
      */
     @Modifying
     @Transactional
-    @Query("DELETE FROM JpaTargetTag t WHERE t.tenant = :tenant")
+    @Query("DELETE FROM JpaDistributionSetTag t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
 
     @Override
     // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT t FROM JpaTargetTag t WHERE t.id IN ?1")
-    List<JpaTargetTag> findAllById(Iterable<Long> ids);
+    @Query("SELECT d FROM JpaDistributionSetTag d WHERE d.id IN ?1")
+    List<JpaDistributionSetTag> findAllById(Iterable<Long> ids);
 }

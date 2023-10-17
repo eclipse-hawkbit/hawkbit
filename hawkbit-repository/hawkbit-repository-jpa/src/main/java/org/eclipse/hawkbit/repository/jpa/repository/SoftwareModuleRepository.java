@@ -7,22 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
-
-import java.util.List;
-import java.util.Optional;
+package org.eclipse.hawkbit.repository.jpa.repository;
 
 import javax.persistence.EntityManager;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleType;
-import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -46,24 +38,6 @@ public interface SoftwareModuleRepository
     Long countByType(JpaSoftwareModuleType type);
 
     /**
-     * deletes the {@link SoftwareModule}s with the given IDs.
-     * 
-     * @param modifiedAt
-     *            current timestamp
-     * @param modifiedBy
-     *            user name of current auditor
-     * @param ids
-     *            to be deleted
-     *
-     */
-    @Modifying
-    @Transactional
-    @Query("UPDATE JpaSoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.id IN :ids")
-    void deleteSoftwareModule(@Param("lastModifiedAt") Long modifiedAt, @Param("lastModifiedBy") String modifiedBy,
-            @Param("ids") Long... ids);
-
-
-    /**
      * Count the software modules which are assigned to the distribution set
      * with the given ID.
      * 
@@ -74,18 +48,6 @@ public interface SoftwareModuleRepository
      *         set ID.
      */
     long countByAssignedToId(Long setId);
-
-    /**
-     * @param pageable
-     *            the page request to page the result set
-     * @param set
-     *            to search for
-     * @param type
-     *            to filter
-     * @return all {@link SoftwareModule}s that are assigned to given
-     *         {@link DistributionSet} filtered by {@link SoftwareModuleType}.
-     */
-    Page<SoftwareModule> findByAssignedToAndType(Pageable pageable, JpaDistributionSet set, SoftwareModuleType type);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

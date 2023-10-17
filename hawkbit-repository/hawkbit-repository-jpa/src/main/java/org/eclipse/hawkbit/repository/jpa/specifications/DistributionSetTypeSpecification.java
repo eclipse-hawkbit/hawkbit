@@ -9,8 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import java.util.Collection;
-
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -47,10 +45,6 @@ public final class DistributionSetTypeSpecification {
      */
     public static Specification<JpaDistributionSetType> byId(final Long distid) {
         return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.id), distid);
-    }
-
-    public static Specification<JpaDistributionSetType> byIds(final Collection<Long> distIds) {
-        return (targetRoot, query, cb) -> targetRoot.get(JpaDistributionSetType_.id).in(distIds);
     }
 
     /**

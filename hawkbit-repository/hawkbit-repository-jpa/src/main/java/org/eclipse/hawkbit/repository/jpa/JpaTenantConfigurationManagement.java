@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.exception.TenantConfigurationValueChangeNo
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
+import org.eclipse.hawkbit.repository.jpa.repository.TenantConfigurationRepository;
 import org.eclipse.hawkbit.repository.model.TenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;

@@ -22,9 +22,12 @@ import org.eclipse.hawkbit.repository.builder.GenericTagUpdate;
 import org.eclipse.hawkbit.repository.builder.TagCreate;
 import org.eclipse.hawkbit.repository.builder.TagUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -94,7 +97,7 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public DistributionSetTag create(final TagCreate c) {
         final JpaTagCreate create = (JpaTagCreate) c;
-        return distributionSetTagRepository.save(create.buildDistributionSetTag());
+        return distributionSetTagRepository.save(AccessController.Operation.CREATE, create.buildDistributionSetTag());
     }
 
     @Override
@@ -102,13 +105,14 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
-
         @SuppressWarnings({ "rawtypes", "unchecked" })
         final Collection<JpaTagCreate> creates = (Collection) dst;
 
-        return Collections.unmodifiableList(
-                creates.stream().map(create -> distributionSetTagRepository.save(create.buildDistributionSetTag()))
-                        .collect(Collectors.toList()));
+        return creates.stream()
+                .map(create -> distributionSetTagRepository
+                        .save(AccessController.Operation.CREATE, create.buildDistributionSetTag()))
+                .map(DistributionSetTag.class::cast)
+                .toList();
     }
 
     @Override

@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.Identifiable;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.autoassign.AutoAssignChecker;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetSpecification;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -35,6 +37,7 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import io.qameta.allure.Description;
@@ -60,8 +63,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
 
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasId(permittedTarget.getId()));
+        defineAccess(AccessController.Operation.READ, permittedTarget);
 
         // verify targetManagement#findAll
         assertThat(targetManagement.findAll(Pageable.unpaged()).get().map(Identifiable::getId).toList())
@@ -113,6 +115,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     void verifyTagFilteringAndManagement() {
         // permit all operations first to prepare test setup
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
         permitAllOperations(AccessController.Operation.UPDATE);
 
@@ -133,11 +136,10 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
 
         // define access controlling rule
         testAccessControlManger.deleteAllRules();
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasIdIn(Arrays.asList(permittedTarget.getId(), readOnlyTarget.getId())));
+        defineAccess(AccessController.Operation.READ, permittedTarget, readOnlyTarget);
         // allow update operation
-        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.UPDATE,
-                target -> target.getId().equals(permittedTarget.getId()));
+        // allow update operation
+        defineAccess(AccessController.Operation.UPDATE, permittedTarget);
 
         // verify targetManagement#findByTag
         assertThat(
@@ -161,12 +163,13 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 .isEqualTo(permittedTarget.getControllerId());
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            targetManagement
-                    .toggleTagAssignment(Collections.singletonList(readOnlyTarget.getControllerId()), myTag.getName())
-                    .getUnassigned();
-        }).as("Missing update permissions for target to toggle tag assignment.")
-                .isInstanceOf(InsufficientPermissionException.class);
+        // No exception has been thrown - because no real change is done
+//        assertThatThrownBy(() -> {
+//            targetManagement
+//                    .toggleTagAssignment(List.of(readOnlyTarget.getControllerId()), myTag.getName())
+//                    .getUnassigned();
+//        }).as("Missing update permissions for target to toggle tag assignment.")
+//                .isInstanceOf(InsufficientPermissionException.class);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
         assertThatThrownBy(() -> {
@@ -204,6 +207,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     @Description("Verifies rules for target assignment")
     void verifyTargetAssignment() {
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
 
         final Target permittedTarget = targetManagement
@@ -215,19 +219,22 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
 
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasId(permittedTarget.getId()));
+        defineAccess(AccessController.Operation.READ, permittedTarget);
 
         // verify targetManagement#findByUpdateStatus before assignment
         assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED).get()
                 .map(Identifiable::getId).toList()).containsOnly(permittedTarget.getId());
 
-        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.UPDATE,
+        testAccessControlManger.defineAccessRule(
+                JpaTarget.class, AccessController.Operation.UPDATE,
+                TargetSpecifications.hasId(permittedTarget.getId()),
                 target -> target.getId().equals(permittedTarget.getId()));
 
         assertThat(assignDistributionSet(ds.getId(), permittedTarget.getControllerId()).getAssigned()).isEqualTo(1);
-        // assigning of non allowed target throws exception
-        assertThatThrownBy(() -> assignDistributionSet(ds.getId(), hiddenTarget.getControllerId())).isExactlyInstanceOf(InsufficientPermissionException.class);
+        // assigning of non allowed target behaves as not found
+        assertThatThrownBy(
+                () -> assignDistributionSet(ds.getId(), hiddenTarget.getControllerId())
+        ).isInstanceOf(AssertionError.class);
 
         // verify targetManagement#findByUpdateStatus(REGISTERED) after assignment
         assertThat(targetManagement.findByUpdateStatus(Pageable.unpaged(), TargetUpdateStatus.REGISTERED)
@@ -241,6 +248,7 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     @Description("Verifies rules for target assignment")
     void verifyTargetAssignmentOnNonUpdatableTarget() {
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
 
         final Target manageableTarget = targetManagement
@@ -252,37 +260,32 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         final DistributionSet firstDs = testdataFactory.createDistributionSet("myDs");
 
         // define access controlling rule
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasIdIn(Arrays.asList(manageableTarget.getId(), readOnlyTarget.getId())));
+        defineAccess(AccessController.Operation.READ, manageableTarget, readOnlyTarget);
 
-        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.UPDATE,
-                target -> target.getId().equals(manageableTarget.getId()));
+        defineAccess(AccessController.Operation.UPDATE, manageableTarget);
 
         // assignment is permitted for manageableTarget
         assertThat(assignDistributionSet(firstDs.getId(), manageableTarget.getControllerId()).getAssigned())
                 .isEqualTo(1);
 
         // assignment is denied for readOnlyTarget (read, but no update permissions)
-        assertThatThrownBy(() -> {
-            assertThat(assignDistributionSet(firstDs.getId(), readOnlyTarget.getControllerId()).getAssigned()).isZero();
-        }).as("Target type delete shouldn't be allowed since the target type is not visible.")
-                .isInstanceOf(InsufficientPermissionException.class);
+        assertThatThrownBy(
+                () -> assignDistributionSet(firstDs.getId(), readOnlyTarget.getControllerId())
+        ).isInstanceOf(AssertionError.class);
 
         final DistributionSet secondDs = testdataFactory.createDistributionSet("anotherDs");
 
-        // bunch assignment is denied since at least one target without update
+        // bunch assignment skips denied denied since at least one target without update
         // permissions is present
-        assertThatThrownBy(() -> {
-            assertThat(assignDistributionSet(secondDs.getId(),
-                    Arrays.asList(readOnlyTarget.getControllerId(), manageableTarget.getControllerId()),
-                    Action.ActionType.FORCED).getAssigned()).isZero();
-        }).as("Target type delete shouldn't be allowed since the target type is not visible.")
-                .isInstanceOf(InsufficientPermissionException.class);
+        assertThat(assignDistributionSet(secondDs.getId(),
+                Arrays.asList(readOnlyTarget.getControllerId(), manageableTarget.getControllerId()),
+                Action.ActionType.FORCED).getAssigned()).isEqualTo(1);
     }
 
     @Test
     @Description("Verifies only manageable targets are part of the rollout")
     void verifyRolloutTargetScope() {
+        permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
 
         final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
@@ -290,10 +293,8 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4",
                 "hidden5");
 
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.UPDATE,
-                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasIdIn(readTargets.stream().map(Identifiable::getId).toList()));
+        defineAccess(AccessController.Operation.UPDATE, updateTargets);
+        defineAccess(AccessController.Operation.READ, merge(readTargets, updateTargets));
 
         final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "description",
                 updateTargets.size(), "id==*", testdataFactory.createDistributionSet(), "50", "5");
@@ -326,21 +327,16 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4",
                 "hidden5");
 
-        testAccessControlManger.permitOperation(JpaTarget.class, AccessController.Operation.UPDATE,
-                target -> updateTargets.stream().map(Identifiable::getId).anyMatch(id -> target.getId().equals(id)));
-
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.UPDATE,
-                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasIdIn(updateTargets.stream().map(Identifiable::getId).toList()));
-        testAccessControlManger.defineAccessRule(JpaTarget.class, AccessController.Operation.READ,
-                TargetSpecifications.hasIdIn(readTargets.stream().map(Identifiable::getId).toList()));
+        defineAccess(AccessController.Operation.UPDATE, updateTargets);
+        defineAccess(AccessController.Operation.READ, merge(updateTargets, readTargets));;
 
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
 
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        testAccessControlManger.permitOperation(JpaDistributionSet.class, AccessController.Operation.UPDATE,
+        testAccessControlManger.defineAccessRule(
+                JpaDistributionSet.class, AccessController.Operation.READ,
+                DistributionSetSpecification.byId(distributionSet.getId()),
                 ds -> ds.getId().equals(distributionSet.getId()));
 
         targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
@@ -359,4 +355,15 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                         .anyMatch(updateTarget -> updateTarget.getId().equals(assignedTarget.getId())));
     }
 
+    private void defineAccess(final AccessController.Operation operation, final Target... target) {
+        defineAccess(operation, List.of(target));
+    }
+
+    private void defineAccess(final AccessController.Operation operation, final List<Target> targets) {
+        final List<Long> ids = targets.stream().map(Target::getId).toList();
+        testAccessControlManger.defineAccessRule(
+                JpaTarget.class, operation,
+                TargetSpecifications.hasIdIn(ids),
+                target -> ids.contains(target.getId()));
+    }
 }

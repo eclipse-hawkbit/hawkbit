@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -60,6 +59,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
@@ -152,18 +155,16 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     private final TenantAware tenantAware;
     private final Database database;
     private final RetryTemplate retryTemplate;
-    private final AccessController<JpaTarget> targetAccessControlManager;
 
     protected JpaDeploymentManagement(final EntityManager entityManager, final ActionRepository actionRepository,
-            final DistributionSetManagement distributionSetManagement,
-            final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
-            final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
-            final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
-            final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
-            final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
-            final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
-            final RepositoryProperties repositoryProperties,
-            final AccessController<JpaTarget> targetAccessControlManager) {
+                                      final DistributionSetManagement distributionSetManagement,
+                                      final DistributionSetRepository distributionSetRepository, final TargetRepository targetRepository,
+                                      final ActionStatusRepository actionStatusRepository, final AuditorAware<String> auditorProvider,
+                                      final EventPublisherHolder eventPublisherHolder, final AfterTransactionCommitExecutor afterCommit,
+                                      final VirtualPropertyReplacer virtualPropertyReplacer, final PlatformTransactionManager txManager,
+                                      final TenantConfigurationManagement tenantConfigurationManagement, final QuotaManagement quotaManagement,
+                                      final SystemSecurityContext systemSecurityContext, final TenantAware tenantAware, final Database database,
+                                      final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
         this.entityManager = entityManager;
         this.distributionSetRepository = distributionSetRepository;
@@ -182,7 +183,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;
         this.database = database;
-        this.targetAccessControlManager = targetAccessControlManager;
         this.retryTemplate = createRetryTemplate();
     }
 
@@ -238,8 +238,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
         checkForTargetTypeCompatibility(deploymentRequests);
         checkQuotaForAssignment(deploymentRequests);
-        checkAssignmentPermitted(deploymentRequests);
-        return deploymentRequests;
+        return checkAssignmentPermitted(deploymentRequests);
     }
 
     private void checkForTargetTypeCompatibility(final List<DeploymentRequest> deploymentRequests) {
@@ -317,8 +316,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     /**
      * method assigns the {@link DistributionSet} to all {@link Target}s by their
      * IDs with a specific {@link ActionType} and {@code forcetime}.
-     *
-     *
+     * <p/>
      * In case the update was executed offline (i.e. not managed by hawkBit) the
      * handling differs my means that:<br/>
      * A. it ignores targets completely that are in
@@ -354,11 +352,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .distinct().toList();
 
         final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
-                .stream().map(ids -> {
-                    final Specification<JpaTarget> specification = targetAccessControlManager.appendAccessRules(
-                            AccessController.Operation.UPDATE, TargetSpecifications.hasControllerIdIn(ids));
-                    return targetRepository.findAll(specification);
-                }).flatMap(List::stream).map(JpaTarget::getControllerId).toList();
+                .stream()
+                .map(ids -> targetRepository.findAll(
+                        AccessController.Operation.UPDATE, TargetSpecifications.hasControllerIdIn(ids)))
+                .flatMap(List::stream).map(JpaTarget::getControllerId).toList();
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
                 distributionSetEntity.getId());
@@ -437,24 +434,29 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         }
     }
 
-    private void checkAssignmentPermitted(final List<DeploymentRequest> deploymentRequests) {
+    private List<DeploymentRequest> checkAssignmentPermitted(final List<DeploymentRequest> deploymentRequests) {
         if (!deploymentRequests.isEmpty()) {
-            // TODO AC - excessive UPDATE check after first query has already checked update access
-            final AccessController.EntityRetrieverBase<String, JpaTarget> entityRetriever = new AccessController.EntityRetrieverBase<>(() -> {
-                final Specification<JpaTarget> specification = targetAccessControlManager
-                        .appendAccessRules(AccessController.Operation.UPDATE, TargetSpecifications.hasControllerIdIn(
-                                deploymentRequests.stream().map(DeploymentRequest::getControllerId).toList()));
-                final List<JpaTarget> accessibleTargets = targetRepository.findAll(specification);
-                if (accessibleTargets.size() != deploymentRequests.size()) { // fail fast
-                    throw new InsufficientPermissionException("Not all targets found or accessible for Update!");
-                }
-                return accessibleTargets;
-            }, JpaTarget::getControllerId);
-            targetAccessControlManager.assertOperationAllowed(
-                    AccessController.Operation.UPDATE,
-                    LongStream.range(0, deploymentRequests.size()).boxed().toList(), // index in result array list
-                    index -> entityRetriever.apply(deploymentRequests.get((int)(long)index).getControllerId()));
+            final List<String> controllerIds =
+                    deploymentRequests.stream()
+                            .map(DeploymentRequest::getControllerId)
+                            .distinct()
+                            .toList();
+
+            final List<String> found = targetRepository.findAll(
+                        AccessController.Operation.UPDATE,
+                        TargetSpecifications.hasControllerIdIn(controllerIds)
+                    ).stream().map(JpaTarget::getControllerId).toList();
+            if (found.size() != controllerIds.size()) {
+                // TODO AC - should assignments that contain non-existing devices be allowed anyway?
+//                throw new EntityNotFoundException(
+//                        Target.class,
+//                        "Not all targets found or accessible for Update " +
+//                                "(found " + found + " of " + controllerIds.size() + ")!");
+                return deploymentRequests.stream()
+                        .filter(deploymentRequest -> found.contains(deploymentRequest.getControllerId())).toList();
+            }
         }
+        return deploymentRequests;
     }
 
     private void enforceMaxAssignmentsPerRequest(final int requestedActions) {
@@ -488,10 +490,9 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void cancelInactiveScheduledActionsForTargets(final List<Long> targetIds) {
         if (!isMultiAssignmentsEnabled()) {
-            targetAccessControlManager.assertOperationAllowed(
-                    AccessController.Operation.UPDATE,
-                    targetIds,
-                    new AccessController.EntityRetriever<>(() -> targetRepository.findAllById(targetIds)));
+            if (targetRepository.count(AccessController.Operation.UPDATE, TargetSpecifications.hasIdIn(targetIds)) != targetIds.size()) {
+                throw new EntityNotFoundException(Target.class, targetIds);
+            }
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
         } else {
             LOG.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
@@ -774,26 +775,24 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Optional<Action> findAction(final long actionId) {
-        return actionRepository.findById(actionId).map(this::assertTargetReadAllowed);
+        return actionRepository.findById(actionId).map(JpaAction.class::cast);
     }
 
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
-        return actionRepository.getActionById(actionId).map(JpaAction.class::cast).map(this::assertTargetReadAllowed);
+        return actionRepository.getActionById(actionId);
     }
 
     @Override
     public Slice<Action> findActionsByTarget(final String controllerId, final Pageable pageable) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
         return actionRepository.findByTargetControllerId(pageable, controllerId);
     }
 
     @Override
     public Page<Action> findActionsByTarget(final String rsqlParam, final String controllerId,
             final Pageable pageable) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
@@ -804,15 +803,13 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Page<Action> findActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
         return actionRepository.findByActiveAndTarget(pageable, controllerId, true);
     }
 
     @Override
     public Page<Action> findInActiveActionsByTarget(final Pageable pageable, final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
         return actionRepository.findByActiveAndTarget(pageable, controllerId, false);
     }
 
@@ -829,29 +826,19 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public long countActionsByTarget(final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
         return actionRepository.countByTargetControllerId(controllerId);
     }
 
     @Override
     public long countActionsByTarget(final String rsqlParam, final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        assertTargetReadAllowed(controllerId);
 
         final List<Specification<JpaAction>> specList = Arrays.asList(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database),
                 ActionSpecifications.byControllerId(controllerId));
 
         return JpaManagementHelper.countBySpec(actionRepository, specList);
-    }
-
-    private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
-        final Specification<JpaTarget> specification = targetAccessControlManager
-                .appendAccessRules(AccessController.Operation.READ, TargetSpecifications.hasControllerId(controllerId));
-        if (!targetRepository.exists(specification)) {
-            throw new EntityNotFoundException(Target.class, controllerId);
-        }
     }
 
     private void throwExceptionIfDistributionSetDoesNotExist(final Long dsId) {
@@ -878,7 +865,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public Page<ActionStatus> findActionStatusByAction(final Pageable pageReq, final long actionId) {
-        // assert exist and accessible
+        // asserts exist and accessible
         actionRepository.findById(actionId);
 
         return actionStatusRepository.findByActionId(pageReq, actionId);
@@ -886,7 +873,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public long countActionStatusByAction(final long actionId) {
-        // assert exist and accessible
+        // asserts exist and accessible
         actionRepository.findById(actionId);
 
         return actionStatusRepository.countByActionId(actionId);
@@ -943,7 +930,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     // TODO AC - filter by accessible targets
     @Override
     public long countActions(final String rsqlParam) {
-        final List<Specification<JpaAction>> specList = Arrays.asList(
+        final List<Specification<JpaAction>> specList = List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
@@ -977,15 +964,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     // TODO AC - filter by accessible targets
     @Override
     public Slice<Action> findActions(final String rsqlParam, final Pageable pageable) {
-        final List<Specification<JpaAction>> specList = Arrays.asList(
+        final List<Specification<JpaAction>> specList = List.of(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, ActionFields.class, virtualPropertyReplacer, database));
         return JpaManagementHelper.findAllWithoutCountBySpec(actionRepository, pageable, specList);
     }
 
     @Override
     public Optional<DistributionSet> getAssignedDistributionSet(final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        // target access checked in assertTargetReadAllowed
+        assertTargetReadAllowed(controllerId);
         return distributionSetRepository.findAssignedToTarget(controllerId);
     }
 
@@ -1027,8 +1014,8 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     @Override
     public boolean hasPendingCancellations(final String controllerId) {
-        // target access checked in throwExceptionIfTargetDoesNotExist
-        throwExceptionIfTargetDoesNotExist(controllerId);
+        // target access checked in assertTargetReadAllowed
+        assertTargetReadAllowed(controllerId);
         return actionRepository.existsByTargetControllerIdAndStatusAndActiveIsTrue(controllerId,
                 Action.Status.CANCELING);
     }
@@ -1111,24 +1098,15 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private void assertTargetReadAllowed(String controllerId) {
-        targetAccessControlManager.assertOperationAllowed(
-                AccessController.Operation.READ,
-                () -> targetRepository
-                        .findOne(TargetSpecifications.hasControllerId(controllerId))
-                        .orElseThrow(InsufficientPermissionException::new));
+        if (!targetRepository.exists(TargetSpecifications.hasControllerId(controllerId))) {
+            throw new EntityNotFoundException(Target.class, controllerId);
+        }
     }
 
     private JpaAction assertTargetUpdateAllowed(final JpaAction action) {
-        targetAccessControlManager.assertOperationAllowed(
-                AccessController.Operation.UPDATE,
-                () -> targetRepository.findById(action.getTarget().getId()).orElseThrow(EntityNotFoundException::new));
-        return action;
-    }
-
-    private JpaAction assertTargetReadAllowed(final JpaAction action) {
-        targetAccessControlManager.assertOperationAllowed(
-                AccessController.Operation.READ,
-                () -> targetRepository.findById(action.getTarget().getId()).orElseThrow(EntityNotFoundException::new));
+        if (!targetRepository.exists(TargetSpecifications.hasId(action.getTarget().getId()))) {
+            throw new EntityNotFoundException(Action.class, action);
+        }
         return action;
     }
 }

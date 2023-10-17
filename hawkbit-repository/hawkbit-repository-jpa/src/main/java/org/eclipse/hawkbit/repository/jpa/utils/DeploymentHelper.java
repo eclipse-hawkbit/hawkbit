@@ -15,8 +15,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.jpa.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.model.Action;

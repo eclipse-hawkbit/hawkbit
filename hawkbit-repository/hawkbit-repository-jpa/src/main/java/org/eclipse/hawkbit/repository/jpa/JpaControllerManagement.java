@@ -66,6 +66,11 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleMetadataRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TargetSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -155,8 +160,8 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private ConfirmationManagement confirmationManagement;
 
     public JpaControllerManagement(final ScheduledExecutorService executorService,
-            final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
-            final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
+                                   final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
+                                   final QuotaManagement quotaManagement, final RepositoryProperties repositoryProperties) {
         super(actionRepository, actionStatusRepository, quotaManagement, repositoryProperties);
 
         if (!repositoryProperties.isEagerPollPersistence()) {

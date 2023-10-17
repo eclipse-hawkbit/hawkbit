@@ -7,9 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.repository.jpa;
+package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -31,6 +30,24 @@ public interface SoftwareModuleTypeRepository
         extends BaseEntityRepository<JpaSoftwareModuleType> {
 
     /**
+     *
+     * @param key
+     *            to search for
+     * @return all {@link SoftwareModuleType}s in the repository with given
+     *         {@link SoftwareModuleType#getKey()}
+     */
+    Optional<SoftwareModuleType> findByKey(String key);
+
+    /**
+     *
+     * @param name
+     *            to search for
+     * @return all {@link SoftwareModuleType}s in the repository with given
+     *         {@link SoftwareModuleType#getName()}
+     */
+    Optional<SoftwareModuleType> findByName(String name);
+
+    /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
      * reasons (this is a "delete everything" query after all) we add the tenant
      * manually to query even if this will by done by {@link EntityManager}
@@ -43,5 +60,4 @@ public interface SoftwareModuleTypeRepository
     @Transactional
     @Query("DELETE FROM JpaSoftwareModuleType t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
 }
