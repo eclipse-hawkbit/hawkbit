@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,7 +34,6 @@ import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.builder.RolloutCreate;
-import org.eclipse.hawkbit.repository.builder.RolloutGroupBuilder;
 import org.eclipse.hawkbit.repository.builder.RolloutGroupCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
@@ -51,7 +49,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,20 +77,17 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private final EntityFactory entityFactory;
     private final TenantConfigHelper tenantConfigHelper;
 
-    private final TargetManagement targetManagement;
-
     MgmtRolloutResource(final RolloutManagement rolloutManagement, final RolloutGroupManagement rolloutGroupManagement,
             final DistributionSetManagement distributionSetManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final EntityFactory entityFactory,
             final SystemSecurityContext systemSecurityContext,
-            final TenantConfigurationManagement tenantConfigurationManagement, final TargetManagement targetManagement) {
+            final TenantConfigurationManagement tenantConfigurationManagement) {
         this.rolloutManagement = rolloutManagement;
         this.rolloutGroupManagement = rolloutGroupManagement;
         this.distributionSetManagement = distributionSetManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
         this.entityFactory = entityFactory;
         this.tenantConfigHelper = TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement);
-        this.targetManagement = targetManagement;
     }
 
     @Override
@@ -148,7 +142,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
         if (targetFilterQuery == null) {
             // Use RSQLParameterSyntaxException due to backwards compatibility
             throw new RSQLParameterSyntaxException("Cannot create a Rollout with an empty target query filter!");
-        } //TODO : retry just like this with minor modifications
+        }
         targetFilterQueryManagement.verifyTargetFilterQuerySyntax(targetFilterQuery);
         final DistributionSet distributionSet = distributionSetManagement
                 .getValidAndComplete(rolloutRequestBody.getDistributionSetId());
