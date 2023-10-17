@@ -132,6 +132,18 @@ final class MgmtRolloutMapper {
                 .weight(restRequest.getWeight());
     }
 
+    static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
+        return entityFactory.rollout().create()
+                .name(rollout.getName().concat("_retried"))
+                .description(rollout.getDescription())
+                .set(rollout.getDistributionSet())
+                .targetFilterQuery("failedRollout==".concat(String.valueOf(rollout.getId())))
+                .actionType(rollout.getActionType())
+                .forcedTime(rollout.getForcedTime())
+                .startAt(rollout.getStartAt())
+                .weight(null);
+    }
+
     static RolloutGroupCreate fromRequest(final EntityFactory entityFactory, final MgmtRolloutGroup restRequest) {
 
         return entityFactory.rolloutGroup().create().name(restRequest.getName())

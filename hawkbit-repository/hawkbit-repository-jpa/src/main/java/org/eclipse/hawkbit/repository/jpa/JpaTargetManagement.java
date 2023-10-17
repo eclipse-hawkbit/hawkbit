@@ -694,6 +694,18 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Slice<Target> findByFailedRolloutAndNotInRolloutGroupsAndCompatible(Pageable pageRequest, Collection<Long> groups,
+        String rolloutId, DistributionSetType distributionSetType) {
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+            TargetSpecifications.failedActionsForRollout(rolloutId),
+            TargetSpecifications.isNotInRolloutGroups(groups),
+            TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId())
+        );
+
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageRequest, specList);
+    }
+
+    @Override
     public Slice<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
         if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
@@ -711,6 +723,17 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()));
+
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public long countByFailedRolloutAndNotInRolloutGroupsAndCompatible(Collection<Long> groups, String rolloutId,
+        DistributionSetType distributionSetType) {
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+            TargetSpecifications.failedActionsForRollout(rolloutId),
+            TargetSpecifications.isNotInRolloutGroups(groups),
+            TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
@@ -792,6 +815,19 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Specification<JpaTarget>> specList = Arrays.asList(RSQLUtility
                 .buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId));
+
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public long countByFailedInRolloutAndCompatible(final String rolloutId, final Long dsTypeId, final Long createdAt) {
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+            TargetSpecifications.failedActionsForRollout(rolloutId),
+            TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId));
+
+        if (createdAt != null) {
+            specList.add(TargetSpecifications.createdBefore(createdAt));
+        }
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }

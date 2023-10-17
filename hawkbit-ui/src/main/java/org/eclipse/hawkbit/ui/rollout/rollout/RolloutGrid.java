@@ -224,6 +224,10 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
         return isDeletionAllowed(status) && status != RolloutStatus.CREATING;
     }
 
+    private static boolean isRolloutRetried(final String targetFilter) {
+        return targetFilter.contains("failedRollout");
+    }
+
     private static boolean isEditingAllowed(final RolloutStatus status) {
         final List<RolloutStatus> statesThatAllowEditing = Arrays.asList(RolloutStatus.PAUSED, RolloutStatus.READY,
                 RolloutStatus.RUNNING, RolloutStatus.STARTING, RolloutStatus.STOPPED);
@@ -361,14 +365,16 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
                 clickEvent -> updateRollout(rollout), VaadinIcons.EDIT, UIMessageIdProvider.TOOLTIP_ROLLOUT_UPDATE,
                 SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 UIComponentIdProvider.ROLLOUT_UPDATE_BUTTON_ID + "." + rollout.getId(),
-                permissionChecker.hasRolloutUpdatePermission() && isEditingAllowed(rollout.getStatus()));
+                permissionChecker.hasRolloutUpdatePermission() && isEditingAllowed(rollout.getStatus())
+                                && !isRolloutRetried(rollout.getTargetFilterQuery()));
         actionColumns.add(GridComponentBuilder.addIconColumn(this, updateButton, UPDATE_BUTTON_ID, null));
 
         final ValueProvider<ProxyRollout, Button> copyButton = rollout -> GridComponentBuilder.buildActionButton(i18n,
                 clickEvent -> copyRollout(rollout), VaadinIcons.COPY, UIMessageIdProvider.TOOLTIP_ROLLOUT_COPY,
                 SPUIStyleDefinitions.STATUS_ICON_NEUTRAL,
                 UIComponentIdProvider.ROLLOUT_COPY_BUTTON_ID + "." + rollout.getId(),
-                permissionChecker.hasRolloutCreatePermission() && isCopyingAllowed(rollout.getStatus()));
+                permissionChecker.hasRolloutCreatePermission() && isCopyingAllowed(rollout.getStatus())
+                            && !isRolloutRetried(rollout.getTargetFilterQuery()));
         actionColumns.add(GridComponentBuilder.addIconColumn(this, copyButton, COPY_BUTTON_ID, null));
 
         actionColumns.add(GridComponentBuilder.addDeleteColumn(this, i18n, DELETE_BUTTON_ID, rolloutDeleteSupport,
