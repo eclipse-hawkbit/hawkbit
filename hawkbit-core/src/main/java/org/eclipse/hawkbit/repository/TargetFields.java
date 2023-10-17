@@ -79,13 +79,6 @@ public enum TargetFields implements FieldNameProvider {
     TAG("tags.name"),
 
     /**
-     * test
-     */
-    ACTIONSTATUS("actions.status"),
-
-    ACTIONROLLOUTID("actions.rollout.id"),
-
-    /**
      * Last time the DDI or DMF client polled.
      */
     LASTCONTROLLERREQUESTAT("lastTargetQuery"),
