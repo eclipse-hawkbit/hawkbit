@@ -12,7 +12,9 @@ package org.eclipse.hawkbit.app;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import org.eclipse.hawkbit.repository.test.util.SharedSqlTestDatabaseExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -33,7 +35,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles({"maven"})
+@ExtendWith({SharedSqlTestDatabaseExtension.class})
 class RestApiDocTest {
     private static final String MANAGEMENT_PREFIX = "mgmt-openapi";
     private static final String DDI_PREFIX = "ddi-openapi";
