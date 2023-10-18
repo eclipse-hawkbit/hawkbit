@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 import org.eclipse.hawkbit.repository.model.Target;
@@ -20,7 +21,7 @@ public class TargetTestData {
     public static final String ATTRIBUTE_VALUE_VALID;
 
     static {
-        final Random rand = new Random();
+        final Random rand = new SecureRandom();
         ATTRIBUTE_KEY_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE + 1, rand);
         ATTRIBUTE_KEY_VALID = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_KEY_SIZE, rand);
         ATTRIBUTE_VALUE_TOO_LONG = generateRandomStringWithLength(Target.CONTROLLER_ATTRIBUTE_VALUE_SIZE + 1, rand);
