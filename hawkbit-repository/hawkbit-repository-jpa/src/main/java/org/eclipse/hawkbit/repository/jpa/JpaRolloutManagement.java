@@ -199,7 +199,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         long totalTargets;
         String errMsg;
         if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-            totalTargets = targetManagement.countByFailedInRolloutAndCompatible(
+            totalTargets = targetManagement.countByFailedInRollout(
                 RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
                 rollout.getDistributionSet().getType().getId());
             errMsg = "No failed targets in Rollout";
@@ -266,7 +266,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         // check if we need to enforce the 'max targets per group' quota
         if (quotaManagement.getMaxTargetsPerRolloutGroup() > 0) {
             validateTargetsInGroups(groups, savedRollout.getTargetFilterQuery(), savedRollout.getCreatedAt(),
-                    distributionSetType.getId(), savedRollout.getCreatedAt()).getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
+                    distributionSetType.getId()).getTargetsPerGroup().forEach(this::assertTargetsPerRolloutGroupQuota);
         }
 
         // create and persist the groups (w/o filling them with targets)
@@ -626,7 +626,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     }
 
     private RolloutGroupsValidation validateTargetsInGroups(final List<RolloutGroup> groups, final String baseFilter,
-            final long totalTargets, final Long dsTypeId, final Long createdAt) {
+            final long totalTargets, final Long dsTypeId) {
         final List<Long> groupTargetCounts = new ArrayList<>(groups.size());
         Map<String, Long> targetFilterCounts;
         if (!RolloutHelper.isRolloutRetried(baseFilter)) {
@@ -638,7 +638,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             targetFilterCounts = groups.stream()
                 .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
                 .collect(Collectors.toMap(Function.identity(),
-                    groupTargetFilter -> targetManagement.countByFailedInRolloutAndCompatible(
+                    groupTargetFilter -> targetManagement.countByFailedInRollout(
                         RolloutHelper.getIdFromRetriedTargetFilter(baseFilter), dsTypeId)));
         }
 
@@ -703,7 +703,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
         }
 
-        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets, dsTypeId, createdAt);
+        final RolloutGroupsValidation validation = validateTargetsInGroups(groups, baseFilter, totalTargets, dsTypeId);
 
         return totalTargets - validation.getTargetsInGroups();
     }
@@ -723,7 +723,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
         return new AsyncResult<>(
                 validateTargetsInGroups(groups.stream().map(RolloutGroupCreate::build).collect(Collectors.toList()),
-                        baseFilter, totalTargets, dsTypeId, createdAt));
+                        baseFilter, totalTargets, dsTypeId));
     }
 
     @Override
@@ -759,7 +759,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             baseFilter = RolloutHelper.getTargetFilterQuery(targetFilter, createdAt);
             totalTargets = targetManagement.countByRsqlAndCompatible(baseFilter, dsTypeId);
         } else {
-            totalTargets = targetManagement.countByFailedInRolloutAndCompatible(
+            totalTargets = targetManagement.countByFailedInRollout(
                 RolloutHelper.getIdFromRetriedTargetFilter(targetFilter), dsTypeId);
             baseFilter = targetFilter;
         }

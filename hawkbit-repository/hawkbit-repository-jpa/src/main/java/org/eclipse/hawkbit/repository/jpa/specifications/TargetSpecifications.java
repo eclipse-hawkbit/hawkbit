@@ -624,10 +624,4 @@ public final class TargetSpecifications {
         };
     }
 
-    public static Specification<JpaTarget> createdBefore(final Long time) {
-      return (targetRoot, query, cb) -> {
-        return cb.lessThanOrEqualTo(targetRoot.get("createdAt"), time);
-      };
-    }
-
 }

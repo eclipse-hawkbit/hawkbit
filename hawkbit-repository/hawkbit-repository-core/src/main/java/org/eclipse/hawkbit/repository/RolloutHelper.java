@@ -230,7 +230,7 @@ public final class RolloutHelper {
             return baseFilter;
         }
         if (isRolloutRetried(baseFilter)) {
-            return group.getTargetFilterQuery();
+            return baseFilter;
         }
         return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
     }

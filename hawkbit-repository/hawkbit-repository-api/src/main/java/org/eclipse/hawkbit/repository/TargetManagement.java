@@ -149,13 +149,10 @@ public interface TargetManagement {
      * @param dsTypeId
      *            ID of the {@link DistributionSetType} the targets need to be
      *            compatible with
-     * @param createdAt
-     *            timestamp which if present will be applied for targets
-     *            which are created before its value
      * @return the found number of{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFailedInRolloutAndCompatible(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
+    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.

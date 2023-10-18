@@ -820,10 +820,9 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFailedInRolloutAndCompatible(final String rolloutId, final Long dsTypeId) {
-        final List<Specification<JpaTarget>> specList = Arrays.asList(
-            TargetSpecifications.failedActionsForRollout(rolloutId),
-            TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId));
+    public long countByFailedInRollout(final String rolloutId, final Long dsTypeId) {
+        final List<Specification<JpaTarget>> specList = List.of(
+            TargetSpecifications.failedActionsForRollout(rolloutId));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
