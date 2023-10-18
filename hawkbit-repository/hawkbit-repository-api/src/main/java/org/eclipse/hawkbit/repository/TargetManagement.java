@@ -155,7 +155,7 @@ public interface TargetManagement {
      * @return the found number of{@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFailedInRolloutAndCompatible(@NotEmpty String rolloutId, @NotNull Long dsTypeId, Long createdAt);
+    long countByFailedInRolloutAndCompatible(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
 
     /**
      * Count {@link TargetFilterQuery}s for given target filter query.

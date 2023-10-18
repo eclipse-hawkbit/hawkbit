@@ -258,10 +258,10 @@ public final class RolloutHelper {
     }
 
     public static boolean isRolloutRetried(final String targetFilter) {
-        return targetFilter.contains("failedRollout");
+        return targetFilter.contains("failedrollout");
     }
 
     public static String getIdFromRetriedTargetFilter(final String targetFilter) {
-        return targetFilter.substring("failedRollout==".length());
+        return targetFilter.substring("failedrollout==".length());
     }
 }

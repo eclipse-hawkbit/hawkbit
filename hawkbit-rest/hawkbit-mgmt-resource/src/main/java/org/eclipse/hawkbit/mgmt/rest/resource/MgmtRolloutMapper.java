@@ -134,10 +134,10 @@ final class MgmtRolloutMapper {
 
     static RolloutCreate fromRetriedRollout(final EntityFactory entityFactory, final Rollout rollout) {
         return entityFactory.rollout().create()
-                .name(rollout.getName().concat("_retried"))
+                .name(rollout.getName().concat("_retry"))
                 .description(rollout.getDescription())
                 .set(rollout.getDistributionSet())
-                .targetFilterQuery("failedRollout==".concat(String.valueOf(rollout.getId())))
+                .targetFilterQuery("failedrollout==".concat(String.valueOf(rollout.getId())))
                 .actionType(rollout.getActionType())
                 .forcedTime(rollout.getForcedTime())
                 .startAt(rollout.getStartAt())

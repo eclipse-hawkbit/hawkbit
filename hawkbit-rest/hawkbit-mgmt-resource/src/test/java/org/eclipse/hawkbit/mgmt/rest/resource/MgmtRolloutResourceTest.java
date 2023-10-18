@@ -1623,7 +1623,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
             .andExpect(status().is(201));
 
         //search for _retried suffix
-        Rollout retriedRollout = rolloutManagement.getByName(rollout.getName() + "_retried").orElseThrow();
+        Rollout retriedRollout = rolloutManagement.getByName(rollout.getName() + "_retry").orElseThrow();
         //assert 4 targets involved
         rolloutHandler.handleAll();
 

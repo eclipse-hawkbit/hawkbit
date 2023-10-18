@@ -225,7 +225,7 @@ public class RolloutGrid extends AbstractGrid<ProxyRollout, String> {
     }
 
     private static boolean isRolloutRetried(final String targetFilter) {
-        return targetFilter.contains("failedRollout");
+        return targetFilter.contains("failedrollout");
     }
 
     private static boolean isEditingAllowed(final RolloutStatus status) {

@@ -201,7 +201,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
             totalTargets = targetManagement.countByFailedInRolloutAndCompatible(
                 RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                rollout.getDistributionSet().getType().getId(), null);
+                rollout.getDistributionSet().getType().getId());
             errMsg = "No failed targets in Rollout";
          } else {
             totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
@@ -639,7 +639,7 @@ public class JpaRolloutManagement implements RolloutManagement {
                 .map(group -> RolloutHelper.getGroupTargetFilter(baseFilter, group)).distinct()
                 .collect(Collectors.toMap(Function.identity(),
                     groupTargetFilter -> targetManagement.countByFailedInRolloutAndCompatible(
-                        RolloutHelper.getIdFromRetriedTargetFilter(baseFilter), dsTypeId, createdAt)));
+                        RolloutHelper.getIdFromRetriedTargetFilter(baseFilter), dsTypeId)));
         }
 
         long unusedTargetsCount = 0;
@@ -695,9 +695,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     private long calculateRemainingTargets(final List<RolloutGroup> groups, final String targetFilter,
             final Long createdAt, final Long dsTypeId) {
 
-        final TargetCount targets = calculateTargetsAndFilterBasedOnRetriedRollout(targetFilter, createdAt, dsTypeId);
-        long totalTargets = targets.getTotal();
-        final String baseFilter = targets.getFilter();
+        final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
+        long totalTargets = targets.total();
+        final String baseFilter = targets.filter();
 
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
@@ -713,9 +713,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     public ListenableFuture<RolloutGroupsValidation> validateTargetsInGroups(final List<RolloutGroupCreate> groups,
             final String targetFilter, final Long createdAt, final Long dsTypeId) {
 
-        final TargetCount targets = calculateTargetsAndFilterBasedOnRetriedRollout(targetFilter, createdAt, dsTypeId);
-        long totalTargets = targets.getTotal();
-        final String baseFilter = targets.getFilter();
+        final TargetCount targets = calculateTargets(targetFilter, createdAt, dsTypeId);
+        long totalTargets = targets.total();
+        final String baseFilter = targets.filter();
 
         if (totalTargets == 0) {
             throw new ConstraintDeclarationException("Rollout target filter does not match any targets");
@@ -752,7 +752,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         startNextRolloutGroupAction.exec(rollout, latestRunning);
     }
 
-    private TargetCount calculateTargetsAndFilterBasedOnRetriedRollout(final String targetFilter, final Long createdAt, final Long dsTypeId) {
+    private TargetCount calculateTargets(final String targetFilter, final Long createdAt, final Long dsTypeId) {
         String baseFilter;
         long totalTargets;
         if (!RolloutHelper.isRolloutRetried(targetFilter)) {
@@ -760,30 +760,13 @@ public class JpaRolloutManagement implements RolloutManagement {
             totalTargets = targetManagement.countByRsqlAndCompatible(baseFilter, dsTypeId);
         } else {
             totalTargets = targetManagement.countByFailedInRolloutAndCompatible(
-                RolloutHelper.getIdFromRetriedTargetFilter(targetFilter), dsTypeId, createdAt);
+                RolloutHelper.getIdFromRetriedTargetFilter(targetFilter), dsTypeId);
             baseFilter = targetFilter;
         }
 
         return new TargetCount(totalTargets, baseFilter);
     }
 
-    private static class TargetCount {
-        private String filter;
-
-        private long total;
-
-        TargetCount(long total, String filter) {
-            this.total = total;
-            this.filter = filter;
-        }
-
-        String getFilter() {
-            return filter;
-        }
-
-        long getTotal() {
-            return total;
-        }
-    }
+    private record TargetCount(long total, String filter) {}
 
 }
