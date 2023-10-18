@@ -310,9 +310,8 @@ public interface TargetManagement {
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Target> findByFailedRolloutAndNotInRolloutGroupsAndCompatible(@NotNull Pageable pageRequest,
-        @NotEmpty Collection<Long> groups, @NotNull String rolloutId,
-        @NotNull DistributionSetType distributionSetType);
+    Slice<Target> findByFailedRolloutAndNotInRolloutGroups(@NotNull Pageable pageRequest,
+        @NotEmpty Collection<Long> groups, @NotNull String rolloutId);
 
     /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
@@ -347,8 +346,7 @@ public interface TargetManagement {
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countByFailedRolloutAndNotInRolloutGroupsAndCompatible(@NotEmpty Collection<Long> groups, @NotNull String rolloutId,
-        @NotNull DistributionSetType distributionSetType);
+    long countByFailedRolloutAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rolloutId);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no

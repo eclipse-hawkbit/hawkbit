@@ -534,9 +534,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         } else {
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
-                count -> targetManagement.countByFailedRolloutAndNotInRolloutGroupsAndCompatible(readyGroups,
-                    RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                    rollout.getDistributionSet().getType()));
+                count -> targetManagement.countByFailedRolloutAndNotInRolloutGroups(readyGroups,
+                    RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery())));
         }
         final long expectedInGroup = Math
                 .round((double) (group.getTargetPercentage() / 100) * (double) targetsInGroupFilter);
@@ -586,9 +585,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
                     pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
             } else {
-                targets = targetManagement.findByFailedRolloutAndNotInRolloutGroupsAndCompatible(
-                    pageRequest, readyGroups, RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                    rollout.getDistributionSet().getType());
+                targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
+                    pageRequest, readyGroups, RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()));
             }
 
             createAssignmentOfTargetsToGroup(targets, group);

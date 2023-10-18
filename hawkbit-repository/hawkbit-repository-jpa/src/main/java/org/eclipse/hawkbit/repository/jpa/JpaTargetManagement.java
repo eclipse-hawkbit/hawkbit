@@ -694,12 +694,11 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public Slice<Target> findByFailedRolloutAndNotInRolloutGroupsAndCompatible(Pageable pageRequest, Collection<Long> groups,
-        String rolloutId, DistributionSetType distributionSetType) {
+    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(Pageable pageRequest, Collection<Long> groups,
+        String rolloutId) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
             TargetSpecifications.failedActionsForRollout(rolloutId),
-            TargetSpecifications.isNotInRolloutGroups(groups),
-            TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId())
+            TargetSpecifications.isNotInRolloutGroups(groups)
         );
 
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageRequest, specList);
@@ -728,12 +727,10 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
-    public long countByFailedRolloutAndNotInRolloutGroupsAndCompatible(Collection<Long> groups, String rolloutId,
-        DistributionSetType distributionSetType) {
+    public long countByFailedRolloutAndNotInRolloutGroups(Collection<Long> groups, String rolloutId) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(
             TargetSpecifications.failedActionsForRollout(rolloutId),
-            TargetSpecifications.isNotInRolloutGroups(groups),
-            TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()));
+            TargetSpecifications.isNotInRolloutGroups(groups));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
