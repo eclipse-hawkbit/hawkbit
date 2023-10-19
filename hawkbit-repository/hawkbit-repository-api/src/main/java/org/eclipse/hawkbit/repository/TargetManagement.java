@@ -304,9 +304,6 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rolloutId
      *            rolloutId of the rollout to be retried.
-     * @param distributionSetType
-     *            type of the {@link DistributionSet} the targets must be
-     *            compatible with
      * @return a page of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -340,9 +337,6 @@ public interface TargetManagement {
      *            the list of {@link RolloutGroup}s
      * @param rolloutId
      *            rolloutId of the rollout to be retried.
-     * @param distributionSetType
-     *            type of the {@link DistributionSet} the targets must be
-     *            compatible with
      * @return count of the found {@link Target}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
