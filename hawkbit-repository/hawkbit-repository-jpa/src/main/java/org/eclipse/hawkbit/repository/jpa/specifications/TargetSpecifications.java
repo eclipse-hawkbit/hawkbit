@@ -42,8 +42,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -608,6 +610,17 @@ public final class TargetSpecifications {
 
             // Spec only provides order, so no further filtering
             return query.getRestriction();
+        };
+    }
+
+    public static Specification<JpaTarget> failedActionsForRollout(final String rolloutId) {
+        return (targetRoot, query, cb) -> {
+            Join<JpaTarget, Action> targetActions =
+                targetRoot.join("actions");
+
+            return cb.and(
+                cb.equal(targetActions.get("rollout").get("id"), rolloutId),
+                cb.equal(targetActions.get("status"), Action.Status.ERROR));
         };
     }
 

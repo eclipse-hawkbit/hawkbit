@@ -140,6 +140,21 @@ public interface TargetManagement {
     long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long dsTypeId);
 
     /**
+     * Count all targets with failed actions for specific Rollout
+     * and that are compatible with the passed {@link DistributionSetType}
+     * and created after given timestamp
+     *
+     * @param rolloutId
+     *            rolloutId of the rollout to be retried.
+     * @param dsTypeId
+     *            ID of the {@link DistributionSetType} the targets need to be
+     *            compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByFailedInRollout(@NotEmpty String rolloutId, @NotNull Long dsTypeId);
+
+    /**
      * Count {@link TargetFilterQuery}s for given target filter query.
      *
      * @param targetFilterQueryId
@@ -279,6 +294,23 @@ public interface TargetManagement {
             @NotNull DistributionSetType distributionSetType);
 
     /**
+     * Finds all targets with failed actions for specific Rollout
+     * and that are not assigned to one of the retried {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
+     *
+     * @param pageRequest
+     *            the pageRequest to enhance the query for paging and sorting
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param rolloutId
+     *            rolloutId of the rollout to be retried.
+     * @return a page of the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Slice<Target> findByFailedRolloutAndNotInRolloutGroups(@NotNull Pageable pageRequest,
+        @NotEmpty Collection<Long> groups, @NotNull String rolloutId);
+
+    /**
      * Counts all targets for all the given parameter {@link TargetFilterQuery}
      * and that are not assigned to one of the {@link RolloutGroup}s and are
      * compatible with the passed {@link DistributionSetType}.
@@ -295,6 +327,20 @@ public interface TargetManagement {
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByRsqlAndNotInRolloutGroupsAndCompatible(@NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
             @NotNull DistributionSetType distributionSetType);
+
+    /**
+     * Counts all targets with failed actions for specific Rollout
+     * and that are not assigned to one of the {@link RolloutGroup}s and are
+     * compatible with the passed {@link DistributionSetType}.
+     *
+     * @param groups
+     *            the list of {@link RolloutGroup}s
+     * @param rolloutId
+     *            rolloutId of the rollout to be retried.
+     * @return count of the found {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByFailedRolloutAndNotInRolloutGroups(@NotEmpty Collection<Long> groups, @NotNull String rolloutId);
 
     /**
      * Finds all targets of the provided {@link RolloutGroup} that have no

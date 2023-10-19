@@ -694,6 +694,17 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(Pageable pageRequest, Collection<Long> groups,
+        String rolloutId) {
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+            TargetSpecifications.failedActionsForRollout(rolloutId),
+            TargetSpecifications.isNotInRolloutGroups(groups)
+        );
+
+        return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageRequest, specList);
+    }
+
+    @Override
     public Slice<Target> findByInRolloutGroupWithoutAction(final Pageable pageRequest, final long group) {
         if (!rolloutGroupRepository.existsById(group)) {
             throw new EntityNotFoundException(RolloutGroup.class, group);
@@ -711,6 +722,15 @@ public class JpaTargetManagement implements TargetManagement {
                         database),
                 TargetSpecifications.isNotInRolloutGroups(groups),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsType.getId()));
+
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public long countByFailedRolloutAndNotInRolloutGroups(Collection<Long> groups, String rolloutId) {
+        final List<Specification<JpaTarget>> specList = Arrays.asList(
+            TargetSpecifications.failedActionsForRollout(rolloutId),
+            TargetSpecifications.isNotInRolloutGroups(groups));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }
@@ -792,6 +812,14 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Specification<JpaTarget>> specList = Arrays.asList(RSQLUtility
                 .buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(dsTypeId));
+
+        return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public long countByFailedInRollout(final String rolloutId, final Long dsTypeId) {
+        final List<Specification<JpaTarget>> specList = List.of(
+            TargetSpecifications.failedActionsForRollout(rolloutId));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
     }

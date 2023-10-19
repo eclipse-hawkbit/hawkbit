@@ -286,7 +286,7 @@ public interface MgmtRolloutRestApi {
      * @param representationModeParam
      *            the representation mode parameter specifying whether a compact
      *            or a full representation shall be returned
-     * 
+     *
      * @return a list of all rollout groups referred to a rollout for a defined
      *         or default page request with status OK. The response is always
      *         paged. In any failure the JsonResponseExceptionHandler is
@@ -404,4 +404,28 @@ public interface MgmtRolloutRestApi {
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/triggerNextGroup", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") Long rolloutId);
+
+    /**
+     * Handles the POST request to retry a rollout
+     *
+     * @param rolloutId
+     *            the ID of the rollout to be retried.
+     * @return OK response (200). In case of any exception the corresponding
+     *         errors occur.
+     */
+    @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. Required Permission: CREATE_ROLLOUT")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+    })
+    @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry", produces = {
+        MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
+    ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") final String rolloutId);
+
 }
