@@ -10,9 +10,13 @@
 package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
@@ -22,7 +26,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ContextConfiguration;
 
@@ -54,9 +57,8 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        @Primary
-        public AccessController<JpaTarget> targetAccessController(final TestAccessControlManger testAccessControlManger) {
-            return new AccessController<>() {
+        public AccessController<JpaTarget, Long> targetAccessController(final TestAccessControlManger testAccessControlManger) {
+            return new AccessControllerBase<>() {
 
                 @Override
                 public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
@@ -64,8 +66,8 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 }
 
                 @Override
-                public Specification<JpaTarget> getAccessRules(final Operation operation) {
-                    return testAccessControlManger.getAccessRule(JpaTarget.class, operation);
+                public Optional<Specification<JpaTarget>> getAccessRules(final Operation operation) {
+                    return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTarget.class, operation));
                 }
 
                 @Override
@@ -77,18 +79,17 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        @Primary
-        public AccessController<JpaTargetType> targetTypeAccessController(
+        public AccessController<JpaTargetType, Long> targetTypeAccessController(
                 final TestAccessControlManger testAccessControlManger) {
-            return new AccessController<>() {
+            return new AccessControllerBase<>() {
                 @Override
                 public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
                     // TODO
                 }
 
                 @Override
-                public Specification<JpaTargetType> getAccessRules(final Operation operation) {
-                    return testAccessControlManger.getAccessRule(JpaTargetType.class, operation);
+                public Optional<Specification<JpaTargetType>> getAccessRules(final Operation operation) {
+                    return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTargetType.class, operation));
                 }
 
                 @Override
@@ -100,18 +101,17 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        @Primary
-        public AccessController<JpaDistributionSet> distributionSetAccessController(
+        public AccessController<JpaDistributionSet, Long> distributionSetAccessController(
                 final TestAccessControlManger testAccessControlManger) {
-            return new AccessController<>() {
+            return new AccessControllerBase<>() {
                 @Override
                 public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
                     // TODO
                 }
 
                 @Override
-                public Specification<JpaDistributionSet> getAccessRules(final Operation operation) {
-                    return testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation);
+                public Optional<Specification<JpaDistributionSet>> getAccessRules(final Operation operation) {
+                    return Optional.ofNullable( testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation));
                 }
 
                 @Override
@@ -127,5 +127,19 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         final List<T> merge = new ArrayList<>(lists0);
         merge.addAll(list1);
         return merge;
+    }
+
+    private static abstract class AccessControllerBase<T extends Identifiable<Long>> implements AccessController<T, Long> {
+
+        @Override
+        public  void assertOperationAllowed(final AccessController.Operation operation, final Iterable<? extends T> entities) throws InsufficientPermissionException {
+            final List<Long> entityIds = new ArrayList<>();
+            final Map<Long, T> idToEntity = new HashMap<>();
+            for (final T entity : entities) {
+                entityIds.add(entity.getId());
+                idToEntity.put(entity.getId(), entity);
+            }
+            assertOperationAllowed(operation, entityIds, idToEntity::get);
+        }
     }
 }

@@ -44,7 +44,7 @@ class ContextAwareTest extends AbstractJpaIntegrationTest {
     ContextAware contextAware;
 
     private static final SecurityContextSerializer SECURITY_CONTEXT_SERIALIZER =
-            new SecurityContextSerializer.JavaSerialization();
+            SecurityContextSerializer.JAVA_SERIALIZATION;
 
     @BeforeEach
     @AfterEach

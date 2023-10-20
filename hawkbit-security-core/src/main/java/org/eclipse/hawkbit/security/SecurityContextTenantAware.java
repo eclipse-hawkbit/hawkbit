@@ -43,8 +43,21 @@ public class SecurityContextTenantAware implements ContextAware {
     private static final Collection<? extends GrantedAuthority> SYSTEM_AUTHORITIES = Collections
             .singletonList(new SimpleGrantedAuthority(SpringEvalExpressions.SYSTEM_ROLE));
 
-    private final SecurityContextSerializer securityContextSerializer;
     private final UserAuthoritiesResolver authoritiesResolver;
+    private final SecurityContextSerializer securityContextSerializer;
+
+    /**
+     * Creates the {@link SecurityContextTenantAware} based on the given
+     * {@link UserAuthoritiesResolver}.
+     *
+     * @param authoritiesResolver
+     *            Resolver to retrieve the authorities for a given user. Must
+     *            not be <code>null</code>..
+     */
+    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver) {
+        this.authoritiesResolver = authoritiesResolver;
+        this.securityContextSerializer = SecurityContextSerializer.NOP;
+    }
 
     /**
      * Creates the {@link SecurityContextTenantAware} based on the given

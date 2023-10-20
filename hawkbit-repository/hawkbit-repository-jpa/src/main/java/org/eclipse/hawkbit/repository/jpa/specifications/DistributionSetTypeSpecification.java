@@ -36,19 +36,6 @@ public final class DistributionSetTypeSpecification {
 
     /**
      * {@link Specification} for retrieving {@link DistributionSetType} with
-     * given {@link DistributionSetType#getId()} including fetching the elements
-     * list.
-     *
-     * @param distid
-     *            to search
-     * @return the {@link DistributionSet} {@link Specification}
-     */
-    public static Specification<JpaDistributionSetType> byId(final Long distid) {
-        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.id), distid);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link DistributionSetType} with
      * given {@link DistributionSetType#getName()} including fetching the
      * elements list.
      *
@@ -72,5 +59,4 @@ public final class DistributionSetTypeSpecification {
     public static Specification<JpaDistributionSetType> byKey(final String key) {
         return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaDistributionSetType_.key), key);
     }
-
 }

@@ -102,7 +102,7 @@ public class SecurityAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public SecurityContextSerializer securityContextSerializer() {
-        return new SecurityContextSerializer.JavaSerialization();
+        return SecurityContextSerializer.JAVA_SERIALIZATION;
     }
 
     /**

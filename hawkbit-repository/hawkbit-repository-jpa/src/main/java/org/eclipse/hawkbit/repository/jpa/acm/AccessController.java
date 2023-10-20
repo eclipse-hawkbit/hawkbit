@@ -9,36 +9,36 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 
 /**
  * Interface of an extended access control. Used by management layer to verify
  * the permission for CRUD operations based on some access criteria.
- *
+ * <p/>
  * After the basic service based access control is applied some additional restrictions
  * (e.g. entity based) could be applied.
  * 
- * @param <T> the repository type
+ * @param <T> the domain type the repository manages
+ * @param <ID> – the type of the id of the entity the repository manages
  */
-public interface AccessController<T extends Identifiable<Long>> {
+public interface AccessController<T, ID> {
 
     /**
      * Introduce a new specification to limit the access to a specific entity.
      *
-     * @return a new specification limiting the access
+     * @return a new specification limiting the access, if empty no access restrictions
+     *   are to be applied
      */
-    Specification<T> getAccessRules(Operation operation);
+    Optional<Specification<T>> getAccessRules(Operation operation);
 
     /**
      * Append the resource limitation on an already existing specification.
@@ -48,8 +48,11 @@ public interface AccessController<T extends Identifiable<Long>> {
      *            resource limitation
      * @return a new appended specification
      */
-    default Specification<T> appendAccessRules(final Operation operation, final Specification<T> specification) {
-        return specification.and(getAccessRules(operation));
+    @Nullable
+    default Specification<T> appendAccessRules(final Operation operation, @Nullable final Specification<T> specification) {
+        return getAccessRules(operation)
+                .map(accessRules -> specification ==  null ? accessRules : specification.and(accessRules))
+                .orElse(specification);
     }
 
     /**
@@ -74,9 +77,9 @@ public interface AccessController<T extends Identifiable<Long>> {
      * @throws InsufficientPermissionException
      *             if operation is not permitted for given entities
      */
-    default void assertOperationAllowed(final Operation operation, final Iterable<Long> entityIds, final Function<Long, T> entityRetriever) throws InsufficientPermissionException {
+    default void assertOperationAllowed(final Operation operation, final Iterable<ID> entityIds, final Function<ID, T> entityRetriever) throws InsufficientPermissionException {
         if (entityIds != null) {
-            for (final Long entityId : entityIds) {
+            for (final ID entityId : entityIds) {
                 assertOperationAllowed(operation, () -> entityRetriever.apply(entityId));
             }
         }
@@ -94,19 +97,14 @@ public interface AccessController<T extends Identifiable<Long>> {
 
     /**
      * Verify if the given {@link Operation} is permitted for all provided entities.
+     * <p/>
+     * Note: default implementation shall be used only if the type <code>I</code> implements properly
+     * {@link Object#hashCode()} and {@link Object#equals(Object)} methods
      *
      * @throws InsufficientPermissionException
      *             if operation is not permitted for given entities
      */
-    default void assertOperationAllowed(final Operation operation, final Iterable<? extends T> entities) throws InsufficientPermissionException {
-        final List<Long> entityIds = new ArrayList<>();
-        final Map<Long, T> idToEntity = new HashMap<>();
-        for (final T entity : entities) {
-            entityIds.add(entity.getId());
-            idToEntity.put(entity.getId(), entity);
-        }
-        assertOperationAllowed(operation, entityIds, idToEntity::get);
-    }
+    void assertOperationAllowed(final Operation operation, final Iterable<? extends T> entities) throws InsufficientPermissionException;
 
     /**
      * Returns if the given {@link Operation} is permitted for ALL entities.
@@ -135,9 +133,9 @@ public interface AccessController<T extends Identifiable<Long>> {
     /**
      * Returns if the given {@link Operation} is permitted for the entities with the given entity ids.
      */
-    default boolean isOperationAllowed(final Operation operation, final Iterable<Long> entityIds, final Function<Long, T> entityRetriever) {
+    default boolean isOperationAllowed(final Operation operation, final Iterable<ID> entityIds, final Function<ID, T> entityRetriever) {
         Objects.requireNonNull(entityIds);
-        for (final Long entityId : entityIds) {
+        for (final ID entityId : entityIds) {
             if (!isOperationAllowed(operation, () -> entityRetriever.apply(entityId))) {
                 return false;
             }
@@ -192,17 +190,12 @@ public interface AccessController<T extends Identifiable<Long>> {
 
     /**
      * Access controller that doesn't do any additional restrictions.
-     *
-     * @param <T> the repository type
      */
-    class Nop<T extends Identifiable<Long>> implements AccessController<T> {
+    class Nop<T, ID> implements AccessController<T, ID> {
 
         @Override
-        public Specification<T> getAccessRules(final Operation operation) {
-            // TODO: Verify if it's okay to specify this kind of specification when
-            // initializing a list of specs which is then combined in
-            // 'org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder.combineWithAnd'
-            return Specification.where(null);
+        public Optional<Specification<T>> getAccessRules(final Operation operation) {
+            return Optional.empty();
         }
 
         @Override
@@ -221,7 +214,7 @@ public interface AccessController<T extends Identifiable<Long>> {
         }
 
         @Override
-        public void assertOperationAllowed(final Operation operation, final Iterable<Long> entityIds, final Function<Long, T> entityRetriever) throws InsufficientPermissionException {
+        public void assertOperationAllowed(final Operation operation, final Iterable<ID> entityIds, final Function<ID, T> entityRetriever) throws InsufficientPermissionException {
             // permit all
         }
 
@@ -246,7 +239,7 @@ public interface AccessController<T extends Identifiable<Long>> {
         }
 
         @Override
-        public boolean isOperationAllowed(final Operation operation, final Iterable<Long> entityIds, final Function<Long, T> entityRetriever) {
+        public boolean isOperationAllowed(final Operation operation, final Iterable<ID> entityIds, final Function<ID, T> entityRetriever) {
             return true;
         }
 
@@ -265,23 +258,24 @@ public interface AccessController<T extends Identifiable<Long>> {
      * Utility that could be used with {@link #assertOperationAllowed(Operation, Iterable, Function)} and
      * {@link #isOperationAllowed(Operation, Iterable, Function)} to pass a function that call, if used, all
      * target entities and then reuse the result further for any subsequent calls.
-     *
-     * @param <T>
+     * <p/>
+     * Note: {@link EntityRetriever} shall be used only if the type <code>I</code> implements properly
+     * {@link Object#hashCode()} and {@link Object#equals(Object)} methods
      */
-    class EntityRetrieverBase<K, T> implements Function<K, T> {
+    class EntityRetriever<T, ID> implements Function<ID, T> {
 
         private final Supplier<Iterable<T>> entityRetriever;
-        private final Function<T, K> keyFn;
+        private final Function<T, ID> keyFn;
 
-        private Map<K, T> entityIdToEntity;
+        private Map<ID, T> entityIdToEntity;
 
-        public EntityRetrieverBase(final Supplier<Iterable<T>> entityRetriever, final Function<T, K> keyFn) {
+        public EntityRetriever(final Supplier<Iterable<T>> entityRetriever, final Function<T, ID> keyFn) {
             this.entityRetriever = entityRetriever;
             this.keyFn = keyFn;
         }
 
         @Override
-        public T apply(final K entityId) {
+        public T apply(final ID entityId) {
             if (entityIdToEntity == null) {
                 entityIdToEntity = index(entityRetriever.get(), keyFn);
             }
@@ -294,13 +288,6 @@ public interface AccessController<T extends Identifiable<Long>> {
                 index.put(keyFn.apply(element), element);
             }
             return index;
-        };
-    }
-
-    class EntityRetriever<T extends Identifiable<Long>> extends EntityRetrieverBase<Long, T> {
-
-        public EntityRetriever(final Supplier<Iterable<T>> entityRetriever) {
-            super(entityRetriever, Identifiable::getId);
         }
     }
 }

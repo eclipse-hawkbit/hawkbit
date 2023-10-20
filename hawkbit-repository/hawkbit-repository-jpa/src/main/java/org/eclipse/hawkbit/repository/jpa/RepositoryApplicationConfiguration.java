@@ -1052,13 +1052,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     public BeanPostProcessor entityManagerBeanPostProcessor(
-            @Autowired(required = false) final AccessController<JpaArtifact> artifactAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModule> softwareModuleAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSet> distributionSetAccessController,
-            @Autowired(required = false) final AccessController<JpaTargetType> targetTypeAccessControlManager,
-            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager) {
+            @Autowired(required = false) final AccessController<JpaArtifact, Long> artifactAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModuleType, Long> softwareModuleTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModule, Long> softwareModuleAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSetType, Long> distributionSetTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSet, Long> distributionSetAccessController,
+            @Autowired(required = false) final AccessController<JpaTargetType, Long> targetTypeAccessControlManager,
+            @Autowired(required = false) final AccessController<JpaTarget, Long> targetAccessControlManager) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName) throws BeansException {

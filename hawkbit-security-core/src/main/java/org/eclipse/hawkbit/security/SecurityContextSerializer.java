@@ -22,6 +22,16 @@ import java.util.Objects;
 public interface SecurityContextSerializer {
 
     /**
+     * Serializer that do not serialize (returns null on {@link #serialize(SecurityContext)}) and
+     * throws exception on {@link #deserialize(String)}.
+     */
+    SecurityContextSerializer NOP = new JavaSerialization();
+    /**
+     * Serializer the uses Java serialization of {@link java.io.Serializable} objects.
+     */
+    SecurityContextSerializer JAVA_SERIALIZATION = new JavaSerialization();
+
+    /**
      * Return security context as string (could be just a reference)
      *
      * @param securityContext the security context
@@ -38,6 +48,8 @@ public interface SecurityContextSerializer {
     SecurityContext deserialize(String securityContextString);
 
     class JavaSerialization implements SecurityContextSerializer {
+
+        private JavaSerialization() {}
 
         @Override
         public String serialize(final SecurityContext securityContext) {
@@ -68,6 +80,8 @@ public interface SecurityContextSerializer {
      * Empty implementation. Could be used if the serialization shall be skipped.
      */
     class Nop implements SecurityContextSerializer {
+
+        private Nop() {}
 
         @Override
         public String serialize(final SecurityContext securityContext) {

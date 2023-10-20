@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
@@ -28,15 +29,16 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
 
     private final BaseEntityRepository<T> repository;
     private final Class<T> entityType;
-    private final AccessController<T> accessController;
+    private final AccessController<T, Long> accessController;
 
-    protected BaseEntityRepositoryACM(final BaseEntityRepository<T> repository, final Class<T> entityType, final AccessController<T> accessController) {
+    protected BaseEntityRepositoryACM(final BaseEntityRepository<T> repository, final Class<T> entityType, final AccessController<T, Long> accessController) {
         this.repository = repository;
         this.entityType = entityType;
         this.accessController = accessController;
@@ -44,7 +46,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @SuppressWarnings("unchecked")
     public static <T extends AbstractJpaTenantAwareBaseEntity, R extends BaseEntityRepository<T>> R of(
-            final R repository, final Class<T> entityType, final AccessController<T> accessController) {
+            final R repository, final Class<T> entityType, final AccessController<T, Long> accessController) {
         if (accessController == null) {
             return repository;
         } else {
@@ -102,7 +104,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     @NonNull
     public Iterable<T> findAll() {
-        return findAll(Specification.where(null));
+        return findAll((Specification<T>) null);
     }
 
     @Override
@@ -114,7 +116,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public long count() {
-        return count(Specification.where(null));
+        return count(null);
     }
 
     @Override
@@ -137,7 +139,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
         accessController.assertOperationAllowed(
                 AccessController.Operation.DELETE,
                 idList,
-                new AccessController.EntityRetriever<>(() -> repository.findAllById(idList)));
+                new AccessController.EntityRetriever<>(() -> repository.findAllById(idList), Identifiable::getId));
         repository.deleteAllById(ids);
     }
 
@@ -177,13 +179,13 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     @NonNull
     public Iterable<T> findAll(@NonNull final Sort sort) {
-        return findAll(Specification.where(null), sort);
+        return findAll(null, sort);
     }
 
     @Override
     @NonNull
     public Page<T> findAll(@NonNull final Pageable pageable) {
-        return findAll(Specification.where(null), pageable);
+        return findAll(null, pageable);
     }
 
     @Override
@@ -206,22 +208,24 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public long count(final Specification<T> spec) {
-        return repository.count(accessController.getAccessRules(AccessController.Operation.READ));
+        return repository.count(accessController.appendAccessRules(AccessController.Operation.READ, spec));
     }
 
     @Override
     public boolean exists(@NonNull final Specification<T> spec) {
-        return repository.exists(accessController.getAccessRules(AccessController.Operation.READ));
+        return repository.exists(
+                Objects.requireNonNull(accessController.appendAccessRules(AccessController.Operation.READ, spec)));
     }
 
     @Override
     public Slice<T> findAllWithoutCount(final Pageable pageable) {
-        return findAllWithoutCount(Specification.where(null), pageable);
+        return findAllWithoutCount(null, pageable);
     }
 
     @Override
     public Slice<T> findAllWithoutCount(final Specification<T> spec, final Pageable pageable) {
-        return repository.findAllWithoutCount(accessController.appendAccessRules(AccessController.Operation.READ, spec), pageable);
+        return repository.findAllWithoutCount(
+                accessController.appendAccessRules(AccessController.Operation.READ, spec), pageable);
     }
 
     @Override
@@ -241,38 +245,33 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @NonNull
     public Optional<T> findOne(@NonNull AccessController.Operation operation, @Nullable Specification<T> spec) {
-        return repository.findOne(applyACM(operation, spec));
+        return repository.findOne(accessController.appendAccessRules(operation, spec));
     }
 
     @Override
     @NonNull
     public List<T> findAll(@NonNull final AccessController.Operation operation, @Nullable final Specification<T> spec) {
-        return repository.findAll(applyACM(operation, spec));
+        return repository.findAll(accessController.appendAccessRules(operation, spec));
     }
 
     @Override
     @NonNull
     public boolean exists(@NonNull AccessController.Operation operation, Specification<T> spec) {
-        return repository.exists(applyACM(operation, spec));
+        return repository.exists(
+                Objects.requireNonNull(accessController.appendAccessRules(operation, spec)));
     }
 
     @Override
     @NonNull
     public long count(@NonNull final AccessController.Operation operation, @Nullable final Specification<T> spec) {
-        return repository.count(applyACM(operation, spec));
+        return repository.count(accessController.appendAccessRules(operation, spec));
     }
 
     @Override
     @NonNull
     public Slice<T> findAllWithoutCount(
             @NonNull final AccessController.Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
-        return repository.findAllWithoutCount(applyACM(operation, spec),pageable);
-    }
-
-    private Specification<T> applyACM(AccessController.Operation operation, Specification<T> spec) {
-        return spec == null ?
-                accessController.getAccessRules(operation) :
-                accessController.appendAccessRules(operation, spec);
+        return repository.findAllWithoutCount(accessController.appendAccessRules(operation, spec),pageable);
     }
 
     @Override

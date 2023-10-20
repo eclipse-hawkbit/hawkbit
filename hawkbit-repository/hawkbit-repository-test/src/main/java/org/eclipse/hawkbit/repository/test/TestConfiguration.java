@@ -130,7 +130,7 @@ public class TestConfiguration implements AsyncConfigurer {
 
     @Bean
     SecurityContextSerializer securityContextSerializer() {
-        return new SecurityContextSerializer.JavaSerialization();
+        return SecurityContextSerializer.JAVA_SERIALIZATION;
     }
 
     @Bean
