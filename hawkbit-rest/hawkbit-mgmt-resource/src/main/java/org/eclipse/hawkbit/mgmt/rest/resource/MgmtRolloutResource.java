@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -47,7 +48,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -309,6 +309,28 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     public ResponseEntity<Void> triggerNextGroup(@PathVariable("rolloutId") final Long rolloutId) {
         this.rolloutManagement.triggerNextGroup(rolloutId);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<MgmtRolloutResponseBody> retryRollout(final String rolloutId) {
+        final Rollout rolloutForRetry = this.rolloutManagement.get(Long.parseLong(rolloutId))
+                .orElseThrow(EntityNotFoundException::new);
+
+        if (rolloutForRetry.isDeleted()) {
+            throw new EntityNotFoundException(Rollout.class, rolloutId);
+        }
+
+        if (!rolloutForRetry.getStatus().equals(Rollout.RolloutStatus.FINISHED)) {
+            throw new ValidationException("Rollout must be finished in order to be retried!");
+        }
+
+        final RolloutCreate create = MgmtRolloutMapper.fromRetriedRollout(entityFactory, rolloutForRetry);
+        final RolloutGroupConditions groupConditions = new RolloutGroupConditionBuilder().withDefaults().build();
+
+        final Rollout retriedRollout = rolloutManagement.create(create, 1, false,
+            groupConditions);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(MgmtRolloutMapper.toResponseRollout(retriedRollout, true));
     }
 
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {

@@ -142,6 +142,21 @@ public class PropertyBasedArtifactUrlHandlerTest {
         assertThat(urls).containsExactly(new ArtifactUrl(TEST_PROTO.toUpperCase(), TEST_REL, TEST_PROTO + "://"
                 + testHost + ":5683/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62));
     }
+    @Test
+    @Description("Verfies that the protocol of the statically defined hostname is replaced with the protocol of the request.")
+    public void urlGenerationWithProtocolFromRequest() throws URISyntaxException {
+        final String testHost = "ddi.host.com";
+
+        final UrlProtocol proto = new UrlProtocol();
+        proto.setRef("{protocolRequest}://{hostname}:{port}/fws/{tenant}/{targetIdBase62}/{artifactIdBase62}");
+        properties.getProtocols().put("download-http", proto);
+
+        final List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI,
+                new URI("https://" + testHost));
+
+        assertThat(urls).containsExactly(new ArtifactUrl("http".toUpperCase(), "download-http",
+                "https://localhost:8080/fws/" + TENANT + "/" + TARGETID_BASE62 + "/" + ARTIFACTID_BASE62));
+    }
 
     @Test
     @Description("Verfies that the port of the statically defined hostname is replaced with the port of the request.")

@@ -229,6 +229,9 @@ public final class RolloutHelper {
         if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         }
+        if (isRolloutRetried(baseFilter)) {
+            return baseFilter;
+        }
         return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
     }
 
@@ -252,5 +255,13 @@ public final class RolloutHelper {
             throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
+    }
+
+    public static boolean isRolloutRetried(final String targetFilter) {
+        return targetFilter.contains("failedrollout");
+    }
+
+    public static String getIdFromRetriedTargetFilter(final String targetFilter) {
+        return targetFilter.substring("failedrollout==".length());
     }
 }

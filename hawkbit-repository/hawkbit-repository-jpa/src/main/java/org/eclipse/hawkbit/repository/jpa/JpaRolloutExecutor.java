@@ -529,10 +529,18 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                 RolloutGroupStatus.READY, group);
 
-        final long targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
+        long targetsInGroupFilter;
+        if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
+            targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
                 count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(readyGroups,
                         groupTargetFilter, rollout.getDistributionSet().getType()));
+        } else {
+            targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
+                "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
+                count -> targetManagement.countByFailedRolloutAndNotInRolloutGroups(readyGroups,
+                    RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery())));
+        }
         final long expectedInGroup = Math
                 .round((double) (group.getTargetPercentage() / 100) * (double) targetsInGroupFilter);
         final long currentlyInGroup = DeploymentHelper.runInNewTransaction(txManager,
@@ -576,8 +584,14 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),
                     RolloutGroupStatus.READY, group);
-            final Slice<Target> targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
+            Slice<Target> targets;
+            if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
+                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                     pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
+            } else {
+                targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(
+                    pageRequest, readyGroups, RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()));
+            }
 
             createAssignmentOfTargetsToGroup(targets, group);
 
