@@ -25,6 +25,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
  * A {@link TenantAware} implementation which retrieves the ID of the tenant
@@ -74,6 +75,9 @@ public class SecurityContextTenantAware implements TenantAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (principal instanceof UserPrincipal) {
                 return ((UserPrincipal) principal).getUsername();
+            }
+            if (principal instanceof OidcUser) {
+                return ((OidcUser) principal).getPreferredUsername();
             }
         }
         return null;
