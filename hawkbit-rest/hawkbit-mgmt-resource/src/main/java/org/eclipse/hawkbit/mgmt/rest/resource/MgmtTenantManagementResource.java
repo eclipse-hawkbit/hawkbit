@@ -41,11 +41,6 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final TenantConfigurationProperties tenantConfigurationProperties;
-
-    /**
-     * Default {@link org.eclipse.hawkbit.repository.model.DistributionSetType} as part of supported configs.
-     * */
-
     private final SystemManagement systemManagement;
 
     MgmtTenantManagementResource(final TenantConfigurationManagement tenantConfigurationManagement,
