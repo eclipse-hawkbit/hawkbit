@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -22,7 +23,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
-import org.hamcrest.BaseMatcher;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -58,7 +58,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 .andExpect(status().isOk())
                 //check for TenantMetadata additional properties
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "']").exists())
-                .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", isEqualNum(getActualDefaultDsType())));
+                .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", equalTo(getActualDefaultDsType().intValue())));
 
     }
 
@@ -80,7 +80,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
             .andDo(MockMvcResultPrinter.print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.value", isEqualNum(getActualDefaultDsType())));
+            .andExpect(jsonPath("$.value", equalTo(getActualDefaultDsType().intValue())));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
     @Test
     @Description("The Batch configuration should not be applied, because of invalid TenantConfiguration props")
-    public void changeBatchConfigurationFail() throws Exception {
+    public void changeBatchConfigurationShouldFailOnInvalidTenantConfiguration() throws Exception {
         //in this scenario
         //  some TenantConfiguration are not valid,
         //  TenantMetadata - DefaultDSType ID is valid,
@@ -182,7 +182,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
     @Test
     @Description("The Batch configuration should not be applied, because of invalid TenantMetadata (DefaultDistributionSetType)")
-    public void changeBatchConfigurationFail2() throws Exception {
+    public void changeBatchConfigurationShouldOnInvalidTenantMetadata() throws Exception {
         //in this scenario
         //  all TenantConfiguration have valid and new values - using old values, inverted
         //  TenantMetadata - DefaultDSType ID is invalid
@@ -300,38 +300,4 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         return systemManagement.getTenantMetadata().getDefaultDsType().getId();
     }
 
-    /**
-     * Needed for comparing json result payloads where comparison on 2 exact numbers are failing.
-     * REST return body contents as Integers(even though it is naturally Long..), thus comparison to actual value which is of type Long fails..
-     * 2 is not equal to 2L
-     *
-     * @param <T>
-     */
-    private static class CustomMatcher<T extends Number> extends BaseMatcher<T> {
-
-        private final Long expectedValue;
-
-        CustomMatcher(Long expectedValue) {
-            this.expectedValue = expectedValue;
-        }
-
-        @Override
-        public boolean matches(Object actual) {
-            boolean matches = false;
-            if (actual instanceof Number) {
-                Long actualValue = ((Number) actual).longValue();
-                matches = actualValue.equals(expectedValue);
-            }
-            return matches;
-        }
-
-        @Override
-        public void describeTo(org.hamcrest.Description description) {
-            description.appendText(expectedValue.toString());
-        }
-    }
-
-    private static <T extends Number> CustomMatcher<T> isEqualNum(Long expected) {
-        return new CustomMatcher<>(expected);
-    }
 }
