@@ -38,7 +38,7 @@ public final class MgmtTenantManagementMapper {
         return restConfValue;
     }
 
-    public static MgmtSystemTenantConfigurationValue toResponseDefaultDsType(String defaultDistributionSetType) {
+    public static MgmtSystemTenantConfigurationValue toResponseDefaultDsType(Long defaultDistributionSetType) {
         final MgmtSystemTenantConfigurationValue restConfValue = new MgmtSystemTenantConfigurationValue();
         restConfValue.setValue(defaultDistributionSetType);
         restConfValue.setGlobal(Boolean.FALSE);

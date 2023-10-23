@@ -76,7 +76,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         //Check if requested key is TenantConfiguration or TenantMetadata, load it and return it as rest response
         MgmtSystemTenantConfigurationValue response;
         if (isDefaultDistributionSetTypeKey(keyName)) {
-            response = MgmtTenantManagementMapper.toResponseDefaultDsType(String.valueOf(systemManagement.getTenantMetadata().getDefaultDsType().getId()));
+            response = MgmtTenantManagementMapper.toResponseDefaultDsType(systemManagement.getTenantMetadata().getDefaultDsType().getId());
         } else {
             response = MgmtTenantManagementMapper.toResponseTenantConfigurationValue(keyName, tenantConfigurationManagement.getConfigurationValue(keyName));
         }
@@ -155,19 +155,18 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         return ResponseEntity.ok(tenantConfigurationListUpdated);
     }
     private MgmtSystemTenantConfigurationValue updateDefaultDsType(Serializable defaultDsType) {
-        if (!defaultDsType.getClass().isAssignableFrom(String.class)) {
+        long updateDefaultDsType;
+        if (defaultDsType.getClass().isAssignableFrom(Integer.class)) {
+            updateDefaultDsType = Long.valueOf((Integer)defaultDsType);
+        } else if (defaultDsType.getClass().isAssignableFrom(Long.class)) {
+            updateDefaultDsType = (Long) defaultDsType;
+        } else {
             throw new TenantConfigurationValidatorException(String.format(
                 "Default DistributionSetType Value Type is incorrect. Expected Long, received %s", defaultDsType.getClass().getName()));
         }
-        long defaultDistributionSetTypeValue;
-        try {
-            defaultDistributionSetTypeValue = Long.parseLong((String)defaultDsType);
-        } catch (Exception ex) {
-            throw new TenantConfigurationValidatorException(String.format(
-                "Default DistributionSetType Value Type is incorrect. Expected input to be a Number, received %s", defaultDsType.getClass().getName()));
-        }
-        systemManagement.updateTenantMetadata(defaultDistributionSetTypeValue);
-        return MgmtTenantManagementMapper.toResponseDefaultDsType((String)defaultDsType);
+
+        systemManagement.updateTenantMetadata(updateDefaultDsType);
+        return MgmtTenantManagementMapper.toResponseDefaultDsType(updateDefaultDsType);
     }
 
     private static boolean isDefaultDistributionSetTypeKey(String keyName) {

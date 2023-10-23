@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -23,6 +22,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
+import org.hamcrest.BaseMatcher;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -30,6 +30,7 @@ import org.springframework.http.MediaType;
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 /**
  * Spring MVC Tests against the MgmtTenantManagementResource.
@@ -57,7 +58,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 .andExpect(status().isOk())
                 //check for TenantMetadata additional properties
                 .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "']").exists())
-                .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", equalTo(getActualDefaultDsType())));
+                .andExpect(jsonPath("$.['" + DEFAULT_DISTRIBUTION_SET_TYPE_KEY + "'].value", isEqualNum(getActualDefaultDsType())));
 
     }
 
@@ -79,7 +80,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
                 DEFAULT_DISTRIBUTION_SET_TYPE_KEY))
             .andDo(MockMvcResultPrinter.print())
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.value", equalTo(getActualDefaultDsType())));
+            .andExpect(jsonPath("$.value", isEqualNum(getActualDefaultDsType())));
     }
 
     @Test
@@ -102,7 +103,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     public void putTenantMetadata() throws Exception {
         final MgmtSystemTenantConfigurationValueRequest bodyPut = new MgmtSystemTenantConfigurationValueRequest();
 
-        String updatedTestDefaultDsType = createTestDistributionSetType();
+        long updatedTestDefaultDsType = createTestDistributionSetType();
         bodyPut.setValue(updatedTestDefaultDsType);
 
         final ObjectMapper mapper = new ObjectMapper();
@@ -118,33 +119,35 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         assertEquals(updatedTestDefaultDsType, getActualDefaultDsType(), "Rest endpoint for updating the Default DistributionSetType completed successfully, but the actual value was not changed.");
     }
 
-    private String createTestDistributionSetType() {
+    private Long createTestDistributionSetType() {
         DistributionSetType testDefaultDsType = distributionSetTypeManagement.create(entityFactory.distributionSetType().create()
             .key("test123").name("TestName123").description("TestDefaultDsType"));
         testDefaultDsType = distributionSetTypeManagement
             .update(entityFactory.distributionSetType().update(testDefaultDsType.getId()).description("TestDefaultDsType"));
-        return String.valueOf(testDefaultDsType.getId());
+        return testDefaultDsType.getId();
     }
 
     @Test
     @Description("Update DefaultDistributionSetType Fails if given DistributionSetType ID does not exist.")
     public void putTenantMetadataFails() throws Exception{
-        String oldDefaultDsType = getActualDefaultDsType();
+        long oldDefaultDsType = getActualDefaultDsType();
         //try an invalid input
         String newDefaultDsType = new JSONObject().put("value", true).toString();
-        assertDefaultDsTypeUpdateFails(newDefaultDsType, oldDefaultDsType);
-        //try and invalid input
+        assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isBadRequest());
+        //try an invalid input
         newDefaultDsType = new JSONObject().put("value", "someInvalidInput").toString();
-        assertDefaultDsTypeUpdateFails(newDefaultDsType, oldDefaultDsType);
+        assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isBadRequest());
+        //try valid input, but the given DistributionSetType Id does not exist..
+        newDefaultDsType = new JSONObject().put("value", 99999).toString();
+        assertDefaultDsTypeUpdateBadRequestFails(newDefaultDsType, oldDefaultDsType, status().isNotFound());
     }
 
-    private void assertDefaultDsTypeUpdateFails(String newDefaultDsType, String oldDefaultDsType) throws Exception {
-
+    private void assertDefaultDsTypeUpdateBadRequestFails(String newDefaultDsType, long oldDefaultDsType, ResultMatcher resultMatchers) throws Exception {
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs/{keyName}/",
                 DEFAULT_DISTRIBUTION_SET_TYPE_KEY).content(newDefaultDsType)
                 .contentType(MediaType.APPLICATION_JSON))
             .andDo(MockMvcResultPrinter.print())
-            .andExpect(status().isBadRequest());
+            .andExpect(resultMatchers);
         assertEquals(oldDefaultDsType, getActualDefaultDsType(), "Rest endpoint for updating DefaultDistributionType failed, but actual value changed unexpectedly.");
     }
 
@@ -170,11 +173,11 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         //  some TenantConfiguration are not valid,
         //  TenantMetadata - DefaultDSType ID is valid,
         //in the end batch configuration update must fail, and thus, not a single config should be actually changed
-        String     testValidDistributionSetType = createTestDistributionSetType();
+        long     testValidDistributionSetType = createTestDistributionSetType();
         boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement.getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
         String oldAuthGatewayToken = (String) tenantConfigurationManagement.getConfigurationValue(AUTHENTICATION_GATEWAYTOKEN_KEY).getValue();
         //test TenantConfiguration with invalid config value, and a valid TenantMetadata - Default DistributionSetType id
-        assertBatchConfigurationFails(!oldRolloutApprovalConfig, "invalid-config-value", oldAuthGatewayToken + "randomSuffix0", testValidDistributionSetType);
+        assertBatchConfigurationFails(!oldRolloutApprovalConfig, "invalid-config-value", oldAuthGatewayToken + "randomSuffix0", testValidDistributionSetType, status().isBadRequest());
     }
 
     @Test
@@ -188,25 +191,29 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
         boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement.getConfigurationValue(AUTHENTICATION_GATEWAYTOKEN_ENABLED).getValue();
         String oldAuthGatewayToken = (String) tenantConfigurationManagement.getConfigurationValue(AUTHENTICATION_GATEWAYTOKEN_KEY).getValue();
 
-        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number wrapped as String. Testing just any random String
+        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - string
         //not a single configuration should be changed after the failure
         Object     testInvalidDistributionSetType = "someInvalidInput";
-        assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix1", testInvalidDistributionSetType);
+        assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix1", testInvalidDistributionSetType, status().isBadRequest());
 
-        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number wrapped as String. Testing not a String at all
+        //invalid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing invalid type - bool
         //not a single configuration should be changed after the failure
         testInvalidDistributionSetType = true;
-        assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix2", testInvalidDistributionSetType);
+        assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix2", testInvalidDistributionSetType, status().isBadRequest());
+
+        //Valid TenantMetadata Default DistributionSetType, it is expected to be a number. Testing valid type - but given DistributionSetType Id does not exist.
+        //not a single configuration should be changed after the failure
+        testInvalidDistributionSetType = 9999;
+        assertBatchConfigurationFails(!oldRolloutApprovalConfig, !oldAuthGatewayTokenEnabled, oldAuthGatewayToken + "randomSuffix2", testInvalidDistributionSetType, status().isNotFound());
     }
 
-    private void assertBatchConfigurationFails(Object newRolloutApprovalEnabled, Object newAuthGatewayTokenEnabled, Object newGatewayToken, Object newDistributionSetTypeId) throws Exception {
-        String oldDefaultDsType = getActualDefaultDsType();
+    private void assertBatchConfigurationFails(Object newRolloutApprovalEnabled, Object newAuthGatewayTokenEnabled, Object newGatewayToken, Object newDistributionSetTypeId, ResultMatcher resultMatchers) throws Exception {
+        long oldDefaultDsType = getActualDefaultDsType();
         boolean oldRolloutApprovalConfig = (Boolean) tenantConfigurationManagement.getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue();
         boolean oldAuthGatewayTokenEnabled = (Boolean) tenantConfigurationManagement.getConfigurationValue(AUTHENTICATION_GATEWAYTOKEN_ENABLED).getValue();
         String oldAuthGatewayToken = (String) tenantConfigurationManagement.getConfigurationValue(AUTHENTICATION_GATEWAYTOKEN_KEY).getValue();
 
         JSONObject configuration = new JSONObject();
-        //if new values are not passed.. use old values inverted.. or append random Strings
         configuration.put(ROLLOUT_APPROVAL_ENABLED, newRolloutApprovalEnabled);
         configuration.put(AUTHENTICATION_GATEWAYTOKEN_ENABLED, newAuthGatewayTokenEnabled);
         configuration.put(AUTHENTICATION_GATEWAYTOKEN_KEY, newGatewayToken);
@@ -215,7 +222,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
 
         mvc.perform(put(MgmtRestConstants.SYSTEM_V1_REQUEST_MAPPING + "/configs")
                 .content(body).contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-            .andExpect(status().isBadRequest());
+            .andExpect(resultMatchers);
         //Check if TenantMetadata and TenantConfiguration is not changed as Batch config failed
         assertEquals(oldDefaultDsType, getActualDefaultDsType(), "Batch configuration update Failed, but TenantMetadata - DistributionSetType was actually changed.");
         assertEquals(oldRolloutApprovalConfig, tenantConfigurationManagement.getConfigurationValue(ROLLOUT_APPROVAL_ENABLED).getValue(), "Batch configuration update Failed, but TenantConfiguration was actually changed.");
@@ -226,7 +233,7 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
     @Test
     @Description("The Batch configuration should be applied")
     public void changeBatchConfiguration() throws Exception {
-        String     updatedDistributionSetType = createTestDistributionSetType();
+        long     updatedDistributionSetType = createTestDistributionSetType();
         boolean updatedRolloutApprovalEnabled = true;
         boolean updatedAuthGatewayTokenEnabled = true;
         String updatedAuthGatewayTokenKey = "54321";
@@ -289,7 +296,42 @@ public class MgmtTenantManagementResourceTest extends AbstractManagementApiInteg
             .andExpect(status().isBadRequest());
     }
 
-    private String getActualDefaultDsType() {
-        return String.valueOf(systemManagement.getTenantMetadata().getDefaultDsType().getId());
+    private Long getActualDefaultDsType() {
+        return systemManagement.getTenantMetadata().getDefaultDsType().getId();
+    }
+
+    /**
+     * Needed for comparing json result payloads where comparison on 2 exact numbers are failing.
+     * REST return body contents as Integers(even though it is naturally Long..), thus comparison to actual value which is of type Long fails..
+     * 2 is not equal to 2L
+     *
+     * @param <T>
+     */
+    private static class CustomMatcher<T extends Number> extends BaseMatcher<T> {
+
+        private final Long expectedValue;
+
+        CustomMatcher(Long expectedValue) {
+            this.expectedValue = expectedValue;
+        }
+
+        @Override
+        public boolean matches(Object actual) {
+            boolean matches = false;
+            if (actual instanceof Number) {
+                Long actualValue = ((Number) actual).longValue();
+                matches = actualValue.equals(expectedValue);
+            }
+            return matches;
+        }
+
+        @Override
+        public void describeTo(org.hamcrest.Description description) {
+            description.appendText(expectedValue.toString());
+        }
+    }
+
+    private static <T extends Number> CustomMatcher<T> isEqualNum(Long expected) {
+        return new CustomMatcher<>(expected);
     }
 }
