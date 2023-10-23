@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.security;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -69,9 +71,9 @@ public class SecurityContextTenantAware implements ContextAware {
      * @param  securityContextSerializer
      *            Serializer that is used to serialize / deserizlize {@link SecurityContext}s.
      */
-    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
-        this.securityContextSerializer = securityContextSerializer;
+    public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer) {
         this.authoritiesResolver = authoritiesResolver;
+        this.securityContextSerializer = securityContextSerializer == null ? SecurityContextSerializer.NOP : securityContextSerializer;
     }
 
     @Override
@@ -177,6 +179,7 @@ public class SecurityContextTenantAware implements ContextAware {
      * a specific tenant and user.
      */
     private static final class AuthenticationDelegate implements Authentication {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         private final Authentication delegate;

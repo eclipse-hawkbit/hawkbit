@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.security.SpringSecurityAuditorAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -63,7 +64,9 @@ public class SecurityAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public ContextAware contextAware(final UserAuthoritiesResolver authoritiesResolver, final SecurityContextSerializer securityContextSerializer) {
+    public ContextAware contextAware(
+            final UserAuthoritiesResolver authoritiesResolver,
+            @Autowired(required = false) final SecurityContextSerializer securityContextSerializer) {
         return new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
     }
 
@@ -91,18 +94,6 @@ public class SecurityAutoConfiguration {
                     securityProperties.getUser().getRoles());
         }
         return new InMemoryUserAuthoritiesResolver(usersToPermissions);
-    }
-
-    /**
-     * Creates default {@link SecurityContextSerializer} bean that is responsible serializing / deserializing
-     * the security context.
-     *
-     * @return an {@link InMemoryUserAuthoritiesResolver} bean
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public SecurityContextSerializer securityContextSerializer() {
-        return SecurityContextSerializer.JAVA_SERIALIZATION;
     }
 
     /**

@@ -156,7 +156,7 @@ class TargetTypeAccessControllerTest extends AbstractAccessControllerTest {
         // verify targetTypeManagement#delete for readOnlyTargetType is not possible
         assertThatThrownBy(() -> {
             targetTypeManagement.delete(readOnlyTargetType.getId());
-        }).isInstanceOf(InsufficientPermissionException.class);
+        }).isInstanceOfAny(InsufficientPermissionException.class, EntityNotFoundException.class);
     }
 
     @Test

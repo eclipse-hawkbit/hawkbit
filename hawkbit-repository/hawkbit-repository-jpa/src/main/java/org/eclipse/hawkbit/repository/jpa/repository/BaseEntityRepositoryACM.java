@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity_;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
@@ -75,7 +75,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                                 } else if (Page.class.isAssignableFrom(method.getReturnType()) || Slice.class.isAssignableFrom(method.getReturnType())) {
                                     return result;
                                 } else if (Optional.class.isAssignableFrom(method.getReturnType())) {
-                                    return ((Optional<T>)result).map(t -> accessController.isOperationAllowed(AccessController.Operation.READ, t));
+                                    return ((Optional<T>)result).map(t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
                                 } else {
                                     accessController.assertOperationAllowed(AccessController.Operation.READ, (T)result);
                                 }
@@ -121,9 +121,9 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public void deleteById(@NonNull final Long id) {
-        accessController.assertOperationAllowed(
-                AccessController.Operation.DELETE,
-                () -> findById(id).orElseThrow(() -> new EntityNotFoundException(entityType, id)));
+        if (!exists(AccessController.Operation.DELETE, byIdSpec(id))) {
+          throw new EntityNotFoundException(entityType, id);
+        }
         repository.deleteById(id);
     }
 
@@ -136,10 +136,9 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     @Override
     public void deleteAllById(@NonNull final Iterable<? extends Long> ids) {
         final List<Long> idList = toList(ids).stream().map(e -> (Long)e).toList();
-        accessController.assertOperationAllowed(
-                AccessController.Operation.DELETE,
-                idList,
-                new AccessController.EntityRetriever<>(() -> repository.findAllById(idList), Identifiable::getId));
+        if (count(AccessController.Operation.DELETE, byIdsSpec(idList)) != idList.size()) {
+            throw new InsufficientPermissionException("Has id that doesn't exist or is not allowed for deletion!");
+        }
         repository.deleteAllById(ids);
     }
 
@@ -290,6 +289,17 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
             ids.forEach(in::value);
             return in;
         };
+    }
+
+    private static <T> boolean isOperationAllowed(
+            final AccessController.Operation operation, T entity,
+            final AccessController<T, Long> accessController) {
+        try {
+            accessController.assertOperationAllowed(operation, entity);
+            return true;
+        } catch (final InsufficientPermissionException e) {
+            return false;
+        }
     }
 
     private static <T> List<T> toList(final Iterable<T> i) {
