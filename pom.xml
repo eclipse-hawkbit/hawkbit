@@ -146,7 +146,7 @@
       <spring.cloud.version>2021.0.5</spring.cloud.version>
       <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
       <!-- CVE-2022-31690 Remove after Spring 3.0.0 migration-->
-      <spring.security.oauth2.client.version>5.7.10</spring.security.oauth2.client.version>
+      <spring.security.oauth2.client.version>5.7.11</spring.security.oauth2.client.version>
 
       <!-- Swagger Support -->
       <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
@@ -853,6 +853,12 @@
             <groupId>org.springframework.plugin</groupId>
             <artifactId>spring-plugin-core</artifactId>
             <version>${spring.plugin.core.version}</version>
+         </dependency>
+         <!-- CVE-2022-31690 Remove after Spring 3.0.0 migration-->
+         <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-client</artifactId>
+            <version>${spring.security.oauth2.client.version}</version>
          </dependency>
 
          <!-- Swagger Support -->
