@@ -156,15 +156,12 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
     }
     private MgmtSystemTenantConfigurationValue updateDefaultDsType(Serializable defaultDsType) {
         long updateDefaultDsType;
-        if (defaultDsType.getClass().isAssignableFrom(Integer.class)) {
-            updateDefaultDsType = Long.valueOf((Integer)defaultDsType);
-        } else if (defaultDsType.getClass().isAssignableFrom(Long.class)) {
-            updateDefaultDsType = (Long) defaultDsType;
-        } else {
+        try {
+            updateDefaultDsType = ((Number) defaultDsType).longValue();
+        } catch (ClassCastException cce) {
             throw new TenantConfigurationValidatorException(String.format(
                 "Default DistributionSetType Value Type is incorrect. Expected Long, received %s", defaultDsType.getClass().getName()));
         }
-
         systemManagement.updateTenantMetadata(updateDefaultDsType);
         return MgmtTenantManagementMapper.toResponseDefaultDsType(updateDefaultDsType);
     }
