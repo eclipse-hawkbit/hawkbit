@@ -315,7 +315,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     @Override
     public ResponseEntity<MgmtRolloutResponseBody> retryRollout(final Long rolloutId) {
         final Rollout rolloutForRetry = this.rolloutManagement.get(rolloutId)
-                .orElseThrow(EntityNotFoundException::new);
+                .orElseThrow(() -> new EntityNotFoundException(Rollout.class, rolloutId));
 
         if (rolloutForRetry.isDeleted()) {
             throw new EntityNotFoundException(Rollout.class, rolloutId);
