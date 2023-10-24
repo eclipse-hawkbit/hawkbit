@@ -426,6 +426,6 @@ public interface MgmtRolloutRestApi {
     })
     @PostMapping(value = MgmtRestConstants.ROLLOUT_V1_REQUEST_MAPPING + "/{rolloutId}/retry", produces = {
         MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE})
-    ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") final String rolloutId);
+    ResponseEntity<MgmtRolloutResponseBody> retryRollout(@PathVariable("rolloutId") final Long rolloutId);
 
 }
