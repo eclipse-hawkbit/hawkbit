@@ -75,7 +75,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
      *            the thrown and catched exception
      * @throws Throwable
      */
-    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.*Management.*(..))", throwing = "ex")
+    @AfterThrowing(pointcut = "execution( * org.eclipse.hawkbit.repository.jpa.management.*Management.*(..))", throwing = "ex")
     // Exception for squid:S00112, squid:S1162
     // It is a AspectJ proxy which deals with exceptions.
     @SuppressWarnings({ "squid:S00112", "squid:S1162" })

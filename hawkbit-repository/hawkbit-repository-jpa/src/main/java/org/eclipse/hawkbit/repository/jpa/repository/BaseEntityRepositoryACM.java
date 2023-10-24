@@ -36,9 +36,9 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     private final BaseEntityRepository<T> repository;
     private final Class<T> entityType;
-    private final AccessController<T, Long> accessController;
+    private final AccessController<T> accessController;
 
-    protected BaseEntityRepositoryACM(final BaseEntityRepository<T> repository, final Class<T> entityType, final AccessController<T, Long> accessController) {
+    protected BaseEntityRepositoryACM(final BaseEntityRepository<T> repository, final Class<T> entityType, final AccessController<T> accessController) {
         this.repository = repository;
         this.entityType = entityType;
         this.accessController = accessController;
@@ -46,7 +46,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @SuppressWarnings("unchecked")
     public static <T extends AbstractJpaTenantAwareBaseEntity, R extends BaseEntityRepository<T>> R of(
-            final R repository, final Class<T> entityType, final AccessController<T, Long> accessController) {
+            final R repository, final Class<T> entityType, final AccessController<T> accessController) {
         if (accessController == null) {
             return repository;
         } else {
@@ -152,7 +152,10 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     public void deleteAll() {
         // TODO AC - shall this method throw exception having that we have deleteByTenant
         // in order to do not allow deletion for all tenants?
-        accessController.assertOperationAllowed(AccessController.Operation.DELETE);
+        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+            throw new InsufficientPermissionException(
+                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
+        }
         repository.deleteAll();
     }
 
@@ -275,7 +278,10 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public void deleteByTenant(final String tenant) {
-        accessController.assertOperationAllowed(AccessController.Operation.DELETE);
+        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+            throw new InsufficientPermissionException(
+                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
+        }
         repository.deleteByTenant(tenant);
     }
 
@@ -293,7 +299,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     private static <T> boolean isOperationAllowed(
             final AccessController.Operation operation, T entity,
-            final AccessController<T, Long> accessController) {
+            final AccessController<T> accessController) {
         try {
             accessController.assertOperationAllowed(operation, entity);
             return true;

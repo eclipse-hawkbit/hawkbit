@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.acm;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
@@ -17,16 +16,16 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.lang.Nullable;
 
 /**
- * Interface of an extended access control. Used by management layer to verify
- * the permission for CRUD operations based on some access criteria.
+ * Interface of an extended access control by providing means or fine-grained access control.
+ * Used by repository (and on few places by management) layer to verify the permission for CRUD operations
+ * based on some access criteria.
  * <p/>
- * After the basic service based access control is applied some additional restrictions
- * (e.g. entity based) could be applied.
+ * First the basic service based access control (hawkBit permissions) on the management layer is applied then
+ * additional restrictions (e.g. entity based) could be applied.
  * 
  * @param <T> the domain type the repository manages
- * @param <ID> – the type of the id of the entity the repository manages
  */
-public interface AccessController<T, ID> {
+public interface AccessController<T> {
 
     /**
      * Introduce a new specification to limit the access to a specific entity.
@@ -47,17 +46,9 @@ public interface AccessController<T, ID> {
     @Nullable
     default Specification<T> appendAccessRules(final Operation operation, @Nullable final Specification<T> specification) {
         return getAccessRules(operation)
-                .map(accessRules -> specification ==  null ? accessRules : specification.and(accessRules))
+                .map(accessRules -> specification == null ? accessRules : specification.and(accessRules))
                 .orElse(specification);
     }
-
-    /**
-     * Verify if the given {@link Operation} is permitted for ALL entities.
-     *
-     * @throws InsufficientPermissionException
-     *             if operation is not permitted for given entities
-     */
-    void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException;
 
     /**
      * Verify if the given {@link Operation} is permitted for the provided entity.

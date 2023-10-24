@@ -69,35 +69,11 @@ public class SecurityContextTenantAware implements ContextAware {
      *            Resolver to retrieve the authorities for a given user. Must
      *            not be <code>null</code>.
      * @param  securityContextSerializer
-     *            Serializer that is used to serialize / deserizlize {@link SecurityContext}s.
+     *            Serializer that is used to serialize / deserialize {@link SecurityContext}s.
      */
     public SecurityContextTenantAware(final UserAuthoritiesResolver authoritiesResolver, @Nullable final SecurityContextSerializer securityContextSerializer) {
         this.authoritiesResolver = authoritiesResolver;
         this.securityContextSerializer = securityContextSerializer == null ? SecurityContextSerializer.NOP : securityContextSerializer;
-    }
-
-    @Override
-    public Optional<String> getCurrentContext() {
-        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
-    }
-
-    @Override
-    public <T, R> R runInContext(final String serializedContext, final Function<T, R> function, final T t) {
-        return runInContext(securityContextSerializer.deserialize(serializedContext), function, t);
-    }
-    private <T, R> R runInContext(final SecurityContext securityContext, final Function<T, R> function, final T t) {
-        Objects.requireNonNull(securityContext);
-        final SecurityContext originalContext = SecurityContextHolder.getContext();
-        if (Objects.equals(securityContext, originalContext)) {
-            return function.apply(t);
-        } else {
-            SecurityContextHolder.setContext(securityContext);
-            try {
-                return function.apply(t);
-            } finally {
-                SecurityContextHolder.setContext(originalContext);
-            }
-        }
     }
 
     @Override
@@ -139,6 +115,31 @@ public class SecurityContextTenantAware implements ContextAware {
                 () -> authoritiesResolver.getUserAuthorities(tenant, username).stream().map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList()));
         return runInContext(buildUserSecurityContext(tenant, username, authorities), tenantRunner);
+    }
+
+    @Override
+    public Optional<String> getCurrentContext() {
+        return Optional.ofNullable(SecurityContextHolder.getContext()).map(securityContextSerializer::serialize);
+    }
+
+    @Override
+    public <T, R> R runInContext(final String serializedContext, final Function<T, R> function, final T t) {
+        Objects.requireNonNull(serializedContext);
+        Objects.requireNonNull(function);
+        final SecurityContext securityContext = securityContextSerializer.deserialize(serializedContext);
+        Objects.requireNonNull(securityContext);
+
+        final SecurityContext originalContext = SecurityContextHolder.getContext();
+        if (Objects.equals(securityContext, originalContext)) {
+            return function.apply(t);
+        } else {
+            SecurityContextHolder.setContext(securityContext);
+            try {
+                return function.apply(t);
+            } finally {
+                SecurityContextHolder.setContext(originalContext);
+            }
+        }
     }
 
     private static <T> T runInContext(final SecurityContext context, final TenantRunner<T> tenantRunner) {
@@ -197,12 +198,7 @@ public class SecurityContextTenantAware implements ContextAware {
 
         @Override
         public boolean equals(final Object another) {
-            if (delegate != null) {
-                return delegate.equals(another);
-            } else if (another == null) {
-                return true;
-            }
-            return false;
+            return Objects.equals(delegate, another);
         }
 
         @Override

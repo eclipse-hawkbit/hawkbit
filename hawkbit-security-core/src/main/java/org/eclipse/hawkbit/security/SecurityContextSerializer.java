@@ -25,9 +25,12 @@ public interface SecurityContextSerializer {
      * Serializer that do not serialize (returns null on {@link #serialize(SecurityContext)}) and
      * throws exception on {@link #deserialize(String)}.
      */
-    SecurityContextSerializer NOP = new JavaSerialization();
+    SecurityContextSerializer NOP = new Nop();
     /**
      * Serializer the uses Java serialization of {@link java.io.Serializable} objects.
+     * <p/>
+     * Note that serialized via java serialization context might become unreadable if incompatible
+     * changes are made to the object classes.
      */
     SecurityContextSerializer JAVA_SERIALIZATION = new JavaSerialization();
 
@@ -47,6 +50,29 @@ public interface SecurityContextSerializer {
      */
     SecurityContext deserialize(String securityContextString);
 
+    /**
+     * Empty implementation. Could be used if the serialization shall not be used.
+     * It returns <code>null</code> as serialized context and throws exception if
+     * someone try to deserialize anything.
+     */
+    class Nop implements SecurityContextSerializer {
+
+        private Nop() {}
+
+        @Override
+        public String serialize(final SecurityContext securityContext) {
+            return null;
+        }
+
+        @Override
+        public SecurityContext deserialize(String securityContextString) {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    /**
+     * Implementation based on the java serialization.
+     */
     class JavaSerialization implements SecurityContextSerializer {
 
         private JavaSerialization() {}
@@ -73,24 +99,6 @@ public interface SecurityContextSerializer {
             } catch (final IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    /**
-     * Empty implementation. Could be used if the serialization shall be skipped.
-     */
-    class Nop implements SecurityContextSerializer {
-
-        private Nop() {}
-
-        @Override
-        public String serialize(final SecurityContext securityContext) {
-            return null;
-        }
-
-        @Override
-        public SecurityContext deserialize(String securityContextString) {
-            throw new UnsupportedOperationException();
         }
     }
 }

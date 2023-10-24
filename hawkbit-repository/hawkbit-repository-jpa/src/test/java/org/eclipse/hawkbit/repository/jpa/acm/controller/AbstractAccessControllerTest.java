@@ -10,19 +10,26 @@
 package org.eclipse.hawkbit.repository.jpa.acm.controller;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
+import org.eclipse.hawkbit.security.SecurityContextTenantAware;
+import org.eclipse.hawkbit.tenancy.TenantAware;
+import org.eclipse.hawkbit.tenancy.UserAuthoritiesResolver;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 
 @ContextConfiguration(classes = { AbstractAccessControllerTest.AccessControlTestConfig.class })
@@ -32,7 +39,12 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
     protected TestAccessControlManger testAccessControlManger;
 
     @BeforeEach
-    void cleanup() {
+    void beforeEach() {
+        testAccessControlManger.deleteAllRules();
+    }
+
+    @AfterEach
+    void afterEach() {
         testAccessControlManger.deleteAllRules();
     }
 
@@ -47,22 +59,28 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
 
     public static class AccessControlTestConfig {
 
+        private final ContextAware contextAware = new SecurityContextTenantAware((tenant, username) -> List.of());
+
+        @Bean
+        public ContextAware contextAware() {
+            return contextAware;
+        }
+
         @Bean
         public TestAccessControlManger accessControlTestManger() {
             return new TestAccessControlManger();
         }
 
         @Bean
-        public AccessController<JpaTarget, Long> targetAccessController(final TestAccessControlManger testAccessControlManger) {
+        public AccessController<JpaTarget> targetAccessController(final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
 
                 @Override
-                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
-                  // TODO
-                }
-
-                @Override
                 public Optional<Specification<JpaTarget>> getAccessRules(final Operation operation) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                        // as tenant, no restrictions
+                        return Optional.empty();
+                    }
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTarget.class, operation));
                 }
 
@@ -75,16 +93,16 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        public AccessController<JpaTargetType, Long> targetTypeAccessController(
+        public AccessController<JpaTargetType> targetTypeAccessController(
                 final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
-                @Override
-                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
-                    // TODO
-                }
 
                 @Override
                 public Optional<Specification<JpaTargetType>> getAccessRules(final Operation operation) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                        // as tenant, no restrictions
+                        return Optional.empty();
+                    }
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaTargetType.class, operation));
                 }
 
@@ -97,16 +115,16 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
         }
 
         @Bean
-        public AccessController<JpaDistributionSet, Long> distributionSetAccessController(
+        public AccessController<JpaDistributionSet> distributionSetAccessController(
                 final TestAccessControlManger testAccessControlManger) {
             return new AccessController<>() {
-                @Override
-                public void assertOperationAllowed(final Operation operation) throws InsufficientPermissionException {
-                    // TODO
-                }
 
                 @Override
                 public Optional<Specification<JpaDistributionSet>> getAccessRules(final Operation operation) {
+                    if (contextAware.getCurrentTenant() != null && SecurityContextTenantAware.SYSTEM_USER.equals(contextAware.getCurrentUsername())) {
+                        // as tenant, no restrictions
+                        return Optional.empty();
+                    }
                     return Optional.ofNullable(testAccessControlManger.getAccessRule(JpaDistributionSet.class, operation));
                 }
 

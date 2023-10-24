@@ -82,6 +82,25 @@ import org.eclipse.hawkbit.repository.jpa.configuration.MultiTenantJpaTransactio
 import org.eclipse.hawkbit.repository.jpa.event.JpaEventEntityManager;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitDefaultServiceExecutor;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.management.JpaArtifactManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaConfirmationManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaControllerManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDeploymentManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetInvalidationManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetTagManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaDistributionSetTypeManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutGroupManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaRolloutManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaSystemManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTargetManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTagManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTypeManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.jpa.management.JpaTenantStatsManagement;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -185,7 +204,7 @@ import com.google.common.collect.Maps;
  * General configuration for hawkBit's Repository.
  *
  */
-@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
+@EnableJpaRepositories(value = "org.eclipse.hawkbit.repository.jpa.repository", repositoryFactoryBeanClass = CustomBaseRepositoryFactoryBean.class)
 @EnableTransactionManagement
 @EnableJpaAuditing
 @EnableAspectJAutoProxy
@@ -864,7 +883,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
      * @param aware
      *            the tenant aware
      * @param entityManager
-     *            the entitymanager
+     *            the entity manager
      * @return a new {@link EventEntityManager}
      */
     @Bean
@@ -897,7 +916,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link AutoAssignScheduler} bean.
-     *
+     * <p/>
      * Note: does not activate in test profile, otherwise it is hard to test the
      * auto assign functionality.
      *
@@ -965,7 +984,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     /**
      * {@link RolloutScheduler} bean.
-     *
+     * <p/>
      * Note: does not activate in test profile, otherwise it is hard to test the
      * rollout handling functionality.
      *
@@ -981,7 +1000,7 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @ConditionalOnMissingBean
     @Profile("!test")
     @ConditionalOnProperty(prefix = "hawkbit.rollout.scheduler", name = "enabled", matchIfMissing = true)
-    RolloutScheduler rolloutScheduler(final TenantAware tenantAware, final SystemManagement systemManagement,
+    RolloutScheduler rolloutScheduler(final SystemManagement systemManagement,
             final RolloutHandler rolloutHandler, final SystemSecurityContext systemSecurityContext) {
         return new RolloutScheduler(systemManagement, rolloutHandler, systemSecurityContext);
     }
@@ -1052,13 +1071,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
 
     @Bean
     public BeanPostProcessor entityManagerBeanPostProcessor(
-            @Autowired(required = false) final AccessController<JpaArtifact, Long> artifactAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModuleType, Long> softwareModuleTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaSoftwareModule, Long> softwareModuleAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSetType, Long> distributionSetTypeAccessController,
-            @Autowired(required = false) final AccessController<JpaDistributionSet, Long> distributionSetAccessController,
-            @Autowired(required = false) final AccessController<JpaTargetType, Long> targetTypeAccessControlManager,
-            @Autowired(required = false) final AccessController<JpaTarget, Long> targetAccessControlManager) {
+            @Autowired(required = false) final AccessController<JpaArtifact> artifactAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModuleType> softwareModuleTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaSoftwareModule> softwareModuleAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
+            @Autowired(required = false) final AccessController<JpaDistributionSet> distributionSetAccessController,
+            @Autowired(required = false) final AccessController<JpaTargetType> targetTypeAccessControlManager,
+            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager) {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName) throws BeansException {
