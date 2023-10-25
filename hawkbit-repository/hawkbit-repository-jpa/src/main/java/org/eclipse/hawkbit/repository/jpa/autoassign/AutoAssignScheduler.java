@@ -58,7 +58,7 @@ public class AutoAssignScheduler {
 
     /**
      * Scheduler method called by the spring-async mechanism. Retrieves all
-     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenants and runs for each
      * tenant the auto assignments defined in the target filter queries
      * {@link SystemSecurityContext}.
      */

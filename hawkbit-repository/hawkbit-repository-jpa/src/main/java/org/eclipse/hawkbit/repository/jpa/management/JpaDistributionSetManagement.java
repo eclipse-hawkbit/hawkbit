@@ -306,10 +306,11 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> distributionSetIDs) {
-        final List<JpaDistributionSet> setsFound = getDistributionSets(distributionSetIDs);
+        getDistributionSets(distributionSetIDs); // throws EntityNotFoundException if any of these do not exists
+        final List<JpaDistributionSet> setsFound = distributionSetRepository.findAll(
+                AccessController.Operation.DELETE, distributionSetRepository.byIdsSpec(distributionSetIDs));
         if (setsFound.size() < distributionSetIDs.size()) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSetIDs,
-                    setsFound.stream().map(DistributionSet::getId).toList());
+            throw new InsufficientPermissionException("No DELETE access to some of distribution sets!");
         }
 
         final List<Long> assigned = distributionSetRepository
@@ -319,7 +320,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         // soft delete assigned
         if (!assigned.isEmpty()) {
             final Long[] dsIds = assigned.toArray(new Long[0]);
-            // TODO AC - shall we check delete ?
             distributionSetRepository.deleteDistributionSet(dsIds);
             targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(dsIds);
         }
@@ -333,7 +333,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
                     toHardDelete.toArray(new Long[0]));
             // don't give the delete statement an empty list, JPA/Oracle cannot
             // handle the empty list
-            distributionSetRepository.deleteByIdIn(toHardDelete);
+            distributionSetRepository.deleteAllById(toHardDelete);
         }
 
         afterCommit.afterCommit(() -> distributionSetIDs.forEach(dsId -> eventPublisherHolder.getEventPublisher()
@@ -790,7 +790,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void invalidate(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaSet = (JpaDistributionSet) distributionSet;
         jpaSet.invalidate();
-        distributionSetRepository.save(jpaSet);
+        distributionSetRepository.save(AccessController.Operation.DELETE, jpaSet);
     }
 
     private JpaDistributionSet getById(final long id) {

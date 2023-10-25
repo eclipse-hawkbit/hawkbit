@@ -89,6 +89,11 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                         throws InsufficientPermissionException {
                     testAccessControlManger.assertOperation(JpaTarget.class, operation, List.of(entity));
                 }
+
+                @Override
+                public String toString() {
+                    return AccessController.class.getSimpleName() + '<' + JpaTarget.class.getSimpleName() + '>';
+                }
             };
         }
 
@@ -111,6 +116,11 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                         throws InsufficientPermissionException {
                     testAccessControlManger.assertOperation(JpaTargetType.class, operation, List.of(entity));
                 }
+
+                @Override
+                public String toString() {
+                    return AccessController.class.getSimpleName() + '<' + JpaTargetType.class.getSimpleName() + '>';
+                }
             };
         }
 
@@ -132,6 +142,11 @@ public abstract class AbstractAccessControllerTest extends AbstractJpaIntegratio
                 public void assertOperationAllowed(final Operation operation, final JpaDistributionSet entity)
                         throws InsufficientPermissionException {
                     testAccessControlManger.assertOperation(JpaDistributionSet.class, operation, List.of(entity));
+                }
+
+                @Override
+                public String toString() {
+                    return AccessController.class.getSimpleName() + '<' + JpaDistributionSet.class.getSimpleName() + '>';
                 }
             };
         }

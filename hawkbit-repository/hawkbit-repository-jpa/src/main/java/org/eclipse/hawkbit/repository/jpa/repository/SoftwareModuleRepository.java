@@ -30,24 +30,25 @@ public interface SoftwareModuleRepository
 
     /**
      * Counts all {@link SoftwareModule}s based on the given {@link JpaSoftwareModuleType}.
+     * <p/>
+     * No access control applied
      *
-     * @param type
-     *            to count for
+     * @param type to count for
      * @return number of {@link SoftwareModule}s
      */
-    Long countByType(JpaSoftwareModuleType type);
+    long countByType(JpaSoftwareModuleType type);
 
     /**
      * Count the software modules which are assigned to the distribution set
      * with the given ID.
+     * <p/>
+     * No access control applied
      * 
-     * @param setId
-     *            the distribution set ID
+     * @param distributionSetId the distribution set ID
      * 
-     * @return the number of software modules matching the given distribution
-     *         set ID.
+     * @return the number of software modules matching the given distribution set ID.
      */
-    long countByAssignedToId(Long setId);
+    long countByAssignedToId(Long distributionSetId);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety

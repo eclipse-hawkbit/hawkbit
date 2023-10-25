@@ -10,7 +10,6 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,8 +20,10 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
@@ -30,6 +31,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import static org.eclipse.hawkbit.repository.model.Action.ActionType.DOWNLOAD_ONLY;
 import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
@@ -55,30 +57,37 @@ public class JpaActionManagement {
         this.repositoryProperties = repositoryProperties;
     }
 
-    protected List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId,
+    List<Action> findActiveActionsWithHighestWeightConsideringDefault(final String controllerId,
             final int maxActionCount) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Collections.emptyList();
-        }
         final List<Action> actions = new ArrayList<>();
-        final PageRequest pageable = PageRequest.of(0, maxActionCount);
-        actions.addAll(actionRepository
-                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNotNullOrderByWeightDescIdAsc(pageable, controllerId)
-                .getContent());
-        actions.addAll(actionRepository
-                .findByTargetControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(pageable, controllerId)
-                .getContent());
+        actions.addAll(
+                actionRepository
+                        .findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNullFetchDS(controllerId, false),
+                                PageRequest.of(
+                                        0, maxActionCount,
+                                        Sort.by(
+                                                Sort.Order.desc(JpaAction_.WEIGHT),
+                                                Sort.Order.asc(JpaAction_.ID))))
+                        .getContent());
+
+        actions.addAll(
+                actionRepository
+                        .findAll(
+                                ActionSpecifications.byTargetControllerIdAndActiveAndWeightIsNullFetchDS(controllerId, true),
+                                PageRequest.of(
+                                        0, maxActionCount,
+                                        Sort.by(
+                                                Sort.Order.asc(JpaAction_.ID))))
+                        .getContent());
         final Comparator<Action> actionImportance = Comparator.comparingInt(this::getWeightConsideringDefault)
                 .reversed().thenComparing(Action::getId);
         return actions.stream().sorted(actionImportance).limit(maxActionCount).collect(Collectors.toList());
     }
 
     protected List<JpaAction> findActiveActionsHavingStatus(final String controllerId, final Action.Status status) {
-        if (!actionRepository.activeActionExistsForControllerId(controllerId)) {
-            return Collections.emptyList();
-        }
-        return Collections
-                .unmodifiableList(actionRepository.findByTargetIdAndIsActiveAndActionStatus(controllerId, status));
+        return actionRepository.findAll(
+                ActionSpecifications.byTargetControllerIdAndIsActiveAndStatus(controllerId, status));
     }
 
     protected Action addActionStatus(final JpaActionStatusCreate statusCreate) {
@@ -102,7 +111,7 @@ public class JpaActionManagement {
      * Status.FINISHED are allowed. In the case of a DOWNLOAD_ONLY action, we accept
      * status updates only once.
      */
-    protected boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
+    private boolean isUpdatingActionStatusAllowed(final JpaAction action, final JpaActionStatus actionStatus) {
 
         final boolean isIntermediateFeedback = (FINISHED != actionStatus.getStatus())
                 && (Action.Status.ERROR != actionStatus.getStatus());
@@ -115,7 +124,7 @@ public class JpaActionManagement {
         return action.isActive() || isAllowedByRepositoryConfiguration || isAllowedForDownloadOnlyActions;
     }
 
-    protected int getWeightConsideringDefault(final Action action) {
+    public int getWeightConsideringDefault(final Action action) {
         return action.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent());
     }
 
@@ -132,7 +141,7 @@ public class JpaActionManagement {
     /**
      * Sets {@link TargetUpdateStatus} based on given {@link ActionStatus}.
      */
-    protected Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
+    private Action handleAddUpdateActionStatus(final JpaActionStatus actionStatus, final JpaAction action) {
         // information status entry - check for a potential DOS attack
         assertActionStatusQuota(action);
         assertActionStatusMessageQuota(actionStatus);

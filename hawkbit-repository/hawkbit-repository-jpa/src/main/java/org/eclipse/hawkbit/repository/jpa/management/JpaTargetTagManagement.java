@@ -25,6 +25,7 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
@@ -51,14 +52,14 @@ import org.springframework.validation.annotation.Validated;
 public class JpaTargetTagManagement implements TargetTagManagement {
 
     private final TargetTagRepository targetTagRepository;
-
     private final TargetRepository targetRepository;
 
     private final VirtualPropertyReplacer virtualPropertyReplacer;
     private final Database database;
 
-    public JpaTargetTagManagement(final TargetTagRepository targetTagRepository,
-            final TargetRepository targetRepository, final VirtualPropertyReplacer virtualPropertyReplacer,
+    public JpaTargetTagManagement(
+            final TargetTagRepository targetTagRepository, final TargetRepository targetRepository,
+            final VirtualPropertyReplacer virtualPropertyReplacer,
             final Database database) {
         this.targetTagRepository = targetTagRepository;
         this.targetRepository = targetRepository;
@@ -97,12 +98,10 @@ public class JpaTargetTagManagement implements TargetTagManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final String targetTagName) {
-        if (!targetTagRepository.existsByName(targetTagName)) {
-            throw new EntityNotFoundException(TargetTag.class, targetTagName);
-        }
-
-        // finally delete the tag itself
-        targetTagRepository.deleteByName(targetTagName);
+        targetTagRepository.delete(
+                targetTagRepository
+                    .findOne(((root, query, cb) -> cb.equal(root.get(JpaTargetTag_.name), targetTagName)))
+                    .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, targetTagName)));
     }
 
     @Override

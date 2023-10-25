@@ -9,7 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.ListJoin;
 import javax.persistence.criteria.SetJoin;
 
@@ -25,6 +27,8 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.List;
+
 /**
  * Utility class for {@link Action}s {@link Specification}s. The class provides
  * Spring Data JPQL Specifications.
@@ -36,8 +40,79 @@ public final class ActionSpecifications {
         // utility class
     }
 
-    public static Specification<JpaAction> byControllerId(final String controllerId) {
+    public static Specification<JpaAction> byTargetIdAndIsActive(final Long targetId) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), targetId),
+                cb.equal(root.get(JpaAction_.active), true));
+    }
+
+    public static Specification<JpaAction> byTargetControllerId(final String controllerId) {
         return (root, query, cb) -> cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId);
+    }
+
+    public static Specification<JpaAction> byTargetIdAndIsActiveAndStatus(final Long targetId, final Action.Status status) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), targetId),
+                cb.equal(root.get(JpaAction_.active), true),
+                cb.equal(root.get(JpaAction_.status), status));
+    }
+
+    public static Specification<JpaAction> byTargetControllerIdAndActive(final String controllerId, final boolean active) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
+                cb.equal(root.get(JpaAction_.active), active));
+    }
+
+    public static Specification<JpaAction> byTargetControllerIdAndIsActiveAndStatus(final String controllerId, final Action.Status status) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
+                cb.equal(root.get(JpaAction_.active), true),
+                cb.equal(root.get(JpaAction_.status), status));
+    }
+
+    public static Specification<JpaAction> byTargetIdsAndActiveAndStatusAndDSNotRequiredMigrationStep(
+            final List<Long> targetIds, final boolean active, final Action.Status status) {
+        return (root, query, cb) -> cb.and(
+                    root.get(JpaAction_.target).in(targetIds),
+                    cb.equal(root.get(JpaAction_.active), active),
+                    cb.equal(root.get(JpaAction_.status), status),
+                    cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false));
+    }
+
+    /**
+     * Returns active actions by target controller that has null or non-null depending on <code>isNull</code> value.
+     * Fetches action's distribution set.
+     *
+     * @param controllerId controller id
+     * @param isNull if <code>true</code> return with <code>null</code> weight, otherwise with non-<code>null</code>
+     * @return the matching action s.
+     */
+    public static Specification<JpaAction> byTargetControllerIdAndActiveAndWeightIsNullFetchDS(final String controllerId, final boolean isNull) {
+        return (root, query, cb) -> {
+            root.fetch(JpaAction_.distributionSet, JoinType.LEFT);
+            return cb.and(
+                    cb.equal(root.get(JpaAction_.target).get(JpaTarget_.controllerId), controllerId),
+                    cb.equal(root.get(JpaAction_.active), true),
+                    isNull ? cb.isNull(root.get(JpaAction_.weight)) : cb.isNotNull(root.get(JpaAction_.weight)));
+        };
+    }
+
+    public static Specification<JpaAction> byDistributionSetId(final Long distributionSetId) {
+        return (root, query, cb) -> cb.equal(root.get(JpaAction_.distributionSet).get(JpaTarget_.id), distributionSetId);
+    }
+
+    public static Specification<JpaAction> byDistributionSetIdAndActive(final Long distributionSetId) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.distributionSet).get(JpaTarget_.id), distributionSetId),
+                cb.equal(root.get(JpaAction_.active), true));
+    }
+
+    public static Specification<JpaAction> byDistributionSetIdAndActiveAndStatusIsNot(
+            final Long distributionSetId, final Action.Status status) {
+        return (root, query, cb) -> cb.and(
+                cb.equal(root.get(JpaAction_.distributionSet).get(JpaTarget_.id), distributionSetId),
+                cb.equal(root.get(JpaAction_.active), true),
+                cb.notEqual(root.get(JpaAction_.status), status));
     }
 
     /**

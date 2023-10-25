@@ -207,12 +207,10 @@ public interface DeploymentManagement {
     long countActionsByTarget(@NotNull String rsqlParam, @NotEmpty String controllerId);
 
     /**
-     * @return the total amount of stored action status
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countActionStatusAll();
-
-    /**
+     * Returns total count of all actions
+     * <p/>
+     * No access control applied.
+     *
      * @return the total amount of stored actions
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -220,6 +218,8 @@ public interface DeploymentManagement {
 
     /**
      * Counts the actions which match the given query.
+     * <p/>
+     * No access control applied.
      * 
      * @param rsqlParam
      *            RSQL query.
@@ -242,29 +242,6 @@ public interface DeploymentManagement {
     long countActionsByTarget(@NotEmpty String controllerId);
 
     /**
-     * Counts all active {@link Action}s referring to the given DistributionSet.
-     *
-     * @param distributionSet
-     *            DistributionSet to count the {@link Action}s from
-     * @return the count of actions referring to the given distributionSet
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countActionsByDistributionSetIdAndActiveIsTrue(Long distributionSet);
-
-    /**
-     * Counts all active {@link Action}s referring to the given DistributionSet
-     * that are not in a given state.
-     *
-     * @param distributionSet
-     *            DistributionSet to count the {@link Action}s from
-     * @param status
-     *            the state the actions should not have
-     * @return the count of actions referring to the given distributionSet
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    long countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(Long distributionSet, Status status);
-
-    /**
      * Get the {@link Action} entity for given actionId.
      *
      * @param actionId
@@ -277,9 +254,10 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all {@link Action}s from repository.
+     * <p/>
+     * No access control applied.
      *
-     * @param pageable
-     *            pagination parameter
+     * @param pageable pagination parameter
      * @return a paged list of {@link Action}s
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
@@ -287,34 +265,16 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all {@link Action} entities which match the given RSQL query.
+     * <p/>
+     * No access control applied.
      * 
-     * @param rsqlParam
-     *            RSQL query string
-     * @param pageable
-     *            the page request parameter for paging and sorting the result
+     * @param rsqlParam RSQL query string
+     * @param pageable the page request parameter for paging and sorting the result
      * 
      * @return a paged list of {@link Action}s.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Slice<Action> findActions(@NotNull String rsqlParam, @NotNull Pageable pageable);
-
-    /**
-     * Retrieves all {@link Action} which assigned to a specific
-     * {@link DistributionSet}.
-     *
-     * @param pageable
-     *            the page request parameter for paging and sorting the result
-     * @param distributionSetId
-     *            the distribution set which should be assigned to the actions
-     *            in the result
-     * @return a list of {@link Action} which are assigned to a specific
-     *         {@link DistributionSet}
-     *
-     * @throws EntityNotFoundException
-     *             if distribution set with given ID does not exist
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Slice<Action> findActionsByDistributionSet(@NotNull Pageable pageable, long distributionSetId);
 
     /**
      * Retrieves all {@link Action}s assigned to a specific {@link Target} and a
@@ -384,7 +344,8 @@ public interface DeploymentManagement {
 
     /**
      * Retrieves all messages for an {@link ActionStatus}.
-     *
+     * <p/>
+     * No entity based access control applied.
      *
      * @param pageable
      *            the page request parameter for paging and sorting the result
@@ -397,14 +358,16 @@ public interface DeploymentManagement {
 
     /**
      * Counts all messages for an {@link ActionStatus}.
+     * <p/>
+     * Used by UI only. With future removal of UI it could be removed.
+     * <p/>
+     * No access control applied.
      *
-     *
-     * @param pageable
-     *            the page request parameter for paging and sorting the result
      * @param actionStatusId
      *            the id of {@link ActionStatus} to count the messages from
      * @return count of messages by a specific {@link ActionStatus} id
      */
+    @Deprecated(forRemoval = true)
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countMessagesByActionStatusId(long actionStatusId);
 
@@ -520,6 +483,8 @@ public interface DeploymentManagement {
 
     /**
      * Starts all scheduled actions of an RolloutGroup parent.
+     * <p/>
+     * No entity based access control applied.
      *
      * @param rolloutId
      *            the rollout the actions belong to
@@ -532,16 +497,6 @@ public interface DeploymentManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long startScheduledActionsByRolloutGroupParent(long rolloutId, long distributionSetId, Long rolloutGroupParentId);
-
-    /**
-     * All {@link ActionStatus} entries in the repository.
-     *
-     * @param pageable
-     *            the pagination parameter
-     * @return {@link Page} of {@link ActionStatus} entries
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    Page<ActionStatus> findActionStatusAll(@NotNull Pageable pageable);
 
     /**
      * Returns {@link DistributionSet} that is assigned to given {@link Target}.
@@ -570,7 +525,9 @@ public interface DeploymentManagement {
 
     /**
      * Deletes actions which match one of the given action status and which have
-     * not been modified since the given (absolute) time-stamp.
+     * not been modified since the given (absolute) time-stamp. Used for obsolete actions cleanup.
+     * <p/>
+     * No entity based access control applied.
      *
      * @param status
      *            Set of action status.
@@ -586,12 +543,11 @@ public interface DeploymentManagement {
      * Checks if there is an action for the device with the given controller ID
      * that is in the {@link Action.Status#CANCELING} state.
      *
-     * @param controllerId
-     *            of target
+     * @param targetId of target
      * @return if actions in CANCELING state are present
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
-    boolean hasPendingCancellations(@NotEmpty String controllerId);
+    boolean hasPendingCancellations(@NotNull Long targetId);
 
     /**
      * Cancels all actions that refer to a given distribution set. This method

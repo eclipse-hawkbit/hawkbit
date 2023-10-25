@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -44,6 +45,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     private final RolloutManagement rolloutManagement;
     private final DeploymentManagement deploymentManagement;
     private final TargetFilterQueryManagement targetFilterQueryManagement;
+    private final ActionRepository actionRepository;
     private final PlatformTransactionManager txManager;
     private final RepositoryProperties repositoryProperties;
     private final TenantAware tenantAware;
@@ -51,13 +53,15 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     public JpaDistributionSetInvalidationManagement(final DistributionSetManagement distributionSetManagement,
             final RolloutManagement rolloutManagement, final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final PlatformTransactionManager txManager,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
+            final PlatformTransactionManager txManager,
             final RepositoryProperties repositoryProperties, final TenantAware tenantAware,
             final LockRegistry lockRegistry) {
         this.distributionSetManagement = distributionSetManagement;
         this.rolloutManagement = rolloutManagement;
         this.deploymentManagement = deploymentManagement;
         this.targetFilterQueryManagement = targetFilterQueryManagement;
+        this.actionRepository = actionRepository;
         this.txManager = txManager;
         this.repositoryProperties = repositoryProperties;
         this.tenantAware = tenantAware;
@@ -155,12 +159,11 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
     }
 
     private long countActionsForForcedInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(deploymentManagement::countActionsByDistributionSetIdAndActiveIsTrue).sum();
+        return setIds.stream().mapToLong(actionRepository::countByDistributionSetIdAndActiveIsTrue).sum();
     }
 
     private long countActionsForSoftInvalidation(final Collection<Long> setIds) {
-        return setIds.stream().mapToLong(distributionSet -> deploymentManagement
-                .countActionsByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING)).sum();
+        return setIds.stream().mapToLong(distributionSet -> actionRepository
+                .countByDistributionSetIdAndActiveIsTrueAndStatusIsNot(distributionSet, Status.CANCELING)).sum();
     }
-
 }

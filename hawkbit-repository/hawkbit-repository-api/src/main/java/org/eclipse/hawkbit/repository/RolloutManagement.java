@@ -68,6 +68,8 @@ public interface RolloutManagement {
     /**
      * Counts all {@link Rollout}s for a specific {@link DistributionSet} that
      * are stoppable
+     * <p/>
+     * No access control applied
      *
      * @param setId
      *            the distribution set

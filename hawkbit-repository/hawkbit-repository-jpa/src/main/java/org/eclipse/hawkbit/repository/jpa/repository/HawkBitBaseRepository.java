@@ -31,26 +31,24 @@ import org.springframework.lang.Nullable;
 
 /**
  * Repository implementation that allows findAll with disabled count query.
- * 
- * @param <T>
- *            entity type
- * @param <I>
- *            key or ID type
+ *
+ * @param <T> the domain type the repository manages
+ * @param <ID> the type of the id of the entity the repository manages
  */
-public class HawkBitBaseRepository<T, I extends Serializable> extends SimpleJpaRepository<T, I>
+public class HawkBitBaseRepository<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
         implements NoCountSliceRepository<T>, ACMRepository<T> {
 
     public HawkBitBaseRepository(final Class<T> domainClass, final EntityManager em) {
         super(domainClass, em);
     }
 
-    public HawkBitBaseRepository(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+    public HawkBitBaseRepository(final JpaEntityInformation<T, ?> entityInformation, final EntityManager entityManager) {
         super(entityInformation, entityManager);
     }
 
     @Override
-    public Slice<T> findAllWithoutCount(@Nullable Specification<T> spec, Pageable pageable) {
-        TypedQuery<T> query = getQuery(spec, pageable);
+    public Slice<T> findAllWithoutCount(@Nullable final Specification<T> spec, final Pageable pageable) {
+        final TypedQuery<T> query = getQuery(spec, pageable);
         return pageable.isUnpaged() ? new PageImpl<>(query.getResultList()) : readPageWithoutCount(query, pageable);
     }
 
@@ -63,44 +61,55 @@ public class HawkBitBaseRepository<T, I extends Serializable> extends SimpleJpaR
     @Override
     @Transactional
     @NonNull
-    public <S  extends T> S save(@NonNull AccessController.Operation operation, @NonNull final S entity) {
+    public <S  extends T> S save(@Nullable AccessController.Operation operation, @NonNull final S entity) {
         return save(entity);
     }
 
     @Override
     @Transactional
-    public <S extends T> List<S> saveAll(@NonNull AccessController.Operation operation, final Iterable<S> entities) {
+    public <S extends T> List<S> saveAll(@Nullable AccessController.Operation operation, final Iterable<S> entities) {
         return saveAll(entities);
     }
 
 
     @NonNull
-    public Optional<T> findOne(@NonNull AccessController.Operation operation, @Nullable Specification<T> spec) {
+    public Optional<T> findOne(@Nullable AccessController.Operation operation, @Nullable Specification<T> spec) {
         return findOne(spec);
     }
 
     @Override
     @NonNull
-    public List<T> findAll(@NonNull final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public List<T> findAll(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
         return findAll(spec);
     }
 
     @Override
     @NonNull
-    public boolean exists(@NonNull AccessController.Operation operation, Specification<T> spec) {
+    public boolean exists(@Nullable AccessController.Operation operation, Specification<T> spec) {
         return exists(spec);
     }
 
     @Override
     @NonNull
-    public long count(@NonNull final AccessController.Operation operation, @Nullable final Specification<T> spec) {
+    public long count(@Nullable final AccessController.Operation operation, @Nullable final Specification<T> spec) {
         return count(spec);
     }
 
     @NonNull
     @Override
-    public Slice<T> findAllWithoutCount(@NonNull final AccessController.Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
+    public Slice<T> findAllWithoutCount(@Nullable final AccessController.Operation operation, @Nullable Specification<T> spec, Pageable pageable) {
         return findAllWithoutCount(spec, pageable);
+    }
+
+    @Override
+    @NonNull
+    public Class<T> getDomainClass() {
+        return super.getDomainClass();
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + getDomainClass().getSimpleName() + '>';
     }
 
     private <S extends T> Page<S> readPageWithoutCount(final TypedQuery<S> query, final Pageable pageable) {
@@ -108,7 +117,6 @@ public class HawkBitBaseRepository<T, I extends Serializable> extends SimpleJpaR
         query.setMaxResults(pageable.getPageSize());
 
         final List<S> content = query.getResultList();
-
         return new PageImpl<>(content, pageable, content.size());
     }
 
@@ -122,6 +130,5 @@ public class HawkBitBaseRepository<T, I extends Serializable> extends SimpleJpaR
         public Class<?> getBaseRepositoryType(final Class<?> repositoryType) {
             return HawkBitBaseRepository.class;
         }
-
     }
 }

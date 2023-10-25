@@ -48,6 +48,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataUpdate;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleUpdate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaSoftwareModuleCreate;
@@ -101,23 +102,14 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
     private final EntityManager entityManager;
-
     private final DistributionSetRepository distributionSetRepository;
-
     private final SoftwareModuleRepository softwareModuleRepository;
-
     private final SoftwareModuleMetadataRepository softwareModuleMetadataRepository;
-
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
-
     private final AuditorAware<String> auditorProvider;
-
     private final ArtifactManagement artifactManagement;
-
     private final QuotaManagement quotaManagement;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final Database database;
 
     public JpaSoftwareModuleManagement(final EntityManager entityManager,
@@ -270,7 +262,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                "UPDATE JpaSoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.tenant = :tenant AND b.id IN :ids"
              */
             final long timestamp = System.currentTimeMillis();
-            final List<JpaSoftwareModule> toDelete = softwareModuleRepository.findAllById(assignedModuleIds);
+            final List<JpaSoftwareModule> toDelete = softwareModuleRepository.findAll(
+                    AccessController.Operation.DELETE, softwareModuleRepository.byIdsSpec(assignedModuleIds));
             for (final JpaSoftwareModule softwareModule : toDelete) {
                 softwareModule.setDeleted(true);
                 softwareModule.setLastModifiedAt(timestamp);
@@ -334,6 +327,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 smFilterNameAndVersionEntries[1]);
     }
 
+    /**
+     *  Used only in UI which is to be removed
+     */
+    @Deprecated(forRemoval = true)
     @Override
     // In the interface org.springframework.data.domain.Pageable.getSort the
     // return value is not guaranteed to be non-null, therefore a null check is
@@ -380,9 +377,17 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         final List<AssignedSoftwareModule> resultList = new ArrayList<>();
 
-        smWithAssignedFlagList.forEach(smWithAssignedFlag -> resultList
-                .add(new AssignedSoftwareModule(smWithAssignedFlag.get("sm", JpaSoftwareModule.class),
-                        smWithAssignedFlag.get("assigned", Number.class).longValue() == 1)));
+        smWithAssignedFlagList.forEach(smWithAssignedFlag -> {
+            final JpaSoftwareModule softwareModule = smWithAssignedFlag.get("sm", JpaSoftwareModule.class);
+            try {
+                softwareModuleRepository.findById(softwareModule.getId()); // check read access
+                resultList
+                        .add(new AssignedSoftwareModule(softwareModule,
+                                smWithAssignedFlag.get("assigned", Number.class).longValue() == 1));
+            } catch (final InsufficientPermissionException e) {
+                // skip the entry
+            }
+        });
 
         return new SliceImpl<>(Collections.unmodifiableList(resultList), pageable, hasNext);
     }
@@ -410,6 +415,12 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                 Arrays.stream(additionalPredicates)).toArray(Predicate[]::new);
     }
 
+    /**
+     * Used only in UI which is to be removed
+     * <p/>
+     * No access control applied
+     */
+    @Deprecated(forRemoval = true)
     @Override
     public long countByTextAndType(final String searchText, final Long typeId) {
         final List<Specification<JpaSoftwareModule>> specList = new ArrayList<>(3);
@@ -469,7 +480,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<SoftwareModuleMetadata> createMetaData(final Collection<SoftwareModuleMetadataCreate> create) {
         if (!create.isEmpty()) {
-            // check if all meta data entries refer to the same software module
+            // check if all metadata entries refer to the same software module
             final Long id = ((JpaSoftwareModuleMetadataCreate) create.iterator().next()).getSoftwareModuleId();
             if (createJpaMetadataCreateStream(create).allMatch(c -> id.equals(c.getSoftwareModuleId()))) {
                 assertSoftwareModuleExists(id);
@@ -513,7 +524,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     private void assertSoftwareModuleMetadataDoesNotExist(final Long id,
             final JpaSoftwareModuleMetadataCreate md) {
         if (softwareModuleMetadataRepository.existsById(new SwMetadataCompositeKey(id, md.getKey()))) {
-            throwMetadataKeyAlreadyExists(md.getKey());
+            throw new EntityAlreadyExistsException("Metadata entry with key '" + md.getKey() + "' already exists!");
         }
     }
 
@@ -572,13 +583,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         final List<Specification<JpaSoftwareModuleMetadata>> specList = Arrays
                 .asList(RSQLUtility.buildRsqlSpecification(rsqlParam, SoftwareModuleMetadataFields.class,
-                        virtualPropertyReplacer, database), bySmIdSpec(id));
+                        virtualPropertyReplacer, database), metadataBySoftwareModuleIdSpec(id));
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable, specList);
-    }
-
-    private static Specification<JpaSoftwareModuleMetadata> bySmIdSpec(final long id) {
-        return (root, query, cb) -> cb
-                .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), id);
     }
 
     @Override
@@ -586,7 +592,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         assertSoftwareModuleExists(id);
 
         return JpaManagementHelper.findAllWithCountBySpec(softwareModuleMetadataRepository, pageable,
-                Collections.singletonList(bySmIdSpec(id)));
+                Collections.singletonList(metadataBySoftwareModuleIdSpec(id)));
     }
 
     @Override
@@ -602,10 +608,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         return softwareModuleMetadataRepository.findById(new SwMetadataCompositeKey(id, key))
                 .map(SoftwareModuleMetadata.class::cast);
-    }
-
-    private static void throwMetadataKeyAlreadyExists(final String metadataKey) {
-        throw new EntityAlreadyExistsException("Metadata entry with key '" + metadataKey + "' already exists");
     }
 
     @Override
@@ -646,5 +648,10 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         if (!distributionSetRepository.existsById(distributionSetId)) {
             throw new EntityNotFoundException(DistributionSet.class, distributionSetId);
         }
+    }
+
+    private static Specification<JpaSoftwareModuleMetadata> metadataBySoftwareModuleIdSpec(final long id) {
+        return (root, query, cb) -> cb
+                .equal(root.get(JpaSoftwareModuleMetadata_.softwareModule).get(JpaSoftwareModule_.id), id);
     }
 }

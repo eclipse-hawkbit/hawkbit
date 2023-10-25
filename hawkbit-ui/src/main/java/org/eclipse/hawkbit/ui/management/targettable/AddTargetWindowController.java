@@ -32,7 +32,7 @@ public class AddTargetWindowController
     private final TargetWindowLayout layout;
     private final EventView view;
     private final ProxyTargetValidator proxyTargetValidator;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for AddTargetWindowController
@@ -48,14 +48,14 @@ public class AddTargetWindowController
      */
     public AddTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetWindowLayout layout, final EventView view,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;
         this.view = view;
         this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -107,11 +107,12 @@ public class AddTargetWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
-        return proxyTargetValidator.isEntityValid(entity, () -> {
-//            return contextRunner.runInAdminContext(() -> {
-                return targetManagement.getByControllerID(entity.getControllerId()).isPresent();
-//            });
-        });
+        return proxyTargetValidator.isEntityValid(
+                entity,
+                () -> contextAware.runAsTenant(
+                        contextAware.getCurrentTenant(),
+                        () ->
+                            targetManagement.getByControllerID(entity.getControllerId()).isPresent()));
     }
 
 }

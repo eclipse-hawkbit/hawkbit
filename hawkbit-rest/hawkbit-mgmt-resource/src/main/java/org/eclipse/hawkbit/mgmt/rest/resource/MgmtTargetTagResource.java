@@ -192,7 +192,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
             @PathVariable("controllerId") final String controllerId) {
         LOG.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
-        this.targetManagement.unAssignTag(controllerId, targetTagId);
+        this.targetManagement.unassignTag(controllerId, targetTagId);
         return ResponseEntity.ok().build();
     }
 

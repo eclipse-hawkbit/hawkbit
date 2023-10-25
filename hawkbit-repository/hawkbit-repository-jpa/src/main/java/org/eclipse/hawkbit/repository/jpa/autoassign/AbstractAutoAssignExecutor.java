@@ -89,8 +89,9 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
         return contextAware;
     }
 
-    // run in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
-    // the auto assignment is made for
+    // run in the context the auto assignment is made in, i.e. if there is access control context it runs in it
+    // otherwise in the tenant & user context built by createdBy
+    // Note! It must be called in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
     protected void forEachFilterWithAutoAssignDS(final Consumer<TargetFilterQuery> consumer) {
         Slice<TargetFilterQuery> filterQueries;
         Pageable query = PageRequest.of(0, PAGE_SIZE);

@@ -171,7 +171,6 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
             final long dsTypeId, final Collection<Long> softwareModulesTypeIds, final boolean mandatory) {
         final Collection<JpaSoftwareModuleType> foundModules =
                 softwareModuleTypeRepository.findAllById(softwareModulesTypeIds);
-
         if (foundModules.size() < softwareModulesTypeIds.size()) {
             throw new EntityNotFoundException(SoftwareModuleType.class, softwareModulesTypeIds,
                     foundModules.stream().map(SoftwareModuleType::getId).toList());
@@ -308,10 +307,9 @@ public class JpaDistributionSetTypeManagement implements DistributionSetTypeMana
     }
 
     private void checkDistributionSetTypeNotAssigned(final Long id) {
-        // TODO AC - do it in tenant scope
         if (distributionSetRepository.countByTypeId(id) > 0) {
             throw new EntityReadOnlyException(String.format(
-                    "distribution set type %s is already assigned to distribution sets and cannot be changed", id));
+                    "Distribution set type %s is already assigned to distribution sets and cannot be changed!", id));
         }
     }
 

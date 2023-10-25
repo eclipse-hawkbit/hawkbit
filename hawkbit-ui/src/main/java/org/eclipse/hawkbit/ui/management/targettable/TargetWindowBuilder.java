@@ -30,7 +30,7 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
     private final TargetTypeManagement targetTypeManagement;
 
     private final EventView view;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for TargetWindowBuilder
@@ -43,17 +43,17 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
      *            TargetTypeManagement
      * @param view
      *            EventView
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public TargetWindowBuilder(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final TargetTypeManagement targetTypeManagement, final EventView view, final ContextAware contextRunner) {
+            final TargetTypeManagement targetTypeManagement, final EventView view, final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.targetTypeManagement = targetTypeManagement;
         this.view = view;
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -64,13 +64,13 @@ public class TargetWindowBuilder extends AbstractEntityWindowBuilder<ProxyTarget
     @Override
     public Window getWindowForAdd() {
         return getWindowForNewEntity(new AddTargetWindowController(uiDependencies, targetManagement,
-                new TargetWindowLayout(getI18n(), targetTypeManagement), view, contextRunner));
+                new TargetWindowLayout(getI18n(), targetTypeManagement), view, contextAware));
 
     }
 
     @Override
     public Window getWindowForUpdate(final ProxyTarget proxyTarget) {
         return getWindowForEntity(proxyTarget, new UpdateTargetWindowController(uiDependencies, targetManagement,
-                new TargetWindowLayout(getI18n(), targetTypeManagement), contextRunner));
+                new TargetWindowLayout(getI18n(), targetTypeManagement), contextAware));
     }
 }

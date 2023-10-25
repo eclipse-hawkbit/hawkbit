@@ -154,8 +154,8 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 () -> targetManagement.toggleTagAssignment(Collections.singletonList(NOT_EXIST_ID), tag.getName()),
                 "Target");
 
-        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(NOT_EXIST_ID, tag.getId()), "Target");
-        verifyThrownExceptionBy(() -> targetManagement.unAssignTag(target.getControllerId(), NOT_EXIST_IDL),
+        verifyThrownExceptionBy(() -> targetManagement.unassignTag(NOT_EXIST_ID, tag.getId()), "Target");
+        verifyThrownExceptionBy(() -> targetManagement.unassignTag(target.getControllerId(), NOT_EXIST_IDL),
                 "TargetTag");
         verifyThrownExceptionBy(() -> targetManagement.update(entityFactory.target().update(NOT_EXIST_ID)), "Target");
 
@@ -394,7 +394,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(assignedTargets.size()).as("Assigned targets are wrong")
                 .isEqualTo(targetManagement.findByTag(PAGE, targetTag.getId()).getNumberOfElements());
 
-        final Target unAssignTarget = targetManagement.unAssignTag("targetId123", findTargetTag.getId());
+        final Target unAssignTarget = targetManagement.unassignTag("targetId123", findTargetTag.getId());
         assertThat(unAssignTarget.getControllerId()).as("Controller id is wrong").isEqualTo("targetId123");
         assertThat(targetTagManagement.findByTarget(PAGE, unAssignTarget.getControllerId())).as("Tag size is wrong")
                 .isEmpty();
@@ -1069,7 +1069,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound1.get().getTargetType().getId()).isEqualTo(targetTypes.get(1).getId());
 
         // unassign the target type
-        targetManagement.unAssignType(target.getControllerId());
+        targetManagement.unassignType(target.getControllerId());
 
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound2 = targetRepository.findById(target.getId());
@@ -1227,7 +1227,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetFound.get().getTargetType().getName()).isEqualTo(targetType.getName());
 
         // un-assign target type from target
-        targetManagement.unAssignType(targetFound.get().getControllerId());
+        targetManagement.unassignType(targetFound.get().getControllerId());
 
         // opt lock revision must be changed
         final Optional<JpaTarget> targetFound1 = targetRepository.findById(target.getId());

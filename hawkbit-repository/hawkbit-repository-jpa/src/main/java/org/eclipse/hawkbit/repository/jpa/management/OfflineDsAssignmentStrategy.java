@@ -19,6 +19,8 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -88,10 +90,30 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     }
 
     @Override
-    public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
-            final String currentUser) {
-        targetIds.forEach(tIds -> targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
-                TargetUpdateStatus.IN_SYNC, set, System.currentTimeMillis(), currentUser, tIds));
+    public void setAssignedDistributionSetAndTargetStatus(
+            final JpaDistributionSet set, final List<List<Long>> targetIds, final String currentUser) {
+        final long now = System.currentTimeMillis();
+        targetIds.forEach(targetIdsChunk -> {
+            if (targetRepository.count(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
+                throw new InsufficientPermissionException("No update access to all targets!");
+            }
+            targetRepository.setAssignedAndInstalledDistributionSetAndUpdateStatus(
+                    TargetUpdateStatus.IN_SYNC, set, now, currentUser, targetIdsChunk);
+            // TODO AC - current problem with this approach is that the caller detach the targets and seems doesn't save them
+//            targetRepository.saveAll(
+//                    targetRepository
+//                            .findAll(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk))
+//                            .stream()
+//                            .peek(target -> {
+//                                target.setAssignedDistributionSet(set);
+//                                target.setInstalledDistributionSet(set);
+//                                target.setInstallationDate(now);
+//                                target.setLastModifiedAt(now);
+//                                target.setLastModifiedBy(currentUser);
+//                                target.setUpdateStatus(TargetUpdateStatus.IN_SYNC);
+//                            })
+//                            .toList());
+        });
     }
 
     @Override

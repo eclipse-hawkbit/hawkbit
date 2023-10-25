@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.persistence.EntityManager;
@@ -27,19 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface TargetTagRepository
-        extends BaseEntityRepository<JpaTargetTag> {
-
-    /**
-     * deletes the {@link TargetTag}s with the given tag names.
-     *
-     * @param tagName
-     *            to be deleted
-     * @return 1 if tag was deleted
-     */
-    @Modifying
-    @Transactional
-    Long deleteByName(String tagName);
+public interface TargetTagRepository extends BaseEntityRepository<JpaTargetTag> {
 
     /**
      * find {@link TargetTag} by its name.
@@ -49,24 +36,6 @@ public interface TargetTagRepository
      * @return the {@link TargetTag} if found, otherwise null
      */
     Optional<TargetTag> findByNameEquals(String tagName);
-
-    /**
-     * Checks if tag with given name exists.
-     * 
-     * @param tagName
-     *            to check for
-     * @return <code>true</code> is tag with given name exists
-     */
-    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaTargetTag t WHERE t.name=:tagName")
-    boolean existsByName(@Param("tagName") String tagName);
-
-    /**
-     * Returns all instances of the type.
-     *
-     * @return all entities
-     */
-    @Override
-    List<JpaTargetTag> findAll();
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
@@ -81,9 +50,4 @@ public interface TargetTagRepository
     @Transactional
     @Query("DELETE FROM JpaTargetTag t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
-    @Override
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT t FROM JpaTargetTag t WHERE t.id IN ?1")
-    List<JpaTargetTag> findAllById(Iterable<Long> ids);
 }

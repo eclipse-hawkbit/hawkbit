@@ -31,16 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface DistributionSetTagRepository
         extends BaseEntityRepository<JpaDistributionSetTag> {
-    /**
-     * deletes the {@link DistributionSet} with the given name.
-     * 
-     * @param tagName
-     *            to be deleted
-     * @return 1 if tag was deleted
-     */
-    @Modifying
-    @Transactional
-    Long deleteByName(String tagName);
 
     /**
      * find {@link DistributionSetTag} by its name.
@@ -50,16 +40,6 @@ public interface DistributionSetTagRepository
      * @return the {@link DistributionSetTag} if found, otherwise null
      */
     Optional<DistributionSetTag> findByNameEquals(String tagName);
-
-    /**
-     * Checks if tag with given name exists.
-     * 
-     * @param tagName
-     *            to check for
-     * @return <code>true</code> is tag with given name exists
-     */
-    @Query("SELECT CASE WHEN COUNT(t)>0 THEN 'true' ELSE 'false' END FROM JpaDistributionSetTag t WHERE t.name=:tagName")
-    boolean existsByName(@Param("tagName") String tagName);
 
     /**
      * Returns all instances of the type.
@@ -82,9 +62,4 @@ public interface DistributionSetTagRepository
     @Transactional
     @Query("DELETE FROM JpaDistributionSetTag t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
-    @Override
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT d FROM JpaDistributionSetTag d WHERE d.id IN ?1")
-    List<JpaDistributionSetTag> findAllById(Iterable<Long> ids);
 }

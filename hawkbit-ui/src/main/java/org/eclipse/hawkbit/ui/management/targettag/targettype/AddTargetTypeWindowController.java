@@ -32,7 +32,7 @@ public class AddTargetTypeWindowController
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
     private final TargetTypeManagement targetTypeManagement;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for AddTargetTypeWindowController
@@ -43,18 +43,18 @@ public class AddTargetTypeWindowController
      *            targetTypeManagement
      * @param layout
      *            TargetTypeWindowLayout
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public AddTargetTypeWindowController(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
         this.layout = layout;
         this.validator = new ProxyTargetTypeValidator(uiDependencies);
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -86,10 +86,9 @@ public class AddTargetTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
-        return validator.isEntityValid(entity, () -> {
-//            return contextRunner.runInAdminContext(() -> {
-                return targetTypeManagement.getByName(entity.getName()).isPresent();
-//            });
-        });
+        return validator.isEntityValid(entity,
+                () -> contextAware.runAsTenant(
+                        contextAware.getCurrentTenant(),
+                        () -> targetTypeManagement.getByName(entity.getName()).isPresent()));
     }
 }

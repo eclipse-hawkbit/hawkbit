@@ -27,6 +27,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.MediaTypes;
@@ -72,7 +74,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
     @Test
     @Description("Forced deployment to a controller. Checks if the confirmation resource response payload for a given"
             + " deployment is as expected.")
-    public void verifyConfirmationReferencesInControllerBase() throws Exception {
+    public void verifyConfirmationReferencesInControllerBase(@Autowired ActionStatusRepository actionStatusRepository) throws Exception {
         enableConfirmationFlow();
         // Prepare test data
         final DistributionSet ds = testdataFactory.createDistributionSet("", true);
@@ -120,7 +122,7 @@ public class DdiConfirmationBaseTest extends AbstractDDiApiIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(actionStatusRepository.count()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 

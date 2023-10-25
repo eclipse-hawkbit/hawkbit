@@ -25,8 +25,11 @@ import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -44,6 +47,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
+import javax.persistence.criteria.JoinType;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
@@ -144,17 +149,23 @@ public abstract class AbstractDsAssignmentStrategy {
     /**
      * Cancels {@link Action}s that are no longer necessary and sends
      * cancellations to the controller.
+     * <p/>
+     * No access control applied
      *
-     * @param targetsIds
-     *            to override {@link Action}s
+     * @param targetsIds to override {@link Action}s
      */
     protected List<Long> overrideObsoleteUpdateActions(final Collection<Long> targetsIds) {
-
         // Figure out if there are potential target/action combinations that
         // need to be considered for cancellation
-        final List<JpaAction> activeActions = actionRepository
-                .findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetNotRequiredMigrationStep(
-                        targetsIds, Action.Status.CANCELING);
+        final List<JpaAction> activeActions = actionRepository.findAll((root, query, cb) -> {
+            root.fetch(JpaAction_.target, JoinType.LEFT);
+            return cb.and(
+                    cb.equal(root.get(JpaAction_.active), true),
+                    cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false),
+                    cb.notEqual(root.get(JpaAction_.status), Action.Status.CANCELING),
+                    root.get(JpaAction_.target).get(JpaTarget_.id).in(targetsIds)
+            );
+        });
 
         final List<Long> targetIds = activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELING);
@@ -177,16 +188,22 @@ public abstract class AbstractDsAssignmentStrategy {
     /**
      * Closes {@link Action}s that are no longer necessary without sending a
      * hint to the controller.
+     * <p/>
+     * No access control applied
      *
-     * @param targetsIds
-     *            to override {@link Action}s
+     * @param targetsIds to override {@link Action}s
      */
     protected List<Long> closeObsoleteUpdateActions(final Collection<Long> targetsIds) {
-
         // Figure out if there are potential target/action combinations that
         // need to be considered for cancellation
-        final List<JpaAction> activeActions = actionRepository
-                .findByActiveAndTargetIdInAndDistributionSetNotRequiredMigrationStep(targetsIds);
+        final List<JpaAction> activeActions = actionRepository.findAll((root, query, cb) -> {
+            root.fetch(JpaAction_.target, JoinType.LEFT);
+            return cb.and(
+                    cb.equal(root.get(JpaAction_.active), true),
+                    cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.requiredMigrationStep), false),
+                    root.get(JpaAction_.target).get(JpaTarget_.id).in(targetsIds)
+            );
+        });
 
         return activeActions.stream().map(action -> {
             action.setStatus(Status.CANCELED);

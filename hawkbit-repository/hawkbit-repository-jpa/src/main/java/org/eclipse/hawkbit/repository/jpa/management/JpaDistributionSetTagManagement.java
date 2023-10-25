@@ -27,9 +27,11 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTagCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
 import org.eclipse.hawkbit.repository.jpa.rsql.RSQLUtility;
+import org.eclipse.hawkbit.repository.jpa.specifications.DistributionSetTagSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.TagSpecification;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
@@ -121,11 +123,11 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final String tagName) {
-        if (!distributionSetTagRepository.existsByName(tagName)) {
-            throw new EntityNotFoundException(DistributionSetTag.class, tagName);
-        }
+        final JpaDistributionSetTag dsTag = distributionSetTagRepository
+                .findOne(DistributionSetTagSpecifications.byName(tagName))
+                .orElseThrow(() -> new EntityNotFoundException(DistributionSetTag.class, tagName));
 
-        distributionSetTagRepository.deleteByName(tagName);
+        distributionSetTagRepository.delete(dsTag);
     }
 
     @Override
@@ -194,5 +196,4 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     public long count() {
         return distributionSetTagRepository.count();
     }
-
 }

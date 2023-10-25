@@ -104,7 +104,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor,
             final TenantAware tenantAware, final ConfirmationManagement confirmationManagement,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -114,7 +114,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
                     targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement, contextRunner);
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement, contextAware);
 
             this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement,
                     deploymentManagement, uiProperties, targetTagManagement, distributionSetManagement, uiExecutor,
@@ -122,7 +122,7 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
                     managementUIState.getDistributionGridLayoutUiState(), tenantAware, confirmationManagement,
-                    contextRunner);
+                    contextAware);
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,

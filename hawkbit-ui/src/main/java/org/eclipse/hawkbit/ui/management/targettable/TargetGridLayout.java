@@ -117,8 +117,8 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            TenantAware
      * @param confirmationManagement
      *            ConfirmationManagement
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public TargetGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetTypeManagement targetTypeManagement, final DeploymentManagement deploymentManagement,
@@ -131,9 +131,9 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState, final TenantAware tenantAware,
-            final ConfirmationManagement confirmationManagement, final ContextAware contextRunner) {
+            final ConfirmationManagement confirmationManagement, final ContextAware contextAware) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
-                targetTypeManagement, EventView.DEPLOYMENT, contextRunner);
+                targetTypeManagement, EventView.DEPLOYMENT, contextAware);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
         final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,

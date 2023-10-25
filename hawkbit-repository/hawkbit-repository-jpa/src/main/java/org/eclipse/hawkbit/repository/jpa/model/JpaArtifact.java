@@ -28,7 +28,7 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 
 /**
- * JPA implementation of {@link LocalArtifact}.
+ * JPA implementation of {@link Artifact}.
  *
  */
 @Table(name = "sp_artifact", indexes = { @Index(name = "sp_idx_artifact_01", columnList = "tenant,software_module"),

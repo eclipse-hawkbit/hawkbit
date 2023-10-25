@@ -29,9 +29,13 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.model.JpaTarget_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
@@ -221,7 +225,13 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
                 .getAssignedDistributionSet(target.getControllerId());
         assertThat(assignedDistributionSet).contains(ds);
-        final Action action = actionRepository.findByTargetAndDistributionSet(PAGE, target, ds).getContent().get(0);
+        final Action action = actionRepository
+                .findAll(
+                        (root, query, cb) ->
+                                cb.and(
+                                        cb.equal(root.get(JpaAction_.target).get(JpaTarget_.id), target.getId()),
+                                        cb.equal(root.get(JpaAction_.distributionSet).get(JpaDistributionSet_.id), ds.getId())),
+                        PAGE).getContent().get(0);;
         assertThat(action).isNotNull();
         return action;
     }

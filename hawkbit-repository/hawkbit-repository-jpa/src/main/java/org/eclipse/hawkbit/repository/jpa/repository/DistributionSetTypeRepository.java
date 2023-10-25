@@ -36,6 +36,8 @@ public interface DistributionSetTypeRepository
     /**
      * Counts all distribution set type where a specific software module type is
      * assigned to.
+     * <p/>
+     * No access control applied
      * 
      * @param softwareModuleType
      *            the software module type to count the distribution set type
@@ -52,8 +54,7 @@ public interface DistributionSetTypeRepository
      * manually to query even if this will by done by {@link EntityManager}
      * anyhow. The DB should take care of optimizing this away.
      *
-     * @param tenant
-     *            to delete data from
+     * @param tenant to delete data from
      */
     @Modifying
     @Transactional
@@ -61,21 +62,10 @@ public interface DistributionSetTypeRepository
     void deleteByTenant(@Param("tenant") String tenant);
 
     /**
-     * Retrieves the {@link DistributionSetType}s for the given IDs. Workaround
-     * for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-     *
-     * @param ids
-     *            of the types to be located
-     * 
-     * @return a list of distribution set types
-     */
-    @Override
-    @Query("SELECT d FROM JpaDistributionSetType d WHERE d.id IN ?1")
-    List<JpaDistributionSetType> findAllById(Iterable<Long> ids);
-
-    /**
      * Counts the {@link SoftwareModuleType}s which are associated with the
      * addressed {@link DistributionSetType}.
+     * <p/>
+     * No access control applied
      * 
      * @param id
      *            of the distribution set type
@@ -84,5 +74,4 @@ public interface DistributionSetTypeRepository
      */
     @Query("SELECT COUNT (e.smType) FROM DistributionSetTypeElement e WHERE e.dsType.id = :id")
     long countSmTypesById(@Param("id") Long id);
-
 }

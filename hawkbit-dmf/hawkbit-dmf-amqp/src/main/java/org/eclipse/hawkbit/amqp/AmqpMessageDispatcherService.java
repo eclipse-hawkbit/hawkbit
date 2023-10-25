@@ -190,7 +190,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private List<Target> getTargetsWithoutPendingCancellations(final Set<String> controllerIds) {
         return partitionedParallelExecution(controllerIds, partition -> {
             return targetManagement.getByControllerID(partition).stream().filter(target -> {
-                if (hasPendingCancellations(target.getControllerId())) {
+                if (hasPendingCancellations(target.getId())) {
                     LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
                             target.getControllerId());
                     return false;
@@ -469,8 +469,8 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return serviceMatcher == null || serviceMatcher.isFromSelf(event);
     }
 
-    private boolean hasPendingCancellations(final String controllerId) {
-        return deploymentManagement.hasPendingCancellations(controllerId);
+    private boolean hasPendingCancellations(final Long targetId) {
+        return deploymentManagement.hasPendingCancellations(targetId);
     }
 
     protected void sendCancelMessageToTarget(final String tenant, final String controllerId, final Long actionId,

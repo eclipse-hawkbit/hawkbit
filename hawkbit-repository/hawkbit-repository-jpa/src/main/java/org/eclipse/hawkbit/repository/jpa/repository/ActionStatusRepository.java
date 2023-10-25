@@ -9,14 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,25 +23,15 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Transactional(readOnly = true)
-public interface ActionStatusRepository
-        extends BaseEntityRepository<JpaActionStatus> {
+public interface ActionStatusRepository extends BaseEntityRepository<JpaActionStatus> {
 
     /**
      * Counts {@link ActionStatus} entries of given {@link Action} in
      * repository.
+     * <p/>
+     * No access control applied
      *
-     * @param action
-     *            to count status entries
-     * @return number of actions in repository
-     */
-    Long countByAction(JpaAction action);
-
-    /**
-     * Counts {@link ActionStatus} entries of given {@link Action} in
-     * repository.
-     *
-     * @param actionId
-     *            of the action to count status entries for
+     * @param actionId of the action to count status entries for
      * @return number of actions in repository
      */
     long countByActionId(Long actionId);
@@ -52,32 +39,19 @@ public interface ActionStatusRepository
     /**
      * Retrieves all {@link ActionStatus} entries from repository of given
      * ActionId.
+     * <p/>
+     * No access control applied
      *
-     * @param pageReq
-     *            parameters
-     * @param actionId
-     *            of the status entries
+     * @param pageReq parameters
+     * @param actionId of the status entries
      * @return pages list of {@link ActionStatus} entries
      */
     Page<ActionStatus> findByActionId(Pageable pageReq, Long actionId);
 
     /**
-     * Finds all status updates for the defined action and target including
-     * {@link ActionStatus#getMessages()}.
-     *
-     * @param pageReq
-     *            for page configuration
-     * @param target
-     *            to look for
-     * @param actionId
-     *            to look for
-     * @return Page with found targets
-     */
-    @EntityGraph(value = "ActionStatus.withMessages", type = EntityGraphType.LOAD)
-    Page<ActionStatus> getByActionId(Pageable pageReq, Long actionId);
-
-    /**
      * Finds a filtered list of status messages for an action.
+     * <p/>
+     * No access control applied
      *
      * @param pageable
      *            for page configuration

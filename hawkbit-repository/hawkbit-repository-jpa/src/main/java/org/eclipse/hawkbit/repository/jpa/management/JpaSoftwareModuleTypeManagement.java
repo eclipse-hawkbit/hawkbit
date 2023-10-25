@@ -51,13 +51,9 @@ import org.springframework.validation.annotation.Validated;
 public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManagement {
 
     private final DistributionSetTypeRepository distributionSetTypeRepository;
-
     private final SoftwareModuleTypeRepository softwareModuleTypeRepository;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
-
     private final SoftwareModuleRepository softwareModuleRepository;
-
     private final Database database;
 
     public JpaSoftwareModuleTypeManagement(final DistributionSetTypeRepository distributionSetTypeRepository,
@@ -103,7 +99,6 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
                 List.of(SoftwareModuleTypeSpecification.isNotDeleted()));
     }
 
-    // TODO AC - should count be restricted?
     @Override
     public long count() {
         return softwareModuleTypeRepository.count(SoftwareModuleTypeSpecification.isNotDeleted());
@@ -137,13 +132,7 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
         final JpaSoftwareModuleType toDelete = softwareModuleTypeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(SoftwareModuleType.class, id));
 
-        if (softwareModuleRepository.countByType(toDelete) > 0
-                || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
-            toDelete.setDeleted(true);
-            softwareModuleTypeRepository.save(AccessController.Operation.DELETE, toDelete);
-        } else {
-            softwareModuleTypeRepository.delete(toDelete);
-        }
+        delete(toDelete);
     }
 
     @Override
@@ -162,8 +151,9 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
-        // TODO AC - shall here some be just marked as deleted (as singleton delete)?
-        softwareModuleTypeRepository.deleteAllById(ids);
+        softwareModuleTypeRepository
+                .findAll(AccessController.Operation.DELETE, softwareModuleTypeRepository.byIdsSpec(ids))
+                .forEach(this::delete);
     }
 
     @Override
@@ -179,5 +169,15 @@ public class JpaSoftwareModuleTypeManagement implements SoftwareModuleTypeManage
     @Override
     public boolean exists(final long id) {
         return softwareModuleTypeRepository.existsById(id);
+    }
+
+    private void delete(JpaSoftwareModuleType toDelete) {
+        if (softwareModuleRepository.countByType(toDelete) > 0
+                || distributionSetTypeRepository.countByElementsSmType(toDelete) > 0) {
+            toDelete.setDeleted(true);
+            softwareModuleTypeRepository.save(AccessController.Operation.DELETE, toDelete);
+        } else {
+            softwareModuleTypeRepository.delete(toDelete);
+        }
     }
 }

@@ -66,14 +66,6 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
         // Default constructor for JPA.
     }
 
-    public List<DistributionSet> getAssignedToDistributionSet() {
-        if (assignedToDistributionSet == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(assignedToDistributionSet);
-    }
-
     @Override
     public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
@@ -84,7 +76,6 @@ public class JpaDistributionSetTag extends JpaTag implements DistributionSetTag,
     public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new DistributionSetTagUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
-
     }
 
     @Override

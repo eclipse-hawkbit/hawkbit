@@ -656,7 +656,7 @@ public interface TargetManagement {
      *         assignment outcome.
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    TargetTypeAssignmentResult unAssignType(@NotEmpty Collection<String> controllerIds);
+    TargetTypeAssignmentResult unassignType(@NotEmpty Collection<String> controllerIds);
 
     /**
      * Un-assign a {@link TargetTag} assignment to given {@link Target}.
@@ -671,7 +671,7 @@ public interface TargetManagement {
      *             if TAG with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unAssignTag(@NotEmpty String controllerId, long targetTagId);
+    Target unassignTag(@NotEmpty String controllerId, long targetTagId);
 
     /**
      * Un-assign a {@link TargetType} assignment to given {@link Target}.
@@ -682,7 +682,7 @@ public interface TargetManagement {
      *
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
-    Target unAssignType(@NotEmpty String controllerId);
+    Target unassignType(@NotEmpty String controllerId);
 
     /**
      * Assign a {@link TargetType} assignment to given {@link Target}.

@@ -29,7 +29,7 @@ public class UpdateTargetWindowController
 
     private String controllerIdBeforeEdit;
     private final ProxyTargetValidator proxyTargetValidator;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for UpdateTargetWindowController
@@ -40,18 +40,18 @@ public class UpdateTargetWindowController
      *            TargetManagement
      * @param layout
      *            TargetWindowLayout
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public UpdateTargetWindowController(final CommonUiDependencies uiDependencies,
             final TargetManagement targetManagement, final TargetWindowLayout layout,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;
         this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -91,7 +91,7 @@ public class UpdateTargetWindowController
         // Un-assigning target type needs another DB request to update the target type
         // value to Null
         if (entity.getTypeInfo() == null) {
-            return targetManagement.unAssignType(entity.getControllerId());
+            return targetManagement.unassignType(entity.getControllerId());
         }
 
         return updatedTarget;
@@ -105,13 +105,13 @@ public class UpdateTargetWindowController
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         final String controllerId = entity.getControllerId();
-        return proxyTargetValidator.isEntityValid(entity, () -> {
-//            return contextRunner.runInAdminContext(() -> {
-                return hasControllerIdChanged(controllerId)
-                        && targetManagement.getByControllerID(controllerId).isPresent();
-//            });
-        });
+        return proxyTargetValidator.isEntityValid(entity,
+                () -> contextAware.runAsTenant(
+                        contextAware.getCurrentTenant(),
+                        () -> hasControllerIdChanged(controllerId)
+                                && targetManagement.getByControllerID(controllerId).isPresent()));
     }
+
 
     private boolean hasControllerIdChanged(final String trimmedControllerId) {
         return !controllerIdBeforeEdit.equals(trimmedControllerId);

@@ -56,7 +56,6 @@ public final class DistributionSetSpecification {
      */
     public static Specification<JpaDistributionSet> isNotDeleted() {
         return isDeleted(false);
-
     }
 
     /**

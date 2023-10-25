@@ -56,6 +56,7 @@ import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaActionStatusCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
@@ -307,13 +308,21 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
-        final List<Action> action = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
-
-        if (action.isEmpty() || action.get(0).isCancelingOrCanceled()) {
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(action.get(0));
+        // TODO AC - REVIEW
+        // it used to perform 3-table join query
+        // @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
+        //        final List<Action> actions = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);
+        // TODO AC - we could fetch distribution sets in order to skip calls to serarch for modules
+        return actionRepository
+                .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true))
+                .stream()
+                .filter(action -> !action.isCancelingOrCanceled())
+                .filter(action -> !action.getDistributionSet().getModules()
+                        .stream()
+                        .map(SoftwareModule::getId)
+                        .toList().isEmpty())
+                .map(Action.class::cast)
+                .findFirst();
     }
 
     private void throwExceptionIfTargetDoesNotExist(final String controllerId) {
@@ -363,12 +372,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public Optional<Action> findActionWithDetails(final long actionId) {
-        return actionRepository.getActionById(actionId);
-    }
-
-    @Override
-    public List<Action> getActiveActionsByExternalRef(@NotNull final List<String> externalRefs) {
-        return actionRepository.findByExternalRefInAndActive(externalRefs, true);
+        return actionRepository.findWithDetailsById(actionId);
     }
 
     @Override
@@ -1011,6 +1015,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Override
     public void updateActionExternalRef(final long actionId, @NotEmpty final String externalRef) {
+        // if access control for target repository is present check that caller has
+        // UPDATE access to the target of the action
+        targetRepository.getAccessController().ifPresent(
+                accessController -> accessController.assertOperationAllowed(
+                        AccessController.Operation.UPDATE,
+                        (JpaTarget) actionRepository
+                                .findById(actionId)
+                                .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId))
+                                .getTarget()));
         actionRepository.updateExternalRef(actionId, externalRef);
     }
 

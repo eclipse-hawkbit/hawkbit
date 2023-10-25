@@ -22,6 +22,8 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
+import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
@@ -125,9 +127,26 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
     @Override
     public void setAssignedDistributionSetAndTargetStatus(final JpaDistributionSet set, final List<List<Long>> targetIds,
             final String currentUser) {
-        targetIds.forEach(tIds -> targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
-                set, System.currentTimeMillis(), currentUser, tIds));
-
+        final long now = System.currentTimeMillis();
+        targetIds.forEach(targetIdsChunk -> {
+            if (targetRepository.count(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk)) != targetIdsChunk.size()) {
+                throw new InsufficientPermissionException("No update access to all targets!");
+            }
+            targetRepository.setAssignedDistributionSetAndUpdateStatus(TargetUpdateStatus.PENDING,
+                    set, now, currentUser, targetIdsChunk);
+            // TODO AC - current problem with this approach is that the caller detach the targets and seems doesn't save them
+//            targetRepository.saveAll(
+//                targetRepository
+//                        .findAll(AccessController.Operation.UPDATE, targetRepository.byIdsSpec(targetIdsChunk))
+//                        .stream()
+//                        .peek(target -> {
+//                            target.setAssignedDistributionSet(set);
+//                            target.setLastModifiedAt(now);
+//                            target.setLastModifiedBy(currentUser);
+//                            target.setUpdateStatus(TargetUpdateStatus.PENDING);
+//                        })
+//                        .toList());
+        });
     }
 
     @Override

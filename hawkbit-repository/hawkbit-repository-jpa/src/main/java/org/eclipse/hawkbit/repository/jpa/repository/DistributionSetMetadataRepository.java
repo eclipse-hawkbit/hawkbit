@@ -29,12 +29,11 @@ public interface DistributionSetMetadataRepository
 
     /**
      * Counts the meta data entries that match the given distribution set ID.
+     * <p/>
+     * No access control applied
      * 
-     * @param id
-     *            of the distribution set.
-     * 
+     * @param id of the distribution set.
      * @return The number of matching meta data entries.
      */
     long countByDistributionSetId(@Param("id") Long id);
-
 }

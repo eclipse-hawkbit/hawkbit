@@ -126,8 +126,6 @@ public class JpaTargetManagement implements TargetManagement {
 
     private final TenantAware tenantAware;
 
-    private final AfterTransactionCommitExecutor afterCommit;
-
     private final VirtualPropertyReplacer virtualPropertyReplacer;
 
     private final Database database;
@@ -140,7 +138,7 @@ public class JpaTargetManagement implements TargetManagement {
             final RolloutGroupRepository rolloutGroupRepository,
             final TargetFilterQueryRepository targetFilterQueryRepository,
             final TargetTagRepository targetTagRepository, final EventPublisherHolder eventPublisherHolder,
-            final TenantAware tenantAware, final AfterTransactionCommitExecutor afterCommit,
+            final TenantAware tenantAware,
             final VirtualPropertyReplacer virtualPropertyReplacer, final Database database) {
         this.entityManager = entityManager;
         this.distributionSetManagement = distributionSetManagement;
@@ -153,7 +151,6 @@ public class JpaTargetManagement implements TargetManagement {
         this.targetTagRepository = targetTagRepository;
         this.eventPublisherHolder = eventPublisherHolder;
         this.tenantAware = tenantAware;
-        this.afterCommit = afterCommit;
         this.virtualPropertyReplacer = virtualPropertyReplacer;
         this.database = database;
     }
@@ -355,20 +352,12 @@ public class JpaTargetManagement implements TargetManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final Collection<Long> ids) {
         final List<JpaTarget> targets = targetRepository.findAllById(ids);
-
         if (targets.size() < ids.size()) {
             throw new EntityNotFoundException(Target.class, ids,
                     targets.stream().map(Target::getId).filter(id -> !ids.contains(id)).toList());
         }
 
-        targetRepository.deleteByIdIn(ids);
-
-        afterCommit
-                .afterCommit(() -> targets.forEach(target -> eventPublisherHolder.getEventPublisher()
-                        .publishEvent(new TargetDeletedEvent(tenantAware.getCurrentTenant(), target.getId(),
-                                target.getControllerId(),
-                                Optional.ofNullable(target.getAddress()).map(URI::toString).orElse(null),
-                                JpaTarget.class, eventPublisherHolder.getApplicationId()))));
+        targetRepository.deleteAll(targets);
     }
 
     @Override
@@ -492,8 +481,7 @@ public class JpaTargetManagement implements TargetManagement {
         final TargetTag tag = targetTagRepository.findByNameEquals(tagName)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagName));
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-
+                .findAll(AccessController.Operation.UPDATE, TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
                     allTargets.stream().map(Target::getControllerId).toList());
@@ -551,7 +539,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public TargetTypeAssignmentResult unAssignType(final Collection<String> controllerIds) {
+    public TargetTypeAssignmentResult unassignType(final Collection<String> controllerIds) {
         final List<JpaTarget> allTargets = findTargetsByInSpecification(controllerIds, null);
 
         if (allTargets.size() < controllerIds.size()) {
@@ -577,10 +565,8 @@ public class JpaTargetManagement implements TargetManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<Target> assignTag(final Collection<String> controllerIds, final long tagId) {
-
         final List<JpaTarget> allTargets = targetRepository
-                .findAll(TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
-
+                .findAll(AccessController.Operation.UPDATE, TargetSpecifications.byControllerIdWithTagsInJoin(controllerIds));
         if (allTargets.size() < controllerIds.size()) {
             throw new EntityNotFoundException(Target.class, controllerIds,
                     allTargets.stream().map(Target::getControllerId).toList());
@@ -602,7 +588,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target unAssignTag(final String controllerId, final long targetTagId) {
+    public Target unassignTag(final String controllerId, final long targetTagId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
 
         final TargetTag tag = targetTagRepository.findById(targetTagId)
@@ -621,7 +607,7 @@ public class JpaTargetManagement implements TargetManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public Target unAssignType(final String controllerId) {
+    public Target unassignType(final String controllerId) {
         final JpaTarget target = getByControllerIdAndThrowIfNotFound(controllerId);
         target.setTargetType(null);
         return targetRepository.save(target);
@@ -913,5 +899,4 @@ public class JpaTargetManagement implements TargetManagement {
         return JpaManagementHelper.findAllWithCountBySpec(targetRepository, pageReq,
                 List.of(TargetSpecifications.hasRequestControllerAttributesTrue()));
     }
-
 }

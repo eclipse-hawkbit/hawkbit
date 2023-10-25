@@ -29,10 +29,10 @@ public interface TargetMetadataRepository
 
     /**
      * Counts the meta data entries that match the given target ID.
+     * <p/>
+     * No access control applied
      * 
-     * @param id
-     *            of the target.
-     * 
+     * @param id of the target.
      * @return The number of matching meta data entries.
      */
     long countByTargetId(@Param("id") Long id);

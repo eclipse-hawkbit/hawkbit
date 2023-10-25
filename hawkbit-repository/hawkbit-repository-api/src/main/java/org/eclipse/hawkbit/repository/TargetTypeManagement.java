@@ -183,5 +183,4 @@ public interface TargetTypeManagement {
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
     TargetType unassignDistributionSetType(long id, long distributionSetTypeIds);
-
 }

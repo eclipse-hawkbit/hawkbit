@@ -22,6 +22,8 @@ import org.springframework.lang.Nullable;
  * <p/>
  * First the basic service based access control (hawkBit permissions) on the management layer is applied then
  * additional restrictions (e.g. entity based) could be applied.
+ * <p/>
+ * <b>Note</b>: Experimental, only
  * 
  * @param <T> the domain type the repository manages
  */

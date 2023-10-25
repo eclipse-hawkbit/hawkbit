@@ -79,7 +79,7 @@ public class TargetTagToken extends AbstractTagToken<ProxyTarget> {
         getMasterEntity().ifPresent(masterEntity -> {
             final Long masterEntityId = masterEntity.getId();
 
-            final Target unassignedTarget = targetManagement.unAssignTag(masterEntity.getControllerId(),
+            final Target unassignedTarget = targetManagement.unassignTag(masterEntity.getControllerId(),
                     tagData.getId());
             if (checkUnassignmentResult(unassignedTarget, masterEntityId)) {
                 uiNotification.displaySuccess(getAssignmentMsgFor("message.unassigned.one",

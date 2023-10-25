@@ -131,7 +131,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         try (final InputStream inputStream1 = new ByteArrayInputStream(randomBytes);
                 final InputStream inputStream2 = new ByteArrayInputStream(randomBytes);
                 final InputStream inputStream3 = new ByteArrayInputStream(randomBytes);
-                final InputStream inputStream4 = new ByteArrayInputStream(randomBytes);) {
+                final InputStream inputStream4 = new ByteArrayInputStream(randomBytes)) {
 
             final Artifact artifact1 = createArtifactForSoftwareModule("file1", sm.getId(), artifactSize, inputStream1);
             createArtifactForSoftwareModule("file11", sm.getId(), artifactSize, inputStream2);
@@ -180,7 +180,6 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Verifies that the quota specifying the maximum number of artifacts per software module is enforced.")
     public void createArtifactsUntilQuotaIsExceeded() throws IOException {
-
         // create a software module
         final long smId = softwareModuleRepository.save(new JpaSoftwareModule(osType, "sm1", "1.0")).getId();
 
@@ -191,7 +190,7 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
         for (int i = 0; i < maxArtifacts; ++i) {
             artifactIds.add(createArtifactForSoftwareModule("file" + i, smId, artifactSize).getId());
         }
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
+        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
 
         // create one mode to trigger the quota exceeded error
         assertThatExceptionOfType(AssignmentQuotaExceededException.class)
@@ -199,12 +198,12 @@ public class ArtifactManagementTest extends AbstractJpaIntegrationTest {
 
         // delete one of the artifacts
         artifactManagement.delete(artifactIds.get(0));
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements())
+        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements())
                 .isEqualTo(maxArtifacts - 1);
 
         // now we should be able to create an artifact again
         createArtifactForSoftwareModule("fileXYZ", smId, artifactSize);
-        assertThat(artifactRepository.findBySoftwareModuleId(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
+        assertThat(artifactManagement.findBySoftwareModule(PAGE, smId).getTotalElements()).isEqualTo(maxArtifacts);
     }
 
     @Test

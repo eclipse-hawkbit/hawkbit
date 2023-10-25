@@ -39,17 +39,12 @@ public interface TargetFilterQueryRepository
     Optional<TargetFilterQuery> findByName(String name);
 
     /**
-     * Find list of all custom target filters.
-     */
-    @Override
-    Page<JpaTargetFilterQuery> findAll();
-
-    /**
      * Sets the auto assign distribution sets and action types to null which
      * match the ds ids.
+     * <p/>
+     * No access control applied
      *
-     * @param dsIds
-     *            distribution set ids to be set to null
+     * @param dsIds distribution set ids to be set to null
      */
     @Modifying
     @Transactional
@@ -59,6 +54,8 @@ public interface TargetFilterQueryRepository
     /**
      * Counts all target filters that have a given auto assign distribution set
      * assigned.
+     * <p/>
+     * No access control applied
      *
      * @param autoAssignDistributionSetId
      *            the id of the distribution set
@@ -79,5 +76,4 @@ public interface TargetFilterQueryRepository
     @Transactional
     @Query("DELETE FROM JpaTargetFilterQuery t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
 }

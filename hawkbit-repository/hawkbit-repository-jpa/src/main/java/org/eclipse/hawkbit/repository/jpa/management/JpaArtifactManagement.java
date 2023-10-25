@@ -39,6 +39,7 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ArtifactSpecifications;
 import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.FileSizeAndStorageQuotaCheckingInputStream;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
@@ -95,36 +96,27 @@ public class JpaArtifactManagement implements ArtifactManagement {
         this.tenantAware = tenantAware;
     }
 
-    private static Artifact checkForExistingArtifact(final String filename, final boolean overrideExisting,
-            final SoftwareModule softwareModule) {
-        final Optional<Artifact> artifact = softwareModule.getArtifactByFilename(filename);
-
-        if (artifact.isPresent()) {
-            if (overrideExisting) {
-                LOG.debug("overriding existing artifact with new filename {}", filename);
-                return artifact.get();
-            } else {
-                throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
-            }
-        }
-        return null;
-    }
-
     @Override
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Artifact create(final ArtifactUpload artifactUpload) {
         final long moduleId = artifactUpload.getModuleId();
-
         assertArtifactQuota(moduleId, 1);
-
-        final String filename = artifactUpload.getFilename();
         final JpaSoftwareModule softwareModule =
                 softwareModuleRepository
                         .findById(moduleId)
                         .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, moduleId));
-        final Artifact existing = checkForExistingArtifact(filename, artifactUpload.overrideExisting(), softwareModule);
+
+        final String filename = artifactUpload.getFilename();
+        final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
+        if (existing != null) {
+            if (artifactUpload.overrideExisting()) {
+                LOG.debug("overriding existing artifact with new filename {}", filename);
+            } else {
+                throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");
+            }
+        }
 
         // touch it to update the lock revision because we are modifying the
         // DS indirectly, it will, also check UPDATE access
@@ -170,15 +162,19 @@ public class JpaArtifactManagement implements ArtifactManagement {
         return ArtifactEncryptionService.getInstance().encryptSoftwareModuleArtifact(smId, stream);
     }
 
-    private void assertArtifactQuota(final long id, final int requested) {
-        QuotaHelper.assertAssignmentQuota(id, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
-                Artifact.class, SoftwareModule.class, localArtifactRepository::countBySoftwareModuleId);
+    private void assertArtifactQuota(final long moduleId, final int requested) {
+        QuotaHelper.assertAssignmentQuota(
+                moduleId, requested, quotaManagement.getMaxArtifactsPerSoftwareModule(),
+                Artifact.class, SoftwareModule.class,
+                // get all artifacts without user context
+                softwareModuleId -> localArtifactRepository
+                            .count(null, ArtifactSpecifications.bySoftwareModuleId(softwareModuleId)));
     }
 
     private InputStream wrapInQuotaStream(final InputStream in) {
         final long maxArtifactSize = quotaManagement.getMaxArtifactSize();
 
-        final long currentlyUsed = localArtifactRepository.getSumOfUndeletedArtifactSize().orElse(0L);
+        final long currentlyUsed = localArtifactRepository.sumOfNonDeletedArtifactSize().orElse(0L);
         final long maxArtifactSizeTotal = quotaManagement.getMaxArtifactStorage();
 
         return new FileSizeAndStorageQuotaCheckingInputStream(in, maxArtifactSize,
@@ -190,11 +186,8 @@ public class JpaArtifactManagement implements ArtifactManagement {
      * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
      * marked as deleted.
      *
-     *
-     * @param sha1Hash
-     *            no longer needed
-     * @param softwareModuleId
-     *            the garbage collection call is made for
+     * @param sha1Hash no longer needed
+     * @param softwareModuleId the garbage collection call is made for
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
     @Transactional
@@ -202,10 +195,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
         // unconditional check of software module id access is essential, used by #delete(int) and JpaSoftwareModuleManagement#delete
-        softwareModuleRepository
-                .findOne(AccessController.Operation.UPDATE, SoftwareModuleSpecification.byId(softwareModuleId))
-                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, softwareModuleId));
+        if (!softwareModuleRepository
+                .exists(AccessController.Operation.UPDATE, SoftwareModuleSpecification.byId(softwareModuleId))) {
+            // TODO - this checks for software module with UPDATE permissions
+            // shall we check this software module exists but no permissions and return
+            // more correct exception - InsufficientPermissionException?
+            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
+        }
 
+        // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
+        // will return total count as it should be
         final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
             sha1Hash,
             tenantAware.getCurrentTenant());
@@ -233,14 +232,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
-        final JpaArtifact existing = (JpaArtifact) get(id)
+        final JpaArtifact toDelete = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
         // clearArtifactBinary checks (unconditionally) software module DELETE access
-        clearArtifactBinary(existing.getSha1Hash(), existing.getSoftwareModule().getId());
+        clearArtifactBinary(toDelete.getSha1Hash(), toDelete.getSoftwareModule().getId());
 
-        ((JpaSoftwareModule) existing.getSoftwareModule()).removeArtifact(existing);
-        softwareModuleRepository.save((JpaSoftwareModule) existing.getSoftwareModule());
+        ((JpaSoftwareModule) toDelete.getSoftwareModule()).removeArtifact(toDelete);
+        softwareModuleRepository.save((JpaSoftwareModule) toDelete.getSoftwareModule());
         localArtifactRepository.deleteById(id);
     }
 
@@ -270,14 +269,16 @@ public class JpaArtifactManagement implements ArtifactManagement {
     public Page<Artifact> findBySoftwareModule(final Pageable pageReq, final long softwareModuleId) {
         assertSoftwareModuleExists(softwareModuleId);
 
-        return localArtifactRepository.findBySoftwareModuleId(pageReq, softwareModuleId);
+        return localArtifactRepository
+                .findAll(ArtifactSpecifications.bySoftwareModuleId(softwareModuleId), pageReq)
+                .map(Artifact.class::cast);
     }
 
     @Override
     public long countBySoftwareModule(final long softwareModuleId) {
         assertSoftwareModuleExists(softwareModuleId);
 
-        return localArtifactRepository.countBySoftwareModuleId(softwareModuleId);
+        return localArtifactRepository.count(ArtifactSpecifications.bySoftwareModuleId(softwareModuleId));
     }
 
     @Override

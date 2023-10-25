@@ -114,7 +114,6 @@ import org.eclipse.hawkbit.repository.jpa.model.helper.SecurityTokenGeneratorHol
 import org.eclipse.hawkbit.repository.jpa.model.helper.TenantAwareHolder;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
-import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepositoryACM;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetMetadataRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetTagRepository;
@@ -451,6 +450,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     @Bean
     public MethodValidationPostProcessor methodValidationPostProcessor() {
         final MethodValidationPostProcessor processor = new MethodValidationPostProcessor();
+        // ValidatorFactory shall NOT be closed because after closing the generated Validator
+        // methods shall not be called - we need the validator in future
         processor.setValidator(Validation.byDefaultProvider().configure()
                 .addProperty(BaseHibernateValidatorConfiguration.ALLOW_PARALLEL_METHODS_DEFINE_PARAMETER_CONSTRAINTS,
                         "true")
@@ -620,11 +621,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                                       final TargetFilterQueryRepository targetFilterQueryRepository,
                                       final TargetTypeRepository targetTypeRepository, final TargetTagRepository targetTagRepository,
                                       final EventPublisherHolder eventPublisherHolder, final TenantAware tenantAware,
-                                      final AfterTransactionCommitExecutor afterCommit, final VirtualPropertyReplacer virtualPropertyReplacer,
+                                      final VirtualPropertyReplacer virtualPropertyReplacer,
                                       final JpaProperties properties, final DistributionSetManagement distributionSetManagement) {
         return new JpaTargetManagement(entityManager, distributionSetManagement, quotaManagement, targetRepository,
                 targetTypeRepository, targetMetadataRepository, rolloutGroupRepository, targetFilterQueryRepository,
-                targetTagRepository, eventPublisherHolder, tenantAware, afterCommit, virtualPropertyReplacer,
+                targetTagRepository, eventPublisherHolder, tenantAware, virtualPropertyReplacer,
                 properties.getDatabase());
     }
 
@@ -1036,11 +1037,13 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
     JpaDistributionSetInvalidationManagement distributionSetInvalidationManagement(
             final DistributionSetManagement distributionSetManagement, final RolloutManagement rolloutManagement,
             final DeploymentManagement deploymentManagement,
-            final TargetFilterQueryManagement targetFilterQueryManagement, final PlatformTransactionManager txManager,
+            final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
+            final PlatformTransactionManager txManager,
             final RepositoryProperties repositoryProperties, final TenantAware tenantAware,
             final LockRegistry lockRegistry) {
         return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
-                deploymentManagement, targetFilterQueryManagement, txManager, repositoryProperties, tenantAware,
+                deploymentManagement, targetFilterQueryManagement, actionRepository,
+                txManager, repositoryProperties, tenantAware,
                 lockRegistry);
     }
 
@@ -1081,20 +1084,20 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
         return new BeanPostProcessor() {
             @Override
             public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName) throws BeansException {
-                if (bean instanceof LocalArtifactRepository) {
-                    return BaseEntityRepositoryACM.of((LocalArtifactRepository)bean, JpaArtifact.class, artifactAccessController);
-                } else if (bean instanceof SoftwareModuleTypeRepository) {
-                    return BaseEntityRepositoryACM.of((SoftwareModuleTypeRepository)bean, JpaSoftwareModuleType.class, softwareModuleTypeAccessController);
-                } else if (bean instanceof SoftwareModuleRepository) {
-                    return BaseEntityRepositoryACM.of((SoftwareModuleRepository)bean, JpaSoftwareModule.class, softwareModuleAccessController);
-                } else if (bean instanceof DistributionSetTypeRepository) {
-                    return BaseEntityRepositoryACM.of((DistributionSetTypeRepository)bean, JpaDistributionSetType.class, distributionSetTypeAccessController);
-                } else if (bean instanceof DistributionSetRepository) {
-                    return BaseEntityRepositoryACM.of((DistributionSetRepository)bean, JpaDistributionSet.class, distributionSetAccessController);
-                } else if (bean instanceof TargetTypeRepository) {
-                    return BaseEntityRepositoryACM.of((TargetTypeRepository)bean, JpaTargetType.class, targetTypeAccessControlManager);
-                } else if (bean instanceof TargetRepository) {
-                    return BaseEntityRepositoryACM.of((TargetRepository)bean, JpaTarget.class, targetAccessControlManager);
+                if (bean instanceof LocalArtifactRepository repo) {
+                    return repo.withACM(artifactAccessController);
+                } else if (bean instanceof SoftwareModuleTypeRepository repo) {
+                    return repo.withACM(softwareModuleTypeAccessController);
+                } else if (bean instanceof SoftwareModuleRepository repo) {
+                    return repo.withACM(softwareModuleAccessController);
+                } else if (bean instanceof DistributionSetTypeRepository repo) {
+                    return repo.withACM(distributionSetTypeAccessController);
+                } else if (bean instanceof DistributionSetRepository repo) {
+                    return repo.withACM(distributionSetAccessController);
+                } else if (bean instanceof TargetTypeRepository repo) {
+                    return repo.withACM(targetTypeAccessControlManager);
+                } else if (bean instanceof TargetRepository repo) {
+                    return repo.withACM(targetAccessControlManager);
                 }
                 return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
             }

@@ -21,10 +21,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -39,31 +36,20 @@ public interface DistributionSetRepository
         extends BaseEntityRepository<JpaDistributionSet> {
 
     /**
-     * Finds {@link DistributionSet}s by assigned {@link Tag}.
-     * 
-     * @param pageable
-     *            paging and sorting information
-     *
-     * @param tagId
-     *            to be found
-     * @return list of found {@link DistributionSet}s
-     */
-    @Query(value = "Select Distinct ds from JpaDistributionSet ds join ds.tags dst where dst.id = :tag and ds.deleted = 0")
-    Page<JpaDistributionSet> findByTag(Pageable pageable, @Param("tag") Long tagId);
-
-    /**
      * Count {@link Rollout}s by Status for Distribution set.
+     * <p/>
+     * No access control applied.
      *
-     * @param dsId
-     *            to be found
+     * @param dsId to be found
      * @return map for {@link Rollout}s status counts
      */
     @Query(value = "SELECT r.status as name, COUNT(r.status) as data FROM JpaRollout r WHERE r.distributionSet.id = :dsId GROUP BY r.status")
     List<JpaStatistic> countRolloutsByStatusForDistributionSet(@Param("dsId") Long dsId);
 
-
     /**
      * Count {@link Action}s by Status for Distribution set.
+     * <p/>
+     * No access control applied.
      *
      * @param dsId
      *            to be found
@@ -74,6 +60,8 @@ public interface DistributionSetRepository
 
     /**
      * Count total AutoAssignments for Distribution set.
+     * <p/>
+     * No access control applied.
      *
      * @param dsId
      *            to be found
@@ -84,6 +72,8 @@ public interface DistributionSetRepository
 
     /**
      * deletes the {@link DistributionSet}s with the given IDs.
+     * <p/>
+     * No access control applied.
      * 
      * @param ids
      *            to be deleted
@@ -94,21 +84,10 @@ public interface DistributionSetRepository
     void deleteDistributionSet(@Param("ids") Long... ids);
 
     /**
-     * deletes {@link DistributionSet}s by the given IDs.
-     *
-     * @param ids
-     *            List of IDs of {@link DistributionSet}s to be deleted
-     * @return number of affected/deleted records
-     */
-    @Modifying
-    @Transactional
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("DELETE FROM JpaDistributionSet d WHERE d.id IN ?1")
-    int deleteByIdIn(Collection<Long> ids);
-
-    /**
      * Finds {@link DistributionSet}s where given {@link SoftwareModule} is
      * assigned.
+     * <p/>
+     * No access control applied.
      *
      * @param moduleId
      *            to search for
@@ -119,6 +98,8 @@ public interface DistributionSetRepository
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to
      * an {@link Action}, i.e. in use.
+     * <p/>
+     * No access control applied.
      *
      * @param ids
      *            to search for
@@ -130,6 +111,8 @@ public interface DistributionSetRepository
     /**
      * Finds {@link DistributionSet}s based on given ID that are assigned yet to
      * an {@link Rollout}, i.e. in use.
+     * <p/>
+     * No access control applied.
      *
      * @param ids
      *            to search for
@@ -146,17 +129,14 @@ public interface DistributionSetRepository
 
     /**
      * Counts {@link DistributionSet} instances of given type in the repository.
+     * <p/>
+     * No access control applied.
      *
      * @param typeId
      *            to search for
      * @return number of found {@link DistributionSet}s
      */
     long countByTypeId(Long typeId);
-
-    @Override
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("SELECT d FROM JpaDistributionSet d WHERE d.id IN ?1")
-    List<JpaDistributionSet> findAllById(Iterable<Long> ids);
 
     /**
      * Deletes all {@link TenantAwareBaseEntity} of a given tenant. For safety
@@ -171,5 +151,4 @@ public interface DistributionSetRepository
     @Transactional
     @Query("DELETE FROM JpaDistributionSet t WHERE t.tenant = :tenant")
     void deleteByTenant(@Param("tenant") String tenant);
-
 }

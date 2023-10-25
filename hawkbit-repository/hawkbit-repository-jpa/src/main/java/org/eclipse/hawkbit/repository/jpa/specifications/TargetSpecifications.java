@@ -219,24 +219,6 @@ public final class TargetSpecifications {
     }
 
     /**
-     * {@link Specification} for retrieving {@link Target}s by "like attribute
-     * value".
-     *
-     * @param searchText
-     *            to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> likeAttributeValue(final String searchText) {
-        return (targetRoot, query, cb) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            final MapJoin<JpaTarget, String, String> attributeMap = targetRoot.join(JpaTarget_.controllerAttributes,
-                    JoinType.LEFT);
-            query.distinct(true);
-            return cb.like(cb.lower(attributeMap.value()), searchTextToLower);
-        };
-    }
-
-    /**
      * {@link Specification} for retrieving {@link Target}s by "like
      * controllerId or like name".
      *

@@ -26,7 +26,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
 
     private final TargetTypeManagement targetTypeManagement;
     private final DistributionSetTypeManagement dsTypeManagement;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for TargetTypeWindowBuilder
@@ -37,17 +37,17 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
      *            TargetTypeManagement
      * @param dsTypeManagement
      *            DistributionSetTypeManagement
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public TargetTypeWindowBuilder(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final DistributionSetTypeManagement dsTypeManagement,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
         this.dsTypeManagement = dsTypeManagement;
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -58,7 +58,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
     @Override
     public Window getWindowForAdd() {
         CommonDialogWindow window = getWindowForNewEntity(new AddTargetTypeWindowController(uiDependencies,
-                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextRunner));
+                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextAware));
         window.hideMandatoryExplanation();
         return window;
     }
@@ -66,7 +66,7 @@ public class TargetTypeWindowBuilder extends AbstractEntityWindowBuilder<ProxyTa
     @Override
     public Window getWindowForUpdate(final ProxyTargetType proxyType) {
         CommonDialogWindow window = getWindowForEntity(proxyType, new UpdateTargetTypeWindowController(uiDependencies,
-                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextRunner));
+                targetTypeManagement, new TargetTypeWindowLayout(uiDependencies, dsTypeManagement), contextAware));
         window.hideMandatoryExplanation();
         return window;
     }

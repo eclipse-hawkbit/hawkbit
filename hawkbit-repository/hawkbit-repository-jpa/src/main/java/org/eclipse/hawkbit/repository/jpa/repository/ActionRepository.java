@@ -23,12 +23,9 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.eclipse.hawkbit.repository.model.SoftwareModule;
-import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.Modifying;
@@ -42,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Transactional(readOnly = true)
 public interface ActionRepository extends BaseEntityRepository<JpaAction> {
+
     /**
      * Retrieves an Action with all lazy attributes.
      *
@@ -50,144 +48,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * @return the found {@link Action}
      */
     @EntityGraph(value = "Action.all", type = EntityGraphType.LOAD)
-    Optional<Action> getActionById(Long actionId);
-
-    /**
-     * Retrieves all {@link Action}s which are referring the given
-     * {@link DistributionSet}.
-     *
-     * @param pageable
-     *            page parameters
-     * @param dsId
-     *            the {@link DistributionSet} on which will be filtered
-     * @return the found {@link Action}s
-     */
-    Page<Action> findByDistributionSetId(Pageable pageable, Long dsId);
-
-    /**
-     * Retrieves all active {@link Action}s which are referring the given
-     * {@link DistributionSet}.
-     *
-     * @param set
-     *            the {@link DistributionSet} on which will be filtered
-     * @return the found {@link Action}s
-     */
-    List<Action> findByDistributionSetAndActiveIsTrue(DistributionSet set);
-
-    /**
-     * Retrieves all active {@link Action}s which are referring the given
-     * {@link DistributionSet} and are not in the given state
-     *
-     * @param set
-     *            the {@link DistributionSet} on which will be filtered
-     * @param status
-     *            the state the actions should not have
-     * @return the found {@link Action}s
-     */
-    List<Action> findByDistributionSetAndActiveIsTrueAndStatusIsNot(DistributionSet set, Status status);
-
-    /**
-     * Retrieves all {@link Action}s which are referring the given
-     * {@link Target}.
-     *
-     * @param pageable
-     *            page parameters
-     * @param controllerId
-     *            the target to find assigned actions
-     * @return the found {@link Action}s
-     */
-    Slice<Action> findByTargetControllerId(Pageable pageable, String controllerId);
-
-    /**
-     * Retrieves all {@link Action}s which are referring the given targetId
-     *
-     * @param pageable
-     *            page parameters
-     * @param targetId
-     *            the target to find assigned actions for
-     * @return the found {@link Action}s
-     */
-    Page<Action> findByTargetId(Pageable pageable, Long targetId);
-
-    /**
-     * Retrieves all {@link Action}s which are active and referring to the given
-     * {@link Target} order by ID ascending.
-     *
-     * @param target
-     *            the target to find assigned actions
-     * @param active
-     *            the action active flag
-     * @return the found {@link Action}s
-     */
-    List<Action> findByTargetAndActiveOrderByIdAsc(JpaTarget target, boolean active);
-
-    /**
-     * Retrieves the active {@link Action}s with the highest weights that refer
-     * to the given {@link Target}. If {@link Action}s have the same weight they
-     * are ordered ascending by ID (oldest ones first).
-     *
-     * @param pageable
-     *            pageable
-     * @param controllerId
-     *            the target to find assigned actions
-     * @return the found {@link Action}s
-     */
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Page<Action> findByTargetControllerIdAndActiveIsTrueAndWeightIsNotNullOrderByWeightDescIdAsc(Pageable pageable,
-            String controllerId);
-
-    /**
-     * Retrieves the active {@link Action}s with the lowest IDs (the oldest one)
-     * whose weight is null and that that refers to the given {@link Target}.
-     *
-     * @param pageable
-     *            pageable
-     * @param controllerId
-     *            the target to find assigned actions
-     * @return the found {@link Action}s
-     */
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    Page<Action> findByTargetControllerIdAndActiveIsTrueAndWeightIsNullOrderByIdAsc(Pageable pageable,
-            String controllerId);
-
-    /**
-     * Checks if an active action exists for given
-     * {@link Target#getControllerId()}.
-     *
-     * @param controllerId
-     *            of target to check
-     * @return <code>true</code> if an active action for the target exists.
-     */
-    @Query("SELECT CASE WHEN COUNT(a)>0 THEN 'true' ELSE 'false' END FROM JpaAction a JOIN a.target t WHERE t.controllerId=:controllerId AND a.active=1")
-    boolean activeActionExistsForControllerId(@Param("controllerId") String controllerId);
-
-    /**
-     * Check if any active actions with given action status and given controller
-     * ID exist.
-     *
-     * @param controllerId
-     *            of the target to check for actions
-     * @param currentStatus
-     *            of the active action to look for
-     *
-     * @return <code>true</code> if one or more active actions for the given
-     *         controllerId and action status are found
-     */
-    boolean existsByTargetControllerIdAndStatusAndActiveIsTrue(String controllerId, Action.Status currentStatus);
-
-    /**
-     * Retrieves latest {@link Action} for given target and
-     * {@link SoftwareModule}.
-     *
-     * @param targetId
-     *            to search for
-     * @param moduleId
-     *            to search for
-     * @return action if there is one with assigned target and module is part of
-     *         assigned {@link DistributionSet}.
-     */
-    @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
-    List<Action> findActionByTargetAndSoftwareModule(@Param("target") String targetId, @Param("module") Long moduleId);
+    Optional<Action> findWithDetailsById(Long actionId);
 
     /**
      * Retrieves the latest finished {@link Action} for given target and {@link DistributionSet}.
@@ -205,54 +66,10 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
             @Param("ds") Long dsId, @Param("status") Action.Status status);
 
     /**
-     * Retrieves all {@link Action}s which are referring the given
-     * {@link DistributionSet} and {@link Target}.
-     *
-     * @param pageable
-     *            page parameters
-     * @param target
-     *            is the assigned target
-     * @param ds
-     *            the {@link DistributionSet} on which will be filtered
-     * @return the found {@link Action}s
-     */
-    @Query("Select a from JpaAction a where a.target = :target and a.distributionSet = :ds")
-    Page<JpaAction> findByTargetAndDistributionSet(Pageable pageable, @Param("target") JpaTarget target,
-            @Param("ds") JpaDistributionSet ds);
-
-    /**
-     * Retrieves all {@link Action}s of a specific target, without pagination
-     * ordered by action ID.
-     *
-     * @param target
-     *            to search for
-     * @return a list of actions according to the searched target
-     */
-    @Query("Select a from JpaAction a where a.target = :target order by a.id")
-    List<JpaAction> findByTarget(@Param("target") Target target);
-
-    /**
-     * Retrieves all {@link Action}s of a specific target and given active flag
-     * ordered by action ID. Loads also the lazy {@link Action#getDistributionSet()}
-     * field.
-     *
-     * @param pageable
-     *            page parameters
-     * @param controllerId
-     *            to search for
-     * @param active
-     *            {@code true} for all actions which are currently active,
-     *            {@code false} for inactive
-     * @return a list of actions
-     */
-    @EntityGraph(value = "Action.ds", type = EntityGraphType.LOAD)
-    @Query("Select a from JpaAction a where a.target.controllerId = :controllerId and a.active = :active")
-    Page<Action> findByActiveAndTarget(Pageable pageable, @Param("controllerId") String controllerId,
-            @Param("active") boolean active);
-
-    /**
      * Switches the status of actions from one specific status into another, only if
-     * the actions are in a specific status. This should be a atomar operation.
+     * the actions are in a specific status. This should be a atomic operation.
+     * <p/>
+     * No access control applied
      *
      * @param statusToSet
      *            the new status the actions should get
@@ -271,24 +88,11 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      *
-     * Retrieves all active {@link Action}s by given controllerId filtered by a
-     * status
-     *
-     * @param controllerId
-     *            the IDs of targets for the actions
-     * @param status
-     *            the current status of the actions
-     * @return the found list of {@link Action}
-     */
-    @Query("SELECT a FROM JpaAction a WHERE a.target.controllerId = :controllerId AND a.active = true AND a.status = :status")
-    List<JpaAction> findByTargetIdAndIsActiveAndActionStatus(@Param("controllerId") String controllerId,
-            @Param("status") Action.Status status);
-
-    /**
-     *
      * Retrieves all IDs for {@link Action}s referring to the given target IDs,
      * active flag, current status and distribution set not requiring migration
      * step.
+     * <p/>
+     * No access control applied
      *
      * @param targetIds
      *            the IDs of targets for the actions
@@ -298,22 +102,11 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      *            the current status of the actions
      * @return the found list of {@link Action} IDs
      */
+    @Deprecated(forRemoval = true)
     @Query("SELECT a.id FROM JpaAction a WHERE a.target IN :targetsIds AND a.active = :active AND a.status = :currentStatus AND a.distributionSet.requiredMigrationStep = false")
     List<Long> findByTargetIdInAndIsActiveAndActionStatusAndDistributionSetNotRequiredMigrationStep(
             @Param("targetsIds") List<Long> targetIds, @Param("active") boolean active,
             @Param("currentStatus") Action.Status currentStatus);
-
-    /**
-     * Retrieves all {@link Action}s that matches the queried externalRefs.
-     *
-     * @param externalRefs
-     *            for which the actions need to be found
-     * @param active
-     *            flag to indicate active/inactive actions
-     * @return list of actions
-     */
-    List<Action> findByExternalRefInAndActive(@Param("externalRefs") List<String> externalRefs,
-            @Param("active") boolean active);
 
     /**
      * Retrieves an {@link Action} that matches the queried externalRef.
@@ -327,6 +120,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Switches the status of actions from one specific status into another for
      * given actions IDs, active flag and current status
+     * <p/>
+     * No access control applied
      *
      * @param statusToSet
      *            the new status the actions should get
@@ -338,6 +133,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      *            the current status of the actions
      * @return the amount of updated actions
      */
+    @Deprecated(forRemoval = true)
     @Modifying
     @Transactional
     @Query("UPDATE JpaAction a SET a.status = :statusToSet WHERE a.id IN :actionIds AND a.active = :active AND a.status = :currentStatus")
@@ -346,36 +142,9 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
             @Param("currentStatus") Action.Status currentStatus);
 
     /**
-     *
-     * Retrieves all {@link Action}s which are active and referring to the given
-     * target Ids and distribution set not requiring migration step.
-     *
-     * @param targetIds
-     *            the IDs of targets for the actions
-     * @param notStatus
-     *            the status which the actions should not have
-     * @return the found list of {@link Action}s
-     */
-    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
-    @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1 AND a.status != ?2")
-    List<JpaAction> findByActiveAndTargetIdInAndActionStatusNotEqualToAndDistributionSetNotRequiredMigrationStep(
-            Collection<Long> targetIds, Action.Status notStatus);
-
-    /**
-     *
-     * Retrieves all {@link Action}s which are active and referring to the given
-     * target Ids and distribution set not requiring migration step.
-     *
-     * @param targetIds
-     *            the IDs of targets for the actions
-     * @return the found list of {@link Action}s
-     */
-    @EntityGraph(attributePaths = { "target" }, type = EntityGraphType.LOAD)
-    @Query("SELECT a FROM JpaAction a WHERE a.active = true AND a.distributionSet.requiredMigrationStep = false AND a.target IN ?1")
-    List<JpaAction> findByActiveAndTargetIdInAndDistributionSetNotRequiredMigrationStep(Collection<Long> targetIds);
-
-    /**
      * Counts all {@link Action}s referring to the given target.
+     * <p/>
+     * No access control applied
      *
      * @param controllerId
      *            the target to count the {@link Action}s
@@ -385,6 +154,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all {@link Action}s referring to the given targetId.
+     * <p/>
+     * No access control applied
      *
      * @param targetId
      *            the target to count the {@link Action}s
@@ -394,6 +165,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all {@link Action}s referring to the given DistributionSet.
+     * <p/>
+     * No access control applied
      *
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
@@ -403,6 +176,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all active {@link Action}s referring to the given DistributionSet.
+     * <p/>
+     * No access control applied
      *
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
@@ -413,6 +188,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Counts all active {@link Action}s referring to the given DistributionSet
      * that are not in a given state.
+     * <p/>
+     * No access control applied
      *
      * @param distributionSet
      *            DistributionSet to count the {@link Action}s from
@@ -427,6 +204,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * are currently not in the given status. An in-clause statement does not
      * work with the spring-data, so this is specific usecase regarding to the
      * rollout-management to find out actions which are not in specific states.
+     * <p/>
+     * No access control applied
      *
      * @param rollout
      *            the rollout the actions are belong to
@@ -442,6 +221,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all actions referring to a given rollout and rolloutgroup.
+     * <p/>
+     * No access control applied
      *
      * @param rollout
      *            the rollout the actions belong to
@@ -453,6 +234,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all actions referring to a given rollout, rolloutgroup and status.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            the ID of rollout the actions belong to
@@ -467,6 +250,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Counts all actions referring to a given rollout and status.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
@@ -480,6 +265,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Returns {@code true} if actions for the given rollout exists, otherwise
      * {@code false}
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
@@ -492,6 +279,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Returns {@code true} if actions for the given rollout exists, otherwise
      * {@code false}
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            the ID of the rollout the actions belong to
@@ -506,8 +295,10 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Retrieving all actions referring to a given rollout with a specific action as
      * parent reference and a specific status.
-     *
+     * <p/>
      * Finding all actions of a specific rolloutgroup parent relation.
+     * <p/>
+     * No access control applied
      *
      * @param pageable
      *            page parameters
@@ -526,6 +317,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Retrieving all actions referring to the first group of a rollout.
+     * <p/>
+     * No access control applied
      *
      * @param pageable
      *            page parameters
@@ -543,6 +336,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
 
     /**
      * Retrieves all actions for a specific rollout and in a specific status.
+     * <p/>
+     * No access control applied
      *
      * @param pageable
      *            page parameters
@@ -557,6 +352,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            id of {@link Rollout}
@@ -568,6 +365,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutId
      *            id of {@link Rollout}
@@ -579,6 +378,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout group.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutGroupId
      *            id of {@link RolloutGroup}
@@ -590,6 +391,8 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     /**
      * Get list of objects which has details of status and count of targets in
      * each status in specified rollout group.
+     * <p/>
+     * No access control applied
      *
      * @param rolloutGroupId
      *            list of id of {@link RolloutGroup}
@@ -597,18 +400,6 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      */
     @Query("SELECT NEW org.eclipse.hawkbit.repository.model.TotalTargetCountActionStatus(a.rolloutGroup.id, a.status , COUNT(a.id)) FROM JpaAction a WHERE a.rolloutGroup.id IN ?1 GROUP BY a.rolloutGroup.id, a.status")
     List<TotalTargetCountActionStatus> getStatusCountByRolloutGroupId(List<Long> rolloutGroupId);
-
-    /**
-     * Deletes all actions with the given IDs.
-     *
-     * @param actionIDs
-     *            the IDs of the actions to be deleted.
-     */
-    @Modifying
-    @Transactional
-    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
-    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
-    void deleteByIdIn(Collection<Long> actionIDs);
 
     /**
      * Updates the externalRef of an action by its actionId.
@@ -622,4 +413,16 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
     @Transactional
     @Query("UPDATE JpaAction a SET a.externalRef = :externalRef WHERE a.id = :actionId")
     void updateExternalRef(@Param("actionId") Long actionId, @Param("externalRef") String externalRef);
+
+    /**
+     * Deletes all actions with the given IDs.
+     *
+     * @param actionIDs
+     *            the IDs of the actions to be deleted.
+     */
+    @Modifying
+    @Transactional
+    // Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=349477
+    @Query("DELETE FROM JpaAction a WHERE a.id IN ?1")
+    void deleteByIdIn(Collection<Long> actionIDs);
 }

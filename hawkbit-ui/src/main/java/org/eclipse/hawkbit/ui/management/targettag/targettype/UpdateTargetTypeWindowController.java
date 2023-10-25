@@ -38,7 +38,7 @@ public class UpdateTargetTypeWindowController
     private final TypeToProxyTypeMapper<DistributionSetType> dsTypeToProxyTypeMapper;
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
-    private final ContextAware contextRunner;
+    private final ContextAware contextAware;
 
     private String nameBeforeEdit;
 
@@ -51,16 +51,16 @@ public class UpdateTargetTypeWindowController
      *            TargetTypeManagement
      * @param layout
      *            TargetTypeWindowLayout
-     * @param contextRunner
-     *            ContextRunner
+     * @param contextAware
+     *            ContextAware
      */
     public UpdateTargetTypeWindowController(final CommonUiDependencies uiDependencies,
             final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
-            final ContextAware contextRunner) {
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
-        this.contextRunner = contextRunner;
+        this.contextAware = contextAware;
         this.dsTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
         this.layout = layout;
         this.validator = new ProxyTargetTypeValidator(uiDependencies);
@@ -129,11 +129,10 @@ public class UpdateTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String name = entity.getName();
-        return validator.isEntityValid(entity, () -> {
-//            return contextRunner.runInAdminContext(() -> {
-                return hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent();
-//            });
-        });
+        return validator.isEntityValid(entity,
+                () -> contextAware.runAsTenant(
+                        contextAware.getCurrentTenant(),
+                        () -> hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent()));
     }
 
     private boolean hasNamedChanged(final String trimmedName) {
