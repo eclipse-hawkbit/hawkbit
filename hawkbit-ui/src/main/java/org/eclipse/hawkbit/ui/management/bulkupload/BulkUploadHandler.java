@@ -110,7 +110,7 @@ public class BulkUploadHandler implements SucceededListener, FailedListener, Rec
     @Override
     public OutputStream receiveUpload(final String filename, final String mimeType) {
         try {
-            tempFile = File.createTempFile("temp", ".csv");
+            tempFile = Files.createTempFile("temp", ".csv").toFile();
 
             return new FileOutputStream(tempFile);
         } catch (final FileNotFoundException e) {
