@@ -13,7 +13,7 @@ set -euxo pipefail
 
 HAWKBIT_VERSION="0.3.0M9"
 MARIADB_DRIVER_VERSION="3.1.4"
-BASE_IMAGE="eclipse-temurin:17.0.8_7-jre-alpine"
+BASE_IMAGE="eclipse-temurin:17.0.9_9-jre-alpine"
 
 ##################################################
 
