@@ -279,6 +279,9 @@ class JwtAuthoritiesExtractor {
     @SuppressWarnings("unchecked")
     Set<GrantedAuthority> extract(final String clientId, final Map<String, Object> claims) {
         final Map<String, Object> resourceMap = (Map<String, Object>) claims.get("resource_access");
+        if (CollectionUtils.isEmpty(resourceMap)) {
+            return Collections.emptySet();
+        }
 
         final Map<String, Map<String, Object>> clientResource = (Map<String, Map<String, Object>>) resourceMap
                 .get(clientId);
