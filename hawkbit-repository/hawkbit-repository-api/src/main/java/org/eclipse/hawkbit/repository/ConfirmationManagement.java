@@ -61,7 +61,8 @@ public interface ConfirmationManagement {
      * @return instance of {@link AutoConfirmationStatus} wrapped in an
      *         {@link Optional}. Present if active and empty if disabled.
      */
-    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    @PreAuthorize(SpPermission.SpringEvalExpressions.IS_CONTROLLER + SpPermission.SpringEvalExpressions.HAS_AUTH_OR +
+            SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     Optional<AutoConfirmationStatus> getStatus(@NotEmpty String controllerId);
 
     /**
