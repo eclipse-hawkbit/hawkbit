@@ -33,6 +33,7 @@ public class OpenApiConfiguration {
         """;
 
   private static final String BASIC_AUTH_SEC_SCHEME_NAME = "Basic Authentication";
+  private static final String BEARER_AUTH_SEC_SCHEME_NAME = "Bearer Authentication";
   private static final String DDI_TOKEN_SEC_SCHEME_NAME = "DDI Target/GatewayToken Authentication";
 
   @Bean
@@ -52,7 +53,9 @@ public class OpenApiConfiguration {
         .pathsToMatch("/rest/v1/**")
         .addOpenApiCustomiser(openApi -> {
             openApi
-                .addSecurityItem(new SecurityRequirement().addList(BASIC_AUTH_SEC_SCHEME_NAME))
+                .addSecurityItem(new SecurityRequirement()
+                        .addList(BASIC_AUTH_SEC_SCHEME_NAME)
+                        .addList(BEARER_AUTH_SEC_SCHEME_NAME))
                 .components(
                     openApi
                         .getComponents()
@@ -61,11 +64,17 @@ public class OpenApiConfiguration {
                                 .name(BASIC_AUTH_SEC_SCHEME_NAME)
                                 .type(SecurityScheme.Type.HTTP)
                                 .in(SecurityScheme.In.HEADER)
-                                .scheme("basic")));
+                                .scheme("basic"))
+                        .addSecuritySchemes(BEARER_AUTH_SEC_SCHEME_NAME,
+                            new SecurityScheme()
+                                .name(BEARER_AUTH_SEC_SCHEME_NAME)
+                                .type(SecurityScheme.Type.HTTP)
+                                .in(SecurityScheme.In.HEADER)
+                                .bearerFormat("JWT")
+                                .scheme("bearer")));
         })
         .build();
   }
-
   @Bean
   @ConditionalOnProperty(
       value="hawkbit.server.swagger.ddi.api.group.enabled",
