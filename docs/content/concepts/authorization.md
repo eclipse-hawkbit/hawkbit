@@ -50,12 +50,10 @@ hawkbit supports authentication providers which use the OpenID Connect standard,
 An example configuration is given below.
 
     spring.security.oauth2.client.registration.oidc.client-id=clientID
-    spring.security.oauth2.client.registration.oidc.client-secret=oidc-client-secret
     spring.security.oauth2.client.provider.oidc.issuer-uri=https://oidc-provider/issuer-uri
-    spring.security.oauth2.client.provider.oidc.authorization-uri=https://oidc-provider/authorization-uri
-    spring.security.oauth2.client.provider.oidc.token-uri=https://oidc-provider/token-uri
-    spring.security.oauth2.client.provider.oidc.user-info-uri=https://oidc-provider/user-info-uri
     spring.security.oauth2.client.provider.oidc.jwk-set-uri=https://oidc-provider/jwk-set-uri
+
+Note: at the moment only DEFAULT tenant is supported. By default the resource_access/<client id>/roles claim is mapped to hawkBit permissions. However, by registering a Spring bean _org.eclipse.hawkbit.autoconfigure.security.OidcUserManagementAutoConfiguration.JwtAuthoritiesExtractor_ a custom extractor permission mapper could be registered.
 
 ### Delivered Permissions
 
