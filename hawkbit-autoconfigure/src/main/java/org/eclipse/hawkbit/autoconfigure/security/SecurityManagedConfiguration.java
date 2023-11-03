@@ -477,12 +477,13 @@ public class SecurityManagedConfiguration {
 
         @Bean
         @Order(350)
-        protected SecurityFilterChain filterChainREST(
+        SecurityFilterChain filterChainREST(
                 final HttpSecurity http,
                 @Lazy
                 final UserAuthenticationFilter userAuthenticationFilter,
                 @Autowired(required = false)
-                final OidcBearerTokenAuthenticationFilter oidcBearerTokenAuthenticationFilter,
+                final OidcUserManagementAutoConfiguration.OidcBearerTokenAuthenticationFilter
+                        oidcBearerTokenAuthenticationFilter,
                 @Autowired(required = false)
                 final InMemoryClientRegistrationRepository clientRegistrationRepository,
                 final SystemManagement systemManagement,
