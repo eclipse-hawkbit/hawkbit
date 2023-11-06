@@ -212,6 +212,7 @@ class AmqpMessageDispatcherServiceTest extends AbstractIntegrationTest {
                 assertThat(found.get().getSize()).isEqualTo(dbArtifact.getSize());
                 assertThat(found.get().getHashes().getMd5()).isEqualTo(dbArtifact.getMd5Hash());
                 assertThat(found.get().getHashes().getSha1()).isEqualTo(dbArtifact.getSha1Hash());
+                assertThat(found.get().getLastModified()).isGreaterThan(0L);
             });
         }
     }
