@@ -223,7 +223,8 @@ public interface ControllerManagement {
     /**
      * Register new target in the repository (plug-and-play) and in case it
      * already exists updates {@link Target#getAddress()} and
-     * {@link Target#getLastTargetQuery()} and {@link Target#getName()} and
+     * {@link Target#getLastTargetQuery()} and {@link Target#getName()}
+     * and {@link Target#getTargetType()} and
      * switches if {@link TargetUpdateStatus#UNKNOWN} to
      * {@link TargetUpdateStatus#REGISTERED}.
      *
@@ -233,10 +234,13 @@ public interface ControllerManagement {
      *            the client IP address of the target, might be {@code null}
      * @param name
      *            the name of the target
+     * @param type
+     *            the target type name of the target
      * @return target reference
      */
     @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address, String name);
+    Target findOrRegisterTargetIfItDoesNotExist(@NotEmpty String controllerId, @NotNull URI address, String name,
+            String type);
 
     /**
      * Retrieves last {@link Action} for a download of an artifact of given

@@ -25,6 +25,9 @@ public class DmfCreateThing {
     private String name;
 
     @JsonProperty
+    private String type;
+
+    @JsonProperty
     private DmfAttributeUpdate attributeUpdate;
 
     public String getName() {
@@ -33,6 +36,14 @@ public class DmfCreateThing {
 
     public void setName(final String name) {
         this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
     }
 
     public DmfAttributeUpdate getAttributeUpdate() {

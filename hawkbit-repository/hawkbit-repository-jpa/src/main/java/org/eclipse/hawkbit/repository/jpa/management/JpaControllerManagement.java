@@ -47,6 +47,7 @@ import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.UpdateMode;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
@@ -84,6 +85,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -159,6 +161,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     @Autowired
     private ConfirmationManagement confirmationManagement;
+
+    @Autowired
+    private TargetTypeManagement targetTypeManagement;
 
     public JpaControllerManagement(final ScheduledExecutorService executorService,
                                    final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
@@ -384,33 +389,51 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address) {
-        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null);
+        return findOrRegisterTargetIfItDoesNotExist(controllerId, address, null, null);
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED)
     @Retryable(include = ConcurrencyFailureException.class, exclude = EntityAlreadyExistsException.class, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Target findOrRegisterTargetIfItDoesNotExist(final String controllerId, final URI address,
-            final String name) {
-        final Specification<JpaTarget> spec = (targetRoot, query, cb) -> cb
-                .equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
+                   final String name, final String type) {
+        final Specification<JpaTarget> spec =
+                (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTarget_.controllerId), controllerId);
 
-        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name))
-                .orElseGet(() -> createTarget(controllerId, address, name));
+        return targetRepository.findOne(spec).map(target -> updateTarget(target, address, name, type))
+                .orElseGet(() -> createTarget(controllerId, address, name, type));
     }
 
-    private Target createTarget(final String controllerId, final URI address, final String name) {
+    private Target createTarget(final String controllerId, final URI address, final String name, final String type) {
 
-        final Target result = targetRepository.save((JpaTarget) entityFactory.target().create()
+        LOG.debug("Creating target for thing ID \"{}\".", controllerId);
+        JpaTarget jpaTarget = (JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId)
                 .name((StringUtils.hasText(name) ? name : controllerId)).status(TargetUpdateStatus.REGISTERED)
                 .lastTargetQuery(System.currentTimeMillis())
-                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build());
+                .address(Optional.ofNullable(address).map(URI::toString).orElse(null)).build();
+
+        if (StringUtils.hasText(type)) {
+            var targetTypeOptional = getTargetType(type);
+            if (targetTypeOptional.isPresent()) {
+                LOG.debug("Setting target type for thing ID \"{}\" to \"{}\".", controllerId, type);
+                jpaTarget.setTargetType(targetTypeOptional.get());
+            } else {
+                LOG.error("Target type with the provided name \"{}\" was not found. Creating target for thing ID" +
+                        " \"{}\" without target type assignment", type, controllerId);
+            }
+        }
+
+        final Target result = targetRepository.save(jpaTarget);
 
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher()
                 .publishEvent(new TargetPollEvent(result, eventPublisherHolder.getApplicationId())));
 
         return result;
+    }
+
+    Optional<TargetType> getTargetType(String targetTypeName) {
+        return systemSecurityContext.runAsSystem(() -> targetTypeManagement.getByName(targetTypeName));
     }
 
     /**
@@ -501,13 +524,29 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * or the buffer queue is full.
      *
      */
-    private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name) {
-        if (isStoreEager(toUpdate, address, name) || !queue.offer(new TargetPoll(toUpdate))) {
+    private Target updateTarget(final JpaTarget toUpdate, final URI address, final String name, final String type) {
+        if (isStoreEager(toUpdate, address, name, type) || !queue.offer(new TargetPoll(toUpdate))) {
             if (isAddressChanged(toUpdate.getAddress(), address)) {
                 toUpdate.setAddress(address.toString());
             }
             if (isNameChanged(toUpdate.getName(), name)) {
                 toUpdate.setName(name);
+            }
+
+            if (isTypeChanged(toUpdate.getTargetType(), type)) {
+                if (StringUtils.hasText(type)) {
+                    var targetTypeOptional = getTargetType(type);
+                    if (targetTypeOptional.isPresent()) {
+                        LOG.debug("Updating target type for thing ID \"{}\" to \"{}\".", toUpdate.getControllerId(), type);
+                        toUpdate.setTargetType(targetTypeOptional.get());
+                    } else {
+                        LOG.error("Target type with the provided name \"{}\" was not found. Target type for thing ID" +
+                                " \"{}\" will not be updated", type, toUpdate.getControllerId());
+                    }
+                } else {
+                    LOG.debug("Removing target type assignment for thing ID \"{}\".", toUpdate.getControllerId());
+                    toUpdate.setTargetType(null); //unassign target type if "" target type name was provided
+                }
             }
             if (isStatusUnknown(toUpdate.getUpdateStatus())) {
                 toUpdate.setUpdateStatus(TargetUpdateStatus.REGISTERED);
@@ -520,9 +559,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         return toUpdate;
     }
 
-    private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name) {
+    private boolean isStoreEager(final JpaTarget toUpdate, final URI address, final String name, final String type) {
         return repositoryProperties.isEagerPollPersistence() || isAddressChanged(toUpdate.getAddress(), address)
-                || isNameChanged(toUpdate.getName(), name) || isStatusUnknown(toUpdate.getUpdateStatus());
+                || isNameChanged(toUpdate.getName(), name) || isTypeChanged(toUpdate.getTargetType(), type)
+                || isStatusUnknown(toUpdate.getUpdateStatus());
     }
 
     private static boolean isAddressChanged(final URI addressToUpdate, final URI address) {
@@ -531,6 +571,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     private static boolean isNameChanged(final String nameToUpdate, final String name) {
         return StringUtils.hasText(name) && !nameToUpdate.equals(name);
+    }
+
+    private static boolean isTypeChanged(final TargetType targetTypeToUpdate, final String type) {
+        return (type != null) && (targetTypeToUpdate == null || !targetTypeToUpdate.getName().equals(type));
     }
 
     private static boolean isStatusUnknown(final TargetUpdateStatus statusToUpdate) {
