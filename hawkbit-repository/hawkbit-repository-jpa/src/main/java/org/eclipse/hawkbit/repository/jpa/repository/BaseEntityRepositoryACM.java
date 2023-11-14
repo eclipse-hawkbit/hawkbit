@@ -72,7 +72,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                                     accessController.assertOperationAllowed(AccessController.Operation.READ, e);
                                 }
                             } else if (Optional.class.isAssignableFrom(method.getReturnType())) {
-                                return ((Optional<T>)result).map(t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
+                                return ((Optional<T>)result).filter(t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
                             } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
                                 accessController.assertOperationAllowed(AccessController.Operation.READ, (T)result);
                             }
@@ -144,8 +144,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
         }
         // TODO - could it be optimized?
         // do delete via query or, after migration to SpringBoot 3.x - to use JPASpecificationExecutor.delete
-        final List<T> toDelete = findAllById(idList);
-        deleteAll(toDelete);
+        repository.deleteAllById(ids);
     }
 
     @Override

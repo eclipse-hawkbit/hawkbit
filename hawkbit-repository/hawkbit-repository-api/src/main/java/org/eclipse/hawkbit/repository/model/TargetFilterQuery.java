@@ -90,7 +90,7 @@ public interface TargetFilterQuery extends TenantAwareBaseEntity {
 
     /**
      * Defining a serialized access control context which needs to be set when
-     * performing the auto-assignment vie the scheduler
+     * performing the auto-assignment by the scheduler
      */
     Optional<String> getAccessControlContext();
 }

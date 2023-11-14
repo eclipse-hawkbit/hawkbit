@@ -317,10 +317,9 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 .findAll(ActionSpecifications.byTargetControllerIdAndActive(controllerId, true))
                 .stream()
                 .filter(action -> !action.isCancelingOrCanceled())
-                .filter(action -> !action.getDistributionSet().getModules()
+                .filter(action -> action.getDistributionSet().getModules()
                         .stream()
-                        .map(SoftwareModule::getId)
-                        .toList().isEmpty())
+                        .anyMatch(module -> module.getId() == moduleId))
                 .map(Action.class::cast)
                 .findFirst();
     }
