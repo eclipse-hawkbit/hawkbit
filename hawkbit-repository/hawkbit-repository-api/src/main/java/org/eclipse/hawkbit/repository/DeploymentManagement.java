@@ -359,10 +359,9 @@ public interface DeploymentManagement {
     /**
      * Counts all messages for an {@link ActionStatus}.
      * <p/>
-     * Used by UI only. With future removal of UI it could be removed.
-     * <p/>
      * No access control applied.
      *
+     * @deprecated Used by UI only. With future removal of UI it could be removed.
      * @param actionStatusId
      *            the id of {@link ActionStatus} to count the messages from
      * @return count of messages by a specific {@link ActionStatus} id

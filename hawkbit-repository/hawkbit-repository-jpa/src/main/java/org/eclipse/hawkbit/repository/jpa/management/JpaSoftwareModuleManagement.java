@@ -220,7 +220,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
                         accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
         for (final Artifact localArtifact : swModule.getArtifacts()) {
             ((JpaArtifactManagement)artifactManagement)
-                    .clearArtifactBinary(localArtifact.getSha1Hash(), swModule.getId());
+                    .clearArtifactBinary(localArtifact.getSha1Hash());
         }
     }
 
@@ -326,7 +326,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     /**
-     *  Used only in UI which is to be removed
+     *  @deprecated Used only in UI which is to be removed
      */
     @Deprecated(forRemoval = true)
     @Override
@@ -422,9 +422,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     /**
-     * Used only in UI which is to be removed
-     * <p/>
      * No access control applied
+     *
+     * @deprecated Used only in UI which is to be removed
      */
     @Deprecated(forRemoval = true)
     @Override

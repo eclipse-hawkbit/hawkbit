@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
@@ -46,7 +47,7 @@ public class ArtifactFilesystemTest {
     @Test
     @Description("Verifies that an InputStream can be opened if file exists")
     public void getInputStreamOfExistingFile() throws IOException {
-        final File createTempFile = File.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "");
+        final File createTempFile = Files.createTempFile(ArtifactFilesystemTest.class.getSimpleName(), "").toFile();
         createTempFile.deleteOnExit();
 
         final ArtifactFilesystem underTest = new ArtifactFilesystem(createTempFile,

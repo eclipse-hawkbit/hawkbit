@@ -848,12 +848,6 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         return JpaManagementHelper.countBySpec(actionRepository, specList);
     }
 
-    private void assertDistributionSetExists(final Long dsId) {
-        if (!distributionSetRepository.existsById(dsId)) {
-            throw new EntityNotFoundException(DistributionSet.class, dsId);
-        }
-    }
-
     @Override
     @Transactional
     @Retryable(include = {

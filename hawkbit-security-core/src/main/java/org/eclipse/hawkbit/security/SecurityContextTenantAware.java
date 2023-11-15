@@ -30,6 +30,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 
 /**
  * A {@link ContextAware} (hence of {@link TenantAware}) that uses spring security context propagation
@@ -97,6 +98,9 @@ public class SecurityContextTenantAware implements ContextAware {
             final Object principal = context.getAuthentication().getPrincipal();
             if (principal instanceof UserPrincipal) {
                 return ((UserPrincipal) principal).getUsername();
+            }
+            if (principal instanceof OidcUser) {
+                return ((OidcUser) principal).getPreferredUsername();
             }
         }
         return null;

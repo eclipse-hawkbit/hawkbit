@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.repository.LocalArtifactRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.SoftwareModuleRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ArtifactSpecifications;
-import org.eclipse.hawkbit.repository.jpa.specifications.SoftwareModuleSpecification;
 import org.eclipse.hawkbit.repository.jpa.utils.FileSizeAndStorageQuotaCheckingInputStream;
 import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -192,7 +191,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
      * @param softwareModuleId the garbage collection call is made for
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    void clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
+    void clearArtifactBinary(final String sha1Hash) {
         // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
         // will return total count as it should be
         final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
@@ -206,8 +205,6 @@ public class JpaArtifactManagement implements ArtifactManagement {
                 public void afterCommit() {
                     try {
                         LOG.debug("deleting artifact from repository {}", sha1Hash);
-                        // TODO - if the transaction fail the artifact will, anyway, be deleted,
-                        // TODO - could be thought about moving it after the root transaction
                         artifactRepository.deleteBySha1(tenantAware.getCurrentTenant(), sha1Hash);
                     } catch (final ArtifactStoreException e) {
                         throw new ArtifactDeleteFailedException(e);
@@ -229,12 +226,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
         softwareModuleRepository.getAccessController().ifPresent(accessController ->
                 accessController.assertOperationAllowed(AccessController.Operation.UPDATE,
                     (JpaSoftwareModule) toDelete.getSoftwareModule()));
-
-        clearArtifactBinary(toDelete.getSha1Hash(), toDelete.getSoftwareModule().getId());
-
         ((JpaSoftwareModule) toDelete.getSoftwareModule()).removeArtifact(toDelete);
         softwareModuleRepository.save((JpaSoftwareModule) toDelete.getSoftwareModule());
+
         localArtifactRepository.deleteById(id);
+        clearArtifactBinary(toDelete.getSha1Hash());
     }
 
     @Override

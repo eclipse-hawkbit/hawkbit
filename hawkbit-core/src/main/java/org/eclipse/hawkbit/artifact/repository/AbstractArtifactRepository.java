@@ -118,7 +118,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
     private static File createTempFile() {
         try {
-            return File.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX);
+            return Files.createTempFile(TEMP_FILE_PREFIX, TEMP_FILE_SUFFIX).toFile();
         } catch (final IOException e) {
             throw new ArtifactStoreException("Cannot create tempfile", e);
         }

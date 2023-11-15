@@ -31,6 +31,9 @@ import org.springframework.transaction.annotation.Transactional;
 public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
 
     // TODO AC - remove it and use specification
+    /**
+     * @deprecated remove it and use specification
+     */
     // no access check
     @Deprecated(forRemoval = true)
     @Modifying
@@ -42,6 +45,10 @@ public interface TargetRepository extends BaseEntityRepository<JpaTarget> {
 
 
     // TODO AC - remove it and use specification
+
+    /**
+     * @deprecated will be removed
+     */
     // no access check
     @Deprecated(forRemoval = true)
     @Modifying

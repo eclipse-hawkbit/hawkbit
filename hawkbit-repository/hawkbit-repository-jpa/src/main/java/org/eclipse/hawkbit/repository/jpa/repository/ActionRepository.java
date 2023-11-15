@@ -94,6 +94,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
+     * @deprecated will be removed
      * @param targetIds
      *            the IDs of targets for the actions
      * @param active
@@ -123,6 +124,7 @@ public interface ActionRepository extends BaseEntityRepository<JpaAction> {
      * <p/>
      * No access control applied
      *
+     * @deprecated will be removed
      * @param statusToSet
      *            the new status the actions should get
      * @param actionIds
