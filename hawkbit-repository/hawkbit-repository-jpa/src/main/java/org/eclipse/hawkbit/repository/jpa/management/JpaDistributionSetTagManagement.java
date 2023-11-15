@@ -108,14 +108,10 @@ public class JpaDistributionSetTagManagement implements DistributionSetTagManage
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public List<DistributionSetTag> create(final Collection<TagCreate> dst) {
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        final Collection<JpaTagCreate> creates = (Collection) dst;
-
-        return creates.stream()
-                .map(create -> distributionSetTagRepository
-                        .save(AccessController.Operation.CREATE, create.buildDistributionSetTag()))
-                .map(DistributionSetTag.class::cast)
-                .toList();
+        final List<JpaDistributionSetTag> toCreate = dst.stream().map(JpaTagCreate.class::cast)
+                .map(JpaTagCreate::buildDistributionSetTag).toList();
+        return Collections
+                .unmodifiableList(distributionSetTagRepository.saveAll(AccessController.Operation.CREATE, toCreate));
     }
 
     @Override

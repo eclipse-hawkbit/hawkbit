@@ -32,7 +32,6 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.ArtifactEncryptionService;
 import org.eclipse.hawkbit.repository.ArtifactManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
@@ -88,7 +87,6 @@ import org.springframework.data.jpa.repository.query.QueryUtils;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
@@ -207,8 +205,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
             final long typeId) {
         assertSoftwareModuleTypeExists(typeId);
 
-        // TODO AC : this method is used to validate input. Is it fine to restrict the
-        // access?
+        // TODO AC - Access is restricted. This could have problem with UI when access control is enabled.
+        // Vaadin UI use this for validation. May need to be called via elevated access
         return JpaManagementHelper
                 .findOneBySpec(softwareModuleRepository, List.of(
                         SoftwareModuleSpecification.likeNameAndVersion(name, version),
@@ -218,7 +216,8 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     private void deleteGridFsArtifacts(final JpaSoftwareModule swModule) {
-        // clearArtifactBinary validates unconditionally the module access
+        softwareModuleRepository.getAccessController().ifPresent(accessController ->
+                        accessController.assertOperationAllowed(AccessController.Operation.DELETE, swModule));
         for (final Artifact localArtifact : swModule.getArtifacts()) {
             ((JpaArtifactManagement)artifactManagement)
                     .clearArtifactBinary(localArtifact.getSha1Hash(), swModule.getId());
@@ -259,6 +258,7 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
             /*
                TODO AC - could use single update query as before via entity manager directly (considers tenant!):
+               maybe it will be possible, via specification when migrate to Spring Boot 3
                "UPDATE JpaSoftwareModule b SET b.deleted = 1, b.lastModifiedAt = :lastModifiedAt, b.lastModifiedBy = :lastModifiedBy WHERE b.tenant = :tenant AND b.id IN :ids"
              */
             final long timestamp = System.currentTimeMillis();
@@ -294,8 +294,6 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     }
 
     @Override
-    // TODO AC - why this overrides the same annotation of the implemented?
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     public List<SoftwareModule> get(final Collection<Long> ids) {
         return Collections.unmodifiableList(softwareModuleRepository.findAllById(ids));
     }
@@ -380,10 +378,18 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
         smWithAssignedFlagList.forEach(smWithAssignedFlag -> {
             final JpaSoftwareModule softwareModule = smWithAssignedFlag.get("sm", JpaSoftwareModule.class);
             try {
-                softwareModuleRepository.findById(softwareModule.getId()); // check read access
-                resultList
-                        .add(new AssignedSoftwareModule(softwareModule,
-                                smWithAssignedFlag.get("assigned", Number.class).longValue() == 1));
+                // check read access
+                if (softwareModuleRepository.getAccessController().map(accessController -> {
+                    try {
+                        accessController.assertOperationAllowed(AccessController.Operation.READ, softwareModule);
+                        return true;
+                    } catch (final InsufficientPermissionException e) {
+                        return false;
+                    }
+                }).orElse(true)) {
+                    resultList.add(new AssignedSoftwareModule(softwareModule,
+                            smWithAssignedFlag.get("assigned", Number.class).longValue() == 1));
+                }
             } catch (final InsufficientPermissionException e) {
                 // skip the entry
             }

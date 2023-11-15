@@ -87,7 +87,7 @@ public class AddTargetTypeWindowController
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
         return validator.isEntityValid(entity,
-                () -> contextAware.runAsTenant(
+                () -> contextAware.runAsTenant( // disable acm checks
                         contextAware.getCurrentTenant(),
                         () -> targetTypeManagement.getByName(entity.getName()).isPresent()));
     }

@@ -185,24 +185,14 @@ public class JpaArtifactManagement implements ArtifactManagement {
      * Garbage collects artifact binaries if only referenced by given
      * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
      * marked as deleted.
+     * <p/>
+     * Software module related UPDATE permission shall be checked by the callers!
      *
      * @param sha1Hash no longer needed
      * @param softwareModuleId the garbage collection call is made for
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    @Transactional
-    @Retryable(include = {
-            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
-    public void clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
-        // unconditional check of software module id access is essential, used by #delete(int) and JpaSoftwareModuleManagement#delete
-        if (!softwareModuleRepository
-                .exists(AccessController.Operation.UPDATE, SoftwareModuleSpecification.byId(softwareModuleId))) {
-            // TODO - this checks for software module with UPDATE permissions
-            // shall we check this software module exists but no permissions and return
-            // more correct exception - InsufficientPermissionException?
-            throw new EntityNotFoundException(SoftwareModule.class, softwareModuleId);
-        }
-
+    void clearArtifactBinary(final String sha1Hash, final long softwareModuleId) {
         // countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse will skip ACM checks and
         // will return total count as it should be
         final long count = localArtifactRepository.countBySha1HashAndTenantAndSoftwareModuleDeletedIsFalse(
@@ -235,7 +225,11 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final JpaArtifact toDelete = (JpaArtifact) get(id)
                 .orElseThrow(() -> new EntityNotFoundException(Artifact.class, id));
 
-        // clearArtifactBinary checks (unconditionally) software module DELETE access
+        // clearArtifactBinary checks (unconditionally) software module UPDATE access
+        softwareModuleRepository.getAccessController().ifPresent(accessController ->
+                accessController.assertOperationAllowed(AccessController.Operation.UPDATE,
+                    (JpaSoftwareModule) toDelete.getSoftwareModule()));
+
         clearArtifactBinary(toDelete.getSha1Hash(), toDelete.getSoftwareModule().getId());
 
         ((JpaSoftwareModule) toDelete.getSoftwareModule()).removeArtifact(toDelete);

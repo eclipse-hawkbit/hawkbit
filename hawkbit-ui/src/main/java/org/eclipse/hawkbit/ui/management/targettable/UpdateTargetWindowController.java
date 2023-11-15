@@ -106,7 +106,7 @@ public class UpdateTargetWindowController
     protected boolean isEntityValid(final ProxyTarget entity) {
         final String controllerId = entity.getControllerId();
         return proxyTargetValidator.isEntityValid(entity,
-                () -> contextAware.runAsTenant(
+                () -> contextAware.runAsTenant( // disable acm checks
                         contextAware.getCurrentTenant(),
                         () -> hasControllerIdChanged(controllerId)
                                 && targetManagement.getByControllerID(controllerId).isPresent()));

@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2023 Bosch.IO GmbH and others
  *
  * This program and the accompanying materials are made
  * available under the terms of the Eclipse Public License 2.0
@@ -28,9 +28,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
 
@@ -138,13 +140,11 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public void deleteAllById(@NonNull final Iterable<? extends Long> ids) {
-        final List<Long> idList = toList(ids);
-        if (count(AccessController.Operation.DELETE, byIdsSpec(idList)) != count(AccessController.Operation.READ, byIdsSpec(idList))) {
+        final Set<Long> idList = toSetDistinct(ids);
+        if (count(AccessController.Operation.DELETE, byIdsSpec(idList)) != idList.size()) {
             throw new InsufficientPermissionException("Has at least one id that is not allowed for deletion!");
         }
-        // TODO - could it be optimized?
-        // do delete via query or, after migration to SpringBoot 3.x - to use JPASpecificationExecutor.delete
-        repository.deleteAllById(ids);
+        repository.deleteAllById(idList);
     }
 
     @Override
@@ -155,13 +155,13 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
 
     @Override
     public void deleteAll() {
-        // TODO - shall this method throw exception having that we have deleteByTenant
-        // in order to do not allow deletion for all tenants?
-        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
-            throw new InsufficientPermissionException(
-                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
-        }
-        repository.deleteAll();
+        // TODO - shall we remove deleteByTenant and implement this method instead?
+//        if (accessController.getAccessRules(AccessController.Operation.DELETE).isPresent()) {
+//            throw new InsufficientPermissionException(
+//                    "DELETE operation has restriction for given context! deleteAll can't be executed!");
+//        }
+//        repository.deleteAll();
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -337,13 +337,9 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    private static <T extends Long> List<Long> toList(final Iterable<T> i) {
-        if (i instanceof List l) {
-            return l;
-        } else {
-            final List<Long> l = new ArrayList<>();
-            i.forEach(l::add);
-            return l;
-        }
+    private static <T extends Long> Set<Long> toSetDistinct(final Iterable<T> i) {
+        final Set<Long> set = new HashSet<>();
+        i.forEach(set::add);
+        return set;
     }
 }

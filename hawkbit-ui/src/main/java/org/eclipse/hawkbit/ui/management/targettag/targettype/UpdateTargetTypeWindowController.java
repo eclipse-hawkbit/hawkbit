@@ -130,7 +130,7 @@ public class UpdateTargetTypeWindowController
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> contextAware.runAsTenant(
+                () -> contextAware.runAsTenant( // disable acm checks
                         contextAware.getCurrentTenant(),
                         () -> hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent()));
     }
