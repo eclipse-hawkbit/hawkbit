@@ -15,7 +15,7 @@
     <parent>
         <groupId>org.eclipse.hawkbit</groupId>
         <artifactId>hawkbit-runtime-parent</artifactId>
-        <version>0.3.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
     <artifactId>hawkbit-update-server</artifactId>
     <name>hawkBit :: Runtime :: Update Server</name>

@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-rest-parent</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>${revision}</version>
    </parent>
    <artifactId>hawkbit-ddi-api</artifactId>
    <name>hawkBit :: REST :: DDI API</name>

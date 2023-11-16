@@ -22,7 +22,7 @@
 
    <groupId>org.eclipse.hawkbit</groupId>
    <artifactId>hawkbit-parent</artifactId>
-   <version>0.3.0-SNAPSHOT</version>
+   <version>${revision}</version>
    <packaging>pom</packaging>
    <name>hawkBit :: Parent</name>
 
@@ -109,8 +109,8 @@
       <developer>
          <id>avgustinmm</id>
          <email>Avgustin.Marinov@bosch.com</email>
-         <organization>Bosch</organization>
-         <organizationUrl>https://www.bosch.io</organizationUrl>
+         <organization>Bosch Digital</organization>
+         <organizationUrl>https://www.bosch-digital.com/</organizationUrl>
          <roles>
             <role>Committer</role>
          </roles>
@@ -138,6 +138,8 @@
    </repositories>
 
    <properties>
+      <revision>0.4.0-SNAPSHOT</revision>
+
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
       <java.version>17</java.version>
@@ -300,6 +302,30 @@
          </plugin>
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
+            <artifactId>flatten-maven-plugin</artifactId>
+            <configuration>
+               <flattenMode>ossrh</flattenMode>
+               <updatePomFile>true</updatePomFile>
+            </configuration>
+            <executions>
+               <execution>
+                  <id>flatten</id>
+                  <phase>process-resources</phase>
+                  <goals>
+                     <goal>flatten</goal>
+                  </goals>
+               </execution>
+               <execution>
+                  <id>flatten.clean</id>
+                  <phase>clean</phase>
+                  <goals>
+                     <goal>clean</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
             <artifactId>versions-maven-plugin</artifactId>
          </plugin>
          <plugin>
@@ -352,6 +378,11 @@
 
       <pluginManagement>
          <plugins>
+            <plugin>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>flatten-maven-plugin</artifactId>
+               <version>1.5.0</version>
+            </plugin>
             <plugin>
                <groupId>io.fabric8</groupId>
                <artifactId>docker-maven-plugin</artifactId>
