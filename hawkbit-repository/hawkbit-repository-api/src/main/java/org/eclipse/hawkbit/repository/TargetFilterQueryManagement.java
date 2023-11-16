@@ -111,6 +111,8 @@ public interface TargetFilterQueryManagement {
     /**
      * Counts all target filters that have a given auto assign distribution set
      * assigned.
+     * <p/>
+     * No access control applied
      *
      * @param autoAssignDistributionSetId
      *            the id of the distribution set

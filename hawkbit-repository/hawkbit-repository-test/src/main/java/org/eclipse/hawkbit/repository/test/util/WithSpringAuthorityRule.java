@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.test.util;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Callable;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission;
@@ -59,42 +60,7 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
     }
 
     private static  void setSecurityContext(final WithUser annotation) {
-        SecurityContextHolder.setContext(new SecurityContext() {
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public void setAuthentication(final Authentication authentication) {
-                // nothing to do
-            }
-
-            @Override
-            public Authentication getAuthentication() {
-                final String[] authorities;
-                if (annotation.allSpPermissions()) {
-                    authorities = getAllAuthorities(annotation.authorities(), annotation.removeFromAllPermission());
-                } else {
-                    authorities = annotation.authorities();
-                }
-                final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
-                        new UserPrincipal(annotation.principal(), annotation.principal(), annotation.principal(),
-                                annotation.principal(), null, annotation.tenantId()),
-                        annotation.credentials(), authorities);
-                testingAuthenticationToken.setDetails(
-                        new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
-                return testingAuthenticationToken;
-            }
-
-            private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
-                final List<String> permissions = SpPermission.getAllAuthorities();
-                if (notInclude != null) {
-                    permissions.removeAll(Arrays.asList(notInclude));
-                }
-                if (additionalAuthorities != null) {
-                    permissions.addAll(Arrays.asList(additionalAuthorities));
-                }
-                return permissions.toArray(new String[0]);
-            }
-        });
+        SecurityContextHolder.setContext(new SecurityContextWithUser(annotation));
     }
 
     public static <T> T  runAsPrivileged(final Callable<T> callable) throws Exception {
@@ -203,5 +169,61 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
                 return controller;
             }
         };
+    }
+
+    private static class SecurityContextWithUser implements SecurityContext {
+        private static final long serialVersionUID = 1L;
+        private final WithUser annotation;
+
+        public SecurityContextWithUser(WithUser annotation) {
+            this.annotation = annotation;
+        }
+
+        @Override
+        public void setAuthentication(final Authentication authentication) {
+            // nothing to do
+        }
+
+        @Override
+        public Authentication getAuthentication() {
+            final String[] authorities;
+            if (annotation.allSpPermissions()) {
+                authorities = getAllAuthorities(annotation.authorities(), annotation.removeFromAllPermission());
+            } else {
+                authorities = annotation.authorities();
+            }
+            final TestingAuthenticationToken testingAuthenticationToken = new TestingAuthenticationToken(
+                    new UserPrincipal(annotation.principal(), annotation.principal(), annotation.principal(),
+                            annotation.principal(), null, annotation.tenantId()),
+                    annotation.credentials(), authorities);
+            testingAuthenticationToken.setDetails(
+                    new TenantAwareAuthenticationDetails(annotation.tenantId(), annotation.controller()));
+            return testingAuthenticationToken;
+        }
+
+        private String[] getAllAuthorities(final String[] additionalAuthorities, final String[] notInclude) {
+            final List<String> permissions = SpPermission.getAllAuthorities();
+            if (notInclude != null) {
+                permissions.removeAll(Arrays.asList(notInclude));
+            }
+            if (additionalAuthorities != null) {
+                permissions.addAll(Arrays.asList(additionalAuthorities));
+            }
+            return permissions.toArray(new String[0]);
+        }
+
+        @Override
+        public boolean equals(final Object obj) {
+            if (obj instanceof SecurityContextWithUser otherSecurityContextWithUser) {
+                return Objects.equals(annotation, otherSecurityContextWithUser.annotation);
+            } else {
+                return false;
+            }
+        }
+
+        @Override
+        public int hashCode() {
+            return annotation.hashCode();
+        }
     }
 }

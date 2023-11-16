@@ -58,10 +58,12 @@ public class ControllerPreAuthenticatedSecurityHeaderFilterTest {
     private TenantConfigurationManagement tenantConfigurationManagementMock;
     @Mock
     private UserAuthoritiesResolver authoritiesResolver;
+    @Mock
+    private SecurityContextSerializer securityContextSerializer;
 
     @BeforeEach
     public void before() {
-        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver);
+        final SecurityContextTenantAware tenantAware = new SecurityContextTenantAware(authoritiesResolver, securityContextSerializer);
         underTest = new ControllerPreAuthenticatedSecurityHeaderFilter(CA_COMMON_NAME, "X-Ssl-Issuer-Hash-%d",
                 tenantConfigurationManagementMock, tenantAware, new SystemSecurityContext(tenantAware));
     }

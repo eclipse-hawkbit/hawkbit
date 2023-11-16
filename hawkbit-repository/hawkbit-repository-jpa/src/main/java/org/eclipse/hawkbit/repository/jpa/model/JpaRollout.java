@@ -140,6 +140,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
+    @Column(name = "access_control_context", nullable = true)
+    private String accessControlContext;
+
     @Transient
     private transient TotalTargetCountStatus totalTargetCountStatus;
 
@@ -220,6 +223,14 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    public Optional<String> getAccessControlContext() {
+        return Optional.ofNullable(accessControlContext);
+    }
+
+    public void setAccessControlContext(final String accessControlContext) {
+        this.accessControlContext = accessControlContext;
     }
 
     @Override

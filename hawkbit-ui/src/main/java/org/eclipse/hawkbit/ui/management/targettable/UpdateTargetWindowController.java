@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractUpdateNamedEntityWindowController;
@@ -28,6 +29,7 @@ public class UpdateTargetWindowController
 
     private String controllerIdBeforeEdit;
     private final ProxyTargetValidator proxyTargetValidator;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for UpdateTargetWindowController
@@ -38,14 +40,18 @@ public class UpdateTargetWindowController
      *            TargetManagement
      * @param layout
      *            TargetWindowLayout
+     * @param contextAware
+     *            ContextAware
      */
     public UpdateTargetWindowController(final CommonUiDependencies uiDependencies,
-            final TargetManagement targetManagement, final TargetWindowLayout layout) {
+            final TargetManagement targetManagement, final TargetWindowLayout layout,
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;
         this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -82,9 +88,10 @@ public class UpdateTargetWindowController
 
         final Target updatedTarget = targetManagement.update(targetUpdate);
 
-        // Un-assigning target type needs another DB request to update the target type value to Null
-        if (entity.getTypeInfo() == null){
-            return targetManagement.unAssignType(entity.getControllerId());
+        // Un-assigning target type needs another DB request to update the target type
+        // value to Null
+        if (entity.getTypeInfo() == null) {
+            return targetManagement.unassignType(entity.getControllerId());
         }
 
         return updatedTarget;
@@ -98,9 +105,13 @@ public class UpdateTargetWindowController
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
         final String controllerId = entity.getControllerId();
-        return proxyTargetValidator.isEntityValid(entity, () -> hasControllerIdChanged(controllerId)
-                && targetManagement.getByControllerID(controllerId).isPresent());
+        return proxyTargetValidator.isEntityValid(entity,
+                () -> contextAware.runAsTenant( // disable acm checks
+                        contextAware.getCurrentTenant(),
+                        () -> hasControllerIdChanged(controllerId)
+                                && targetManagement.getByControllerID(controllerId).isPresent()));
     }
+
 
     private boolean hasControllerIdChanged(final String trimmedControllerId) {
         return !controllerIdBeforeEdit.equals(trimmedControllerId);

@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup_;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
-import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
@@ -217,24 +216,6 @@ public final class TargetSpecifications {
     public static Specification<JpaTarget> isOverdue(final long overdueTimestamp) {
         return (targetRoot, query, cb) -> cb.lessThanOrEqualTo(targetRoot.get(JpaTarget_.lastTargetQuery),
                 overdueTimestamp);
-    }
-
-    /**
-     * {@link Specification} for retrieving {@link Target}s by "like attribute
-     * value".
-     *
-     * @param searchText
-     *            to be filtered on
-     * @return the {@link Target} {@link Specification}
-     */
-    public static Specification<JpaTarget> likeAttributeValue(final String searchText) {
-        return (targetRoot, query, cb) -> {
-            final String searchTextToLower = searchText.toLowerCase();
-            final MapJoin<JpaTarget, String, String> attributeMap = targetRoot.join(JpaTarget_.controllerAttributes,
-                    JoinType.LEFT);
-            query.distinct(true);
-            return cb.like(cb.lower(attributeMap.value()), searchTextToLower);
-        };
     }
 
     /**

@@ -40,6 +40,8 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -64,6 +66,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -1411,6 +1414,8 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .as("Five targets in repository have DS assigned").hasSize(5);
     }
 
+    @Autowired
+    ActionRepository actionRepository;
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Ensures that confirmation option is considered in assignment request.")
@@ -1431,7 +1436,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(jsonPath("$.assigned", equalTo(1))).andExpect(jsonPath("$.alreadyAssigned", equalTo(0)))
                 .andExpect(jsonPath("$.total", equalTo(1)));
 
-        assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, createdDs.getId()).getContent()).hasSize(1)
+        assertThat(
+                actionRepository
+                        .findAll(ActionSpecifications.byDistributionSetId(createdDs.getId()), PAGE)
+                        .map(Action.class::cast).getContent()).hasSize(1)
                 .allMatch(action -> {
                     if (!confirmationFlowActive) {
                         return !action.isWaitingConfirmation();

@@ -11,10 +11,12 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.repository.NoCountSliceRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -33,6 +35,11 @@ public final class JpaManagementHelper {
     private JpaManagementHelper() {
     }
 
+    public static <T, J extends T> Optional<J> findOneBySpec(final JpaSpecificationExecutor<J> repository,
+            final List<Specification<J>> specList) {
+        return repository.findOne(combineWithAnd(specList));
+    }
+
     public static <T, J extends T> Page<T> findAllWithCountBySpec(final JpaSpecificationExecutor<J> repository,
             final Pageable pageable, final List<Specification<J>> specList) {
         if (CollectionUtils.isEmpty(specList)) {
@@ -46,7 +53,7 @@ public final class JpaManagementHelper {
         return new PageImpl<>(Collections.unmodifiableList(jpaAll.getContent()), pageable, jpaAll.getTotalElements());
     }
 
-    private static <J> Specification<J> combineWithAnd(final List<Specification<J>> specList) {
+    public static <J> Specification<J> combineWithAnd(final List<Specification<J>> specList) {
         return specList.size() == 1 ? specList.get(0) : SpecificationsBuilder.combineWithAnd(specList);
     }
 

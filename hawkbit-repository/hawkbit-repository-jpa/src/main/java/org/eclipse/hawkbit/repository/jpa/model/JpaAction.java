@@ -56,9 +56,12 @@ import org.eclipse.persistence.descriptors.DescriptorEvent;
 @Table(name = "sp_action", indexes = { @Index(name = "sp_idx_action_01", columnList = "tenant,distribution_set"),
         @Index(name = "sp_idx_action_02", columnList = "tenant,target,active"),
         @Index(name = "sp_idx_action_prim", columnList = "tenant,id") })
-@NamedEntityGraphs({ @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
-        @NamedEntityGraph(name = "Action.all", attributeNodes = { @NamedAttributeNode("distributionSet"),
-                @NamedAttributeNode(value = "target", subgraph = "target.ds") }, subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
+@NamedEntityGraphs({
+        @NamedEntityGraph(name = "Action.ds", attributeNodes = { @NamedAttributeNode("distributionSet") }),
+        @NamedEntityGraph(name = "Action.all", attributeNodes = {
+                @NamedAttributeNode("distributionSet"),
+                @NamedAttributeNode(value = "target", subgraph = "target.ds") },
+                subgraphs = @NamedSubgraph(name = "target.ds", attributeNodes = @NamedAttributeNode("assignedDistributionSet"))) })
 @Entity
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities

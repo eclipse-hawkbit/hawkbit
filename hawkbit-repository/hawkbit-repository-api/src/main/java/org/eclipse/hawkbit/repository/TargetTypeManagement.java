@@ -164,24 +164,23 @@ public interface TargetTypeManagement {
     TargetType update(@NotNull @Valid TargetTypeUpdate update);
 
     /**
-     * @param targetTypeId
+     * @param id
      *            Target type ID
      * @param distributionSetTypeIds
      *            Distribution set ID
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    TargetType assignCompatibleDistributionSetTypes(long targetTypeId,
+    TargetType assignCompatibleDistributionSetTypes(long id,
             @NotEmpty Collection<Long> distributionSetTypeIds);
 
     /**
-     * @param targetTypeId
+     * @param id
      *            Target type ID
      * @param distributionSetTypeIds
      *            Distribution set ID
      * @return Target type
      */
     @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY_AND_UPDATE_TARGET)
-    TargetType unassignDistributionSetType(long targetTypeId, long distributionSetTypeIds);
-
+    TargetType unassignDistributionSetType(long id, long distributionSetTypeIds);
 }

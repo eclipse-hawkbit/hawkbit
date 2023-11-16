@@ -61,7 +61,7 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      * @param pageable
      *            information for page size, offset and sort order.
      *
-     * @param setId
+     * @param distributionSetId
      *            of the {@link DistributionSet}
      * @return page of the found {@link TargetTag}s
      * 
@@ -69,6 +69,5 @@ public interface DistributionSetTagManagement extends RepositoryManagement<Distr
      *             if {@link DistributionSet} with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<DistributionSetTag> findByDistributionSet(@NotNull Pageable pageable, long setId);
-
+    Page<DistributionSetTag> findByDistributionSet(@NotNull Pageable pageable, long distributionSetId);
 }

@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.UiProperties;
@@ -116,9 +117,10 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
      *            TenantAware
      * @param confirmationManagement
      *            ConfirmationManagement
+     * @param contextAware
+     *            ContextAware
      */
-    public TargetGridLayout(
-            final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
+    public TargetGridLayout(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
             final TargetTypeManagement targetTypeManagement, final DeploymentManagement deploymentManagement,
             final UiProperties uiProperties, final TargetTagManagement targetTagManagement,
             final DistributionSetManagement distributionSetManagement, final Executor uiExecutor,
@@ -129,9 +131,9 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
             final TargetGridLayoutUiState targetGridLayoutUiState,
             final TargetBulkUploadUiState targetBulkUploadUiState,
             final DistributionGridLayoutUiState distributionGridLayoutUiState, final TenantAware tenantAware,
-            final ConfirmationManagement confirmationManagement) {
+            final ConfirmationManagement confirmationManagement, final ContextAware contextAware) {
         final TargetWindowBuilder targetWindowBuilder = new TargetWindowBuilder(uiDependencies, targetManagement,
-                targetTypeManagement, EventView.DEPLOYMENT);
+                targetTypeManagement, EventView.DEPLOYMENT, contextAware);
         final TargetMetaDataWindowBuilder targetMetaDataWindowBuilder = new TargetMetaDataWindowBuilder(uiDependencies,
                 targetManagement);
         final BulkUploadWindowBuilder bulkUploadWindowBuilder = new BulkUploadWindowBuilder(uiDependencies,
@@ -169,7 +171,7 @@ public class TargetGridLayout extends AbstractGridComponentLayout {
                 targetGrid.getSelectionSupport());
         this.targetModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(),
                 ProxyTarget.class).viewAware(layoutViewAware)
-                        .entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
+                .entityModifiedAwareSupports(getTargetModifiedAwareSupports()).build();
         this.tagModifiedListener = new EntityModifiedListener.Builder<>(uiDependencies.getEventBus(), ProxyTag.class)
                 .parentEntityType(ProxyTarget.class).viewAware(layoutViewAware)
                 .entityModifiedAwareSupports(getTagModifiedAwareSupports()).build();

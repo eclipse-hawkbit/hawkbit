@@ -36,7 +36,11 @@ public class InsufficientPermissionException extends AbstractServerRtException {
     /**
      * creates new InsufficientPermissionException.
      */
+    public InsufficientPermissionException(final String message) {
+        super(message, SpServerError.SP_INSUFFICIENT_PERMISSION);
+    }
+
     public InsufficientPermissionException() {
-        this(null);
+        super(SpServerError.SP_INSUFFICIENT_PERMISSION, null);
     }
 }

@@ -109,6 +109,11 @@ public interface Rollout extends NamedEntity {
     Optional<Integer> getWeight();
 
     /**
+     * @return the stored access control context (if present)
+     */
+    Optional<String> getAccessControlContext();
+
+    /**
      *
      * State machine for rollout.
      *

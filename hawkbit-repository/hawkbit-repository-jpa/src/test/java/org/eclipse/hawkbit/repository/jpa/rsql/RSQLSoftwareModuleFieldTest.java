@@ -102,7 +102,6 @@ public class RSQLSoftwareModuleFieldTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Test filter software module by name which contain mutated vowels ")
-    @Disabled("Temporarily disabled because test depends on collation settings of database")
     public void testFilterByParameterNameWithUmlaut() {
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ö*", 1);
         assertRSQLQuery(SoftwareModuleFields.NAME.name() + "==*Ä*", 1);

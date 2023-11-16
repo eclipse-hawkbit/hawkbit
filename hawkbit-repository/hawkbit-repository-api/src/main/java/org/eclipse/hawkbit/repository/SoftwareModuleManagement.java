@@ -108,7 +108,7 @@ public interface SoftwareModuleManagement
     /**
      * Deletes a software module meta data entry.
      *
-     * @param moduleId
+     * @param id
      *            where meta data has to be deleted
      * @param key
      *            of the metda data element
@@ -117,14 +117,14 @@ public interface SoftwareModuleManagement
      *             of module or metadata entry does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    void deleteMetaData(long moduleId, @NotEmpty String key);
+    void deleteMetaData(long id, @NotEmpty String key);
 
     /**
      * Returns all modules assigned to given {@link DistributionSet}.
      *
      * @param pageable
      *            the page request to page the result set
-     * @param setId
+     * @param distributionSetId
      *            to search for
      *
      * @return all {@link SoftwareModule}s that are assigned to given
@@ -134,12 +134,12 @@ public interface SoftwareModuleManagement
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, long setId);
+    Page<SoftwareModule> findByAssignedTo(@NotNull Pageable pageable, long distributionSetId);
 
     /**
      * Returns count of all modules assigned to given {@link DistributionSet}.
      *
-     * @param setId
+     * @param distributionSetId
      *            to search for
      *
      * @return count of {@link SoftwareModule}s that are assigned to given
@@ -149,7 +149,7 @@ public interface SoftwareModuleManagement
      *             if distribution set with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countByAssignedTo(long setId);
+    long countByAssignedTo(long distributionSetId);
 
     /**
      * Filter {@link SoftwareModule}s with given
@@ -192,7 +192,7 @@ public interface SoftwareModuleManagement
     /**
      * Finds a single software module meta data by its id.
      *
-     * @param moduleId
+     * @param id
      *            where meta data has to be found
      * @param key
      *            of the meta data element
@@ -202,14 +202,14 @@ public interface SoftwareModuleManagement
      *             is module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(long moduleId, @NotEmpty String key);
+    Optional<SoftwareModuleMetadata> getMetaDataBySoftwareModuleId(long id, @NotEmpty String key);
 
     /**
      * Finds all meta data by the given software module id.
      *
      * @param pageable
      *            the page request to page the result
-     * @param moduleId
+     * @param id
      *            the software module id to retrieve the meta data from
      *
      * @return a paged result of all meta data entries for a given software
@@ -219,12 +219,12 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long moduleId);
+    Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleId(@NotNull Pageable pageable, long id);
 
     /**
      * Counts all meta data by the given software module id.
      *
-     * @param moduleId
+     * @param id
      *            the software module id to retrieve the meta data count from
      *
      * @return count of all meta data entries for a given software module id
@@ -233,7 +233,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countMetaDataBySoftwareModuleId(long moduleId);
+    long countMetaDataBySoftwareModuleId(long id);
 
     /**
      * Finds all meta data by the given software module id where
@@ -241,7 +241,7 @@ public interface SoftwareModuleManagement
      *
      * @param pageable
      *            the page request to page the result
-     * @param moduleId
+     * @param id
      *            the software module id to retrieve the meta data from
      *
      * @return a paged result of all meta data entries for a given software
@@ -252,14 +252,14 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Page<SoftwareModuleMetadata> findMetaDataBySoftwareModuleIdAndTargetVisible(@NotNull Pageable pageable,
-            long moduleId);
+            long id);
 
     /**
      * Finds all meta data by the given software module id.
      *
      * @param pageable
      *            the page request to page the result
-     * @param moduleId
+     * @param id
      *            the software module id to retrieve the meta data from
      * @param rsqlParam
      *            filter definition in RSQL syntax
@@ -278,7 +278,7 @@ public interface SoftwareModuleManagement
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long moduleId,
+    Page<SoftwareModuleMetadata> findMetaDataByRsql(@NotNull Pageable pageable, long id,
             @NotNull String rsqlParam);
 
     /**
@@ -296,7 +296,7 @@ public interface SoftwareModuleManagement
      *
      * @param pageable
      *            page parameter
-     * @param orderByDistributionId
+     * @param orderByDistributionSetId
      *            the ID of distribution set to be ordered on top
      * @param searchText
      *            filtered as "like" on {@link SoftwareModule#getName()}
@@ -310,7 +310,7 @@ public interface SoftwareModuleManagement
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
     Slice<AssignedSoftwareModule> findAllOrderBySetAssignmentAndModuleNameAscModuleVersionAsc(
-            @NotNull Pageable pageable, long orderByDistributionId, String searchText, Long typeId);
+            @NotNull Pageable pageable, long orderByDistributionSetId, String searchText, Long typeId);
 
     /**
      * Retrieves the {@link SoftwareModule}s by their {@link SoftwareModuleType}

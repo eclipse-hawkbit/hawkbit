@@ -57,6 +57,8 @@ import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.builder.ActionStatusCreate;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -1417,6 +1419,8 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get()).isEqualTo(target);
     }
 
+    @Autowired
+    ActionRepository actionRepository;
     @ParameterizedTest
     @MethodSource("confirmationOptions")
     @Description("Ensures that confirmation option is considered in assignment request.")
@@ -1444,7 +1448,10 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
 
-        assertThat(deploymentManagement.findActionsByDistributionSet(PAGE, set.getId()).getContent()).hasSize(1)
+        assertThat(
+                actionRepository
+                        .findAll(ActionSpecifications.byDistributionSetId(set.getId()), PAGE)
+                        .map(Action.class::cast).getContent()).hasSize(1)
                 .allMatch(action -> {
                     if (!confirmationFlowActive) {
                         return !action.isWaitingConfirmation();

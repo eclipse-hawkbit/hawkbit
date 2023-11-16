@@ -11,16 +11,14 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
@@ -55,14 +53,14 @@ class AutoAssignCheckerTest {
     @Mock
     private PlatformTransactionManager transactionManager;
     @Mock
-    private TenantAware tenantAware;
+    private ContextAware contextAware;
 
     private AutoAssignChecker sut;
 
     @BeforeEach
     void before() {
         sut = new AutoAssignChecker(targetFilterQueryManagement, targetManagement, deploymentManagement,
-                transactionManager, tenantAware);
+                transactionManager, contextAware);
     }
 
     @Test
@@ -78,8 +76,8 @@ class AutoAssignCheckerTest {
 
         when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, matching.getQuery()))
                 .thenReturn(true);
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds,
-                notMatching.getQuery())).thenReturn(false);
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, notMatching.getQuery()))
+                .thenReturn(false);
 
         sut.checkSingleTarget(target);
 
@@ -107,7 +105,9 @@ class AutoAssignCheckerTest {
     }
 
     private void mockRunningAsNonSystem() {
-        when(tenantAware.getCurrentUsername()).thenReturn(getRandomString());
+        when(contextAware.getCurrentTenant()).thenReturn(getRandomString());
+        when(contextAware.runAsTenantAsUser(any(String.class), any(String.class), any(TenantAware.TenantRunner.class)))
+                .thenAnswer(i -> ((TenantAware.TenantRunner)i.getArgument(2)).run());
     }
 
     private static long getRandomLong() {

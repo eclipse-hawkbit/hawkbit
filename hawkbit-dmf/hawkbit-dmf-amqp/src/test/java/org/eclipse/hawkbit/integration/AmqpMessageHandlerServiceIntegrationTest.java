@@ -489,7 +489,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = TargetUpdatedEvent.class, count = 1), @Expect(type = TargetPollEvent.class, count = 2) })
-    void receiveDownLoadAndInstallMessageAfterAssignment() {
+    void receiveDownloadAndInstallMessageAfterAssignment() {
         final String controllerId = TARGET_PREFIX + "receiveDownLoadAndInstallMessageAfterAssignment";
 
         // setup

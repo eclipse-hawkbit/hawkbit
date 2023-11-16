@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.ui.AbstractHawkbitUI;
@@ -102,7 +103,8 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
             final TenantConfigurationManagement configManagement,
             final TargetManagementStateDataSupplier targetManagementStateDataSupplier,
             final SystemSecurityContext systemSecurityContext, @Qualifier("uiExecutor") final Executor uiExecutor,
-            final TenantAware tenantAware, final ConfirmationManagement confirmationManagement) {
+            final TenantAware tenantAware, final ConfirmationManagement confirmationManagement,
+            final ContextAware contextAware) {
         this.permChecker = permChecker;
         this.managementUIState = managementUIState;
 
@@ -112,14 +114,15 @@ public class DeploymentView extends AbstractEventListenersAwareView implements B
         if (permChecker.hasTargetReadPermission()) {
             this.targetTagFilterLayout = new TargetTagFilterLayout(uiDependencies, managementUIState,
                     targetFilterQueryManagement, targetTypeManagement, targetTagManagement, targetManagement,
-                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement);
+                    managementUIState.getTargetTagFilterLayoutUiState(), distributionSetTypeManagement, contextAware);
 
             this.targetGridLayout = new TargetGridLayout(uiDependencies, targetManagement, targetTypeManagement,
                     deploymentManagement, uiProperties, targetTagManagement, distributionSetManagement, uiExecutor,
                     configManagement, targetManagementStateDataSupplier, systemSecurityContext,
                     managementUIState.getTargetTagFilterLayoutUiState(), managementUIState.getTargetGridLayoutUiState(),
                     managementUIState.getTargetBulkUploadUiState(),
-                    managementUIState.getDistributionGridLayoutUiState(), tenantAware, confirmationManagement);
+                    managementUIState.getDistributionGridLayoutUiState(), tenantAware, confirmationManagement,
+                    contextAware);
             this.targetCountLayout = targetGridLayout.getCountMessageLabel().createFooterMessageComponent();
 
             this.actionHistoryLayout = new ActionHistoryLayout(uiDependencies, deploymentManagement,

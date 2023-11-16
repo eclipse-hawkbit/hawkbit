@@ -58,7 +58,7 @@ public class AutoAssignScheduler {
 
     /**
      * Scheduler method called by the spring-async mechanism. Retrieves all
-     * tenants from the {@link SystemManagement#findTenants()} and runs for each
+     * tenants and runs for each
      * tenant the auto assignments defined in the target filter queries
      * {@link SystemSecurityContext}.
      */
@@ -83,7 +83,7 @@ public class AutoAssignScheduler {
         }
 
         try {
-            LOGGER.debug("Auto assign scheduled execution has aquired lock and started for each tenant.");
+            LOGGER.debug("Auto assign scheduled execution has acquired lock and started for each tenant.");
             systemManagement.forEachTenant(tenant -> autoAssignExecutor.checkAllTargets());
         } finally {
             lock.unlock();

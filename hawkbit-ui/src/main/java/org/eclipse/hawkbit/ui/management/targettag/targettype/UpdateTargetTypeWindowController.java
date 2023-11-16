@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractEntityWindowLayout;
@@ -37,6 +38,7 @@ public class UpdateTargetTypeWindowController
     private final TypeToProxyTypeMapper<DistributionSetType> dsTypeToProxyTypeMapper;
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
+    private final ContextAware contextAware;
 
     private String nameBeforeEdit;
 
@@ -49,13 +51,16 @@ public class UpdateTargetTypeWindowController
      *            TargetTypeManagement
      * @param layout
      *            TargetTypeWindowLayout
+     * @param contextAware
+     *            ContextAware
      */
     public UpdateTargetTypeWindowController(final CommonUiDependencies uiDependencies,
-                                            final TargetTypeManagement targetTypeManagement,
-                                            final TargetTypeWindowLayout layout) {
+            final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
+        this.contextAware = contextAware;
         this.dsTypeToProxyTypeMapper = new TypeToProxyTypeMapper<>();
         this.layout = layout;
         this.validator = new ProxyTargetTypeValidator(uiDependencies);
@@ -89,14 +94,16 @@ public class UpdateTargetTypeWindowController
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
 
-        final Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId).collect(Collectors.toSet());
+        final Set<Long> dsTypesIds = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
+                .collect(Collectors.toSet());
 
-        final Set<Long> selectedDsIds = entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet());
+        final Set<Long> selectedDsIds = entity.getSelectedDsTypes().stream().map(ProxyType::getId)
+                .collect(Collectors.toSet());
 
         final Set<Long> dsTypesForRemoval = getDsTypesByDsTypeId(entity.getId()).stream().map(ProxyType::getId)
                 .filter(dsType -> !selectedDsIds.contains(dsType)).collect(Collectors.toSet());
-        final Set<Long> dsTypesForAdd = selectedDsIds.stream()
-                .filter(dsType -> !dsTypesIds.contains(dsType)).collect(Collectors.toSet());
+        final Set<Long> dsTypesForAdd = selectedDsIds.stream().filter(dsType -> !dsTypesIds.contains(dsType))
+                .collect(Collectors.toSet());
 
         dsTypesForRemoval.forEach(dsType -> targetTypeManagement.unassignDistributionSetType(entity.getId(), dsType));
 
@@ -104,8 +111,8 @@ public class UpdateTargetTypeWindowController
             targetTypeManagement.assignCompatibleDistributionSetTypes(entity.getId(), dsTypesForAdd);
         }
 
-        return targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId())
-                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour()));
+        return targetTypeManagement.update(getEntityFactory().targetType().update(entity.getId()).name(entity.getName())
+                .description(entity.getDescription()).colour(entity.getColour()));
 
     }
 
@@ -123,7 +130,9 @@ public class UpdateTargetTypeWindowController
     protected boolean isEntityValid(final ProxyTargetType entity) {
         final String name = entity.getName();
         return validator.isEntityValid(entity,
-                () -> hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent());
+                () -> contextAware.runAsTenant( // disable acm checks
+                        contextAware.getCurrentTenant(),
+                        () -> hasNamedChanged(name) && targetTypeManagement.getByName(name).isPresent()));
     }
 
     private boolean hasNamedChanged(final String trimmedName) {

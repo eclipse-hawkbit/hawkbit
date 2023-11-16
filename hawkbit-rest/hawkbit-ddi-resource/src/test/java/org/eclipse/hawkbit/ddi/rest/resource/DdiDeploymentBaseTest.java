@@ -37,6 +37,10 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -50,7 +54,10 @@ import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.rest.exception.MessageNotReadableException;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -171,7 +178,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
@@ -268,7 +275,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
@@ -307,7 +314,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(deploymentManagement.countActionsAll()).isEqualTo(1);
         assignDistributionSet(ds2, saved).getAssignedEntity();
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).hasSize(2);
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(countActionStatusAll()).isEqualTo(2);
 
         final Action uaction = deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())
                 .getContent().get(0);
@@ -325,7 +332,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
@@ -391,7 +398,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
                 .isGreaterThanOrEqualTo(current);
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getLastTargetQuery())
                 .isLessThanOrEqualTo(System.currentTimeMillis());
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(2);
+        assertThat(countActionStatusAll()).isEqualTo(2);
 
         final DistributionSet findDistributionSetByAction = distributionSetManagement.getByAction(action.getId()).get();
 
@@ -538,6 +545,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     }
 
+    @Autowired
+    ActionRepository actionRepository;
     @Test
     @Description("Verifies that an update action is correctly set to error if the controller provides error feedback.")
     public void rootRsSingleDeploymentActionWithErrorFeedback() throws Exception {
@@ -547,7 +556,9 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(targetManagement.getByControllerID(DEFAULT_CONTROLLER_ID).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.UNKNOWN);
         assignDistributionSet(ds, Collections.singletonList(savedTarget));
-        final Action action = deploymentManagement.findActionsByDistributionSet(PAGE, ds.getId()).getContent().get(0);
+        final Action action = actionRepository
+                .findAll(ActionSpecifications.byDistributionSetId(ds.getId()), PAGE)
+                .map(Action.class::cast).getContent().get(0);
 
         postDeploymentFeedback(DEFAULT_CONTROLLER_ID, action.getId(),
                 getJsonActionFeedback(DdiStatus.ExecutionStatus.CLOSED, DdiResult.FinalResult.FAILURE,
@@ -569,7 +580,7 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         findTargetAndAssertUpdateStatus(Optional.of(ds), TargetUpdateStatus.IN_SYNC, 0, Optional.of(ds));
         assertTargetCountByStatus(0, 0, 1);
         assertThat(deploymentManagement.findInActiveActionsByTarget(PAGE, DEFAULT_CONTROLLER_ID)).hasSize(2);
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(4);
+        assertThat(countActionStatusAll()).isEqualTo(4);
         assertThat(deploymentManagement.findActionStatusByAction(PAGE, action.getId()).getContent()).haveAtLeast(1,
                 new ActionStatusCondition(Status.ERROR));
         assertThat(deploymentManagement.findActionStatusByAction(PAGE, action2.getId()).getContent()).haveAtLeast(1,
@@ -733,8 +744,8 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertTargetCountByStatus(1, 0, 0);
 
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId())).hasSize(1);
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(actionStatusCount);
-        assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(minActionStatusCountInPage,
+        assertThat(countActionStatusAll()).isEqualTo(actionStatusCount);
+        assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(minActionStatusCountInPage,
                 new ActionStatusCondition(Status.RUNNING));
     }
 
@@ -755,13 +766,13 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         final Target savedTarget = testdataFactory.createTarget(DdiDeploymentBaseTest.DEFAULT_CONTROLLER_ID);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isZero();
-        assertThat(deploymentManagement.countActionStatusAll()).isZero();
+        assertThat(countActionStatusAll()).isZero();
         return savedTarget;
     }
 
     private void assertStatusMessagesCount(final int actionStatusMessagesCount) {
         final Iterable<ActionStatus> actionStatusMessages;
-        actionStatusMessages = deploymentManagement.findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id"))
+        actionStatusMessages = findActionStatusAll(PageRequest.of(0, 100, Direction.DESC, "id"))
                 .getContent();
         assertThat(actionStatusMessages).hasSize(actionStatusMessagesCount);
         assertThat(actionStatusMessages).haveAtLeast(1, new ActionStatusCondition(Status.FINISHED));
@@ -787,14 +798,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
 
     private void assertActionStatusCount(final int total, final int running, final int warning, final int finished,
             final int canceled) {
-        assertThat(deploymentManagement.countActionStatusAll()).isEqualTo(total);
-        assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(running,
+        assertThat(countActionStatusAll()).isEqualTo(total);
+        assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(running,
                 new ActionStatusCondition(Status.RUNNING));
-        assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(warning,
+        assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(warning,
                 new ActionStatusCondition(Status.WARNING));
-        assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(canceled,
+        assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(canceled,
                 new ActionStatusCondition(Status.CANCELED));
-        assertThat(deploymentManagement.findActionStatusAll(PAGE).getContent()).haveAtLeast(finished,
+        assertThat(findActionStatusAll(PAGE).getContent()).haveAtLeast(finished,
                 new ActionStatusCondition(Status.FINISHED));
     }
 
@@ -803,5 +814,14 @@ public class DdiDeploymentBaseTest extends AbstractDDiApiIntegrationTest {
         assertThat(target.getUpdateStatus()).isEqualTo(status);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, target.getControllerId()))
                 .hasSize(activeActions);
+    }
+
+    @Autowired
+    ActionStatusRepository actionStatusRepository;
+    private Page<ActionStatus> findActionStatusAll(final Pageable pageable) {
+        return JpaManagementHelper.findAllWithCountBySpec(actionStatusRepository, pageable, null);
+    }
+    public long countActionStatusAll() {
+        return actionStatusRepository.count();
     }
 }

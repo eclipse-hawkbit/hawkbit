@@ -52,7 +52,7 @@ public interface DistributionSetTypeManagement
     /**
      * Assigns {@link DistributionSetType#getMandatoryModuleTypes()}.
      * 
-     * @param dsTypeId
+     * @param id
      *            to update
      * @param softwareModuleTypeIds
      *            to assign
@@ -71,15 +71,14 @@ public interface DistributionSetTypeManagement
      *             exceeded for the addressed {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignOptionalSoftwareModuleTypes(long dsTypeId,
-            @NotEmpty Collection<Long> softwareModuleTypeIds);
+    DistributionSetType assignOptionalSoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Assigns {@link DistributionSetType#getOptionalModuleTypes()}.
      * 
-     * @param dsTypeId
+     * @param id
      *            to update
-     * @param softwareModuleTypes
+     * @param softwareModuleTypeIds
      *            to assign
      * @return updated {@link DistributionSetType}
      * 
@@ -96,17 +95,16 @@ public interface DistributionSetTypeManagement
      *             exceeded for the addressed {@link DistributionSetType}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType assignMandatorySoftwareModuleTypes(long dsTypeId,
-            @NotEmpty Collection<Long> softwareModuleTypes);
+    DistributionSetType assignMandatorySoftwareModuleTypes(long id, @NotEmpty Collection<Long> softwareModuleTypeIds);
 
     /**
      * Unassigns a {@link SoftwareModuleType} from the
      * {@link DistributionSetType}. Does nothing if {@link SoftwareModuleType}
      * has not been assigned in the first place.
      * 
-     * @param dsTypeId
+     * @param id
      *            to update
-     * @param softwareModuleId
+     * @param softwareModuleTypeId
      *            to unassign
      * @return updated {@link DistributionSetType}
      * 
@@ -118,6 +116,5 @@ public interface DistributionSetTypeManagement
      *             by a {@link DistributionSet}
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
-    DistributionSetType unassignSoftwareModuleType(long dsTypeId, long softwareModuleId);
-
+    DistributionSetType unassignSoftwareModuleType(long id, long softwareModuleTypeId);
 }

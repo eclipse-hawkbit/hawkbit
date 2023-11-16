@@ -35,6 +35,10 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.RolloutTargetGroup;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.RolloutRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.RolloutTargetGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.EvaluatorNotConfiguredException;
 import org.eclipse.hawkbit.repository.jpa.rollout.condition.RolloutGroupEvaluationManager;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -529,8 +533,8 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countAllTargetsByTargetFilterQueryAndNotInRolloutGroups",
-                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatible(readyGroups, groupTargetFilter,
-                    rollout.getDistributionSet().getType()));
+                count -> targetManagement.countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(readyGroups,
+                        groupTargetFilter, rollout.getDistributionSet().getType()));
         } else {
             targetsInGroupFilter = DeploymentHelper.runInNewTransaction(txManager,
                 "countByFailedRolloutAndNotInRolloutGroupsAndCompatible",
@@ -582,7 +586,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                     RolloutGroupStatus.READY, group);
             Slice<Target> targets;
             if (!RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
-                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatible(
+                targets = targetManagement.findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(
                     pageRequest, readyGroups, targetFilter, rollout.getDistributionSet().getType());
             } else {
                 targets = targetManagement.findByFailedRolloutAndNotInRolloutGroups(

@@ -20,9 +20,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -58,7 +59,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
     private AutoAssignChecker autoAssignChecker;
 
     @Autowired
-    private ActionRepository actionRepository;
+    private DeploymentManagement deploymentManagement;
 
     @Test
     @Description("Verifies that a running action is auto canceled by a AutoAssignment which assigns another distribution-set.")
@@ -141,7 +142,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(10, 20), targetsCount);
 
         // Count the number of targets that will be assigned with setA
-        assertThat(targetManagement.countByRsqlAndNonDSAndCompatible(setA.getId(), targetFilterQuery.getQuery()))
+        assertThat(targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(setA.getId(), targetFilterQuery.getQuery()))
                 .isEqualTo(15);
 
         // Run the check
@@ -322,7 +323,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         assertThat(targetsWithAssignedDS).isNotEmpty();
         assertThat(targetsWithAssignedDS).allMatch(target -> targetIds.contains(target.getControllerId()));
 
-        final List<Action> actionsByDs = deploymentManagement.findActionsByDistributionSet(PAGE, set.getId())
+        final List<Action> actionsByDs = findActionsByDistributionSet(PAGE, set.getId())
                 .getContent();
 
         assertThat(actionsByDs).hasSize(targets.size());
@@ -349,7 +350,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
             final DistributionSet distributionSet, final List<Target> targets) {
         final Set<String> targetIds = targets.stream().map(Target::getControllerId).collect(Collectors.toSet());
 
-        actionRepository.findByDistributionSetId(Pageable.unpaged(), distributionSet.getId()).stream()
+        findActionsByDistributionSet(Pageable.unpaged(), distributionSet.getId()).stream()
                 .filter(a -> targetIds.contains(a.getTarget().getControllerId()))
                 .forEach(a -> assertThat(a.getInitiatedBy())
                         .as("Action should be initiated by the user who initiated the auto assignment")
@@ -480,7 +481,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         final List<Long> compatibleTargets = Stream
                 .of(compatibleTargetsSingleType, compatibleTargetsMultiType, compatibleTargetsWithoutType)
                 .flatMap(Collection::stream).map(Target::getId).collect(Collectors.toList());
-        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatible(testDs.getId(),
+        final long compatibleCount = targetManagement.countByRsqlAndNonDSAndCompatibleAndUpdatable(testDs.getId(),
                 testFilter.getQuery());
         assertThat(compatibleCount).isEqualTo(compatibleTargets.size());
 
@@ -490,5 +491,11 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         assertThat(actions).hasSize(compatibleTargets.size());
         final List<Long> actionTargets = actions.stream().map(a -> a.getTarget().getId()).collect(Collectors.toList());
         assertThat(actionTargets).containsExactlyInAnyOrderElementsOf(compatibleTargets);
+    }
+
+    private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {
+        return actionRepository
+                .findAll(ActionSpecifications.byDistributionSetId(distributionSetId), pageable)
+                .map(Action.class::cast);
     }
 }

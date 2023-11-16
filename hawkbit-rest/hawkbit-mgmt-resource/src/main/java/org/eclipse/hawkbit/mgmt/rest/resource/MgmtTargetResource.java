@@ -159,7 +159,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
         if (targetRest.getTargetType() != null && targetRest.getTargetType() == -1L) {
             // if targetType in request is -1 - unassign targetType from target
-            this.targetManagement.unAssignType(targetId);
+            this.targetManagement.unassignType(targetId);
             // update target without targetType here ...
             updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
@@ -189,7 +189,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<Void> unassignTargetType(@PathVariable("targetId") final String targetId) {
-        this.targetManagement.unAssignType(targetId);
+        this.targetManagement.unassignType(targetId);
         return ResponseEntity.ok().build();
     }
 

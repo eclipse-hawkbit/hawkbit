@@ -10,14 +10,13 @@
 package org.eclipse.hawkbit.repository.jpa;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
-import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +34,7 @@ public class JpaRolloutHandler implements RolloutHandler {
     private final RolloutExecutor rolloutExecutor;
     private final LockRegistry lockRegistry;
     private final PlatformTransactionManager txManager;
+    private final ContextAware contextAware;
 
     /**
      * Constructor
@@ -52,12 +52,14 @@ public class JpaRolloutHandler implements RolloutHandler {
      */
     public JpaRolloutHandler(final TenantAware tenantAware, final RolloutManagement rolloutManagement,
             final RolloutExecutor rolloutExecutor, final LockRegistry lockRegistry,
-            final PlatformTransactionManager txManager) {
+            final PlatformTransactionManager txManager,
+            final ContextAware contextAware) {
         this.tenantAware = tenantAware;
         this.rolloutManagement = rolloutManagement;
         this.rolloutExecutor = rolloutExecutor;
         this.lockRegistry = lockRegistry;
         this.txManager = txManager;
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -92,19 +94,29 @@ public class JpaRolloutHandler implements RolloutHandler {
         return tenant + "-rollout";
     }
 
+    // run in a tenant context, i.e. contextAware.getCurrentTenant() returns the tenant
+    // the rollout is made for
     private void handleRolloutInNewTransaction(final long rolloutId, final String handlerId) {
         DeploymentHelper.runInNewTransaction(txManager, handlerId + "-" + rolloutId, status -> {
             rolloutManagement.get(rolloutId).ifPresentOrElse(
-                    rollout -> runInUserContext(rollout, () -> rolloutExecutor.execute(rollout)),
+                    rollout -> {
+                        rollout.getAccessControlContext().ifPresentOrElse(
+                            context -> // has stored context - executes it with it
+                                contextAware.runInContext(
+                                    context,
+                                    () -> rolloutExecutor.execute(rollout)),
+                            () -> // has no stored context - executes it in the tenant & user scope
+                                contextAware.runAsTenantAsUser(
+                                    contextAware.getCurrentTenant(),
+                                    rollout.getCreatedBy(), () -> {
+                                        rolloutExecutor.execute(rollout);
+                                        return null;
+                                    })
+                        );
+                    },
                     () -> LOGGER.error("Could not retrieve rollout with id {}. Will not continue with execution.",
                             rolloutId));
             return 0L;
         });
     }
-
-    private void runInUserContext(final BaseEntity rollout, final Runnable handler) {
-        DeploymentHelper.runInNonSystemContext(handler, () -> Objects.requireNonNull(rollout.getCreatedBy()),
-                tenantAware);
-    }
-
 }

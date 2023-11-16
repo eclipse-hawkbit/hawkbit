@@ -41,6 +41,8 @@ import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedE
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
+import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -52,7 +54,10 @@ import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
@@ -580,12 +585,13 @@ public class DdiInstalledBaseTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotAcceptable());
     }
 
+    @Autowired
+    ActionStatusRepository actionStatusRepository;
     private Target createTargetAndAssertNoActiveActions() {
         final Target savedTarget = testdataFactory.createTarget(CONTROLLER_ID);
         assertThat(deploymentManagement.findActiveActionsByTarget(PAGE, savedTarget.getControllerId())).isEmpty();
         assertThat(deploymentManagement.countActionsAll()).isZero();
-        assertThat(deploymentManagement.countActionStatusAll()).isZero();
+        assertThat(actionStatusRepository.count()).isZero();
         return savedTarget;
     }
-
 }

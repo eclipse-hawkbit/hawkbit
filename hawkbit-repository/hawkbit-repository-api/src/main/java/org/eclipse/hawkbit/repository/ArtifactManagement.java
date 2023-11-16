@@ -69,22 +69,6 @@ public interface ArtifactManagement {
     Artifact create(@NotNull @Valid ArtifactUpload artifactUpload);
 
     /**
-     * Garbage collects artifact binaries if only referenced by given
-     * {@link SoftwareModule#getId()} or {@link SoftwareModule}'s that are
-     * marked as deleted.
-     * 
-     *
-     * @param artifactSha1Hash
-     *            no longer needed
-     * @param moduleId
-     *            the garbage collection call is made for
-     * 
-     * @return <code>true</code> if an binary was actually garbage collected
-     */
-    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_DELETE_REPOSITORY)
-    boolean clearArtifactBinary(@NotEmpty String artifactSha1Hash, long moduleId);
-
-    /**
      * Deletes {@link Artifact} based on given id.
      *
      * @param id
@@ -151,7 +135,7 @@ public interface ArtifactManagement {
      *
      * @param pageReq
      *            Pageable parameter
-     * @param swId
+     * @param softwareModuleId
      *            software module id
      * @return Page<Artifact>
      * 
@@ -159,12 +143,12 @@ public interface ArtifactManagement {
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long swId);
+    Page<Artifact> findBySoftwareModule(@NotNull Pageable pageReq, long softwareModuleId);
 
     /**
      * Count local artifacts for a base software module.
      *
-     * @param swId
+     * @param softwareModuleId
      *            software module id
      * @return count by software module
      * 
@@ -172,7 +156,7 @@ public interface ArtifactManagement {
      *             if software module with given ID does not exist
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_REPOSITORY)
-    long countBySoftwareModule(long swId);
+    long countBySoftwareModule(long softwareModuleId);
 
     /**
      * Loads {@link DbArtifact} from store for given {@link Artifact}.

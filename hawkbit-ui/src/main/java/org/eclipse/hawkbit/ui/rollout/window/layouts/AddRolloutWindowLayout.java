@@ -134,6 +134,7 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     }
 
     private Long getTotalTargets(final String filterQuery, final Long distSetTypeId) {
+        // TODO AC -  Check for updatable targets only
         if (StringUtils.isEmpty(filterQuery)) {
             return null;
         }

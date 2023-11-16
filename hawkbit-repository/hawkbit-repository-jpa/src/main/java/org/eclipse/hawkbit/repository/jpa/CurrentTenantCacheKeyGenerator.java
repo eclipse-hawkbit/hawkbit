@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
+import org.eclipse.hawkbit.repository.jpa.management.JpaSystemManagement;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;

@@ -11,14 +11,15 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
-import org.eclipse.hawkbit.repository.jpa.ActionRepository;
-import org.eclipse.hawkbit.repository.jpa.TargetRepository;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
+import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
+import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
+import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -26,6 +27,7 @@ import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Isolation;
@@ -66,8 +68,12 @@ public final class DeploymentHelper {
         action.setStatus(Status.CANCELED);
 
         final JpaTarget target = (JpaTarget) action.getTarget();
-        final List<Action> nextActiveActions = actionRepository.findByTargetAndActiveOrderByIdAsc(target, true).stream()
-                .filter(a -> !a.getId().equals(action.getId())).collect(Collectors.toList());
+        final List<Action> nextActiveActions = actionRepository
+                .findAll(ActionSpecifications.byTargetIdAndIsActive(target.getId()), Sort.by(Sort.Order.asc(JpaAction_.ID)))
+                .stream()
+                .filter(a -> !a.getId().equals(action.getId()))
+                .map(Action.class::cast)
+                .toList();
 
         if (nextActiveActions.isEmpty()) {
             target.setAssignedDistributionSet(target.getInstalledDistributionSet());

@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleManagement;
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
+import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
 import org.eclipse.hawkbit.repository.TargetManagement;
 import org.eclipse.hawkbit.repository.TargetTagManagement;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.ArtifactUpload;
 import org.eclipse.hawkbit.repository.model.BaseEntity;
+import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
@@ -71,11 +73,13 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.google.common.collect.Lists;
 
@@ -127,8 +131,8 @@ public class TestdataFactory {
     public static final String SM_TYPE_RT = "runtime";
 
     /**
-     * Key of test "application" {@link SoftwareModuleType} : optional software
-     * in {@link #DS_TYPE_DEFAULT}.
+     * Key of test "application" {@link SoftwareModuleType} : optional software in
+     * {@link #DS_TYPE_DEFAULT}.
      */
     public static final String SM_TYPE_APP = "application";
 
@@ -154,6 +158,9 @@ public class TestdataFactory {
 
     @Autowired
     private TargetManagement targetManagement;
+
+    @Autowired
+    private TargetFilterQueryManagement targetFilterQueryManagement;
 
     @Autowired
     private TargetTypeManagement targetTypeManagement;
@@ -182,10 +189,20 @@ public class TestdataFactory {
     @Autowired
     private QuotaManagement quotaManagement;
 
+    public Action performAssignment(final DistributionSet distributionSet) {
+        final Target target = createTarget(RandomStringUtils.randomAlphanumeric(5));
+        final DeploymentRequest deploymentRequest = new DeploymentRequest(target.getControllerId(),
+                distributionSet.getId(), ActionType.FORCED, 0, null, null, null, null, false);
+        deploymentManagement.assignDistributionSets(Collections.singletonList(deploymentRequest));
+
+        return deploymentManagement.findActionsByTarget(target.getControllerId(), Pageable.unpaged()).getContent()
+                .get(0);
+    }
+
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
      * @param prefix
@@ -200,8 +217,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
      * @return {@link DistributionSet} entity.
@@ -212,8 +229,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
      * @param modules
@@ -227,8 +244,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
      * @param modules
@@ -245,8 +262,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION}.
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION}.
      *
      * @param prefix
      *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
@@ -262,8 +279,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} and
      * {@link DistributionSet#isRequiredMigrationStep()} <code>false</code>.
      *
      * @param prefix
@@ -280,16 +297,15 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP}.
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP}.
      *
      * @param prefix
      *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
      *            vendor and description.
      * @param version
      *            {@link DistributionSet#getVersion()} and
-     *            {@link SoftwareModule#getVersion()} extended by a random
-     *            number.
+     *            {@link SoftwareModule#getVersion()} extended by a random number.
      * @param isRequiredMigrationStep
      *            for {@link DistributionSet#isRequiredMigrationStep()}
      *
@@ -350,8 +366,7 @@ public class TestdataFactory {
      *            vendor and description.
      * @param version
      *            {@link DistributionSet#getVersion()} and
-     *            {@link SoftwareModule#getVersion()} extended by a random
-     *            number.
+     *            {@link SoftwareModule#getVersion()} extended by a random number.
      * @param isRequiredMigrationStep
      *            for {@link DistributionSet#isRequiredMigrationStep()}
      * @param modules
@@ -371,8 +386,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet} in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP}.
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP}.
      *
      * @param prefix
      *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
@@ -399,9 +414,9 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet}s in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an
-     * iterative number and {@link DistributionSet#isRequiredMigrationStep()}
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative
+     * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
      * @param number
@@ -415,8 +430,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Create a list of {@link DistributionSet}s without modules, i.e.
-     * incomplete.
+     * Create a list of {@link DistributionSet}s without modules, i.e. incomplete.
      *
      * @param number
      *            of {@link DistributionSet}s to create
@@ -436,9 +450,9 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet}s in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an
-     * iterative number and {@link DistributionSet#isRequiredMigrationStep()}
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative
+     * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
      * @param prefix
@@ -478,8 +492,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link Artifact}s for given {@link SoftwareModule} with a small
-     * text payload.
+     * Creates {@link Artifact}s for given {@link SoftwareModule} with a small text
+     * payload.
      *
      * @param moduleId
      *            the {@link Artifact}s belong to.
@@ -497,8 +511,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Create an {@link Artifact} for given {@link SoftwareModule} with a small
-     * text payload.
+     * Create an {@link Artifact} for given {@link SoftwareModule} with a small text
+     * payload.
      *
      * @param artifactData
      *            the {@link Artifact} Inputstream
@@ -518,8 +532,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Create an {@link Artifact} for given {@link SoftwareModule} with a small
-     * text payload.
+     * Create an {@link Artifact} for given {@link SoftwareModule} with a small text
+     * payload.
      *
      * @param artifactData
      *            the {@link Artifact} Inputstream
@@ -543,8 +557,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link SoftwareModule} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * {@link #DEFAULT_VERSION} and random generated {@link Target#getDescription()}
+     * in the repository.
      *
      * @param typeKey
      *            of the {@link SoftwareModuleType}
@@ -556,10 +570,9 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link SoftwareModule} of type
-     * {@value Constants#SMT_DEFAULT_APP_KEY} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_APP_KEY}
+     * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
+     * generated {@link Target#getDescription()} in the repository.
      *
      *
      * @return persisted {@link SoftwareModule}.
@@ -569,10 +582,9 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link SoftwareModule} of type
-     * {@value Constants#SMT_DEFAULT_APP_KEY} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_APP_KEY}
+     * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
+     * generated {@link Target#getDescription()} in the repository.
      *
      * @param prefix
      *            added to name and version
@@ -585,10 +597,9 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link SoftwareModule} of type
-     * {@value Constants#SMT_DEFAULT_OS_KEY} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_OS_KEY}
+     * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
+     * generated {@link Target#getDescription()} in the repository.
      *
      *
      * @return persisted {@link SoftwareModule}.
@@ -598,10 +609,9 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link SoftwareModule} of type
-     * {@value Constants#SMT_DEFAULT_OS_KEY} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * Creates {@link SoftwareModule} of type {@value Constants#SMT_DEFAULT_OS_KEY}
+     * with {@link #DEFAULT_VENDOR} and {@link #DEFAULT_VERSION} and random
+     * generated {@link Target#getDescription()} in the repository.
      *
      * @param prefix
      *            added to name and version
@@ -615,8 +625,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link SoftwareModule} with {@link #DEFAULT_VENDOR} and
-     * {@link #DEFAULT_VERSION} and random generated
-     * {@link Target#getDescription()} in the repository.
+     * {@link #DEFAULT_VERSION} and random generated {@link Target#getDescription()}
+     * in the repository.
      *
      * @param typeKey
      *            of the {@link SoftwareModuleType}
@@ -695,15 +705,14 @@ public class TestdataFactory {
 
     /**
      * Creates {@link DistributionSet}s in repository including three
-     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
-     * , {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an
-     * iterative number and {@link DistributionSet#isRequiredMigrationStep()}
+     * {@link SoftwareModule}s of types {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT} ,
+     * {@link #SM_TYPE_APP} with {@link #DEFAULT_VERSION} followed by an iterative
+     * number and {@link DistributionSet#isRequiredMigrationStep()}
      * <code>false</code>.
      *
      * In addition it updates the created {@link DistributionSet}s and
-     * {@link SoftwareModule}s to ensure that
-     * {@link BaseEntity#getLastModifiedAt()} and
-     * {@link BaseEntity#getLastModifiedBy()} is filled.
+     * {@link SoftwareModule}s to ensure that {@link BaseEntity#getLastModifiedAt()}
+     * and {@link BaseEntity#getLastModifiedBy()} is filled.
      *
      * @return persisted {@link DistributionSet}.
      */
@@ -721,8 +730,8 @@ public class TestdataFactory {
 
     /**
      * @return {@link DistributionSetType} with key {@link #DS_TYPE_DEFAULT} and
-     *         {@link SoftwareModuleType}s {@link #SM_TYPE_OS},
-     *         {@link #SM_TYPE_RT} , {@link #SM_TYPE_APP}.
+     *         {@link SoftwareModuleType}s {@link #SM_TYPE_OS}, {@link #SM_TYPE_RT}
+     *         , {@link #SM_TYPE_APP}.
      */
     public DistributionSetType findOrCreateDefaultTestDsType() {
         final List<SoftwareModuleType> mand = new ArrayList<>();
@@ -778,8 +787,8 @@ public class TestdataFactory {
 
     /**
      * Finds {@link SoftwareModuleType} in repository with given
-     * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet
-     * with {@link SoftwareModuleType#getMaxAssignments()} = 1.
+     * {@link SoftwareModuleType#getKey()} or creates if it does not exist yet with
+     * {@link SoftwareModuleType#getMaxAssignments()} = 1.
      *
      * @param key
      *            {@link SoftwareModuleType#getKey()}
@@ -887,9 +896,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates {@link Target}s in repository and with
-     * {@link #DEFAULT_CONTROLLER_ID} as prefix for
-     * {@link Target#getControllerId()}.
+     * Creates {@link Target}s in repository and with {@link #DEFAULT_CONTROLLER_ID}
+     * as prefix for {@link Target#getControllerId()}.
      *
      * @param number
      *            of {@link Target}s to create
@@ -975,8 +983,7 @@ public class TestdataFactory {
 
     /**
      * Builds {@link Target} objects with given prefix for
-     * {@link Target#getControllerId()} followed by a number suffix starting
-     * with 0.
+     * {@link Target#getControllerId()} followed by a number suffix starting with 0.
      *
      * @param numberOfTargets
      *            of {@link Target}s to generate
@@ -1102,8 +1109,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Append {@link ActionStatus} to all {@link Action}s of given
-     * {@link Target}s.
+     * Append {@link ActionStatus} to all {@link Action}s of given {@link Target}s.
      *
      * @param targets
      *            to add {@link ActionStatus}
@@ -1120,8 +1126,7 @@ public class TestdataFactory {
     }
 
     /**
-     * Append {@link ActionStatus} to all {@link Action}s of given
-     * {@link Target}s.
+     * Append {@link ActionStatus} to all {@link Action}s of given {@link Target}s.
      *
      * @param targets
      *            to add {@link ActionStatus}
@@ -1143,6 +1148,15 @@ public class TestdataFactory {
             }
         }
         return result;
+    }
+
+    public TargetFilterQuery createTargetFilterWithTargetsAndActiveAutoAssignment() {
+        createTargets(quotaManagement.getMaxTargetsPerAutoAssignment());
+        final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
+                .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
+
+        return targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
+                .updateAutoAssign(targetFilterQuery.getId()).ds(createDistributionSet().getId()));
     }
 
     /**
@@ -1200,8 +1214,8 @@ public class TestdataFactory {
      * @param weight
      *            weight of the Rollout
      * @param confirmationRequired
-     *            if the confirmation is required (considered with confirmation
-     *            flow active)
+     *            if the confirmation is required (considered with confirmation flow
+     *            active)
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
@@ -1229,8 +1243,8 @@ public class TestdataFactory {
      * {@link Target}s.
      *
      * @param prefix
-     *            for rollouts name, description,
-     *            {@link Target#getControllerId()} filter
+     *            for rollouts name, description, {@link Target#getControllerId()}
+     *            filter
      * @return created {@link Rollout}
      */
     public Rollout createRollout(final String prefix) {
@@ -1356,12 +1370,12 @@ public class TestdataFactory {
     }
 
     /**
-     * Create the soft deleted {@link Rollout} with a new
-     * {@link DistributionSet} and {@link Target}s.
+     * Create the soft deleted {@link Rollout} with a new {@link DistributionSet}
+     * and {@link Target}s.
      *
      * @param prefix
-     *            for rollouts name, description,
-     *            {@link Target#getControllerId()} filter
+     *            for rollouts name, description, {@link Target#getControllerId()}
+     *            filter
      * @return created {@link Rollout}
      */
     public Rollout createSoftDeletedRollout(final String prefix) {
@@ -1375,8 +1389,8 @@ public class TestdataFactory {
 
     /**
      * Finds {@link TargetType} in repository with given
-     * {@link TargetType#getName()} or creates if it does not exist yet. No ds
-     * types are assigned on creation.
+     * {@link TargetType#getName()} or creates if it does not exist yet. No ds types
+     * are assigned on creation.
      *
      * @param targetTypeName
      *            {@link TargetType#getName()}
@@ -1391,8 +1405,8 @@ public class TestdataFactory {
 
     /**
      * Creates {@link TargetType} in repository with given
-     * {@link TargetType#getName()}. Compatible distribution set types are
-     * assigned on creation
+     * {@link TargetType#getName()}. Compatible distribution set types are assigned
+     * on creation
      *
      * @param targetTypeName
      *            {@link TargetType#getName()}
@@ -1424,8 +1438,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set and directly invalidates it. No actions will
-     * be canceled and no rollouts will be stopped with this invalidation.
+     * Creates a distribution set and directly invalidates it. No actions will be
+     * canceled and no rollouts will be stopped with this invalidation.
      *
      * @return created invalidated {@link DistributionSet}
      */
@@ -1437,8 +1451,8 @@ public class TestdataFactory {
     }
 
     /**
-     * Creates a distribution set that has no software modules assigned, so it
-     * is incomplete.
+     * Creates a distribution set that has no software modules assigned, so it is
+     * incomplete.
      *
      * @return created incomplete {@link DistributionSet}
      */

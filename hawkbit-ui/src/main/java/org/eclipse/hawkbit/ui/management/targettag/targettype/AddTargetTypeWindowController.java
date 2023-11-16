@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.ui.management.targettag.targettype;
 import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -31,6 +32,7 @@ public class AddTargetTypeWindowController
     private final TargetTypeWindowLayout layout;
     private final ProxyTargetTypeValidator validator;
     private final TargetTypeManagement targetTypeManagement;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for AddTargetTypeWindowController
@@ -41,14 +43,18 @@ public class AddTargetTypeWindowController
      *            targetTypeManagement
      * @param layout
      *            TargetTypeWindowLayout
+     * @param contextAware
+     *            ContextAware
      */
     public AddTargetTypeWindowController(final CommonUiDependencies uiDependencies,
-                                         final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout) {
+            final TargetTypeManagement targetTypeManagement, final TargetTypeWindowLayout layout,
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetTypeManagement = targetTypeManagement;
         this.layout = layout;
         this.validator = new ProxyTargetTypeValidator(uiDependencies);
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -63,10 +69,9 @@ public class AddTargetTypeWindowController
 
     @Override
     protected TargetType persistEntityInRepository(final ProxyTargetType entity) {
-        return targetTypeManagement.create(getEntityFactory().targetType().create()
-                .name(entity.getName()).description(entity.getDescription()).colour(entity.getColour())
-                .compatible(entity.getSelectedDsTypes().stream().map(ProxyType::getId)
-                        .collect(Collectors.toSet())));
+        return targetTypeManagement.create(getEntityFactory().targetType().create().name(entity.getName())
+                .description(entity.getDescription()).colour(entity.getColour())
+                .compatible(entity.getSelectedDsTypes().stream().map(ProxyType::getId).collect(Collectors.toSet())));
     }
 
     @Override
@@ -81,6 +86,9 @@ public class AddTargetTypeWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTargetType entity) {
-        return validator.isEntityValid(entity, () -> targetTypeManagement.getByName(entity.getName()).isPresent());
+        return validator.isEntityValid(entity,
+                () -> contextAware.runAsTenant( // disable acm checks
+                        contextAware.getCurrentTenant(),
+                        () -> targetTypeManagement.getByName(entity.getName()).isPresent()));
     }
 }

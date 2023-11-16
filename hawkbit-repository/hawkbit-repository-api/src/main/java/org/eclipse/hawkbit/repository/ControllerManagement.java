@@ -473,17 +473,6 @@ public interface ControllerManagement {
     void updateActionExternalRef(long actionId, @NotEmpty String externalRef);
 
     /**
-     * Retrieves list of {@link Action}s which matches the provided
-     * externalRefs.
-     * 
-     * @param externalRefs
-     *            for which the actions need to be fetched.
-     * @return list of {@link Action}s matching the externalRefs.
-     */
-    @PreAuthorize(SpringEvalExpressions.IS_CONTROLLER)
-    List<Action> getActiveActionsByExternalRef(@NotNull List<String> externalRefs);
-
-    /**
      * Retrieves an {@link Action} using {@link Action#getExternalRef()}
      * 
      * @param externalRef

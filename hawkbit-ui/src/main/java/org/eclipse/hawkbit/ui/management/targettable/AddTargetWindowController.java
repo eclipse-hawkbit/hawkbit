@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.ui.management.targettable;
 
 import org.eclipse.hawkbit.repository.TargetManagement;
+import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.ui.common.AbstractAddNamedEntityWindowController;
 import org.eclipse.hawkbit.ui.common.CommonUiDependencies;
@@ -31,6 +32,7 @@ public class AddTargetWindowController
     private final TargetWindowLayout layout;
     private final EventView view;
     private final ProxyTargetValidator proxyTargetValidator;
+    private final ContextAware contextAware;
 
     /**
      * Constructor for AddTargetWindowController
@@ -45,13 +47,15 @@ public class AddTargetWindowController
      *            EventView
      */
     public AddTargetWindowController(final CommonUiDependencies uiDependencies, final TargetManagement targetManagement,
-            final TargetWindowLayout layout, final EventView view) {
+            final TargetWindowLayout layout, final EventView view,
+            final ContextAware contextAware) {
         super(uiDependencies);
 
         this.targetManagement = targetManagement;
         this.layout = layout;
         this.view = view;
         this.proxyTargetValidator = new ProxyTargetValidator(uiDependencies);
+        this.contextAware = contextAware;
     }
 
     @Override
@@ -103,8 +107,12 @@ public class AddTargetWindowController
 
     @Override
     protected boolean isEntityValid(final ProxyTarget entity) {
-        return proxyTargetValidator.isEntityValid(entity,
-                () -> targetManagement.getByControllerID(entity.getControllerId()).isPresent());
+        return proxyTargetValidator.isEntityValid(
+                entity,
+                () -> contextAware.runAsTenant( // disable acm checks
+                        contextAware.getCurrentTenant(),
+                        () ->
+                            targetManagement.getByControllerID(entity.getControllerId()).isPresent()));
     }
 
 }
