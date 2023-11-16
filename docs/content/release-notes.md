@@ -3,12 +3,20 @@ title: Release notes
 weight: 100
 ---
 
+## 0.3.0M9
+
+**Release Date:** Thursday, August 24, 2023 <br />
+Hawkbit: [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M9) /
+         [Release](https://github.com/eclipse/hawkbit/milestone/24)  <br />
+Extensions: [Tag](https://github.com/eclipse/hawkbit-extensions/releases/tag/0.3.0M9)
+
 ## 0.3.0M8
 
 **Release Date:** Friday, April 21, 2023 <br />
-Hawkbit: [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M8)  <br />
+Hawkbit: [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.3.0M8) /
+         [Release](https://github.com/eclipse/hawkbit/milestone/23)   <br />
 Extensions: [Tag](https://github.com/eclipse/hawkbit-extensions/releases/tag/0.3.0M8) /
-            
+         [Release](https://github.com/eclipse/hawkbit-extensions/milestone/2)
 
 
 ## 0.3.0M7
