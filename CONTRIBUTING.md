@@ -20,6 +20,7 @@ Please read this if you intend to contribute to the project.
     * disabled rules: ImportantRule, PropertySortOrder
 * Sonarqube:
   * Our rule set can be found [here](https://sonarcloud.io/organizations/bosch-iot-rollouts/rules)
+  * Sonarqube reports can be found [here](https://sonarcloud.io/project/overview?id=org.eclipse.hawkbit%3Ahawkbit-parent)
 
 ### Utility library usage
 
