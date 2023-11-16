@@ -14,8 +14,8 @@
    <modelVersion>4.0.0</modelVersion>
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
-      <version>0.3.0-SNAPSHOT</version>
       <artifactId>hawkbit-parent</artifactId>
+      <version>${revision}</version>
    </parent>
    <artifactId>hawkbit-dmf-parent</artifactId>
    <name>hawkBit :: DMF</name>

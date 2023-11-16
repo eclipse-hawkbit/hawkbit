@@ -16,7 +16,7 @@
    <parent>
       <groupId>org.eclipse.hawkbit</groupId>
       <artifactId>hawkbit-rest-parent</artifactId>
-      <version>0.3.0-SNAPSHOT</version>
+      <version>${revision}</version>
    </parent>
    <artifactId>hawkbit-mgmt-resource</artifactId>
    <name>hawkBit :: REST :: Management Resources</name>
