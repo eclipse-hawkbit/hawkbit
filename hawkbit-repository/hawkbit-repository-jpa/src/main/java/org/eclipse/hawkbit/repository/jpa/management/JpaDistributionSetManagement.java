@@ -335,10 +335,6 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
             // handle the empty list
             distributionSetRepository.deleteAllById(toHardDelete);
         }
-
-        afterCommit.afterCommit(() -> distributionSetIDs.forEach(dsId -> eventPublisherHolder.getEventPublisher()
-                .publishEvent(new DistributionSetDeletedEvent(tenantAware.getCurrentTenant(), dsId,
-                        JpaDistributionSet.class, eventPublisherHolder.getApplicationId()))));
     }
 
     @Override
