@@ -136,9 +136,23 @@
          <url>https://maven.vaadin.com/vaadin-addons</url>
       </repository>
    </repositories>
+   <pluginRepositories>
+      <pluginRepository>
+         <id>dash-licenses</id>
+         <url>https://repo.eclipse.org/content/repositories/dash-licenses</url>
+      </pluginRepository>
+   </pluginRepositories>
 
    <properties>
       <revision>0.4.0-SNAPSHOT</revision>
+
+      <dash.skip>true</dash.skip>
+      <dash.fail>true</dash.fail>
+      <dash.projectId>iot.hawkbit</dash.projectId>
+      <dash.summary>${project.build.directory}/dash/summary</dash.summary>
+      <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
+      <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
+      <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
 
       <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
 
@@ -370,6 +384,19 @@
                   <id>attach-sources</id>
                   <goals>
                      <goal>jar</goal>
+                  </goals>
+               </execution>
+            </executions>
+         </plugin>
+         <plugin>
+            <groupId>org.eclipse.dash</groupId>
+            <artifactId>license-tool-plugin</artifactId>
+            <version>1.0.2</version>
+            <executions>
+               <execution>
+                  <id>license-check</id>
+                  <goals>
+                     <goal>license-check</goal>
                   </goals>
                </execution>
             </executions>

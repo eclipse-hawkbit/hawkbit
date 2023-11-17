@@ -68,6 +68,9 @@ maven/mavencentral/net.minidev/json-smart/2.4.11, Apache-2.0, approved, #3288
 maven/mavencentral/org.apache.commons/commons-lang3/3.12.0, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.apache.logging.log4j/log4j-api/2.17.2, Apache-2.0, approved, clearlydefined
 maven/mavencentral/org.apache.logging.log4j/log4j-to-slf4j/2.17.2, Apache-2.0, approved, #2163
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-core/9.0.82, Apache-2.0 AND (CDDL-1.0 OR GPL-2.0 WITH Classpath-exception-2.0), approved, CQ20188
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-el/9.0.82, Apache-2.0, approved, CQ20193
+maven/mavencentral/org.apache.tomcat.embed/tomcat-embed-websocket/9.0.82, Apache-2.0, approved, CQ20194
 maven/mavencentral/org.aspectj/aspectjrt/1.9.7, EPL-1.0, approved, tools.aspectj
 maven/mavencentral/org.aspectj/aspectjweaver/1.9.7, EPL-1.0, approved, tools.aspectj
 maven/mavencentral/org.checkerframework/checker-qual/3.19.0, MIT, approved, clearlydefined
@@ -97,6 +100,7 @@ maven/mavencentral/org.springframework.boot/spring-boot-starter-json/2.7.17, Apa
 maven/mavencentral/org.springframework.boot/spring-boot-starter-logging/2.7.17, Apache-2.0, approved, #4327
 maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-client/2.7.17, Apache-2.0, approved, #7511
 maven/mavencentral/org.springframework.boot/spring-boot-starter-oauth2-resource-server/2.7.17, Apache-2.0, approved, #4312
+maven/mavencentral/org.springframework.boot/spring-boot-starter-tomcat/2.7.17, Apache-2.0, approved, #4305
 maven/mavencentral/org.springframework.boot/spring-boot-starter-web/2.7.17, Apache-2.0, approved, #4304
 maven/mavencentral/org.springframework.boot/spring-boot-starter/2.7.17, Apache-2.0, approved, #4308
 maven/mavencentral/org.springframework.boot/spring-boot/2.7.17, Apache-2.0, approved, #4322
