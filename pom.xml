@@ -484,7 +484,7 @@
                <artifactId>license-maven-plugin</artifactId>
                <version>2.11</version>
                <configuration>
-                  <header>licenses/LICENSE_HEADER_TEMPLATE_BOSCH_23.txt</header>
+                  <header>licenses/LICENSE_HEADER_TEMPLATE.txt</header>
                   <validHeaders>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS.txt</validHeader>
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_SIEMENS_18.txt</validHeader>
