@@ -9,28 +9,16 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-DASH_LICENSE_JAR=$1
-shift
+DASH_SUMMARY=".3rd-party/DEPENDENCIES"
+DASH_REVIEW_SUMMARY=".3rd-party/DEPENDENCIES_REVIEW"
 
-if [ ! -f "$DASH_LICENSE_JAR" ]; then
-  echo "This script can be used to update the DEPENDENCIES"
-  echo "file with the result of checking the Hawkbit maven"
-  echo "dependencies using the Dash License Tool."
-  echo ""
-  echo "Usage: $0 <org.eclipse.dash.licenses jar path> [<other dash-tool parameters>..]"
-  exit 1
+if [ -z "$1" ]
+then
+      DASH_IP_LAB=
+else
+      DASH_IP_LAB="-Ddash.review.summary=${DASH_REVIEW_SUMMARY} -Ddash.iplab.token=$1"
 fi
 
-HAWKBIT_MAVEN_DEPS=".3rd-party/hawkbit-maven.deps"
-DEPENDENCIES=".3rd-party/DEPENDENCIES"
-
-mvn dependency:list \
-  -DexcludeGroupIds=org.eclipse,org.junit \
-  -pl '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' | \
-  grep -Poh "\S+:(runtime|compile|provided)" | \
-  sed -e 's/^\(.*\)\:.*$/\1/' | \
-  sort | \
-  uniq > $HAWKBIT_MAVEN_DEPS
-
-java -Dorg.eclipse.dash.timeout=60 -jar "${DASH_LICENSE_JAR}" -batch 90 -summary ${DEPENDENCIES} ${HAWKBIT_MAVEN_DEPS} "$@"
-sort -o ${DEPENDENCIES} ${DEPENDENCIES}
+mvn clean install -DskipTests -Ddash.skip=false \
+  --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' \
+  -Ddash.summary=${DASH_SUMMARY}  ${DASH_IP_LAB}
