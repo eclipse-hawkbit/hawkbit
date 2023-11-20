@@ -1,6 +1,7 @@
 ---
 title: Eclipse hawkBit 0.2.0 - First Release
-weight: -200
+parent: Blog
+weight: 200
 ---
 
 hawkBit is a domain-independent back-end framework for rolling out software updates to constrained edge devices as well 
