@@ -28,13 +28,16 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 public final class IpUtil {
 
     private static final String HIDDEN_IP = "***";
-    private static final String SCHEME_SEPERATOR = "://";
+    private static final String SCHEME_SEPARATOR = "://";
     private static final String HTTP_SCHEME = "http";
     private static final String AMQP_SCHEME = "amqp";
-    private static final Pattern IPV4_ADDRESS_PATTERN = Pattern
-            .compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})");
 
+    // v4 address with (optionally) port
+    private static final Pattern IPV4_ADDRESS_PATTERN = Pattern
+            .compile("([0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3})(:[0-9]{1,5})?");
     private static final Pattern IPV6_ADDRESS_PATTERN = Pattern.compile("([0-9a-f]{1,4}:){7}([0-9a-f]){1,4}");
+    // v6 address with [] amd (optionally) port
+    private static final Pattern IPV6_ADDRESS_WITH_PORT_PATTERN = Pattern.compile("\\[(?<address>([0-9a-f]{1,4}:){7}([0-9a-f]){1,4})](:[0-9]{1,5})?");
 
     private IpUtil() {
 
@@ -42,9 +45,8 @@ public final class IpUtil {
 
     /**
      * Retrieves the string based IP address from a given
-     * {@link HttpServletRequest} by either the
-     * {@link HttpHeaders#X_FORWARDED_FOR} or by the
-     * {@link HttpServletRequest#getRemoteAddr()} methods.
+     * {@link HttpServletRequest} by either the configured {@link HawkbitSecurityProperties.Clients#getRemoteIpHeader()}
+     * (by default X-Forwarded-For) or by the {@link HttpServletRequest#getRemoteAddr()} method.
      *
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
@@ -62,10 +64,8 @@ public final class IpUtil {
     }
 
     /**
-     * Retrieves the string based IP address from a given
-     * {@link HttpServletRequest} by either the
-     * {@link HttpHeaders#X_FORWARDED_FOR} or by the
-     * {@link HttpServletRequest#getRemoteAddr()} methods.
+     * Retrieves the string based IP address from a given {@link HttpServletRequest} by either the
+     * forward header or by the {@link HttpServletRequest#getRemoteAddr()} method.
      *
      * @param request
      *            the {@link HttpServletRequest} to determine the IP address
@@ -82,7 +82,6 @@ public final class IpUtil {
 
     private static URI getClientIpFromRequest(final HttpServletRequest request, final String forwardHeader,
             final boolean trackRemoteIp) {
-
         String ip;
 
         if (trackRemoteIp) {
@@ -98,17 +97,19 @@ public final class IpUtil {
     }
 
     private static String findClientIpAddress(final String s) {
-
-        final Matcher matcherv4 = IPV4_ADDRESS_PATTERN.matcher(s);
-
-        if (matcherv4.find()) {
-            return matcherv4.group(0);
+        Matcher matcher = IPV4_ADDRESS_PATTERN.matcher(s);
+        if (matcher.find()) {
+            return matcher.group(1);
         }
 
-        final Matcher matcherv6 = IPV6_ADDRESS_PATTERN.matcher(s);
+        matcher = IPV6_ADDRESS_PATTERN.matcher(s);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
 
-        if (matcherv6.find()) {
-            return matcherv6.group(0);
+        matcher = IPV6_ADDRESS_WITH_PORT_PATTERN.matcher(s);
+        if (matcher.find()) {
+            return matcher.group("address");
         }
 
         return null;
@@ -126,11 +127,11 @@ public final class IpUtil {
      *             If the given string not parsable
      */
     public static URI createUri(final String scheme, final String host) {
-        final boolean isIpV6 = host.indexOf(':') >= 0 && host.charAt(0) != '[';
+        final boolean isIpV6 = host.indexOf(':') >= 0 && host.indexOf('.') == -1 && host.charAt(0) != '[';
         if (isIpV6) {
-            return URI.create(scheme + SCHEME_SEPERATOR + "[" + host + "]");
+            return URI.create(scheme + SCHEME_SEPARATOR + "[" + host + "]");
         }
-        return URI.create(scheme + SCHEME_SEPERATOR + host);
+        return URI.create(scheme + SCHEME_SEPARATOR + host);
     }
 
     /**
