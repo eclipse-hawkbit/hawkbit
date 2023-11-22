@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.util;
 
 import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,8 +50,7 @@ public class IpUtilTest {
 
     @Test
     @Description("Tests create uri from request")
-    public void getRemoteAddrFromRequestIfForwaredHeaderNotPresent() {
-
+    public void getRemoteAddrFromRequestIfForwardedHeaderNotPresent() {
         final URI knownRemoteClientIP = IpUtil.createHttpUri("127.0.0.1");
         when(requestMock.getRemoteAddr()).thenReturn(knownRemoteClientIP.getHost());
 
@@ -66,7 +66,6 @@ public class IpUtilTest {
     @Test
     @Description("Tests create uri from request with masked IP when IP tracking is disabled")
     public void maskRemoteAddrIfDisabled() {
-
         final URI knownRemoteClientIP = IpUtil.createHttpUri("***");
         when(securityPropertyMock.getClients()).thenReturn(clientMock);
         when(clientMock.getRemoteIpHeader()).thenReturn(KNOWN_REQUEST_HEADER);
@@ -83,7 +82,6 @@ public class IpUtilTest {
     @Test
     @Description("Tests create uri from x forward header")
     public void getRemoteAddrFromXForwardedForHeader() {
-
         final URI knownRemoteClientIP = IpUtil.createHttpUri("10.99.99.1");
         when(requestMock.getHeader(X_FORWARDED_FOR)).thenReturn(knownRemoteClientIP.getHost());
 
@@ -96,9 +94,46 @@ public class IpUtilTest {
     }
 
     @Test
+    @Description("Tests client uri from request")
+    public void testCreateClientHttpUri() {
+        checkHostInfoResolution("0:0:0:0:0:0:0:1", "[0:0:0:0:0:0:0:1]", true);
+        checkHostInfoResolution("127.0.0.1", "127.0.0.1", true);
+        checkHostInfoResolution("127.0.0.1:93493", "127.0.0.1", true);
+        checkHostInfoResolution("myhost", "myhost", true);
+        checkHostInfoResolution("myhost.my", "myhost.my", true);
+        checkHostInfoResolution("myhost.my:4233", "myhost.my", true);
+        checkHostInfoResolution("[0:0:0:0:0:0:0:1]", "[0:0:0:0:0:0:0:1]", true);
+        checkHostInfoResolution("[0:0:0:0:0:0:0:1]:4233", "[0:0:0:0:0:0:0:1]", true);
+    }
+
+    @Test
+    @Description("Tests client uri from request")
+    public void testResolveClientIpFromHeader() {
+        checkHostInfoResolution("0:0:0:0:0:0:0:1", "[0:0:0:0:0:0:0:1]", false);
+        checkHostInfoResolution("127.0.0.1", "127.0.0.1", false);
+        checkHostInfoResolution("127.0.0.1:93493", "127.0.0.1", false);
+        checkHostInfoResolution("[0:0:0:0:0:0:0:1]", "[0:0:0:0:0:0:0:1]", false);
+        checkHostInfoResolution("[0:0:0:0:0:0:0:1]:4233", "[0:0:0:0:0:0:0:1]", false);
+    }
+
+    private void checkHostInfoResolution(final String hostInfo, final String expectedHost, final boolean remoteAddress) {
+        reset(requestMock);
+        when(remoteAddress ? requestMock.getRemoteAddr() : requestMock.getHeader(KNOWN_REQUEST_HEADER)).thenReturn(hostInfo);
+
+        final URI remoteAddr = IpUtil.getClientIpFromRequest(requestMock, KNOWN_REQUEST_HEADER);
+
+        // verify
+        assertThat(remoteAddr.getHost()).as("The remote address should be as the known client IP address")
+                .isEqualTo(expectedHost);
+        verify(requestMock, times(1)).getHeader(KNOWN_REQUEST_HEADER);
+        if (remoteAddress) {
+            verify(requestMock, times(1)).getRemoteAddr();
+        }
+    }
+
+    @Test
     @Description("Tests create http uri ipv4 and ipv6")
     public void testCreateHttpUri() {
-
         final String ipv4 = "10.99.99.1";
         URI httpUri = IpUtil.createHttpUri(ipv4);
         assertHttpUri(ipv4, httpUri);
@@ -122,18 +157,28 @@ public class IpUtilTest {
     @Test
     @Description("Tests create amqp uri ipv4 and ipv6")
     public void testCreateAmqpUri() {
-
         final String ipv4 = "10.99.99.1";
         URI amqpUri = IpUtil.createAmqpUri(ipv4, "path");
+        assertAmqpUri(ipv4, amqpUri);
+        final String ipv4Port = ipv4 + ":12000";
+        amqpUri = IpUtil.createAmqpUri(ipv4Port, "path");
         assertAmqpUri(ipv4, amqpUri);
 
         final String host = "myhost";
         amqpUri = IpUtil.createAmqpUri(host, "path");
         assertAmqpUri(host, amqpUri);
 
+        final String hostDots = "myhost.my";
+        amqpUri = IpUtil.createAmqpUri(hostDots, "path");
+        assertAmqpUri(hostDots, amqpUri);
+
         final String ipv6 = "0:0:0:0:0:0:0:1";
         amqpUri = IpUtil.createAmqpUri(ipv6, "path");
         assertAmqpUri("[" + ipv6 + "]", amqpUri);
+
+        final String ipv6Braces = "[0:0:0:0:0:0:0:1]";
+        amqpUri = IpUtil.createAmqpUri(ipv6Braces, "path");
+        assertAmqpUri(ipv6Braces, amqpUri);
     }
 
     private void assertAmqpUri(final String host, final URI amqpUri) {

@@ -46,12 +46,14 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
-        return super.createMvcWebAppContext(context).addFilter(new DosFilter(null, 10, 10,
-                "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)", "X-Forwarded-For"));
+        return super.createMvcWebAppContext(context).addFilter(
+                new DosFilter(null, 10, 10,
+                        "127\\.0\\.0\\.1|\\[0:0:0:0:0:0:0:1\\]", "(^192\\.168\\.)",
+                        "X-Forwarded-For"));
     }
 
     @Test
-    @Description("Ensures that clients that are on the blacklist are forbidded ")
+    @Description("Ensures that clients that are on the blacklist are forbidden")
     void blackListedClientIsForbidden() throws Exception {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
                 .header(HttpHeaders.X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 ")).andExpect(status().isForbidden());
@@ -59,7 +61,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
     @Test
     @Description("Ensures that a READ DoS attempt is blocked ")
-    void getFloddingAttackThatisPrevented() throws Exception {
+    void getFloodingAttackThatIsPrevented() throws Exception {
 
         MvcResult result = null;
 
@@ -168,5 +170,4 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
         return uaction.getId();
     }
-
 }
