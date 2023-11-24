@@ -20,6 +20,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -81,9 +82,13 @@ import org.springframework.security.web.authentication.AnonymousAuthenticationFi
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.firewall.FirewalledRequest;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.security.web.session.SessionManagementFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -580,6 +585,51 @@ public class SecurityManagedConfiguration {
             corsConfiguration.setExposedHeaders(securityProperties.getCors().getExposedHeaders());
 
             return corsConfiguration;
+        }
+    }
+
+
+    /**
+     * HttpFirewall which enables to define a list of allowed host names.
+     *
+     * @return the http firewall.
+     */
+    @Bean
+    public HttpFirewall httpFirewall(final HawkbitSecurityProperties hawkbitSecurityProperties) {
+        final List<String> allowedHostNames = hawkbitSecurityProperties.getAllowedHostNames();
+        final IgnorePathsStrictHttpFirewall firewall = new IgnorePathsStrictHttpFirewall(
+                hawkbitSecurityProperties.getHttpFirewallIgnoredPaths());
+
+        if (!CollectionUtils.isEmpty(allowedHostNames)) {
+            firewall.setAllowedHostnames(hostName -> {
+                LOG.debug("Firewall check host: {}, allowed: {}", hostName, allowedHostNames.contains(hostName));
+                return allowedHostNames.contains(hostName);
+            });
+        }
+        return firewall;
+    }
+
+
+    private static class IgnorePathsStrictHttpFirewall extends StrictHttpFirewall {
+
+        private final Collection<String> pathsToIgnore;
+
+        public IgnorePathsStrictHttpFirewall(final Collection<String> pathsToIgnore) {
+            super();
+            this.pathsToIgnore = pathsToIgnore;
+        }
+
+        @Override
+        public FirewalledRequest getFirewalledRequest(final HttpServletRequest request) {
+            if (pathsToIgnore != null && pathsToIgnore.contains(request.getRequestURI())) {
+                return new FirewalledRequest(request) {
+                    @Override
+                    public void reset() {
+                        // nothing to do
+                    }
+                };
+            }
+            return super.getFirewalledRequest(request);
         }
     }
 

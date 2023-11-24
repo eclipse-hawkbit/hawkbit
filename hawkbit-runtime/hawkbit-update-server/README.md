@@ -1,6 +1,6 @@
 # hawkBit Update Server
 
-The hawkBit Update Server is a standalone spring-boot application with an embedded servlet container .
+The hawkBit Update Server (Monolith) is a standalone spring-boot application with an embedded servlet container .
 
 ## On your own workstation
 
@@ -15,7 +15,7 @@ _(Note: you have to add the JDBC driver also to your class path if you intend to
 Or:
 
 ```bash
-run org.eclipse.hawkbit.app.Start
+run org.eclipse.hawkbit.doc.Start
 ```
 
 ### Usage

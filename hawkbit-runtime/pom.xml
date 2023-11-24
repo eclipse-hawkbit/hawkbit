@@ -19,10 +19,100 @@
    </parent>
 
    <artifactId>hawkbit-runtime-parent</artifactId>
-   <name>hawkBit :: Runtime</name>
+   <name>hawkBit :: Runtime :: Parent</name>
    <packaging>pom</packaging>
 
+   <!-- Common runtime dependences -->
+   <dependencies>
+      <dependency>
+         <groupId>com.h2database</groupId>
+         <artifactId>h2</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>com.microsoft.sqlserver</groupId>
+         <artifactId>mssql-jdbc</artifactId>
+      </dependency>
+      <dependency>
+         <groupId>org.postgresql</groupId>
+         <artifactId>postgresql</artifactId>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>io.qameta.allure</groupId>
+         <artifactId>allure-junit5</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.security</groupId>
+         <artifactId>spring-security-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.mariadb.jdbc</groupId>
+         <artifactId>mariadb-java-client</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>repackage</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${baseDir}</outputDirectory>
+                     <mainClass>${spring.app.class}</mainClass>
+                     <layout>JAR</layout>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+
+      <resources>
+         <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+      </resources>
+   </build>
+
+   <profiles>
+      <profile>
+         <id>docker</id>
+         <build>
+            <plugins>
+               <plugin>
+                  <groupId>io.fabric8</groupId>
+                  <artifactId>docker-maven-plugin</artifactId>
+               </plugin>
+            </plugins>
+         </build>
+      </profile>
+   </profiles>
+
    <modules>
+      <module>hawkbit-ddi-server</module>
+      <module>hawkbit-dmf-server</module>
+      <module>hawkbit-mgmt-server</module>
+      <module>hawkbit-vv8-ui</module>
+
       <module>hawkbit-update-server</module>
    </modules>
 </project>

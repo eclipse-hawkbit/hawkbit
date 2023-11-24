@@ -1,0 +1,82 @@
+#
+# Copyright (c) 2018 Bosch Software Innovations GmbH and others
+#
+# This program and the accompanying materials are made
+# available under the terms of the Eclipse Public License 2.0
+# which is available at https://www.eclipse.org/legal/epl-2.0/
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+version: '3.7'
+
+include:
+  - docker-compose-deps-mysql.yml
+
+services:
+
+  # ---------------------
+  # HawkBit DDI
+  # ---------------------
+  hawkbit-ddi:
+    image: "hawkbit/hawkbit-ddi-server:latest-mysql"
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SPRING_DATASOURCE_USERNAME=root'
+    restart: always
+    ports:
+      - "8081:8081"
+    labels:
+      NAME: "hawkbit-ddi"
+
+  # ---------------------
+  # HawkBit DMF
+  # ---------------------
+  hawkbit-dmf:
+    image: "hawkbit/hawkbit-dmf-server:latest-mysql"
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SPRING_DATASOURCE_USERNAME=root'
+    restart: always
+    labels:
+      NAME: "hawkbit-dmf"
+
+  # ---------------------
+  # HawkBit MGMT
+  # ---------------------
+  hawkbit-mgmt:
+    image: "hawkbit/hawkbit-mgmt-server:latest-mysql"
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SPRING_DATASOURCE_USERNAME=root'
+    restart: always
+    ports:
+      - "8080:8080"
+    labels:
+      NAME: "hawkbit-mgmt"
+
+
+  # ---------------------
+  # HawkBit MGMT
+  # ---------------------
+  hawkbit-vv8ui:
+    image: "hawkbit/hawkbit-vv8-ui:latest-mysql"
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:mariadb://mysql:3306/hawkbit'
+      - 'SPRING_RABBITMQ_HOST=rabbitmq'
+      - 'SPRING_RABBITMQ_USERNAME=guest'
+      - 'SPRING_RABBITMQ_PASSWORD=guest'
+      - 'SPRING_DATASOURCE_USERNAME=root'
+    restart: always
+    ports:
+      - "8082:8082"
+    labels:
+      NAME: "hawkbit-vv8-ui"
