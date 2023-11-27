@@ -21,4 +21,4 @@ fi
 
 mvn clean install -DskipTests -Ddash.skip=false \
   --projects '!org.eclipse.hawkbit:hawkbit-repository-test,!org.eclipse.hawkbit:hawkbit-dmf-rabbitmq-test' \
-  -Ddash.summary=${DASH_SUMMARY}  ${DASH_IP_LAB}
+  -Ddash.summary=${DASH_SUMMARY} ${DASH_IP_LAB}
