@@ -74,9 +74,9 @@ class AutoAssignCheckerTest {
         when(targetFilterQueryManagement.findWithAutoAssignDS(any()))
                 .thenReturn(new SliceImpl<>(Arrays.asList(notMatching, matching)));
 
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, matching.getQuery()))
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, matching.getQuery()))
                 .thenReturn(true);
-        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, notMatching.getQuery()))
+        when(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, notMatching.getQuery()))
                 .thenReturn(false);
 
         sut.checkSingleTarget(target);
