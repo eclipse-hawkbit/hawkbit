@@ -45,7 +45,7 @@ COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
 COPY --from=build ${BUILD_DIR}/snapshot-dependencies/ ./
 COPY --from=build ${BUILD_DIR}/application/ ./
 ARG MARIADB_DRIVER_VERSION=3.1.4
-COPY --from=build ${BUILD_DIR}/mariadb-java-client-${MARIADB_DRIVER_VERSION}.jar/ ./BOOT-INF/lib/
+COPY --from=build ${BUILD_DIR}/mariadb-java-client-${MARIADB_DRIVER_VERSION}.jar ./BOOT-INF/lib/
 
 ARG CONTAINER_PORT=8080
 ENV JAVA_OPTS="-Dspring.profiles.active=mysql -Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
