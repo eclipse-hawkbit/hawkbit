@@ -1,0 +1,38 @@
+# set Java
+ARG JAVA_VERSION=17.0.9_9
+# extracts spring layers from the app jar (to optimize boot)
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
+
+ARG HAWKBIT_APP=hawkbit-update-server
+ARG HAWKBIT_VERSION=0.3.0
+
+ENV BUILD_DIR=/opt/hawkbit_build
+ENV APP=${HAWKBIT_APP}
+ENV VERSION=${HAWKBIT_VERSION}
+
+COPY org/eclipse/hawkbit/${APP}/${VERSION}/${APP}-${VERSION}.jar ${APP}-${VERSION}.jar
+
+RUN set -x &&\
+ mkdir -p ${BUILD_DIR} &&\
+ cd ${BUILD_DIR} &&\
+ java -Djarmode=layertools -jar /${APP}-${VERSION}.jar extract --destination . &&\
+ rm /${APP}-${VERSION}.jar
+
+FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
+
+RUN addgroup -S rollouts && adduser -D sp -G rollouts
+USER sp
+
+ENV BUILD_DIR=/opt/hawkbit_build
+COPY --from=build ${BUILD_DIR}/dependencies/ ./
+COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
+COPY --from=build ${BUILD_DIR}/snapshot-dependencies/ ./
+COPY --from=build ${BUILD_DIR}/application/ ./
+ARG MARIADB_DRIVER_VERSION=3.1.4
+COPY org/mariadb/jdbc/mariadb-java-client/${MARIADB_DRIVER_VERSION}/mariadb-java-client-${MARIADB_DRIVER_VERSION}.jar ./BOOT-INF/lib/
+
+ARG CONTAINER_PORT=8080
+ENV JAVA_OPTS="-Dspring.profiles.active=mysql -Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
+
+EXPOSE ${CONTAINER_PORT}
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher ${@}"]
