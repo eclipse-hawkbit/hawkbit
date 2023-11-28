@@ -32,56 +32,6 @@
                 </plugins>
             </build>
         </profile>
-        <profile>
-            <id>attach-artifacts-profile</id>
-            <!-- This profile activates when -DskipTests is not provided -->
-            <activation>
-                <property>
-                    <name>!skipTests</name>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>attach-artifacts</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>attach-artifact</goal>
-                                </goals>
-                                <configuration>
-                                    <artifacts>
-                                        <artifact>
-                                            <file>${project.build.directory}/rest-api/mgmt-openapi.json</file>
-                                            <type>json</type>
-                                            <classifier>mgmt-openapi</classifier>
-                                        </artifact>
-                                        <artifact>
-                                            <file>${project.build.directory}/rest-api/mgmt-openapi.yaml</file>
-                                            <type>yaml</type>
-                                            <classifier>mgmt-openapi</classifier>
-                                        </artifact>
-                                        <artifact>
-                                            <file>${project.build.directory}/rest-api/ddi-openapi.json</file>
-                                            <type>json</type>
-                                            <classifier>ddi-openapi</classifier>
-                                        </artifact>
-                                        <artifact>
-                                            <file>${project.build.directory}/rest-api/ddi-openapi.yaml</file>
-                                            <type>yaml</type>
-                                            <classifier>ddi-openapi</classifier>
-                                        </artifact>
-                                    </artifacts>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
     </profiles>
     <build>
         <plugins>
