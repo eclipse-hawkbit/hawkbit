@@ -15,7 +15,10 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.NoCountSliceRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.springframework.data.domain.Page;
@@ -77,6 +80,16 @@ public final class JpaManagementHelper {
         }
 
         return repository.count(combineWithAnd(specList));
+    }
+
+    public static <J extends AbstractJpaTenantAwareBaseEntity> long countBySpec(
+            final AccessController.Operation operation, final BaseEntityRepository<J> repository,
+            final List<Specification<J>> specList) {
+        if (CollectionUtils.isEmpty(specList)) {
+            return repository.count(Specification.where(null));
+        }
+
+        return repository.count(operation, combineWithAnd(specList));
     }
 
     public static <J extends AbstractJpaBaseEntity> J touch(final EntityManager entityManager,

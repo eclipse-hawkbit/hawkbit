@@ -203,18 +203,18 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     @Test
-    @Description("Verify that a user that has authority READ_REPOSITORY and UPDATE_REPOSITORY is not allowed to invalidate a distribution set")
+    @Description("Verify that a user that has authority READ_REPOSITORY and UPDATE_REPOSITORY is allowed to invalidate a distribution set")
     @WithUser(authorities = { "READ_REPOSITORY", "UPDATE_REPOSITORY" })
     void verifyInvalidateWithReadAndUpdateRepoAuthority() {
         final InvalidationTestData invalidationTestData = systemSecurityContext
                 .runAsSystem(() -> createInvalidationTestData("verifyInvalidateWithUpdateRepoAuthority"));
 
-        assertThatExceptionOfType(InsufficientPermissionException.class)
-                .as("Insufficient permission exception expected")
-                .isThrownBy(() -> distributionSetInvalidationManagement
-                        .invalidateDistributionSet(new DistributionSetInvalidation(
-                                Collections.singletonList(invalidationTestData.getDistributionSet().getId()),
-                                CancelationType.NONE, false)));
+        distributionSetInvalidationManagement.invalidateDistributionSet(new DistributionSetInvalidation(
+                Collections.singletonList(invalidationTestData.getDistributionSet().getId()), CancelationType.NONE,
+                false));
+        assertThat(
+                distributionSetRepository.findById(invalidationTestData.getDistributionSet().getId()).get().isValid())
+                .isFalse();
     }
 
     @Test

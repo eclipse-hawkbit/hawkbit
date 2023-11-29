@@ -812,12 +812,27 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public long countByRsqlAndUpdatable(String targetFilterQuery) {
+        return JpaManagementHelper.countBySpec(AccessController.Operation.UPDATE, targetRepository, List.of(RSQLUtility
+                .buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)));
+    }
+
+    @Override
     public long countByRsqlAndCompatible(final String targetFilterQuery, final Long distributionSetIdTypeId) {
         final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery,
                 TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
 
         return JpaManagementHelper.countBySpec(targetRepository, specList);
+    }
+
+    @Override
+    public long countByRsqlAndCompatibleAndUpdatable(String targetFilterQuery, Long distributionSetIdTypeId) {
+        final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery,
+                TargetFields.class, virtualPropertyReplacer, database),
+                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
+
+        return JpaManagementHelper.countBySpec(AccessController.Operation.UPDATE, targetRepository, specList);
     }
 
     @Override

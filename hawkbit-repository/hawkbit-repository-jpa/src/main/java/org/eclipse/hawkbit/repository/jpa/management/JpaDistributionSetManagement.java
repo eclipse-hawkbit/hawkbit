@@ -786,7 +786,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void invalidate(final DistributionSet distributionSet) {
         final JpaDistributionSet jpaSet = (JpaDistributionSet) distributionSet;
         jpaSet.invalidate();
-        distributionSetRepository.save(AccessController.Operation.DELETE, jpaSet);
+        distributionSetRepository.save(jpaSet);
     }
 
     private JpaDistributionSet getById(final long id) {

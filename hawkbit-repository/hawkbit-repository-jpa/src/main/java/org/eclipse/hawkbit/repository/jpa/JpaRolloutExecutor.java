@@ -520,10 +520,10 @@ public class JpaRolloutExecutor implements RolloutExecutor {
 
         final String baseFilter = RolloutHelper.getTargetFilterQuery(rollout);
         final String groupTargetFilter;
-        if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
-            groupTargetFilter = baseFilter;
-        } else {
+        if (StringUtils.hasText(group.getTargetFilterQuery())) {
             groupTargetFilter = baseFilter + ";" + group.getTargetFilterQuery();
+        } else {
+            groupTargetFilter = baseFilter;
         }
 
         final List<Long> readyGroups = RolloutHelper.getGroupsByStatusIncludingGroup(rollout.getRolloutGroups(),

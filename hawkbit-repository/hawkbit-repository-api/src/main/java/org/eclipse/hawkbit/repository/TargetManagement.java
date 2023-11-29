@@ -132,6 +132,16 @@ public interface TargetManagement {
     long countByRsql(@NotEmpty String rsqlParam);
 
     /**
+     * Count {@link TargetFilterQuery}s for given target filter query with UPDATE permission.
+     *
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
+     * @return the found number of {@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByRsqlAndUpdatable(@NotEmpty String rsqlParam);
+
+    /**
      * Count all targets for given {@link TargetFilterQuery} and that are compatible
      * with the passed {@link DistributionSetType}.
      *
@@ -144,6 +154,20 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
     long countByRsqlAndCompatible(@NotEmpty String rsqlParam, @NotNull Long distributionSetIdTypeId);
+
+    /**
+     * Count all targets for given {@link TargetFilterQuery} and that are compatible
+     * with the passed {@link DistributionSetType} and UPDATE permission.
+     *
+     * @param rsqlParam
+     *            filter definition in RSQL syntax
+     * @param distributionSetIdTypeId
+     *            ID of the {@link DistributionSetType} the targets need to be
+     *            compatible with
+     * @return the found number of{@link Target}s
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByRsqlAndCompatibleAndUpdatable(@NotEmpty String rsqlParam, @NotNull Long distributionSetIdTypeId);
 
     /**
      * Count all targets with failed actions for specific Rollout and that are
