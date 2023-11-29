@@ -6,8 +6,8 @@ content/rest-api/*.yaml
 node_modules
 package.json
 package-lock.json
-# themse
-themes
+# themes
+themes/hugo-material-docs
 # hugo
 public
 .hugo_build.lock

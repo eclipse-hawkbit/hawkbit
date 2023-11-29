@@ -8,7 +8,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package org.eclipse.hawkbit.app;
+package org.eclipse.hawkbit.doc;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
@@ -36,9 +36,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ExtendWith({SharedSqlTestDatabaseExtension.class})
 class RestApiDocTest {
-    private static final String MANAGEMENT_PREFIX = "mgmt-openapi";
-    private static final String DDI_PREFIX = "ddi-openapi";
-    private static final String TARGET_DIRECTORY = "target/rest-api/";
+    private static final String MANAGEMENT_PREFIX = "mgmt";
+    private static final String DDI_PREFIX = "ddi";
+    private static final String TARGET_DIRECTORY = "content/rest-api/";
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @LocalServerPort
     private int port;
@@ -46,39 +48,37 @@ class RestApiDocTest {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @Test
     void openapiJson() throws IOException {
-        ResponseEntity<String> response =
+        final ResponseEntity<String> response =
                 restTemplate.getForEntity("http://localhost:" + port + "/v3/api-docs", String.class);
-        String openapiDoc = response.getBody();
+        final String openapiDoc = response.getBody();
         assertThat(openapiDoc).isNotNull();
         splitDocumentation(openapiDoc);
     }
 
-    private void splitDocumentation(String json) throws IOException {
+    private static void splitDocumentation(final String json) throws IOException {
         processDocumentation(json, true);
         processDocumentation(json, false);
     }
 
-    private void processDocumentation(String json, boolean isMgmt) throws IOException {
-        JsonNode rootNode = objectMapper.readTree(json);
+    private static void processDocumentation(final String json, final boolean isMgmt) throws IOException {
+        final JsonNode rootNode = OBJECT_MAPPER.readTree(json);
         updateJsonNodeForApi(rootNode, isMgmt);
         saveDocumentation(rootNode, isMgmt);
     }
 
-    private void updateJsonNodeForApi(JsonNode rootNode, boolean isMgmt) {
+    private static void updateJsonNodeForApi(final JsonNode rootNode, final boolean isMgmt) {
         removeTags(rootNode, isMgmt);
         removePaths(rootNode, isMgmt);
         removeComponents(rootNode, isMgmt);
     }
 
-    private void removeTags(JsonNode rootNode, boolean isMgmt) {
-        ArrayNode tagsNode = (ArrayNode) rootNode.get("tags");
-        ArrayNode modifiedTagsNode = objectMapper.createArrayNode();
+    private static void removeTags(final JsonNode rootNode, final boolean isMgmt) {
+        final ArrayNode tagsNode = (ArrayNode) rootNode.get("tags");
+        final ArrayNode modifiedTagsNode = OBJECT_MAPPER.createArrayNode();
 
-        for (JsonNode tagNode : tagsNode) {
+        for (final JsonNode tagNode : tagsNode) {
             String tagName = tagNode.get("name").asText();
             if (isMgmt != tagName.startsWith("DDI")) {
                 modifiedTagsNode.add(tagNode);
@@ -87,17 +87,17 @@ class RestApiDocTest {
 
         ((ObjectNode) rootNode).set("tags", modifiedTagsNode);
     }
-    private void removePaths(JsonNode rootNode, boolean isMgmt) {
-        ObjectNode pathsNode = (ObjectNode) rootNode.get("paths");
-        List<String> fieldsToRemove = new ArrayList<>();
+    private static void removePaths(final JsonNode rootNode, final boolean isMgmt) {
+        final ObjectNode pathsNode = (ObjectNode) rootNode.get("paths");
+        final List<String> fieldsToRemove = new ArrayList<>();
         pathsNode.fieldNames().forEachRemaining(fieldName -> {
-            JsonNode pathNode = pathsNode.get(fieldName);
+            final JsonNode pathNode = pathsNode.get(fieldName);
             pathNode.fieldNames().forEachRemaining(path -> {
-                JsonNode methodNode = pathNode.get(path);
-                JsonNode tagsNode = methodNode.get("tags");
+                final JsonNode methodNode = pathNode.get(path);
+                final JsonNode tagsNode = methodNode.get("tags");
                 if (tagsNode != null) {
                     for (JsonNode tagNode : tagsNode) {
-                        String tag = tagNode.asText();
+                        final String tag = tagNode.asText();
                         if (isMgmt == tag.startsWith("DDI")) {
                             fieldsToRemove.add(fieldName);
                             break;
@@ -109,8 +109,8 @@ class RestApiDocTest {
         fieldsToRemove.forEach(pathsNode::remove);
     }
 
-    private void removeComponents(JsonNode rootNode, boolean isMgmt) {
-        ObjectNode schemasNode = (ObjectNode) rootNode.get("components").get("schemas");
+    private static void removeComponents(final JsonNode rootNode, final boolean isMgmt) {
+        final ObjectNode schemasNode = (ObjectNode) rootNode.get("components").get("schemas");
 
         List<String> fieldsToRemove = new ArrayList<>();
         schemasNode.fieldNames().forEachRemaining(fieldName -> {
@@ -121,7 +121,7 @@ class RestApiDocTest {
         fieldsToRemove.forEach(schemasNode::remove);
     }
 
-    private boolean shouldDeleteComponent(String fieldName, boolean isMgmt) {
+    private static boolean shouldDeleteComponent(final String fieldName, final boolean isMgmt) {
         if (isMgmt) {
             return fieldName.startsWith("Ddi");
         }
@@ -129,25 +129,25 @@ class RestApiDocTest {
 
     }
 
-    private void saveDocumentation(JsonNode rootNode, boolean isMgmt) throws IOException {
-        String prefix = isMgmt ? MANAGEMENT_PREFIX : DDI_PREFIX;
+    private static void saveDocumentation(final JsonNode rootNode, final boolean isMgmt) throws IOException {
+        final String prefix = isMgmt ? MANAGEMENT_PREFIX : DDI_PREFIX;
         saveAsJson(rootNode, prefix);
         saveAsYaml(rootNode, prefix);
     }
 
-    private void saveAsJson(JsonNode rootNode, String prefix) throws IOException {
-        Path targetPath = getTargetPath(prefix, ".json");
-        Files.writeString(targetPath, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode));
+    private static void saveAsJson(final JsonNode rootNode, final String prefix) throws IOException {
+        final Path targetPath = getTargetPath(prefix, ".json");
+        Files.writeString(targetPath, OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(rootNode));
     }
 
-    private void saveAsYaml(JsonNode rootNode, String prefix) throws IOException {
-        YAMLMapper yamlMapper = new YAMLMapper();
-        Path targetPath = getTargetPath(prefix, ".yaml");
+    private static void saveAsYaml(final JsonNode rootNode, final String prefix) throws IOException {
+        final YAMLMapper yamlMapper = new YAMLMapper();
+        final Path targetPath = getTargetPath(prefix, ".yaml");
         Files.writeString(targetPath, yamlMapper.writeValueAsString(rootNode));
     }
 
-    private Path getTargetPath(String prefix, String extension) throws IOException {
-        Path targetPath = Paths.get(TARGET_DIRECTORY + prefix + extension);
+    private static Path getTargetPath(final String prefix, final String extension) throws IOException {
+        final Path targetPath = Paths.get(TARGET_DIRECTORY + prefix + extension);
         Files.createDirectories(targetPath.getParent());
         return targetPath;
     }

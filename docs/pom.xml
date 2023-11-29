@@ -1,6 +1,6 @@
 <!--
 
-    Copyright (c) 2018 Bosch Software Innovations GmbH and others
+    Copyright (c) 2023 Bosch.IO GmbH and others
 
     This program and the accompanying materials are made
     available under the terms of the Eclipse Public License 2.0
@@ -16,8 +16,9 @@
       <artifactId>hawkbit-parent</artifactId>
       <version>${revision}</version>
    </parent>
+
    <artifactId>docs</artifactId>
-   <packaging>pom</packaging>
+<!--   <packaging>pom</packaging>-->
    <name>hawkBit :: Documentation</name>
    <description>Documentation for hawkBit</description>
 
@@ -56,43 +57,6 @@
 
    <build>
       <plugins>
-         <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <executions>
-               <execution>
-                  <id>copy-openapi</id>
-                  <phase>prepare-package</phase>
-                  <goals>
-                     <goal>copy</goal>
-                  </goals>
-                  <configuration>
-                     <artifactItems>
-                        <artifactItem>
-                           <groupId>org.eclipse.hawkbit</groupId>
-                           <artifactId>hawkbit-update-server</artifactId>
-                           <version>${project.version}</version>
-                           <classifier>mgmt-openapi</classifier>
-                           <type>yaml</type>
-                           <overWrite>true</overWrite>
-                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
-                           <destFileName>mgmt.yaml</destFileName>
-                        </artifactItem>
-                        <artifactItem>
-                           <groupId>org.eclipse.hawkbit</groupId>
-                           <artifactId>hawkbit-update-server</artifactId>
-                           <version>${project.version}</version>
-                           <classifier>ddi-openapi</classifier>
-                           <type>yaml</type>
-                           <overWrite>true</overWrite>
-                           <outputDirectory>${basedir}/content/rest-api</outputDirectory>
-                           <destFileName>ddi.yaml</destFileName>
-                        </artifactItem>
-                     </artifactItems>
-                  </configuration>
-               </execution>
-            </executions>
-         </plugin>
          <plugin>
             <groupId>org.codehaus.mojo</groupId>
             <artifactId>exec-maven-plugin</artifactId>
@@ -162,4 +126,29 @@
       </plugins>
    </build>
 
+   <dependencies>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-boot-starter</artifactId>
+         <version>${project.version}</version>
+      </dependency>
+
+      <!-- Test -->
+      <dependency>
+         <groupId>io.qameta.allure</groupId>
+         <artifactId>allure-junit5</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-test</artifactId>
+         <scope>test</scope>
+      </dependency>
+      <dependency>
+         <groupId>org.eclipse.hawkbit</groupId>
+         <artifactId>hawkbit-repository-test</artifactId>
+         <version>${project.version}</version>
+         <scope>test</scope>
+      </dependency>
+   </dependencies>
 </project>
