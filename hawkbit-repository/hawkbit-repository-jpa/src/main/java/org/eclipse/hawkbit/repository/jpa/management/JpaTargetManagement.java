@@ -96,6 +96,8 @@ import org.springframework.validation.annotation.Validated;
 
 import com.google.common.collect.Lists;
 
+import static org.eclipse.hawkbit.repository.jpa.JpaManagementHelper.combineWithAnd;
+
 /**
  * JPA implementation of {@link TargetManagement}.
  *
@@ -490,6 +492,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         // all are already assigned -> unassign
         if (alreadyAssignedTargets.size() == allTargets.size()) {
+
             alreadyAssignedTargets.forEach(target -> target.removeTag(tag));
             return new TargetTagAssignmentResult(0, Collections.emptyList(),
                     Collections.unmodifiableList(alreadyAssignedTargets), tag);
@@ -499,9 +502,7 @@ public class JpaTargetManagement implements TargetManagement {
         // some or none are assigned -> assign
         allTargets.forEach(target -> target.addTag(tag));
         final TargetTagAssignmentResult result = new TargetTagAssignmentResult(alreadyAssignedTargets.size(),
-                Collections
-                        .unmodifiableList(allTargets.stream().map(targetRepository::save).collect(Collectors.toList())),
-                Collections.emptyList(), tag);
+                targetRepository.saveAll(allTargets), Collections.emptyList(), tag);
 
         // no reason to persist the tag
         entityManager.detach(tag);
@@ -522,16 +523,11 @@ public class JpaTargetManagement implements TargetManagement {
         final List<JpaTarget> targetsWithoutSameType = findTargetsByInSpecification(controllerIds,
                 TargetSpecifications.hasTargetTypeNot(typeId));
 
-        targetRepository.getAccessController().ifPresent(acm -> {
-            // verify if targets are updatable
-            acm.assertOperationAllowed(AccessController.Operation.UPDATE, targetsWithoutSameType);
-        });
-
         // set new target type to all targets without that type
         targetsWithoutSameType.forEach(target -> target.setTargetType(type));
 
         final TargetTypeAssignmentResult result = new TargetTypeAssignmentResult(targetsWithSameType.size(),
-                targetsWithoutSameType.stream().map(targetRepository::save).toList(), Collections.emptyList(), type);
+                targetRepository.saveAll(targetsWithoutSameType), Collections.emptyList(), type);
 
         // no reason to persist the type
         entityManager.detach(type);
@@ -574,6 +570,9 @@ public class JpaTargetManagement implements TargetManagement {
             throw new EntityNotFoundException(Target.class, controllerIds,
                     allTargets.stream().map(Target::getControllerId).toList());
         }
+
+        targetRepository.getAccessController()
+                .ifPresent(acm -> acm.assertOperationAllowed(AccessController.Operation.UPDATE, allTargets));
 
         final JpaTargetTag tag = targetTagRepository.findById(tagId)
                 .orElseThrow(() -> new EntityNotFoundException(TargetTag.class, tagId));
@@ -675,7 +674,7 @@ public class JpaTargetManagement implements TargetManagement {
 
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        JpaManagementHelper.combineWithAnd(List.of(
+                        combineWithAnd(List.of(
                                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                                         virtualPropertyReplacer, database),
                                 TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
@@ -690,7 +689,7 @@ public class JpaTargetManagement implements TargetManagement {
             final DistributionSetType dsType) {
         return targetRepository
                 .findAllWithoutCount(AccessController.Operation.UPDATE,
-                        JpaManagementHelper.combineWithAnd(List.of(
+                        combineWithAnd(List.of(
                                 RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                                         virtualPropertyReplacer, database),
                                 TargetSpecifications.isNotInRolloutGroups(groups),
@@ -723,7 +722,7 @@ public class JpaTargetManagement implements TargetManagement {
     public long countByRsqlAndNotInRolloutGroupsAndCompatibleAndUpdatable(final Collection<Long> groups,
             final String targetFilterQuery, final DistributionSetType dsType) {
         return targetRepository.count(AccessController.Operation.UPDATE,
-                JpaManagementHelper.combineWithAnd(List.of(
+                combineWithAnd(List.of(
                         RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                                 virtualPropertyReplacer, database),
                         TargetSpecifications.isNotInRolloutGroups(groups),
@@ -746,7 +745,7 @@ public class JpaTargetManagement implements TargetManagement {
         final Long distSetTypeId = jpaDistributionSet.getType().getId();
 
         return targetRepository.count(AccessController.Operation.UPDATE,
-                JpaManagementHelper.combineWithAnd(List.of(
+                combineWithAnd(List.of(
                         RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
                                 virtualPropertyReplacer, database),
                         TargetSpecifications.hasNotDistributionSetInActions(distributionSetId),
@@ -813,8 +812,9 @@ public class JpaTargetManagement implements TargetManagement {
 
     @Override
     public long countByRsqlAndUpdatable(String targetFilterQuery) {
-        return JpaManagementHelper.countBySpec(AccessController.Operation.UPDATE, targetRepository, List.of(RSQLUtility
-                .buildRsqlSpecification(targetFilterQuery, TargetFields.class, virtualPropertyReplacer, database)));
+        final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery,
+                TargetFields.class, virtualPropertyReplacer, database));
+        return targetRepository.count(AccessController.Operation.UPDATE, combineWithAnd(specList));
     }
 
     @Override
@@ -831,8 +831,7 @@ public class JpaTargetManagement implements TargetManagement {
         final List<Specification<JpaTarget>> specList = List.of(RSQLUtility.buildRsqlSpecification(targetFilterQuery,
                 TargetFields.class, virtualPropertyReplacer, database),
                 TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetIdTypeId));
-
-        return JpaManagementHelper.countBySpec(AccessController.Operation.UPDATE, targetRepository, specList);
+        return targetRepository.count(AccessController.Operation.UPDATE, combineWithAnd(specList));
     }
 
     @Override
