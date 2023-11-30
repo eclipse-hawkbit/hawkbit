@@ -27,7 +27,7 @@ Start the hawkBit Update Server and Device Simulator together with an MySQL and 
 
 ```bash
 $ docker swarm init
-$ docker stack deploy -c docker-compose-stack.yml hawkbit
+$ docker stack deploy -c docker-compose-deps-mysql.yml hawkbit
 ```
 
 # Access
