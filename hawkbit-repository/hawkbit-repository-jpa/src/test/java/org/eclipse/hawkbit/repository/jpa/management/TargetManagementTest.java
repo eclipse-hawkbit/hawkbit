@@ -1267,7 +1267,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final String filter = "metadata.key1==target1-value1";
 
-        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target.getControllerId(),
                 ds.getId(), filter)).isTrue();
     }
 
@@ -1278,7 +1278,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final String filter = "metadata.key==not_existing";
 
-        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target.getControllerId(),
                 ds.getId(), filter)).isFalse();
     }
 
@@ -1292,7 +1292,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds2, target);
         final String filter = "name==*";
 
-        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target.getControllerId(),
                 ds1.getId(), filter)).isFalse();
     }
 
@@ -1303,7 +1303,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Target target = testdataFactory.createTarget("target", "target", type.getId());
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
-        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target.getControllerId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target.getControllerId(),
                 ds.getId(), "name==*")).isFalse();
     }
 
@@ -1314,9 +1314,9 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final Long ds = testdataFactory.createDistributionSet().getId();
 
         assertThatExceptionOfType(RSQLParameterSyntaxException.class).isThrownBy(() -> targetManagement
-                .isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, "invalid_syntax"));
+                .isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, "invalid_syntax"));
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class).isThrownBy(() -> targetManagement
-                .isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, ds, "invalid_field==1"));
+                .isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, ds, "invalid_field==1"));
     }
 
     @Test
@@ -1324,7 +1324,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     void matchesFilterTargetNotExists() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
 
-        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible("notExisting", ds.getId(),
+        assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable("notExisting", ds.getId(),
                 "name==*")).isFalse();
     }
 
@@ -1334,7 +1334,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String target = testdataFactory.createTarget().getControllerId();
 
         assertThatExceptionOfType(EntityNotFoundException.class).isThrownBy(
-                () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatible(target, 123, "name==*"));
+                () -> targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable(target, 123, "name==*"));
     }
 
     private void validateFoundTargetsByRsql(final String rsqlFilter, final String... controllerIds) {

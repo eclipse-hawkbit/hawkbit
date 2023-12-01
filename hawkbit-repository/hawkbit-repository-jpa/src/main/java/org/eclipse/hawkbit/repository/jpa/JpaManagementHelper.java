@@ -15,7 +15,10 @@ import java.util.Optional;
 
 import javax.persistence.EntityManager;
 
+import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.jpa.repository.BaseEntityRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.NoCountSliceRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.SpecificationsBuilder;
 import org.springframework.data.domain.Page;
@@ -26,6 +29,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -54,6 +58,9 @@ public final class JpaManagementHelper {
     }
 
     public static <J> Specification<J> combineWithAnd(final List<Specification<J>> specList) {
+        if (ObjectUtils.isEmpty(specList)) {
+            return Specification.where(null);
+        }
         return specList.size() == 1 ? specList.get(0) : SpecificationsBuilder.combineWithAnd(specList);
     }
 

@@ -134,14 +134,13 @@ public class AddRolloutWindowLayout extends AbstractRolloutWindowLayout {
     }
 
     private Long getTotalTargets(final String filterQuery, final Long distSetTypeId) {
-        // TODO AC -  Check for updatable targets only
         if (StringUtils.isEmpty(filterQuery)) {
             return null;
         }
         if (distSetTypeId == null) {
-            return targetManagement.countByRsql(filterQuery);
+            return targetManagement.countByRsqlAndUpdatable(filterQuery);
         }
-        return targetManagement.countByRsqlAndCompatible(filterQuery, distSetTypeId);
+        return targetManagement.countByRsqlAndCompatibleAndUpdatable(filterQuery, distSetTypeId);
     }
 
     private boolean isSimpleGroupsTabSelected() {

@@ -27,7 +27,6 @@ import javax.transaction.Transactional;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -70,13 +69,18 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                         if (method.getName().startsWith("find") || method.getName().startsWith("get")) {
                             final Object result = method.invoke(repository, args);
                             if (Iterable.class.isAssignableFrom(method.getReturnType())) {
-                                for (final T e : ((Iterable<T>) result)) {
-                                    accessController.assertOperationAllowed(AccessController.Operation.READ, e);
+                                for (final Object e : (Iterable<?>) result) {
+                                    if (repository.getDomainClass().isAssignableFrom(e.getClass())) {
+                                        accessController.assertOperationAllowed(AccessController.Operation.READ, (T) e);
+                                    }
                                 }
-                            } else if (Optional.class.isAssignableFrom(method.getReturnType())) {
-                                return ((Optional<T>)result).filter(t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
+                            } else if (Optional.class.isAssignableFrom(method.getReturnType()) && ((Optional<?>) result)
+                                    .filter(value -> repository.getDomainClass().isAssignableFrom(value.getClass()))
+                                    .isPresent()) {
+                                return ((Optional<T>) result).filter(
+                                        t -> isOperationAllowed(AccessController.Operation.READ, t, accessController));
                             } else if (repository.getDomainClass().isAssignableFrom(method.getReturnType())) {
-                                accessController.assertOperationAllowed(AccessController.Operation.READ, (T)result);
+                                accessController.assertOperationAllowed(AccessController.Operation.READ, (T) result);
                             }
                             return result;
                         } else if ("toString".equals(method.getName()) && method.getParameterCount() == 0) {

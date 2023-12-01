@@ -308,7 +308,6 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         throwExceptionIfTargetDoesNotExist(controllerId);
         throwExceptionIfSoftwareModuleDoesNotExist(moduleId);
 
-        // TODO AC - REVIEW
         // it used to perform 3-table join query
         // @Query("Select a from JpaAction a join a.distributionSet ds join ds.modules modul where a.target.controllerId = :target and modul.id = :module order by a.id desc")
         //        final List<Action> actions = actionRepository.findActionByTargetAndSoftwareModule(controllerId, moduleId);

@@ -101,6 +101,7 @@ import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTagManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaTargetTypeManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaTenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.jpa.management.JpaTenantStatsManagement;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaArtifact;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
@@ -1038,13 +1039,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DistributionSetManagement distributionSetManagement, final RolloutManagement rolloutManagement,
             final DeploymentManagement deploymentManagement,
             final TargetFilterQueryManagement targetFilterQueryManagement, final ActionRepository actionRepository,
-            final PlatformTransactionManager txManager,
-            final RepositoryProperties repositoryProperties, final TenantAware tenantAware,
-            final LockRegistry lockRegistry) {
+            final PlatformTransactionManager txManager, final RepositoryProperties repositoryProperties,
+            final TenantAware tenantAware, final LockRegistry lockRegistry,
+            final SystemSecurityContext systemSecurityContext) {
         return new JpaDistributionSetInvalidationManagement(distributionSetManagement, rolloutManagement,
-                deploymentManagement, targetFilterQueryManagement, actionRepository,
-                txManager, repositoryProperties, tenantAware,
-                lockRegistry);
+                deploymentManagement, targetFilterQueryManagement, actionRepository, txManager, repositoryProperties,
+                tenantAware, lockRegistry, systemSecurityContext);
     }
 
     /**
@@ -1080,10 +1080,12 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             @Autowired(required = false) final AccessController<JpaDistributionSetType> distributionSetTypeAccessController,
             @Autowired(required = false) final AccessController<JpaDistributionSet> distributionSetAccessController,
             @Autowired(required = false) final AccessController<JpaTargetType> targetTypeAccessControlManager,
-            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager) {
+            @Autowired(required = false) final AccessController<JpaTarget> targetAccessControlManager,
+            @Autowired(required = false) final AccessController<JpaAction> actionAccessController) {
         return new BeanPostProcessor() {
             @Override
-            public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName) throws BeansException {
+            public Object postProcessAfterInitialization(@NonNull final Object bean, @NonNull final String beanName)
+                    throws BeansException {
                 if (bean instanceof LocalArtifactRepository repo) {
                     return repo.withACM(artifactAccessController);
                 } else if (bean instanceof SoftwareModuleTypeRepository repo) {
@@ -1098,6 +1100,8 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
                     return repo.withACM(targetTypeAccessControlManager);
                 } else if (bean instanceof TargetRepository repo) {
                     return repo.withACM(targetAccessControlManager);
+                } else if (bean instanceof ActionRepository repo) {
+                    return repo.withACM(actionAccessController);
                 }
                 return BeanPostProcessor.super.postProcessAfterInitialization(bean, beanName);
             }

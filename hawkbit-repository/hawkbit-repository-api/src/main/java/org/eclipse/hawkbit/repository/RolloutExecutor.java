@@ -22,6 +22,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface RolloutExecutor {
 
     /**
+     * This execution should only be triggered by the system as a background job and
+     * not available via API.
+     * 
      * Process rollout based on its current {@link Rollout#getStatus()}.
      *
      * For {@link RolloutStatus#CREATING} that means creating the
@@ -29,9 +32,9 @@ public interface RolloutExecutor {
      * {@link RolloutStatus#READY}.
      *
      * For {@link RolloutStatus#READY} that means switching to
-     * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set
-     * and time of calling this method is beyond this point in time. This auto
-     * start mechanism is optional. Call {@link #start(Long)} otherwise.
+     * {@link RolloutStatus#STARTING} if the {@link Rollout#getStartAt()} is set and
+     * time of calling this method is beyond this point in time. This auto start
+     * mechanism is optional. Call {@link #start(Long)} otherwise.
      *
      * For {@link RolloutStatus#STARTING} that means starting the first
      * {@link RolloutGroup}s in line and when finished switch to
@@ -45,8 +48,7 @@ public interface RolloutExecutor {
      * rollout was already {@link RolloutStatus#RUNNING} which results in status
      * change {@link RolloutStatus#DELETED} or hard delete from the persistence
      * otherwise.
-     *
      */
-    @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_ROLLOUT_MANAGEMENT_CREATE)
     void execute(Rollout rollout);
 }
