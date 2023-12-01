@@ -36,9 +36,6 @@ RUN set -x &&\
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 
-RUN addgroup -S rollouts && adduser -D sp -G rollouts
-USER sp
-
 ENV BUILD_DIR=/opt/hawkbit_build
 COPY --from=build ${BUILD_DIR}/dependencies/ ./
 COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
@@ -50,5 +47,6 @@ COPY --from=build ${BUILD_DIR}/mariadb-java-client-${MARIADB_DRIVER_VERSION}.jar
 ARG CONTAINER_PORT=8080
 ENV JAVA_OPTS="-Dspring.profiles.active=mysql -Xms768m -Xmx768m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K -XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops -XX:+HeapDumpOnOutOfMemoryError"
 
+VOLUME "/artifactrepo"
 EXPOSE ${CONTAINER_PORT}
 ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher ${@}"]
