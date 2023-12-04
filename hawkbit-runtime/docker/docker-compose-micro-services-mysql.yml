@@ -28,6 +28,9 @@ services:
     restart: always
     ports:
       - "8081:8081"
+    depends_on:
+      mysql:
+        condition: service_healthy
     labels:
       NAME: "hawkbit-ddi"
 
@@ -43,6 +46,9 @@ services:
       - 'SPRING_RABBITMQ_PASSWORD=guest'
       - 'SPRING_DATASOURCE_USERNAME=root'
     restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
     labels:
       NAME: "hawkbit-dmf"
 
@@ -62,6 +68,9 @@ services:
     restart: always
     ports:
       - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
     labels:
       NAME: "hawkbit-mgmt"
 
@@ -82,6 +91,9 @@ services:
     restart: always
     ports:
       - "8082:8082"
+    depends_on:
+      mysql:
+        condition: service_healthy
     labels:
       NAME: "hawkbit-vv8-ui"
 
