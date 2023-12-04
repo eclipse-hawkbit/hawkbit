@@ -10,6 +10,11 @@
 #
 set -xe
 
+# Usage: builds all docker images. Use:
+# -v <version> to pass version
+# -f <flavour> to pass flavour. "mysql" stands for MySQL while all the rest (and default) is assumed Standard
+# -r <local maven repository> the local maven repository the already built application jars are located into
+
 VERSION=0.4.0-SNAPSHOT
 FLAVOUR="standard"
 MVN_REPO=~/.m2/repository
@@ -39,7 +44,13 @@ fi
 
 echo "docker file          : ${DOCKER_FILE}"
 
-docker build -t hawkbit/hawkbit-ddi-server:${VERSION}${TAG_SUFFIX} -t hawkbit/hawkbit-ddi-server:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=hawkbit-ddi-server --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
-docker build -t hawkbit/hawkbit-dmf-server:${VERSION}${TAG_SUFFIX} -t hawkbit/hawkbit-dmf-server:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=hawkbit-dmf-server --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
-docker build -t hawkbit/hawkbit-mgmt-server:${VERSION}${TAG_SUFFIX} -t hawkbit/hawkbit-mgmt-server:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=hawkbit-mgmt-server --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
-docker build -t hawkbit/hawkbit-vv8-ui:${VERSION}${TAG_SUFFIX} -t hawkbit/hawkbit-vv8-ui:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=hawkbit-vv8-ui --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
+function build() {
+  docker build -t hawkbit/$1:${VERSION}${TAG_SUFFIX} -t hawkbit/$1:latest${TAG_SUFFIX} --build-arg HAWKBIT_APP=$1 --build-arg HAWKBIT_VERSION=${VERSION} -f ${DOCKER_FILE} "${MVN_REPO}"
+}
+
+build "hawkbit-ddi-server"
+build "hawkbit-dmf-server"
+build "hawkbit-mgmt-server"
+build "hawkbit-vv8-ui"
+
+build "hawkbit-update-server"
