@@ -26,6 +26,10 @@ RUN set -x &&\
 
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine
 
+RUN addgroup -S hawkbit_group && adduser -D hawkbit -G hawkbit_group
+RUN mkdir -p /artifactrepo && chown -R hawkbit /artifactrepo
+USER hawkbit
+
 ENV BUILD_DIR=/opt/hawkbit_build
 COPY --from=build ${BUILD_DIR}/dependencies/ ./
 COPY --from=build ${BUILD_DIR}/spring-boot-loader/ ./
