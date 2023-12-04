@@ -24,16 +24,13 @@ In addition, the following vendors offer free trial accounts for their Eclipse h
 
 ### Overview
 
-| Service / Container | A | B | C |
-|---|---|---|---|
-| hawkBit Update Server |  &#10003; | &#10003; | &#10003; |
-| hawkBit Device Simulator |   |  | &#10003; |
-| MySQL |  | &#10003; | &#10003; |
-| RabbitMQ |  | &#10003; | &#10003; |
+HawkBit Update Server username/password -> admin/admin as default login credentials. They can be overridden by the environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
 
-HawkBit Update Server uses username=admin and password=admin as default login credentials. They can be overridden by the environment variables spring.security.user.name and spring.security.user.password which are defined in the corresponding default [application.properties](hawkbit-runtime/hawkbit-update-server/src/main/resources/application.properties).
+It supports two configurations:
+* monolith - hawkbit-update-server
+* micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server, hawkbit-vv8-ui.
 
-### A: Run hawkBit Update Server as Docker Container
+### A: Run hawkBit Update Server (Monolith) as Docker Container
 
 Start the hawkBit Update Server as a single container
 
@@ -41,25 +38,24 @@ Start the hawkBit Update Server as a single container
 $ docker run -p 8080:8080 hawkbit/hawkbit-update-server:latest
 ```
 
-### B: Run hawkBit Update Server with services as Docker Compose
+### B: Run hawkBit Update Server (Monolith) with services as Docker Compose
 
 Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
 
 ```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/docker
-$ docker-compose up -d
+$ docker-compose -f docker-compose-monolith-mysql.yml up -d
 ```
 
-### C: Run hawkBit Update Server with services as Docker Stack
+### C: Run hawkBit Update Server (Micro-Service) with services as Docker Compose
 
-Start the hawkBit Update Server and Device Simulator together with an MySQL and RabbitMQ instance as services within a swarm
+Start the hawkBit Update Server together with an MySQL and RabbitMQ instance as containers
 
 ```bash
 $ git clone https://github.com/eclipse/hawkbit.git
 $ cd hawkbit/hawkbit-runtime/docker
-$ docker swarm init
-$ docker stack deploy -c docker-compose-stack.yml hawkbit
+$ docker-compose -f docker-compose-micro-service-mysql.yml up -d
 ```
 
 ## From Sources
@@ -71,7 +67,7 @@ $ cd hawkbit
 $ mvn clean install
 ```
 
-### 2: Start hawkBit [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server)
+### 2: Start hawkBit [update server](https://github.com/eclipse/hawkbit/tree/master/hawkbit-runtime/hawkbit-update-server) (Monolith)
 
 ```sh
 $ java -jar ./hawkbit-runtime/hawkbit-update-server/target/hawkbit-update-server-#version#-SNAPSHOT.jar
