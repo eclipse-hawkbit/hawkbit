@@ -16,11 +16,17 @@ import java.util.Set;
  * {@link Target}
  *
  */
-public interface TargetType extends NamedEntity {
+public interface TargetType extends Type {
+
     /**
-     * Maximum length of color in Management UI.
+     * Target type doesn't support soft-delete so all target type instandces re not deleted.
+     *
+     * @return <code>false</code>
      */
-    int COLOUR_MAX_SIZE = 16;
+    @Override
+    default boolean isDeleted() {
+        return false;
+    }
 
     /**
      * @return immutable set of optional {@link DistributionSetType}s
@@ -31,18 +37,6 @@ public interface TargetType extends NamedEntity {
      * @return immutable set of optional {@link Target}s
      */
     Set<Target> getTargets();
-
-    /**
-     * Checks if the given {@link DistributionSetType} is in
-     * {@link #getCompatibleDistributionSetTypes()}.
-     *
-     * @param distributionSetType
-     *            search for
-     * @return <code>true</code> if found
-     */
-    default boolean containsCompatibleDistributionSetType(final DistributionSetType distributionSetType) {
-        return containsCompatibleDistributionSetType(distributionSetType.getId());
-    }
 
     /**
      * Checks if the given {@link DistributionSetType} is in
@@ -64,9 +58,4 @@ public interface TargetType extends NamedEntity {
      * @return the resulting target type
      */
     TargetType removeDistributionSetType(final Long dsTypeId);
-
-    /**
-     * @return get color code to be used in management UI views.
-     */
-    String getColour();
 }

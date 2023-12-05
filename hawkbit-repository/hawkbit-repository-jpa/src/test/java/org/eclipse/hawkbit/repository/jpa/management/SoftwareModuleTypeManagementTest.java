@@ -74,14 +74,14 @@ public class SoftwareModuleTypeManagementTest extends AbstractJpaIntegrationTest
 
     @Test
     @Description("Calling update for changed fields results in change in the repository.")
-    public void updateSoftareModuleTypeFieldsToNewValue() {
+    public void updateSoftwareModuleTypeFieldsToNewValue() {
         final SoftwareModuleType created = softwareModuleTypeManagement
                 .create(entityFactory.softwareModuleType().create().key("test-key").name("test-name"));
 
         final SoftwareModuleType updated = softwareModuleTypeManagement.update(
                 entityFactory.softwareModuleType().update(created.getId()).description("changed").colour("changed"));
 
-        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entitity is")
+        assertThat(updated.getOptLockRevision()).as("Expected version number of updated entities is")
                 .isEqualTo(created.getOptLockRevision() + 1);
         assertThat(updated.getDescription()).as("Updated description is").isEqualTo("changed");
         assertThat(updated.getColour()).as("Updated vendor is").isEqualTo("changed");

@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.persistence.annotations.CascadeOnDelete;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
 
-import javax.persistence.Column;
 import javax.persistence.ConstraintMode;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,7 +30,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -45,13 +44,10 @@ import java.util.Set;
 @Table(name = "sp_target_type", indexes = {
         @Index(name = "sp_idx_target_type_prim", columnList = "tenant,id") }, uniqueConstraints = {
         @UniqueConstraint(columnNames = { "name", "tenant" }, name = "uk_target_type_name")})
-public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType, EventAwareEntity{
+public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    @Column(name = "colour", nullable = true, length = TargetType.COLOUR_MAX_SIZE)
-    @Size(max = TargetType.COLOUR_MAX_SIZE)
-    private String colour;
 
     @CascadeOnDelete
     @ManyToMany(targetEntity = JpaDistributionSetType.class)
@@ -74,15 +70,30 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
      * Constructor
      *
      * @param name
-     *          Type name
+     *            of the type
      * @param description
-     *          Description
+     *            of the type
      * @param colour
-     *          Colour
+     *            of the type
      */
-    public JpaTargetType(String name, String description, String colour) {
-        super(name,description);
-        this.colour = colour;
+    public JpaTargetType(final String name, final String description, final String colour) {
+        this(name, name, description, colour);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param key
+     *            of the type
+     * @param name
+     *            of the type
+     * @param description
+     *            of the type
+     * @param colour
+     *            of the type. It will be null by default
+     */
+    public JpaTargetType(final String key, final String name, final String description, final String colour) {
+        super(name, description, key, colour);
     }
 
     /**
@@ -90,13 +101,12 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
      *          Distribution set type
      * @return Target type
      */
-    public JpaTargetType addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
+    public void addCompatibleDistributionSetType(final DistributionSetType dsSetType) {
         if (distributionSetTypes == null) {
             distributionSetTypes = new HashSet<>();
         }
 
         distributionSetTypes.add(dsSetType);
-        return this;
     }
 
     /**
@@ -129,28 +139,24 @@ public class JpaTargetType extends AbstractJpaNamedEntity implements TargetType,
     }
 
     @Override
-    public String getColour() {
-        return colour;
-    }
-
-    public void setColour(final String colour) {
-        this.colour = colour;
+    public String toString() {
+        return "TargetType [key=" + getKey() + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
 
     @Override
-    public void fireCreateEvent(DescriptorEvent descriptorEvent) {
+    public void fireCreateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetTypeCreatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireUpdateEvent(DescriptorEvent descriptorEvent) {
+    public void fireUpdateEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(
                 new TargetTypeUpdatedEvent(this, EventPublisherHolder.getInstance().getApplicationId()));
     }
 
     @Override
-    public void fireDeleteEvent(DescriptorEvent descriptorEvent) {
+    public void fireDeleteEvent(final DescriptorEvent descriptorEvent) {
         EventPublisherHolder.getInstance().getEventPublisher().publishEvent(new TargetTypeDeletedEvent(
                 getTenant(), getId(), getClass(), EventPublisherHolder.getInstance().getApplicationId()));
     }
