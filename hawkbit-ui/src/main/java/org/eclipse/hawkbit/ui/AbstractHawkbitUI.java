@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui;
 
+import com.vaadin.shared.ui.ContentMode;
 import org.eclipse.hawkbit.ui.components.NotificationUnreadButton;
 import org.eclipse.hawkbit.ui.error.ErrorView;
 import org.eclipse.hawkbit.ui.menu.DashboardEvent.PostViewChangeEvent;
@@ -156,6 +157,11 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         contentVerticalLayout.addComponent(content);
         contentVerticalLayout.setExpandRatio(content, 1.0F);
 
+        String footerNotification = uiProperties.getNotification().getText();
+        if (footerNotification != null && !footerNotification.isEmpty()) {
+            contentVerticalLayout.addComponent(buildFooterNotification(footerNotification));
+        }
+
         rootLayout.addComponent(dashboardMenu);
         rootLayout.addComponent(contentVerticalLayout);
         rootLayout.setExpandRatio(contentVerticalLayout, 1.0F);
@@ -192,6 +198,13 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         }
 
         LOG.debug("Current locale of the application is : {}", getLocale());
+    }
+
+    private static Component buildFooterNotification(String text) {
+        Label notification = new Label();
+        notification.setValue(text);
+        notification.setContentMode(ContentMode.HTML);
+        return notification;
     }
 
     private static Panel buildContent() {

@@ -37,6 +37,8 @@ public class UiProperties implements Serializable {
 
     private final Event event = new Event();
 
+    private final Notification notification = new Notification();
+
     /**
      * @return True if menu item has gravatar else false
      */
@@ -578,6 +580,18 @@ public class UiProperties implements Serializable {
         }
     }
 
+    public static class Notification implements Serializable {
+        private String text;
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(final String text) {
+            this.text = text;
+        }
+    }
+
     /**
      * @return Demo account details
      */
@@ -604,6 +618,10 @@ public class UiProperties implements Serializable {
      */
     public Localization getLocalization() {
         return localization;
+    }
+
+    public Notification getNotification() {
+        return notification;
     }
 
 }
