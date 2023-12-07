@@ -171,7 +171,7 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
         };
     }
 
-    private static class SecurityContextWithUser implements SecurityContext {
+    static class SecurityContextWithUser implements SecurityContext {
         private static final long serialVersionUID = 1L;
         private final WithUser annotation;
 
