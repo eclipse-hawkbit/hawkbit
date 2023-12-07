@@ -52,7 +52,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.cloud.bus.ConditionalOnBusEnabled;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.context.annotation.AdviceMode;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -67,7 +66,7 @@ import org.springframework.messaging.converter.MessageConverter;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -75,12 +74,12 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
  * Spring context configuration required for Dev.Environment.
  */
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true, mode = AdviceMode.PROXY, proxyTargetClass = false, securedEnabled = true)
 @EnableConfigurationProperties({ HawkbitServerProperties.class, DdiSecurityProperties.class,
         ArtifactUrlHandlerProperties.class, ArtifactFilesystemProperties.class, HawkbitSecurityProperties.class,
         ControllerPollProperties.class, TenantConfigurationProperties.class })
 @Profile("test")
 @EnableAutoConfiguration
+@EnableMethodSecurity(proxyTargetClass = true, securedEnabled = true)
 @PropertySource("classpath:/hawkbit-test-defaults.properties")
 public class TestConfiguration implements AsyncConfigurer {
 
