@@ -63,7 +63,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.TargetTestData;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
@@ -941,7 +941,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
     private void assertAction(final Long actionId, final int messages, final Status... expectedActionStates) {
         createConditionFactory().await().untilAsserted(() -> {
             try {
-                WithSpringAuthorityRule.runAsPrivileged(() -> {
+                SecurityContextSwitch.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
                             .findActionStatusByAction(PAGE, actionId).getContent();
 
@@ -979,7 +979,7 @@ class AmqpMessageHandlerServiceIntegrationTest extends AbstractAmqpServiceIntegr
             final Status... expectedActionStates) {
         createConditionFactory().await().untilAsserted(() -> {
             try {
-                WithSpringAuthorityRule.runAsPrivileged(() -> {
+                SecurityContextSwitch.runAsPrivileged(() -> {
                     final List<ActionStatus> actionStatusList = deploymentManagement
                             .findActionStatusByAction(PAGE, actionId).getContent();
                     assertThat(actionStatusList).hasSize(statusListCount);

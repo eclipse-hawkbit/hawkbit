@@ -76,7 +76,7 @@ import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
 import org.eclipse.hawkbit.repository.test.util.TargetTestData;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -844,7 +844,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final String controllerId = "test123";
         final Target target = testdataFactory.createTarget(controllerId);
 
-        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             addAttributeAndVerify(controllerId);
             addSecondAttributeAndVerify(controllerId);
             updateAttributeAndVerify(controllerId);
@@ -999,8 +999,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final int allowedAttributes = quotaManagement.getMaxAttributeEntriesPerTarget();
         testdataFactory.createTarget(controllerId);
 
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
-                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, allowedAttributes + 1, "key", "value");
                     return null;
                 })).withMessageContaining("" + allowedAttributes);
@@ -1010,7 +1010,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         // Write allowed number of attributes twice with same key should result
         // in update but work
-        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
             writeAttributes(controllerId, allowedAttributes, "key", "value1");
             writeAttributes(controllerId, allowedAttributes, "key", "value2");
             return null;
@@ -1018,8 +1018,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetManagement.getControllerAttributes(controllerId)).hasSize(10);
 
         // Now rite one more
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
-                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeAttributes(controllerId, 1, "additional", "value1");
                     return null;
                 })).withMessageContaining("" + allowedAttributes);
@@ -1075,8 +1075,8 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         final Long actionId = createTargetAndAssignDs();
 
         // Fails as one entry is already in there from the assignment
-        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> WithSpringAuthorityRule
-                .runAs(WithSpringAuthorityRule.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
+        assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withController("controller", CONTROLLER_ROLE_ANONYMOUS), () -> {
                     writeStatus(actionId, allowStatusEntries);
                     return null;
                 })).withMessageContaining("" + allowStatusEntries);

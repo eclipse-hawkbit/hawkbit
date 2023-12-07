@@ -52,7 +52,7 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditionBuilder;
 import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.util.JsonBuilder;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
@@ -1206,7 +1206,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
 
     private void awaitRunningState(final Long rolloutId) {
         Awaitility.await().atMost(Duration.ofMinutes(1)).pollInterval(Duration.ofMillis(100)).with()
-                .until(() -> WithSpringAuthorityRule
+                .until(() -> SecurityContextSwitch
                         .runAsPrivileged(
                                 () -> rolloutManagement.get(rolloutId).orElseThrow(NoSuchElementException::new))
                         .getStatus().equals(RolloutStatus.RUNNING));

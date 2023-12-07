@@ -23,7 +23,7 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
 import org.eclipse.hawkbit.repository.test.util.DisposableSqlTestDatabaseExtension;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -117,7 +117,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
 
         for (int i = 0; i < tenants; i++) {
             final String tenantname = "tenant" + i;
-            WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUserAndTenant("bumlux", tenantname, true, true, false,
+            SecurityContextSwitch.runAs(SecurityContextSwitch.withUserAndTenant("bumlux", tenantname, true, true, false,
                     SpringEvalExpressions.SYSTEM_ROLE), () -> {
                         systemManagement.getTenantMetadata(tenantname);
                         if (artifactSize > 0) {

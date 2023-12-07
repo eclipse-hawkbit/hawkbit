@@ -92,7 +92,7 @@ import org.springframework.test.context.TestExecutionListeners.MergeMode;
 import org.springframework.test.context.TestPropertySource;
 
 @ActiveProfiles({ "test" })
-@ExtendWith({ JUnitTestLoggerExtension.class, WithSpringAuthorityRule.class , SharedSqlTestDatabaseExtension.class })
+@ExtendWith({ JUnitTestLoggerExtension.class , SharedSqlTestDatabaseExtension.class })
 @WithUser(principal = "bumlux", allSpPermissions = true, authorities = { CONTROLLER_ROLE, SYSTEM_ROLE })
 @SpringBootTest
 @ContextConfiguration(classes = { TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
@@ -391,22 +391,22 @@ public abstract class AbstractIntegrationTest {
 
         final String description = "Updated description.";
 
-        osType = WithSpringAuthorityRule
+        osType = SecurityContextSwitch
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_OS));
-        osType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        osType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(osType.getId()).description(description)));
 
-        appType = WithSpringAuthorityRule.runAsPrivileged(
+        appType = SecurityContextSwitch.runAsPrivileged(
                 () -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_APP, Integer.MAX_VALUE));
-        appType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        appType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(appType.getId()).description(description)));
 
-        runtimeType = WithSpringAuthorityRule
+        runtimeType = SecurityContextSwitch
                 .runAsPrivileged(() -> testdataFactory.findOrCreateSoftwareModuleType(TestdataFactory.SM_TYPE_RT));
-        runtimeType = WithSpringAuthorityRule.runAsPrivileged(() -> softwareModuleTypeManagement
+        runtimeType = SecurityContextSwitch.runAsPrivileged(() -> softwareModuleTypeManagement
                 .update(entityFactory.softwareModuleType().update(runtimeType.getId()).description(description)));
 
-        standardDsType = WithSpringAuthorityRule.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
+        standardDsType = SecurityContextSwitch.runAsPrivileged(() -> testdataFactory.findOrCreateDefaultTestDsType());
 
         // publish the reset counter market event to reset the counters after
         // setup. The setup is transparent by the test and its @ExpectedEvent
