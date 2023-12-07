@@ -1,4 +1,4 @@
-# hawkBit DDI Server
+# hawkBit DDI Server (EXPERIMENTAL!)
 The hawkBit DDI Server is a standalone spring-boot application with an embedded servlet container. It should be started with at least hawkbit-mgmt-server.
 
 ## On your own workstation

@@ -1,4 +1,4 @@
-# hawkBit Vaadin 8 UI (Deprecated)
+# hawkBit Vaadin 8 UI  (EXPERIMENTAL and already DEPRECATED!)
 The hawkBit Vaadin v8 UI is a standalone spring-boot application with an embedded servlet container. It should be started with at least hawkbit-mgmt-server.
 
 ## On your own workstation
