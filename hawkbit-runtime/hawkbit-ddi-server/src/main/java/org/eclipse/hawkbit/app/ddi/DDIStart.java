@@ -12,6 +12,9 @@ package org.eclipse.hawkbit.app.ddi;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -45,5 +48,11 @@ public class DDIStart {
             attributes.addAttribute("attribute", "redirectWithRedirectView");
             return new RedirectView("swagger-ui/index.html");
         }
+    }
+
+    @Configuration
+    @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true)
+    public static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
+
     }
 }

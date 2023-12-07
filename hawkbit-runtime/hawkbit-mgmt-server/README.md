@@ -1,4 +1,4 @@
-# hawkBit Management Server
+# hawkBit Management Server (EXPERIMENTAL!)
 The hawkBit Management Server is a standalone spring-boot application with an embedded servlet container. It should be started with at least one (or both) of the device interface servers - hawkbit-ddi-server or/and hawkbit-dmf-server.
 
 ## On your own workstation

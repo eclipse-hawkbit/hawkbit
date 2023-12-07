@@ -1,4 +1,4 @@
-# hawkBit DMF Server
+# hawkBit DMF Server (EXPERIMENTAL!)
 The hawkBit DMF Server is a standalone spring-boot application with an embedded servlet container. It should be started with at least hawkbit-mgmt-server.
 
 ## On your own workstation
