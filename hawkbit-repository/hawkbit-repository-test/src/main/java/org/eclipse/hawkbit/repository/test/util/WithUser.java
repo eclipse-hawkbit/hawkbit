@@ -9,6 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContext;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
@@ -21,6 +25,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
+@WithSecurityContext(factory = WithUser.WithUserPrincipalSecurityContextFactory.class)
 @Inherited
 public @interface WithUser {
 
@@ -74,4 +79,11 @@ public @interface WithUser {
     String[] removeFromAllPermission() default {};
 
     boolean controller() default false;
+
+    class WithUserPrincipalSecurityContextFactory implements WithSecurityContextFactory<WithUser> {
+        @Override
+        public SecurityContext createSecurityContext(final WithUser withUserPrincipal) {
+            return new WithSpringAuthorityRule.SecurityContextWithUser(withUserPrincipal);
+        }
+    }
 }
