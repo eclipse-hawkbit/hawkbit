@@ -83,7 +83,7 @@ public @interface WithUser {
     class WithUserPrincipalSecurityContextFactory implements WithSecurityContextFactory<WithUser> {
         @Override
         public SecurityContext createSecurityContext(final WithUser withUserPrincipal) {
-            return new WithSpringAuthorityRule.SecurityContextWithUser(withUserPrincipal);
+            return new SecurityContextSwitch.WithUserSecurityContext(withUserPrincipal);
         }
     }
 }

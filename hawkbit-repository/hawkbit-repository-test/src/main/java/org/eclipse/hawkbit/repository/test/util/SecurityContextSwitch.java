@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import java.io.Serial;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.List;
@@ -19,55 +20,27 @@ import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.im.authentication.TenantAwareAuthenticationDetails;
 import org.eclipse.hawkbit.im.authentication.UserPrincipal;
 import org.eclipse.hawkbit.repository.model.helper.SystemManagementHolder;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCallback {
+public class SecurityContextSwitch {
 
     public static final String DEFAULT_TENANT = "default";
-    private  SecurityContext oldContext;
-
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception {
-        oldContext = SecurityContextHolder.getContext();
-        WithUser annotation = getWithUserAnnotation(context);
-        if (annotation != null) {
-            if (annotation.autoCreateTenant()) {
-                createTenant(annotation.tenantId());
-            }
-            setSecurityContext(annotation);
-        }
-    }
-
-    private WithUser getWithUserAnnotation(ExtensionContext context) {
-        if (context.getRequiredTestMethod().isAnnotationPresent(WithUser.class)) {
-            return context.getRequiredTestMethod().getAnnotation(WithUser.class);
-        }
-        if(context.getRequiredTestClass().isAnnotationPresent(WithUser.class)){
-            return context.getRequiredTestClass().getAnnotation(WithUser.class);
-        }
-        return null;
-    }
-
-    @Override
-    public void afterEach(ExtensionContext context) throws Exception {
-        SecurityContextHolder.setContext(oldContext);
-    }
+    private static final WithUser PRIVILEDGED_USER =
+            createWithUser("bumlux", DEFAULT_TENANT, false, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
 
     private static  void setSecurityContext(final WithUser annotation) {
-        SecurityContextHolder.setContext(new SecurityContextWithUser(annotation));
+        SecurityContextHolder.setContext(new WithUserSecurityContext(annotation));
     }
 
-    public static <T> T  runAsPrivileged(final Callable<T> callable) throws Exception {
-        return runAs(privilegedUser(), callable);
+    public static <T> T runAsPrivileged(final Callable<T> callable) throws Exception {
+        createTenant(DEFAULT_TENANT);
+        return runAs(PRIVILEDGED_USER, callable);
     }
 
-    public static <T> T  runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
+    public static <T> T runAs(final WithUser withUser, final Callable<T> callable) throws Exception {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(withUser);
         if (withUser.autoCreateTenant()) {
@@ -82,7 +55,7 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
 
     private static void createTenant(final String tenantId) {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
-        setSecurityContext(privilegedUser());
+        setSecurityContext(PRIVILEDGED_USER);
         try {
             SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
         } finally {
@@ -102,10 +75,6 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
         return withUserAndTenant(principal, DEFAULT_TENANT, true, allSpPermision, false, authorities);
     }
 
-    public static WithUser withUser(final boolean autoCreateTenant) {
-        return withUserAndTenant("bumlux", DEFAULT_TENANT, autoCreateTenant, true, false);
-    }
-
     public static WithUser withUserAndTenant(final String principal, final String tenant, final String... authorities) {
         return withUserAndTenant(principal, tenant, true, true, false, authorities);
     }
@@ -114,10 +83,6 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
             final boolean autoCreateTenant, final boolean allSpPermission, final boolean controller,
             final String... authorities) {
         return createWithUser(principal, tenant, autoCreateTenant, allSpPermission, controller, authorities);
-    }
-
-    private static WithUser privilegedUser() {
-        return createWithUser("bumlux", DEFAULT_TENANT, true, true, false, "ROLE_CONTROLLER", "ROLE_SYSTEM_CODE");
     }
 
     private static WithUser createWithUser(final String principal, final String tenant, final boolean autoCreateTenant,
@@ -171,12 +136,17 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
         };
     }
 
-    static class SecurityContextWithUser implements SecurityContext {
+    static class WithUserSecurityContext implements SecurityContext {
+
+        @Serial
         private static final long serialVersionUID = 1L;
         private final WithUser annotation;
 
-        public SecurityContextWithUser(WithUser annotation) {
+        public WithUserSecurityContext(final WithUser annotation) {
             this.annotation = annotation;
+            if (annotation.autoCreateTenant()) {
+                createTenant(annotation.tenantId());
+            }
         }
 
         @Override
@@ -214,7 +184,7 @@ public class WithSpringAuthorityRule implements BeforeEachCallback, AfterEachCal
 
         @Override
         public boolean equals(final Object obj) {
-            if (obj instanceof SecurityContextWithUser otherSecurityContextWithUser) {
+            if (obj instanceof WithUserSecurityContext otherSecurityContextWithUser) {
                 return Objects.equals(annotation, otherSecurityContextWithUser.annotation);
             } else {
                 return false;

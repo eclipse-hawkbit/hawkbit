@@ -50,7 +50,7 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.repository.test.TestConfiguration;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
@@ -102,10 +102,10 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
     protected <T> T waitUntilIsPresent(final Callable<Optional<T>> callable) {
 
         createConditionFactory()
-                .until(() -> WithSpringAuthorityRule.runAsPrivileged(() -> callable.call().isPresent()));
+                .until(() -> SecurityContextSwitch.runAsPrivileged(() -> callable.call().isPresent()));
 
         try {
-            return WithSpringAuthorityRule.runAsPrivileged(() -> callable.call().get());
+            return SecurityContextSwitch.runAsPrivileged(() -> callable.call().get());
         } catch (final Exception e) {
             return null;
         }
@@ -429,7 +429,7 @@ public abstract class AbstractAmqpServiceIntegrationTest extends AbstractAmqpInt
 
         createConditionFactory().untilAsserted(() -> {
             try {
-                final Map<String, String> controllerAttributes = WithSpringAuthorityRule
+                final Map<String, String> controllerAttributes = SecurityContextSwitch
                         .runAsPrivileged(() -> targetManagement.getControllerAttributes(controllerId));
                 assertThat(controllerAttributes.size()).isEqualTo(attributes.size());
                 assertThat(controllerAttributes).containsAllEntriesOf(attributes);

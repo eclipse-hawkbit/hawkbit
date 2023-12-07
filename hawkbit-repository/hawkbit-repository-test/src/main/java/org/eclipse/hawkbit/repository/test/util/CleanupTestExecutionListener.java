@@ -25,7 +25,7 @@ public class CleanupTestExecutionListener extends AbstractTestExecutionListener 
 
     @Override
     public void afterTestMethod(final TestContext testContext) throws Exception {
-        WithSpringAuthorityRule.runAsPrivileged(() -> {
+        SecurityContextSwitch.runAsPrivileged(() -> {
             final ApplicationContext applicationContext = testContext.getApplicationContext();
             new JpaTestRepositoryManagement(applicationContext.getBean(TenantAwareCacheManager.class),
                     applicationContext.getBean(SystemSecurityContext.class),

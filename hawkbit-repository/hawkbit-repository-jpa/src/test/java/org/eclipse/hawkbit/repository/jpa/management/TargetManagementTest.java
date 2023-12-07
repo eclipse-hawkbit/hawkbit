@@ -68,7 +68,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.repository.model.TargetTypeAssignmentResult;
 import org.eclipse.hawkbit.repository.test.matcher.Expect;
 import org.eclipse.hawkbit.repository.test.matcher.ExpectEvents;
-import org.eclipse.hawkbit.repository.test.util.WithSpringAuthorityRule;
+import org.eclipse.hawkbit.repository.test.util.SecurityContextSwitch;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
@@ -183,16 +183,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .create(entityFactory.target().create().controllerId("targetWithSecurityToken").securityToken("token"));
 
         // retrieve security token only with READ_TARGET_SEC_TOKEN permission
-        final String securityTokenWithReadPermission = WithSpringAuthorityRule.runAs(
-                WithSpringAuthorityRule.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
+        final String securityTokenWithReadPermission = SecurityContextSwitch.runAs(
+                SecurityContextSwitch.withUser("OnlyTargetReadPermission", false, SpPermission.READ_TARGET_SEC_TOKEN),
                 createdTarget::getSecurityToken);
 
         // retrieve security token as system code execution
         final String securityTokenAsSystemCode = systemSecurityContext.runAsSystem(createdTarget::getSecurityToken);
 
         // retrieve security token without any permissions
-        final String securityTokenWithoutPermission = WithSpringAuthorityRule
-                .runAs(WithSpringAuthorityRule.withUser("NoPermission", false), createdTarget::getSecurityToken);
+        final String securityTokenWithoutPermission = SecurityContextSwitch
+                .runAs(SecurityContextSwitch.withUser("NoPermission", false), createdTarget::getSecurityToken);
 
         assertThat(createdTarget.getSecurityToken()).isEqualTo("token");
         assertThat(securityTokenWithReadPermission).isNotNull();
@@ -871,7 +871,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final String knownTargetControllerId = "readTarget";
         controllerManagement.findOrRegisterTargetIfItDoesNotExist(knownTargetControllerId, new URI("http://127.0.0.1"));
 
-        WithSpringAuthorityRule.runAs(WithSpringAuthorityRule.withUser("bumlux", "READ_TARGET"), () -> {
+        SecurityContextSwitch.runAs(SecurityContextSwitch.withUser("bumlux", "READ_TARGET"), () -> {
             final Target findTargetByControllerID = targetManagement.getByControllerID(knownTargetControllerId)
                     .orElseThrow(IllegalStateException::new);
             assertThat(findTargetByControllerID).isNotNull();
