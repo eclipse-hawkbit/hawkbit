@@ -21,7 +21,6 @@ import org.eclipse.hawkbit.repository.test.util.JUnitTestLoggerExtension;
 import org.eclipse.hawkbit.repository.test.util.SharedSqlTestDatabaseExtension;
 import org.eclipse.hawkbit.repository.test.util.WithUser;
 import org.eclipse.hawkbit.rest.RestConfiguration;
-import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,6 @@ import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.filter.CharacterEncodingFilter;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -72,7 +70,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = { MgmtApiConfiguration.class, RestConfiguration.class,
         RepositoryApplicationConfiguration.class, TestConfiguration.class,
         TestSupportBinderAutoConfiguration.class })
-//@TestPropertySource(locations = "classpath:/mgmt-test.properties")
 @Feature("Component Tests - Management API")
 @Story("Basic auth Userinfo Resource")
 public class MgmtBasicAuthResourceTest {
@@ -83,10 +80,6 @@ public class MgmtBasicAuthResourceTest {
     @Autowired
     MockMvc defaultMock;
 
-    @Autowired
-    private FilterHttpResponse filterHttpResponse;
-    @Autowired
-    private CharacterEncodingFilter characterEncodingFilter;
     @Autowired
     protected WebApplicationContext webApplicationContext;
 
@@ -120,8 +113,6 @@ public class MgmtBasicAuthResourceTest {
     }
 
     private DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
-        final DefaultMockMvcBuilder createMvcWebAppContext = MockMvcBuilders.webAppContextSetup(context);
-
-        return createMvcWebAppContext;
+        return MockMvcBuilders.webAppContextSetup(context);
     }
 }
