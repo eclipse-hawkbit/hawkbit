@@ -29,7 +29,7 @@ public class HttpResponseFactoryBean implements FactoryBean<HttpServletResponse>
     private ApplicationContext applicationContext;
 
     @Override
-    public HttpServletResponse getObject() throws Exception {
+    public HttpServletResponse getObject() {
         return applicationContext.getBean(FilterHttpResponse.class).getHttpServletReponse();
     }
 
