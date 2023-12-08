@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.util.ObjectUtils;
 import org.vaadin.spring.events.EventBus.UIEventBus;
 
 import com.vaadin.annotations.Theme;
@@ -158,7 +159,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
         contentVerticalLayout.setExpandRatio(content, 1.0F);
 
         String footerNotification = uiProperties.getNotification().getText();
-        if (footerNotification != null && !footerNotification.isEmpty()) {
+        if (!ObjectUtils.isEmpty(footerNotification)) {
             contentVerticalLayout.addComponent(buildFooterNotification(footerNotification));
         }
 
@@ -203,6 +204,7 @@ public abstract class AbstractHawkbitUI extends UI implements DetachListener {
     private static Component buildFooterNotification(String text) {
         Label notification = new Label();
         notification.setValue(text);
+        notification.setWidth("100%");
         notification.setContentMode(ContentMode.HTML);
         return notification;
     }

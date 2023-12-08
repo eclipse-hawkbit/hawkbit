@@ -581,7 +581,7 @@ public class UiProperties implements Serializable {
     }
 
     public static class Notification implements Serializable {
-        private String text;
+        private String text = "";
 
         public String getText() {
             return text;
