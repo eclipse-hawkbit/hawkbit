@@ -62,21 +62,21 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     public RolloutView(final HawkbitClient hawkbitClient) {
         super(
-                new RolloutFilter(hawkbitClient),
+                new RolloutFilter(),
                 new SelectionGrid.EntityRepresentation<>(
                         MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getRolloutId) {
 
                     private final RolloutDetails details = new RolloutDetails(hawkbitClient);
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutResponseBody> grid) {
-                        grid.addColumn(MgmtRolloutResponseBody::getRolloutId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutResponseBody::getName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutResponseBody::getTotalGroups).setHeader("Group Count").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutResponseBody::getTotalTargets).setHeader("Target Count").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutResponseBody::getTotalTargetsPerStatus).setHeader("Stats").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutResponseBody::getStatus).setHeader("Status").setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getRolloutId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getTotalGroups).setHeader(GROUP_COUNT).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getTotalTargets).setHeader(TARGET_COUNT).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getTotalTargetsPerStatus).setHeader(STATS).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutResponseBody::getStatus).setHeader(STATUS).setAutoWidth(true);
 
-                        grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader("Actions").setAutoWidth(true);
+                        grid.addComponentColumn(rollout -> new Actions(rollout, grid, hawkbitClient)).setHeader(ACTIONS).setAutoWidth(true);
 
                             grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                     () -> details, RolloutDetails::setItem));
@@ -84,7 +84,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getRolloutRestApi()
                         .getRollouts(
-                                query.getOffset(), query.getPageSize(), "name:asc", rsqlFilter, null)
+                                query.getOffset(), query.getPageSize(), NAME_ASC, rsqlFilter, null)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -102,11 +102,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 new SelectionGrid.EntityRepresentation<>(MgmtRolloutGroupResponseBody.class, MgmtRolloutGroupResponseBody::getRolloutGroupId) {
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutGroupResponseBody> grid) {
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader("Target Count").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader("Stats").setAutoWidth(true);
-                        grid.addColumn(MgmtRolloutGroupResponseBody::getStatus).setHeader("Status").setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutGroupResponseBody::getRolloutGroupId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutGroupResponseBody::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargets).setHeader(TARGET_COUNT).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutGroupResponseBody::getTotalTargetsPerStatus).setHeader(STATS).setAutoWidth(true);
+                        grid.addColumn(MgmtRolloutGroupResponseBody::getStatus).setHeader(STATUS).setAutoWidth(true);
                     }
                 });
     }
@@ -115,7 +115,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
         private final long rolloutId;
         private final Grid<MgmtRolloutResponseBody> grid;
-        private final HawkbitClient hawkbitClient;
+        private final transient HawkbitClient hawkbitClient;
 
         private Actions(final MgmtRolloutResponseBody rollout, final Grid<MgmtRolloutResponseBody> grid, final HawkbitClient hawkbitClient) {
             this.rolloutId = rollout.getRolloutId();
@@ -163,9 +163,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     private static class RolloutFilter implements Filter.Rsql {
 
-        private final TextField name = Utils.textField("Name");
+        private final TextField name = Utils.textField(NAME);
 
-        private RolloutFilter(final HawkbitClient hawkbitClient) {
+        private RolloutFilter() {
             name.setPlaceholder("<name filter>");
         }
 
@@ -182,17 +182,17 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
 
     private static class RolloutDetails extends FormLayout {
 
-        private final HawkbitClient hawkbitClient;
+        private final transient HawkbitClient hawkbitClient;
 
-        private final TextArea description = new TextArea("Description");
-        private final TextField createdBy = Utils.textField("Created by");
-        private final TextField createdAt = Utils.textField("Created at");
-        private final TextField lastModifiedBy = Utils.textField("Last modified by");
-        private final TextField lastModifiedAt = Utils.textField("Last modified at");
-        private final TextField targetFilter = Utils.textField("Target Filter");
-        private final TextField distributionSet = Utils.textField("Distribution Set");
-        private final TextField actonType = Utils.textField("Action Type");
-        private final TextField startAt = Utils.textField("Start At");
+        private final TextArea description = new TextArea(DESCRIPTION);
+        private final TextField createdBy = Utils.textField(CREATED_BY);
+        private final TextField createdAt = Utils.textField(CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(LAST_MODIFIED_AT);
+        private final TextField targetFilter = Utils.textField(TARGET_FILTER);
+        private final TextField distributionSet = Utils.textField(DISTRIBUTION_SET);
+        private final TextField actonType = Utils.textField(ACTION_TYPE);
+        private final TextField startAt = Utils.textField(START_AT);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
 
         private RolloutDetails(final HawkbitClient hawkbitClient) {
@@ -228,9 +228,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     .getDistributionSet(rollout.getDistributionSetId()).getBody();
             distributionSet.setValue(distributionSetMgmt.getName() + ":" + distributionSetMgmt.getVersion());
             actonType.setValue(switch (rollout.getType()) {
-                case SOFT -> "Soft";
-                case FORCED -> "Forced";
-                case DOWNLOAD_ONLY -> "Download Only";
+                case SOFT -> SOFT;
+                case FORCED -> FORCED;
+                case DOWNLOAD_ONLY -> DOWNLOAD_ONLY;
                 case TIMEFORCED -> "Scheduled at " + new Date(rollout.getForcetime());
             });
             startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
@@ -261,7 +261,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final Select<MgmtActionType> actionType;
         private final DateTimePicker forceTime = new DateTimePicker("Force Time");
         private final Select<StartType> startType;
-        private final DateTimePicker startAt = new DateTimePicker("Start At");
+        private final DateTimePicker startAt = new DateTimePicker(START_AT);
         private final NumberField groupNumber;
         private final NumberField triggerThreshold;
         private final NumberField errorThreshold;
@@ -277,66 +277,66 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     "Distribution Set",
                     this::readyToCreate,
                     hawkbitClient.getDistributionSetRestApi()
-                            .getDistributionSets(0, 30, "name:asc", null)
+                            .getDistributionSets(0, 30, NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtDistributionSet[0]));
             distributionSet.setRequiredIndicatorVisible(true);
-            distributionSet.setItemLabelGenerator(distributionSet ->
-                    distributionSet.getName() + ":" + distributionSet.getVersion());
+            distributionSet.setItemLabelGenerator(distributionSetO ->
+                    distributionSetO.getName() + ":" + distributionSetO.getVersion());
             distributionSet.setWidthFull();
             targetFilter = new Select<>(
                     "Target Filter",
                     this::readyToCreate,
                     hawkbitClient.getTargetFilterQueryRestApi()
-                            .getFilters(0, 30, "name:asc", null, null)
+                            .getFilters(0, 30, NAME_ASC, null, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtTargetFilterQuery[0]));
             targetFilter.setRequiredIndicatorVisible(true);
             targetFilter.setItemLabelGenerator(MgmtTargetFilterQuery::getName);
             targetFilter.setWidthFull();
-            description = new TextArea("Description");
+            description = new TextArea(DESCRIPTION);
             description.setMinLength(2);
             description.setWidthFull();
 
             actionType = new Select<>();
-            actionType.setLabel("Action Type");
+            actionType.setLabel(ACTION_TYPE);
             actionType.setItems(MgmtActionType.values());
             actionType.setValue(MgmtActionType.FORCED);
-            final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionType ->
-                    switch (actionType) {
-                        case SOFT -> new Text("Soft");
-                        case FORCED -> new Text("Forced");
-                        case DOWNLOAD_ONLY -> new Text("Download Only");
+            final ComponentRenderer<Component, MgmtActionType> actionTypeRenderer = new ComponentRenderer<>(actionTypeO ->
+                    switch (actionTypeO) {
+                        case SOFT -> new Text(SOFT);
+                        case FORCED -> new Text(FORCED);
+                        case DOWNLOAD_ONLY -> new Text(DOWNLOAD_ONLY);
                         case TIMEFORCED -> forceTime;
                     });
             actionType.addValueChangeListener(e -> actionType.setRenderer(actionTypeRenderer));
-            actionType.setItemLabelGenerator(startType ->
-                    switch (startType) {
-                        case SOFT -> "Soft";
-                        case FORCED -> "Forced";
-                        case DOWNLOAD_ONLY -> "Download Only";
+            actionType.setItemLabelGenerator(startTypeO ->
+                    switch (startTypeO) {
+                        case SOFT -> SOFT;
+                        case FORCED -> FORCED;
+                        case DOWNLOAD_ONLY -> DOWNLOAD_ONLY;
                         case TIMEFORCED -> "Time Forced at " + (forceTime.isEmpty() ? "" : " " + forceTime.getValue());
                     });
             actionType.setWidthFull();
             startType = new Select<>();
             startType.setValue(StartType.MANUAL);
-            startType.setLabel("Start Type");
+            startType.setLabel(START_TYPE);
             startType.setItems(StartType.values());
             startType.setValue(StartType.MANUAL);
-            final ComponentRenderer<Component, StartType> startTypeRenderer = new ComponentRenderer<>(startType ->
-                    switch (startType) {
-                        case MANUAL -> new Text("Manual");
-                        case AUTO -> new Text("Auto");
+            final ComponentRenderer<Component, StartType> startTypeRenderer = new ComponentRenderer<>(startTypeO ->
+                    switch (startTypeO) {
+                        case MANUAL -> new Text(MANUAL);
+                        case AUTO -> new Text(AUTO);
                         case SCHEDULED -> startAt;
                     });
             startType.setRenderer(startTypeRenderer);
             startType.addValueChangeListener(e -> startType.setRenderer(startTypeRenderer));
             startType.setItemLabelGenerator(startType ->
                     switch (startType) {
-                        case MANUAL -> "Manual";
-                        case AUTO -> "Auto";
+                        case MANUAL -> MANUAL;
+                        case AUTO -> AUTO;
                         case SCHEDULED -> "Scheduled" + (startAt.isEmpty() ? "" : "  at " + startAt.getValue());
                     });
             startType.setWidthFull();
@@ -396,17 +396,26 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 final MgmtRolloutRestRequestBody request = new MgmtRolloutRestRequestBody();
                 request.setName(name.getValue());
                 request.setDistributionSetId(distributionSet.getValue().getDsId());
-                request.setTargetFilterQuery(targetFilter.getValue().getName());
+                request.setTargetFilterQuery(targetFilter.getValue().getQuery());
                 request.setDescription(description.getValue());
 
                 request.setType(actionType.getValue());
-                if (actionType.getValue() == MgmtActionType.FORCED) {
-                    request.setForcetime(forceTime.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
+                if (actionType.getValue() == MgmtActionType.TIMEFORCED) {
+                    request.setForcetime(
+                            forceTime.isEmpty() ?
+                                    System.currentTimeMillis() :
+                                    forceTime.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
                 }
                 switch (startType.getValue()) {
                     case AUTO -> request.setStartAt(System.currentTimeMillis());
-                    case SCHEDULED -> request.setStartAt(startAt.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
-                } // else - manual, do not start
+                    case SCHEDULED -> request.setStartAt(
+                            startAt.isEmpty() ?
+                                    System.currentTimeMillis() :
+                                    startAt.getValue().toEpochSecond(ZoneOffset.UTC) * 1000);
+                    case MANUAL -> {
+                        // do nothing, will be started manually
+                    }
+                }
 
                 request.setAmountGroups(groupNumber.getValue().intValue());
                 request.setSuccessCondition(

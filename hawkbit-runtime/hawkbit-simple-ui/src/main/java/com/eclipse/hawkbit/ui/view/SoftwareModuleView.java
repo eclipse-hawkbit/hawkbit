@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 @Route(value = "software_modules", layout = MainLayout.class)
 @RolesAllowed({"SOFTWARE_MODULE_READ"})
 @Uses(Icon.class)
-public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
+public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
 
     @Autowired
     public SoftwareModuleView(final HawkbitClient hawkbitClient) {
@@ -75,11 +75,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                     private final SoftwareModuleDetails details = new SoftwareModuleDetails(hawkbitClient);
                     @Override
                     protected void addColumns(final Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader("Version").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader("Type").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader("Vendor").setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(VENDOR).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, SoftwareModuleDetails::setItem));
@@ -88,7 +88,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getSoftwareModuleRestApi()
                         .getSoftwareModules(
-                                query.getOffset(), query.getPageSize(), "name:asc", rsqlFilter)
+                                query.getOffset(), query.getPageSize(), NAME_ASC, rsqlFilter)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -110,25 +110,24 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
                 new SelectionGrid.EntityRepresentation<>(MgmtArtifact.class, MgmtArtifact::getArtifactId) {
                     @Override
                     protected void addColumns(final Grid<MgmtArtifact> grid) {
-                        grid.addColumn(MgmtArtifact::getArtifactId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtArtifact::getProvidedFilename).setHeader("Name").setAutoWidth(true);
+                        grid.addColumn(MgmtArtifact::getArtifactId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtArtifact::getProvidedFilename).setHeader(NAME).setAutoWidth(true);
                         grid.addColumn(MgmtArtifact::getSize).setHeader("Size").setAutoWidth(true);
-                        grid.addColumn(MgmtArtifact::getHashes).setHeader("Hashes").setAutoWidth(true);
                     }
                 });
     }
 
     private static class SoftwareModuleFilter implements Filter.Rsql {
 
-        private final TextField name = Utils.textField("Name");
-        private final CheckboxGroup<MgmtSoftwareModuleType> type = new CheckboxGroup<>("Type");
+        private final TextField name = Utils.textField(NAME);
+        private final CheckboxGroup<MgmtSoftwareModuleType> type = new CheckboxGroup<>(TYPE);
 
         private SoftwareModuleFilter(final HawkbitClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.setItems(
                     hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 20, "name:asc", null)
+                            .getTypes(0, 20, NAME_ASC, null)
                             .getBody()
                             .getContent());
         }
@@ -151,13 +150,13 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     private static class SoftwareModuleDetails extends FormLayout {
 
-        private final HawkbitClient hawkbitClient;
+        private final transient HawkbitClient hawkbitClient;
 
-        private final TextArea description = new TextArea("Description");
-        private final TextField createdBy = Utils.textField("Created by");
-        private final TextField createdAt = Utils.textField("Created at");
-        private final TextField lastModifiedBy = Utils.textField("Last modified by");
-        private final TextField lastModifiedAt = Utils.textField("Last modified at");
+        private final TextArea description = new TextArea(DESCRIPTION);
+        private final TextField createdBy = Utils.textField(CREATED_BY);
+        private final TextField createdAt = Utils.textField(CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(LAST_MODIFIED_AT);
         private final SelectionGrid<MgmtArtifact, Long> artifactGrid;
 
         private SoftwareModuleDetails(final HawkbitClient hawkbitClient) {
@@ -212,10 +211,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             super("Create Software Module");
 
             type = new Select<>(
-                    "Type",
+                    TYPE,
                     this::readyToCreate,
                     hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 30, "name:asc", null)
+                            .getTypes(0, 30, NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtSoftwareModuleType[0]));
@@ -223,10 +222,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
             type.setRequiredIndicatorVisible(true);
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.focus();
-            name = Utils.textField("Name", this::readyToCreate);
-            version = Utils.textField("Version", this::readyToCreate);
-            vendor = Utils.textField("Vendor");
-            description = new TextArea("Description");
+            name = Utils.textField(NAME, this::readyToCreate);
+            version = Utils.textField(VERSION, this::readyToCreate);
+            vendor = Utils.textField(VENDOR);
+            description = new TextArea(DESCRIPTION);
             description.setWidthFull();
             description.setMinLength(2);
             enableArtifactEncryption = new Checkbox("Enable artifact encryption");
@@ -280,7 +279,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     private static class AddArtifactsDialog extends Utils.BaseDialog<Void> {
 
-        private final Set<MgmtArtifact> artifacts = Collections.synchronizedSet(new HashSet<>());
+        private final transient Set<MgmtArtifact> artifacts = Collections.synchronizedSet(new HashSet<>());
 
         private AddArtifactsDialog(
                 final long softwareModuleId,

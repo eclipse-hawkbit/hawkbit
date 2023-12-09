@@ -39,6 +39,10 @@ import java.util.function.Function;
 
 public class Utils {
 
+    private Utils() {
+        // prevent initialization
+    }
+
     public static TextField textField(final String label) {
         return textField(label, null);
     }
@@ -69,12 +73,12 @@ public class Utils {
         return numberField;
     }
 
-    public static <T, ID> Optional<HorizontalLayout> addRemoveControls(
+    public static <T, ID> HorizontalLayout addRemoveControls(
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> addHandler,
             final Function<SelectionGrid<T, ID>, CompletionStage<Void>> removeHandler,
             final SelectionGrid<T, ID> selectionGrid, final boolean noPadding) {
         if (addHandler == null && removeHandler == null) {
-            return Optional.empty();
+            throw new IllegalArgumentException("At least one of add or remove handlers must not be null!");
         }
 
         final HorizontalLayout layout = new HorizontalLayout();
@@ -100,7 +104,7 @@ public class Utils {
                     .thenAccept(v -> selectionGrid.refreshGrid(false)));
             layout.add(removeBtn);
         }
-        return Optional.of(layout);
+        return layout;
     }
 
     public static <T> void remove(final Collection<T> remove, final Set<T> from, final Function<T, ?> idFn) {
@@ -144,7 +148,7 @@ public class Utils {
 
     public static class BaseDialog<T> extends Dialog {
 
-        protected final CompletableFuture<T> result = new CompletableFuture<>();
+        protected final transient CompletableFuture<T> result = new CompletableFuture<>();
 
         protected BaseDialog(final String headerTitle) {
             setHeaderTitle(headerTitle);
