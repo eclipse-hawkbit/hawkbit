@@ -40,10 +40,6 @@ import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQuery;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtTargetFilterQueryRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.targettype.MgmtTargetType;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetFilterQueryRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTagRestApi;
-import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetTypeRestApi;
 import org.springframework.util.ObjectUtils;
 
 import java.util.Collections;
@@ -61,12 +57,8 @@ import java.util.stream.Stream;
 @Uses(Icon.class)
 public class TargetView extends TableView<MgmtTarget, String> {
 
-    private final HawkbitClient hawkbitClient;
-
-    private final MgmtTargetRestApi targetRestApi;
-    private final MgmtTargetTypeRestApi targetTypeRestApi;
-    private final MgmtTargetTagRestApi targetTagRestApi;
-    private final MgmtTargetFilterQueryRestApi targetFilterQueryRestApi;
+    public static final String CONTROLLER_ID = "Controller Id";
+    public static final String TAG = "Tag";
 
     public TargetView(final HawkbitClient hawkbitClient) {
         super(
@@ -75,9 +67,9 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
                     @Override
                     protected void addColumns(final Grid<MgmtTarget> grid) {
-                        grid.addColumn(MgmtTarget::getControllerId).setHeader("Controller Id").setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader("Type").setAutoWidth(true);
+                        grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
+                        grid.addColumn(MgmtTarget::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 TargetDetails::new, TargetDetails::setItem));
@@ -85,7 +77,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
                         .getTargets(
-                                query.getOffset(), query.getPageSize(), "name:asc",
+                                query.getOffset(), query.getPageSize(), NAME_ASC,
                                 filter)
                         .getBody()
                         .getContent()
@@ -96,11 +88,6 @@ public class TargetView extends TableView<MgmtTarget, String> {
                             hawkbitClient.getTargetRestApi().deleteTarget(toDelete.getControllerId()));
                     return CompletableFuture.completedFuture(null);
                 });
-        this.hawkbitClient = hawkbitClient;
-        this.targetRestApi = hawkbitClient.getTargetRestApi();
-        this.targetTypeRestApi = hawkbitClient.getTargetTypeRestApi();
-        this.targetTagRestApi = hawkbitClient.getTargetTagRestApi();
-        this.targetFilterQueryRestApi = hawkbitClient.getTargetFilterQueryRestApi();
     }
 
     private static class SimpleFilter implements Filter.Rsql {
@@ -114,11 +101,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private SimpleFilter(final HawkbitClient hawkbitClient) {
             this.hawkbitClient = hawkbitClient;
 
-            controllerId = Utils.textField("Controller Id");
+            controllerId = Utils.textField(CONTROLLER_ID);
             controllerId.setPlaceholder("<controller id filter>");
-            type = new CheckboxGroup<>("Type");
+            type = new CheckboxGroup<>(TYPE);
             type.setItemLabelGenerator(MgmtTargetType::getName);
-            tag = new CheckboxGroup<>("Tag");
+            tag = new CheckboxGroup<>(TAG);
             tag.setItemLabelGenerator(MgmtTag::getName);
         }
 
@@ -126,11 +113,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
             components.add(controllerId);
-            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(0, 20, "name:asc", null).getBody().getContent());
+            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(0, 20, NAME_ASC, null).getBody().getContent());
             if (!type.getValue().isEmpty()) {
                 components.add(type);
             }
-            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(0, 20, "name:asc", null).getBody().getContent());
+            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(0, 20, NAME_ASC, null).getBody().getContent());
             if (!tag.isEmpty()) {
                 components.add(tag);
             }
@@ -150,14 +137,10 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class RawFilter implements Filter.Rsql {
 
-        private final HawkbitClient hawkbitClient;
-
         private final TextField textFilter = new TextField("Raw Filter");
         private final VerticalLayout layout = new VerticalLayout();
 
         private RawFilter(final HawkbitClient hawkbitClient) {
-            this.hawkbitClient = hawkbitClient;
-
             textFilter.setPlaceholder("<raw filter>");
             final Select<MgmtTargetFilterQuery> savedFilters = new Select<>(
                     "Saved Filters",
@@ -178,12 +161,12 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
             textFilter.setWidthFull();
             final Button saveBtn = Utils.tooltip(new Button(VaadinIcon.ARCHIVE.create()), "Save (Enter)");
-            saveBtn.addClickListener(e -> {
-                new Utils.BaseDialog("Save Filter") {{
+            saveBtn.addClickListener(e ->
+                new Utils.BaseDialog<Void>("Save Filter") {{
                     setHeight("40%");
                     final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
                     final TextField name = Utils.textField(
-                            "Name",
+                            NAME,
                             e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
                     name.focus();
                     finishBtn.addClickShortcut(Key.ENTER);
@@ -200,8 +183,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     });
                     add(name, finishBtn);
                     open();
-                }};
-            });
+                }});
             saveBtn.addClickShortcut(Key.ENTER);
 
             layout.setSpacing(false);
@@ -224,11 +206,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class TargetDetails extends FormLayout {
 
-        private final TextArea description = new TextArea("Description");
-        private final TextField createdBy = Utils.textField("Created by");
-        private final TextField createdAt = Utils.textField("Created at");
-        private final TextField lastModifiedBy = Utils.textField("Last modified by");
-        private final TextField lastModifiedAt = Utils.textField("Last modified at");
+        private final TextArea description = new TextArea(DESCRIPTION);
+        private final TextField createdBy = Utils.textField(CREATED_BY);
+        private final TextField createdAt = Utils.textField(CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(LAST_MODIFIED_AT);
 
         private TargetDetails() {
             description.setMinLength(2);
@@ -254,7 +236,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
     }
 
-    private static class RegisterDialog extends Utils.BaseDialog {
+    private static class RegisterDialog extends Utils.BaseDialog<Void> {
 
         private final Select<MgmtTargetType> type;
         private final TextField controllerId;
@@ -269,20 +251,19 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     "Type",
                     e -> {},
                     hawkbitClient.getTargetTypeRestApi()
-                            .getTargetTypes(0, 30, "name:asc", null)
+                            .getTargetTypes(0, 30, NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtTargetType[0]));
             type.setWidthFull();
             type.setEmptySelectionAllowed(true);
             type.setItemLabelGenerator(item -> item == null ? "" : item.getName());
-            controllerId = Utils.textField(
-                    "Controller Id",
+            controllerId = Utils.textField(CONTROLLER_ID,
                     e -> register.setEnabled(!e.getHasValue().isEmpty()));
             controllerId.focus();
-            name = Utils.textField("Name");
+            name = Utils.textField(NAME);
             name.setWidthFull();
-            description = new TextArea("Description");
+            description = new TextArea(DESCRIPTION);
             description.setMinLength(2);
             description.setWidthFull();
 

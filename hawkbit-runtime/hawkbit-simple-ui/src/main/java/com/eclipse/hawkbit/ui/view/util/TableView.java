@@ -9,6 +9,7 @@
  */
 package com.eclipse.hawkbit.ui.view.util;
 
+import com.eclipse.hawkbit.ui.view.Constants;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.data.provider.Query;
@@ -18,7 +19,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public class TableView<T, ID> extends Div {
+public class TableView<T, ID> extends Div implements Constants {
 
     protected SelectionGrid<T, ID> selectionGrid;
     private final Filter filter;
@@ -58,7 +59,9 @@ public class TableView<T, ID> extends Div {
         layout.setSizeFull();
         layout.setPadding(false);
         layout.setSpacing(false);
-        Utils.addRemoveControls(addHandler, removeHandler, selectionGrid, false).ifPresent(layout::add);
+        if (addHandler != null || removeHandler != null) {
+            layout.add(Utils.addRemoveControls(addHandler, removeHandler, selectionGrid, false));
+        }
         add(layout);
     }
 }

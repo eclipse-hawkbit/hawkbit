@@ -83,7 +83,11 @@ public class SimpleUIApp implements AppShellConfigurator {
                 return new UsernamePasswordAuthenticationToken(
                         username, password,
                         roles.stream().map(role -> new SimpleGrantedAuthority("ROLE_" + role)).toList()) {
-                    public void eraseCredentials() {}
+                    @Override
+                    public void eraseCredentials() {
+                        // don't erase credentials because they will be used
+                        // to authenticate to the hawkBit update server / mgmt server
+                    }
                 };
             };
     }

@@ -30,7 +30,7 @@ import java.util.stream.Stream;
 
 public class Filter extends Div {
 
-    private Rsql rsql;
+    private transient Rsql rsql;
 
     public Filter(final Consumer<String> changeListener, final Rsql primaryRsql, final Rsql secondaryOptionalRsql) {
         rsql = primaryRsql;
@@ -89,7 +89,7 @@ public class Filter extends Div {
                         .entrySet()
                         .stream()
                         .filter(e -> {
-                            if (e.getValue() instanceof Optional opt) {
+                            if (e.getValue() instanceof Optional<?> opt) {
                                 return opt.isPresent();
                             } else {
                                 return e.getValue() != null;
@@ -100,13 +100,14 @@ public class Filter extends Div {
         if (normalized.isEmpty()) {
             return null;
         } else if (normalized.size() == 1) {
-            return normalized.entrySet().stream().findFirst().map(e -> filter(e.getKey(), e.getValue())).get();
+            return normalized.entrySet().stream()
+                    .findFirst().map(e -> filter(e.getKey(), e.getValue())).orElse(null); // never return null!
         } else {
             final StringBuilder sb = new StringBuilder();
             normalized.forEach((k, v) -> {
                 if (v instanceof Collection<?>) {
                     sb.append('(').append(filter(k, v)).append(')');
-                } else if (v instanceof Optional opt) {
+                } else if (v instanceof Optional<?> opt) {
                     sb.append(filter(k, opt.get()));
                 } else {
                     sb.append(filter(k, v));
@@ -118,16 +119,20 @@ public class Filter extends Div {
     }
 
     private static String filter(final String key, final Object value) {
-        if (value == null || (value instanceof Collection coll && coll.isEmpty())) {
+        if (value == null || (value instanceof Collection<?> coll && coll.isEmpty())) {
             return null;
         }
 
-        if (value instanceof Collection coll) {
+        if (value instanceof Collection<?> coll) {
             final StringBuilder sb = new StringBuilder();
             coll.stream().forEach(next -> sb.append(key).append("==").append(next).append(','));
             return sb.substring(0, sb.length() - 1);
-        } else if (value instanceof Optional opt) {
-            return key + "==" + opt.get();
+        } else if (value instanceof Optional<?> opt) {
+            if (opt.isEmpty()) {
+                return null;
+            } else {
+                return key + "==" + opt.get();
+            }
         } else {
             return key + "==" + value;
         }

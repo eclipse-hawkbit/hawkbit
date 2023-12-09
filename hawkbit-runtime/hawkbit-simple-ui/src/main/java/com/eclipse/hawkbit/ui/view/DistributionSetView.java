@@ -65,10 +65,10 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
-                        grid.addColumn(MgmtDistributionSet::getDsId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader("Version").setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader("Type").setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getDsId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader(VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, DistributionSetDetails::setItem));
@@ -76,7 +76,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getDistributionSetRestApi()
                         .getDistributionSets(
-                                query.getOffset(), query.getPageSize(), "name:asc", rsqlFilter)
+                                query.getOffset(), query.getPageSize(), NAME_ASC, rsqlFilter)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -95,10 +95,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
                     @Override
                     protected void addColumns(Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader("Id").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader("Version").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader("Name").setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader("Vendor").setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(VENDOR).setAutoWidth(true);
                     }
                 });
     }
@@ -114,13 +115,13 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(
                     hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 20, "name:asc", null)
+                            .getDistributionSetTypes(0, 20, NAME_ASC, null)
                             .getBody()
                             .getContent());
             tag.setItemLabelGenerator(MgmtTag::getName);
             tag.setItems(
                     hawkbitClient.getDistributionSetTagRestApi()
-                            .getDistributionSetTags(0, 20, "name:asc", null)
+                            .getDistributionSetTags(0, 20, NAME_ASC, null)
                             .getBody()
                             .getContent());
         }
@@ -143,7 +144,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class DistributionSetDetails extends FormLayout {
 
-        private final HawkbitClient hawkbitClient;
+        private final transient HawkbitClient hawkbitClient;
 
         private final TextArea description = new TextArea("Description");
         private final TextField createdBy = Utils.textField("Created by");
@@ -182,7 +183,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     hawkbitClient.getDistributionSetRestApi()
                             .getAssignedSoftwareModules(
                                     distributionSet.getDsId(),
-                                    query.getOffset(), query.getLimit(), "name:asc")
+                                    query.getOffset(), query.getLimit(), NAME_ASC)
                             .getBody()
                             .getContent()
                             .stream());
@@ -192,7 +193,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class CreateDialog extends Utils.BaseDialog<Void> {
 
-        private final HawkbitClient hawkbitClient;
+        private final transient HawkbitClient hawkbitClient;
 
         private final Select<MgmtDistributionSetType> type;
         private final TextField name;
@@ -209,7 +210,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     "Type",
                     this::readyToCreate,
                     hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 30, "name:asc", null)
+                            .getDistributionSetTypes(0, 30, NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtDistributionSetType[0]));
@@ -217,13 +218,13 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type.setWidthFull();
             type.setRequiredIndicatorVisible(true);
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
-            name = Utils.textField("Name", this::readyToCreate);
-            version = Utils.textField("Version", this::readyToCreate);
-            final TextField vendor = Utils.textField("Vendor");
-            description = new TextArea("Description");
+            name = Utils.textField(NAME, this::readyToCreate);
+            version = Utils.textField(VERSION, this::readyToCreate);
+            final TextField vendor = Utils.textField(VENDOR);
+            description = new TextArea(DESCRIPTION);
             description.setWidthFull();
             description.setMinLength(2);
-            requiredMigrationStep = new Checkbox("Reguired Migration Step");
+            requiredMigrationStep = new Checkbox("Required Migration Step");
 
             create = Utils.tooltip(new Button("Create"), "Create (Enter)");
             create.setEnabled(false);
@@ -275,7 +276,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
     private static class AddSoftwareModulesDialog extends Utils.BaseDialog<Void> {
 
-        private final Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());
+        private final transient Set<MgmtSoftwareModule> softwareModules = Collections.synchronizedSet(new HashSet<>());
 
         private AddSoftwareModulesDialog(final long distributionSetId, final HawkbitClient hawkbitClient) {
             super("Add Software Modules");
@@ -304,7 +305,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         softwareModulesGrid.refreshGrid(false);
                         return CompletableFuture.completedFuture(null);
                     },
-                    softwareModulesGrid, true).get();
+                    softwareModulesGrid, true);
             final Button finishBtn = Utils.tooltip(new Button("Finish"), "Finish (Esc)");
             finishBtn.addClickListener(e -> {
                 hawkbitClient.getDistributionSetRestApi().assignSoftwareModules(

@@ -51,7 +51,10 @@ public class SelectionGrid<T,ID> extends Grid<T> {
                     return fetch;
                 } else {
                     final Set<ID> selectedIds = new HashSet<>();
-                    selected.stream().forEach(next -> selectedIds.add(entityRepresentation.idFn.apply(next)));
+                    selected.forEach(next -> selectedIds.add(entityRepresentation.idFn.apply(next)));
+                    // if matching keeps old entries instead of new the new ones in order to
+                    // select them in case refresh is made with keepSelection
+                    // this however means that if they are changed the old state will be shown!!!
                     return Streams.concat(selected.stream(),
                             fetch.filter(next -> !selectedIds.contains(entityRepresentation.idFn.apply(next))));
                 }
@@ -70,7 +73,7 @@ public class SelectionGrid<T,ID> extends Grid<T> {
         if (keepSelection) {
             final Set<T> selected = getSelectedItems();
             getDataProvider().refreshAll();
-            if (selected == null || selected.isEmpty()) {
+            if (selected != null && !selected.isEmpty()) {
                 selected.forEach(this::select);
             }
         } else {
