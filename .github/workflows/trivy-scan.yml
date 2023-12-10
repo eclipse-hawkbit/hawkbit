@@ -48,7 +48,7 @@ jobs:
           mkdir -p scans/eclipse/hawkbit
           for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit/hawkbit-*:latest"); do
             echo "Scanning image ${IMAGE} ..."
-            ./trivy image "${IMAGE}" --ignore-unfixed --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/hawkbit/$IMAGE.sarif" --format sarif
+            ./trivy image "${IMAGE}" --ignore-unfixed --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/$IMAGE.sarif" --format sarif
           done
 
       - name: Upload Docker image scan results to GitHub Security tab
