@@ -333,8 +333,8 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     });
             startType.setRenderer(startTypeRenderer);
             startType.addValueChangeListener(e -> startType.setRenderer(startTypeRenderer));
-            startType.setItemLabelGenerator(startType ->
-                    switch (startType) {
+            startType.setItemLabelGenerator(startTypeO ->
+                    switch (startTypeO) {
                         case MANUAL -> MANUAL;
                         case AUTO -> AUTO;
                         case SCHEDULED -> "Scheduled" + (startAt.isEmpty() ? "" : "  at " + startAt.getValue());
