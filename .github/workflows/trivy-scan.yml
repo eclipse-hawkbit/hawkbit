@@ -46,7 +46,7 @@ jobs:
       - name: Scan Docker images
         run: |
           mkdir -p scans/eclipse/hawkbit
-          for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit-*:latest"); do
+          for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit/hawkbit-*:latest"); do
             echo "Scanning image ${IMAGE} ..."
             ./trivy image "${IMAGE}" --ignore-unfixed --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/hawkbit/$IMAGE.sarif" --format sarif
           done
