@@ -61,7 +61,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
-    protected static final String HTTP_LOCALHOST = "http://localhost:8080/";
+    protected static final String HTTP_LOCALHOST = "http://localhost/";
     protected static final String CONTROLLER_BASE = "/{tenant}/controller/v1/{controllerId}";
 
     protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE
