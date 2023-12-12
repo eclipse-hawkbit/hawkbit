@@ -31,8 +31,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.io.Serial;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -54,22 +53,15 @@ import java.util.stream.Collectors;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
-public class JpaDistributionSetType extends AbstractJpaNamedEntity implements DistributionSetType, EventAwareEntity {
+public class JpaDistributionSetType extends AbstractJpaTypeEntity implements DistributionSetType, EventAwareEntity {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     @CascadeOnDelete
     @OneToMany(mappedBy = "dsType", targetEntity = DistributionSetTypeElement.class, cascade = {
             CascadeType.PERSIST }, fetch = FetchType.EAGER, orphanRemoval = true)
     private Set<DistributionSetTypeElement> elements;
-
-    @Column(name = "type_key", nullable = false, updatable = false, length = DistributionSetType.KEY_MAX_SIZE)
-    @Size(min = 1, max = DistributionSetType.KEY_MAX_SIZE)
-    @NotNull
-    private String key;
-
-    @Column(name = "colour", nullable = true, length = DistributionSetType.COLOUR_MAX_SIZE)
-    @Size(max = DistributionSetType.COLOUR_MAX_SIZE)
-    private String colour;
 
     @Column(name = "deleted")
     private boolean deleted;
@@ -109,9 +101,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
      *            of the type. It will be null by default
      */
     public JpaDistributionSetType(final String key, final String name, final String description, final String colour) {
-        super(name, description);
-        this.key = key;
-        this.colour = colour;
+        super(name, description, key, colour);
     }
 
     @Override
@@ -206,15 +196,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
     }
 
     @Override
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    @Override
     public boolean checkComplete(final DistributionSet distributionSet) {
         final List<SoftwareModuleType> smTypes = distributionSet.getModules().stream().map(SoftwareModule::getType)
                 .distinct().collect(Collectors.toList());
@@ -222,15 +203,6 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
             return false;
         }
         return smTypes.containsAll(getMandatoryModuleTypes());
-    }
-
-    @Override
-    public String getColour() {
-        return colour;
-    }
-
-    public void setColour(final String colour) {
-        this.colour = colour;
     }
 
     public Set<DistributionSetTypeElement> getElements() {
@@ -243,7 +215,7 @@ public class JpaDistributionSetType extends AbstractJpaNamedEntity implements Di
 
     @Override
     public String toString() {
-        return "DistributionSetType [key=" + key + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
+        return "DistributionSetType [key=" + getKey() + ", isDeleted()=" + isDeleted() + ", getId()=" + getId() + "]";
     }
 
     @Override

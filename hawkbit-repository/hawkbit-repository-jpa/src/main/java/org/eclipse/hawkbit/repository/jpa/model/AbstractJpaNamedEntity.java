@@ -17,6 +17,8 @@ import javax.validation.constraints.Size;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
+import java.io.Serial;
+
 /**
  * {@link TenantAwareBaseEntity} extension for all entities that are named in
  * addition to their technical ID.
@@ -26,15 +28,17 @@ import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 // sub entities
 @SuppressWarnings("squid:S2160")
 public abstract class AbstractJpaNamedEntity extends AbstractJpaTenantAwareBaseEntity implements NamedEntity {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
-    @Column(name = "name", nullable = false, length = NamedEntity.NAME_MAX_SIZE)
-    @Size(min = 1, max = NamedEntity.NAME_MAX_SIZE)
+    @Column(name = "name", nullable = false, length = NAME_MAX_SIZE)
+    @Size(min = 1, max = NAME_MAX_SIZE)
     @NotNull
     private String name;
 
-    @Column(name = "description", length = NamedEntity.DESCRIPTION_MAX_SIZE)
-    @Size(max = NamedEntity.DESCRIPTION_MAX_SIZE)
+    @Column(name = "description", length = DESCRIPTION_MAX_SIZE)
+    @Size(max = DESCRIPTION_MAX_SIZE)
     private String description;
 
     /**
