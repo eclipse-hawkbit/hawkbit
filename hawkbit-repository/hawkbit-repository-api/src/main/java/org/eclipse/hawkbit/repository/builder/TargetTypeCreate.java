@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.model.BaseEntity;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TargetType;
+import org.eclipse.hawkbit.repository.model.Type;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -43,11 +44,18 @@ public interface TargetTypeCreate {
     TargetTypeCreate description(@Size(max = NamedEntity.DESCRIPTION_MAX_SIZE) String description);
 
     /**
+     * @param key
+     *            for {@link TargetType#getName()}
+     * @return updated builder instance
+     */
+    TargetTypeCreate key(@Size(min = 1, max = Type.KEY_MAX_SIZE) @NotEmpty String key);
+
+    /**
      * @param colour
      *            for {@link TargetType#getColour()}
      * @return updated builder instance
      */
-    TargetTypeCreate colour(@Size(max = TargetType.COLOUR_MAX_SIZE) String colour);
+    TargetTypeCreate colour(@Size(max = Type.COLOUR_MAX_SIZE) String colour);
 
     /**
      * @param compatible

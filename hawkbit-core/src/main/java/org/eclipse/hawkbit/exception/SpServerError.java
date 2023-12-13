@@ -306,7 +306,10 @@ public enum SpServerError {
     SP_TARGET_TYPE_INCOMPATIBLE("hawkbit.server.error.target.type.incompatible",
             "Target type of target is not compatible with distribution set."),
 
-    SP_STOP_ROLLOUT_FAILED("hawkbit.server.error.stopRolloutFailed", "Stopping the rollout failed");
+    SP_TARGET_TYPE_KEY_OR_NAME_REQUIRED("hawkbit.server.error.target.type.keyOrNameRequired",
+            "Target type key or name is required."),
+
+    SP_STOP_ROLLOUT_FAILED("hawkbit.server.error.stopRolloutFailed", "Stopping the rollout failed.");
 
     private final String key;
     private final String message;

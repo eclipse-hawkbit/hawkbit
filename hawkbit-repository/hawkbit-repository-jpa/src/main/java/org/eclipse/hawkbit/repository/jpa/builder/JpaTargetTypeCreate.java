@@ -13,6 +13,7 @@ import org.eclipse.hawkbit.repository.DistributionSetTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractTargetTypeUpdateCreate;
 import org.eclipse.hawkbit.repository.builder.TargetTypeCreate;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.TargetTypeKeyOrNameRequiredException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetType;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
@@ -42,10 +43,12 @@ public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTy
 
     @Override
     public JpaTargetType build() {
-        final JpaTargetType result = new JpaTargetType(name, description, colour);
+        if (key == null && name == null) {
+            throw new TargetTypeKeyOrNameRequiredException("Key or name of the target type shall be specified!");
+        }
 
+        final JpaTargetType result = new JpaTargetType(key == null ? name : key, name == null ? key : name, description, colour);
         findDistributionSetTypeWithExceptionIfNotFound(compatible).forEach(result::addCompatibleDistributionSetType);
-
         return result;
     }
 
@@ -62,5 +65,4 @@ public class JpaTargetTypeCreate extends AbstractTargetTypeUpdateCreate<TargetTy
 
         return type;
     }
-
 }

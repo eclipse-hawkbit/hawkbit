@@ -21,9 +21,7 @@ import java.util.Optional;
  * @param <T>
  *            update or create builder interface
  */
-public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
-    @ValidString
-    protected String colour;
+public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractTypeUpdateCreate<T> {
 
     protected Collection<Long> compatible;
 
@@ -43,22 +41,4 @@ public abstract class AbstractTargetTypeUpdateCreate<T> extends AbstractNamedEnt
     public Optional<Collection<Long>> getCompatible() {
         return Optional.ofNullable(compatible);
     }
-
-    /**
-     * @param colour
-     *          Colour value
-     * @return generic type
-     */
-    public T colour(final String colour) {
-        this.colour = StringUtils.trimWhitespace(colour);
-        return (T) this;
-    }
-
-    /**
-     * @return colour
-     */
-    public Optional<String> getColour() {
-        return Optional.ofNullable(colour);
-    }
-
 }

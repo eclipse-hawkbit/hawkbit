@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import org.eclipse.hawkbit.repository.ValidString;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 /**
@@ -22,11 +21,7 @@ import org.springframework.util.StringUtils;
  * @param <T>
  *            update or create builder interface
  */
-public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
-    @ValidString
-    protected String colour;
-    @ValidString
-    protected String key;
+public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends AbstractTypeUpdateCreate<T> {
 
     protected Collection<Long> mandatory;
     protected Collection<Long> optional;
@@ -48,23 +43,4 @@ public abstract class AbstractDistributionSetTypeUpdateCreate<T> extends Abstrac
     public Optional<Collection<Long>> getOptional() {
         return Optional.ofNullable(optional);
     }
-
-    public T colour(final String colour) {
-        this.colour = StringUtils.trimWhitespace(colour);
-        return (T) this;
-    }
-
-    public Optional<String> getColour() {
-        return Optional.ofNullable(colour);
-    }
-
-    public T key(final String key) {
-        this.key = StringUtils.trimWhitespace(key);
-        return (T) this;
-    }
-
-    public Optional<String> getKey() {
-        return Optional.ofNullable(key);
-    }
-
 }
