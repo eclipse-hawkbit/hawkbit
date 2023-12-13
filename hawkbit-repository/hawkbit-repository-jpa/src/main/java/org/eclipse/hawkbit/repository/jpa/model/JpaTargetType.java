@@ -67,7 +67,7 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
     }
 
     /**
-     * Constructor
+     * Constructor, legacy support where <code>key</code> is set to passed <code>name</code>.
      *
      * @param name
      *            of the type
@@ -76,6 +76,7 @@ public class JpaTargetType extends AbstractJpaTypeEntity implements TargetType, 
      * @param colour
      *            of the type
      */
+    @Deprecated
     public JpaTargetType(final String name, final String description, final String colour) {
         this(name, name, description, colour);
     }
