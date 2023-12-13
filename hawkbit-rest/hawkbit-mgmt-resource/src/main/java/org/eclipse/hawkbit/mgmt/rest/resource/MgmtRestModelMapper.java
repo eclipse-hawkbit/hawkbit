@@ -11,12 +11,14 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtBaseEntity;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtCancelationType;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.CancelationType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+import org.eclipse.hawkbit.repository.model.Type;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -46,6 +48,14 @@ public final class MgmtRestModelMapper {
 
         response.setName(base.getName());
         response.setDescription(base.getDescription());
+    }
+
+    static void mapTypeToType(final MgmtTypeEntity response, final Type base) {
+        mapNamedToNamed(response, base);
+
+        response.setKey(base.getKey());
+        response.setColour(base.getColour());
+        response.setDeleted(base.isDeleted());
     }
 
     /**

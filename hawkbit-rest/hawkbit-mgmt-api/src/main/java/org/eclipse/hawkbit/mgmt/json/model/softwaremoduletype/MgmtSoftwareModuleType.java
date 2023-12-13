@@ -10,49 +10,28 @@
 package org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
  * A json annotated rest model for SoftwareModuleType to RESTful API
  * representation.
- *
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class MgmtSoftwareModuleType extends MgmtNamedEntity {
+public class MgmtSoftwareModuleType extends MgmtTypeEntity {
 
     @JsonProperty(value = "id", required = true)
     @Schema(example = "83")
     private Long moduleId;
 
-    @JsonProperty(required = true)
-    @Schema(example = "OS")
-    private String key;
-
     @JsonProperty
     @Schema(example = "1")
     private int maxAssignments;
-
-    @JsonProperty
-    @Schema(example = "false")
-    private boolean deleted;
-
-    @JsonProperty
-    @Schema(example = "brown")
-    private String colour;
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(final boolean deleted) {
-        this.deleted = deleted;
-    }
 
     public Long getModuleId() {
         return moduleId;
@@ -62,27 +41,11 @@ public class MgmtSoftwareModuleType extends MgmtNamedEntity {
         this.moduleId = moduleId;
     }
 
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
     public int getMaxAssignments() {
         return maxAssignments;
     }
 
     public void setMaxAssignments(final int maxAssignments) {
         this.maxAssignments = maxAssignments;
-    }
-
-    public String getColour() {
-        return colour;
-    }
-
-    public void setColour(String colour) {
-        this.colour = colour;
     }
 }

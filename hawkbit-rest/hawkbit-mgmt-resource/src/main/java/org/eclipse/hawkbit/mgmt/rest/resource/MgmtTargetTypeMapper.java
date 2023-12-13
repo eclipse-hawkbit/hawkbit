@@ -29,9 +29,7 @@ import org.eclipse.hawkbit.repository.model.TargetType;
 import org.eclipse.hawkbit.rest.data.ResponseList;
 
 /**
- * A mapper which maps repository model to RESTful model representation and
- * back.
- *
+ * A mapper which maps repository model to RESTful model representation and back.
  */
 public final class MgmtTargetTypeMapper {
 
@@ -50,8 +48,9 @@ public final class MgmtTargetTypeMapper {
 
     private static TargetTypeCreate fromRequest(final EntityFactory entityFactory,
             final MgmtTargetTypeRequestBodyPost targetTypesRest) {
-        return entityFactory.targetType().create().name(targetTypesRest.getName())
-                .description(targetTypesRest.getDescription()).colour(targetTypesRest.getColour())
+        return entityFactory.targetType().create()
+                .name(targetTypesRest.getName()).description(targetTypesRest.getDescription())
+                .key(targetTypesRest.getKey()).colour(targetTypesRest.getColour())
                 .compatible(getDistributionSets(targetTypesRest));
     }
 
@@ -70,9 +69,9 @@ public final class MgmtTargetTypeMapper {
 
     static MgmtTargetType toResponse(final TargetType type) {
         final MgmtTargetType result = new MgmtTargetType();
-        MgmtRestModelMapper.mapNamedToNamed(result, type);
+
+        MgmtRestModelMapper.mapTypeToType(result, type);
         result.setTypeId(type.getId());
-        result.setColour(type.getColour());
         result.add(
                 linkTo(methodOn(MgmtTargetTypeRestApi.class).getTargetType(result.getTypeId())).withSelfRel().expand());
         return result;

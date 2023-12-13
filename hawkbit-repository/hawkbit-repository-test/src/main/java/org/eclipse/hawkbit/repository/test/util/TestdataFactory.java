@@ -1399,8 +1399,9 @@ public class TestdataFactory {
      */
     public TargetType findOrCreateTargetType(final String targetTypeName) {
         return targetTypeManagement.getByName(targetTypeName)
-                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create().name(targetTypeName)
-                        .description(targetTypeName + " description").colour(DEFAULT_COLOUR)));
+                .orElseGet(() -> targetTypeManagement.create(entityFactory.targetType().create()
+                        .name(targetTypeName).description(targetTypeName + " description")
+                        .key(targetTypeName + " key").colour(DEFAULT_COLOUR)));
     }
 
     /**
@@ -1431,8 +1432,9 @@ public class TestdataFactory {
     public List<TargetType> createTargetTypes(final String targetTypePrefix, final int count) {
         final List<TargetTypeCreate> result = Lists.newArrayListWithExpectedSize(count);
         for (int i = 0; i < count; i++) {
-            result.add(entityFactory.targetType().create().name(targetTypePrefix + i)
-                    .description(targetTypePrefix + " description").colour(DEFAULT_COLOUR));
+            result.add(entityFactory.targetType().create()
+                    .name(targetTypePrefix + i).description(targetTypePrefix + " description")
+                    .key(targetTypePrefix + i + " key").colour(DEFAULT_COLOUR));
         }
         return targetTypeManagement.create(result);
     }

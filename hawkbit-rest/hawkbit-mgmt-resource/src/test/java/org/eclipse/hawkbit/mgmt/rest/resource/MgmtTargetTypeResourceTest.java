@@ -98,8 +98,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
                 .andExpect(jsonPath("$._links.self.href", equalTo("http://localhost/rest/v1/targettypes/" + typeId)))
-                .andExpect(jsonPath("$.deleted").doesNotExist())
-                .andExpect(jsonPath("$.key").doesNotExist())
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.key", equalTo(typeName + " key")))
                 .andExpect(jsonPath("$._links.compatibledistributionsettypes.href",
                         equalTo("http://localhost/rest/v1/targettypes/" + typeId + "/compatibledistributionsettypes")));
     }
@@ -129,8 +129,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].lastModifiedBy", contains(TEST_USER)))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].lastModifiedAt",
                             contains(testTypes.get(index).getLastModifiedAt())))
-                    .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].deleted").doesNotExist())
-                    .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].key").doesNotExist())
+                    .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].deleted", contains(false)))
+                    .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')].key", contains(typeName + index + " key")))
                     .andExpect(jsonPath("$.content.[?(@.id=='" + typeId + "')]._links.self.href",
                             contains("http://localhost/rest/v1/targettypes/" + typeId)))
                     .andExpect(
@@ -179,8 +179,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.content.[0].createdAt", equalTo(testTypeC.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(testTypeC.getLastModifiedAt())))
-                .andExpect(jsonPath("$.content.[0].deleted").doesNotExist())
-                .andExpect(jsonPath("$.content.[0].key").doesNotExist())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("$.content.[0].key", equalTo(typeNameC + " key")))
                 .andExpect(jsonPath("$.content.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/targettypes/" + testTypeC.getId())))
                 .andExpect(jsonPath("$.content.[0]._links.compatibledistributionsettypes.href").doesNotExist())
@@ -200,8 +200,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.content.[0].createdAt", equalTo(testTypeA.getCreatedAt())))
                 .andExpect(jsonPath("$.content.[0].lastModifiedBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.content.[0].lastModifiedAt", equalTo(testTypeA.getLastModifiedAt())))
-                .andExpect(jsonPath("$.content.[0].deleted").doesNotExist())
-                .andExpect(jsonPath("$.content.[0].key").doesNotExist())
+                .andExpect(jsonPath("$.content.[0].deleted", equalTo(false)))
+                .andExpect(jsonPath("$.content.[0].key", equalTo(typeNameA + " key")))
                 .andExpect(jsonPath("$.content.[0]._links.self.href",
                         equalTo("http://localhost/rest/v1/targettypes/" + testTypeA.getId())))
                 .andExpect(jsonPath("$.content.[0]._links.compatibledistributionsettypes.href").doesNotExist())
@@ -268,8 +268,9 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
     @WithUser(principal = TEST_USER, allSpPermissions = true)
     @Description("Checks the correct behaviour of /rest/v1/targettypes/{id} GET requests.")
     void getUpdatedTargetType() throws Exception {
-        TargetType testType = createTestTargetTypeInDB("TestTypeGET");
-        String typeNameUpdated = "TestTypeGETupdated";
+        final String initialTypeName = "TestTypeGET";
+        TargetType testType = createTestTargetTypeInDB(initialTypeName);
+        final String typeNameUpdated = "TestTypeGETupdated";
         testType = targetTypeManagement.update(entityFactory.targetType().update(testType.getId()).name(typeNameUpdated)
                 .description("Updated Description").colour("#ffffff"));
 
@@ -283,8 +284,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 .andExpect(jsonPath("$.createdAt", equalTo(testType.getCreatedAt())))
                 .andExpect(jsonPath("$.lastModifiedBy", equalTo(TEST_USER)))
                 .andExpect(jsonPath("$.lastModifiedAt", equalTo(testType.getLastModifiedAt())))
-                .andExpect(jsonPath("$.deleted").doesNotExist())
-                .andExpect(jsonPath("$.key").doesNotExist());
+                .andExpect(jsonPath("$.deleted", equalTo(false)))
+                .andExpect(jsonPath("$.key", equalTo(initialTypeName + " key")));
     }
 
     @Test
@@ -437,7 +438,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                 put(TARGETTYPE_SINGLE_ENDPOINT, testType.getId()).content(body).contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", equalTo(testType.getId().intValue())))
-                .andExpect(jsonPath("$.deleted").doesNotExist());
+                .andExpect(jsonPath("$.deleted", equalTo(false))); // don't delete with update
     }
 
     @Test
@@ -623,8 +624,8 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
                     .andExpect(jsonPath("$[" + index + "].createdAt").exists())
                     .andExpect(jsonPath("$[" + index + "].lastModifiedBy", equalTo(TEST_USER)))
                     .andExpect(jsonPath("$[" + index + "].lastModifiedAt").exists())
-                    .andExpect(jsonPath("$[" + index + "].key").doesNotExist())
-                    .andExpect(jsonPath("$[" + index + "].deleted").doesNotExist())
+                    .andExpect(jsonPath("$[" + index + "].deleted", equalTo(false)))
+                    .andExpect(jsonPath("$[" + index + "].key", startsWith("TestTypePOST")))
                     .andExpect(jsonPath("$[" + index + "]._links.self.href",
                             startsWith("http://localhost/rest/v1/targettypes/")))
                     .andExpect(
