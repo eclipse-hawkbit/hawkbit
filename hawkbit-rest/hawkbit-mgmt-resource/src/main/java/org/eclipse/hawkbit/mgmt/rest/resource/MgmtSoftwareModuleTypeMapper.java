@@ -65,12 +65,9 @@ final class MgmtSoftwareModuleTypeMapper {
     static MgmtSoftwareModuleType toResponse(final SoftwareModuleType type) {
         final MgmtSoftwareModuleType result = new MgmtSoftwareModuleType();
 
-        MgmtRestModelMapper.mapNamedToNamed(result, type);
-        result.setKey(type.getKey());
+        MgmtRestModelMapper.mapTypeToType(result, type);
         result.setMaxAssignments(type.getMaxAssignments());
         result.setModuleId(type.getId());
-        result.setDeleted(type.isDeleted());
-        result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtSoftwareModuleTypeRestApi.class).getSoftwareModuleType(result.getModuleId()))
                 .withSelfRel().expand());

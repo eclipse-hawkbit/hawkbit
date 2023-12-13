@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.targettype;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeRequestBodyPost;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
@@ -20,7 +21,11 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
  * Request Body for TargetType POST.
  *
  */
-public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut{
+public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut {
+
+    @JsonProperty
+    @Schema(example = "id.t23")
+    private String key;
 
     @JsonProperty
     private List<MgmtDistributionSetTypeAssignment> compatibledistributionsettypes;
@@ -40,6 +45,15 @@ public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut{
     public MgmtTargetTypeRequestBodyPost setDescription(final String description) {
         super.setDescription(description);
         return this;
+    }
+
+    public MgmtTargetTypeRequestBodyPost setKey(final String key) {
+        this.key = key;
+        return this;
+    }
+
+    public String getKey() {
+        return key;
     }
 
     @Override

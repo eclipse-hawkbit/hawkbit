@@ -80,11 +80,8 @@ final class MgmtDistributionSetTypeMapper {
     static MgmtDistributionSetType toResponse(final DistributionSetType type) {
         final MgmtDistributionSetType result = new MgmtDistributionSetType();
 
-        MgmtRestModelMapper.mapNamedToNamed(result, type);
-        result.setKey(type.getKey());
+        MgmtRestModelMapper.mapTypeToType(result, type);
         result.setModuleId(type.getId());
-        result.setDeleted(type.isDeleted());
-        result.setColour(type.getColour());
 
         result.add(linkTo(methodOn(MgmtDistributionSetTypeRestApi.class).getDistributionSetType(result.getModuleId()))
                 .withSelfRel().expand());
