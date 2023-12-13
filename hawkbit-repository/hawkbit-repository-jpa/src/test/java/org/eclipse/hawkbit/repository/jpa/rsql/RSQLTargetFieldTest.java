@@ -90,9 +90,13 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
         assignDistributionSet(ds.getId(), target.getControllerId());
 
         targetType1 = targetTypeManagement
-                .create(entityFactory.targetType().create().name("Type1").description("Desc. Type1"));
+                .create(entityFactory.targetType().create()
+                        .name("Type1").description("Desc. Type1")
+                        .key("Type1.key"));
         targetType2 = targetTypeManagement
-                .create(entityFactory.targetType().create().name("Type2").description("Desc. Type2"));
+                .create(entityFactory.targetType().create()
+                        .name("Type2").description("Desc. Type2")
+                        .key("Type2.key"));
 
         targetManagement.assignType(target.getControllerId(), targetType1.getId());
         targetManagement.assignType(target2.getControllerId(), targetType2.getId());
@@ -306,13 +310,26 @@ class RSQLTargetFieldTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Test filter by target type")
-    void shouldFilterTargetsByTypeIdNameAndDescription() {
+    @Description("Test filter by target type key")
+    void shouldFilterTargetsByTypeKey() {
+        assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "==" + targetType1.getKey(), 1);
+        assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "==*1.key", 1);
+        assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "!=" + targetType2.getKey(), 4);
+        assertRSQLQuery("targettype." + TargetTypeFields.KEY.name() + "==noExist*", 0);
+    }
+
+    @Test
+    @Description("Test filter by target type name")
+    void shouldFilterTargetsByTypeName() {
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==" + targetType1.getName(), 1);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==*1", 1);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "!=" + targetType2.getName(), 4);
         assertRSQLQuery("targettype." + TargetTypeFields.NAME.name() + "==noExist*", 0);
+    }
 
+    @Test
+    @Description("Test filter by target type ID and description")
+    void shouldFilterTargetsByTypeIdAndDescription() {
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
                 .isThrownBy(() -> assertRSQLQuery("targettype.ID==1", 0));
         assertThatExceptionOfType(RSQLParameterUnsupportedFieldException.class)
