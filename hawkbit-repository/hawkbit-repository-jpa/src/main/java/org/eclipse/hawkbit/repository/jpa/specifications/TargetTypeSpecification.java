@@ -133,6 +133,18 @@ public final class TargetTypeSpecification {
         };
     }
 
+    /**
+     * {@link Specification} for retrieving {@link TargetType} with
+     * given {@link TargetType#getKey()} including fetching the
+     * elements list.
+     *
+     * @param key
+     *            to search
+     * @return the {@link TargetType} {@link Specification}
+     */
+    public static Specification<JpaTargetType> hasKey(final String key) {
+        return (targetRoot, query, cb) -> cb.equal(targetRoot.get(JpaTargetType_.key), key);
+    }
 
     /**
      * {@link Specification} for retrieving {@link TargetType} with
