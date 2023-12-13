@@ -17,6 +17,10 @@ public enum TargetTypeFields implements FieldNameProvider {
     /**
      * The name field.
      */
+    KEY("key"),
+    /**
+     * The name field.
+     */
     NAME("name"),
     /**
      * The description field.
