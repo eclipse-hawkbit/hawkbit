@@ -33,6 +33,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 public interface TargetTypeManagement {
 
     /**
+     * @param key
+     *            as {@link TargetType#getKey()}
+     * @return {@link TargetType}
+     */
+    @PreAuthorize(SpPermission.SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    Optional<TargetType> getByKey(@NotEmpty String key);
+
+    /**
      * @param name
      *            as {@link TargetType#getName()}
      * @return {@link TargetType}

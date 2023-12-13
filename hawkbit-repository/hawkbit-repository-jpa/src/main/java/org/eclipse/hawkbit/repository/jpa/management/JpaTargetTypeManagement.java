@@ -90,6 +90,11 @@ public class JpaTargetTypeManagement implements TargetTypeManagement {
     }
 
     @Override
+    public Optional<TargetType> getByKey(final String key) {
+        return targetTypeRepository.findOne(TargetTypeSpecification.hasKey(key)).map(TargetType.class::cast);
+    }
+
+    @Override
     public Optional<TargetType> getByName(final String name) {
         return targetTypeRepository.findOne(TargetTypeSpecification.hasName(name)).map(TargetType.class::cast);
     }

@@ -50,18 +50,7 @@ public interface TargetTypeRepository
      *         {@link TargetType#getName()}
      */
     default List<JpaTargetType> findByDsType(@Param("id") final Long dsTypeId) {
-        return this.findAll(Specification.where(TargetTypeSpecification.hasDsSetType(dsTypeId)));
-    }
-
-    /**
-     *
-     * @param name
-     *            to search for
-     * @return all {@link TargetType}s in the repository with given
-     *         {@link TargetType#getName()}
-     */
-    default Optional<JpaTargetType> findByName(final String name) {
-        return this.findOne(Specification.where(TargetTypeSpecification.hasName(name)));
+        return findAll(Specification.where(TargetTypeSpecification.hasDsSetType(dsTypeId)));
     }
 
     /**
