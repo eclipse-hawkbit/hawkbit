@@ -32,7 +32,8 @@ jobs:
           mvn clean install -DskipTests && \
           cd hawkbit-runtime/docker/docker_build && \
           chmod +x build_all_dev.sh && \
-          ./build_all_dev.sh
+          ./build_all_dev.sh && \
+          cd ../../..
 
       - name: Determine most recent Trivy version
         run: |
@@ -48,7 +49,7 @@ jobs:
           mkdir -p scans/eclipse/hawkbit
           for IMAGE in $(docker image ls --format "{{.Repository}}:{{.Tag}}" "hawkbit/hawkbit-*:latest"); do
             echo "Scanning image ${IMAGE} ..."
-            ./trivy image "${IMAGE}" --ignore-unfixed --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/$IMAGE.sarif" --format sarif
+            ./trivy image "${IMAGE}" --ignore-unfixed --ignorefile .github/workflows/.trivyignore --severity HIGH,CRITICAL --vuln-type library --output "scans/eclipse/$IMAGE.sarif" --format sarif
           done
 
       - name: Upload Docker image scan results to GitHub Security tab
