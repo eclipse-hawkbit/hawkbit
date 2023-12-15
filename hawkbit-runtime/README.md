@@ -12,3 +12,5 @@ hawkBit Runtime
 | `hawkbit-dmf-server/`    | Spring-Boot application of hawkBit DMF server.                                                                             |
 | `hawkbit-mgmt-server/`   | Spring-Boot application of hawkBit Management server. Provides REST Management API and rollouts / auto assigment processing |
 | `hawkbit-vv8-ui/`        | Spring-Boot application of hawkBit Vaadin 8 UI.                                                                            |
+
+Note: micro service setup requires all services using DB to use same shared DB. So, they don't work with default in memory H2 database. Docker compose with mysql shows an example setup.
