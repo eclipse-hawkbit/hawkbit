@@ -868,6 +868,11 @@
          </dependency>
          <dependency>
             <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-hateoas</artifactId>
+            <version>${springdoc-openapi.version}</version>
+         </dependency>
+         <dependency>
+            <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-security</artifactId>
             <version>${springdoc-openapi.version}</version>
          </dependency>
