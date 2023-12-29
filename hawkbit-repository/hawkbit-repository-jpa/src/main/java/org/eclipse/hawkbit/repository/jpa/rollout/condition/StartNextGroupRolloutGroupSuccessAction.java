@@ -75,11 +75,15 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
             final List<JpaRolloutGroup> findByRolloutGroupParent = rolloutGroupRepository
                     .findByParentIdAndStatus(rolloutGroup.getId(), RolloutGroupStatus.SCHEDULED);
             findByRolloutGroupParent.forEach(nextGroup -> {
-                logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
-                nextGroup.setStatus(RolloutGroupStatus.FINISHED);
-                rolloutGroupRepository.save(nextGroup);
-                // find the next group to set in running state
-                startNextGroup(rollout, nextGroup);
+                if (nextGroup.isDynamic()) {
+                    nextGroup.setStatus(RolloutGroupStatus.RUNNING);
+                } else {
+                    logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
+                    nextGroup.setStatus(RolloutGroupStatus.FINISHED);
+                    rolloutGroupRepository.save(nextGroup);
+                    // find the next group to set in running state
+                    startNextGroup(rollout, nextGroup);
+                }
             });
         }
     }

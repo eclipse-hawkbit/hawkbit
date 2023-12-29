@@ -104,6 +104,15 @@ public interface RolloutCreate {
     RolloutCreate weight(Integer weight);
 
     /**
+     * Set if the rollout shall be dynamic
+     *
+     * @param dynamic
+     *            for {@link Rollout#isDynamic()}
+     * @return updated builder instance
+     */
+    RolloutCreate dynamic(boolean dynamic);
+
+    /**
      * set start
      * 
      * @param startAt
@@ -116,5 +125,4 @@ public interface RolloutCreate {
      * @return peek on current state of {@link Rollout} in the builder
      */
     Rollout build();
-
 }

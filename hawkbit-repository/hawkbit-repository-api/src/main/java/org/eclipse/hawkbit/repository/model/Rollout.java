@@ -109,6 +109,11 @@ public interface Rollout extends NamedEntity {
     Optional<Integer> getWeight();
 
     /**
+     * @return if the {@link Rollout} is dynamic.
+     */
+    boolean isDynamic();
+
+    /**
      * @return the stored access control context (if present)
      */
     Optional<String> getAccessControlContext();

@@ -287,7 +287,7 @@ public class TestdataFactory {
      *            for {@link SoftwareModule}s and {@link DistributionSet}s name,
      *            vendor and description.
      * @param tags
-     *            {@link DistributionSet#getTags()}
+     *            DistributionSet tags
      *
      * @return {@link DistributionSet} entity.
      */
@@ -397,7 +397,7 @@ public class TestdataFactory {
      *            {@link SoftwareModule#getVersion()} extended by a random
      *            number.updat
      * @param tags
-     *            {@link DistributionSet#getTags()}
+     *            DistributionSet tags
      *
      * @return {@link DistributionSet} entity.
      */
@@ -909,10 +909,13 @@ public class TestdataFactory {
     }
 
     public List<Target> createTargets(final String prefix, final int number) {
+        return createTargets(prefix, 0, number);
+    }
 
+    public List<Target> createTargets(final String prefix, final int offset, final int number) {
         final List<TargetCreate> targets = Lists.newArrayListWithExpectedSize(number);
         for (int i = 0; i < number; i++) {
-            targets.add(entityFactory.target().create().controllerId(prefix + i));
+            targets.add(entityFactory.target().create().controllerId(prefix + (offset + i)));
         }
 
         return createTargets(targets);
@@ -1192,6 +1195,21 @@ public class TestdataFactory {
                 successCondition, errorCondition, Action.ActionType.FORCED, null, confirmationRequired);
     }
 
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition, final boolean confirmationRequired,
+            final boolean dynamic) {
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, Action.ActionType.FORCED, null, confirmationRequired, dynamic);
+    }
+
+    public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
+            final int groupSize, final String filterQuery, final DistributionSet distributionSet,
+            final String successCondition, final String errorCondition, final Action.ActionType actionType,
+            final Integer weight, final boolean confirmationRequired) {
+        return createRolloutByVariables(rolloutName, rolloutDescription, groupSize, filterQuery, distributionSet,
+                successCondition, errorCondition, actionType, weight, confirmationRequired, false);
+    }
     /**
      * Creates rollout based on given parameters.
      *
@@ -1216,12 +1234,13 @@ public class TestdataFactory {
      * @param confirmationRequired
      *            if the confirmation is required (considered with confirmation flow
      *            active)
+     * @param dynamic is dynamic
      * @return created {@link Rollout}
      */
     public Rollout createRolloutByVariables(final String rolloutName, final String rolloutDescription,
             final int groupSize, final String filterQuery, final DistributionSet distributionSet,
             final String successCondition, final String errorCondition, final Action.ActionType actionType,
-            final Integer weight, final boolean confirmationRequired) {
+            final Integer weight, final boolean confirmationRequired, final boolean dynamic) {
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults()
                 .successCondition(RolloutGroupSuccessCondition.THRESHOLD, successCondition)
                 .errorCondition(RolloutGroupErrorCondition.THRESHOLD, errorCondition)
@@ -1229,7 +1248,8 @@ public class TestdataFactory {
 
         final Rollout rollout = rolloutManagement.create(
                 entityFactory.rollout().create().name(rolloutName).description(rolloutDescription)
-                        .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight),
+                        .targetFilterQuery(filterQuery).set(distributionSet).actionType(actionType).weight(weight)
+                        .dynamic(dynamic),
                 groupSize, confirmationRequired, conditions);
 
         // Run here, because Scheduler is disabled during tests
@@ -1300,7 +1320,7 @@ public class TestdataFactory {
      *            the amount of targets used for the rollout
      * @param amountOtherTargets
      *            amount of other targets not included in the rollout
-     * @param groupSize
+     * @param amountGroups
      *            the size of the rollout group
      * @param successCondition
      *            success condition

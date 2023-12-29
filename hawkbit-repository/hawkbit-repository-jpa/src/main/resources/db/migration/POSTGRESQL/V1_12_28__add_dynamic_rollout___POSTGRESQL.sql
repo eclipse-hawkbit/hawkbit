@@ -1,0 +1,2 @@
+ALTER TABLE sp_rollout ADD COLUMN dynamic BOOLEAN;
+ALTER TABLE sp_rolloutgroup ADD COLUMN dynamic BOOLEAN NOT NULL DEFAULT false;

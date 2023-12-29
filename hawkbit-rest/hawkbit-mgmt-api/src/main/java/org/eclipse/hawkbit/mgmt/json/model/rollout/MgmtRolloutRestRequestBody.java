@@ -48,6 +48,10 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
     private Integer weight;
 
     @JsonProperty(required = false)
+    @Schema(example = "true")
+    private boolean dynamic;
+
+    @JsonProperty(required = false)
     @Schema(example = "false")
     private Boolean confirmationRequired;
 
@@ -173,6 +177,21 @@ public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEnt
      */
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    /**
+     * @return if the {@link Rollout} shall be dynamic
+     */
+    public boolean isDynamic() {
+        return dynamic;
+    }
+
+    /**
+     * @param dynamic
+     *            is the {@link Rollout} shall be dynamic
+     */
+    public void setDynamic(final boolean dynamic) {
+        this.dynamic = dynamic;
     }
 
     /**

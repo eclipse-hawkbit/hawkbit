@@ -1516,8 +1516,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyValide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+                .andExpect(status().isOk());
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/distributionsets/{ds}/assignedTargets", dsId).content(bodyInvalide.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
@@ -1528,7 +1527,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andExpect(status().isOk());
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).get().collect(Collectors.toList());
-        assertThat(actions).size().isEqualTo(1);
+        assertThat(actions).size().isEqualTo(2);
         assertThat(actions.get(0).getWeight()).get().isEqualTo(weight);
     }
 

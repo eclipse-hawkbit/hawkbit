@@ -1364,7 +1364,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("A rollout create request containing a weight is only accepted when weight is valid and multi assignment is on.")
+    @Description("A rollout create request containing a weight is always accepted when weight is valid.")
     void weightValidation() throws Exception {
         testdataFactory.createTargets(4, "rollout", "description");
         final Long dsId = testdataFactory.createDistributionSet().getId();
@@ -1375,22 +1375,23 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
                 null, null);
         final String valideWeightRequest = JsonBuilder.rollout("withWeight", "d", 2, dsId, "id==rollout*",
                 new RolloutGroupConditionBuilder().withDefaults().build(), null, null, weight, null, null, null);
+        final String valideWeightRequestMultiAssignment = JsonBuilder.rollout("withWeightMultiAssignment", "d", 2, dsId, "id==rollout*",
+                new RolloutGroupConditionBuilder().withDefaults().build(), null, null, weight, null, null, null);
 
         mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+                .andExpect(status().isCreated());
         enableMultiAssignments();
         mvc.perform(post("/rest/v1/rollouts").content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.repo.constraintViolation")));
-        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)
+        mvc.perform(post("/rest/v1/rollouts").content(valideWeightRequestMultiAssignment).contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isCreated());
 
         final List<Rollout> rollouts = rolloutManagement.findAll(PAGE, false).getContent();
-        assertThat(rollouts).hasSize(1);
+        assertThat(rollouts).hasSize(2);
         assertThat(rollouts.get(0).getWeight()).get().isEqualTo(weight);
     }
 
@@ -1542,7 +1543,7 @@ class MgmtRolloutResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Trigger next rollout group if rollout is in wrong state")
     void triggeringNextGroupRolloutWrongState() throws Exception {
-        final int amountTargets = 2;
+        final int amountTargets = 3;
         final List<Target> targets = testdataFactory.createTargets(amountTargets, "rollout");
         final DistributionSet dsA = testdataFactory.createDistributionSet("");
 

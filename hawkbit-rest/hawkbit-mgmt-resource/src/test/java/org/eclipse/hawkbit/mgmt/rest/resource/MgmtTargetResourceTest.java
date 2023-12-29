@@ -2167,8 +2167,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
         mvc.perform(post("/rest/v1/targets/{targetId}/assignedDS", targetId).content(bodyValid.toString())
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+                .andExpect(status().isOk());
     }
 
     @Test

@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.validation.ValidationException;
@@ -229,9 +230,6 @@ public final class RolloutHelper {
         if (StringUtils.isEmpty(group.getTargetFilterQuery())) {
             return baseFilter;
         }
-        if (isRolloutRetried(baseFilter)) {
-            return baseFilter;
-        }
         return concatAndTargetFilters(baseFilter, group.getTargetFilterQuery());
     }
 
@@ -255,6 +253,23 @@ public final class RolloutHelper {
             throw new RolloutIllegalStateException("Rollout can only be started in state ready but current state is "
                     + rollout.getStatus().name().toLowerCase());
         }
+    }
+
+    public static double toPercentFromTheRest(final RolloutGroup group, List<? extends RolloutGroup> rolloutGroups) {
+        final double percentFromRest;
+        // assume that the groups are served orderly
+        double toServePercent = 100;
+        for (final RolloutGroup next : rolloutGroups) {
+            if (next == group) {
+                break;
+            }
+            if (Objects.equals(next.getTargetFilterQuery(), group.getTargetFilterQuery())) {
+                toServePercent -= next.getTargetPercentage();
+            }
+        }
+        percentFromRest =
+                toServePercent <= 1 ? 100 : Math.min(100, group.getTargetPercentage() * 100 / toServePercent);
+        return percentFromRest;
     }
 
     public static boolean isRolloutRetried(final String targetFilter) {

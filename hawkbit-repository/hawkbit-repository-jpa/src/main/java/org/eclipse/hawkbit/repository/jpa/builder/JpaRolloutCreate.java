@@ -16,9 +16,15 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 
 public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate> implements RolloutCreate {
     private final DistributionSetManagement distributionSetManagement;
+    private boolean dynamic;
 
     JpaRolloutCreate(final DistributionSetManagement distributionSetManagement) {
         this.distributionSetManagement = distributionSetManagement;
+    }
+
+    public RolloutCreate dynamic(final boolean dynamic) {
+        this.dynamic = dynamic;
+        return this;
     }
 
     @Override
@@ -31,6 +37,7 @@ public class JpaRolloutCreate extends AbstractRolloutUpdateCreate<RolloutCreate>
         rollout.setTargetFilterQuery(targetFilterQuery);
         rollout.setStartAt(startAt);
         rollout.setWeight(weight);
+        rollout.setDynamic(dynamic);
 
         if (actionType != null) {
             rollout.setActionType(actionType);

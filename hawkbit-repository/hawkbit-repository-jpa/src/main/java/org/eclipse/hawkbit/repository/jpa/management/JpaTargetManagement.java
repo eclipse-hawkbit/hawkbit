@@ -699,6 +699,27 @@ public class JpaTargetManagement implements TargetManagement {
     }
 
     @Override
+    public Slice<Target> findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
+            final Pageable pageRequest, final long rolloutId, final int weight, final long firstGroupId, final String targetFilterQuery,
+            final DistributionSetType distributionSetType) {
+        return targetRepository
+                .findAllWithoutCount(AccessController.Operation.UPDATE,
+                        combineWithAnd(List.of(
+                                RSQLUtility.buildRsqlSpecification(targetFilterQuery, TargetFields.class,
+                                        virtualPropertyReplacer, database),
+                                TargetSpecifications.isNotInGERolloutGroup(firstGroupId),
+                                TargetSpecifications.hasNoActiveActionWithGEWeightOrInRollout(weight, rolloutId),
+                                TargetSpecifications.isCompatibleWithDistributionSetType(distributionSetType.getId()))),
+                        pageRequest)
+                .map(Target.class::cast);
+    }
+
+    @Override
+    public long countByActionsInRolloutGroup(final long rolloutGroupId) {
+        return targetRepository.count(TargetSpecifications.isInActionRolloutGroup(rolloutGroupId));
+    }
+
+    @Override
     public Slice<Target> findByFailedRolloutAndNotInRolloutGroups(Pageable pageRequest, Collection<Long> groups,
             String rolloutId) {
         final List<Specification<JpaTarget>> specList = Arrays.asList(

@@ -33,7 +33,9 @@ import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetType_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup_;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetTag_;
@@ -459,9 +461,24 @@ public final class TargetSpecifications {
         return (targetRoot, query, cb) -> {
             final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
                     .join(JpaTarget_.rolloutTargetGroup, JoinType.LEFT);
-            final Predicate inRolloutGroups = rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
-                    .get(JpaRolloutGroup_.id).in(groups);
-            rolloutTargetJoin.on(inRolloutGroups);
+            rolloutTargetJoin.on(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
+                    .get(JpaRolloutGroup_.id).in(groups));
+            return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
+        };
+    }
+
+    /**
+     * {@link Specification} for retrieving {@link Target}s that are not in
+     * any {@link RolloutGroup}s
+     *
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> isNotInGERolloutGroup(final long groupId) {
+        return (targetRoot, query, cb) -> {
+            final ListJoin<JpaTarget, RolloutTargetGroup> rolloutTargetJoin = targetRoot
+                    .join(JpaTarget_.rolloutTargetGroup, JoinType.LEFT);
+            rolloutTargetJoin.on(cb.ge(rolloutTargetJoin.get(RolloutTargetGroup_.rolloutGroup)
+                    .get(JpaRolloutGroup_.id), groupId));
             return cb.isNull(rolloutTargetJoin.get(RolloutTargetGroup_.target));
         };
     }
@@ -605,4 +622,25 @@ public final class TargetSpecifications {
         };
     }
 
+    /**
+     * {@link Specification} for retrieving {@link Target}s that have no active (non-finished) action
+     * with great or equal weight (GEWeight.
+     *
+     * @param weight the referent weight
+     * @return the {@link Target} {@link Specification}
+     */
+    public static Specification<JpaTarget> hasNoActiveActionWithGEWeightOrInRollout(final int weight, final long rolloutId) {
+        return (targetRoot, query, cb) -> {
+            final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
+            actionsJoin.on(
+                    cb.or(
+                            // in rollout
+                            cb.equal(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+                            // or, active action with ge status
+                            cb.and(
+                                    cb.not(actionsJoin.get(JpaAction_.STATUS).in(Action.Status.FINISHED, Action.Status.ERROR, Action.Status.CANCELED)),
+                                    cb.ge(actionsJoin.get(JpaAction_.weight), weight))));
+            return cb.isNull(actionsJoin.get(JpaAction_.id));
+        };
+    }
 }

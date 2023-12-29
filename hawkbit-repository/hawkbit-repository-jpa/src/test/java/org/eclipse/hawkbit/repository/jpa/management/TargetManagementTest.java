@@ -53,13 +53,16 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
+import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetAssignmentResult;
 import org.eclipse.hawkbit.repository.model.MetaData;
 import org.eclipse.hawkbit.repository.model.NamedEntity;
+import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Tag;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
@@ -1326,6 +1329,90 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(targetManagement.isTargetMatchingQueryAndDSNotAssignedAndCompatibleAndUpdatable("notExisting", ds.getId(),
                 "name==*")).isFalse();
+    }
+
+    @Test
+    @Description("Target matches filter no active action with ge weight.")
+    void findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable() {
+        final String targetPrefix = "dyn_action_filter_";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        final List<Target> targets = testdataFactory.createTargets(targetPrefix, 10);
+        final Rollout rollout = testdataFactory.createRollout();
+        for (int i = 0; i < targets.size(); i++) {
+            final Target target = targets.get(i);
+            JpaAction action = new JpaAction();
+            action.setActionType(Action.ActionType.FORCED);
+            action.setTarget(target);
+            action.setInitiatedBy("test");
+            action.setDistributionSet(distributionSet);
+            switch (i % 3) {
+                case 0: {
+                    action.setStatus(Status.FINISHED);
+                    action.setWeight(100);
+                    if (i == 6) { // for 6th device that otherwise match action condition - add it already in rollout
+                        action.setRollout(rollout);
+                    }
+                    break;
+                }
+                case 1: {
+                    action.setStatus(Status.ERROR);
+                    action.setWeight(100);
+                    break;
+                }
+                default: {
+                    action.setStatus(Status.CANCELED);
+                    action.setWeight(100);
+                    break;
+                }
+            }
+            actionRepository.save(action);
+
+            action = new JpaAction();
+            action.setActionType(Action.ActionType.FORCED);
+            action.setTarget(target);
+            action.setInitiatedBy("test");
+            action.setDistributionSet(distributionSet);
+            action.setStatus(Status.RUNNING);
+
+            switch (i % 5) {
+                case 0: {
+                    action.setStatus(Status.DOWNLOADED);
+                    action.setWeight(1);
+                    break;
+                }
+                case 1: {
+                    action.setStatus(Status.WAIT_FOR_CONFIRMATION);
+                    break;
+                }
+                case 2: {
+                    action.setStatus(Status.SCHEDULED);
+                    action.setWeight(10);
+                    break;
+                }
+                case 3: {
+                    action.setStatus(Status.RUNNING);
+                    action.setWeight(100);
+                    break;
+                }
+                default: {
+                    action.setStatus(Status.RUNNING);
+                    action.setWeight(3);
+                    break;
+                }
+            }
+            actionRepository.save(action);
+        }
+
+        final Slice<Target> matching = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
+                PAGE, rollout.getId(), 10, Long.MAX_VALUE,"controllerid==dyn_action_filter_*", distributionSet.getType());
+
+        assertThat(matching.getNumberOfElements()).isEqualTo(5);
+        assertThat(matching.stream()
+                .map(Target::getControllerId)
+                .map(s -> s.substring(targetPrefix.length()))
+                .map(Integer::parseInt)
+                .sorted()
+                .toList()).isEqualTo(List.of(0, 1, 4, 5, 9));
     }
 
     @Test

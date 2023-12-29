@@ -1432,7 +1432,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupCreate group1 = entityFactory.rolloutGroup().create().conditions(conditions).name("group1")
                 .targetPercentage(50.0F);
         final RolloutGroupCreate group2 = entityFactory.rolloutGroup().create().conditions(conditions).name("group2")
-                .targetPercentage(100.0F);
+                .targetPercentage(50.0F);
 
         // group1 exceeds the quota
         assertThatExceptionOfType(AssignmentQuotaExceededException.class).isThrownBy(() -> rolloutManagement.create(
@@ -1456,9 +1456,9 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final RolloutGroupCreate group5 = entityFactory.rolloutGroup().create().conditions(conditions).name("group5")
                 .targetPercentage(33.3F);
         final RolloutGroupCreate group6 = entityFactory.rolloutGroup().create().conditions(conditions).name("group6")
-                .targetPercentage(66.6F);
+                .targetPercentage(33.3F);
         final RolloutGroupCreate group7 = entityFactory.rolloutGroup().create().conditions(conditions).name("group7")
-                .targetPercentage(100.0F);
+                .targetPercentage(33.3F);
 
         // should work fine
         assertThat(rolloutManagement.create(
@@ -1531,17 +1531,17 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         final int amountTargetsInGroup1 = 10;
         final int percentTargetsInGroup1 = 100;
 
-        final int amountTargetsInGroup1and2 = 20;
+        final int amountTargetsInGroup2and3 = 20;
         final int percentTargetsInGroup2 = 20;
-        final int percentTargetsInGroup3 = 100;
+        final int percentTargetsInGroup3 = 80;
 
         final int countTargetsInGroup2 = (int) Math
-                .ceil((double) percentTargetsInGroup2 / 100 * amountTargetsInGroup1and2);
-        final int countTargetsInGroup3 = amountTargetsInGroup1and2 - countTargetsInGroup2;
+                .ceil((double) percentTargetsInGroup2 / 100 * amountTargetsInGroup2and3);
+        final int countTargetsInGroup3 = amountTargetsInGroup2and3 - countTargetsInGroup2;
 
         final RolloutGroupConditions conditions = new RolloutGroupConditionBuilder().withDefaults().build();
         // Generate Targets for group 2 and 3 and generate the Rollout
-        final RolloutCreate rolloutcreate = generateTargetsAndRollout(rolloutName, amountTargetsInGroup1and2);
+        final RolloutCreate rolloutcreate = generateTargetsAndRollout(rolloutName, amountTargetsInGroup2and3);
 
         // Generate Targets for group 1
         testdataFactory.createTargets(amountTargetsInGroup1, rolloutName + "-gr1-", rolloutName);
@@ -1568,7 +1568,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
         myRollout = getRollout(myRollout.getId());
         assertThat(myRollout.getStatus()).isEqualTo(RolloutStatus.READY);
-        assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup1and2 + amountTargetsInGroup1);
+        assertThat(myRollout.getTotalTargets()).isEqualTo(amountTargetsInGroup2and3 + amountTargetsInGroup1);
 
         final List<RolloutGroup> groups = rolloutGroupManagement.findByRollout(PAGE, myRollout.getId()).getContent();
 
@@ -1979,11 +1979,10 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Creating a rollout with a weight causes an error when multi assignment in disabled.")
-    void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
-        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
-                .isThrownBy(() -> testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
+    void weightAllowedWhenMultiAssignmentModeNotEnabled() {
+        testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(10, 10, 2, "50",
                         "80",
-                        ActionType.FORCED, 66));
+                        ActionType.FORCED, 66);
     }
 
     @Test

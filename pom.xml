@@ -259,7 +259,7 @@
       <sonar.coverage.exclusions>
          **/src/main/java/org/eclipse/hawkbit/ui/**,**/target/generated-sources/apt/**,**/src/main/java/org/eclipse/hawkbit/repository/test/**,**/examples/**
       </sonar.coverage.exclusions>
-      <jacoco.version>0.8.8</jacoco.version>
+      <jacoco.version>0.8.11</jacoco.version>
       <jacoco.outputDir>${project.build.directory}</jacoco.outputDir>
       <sonar.coverage.jacoco.xmlReportPaths>
          ${project.basedir}/../hawkbit-test-report/target/jacoco-aggregate/jacoco.xml,

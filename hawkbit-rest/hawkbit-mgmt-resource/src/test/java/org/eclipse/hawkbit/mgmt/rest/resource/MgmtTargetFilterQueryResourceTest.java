@@ -720,8 +720,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
 
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
                 filterId).content(valideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode", equalTo("hawkbit.server.error.multiassignmentNotEnabled")));
+                .andExpect(status().isOk());
         enableMultiAssignments();
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{targetFilterQueryId}/autoAssignDS",
                 filterId).content(invalideWeightRequest).contentType(MediaType.APPLICATION_JSON)).andDo(print())

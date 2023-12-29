@@ -972,18 +972,14 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("An assignment request containing a weight causes an error when multi assignment in disabled.")
-    @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
-            @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
-    void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
+    void weightAllowedWhenMultiAssignmentModeNotEnabled() {
         final String targetId = testdataFactory.createTarget().getControllerId();
         final Long dsId = testdataFactory.createDistributionSet().getId();
 
         final DeploymentRequest assignWithoutWeight = DeploymentManagement.deploymentRequest(targetId, dsId)
                 .setWeight(456).build();
 
-        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class).isThrownBy(
-                () -> deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight)));
+        deploymentManagement.assignDistributionSets(Collections.singletonList(assignWithoutWeight));
     }
 
     @Test

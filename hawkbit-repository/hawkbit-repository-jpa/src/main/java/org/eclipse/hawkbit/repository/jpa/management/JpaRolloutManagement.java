@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -247,7 +248,15 @@ public class JpaRolloutManagement implements RolloutManagement {
 
             addSuccessAndErrorConditionsAndActions(group, conditions);
 
-            group.setTargetPercentage(1.0F / (amountOfGroups - i) * 100);
+            // total percent of the all devices. Before, it was relative percent -
+            // the percent of the "rest" of the devices. Thus, if you have
+            // first a group 10% (the rest is 90%) and the second group is 50%
+            // then the percent would be 50% of 90% - 45%.
+            // This is very unintuitive and is switched in order to be interpreted easier.
+            // the "new style" (vs "old style") rollouts could be detected by
+            // JpaRollout#isNewStyleTargetPercent (which uses that old style rollouts
+            // have null as dynamic
+            group.setTargetPercentage(100.0F / amountOfGroups);
 
             lastSavedGroup = rolloutGroupRepository.save(group);
             publishRolloutGroupCreatedEventAfterCommit(lastSavedGroup, rollout);
@@ -350,7 +359,7 @@ public class JpaRolloutManagement implements RolloutManagement {
         return group;
     }
 
-    private void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
+    public void publishRolloutGroupCreatedEventAfterCommit(final RolloutGroup group, final Rollout rollout) {
         afterCommit.afterCommit(() -> eventPublisherHolder.getEventPublisher().publishEvent(
                 new RolloutGroupCreatedEvent(group, rollout.getId(), eventPublisherHolder.getApplicationId())));
     }
@@ -672,11 +681,13 @@ public class JpaRolloutManagement implements RolloutManagement {
                 realTargetsInGroup = targetsInGroupFilter - overlappingTargets;
             }
 
+            // new style percent - total percent
+            final double percentFromRest = RolloutHelper.toPercentFromTheRest(group, groups);
+
             final long reducedTargetsInGroup = Math
-                    .round(group.getTargetPercentage() / 100 * (double) realTargetsInGroup);
+                    .round(percentFromRest / 100 * (double) realTargetsInGroup);
             groupTargetCounts.add(reducedTargetsInGroup);
             unusedTargetsCount += realTargetsInGroup - reducedTargetsInGroup;
-
         }
 
         return new RolloutGroupsValidation(totalTargets, groupTargetCounts);

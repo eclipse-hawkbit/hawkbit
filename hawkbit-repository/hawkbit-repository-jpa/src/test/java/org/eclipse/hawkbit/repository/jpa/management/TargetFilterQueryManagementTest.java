@@ -463,17 +463,15 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
     @Test
     @Description("Creating or updating a target filter query with autoassignment with a weight causes an error when multi assignment in disabled.")
-    public void weightNotAllowedWhenMultiAssignmentModeNotEnabled() {
+    public void weightAllowedWhenMultiAssignmentModeNotEnabled() {
         final DistributionSet ds = testdataFactory.createDistributionSet();
         final Long filterId = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("a").query("name==*")).getId();
 
-        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
-                        .name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342)));
-        Assertions.assertThatExceptionOfType(MultiAssignmentIsNotEnabledException.class)
-                .isThrownBy(() -> targetFilterQueryManagement.updateAutoAssignDS(
-                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(343)));
+        targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create()
+                        .name("b").query("name==*").autoAssignDistributionSet(ds).autoAssignWeight(342));
+        targetFilterQueryManagement.updateAutoAssignDS(
+                        entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(ds.getId()).weight(343));
     }
 
     @Test
