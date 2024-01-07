@@ -140,7 +140,7 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
-    @Column(name = "dynamic")
+    @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
     private Boolean dynamic;
 
     @Column(name = "access_control_context", nullable = true)

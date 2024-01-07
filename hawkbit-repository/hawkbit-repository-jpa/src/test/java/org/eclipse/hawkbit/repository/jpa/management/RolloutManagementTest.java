@@ -440,11 +440,6 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     }
 
-    private void finishAction(final Action action) {
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Status.FINISHED));
-    }
-
     @Test
     @Description("Verifying that the error handling action of a group is executed to pause the current rollout")
     void checkErrorHitOfGroupCallsErrorActionToPauseTheRollout() {
@@ -2027,7 +2022,7 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
 
     @Test
     @Description("Rollout can be created without weight in single assignment and be started in multi assignment")
-    void createInSingleStartInMultiassigMode() {
+    void createInSingleStartInMultiassignMode() {
         final int amountOfTargets = 5;
         final Long rolloutId = testdataFactory.createSimpleTestRolloutWithTargetsAndDistributionSet(amountOfTargets, 2,
                 amountOfTargets,
@@ -2037,7 +2032,8 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         rolloutManagement.start(rolloutId);
         rolloutHandler.handleAll();
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
-        assertThat(actions).hasSize(amountOfTargets).allMatch(action -> !action.getWeight().isPresent());
+        // wight replaced with default
+        assertThat(actions).hasSize(5).allMatch(action -> action.getWeight().isPresent());
     }
 
     @Test
@@ -2317,5 +2313,67 @@ class RolloutManagementTest extends AbstractJpaIntegrationTest {
         assertThatExceptionOfType(RolloutIllegalStateException.class)
                 .isThrownBy(() -> rolloutManagement.triggerNextGroup(createdRollout.getId()))
                 .withMessageContaining(errorMessage);
+    }
+
+    /**
+     * Tests static assignment aspects of the dynamic group assignment filters.
+     */
+    @Test
+    @Description("Dynamic group doesn't override newer static group assignments")
+    public void dynamicGroupDoesntOverrideItsOrNewerStaticGroups() {
+        final int amountGroups = 1; // static only
+        final String targetPrefix = "controller-dynamic-rollout-";
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds");
+
+        testdataFactory.createTargets(targetPrefix, 0, amountGroups * 2);
+        final Rollout dynamicRollout = testdataFactory.createRolloutByVariables("dynamic", "static rollout", amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 1000, false, true);
+        rolloutManagement.start(dynamicRollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(dynamicRollout, true, RolloutStatus.RUNNING, amountGroups + 1, amountGroups * 2);
+        final List<RolloutGroup> dynamicGroups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                dynamicRollout.getId()).getContent();
+        for (int i = 0; i < dynamicGroups.size(); i++) {
+            final RolloutGroup group = dynamicGroups.get(i);
+            if (i + 1 == dynamicGroups.size()) {
+                assertGroup(group, true, RolloutGroupStatus.SCHEDULED, 0);
+            } else {
+                assertGroup(group, false, RolloutGroupStatus.RUNNING, 2);
+            }
+        }
+        assertAndGetRunning(dynamicRollout, 2).forEach(this::finishAction);
+        rolloutHandler.handleAll();
+        for (int i = 0; i < dynamicGroups.size(); i++) {
+            final RolloutGroup group = dynamicGroups.get(i);
+            if (i + 1 == dynamicGroups.size()) {
+                assertGroup(group, true, RolloutGroupStatus.RUNNING, 0);
+            } else {
+                assertGroup(group, false, RolloutGroupStatus.FINISHED, 2);
+            }
+        }
+        assertAndGetRunning(dynamicRollout, 0);
+        rolloutHandler.handleAll();
+        // NB: asserts that dynamic group doesn't get from its static groups (already finished action targets)
+        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
+        assertAndGetRunning(dynamicRollout, 0);
+        rolloutManagement.pauseRollout(dynamicRollout.getId());
+        rolloutHandler.handleAll();
+
+        testdataFactory.createTargets(targetPrefix, amountGroups * 2, amountGroups);
+        final Rollout staticRollout = testdataFactory.createRolloutByVariables("static", "static rollout", amountGroups,
+                "controllerid==" + targetPrefix + "*", distributionSet, "0", "30", ActionType.FORCED, 0, false, false);
+        rolloutManagement.start(staticRollout.getId());
+        rolloutHandler.handleAll();
+        assertRollout(staticRollout, false, RolloutStatus.RUNNING, amountGroups, amountGroups * 3);
+        final List<RolloutGroup> staticGroups = rolloutGroupManagement.findByRollout(
+                new OffsetBasedPageRequest(0, amountGroups + 10, Sort.by(Direction.ASC, "id")),
+                staticRollout.getId()).getContent();
+        staticGroups.forEach(group -> assertGroup(group, false, RolloutGroupStatus.RUNNING, 3));
+
+        rolloutManagement.resumeRollout(dynamicRollout.getId());
+        rolloutHandler.handleAll(); // resume, do not get last devices (they are assigned to a newer group, nevertheless newer is with bigger weight
+        assertGroup(dynamicGroups.get(dynamicGroups.size() - 1), true, RolloutGroupStatus.RUNNING, 0);
+        assertAndGetRunning(dynamicRollout, 0);
     }
 }

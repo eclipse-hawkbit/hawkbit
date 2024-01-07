@@ -78,7 +78,7 @@ public class JpaRolloutGroup extends AbstractJpaNamedEntity implements RolloutGr
     @JoinColumn(name = "parent_id")
     private JpaRolloutGroup parent;
 
-    @Column(name = "dynamic")
+    @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
     private boolean dynamic;
 
     @Column(name = "success_condition", nullable = false)

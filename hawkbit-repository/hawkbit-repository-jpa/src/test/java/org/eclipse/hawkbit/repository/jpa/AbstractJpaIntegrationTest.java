@@ -19,6 +19,9 @@ import javax.persistence.PersistenceContext;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
+import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -40,6 +43,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
+import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -52,12 +56,15 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {
         RepositoryApplicationConfiguration.class, TestConfiguration.class,
@@ -159,4 +166,42 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
                 targets.stream().map(Target::getControllerId).collect(Collectors.toList()), type.getId());
     }
 
+    protected void assertRollout(final Rollout rollout, final boolean dynamic, final Rollout.RolloutStatus status, final int groupCreated, final long totalTargets) {
+        final Rollout refreshed = refresh(rollout);
+        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).isEqualTo(status);
+        assertThat(refreshed.getRolloutGroupsCreated()).isEqualTo(groupCreated);
+        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+    }
+
+    protected void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroup.RolloutGroupStatus status, final long totalTargets) {
+        final RolloutGroup refreshed = refresh(group);
+        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
+        assertThat(refreshed.getStatus()).isEqualTo(status);
+        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
+    }
+
+    protected Page<JpaAction> assertAndGetRunning(final Rollout rollout, final int count) {
+        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
+        assertThat(running.getTotalElements()).isEqualTo(count);
+        return running;
+    }
+
+    protected void assertScheduled(final Rollout rollout, final int count) {
+        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.SCHEDULED);
+        assertThat(running.getTotalElements()).isEqualTo(count);
+    }
+
+    protected void finishAction(final Action action) {
+        controllerManagement
+                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
+    }
+
+    private JpaRollout refresh(final Rollout rollout) {
+        return rolloutRepository.findById(rollout.getId()).get();
+    }
+
+    protected JpaRolloutGroup refresh(final RolloutGroup group) {
+        return rolloutGroupRepository.findById(group.getId()).get();
+    }
 }

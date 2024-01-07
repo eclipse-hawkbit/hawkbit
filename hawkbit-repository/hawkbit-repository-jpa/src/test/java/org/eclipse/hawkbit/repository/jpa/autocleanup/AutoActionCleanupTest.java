@@ -115,15 +115,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
-        final long createTime = System.currentTimeMillis();
-        // ensure that autoActionCleanup.run() will be run AFTER action create
-        while (System.currentTimeMillis() == createTime) {
-            try {
-                Thread.sleep(1);
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
+        waitNextMillis();
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);

@@ -27,6 +27,7 @@ import javax.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutApprovalStrategy;
 import org.eclipse.hawkbit.repository.RolloutFields;
 import org.eclipse.hawkbit.repository.RolloutHelper;
@@ -109,6 +110,9 @@ public class JpaRolloutManagement implements RolloutManagement {
     private static final List<RolloutStatus> ROLLOUT_STATUS_STOPPABLE = Arrays.asList(RolloutStatus.RUNNING,
             RolloutStatus.CREATING, RolloutStatus.PAUSED, RolloutStatus.READY, RolloutStatus.STARTING,
             RolloutStatus.WAITING_FOR_APPROVAL, RolloutStatus.APPROVAL_DENIED);
+
+    @Autowired
+    private RepositoryProperties repositoryProperties;
 
     @Autowired
     private RolloutRepository rolloutRepository;
@@ -220,6 +224,9 @@ public class JpaRolloutManagement implements RolloutManagement {
             throw new ValidationException(errMsg);
         }
         rollout.setTotalTargets(totalTargets);
+        if (rollout.getWeight().isEmpty()) {
+            rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
+        }
         contextAware.getCurrentContext().ifPresent(rollout::setAccessControlContext);
         return rolloutRepository.save(rollout);
     }

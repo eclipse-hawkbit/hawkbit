@@ -655,10 +655,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
+            final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, systemSecurityContext, contextAware);
+                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware);
     }
 
 
@@ -749,12 +750,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
             final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement,
-            final RepositoryProperties repositoryProperties) {
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
         return new JpaRolloutExecutor(rolloutTargetGroupRepository, entityManager, rolloutRepository, actionRepository,
                 rolloutGroupRepository, afterCommit, tenantAware, rolloutGroupManagement, quotaManagement,
                 deploymentManagement, targetManagement, eventPublisherHolder, txManager, rolloutApprovalStrategy,
-                evaluationManager, rolloutManagement, repositoryProperties);
+                evaluationManager, rolloutManagement);
     }
 
     @Bean

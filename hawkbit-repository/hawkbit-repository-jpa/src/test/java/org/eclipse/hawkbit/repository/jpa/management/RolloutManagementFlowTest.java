@@ -14,10 +14,6 @@ import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
-import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
-import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.Rollout.RolloutStatus;
@@ -25,7 +21,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
@@ -206,44 +201,5 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 5);
         assertAndGetRunning(rollout, 3);
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // assign the target created when paused
-    }
-
-    private void assertRollout(final Rollout rollout, final boolean dynamic, final RolloutStatus status, final int groupCreated, final long totalTargets) {
-        final Rollout refreshed = refresh(rollout);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getRolloutGroupsCreated()).isEqualTo(groupCreated);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
-    }
-
-    private void assertGroup(final RolloutGroup group, final boolean dynamic, final RolloutGroupStatus status, final long totalTargets) {
-        final RolloutGroup refreshed = refresh(group);
-        assertThat(refreshed.isDynamic()).isEqualTo(dynamic);
-        assertThat(refreshed.getStatus()).isEqualTo(status);
-        assertThat(refreshed.getTotalTargets()).isEqualTo(totalTargets);
-    }
-
-    private Page<JpaAction> assertAndGetRunning(final Rollout rollout, final int count) {
-        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.RUNNING);
-        assertThat(running.getTotalElements()).isEqualTo(count);
-        return running;
-    }
-
-    private void assertScheduled(final Rollout rollout, final int count) {
-        final Page<JpaAction> running = actionRepository.findByRolloutIdAndStatus(PAGE, rollout.getId(), Action.Status.SCHEDULED);
-        assertThat(running.getTotalElements()).isEqualTo(count);
-    }
-
-    private void finishAction(final Action action) {
-        controllerManagement
-                .addUpdateActionStatus(entityFactory.actionStatus().create(action.getId()).status(Action.Status.FINISHED));
-    }
-
-    private JpaRollout refresh(final Rollout rollout) {
-        return rolloutRepository.findById(rollout.getId()).get();
-    }
-
-    private JpaRolloutGroup refresh(final RolloutGroup group) {
-        return rolloutGroupRepository.findById(group.getId()).get();
     }
 }

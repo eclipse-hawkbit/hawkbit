@@ -115,7 +115,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     private final RolloutApprovalStrategy rolloutApprovalStrategy;
     private final RolloutGroupEvaluationManager evaluationManager;
     private final RolloutManagement rolloutManagement;
-    private final RepositoryProperties repositoryProperties;
     
     /**
      * Constructor
@@ -128,8 +127,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final DeploymentManagement deploymentManagement, final TargetManagement targetManagement,
             final EventPublisherHolder eventPublisherHolder, final PlatformTransactionManager txManager,
             final RolloutApprovalStrategy rolloutApprovalStrategy,
-            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement,
-            final RepositoryProperties repositoryProperties) {
+            final RolloutGroupEvaluationManager evaluationManager, final RolloutManagement rolloutManagement) {
         this.rolloutTargetGroupRepository = rolloutTargetGroupRepository;
         this.entityManager = entityManager;
         this.rolloutRepository = rolloutRepository;
@@ -146,7 +144,6 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         this.rolloutApprovalStrategy = rolloutApprovalStrategy;
         this.evaluationManager = evaluationManager;
         this.rolloutManagement = rolloutManagement;
-        this.repositoryProperties = repositoryProperties;
     }
 
     @Override
@@ -341,7 +338,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             executeLatestRolloutGroup(rollout);
         } else {
             LOGGER.debug("Rollout {} has {} running groups", rollout.getId(), rolloutGroupsRunning.size());
-            executeRolloutGroups(rollout, rolloutGroupsRunning);
+            executeRolloutGroups(rollout, rolloutGroupsRunning, rollout.getRolloutGroups().get(rollout.getRolloutGroups().size() - 1));
         }
 
         if (isRolloutComplete(rollout)) {
@@ -446,7 +443,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
         }
     }
 
-    private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups) {
+    private void executeRolloutGroups(final JpaRollout rollout, final List<JpaRolloutGroup> rolloutGroups, final RolloutGroup lastRolloutGroup) {
         for (final JpaRolloutGroup rolloutGroup : rolloutGroups) {
             final long targetCount = countTargetsFrom(rolloutGroup);
             if (rolloutGroup.getTotalTargets() != targetCount) {
@@ -465,7 +462,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
                 // not in error so check finished state, do we need to
                 // start the next group?
                 checkSuccessCondition(rollout, rolloutGroup, evalProxy, rolloutGroup.getSuccessCondition());
-                if (!(rolloutGroup == rolloutGroups.get(rolloutGroups.size() - 1) && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup)) {
+                if (!(rolloutGroup == lastRolloutGroup && rolloutGroup.isDynamic()) && isRolloutGroupComplete(rollout, rolloutGroup)) {
                     rolloutGroup.setStatus(RolloutGroupStatus.FINISHED);
                     rolloutGroupRepository.save(rolloutGroup);
                 }
@@ -501,11 +498,11 @@ public class JpaRolloutExecutor implements RolloutExecutor {
     }
 
     private boolean isRolloutGroupComplete(final JpaRollout rollout, final JpaRolloutGroup rolloutGroup) {
-        final Long actionsLeftForRollout = ActionType.DOWNLOAD_ONLY == rollout.getActionType()
-                ? actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
-                        DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES)
-                : actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(rollout, rolloutGroup,
-                        DEFAULT_ACTION_TERMINATION_STATUSES);
+        final Long actionsLeftForRollout =
+                actionRepository.countByRolloutAndRolloutGroupAndStatusNotIn(
+                        rollout, rolloutGroup,
+                        ActionType.DOWNLOAD_ONLY == rollout.getActionType() ?
+                                DOWNLOAD_ONLY_ACTION_TERMINATION_STATUSES : DEFAULT_ACTION_TERMINATION_STATUSES);
         return actionsLeftForRollout == 0;
     }
 
@@ -772,7 +769,7 @@ public class JpaRolloutExecutor implements RolloutExecutor {
             final PageRequest pageRequest = PageRequest.of(0, Math.toIntExact(limit));
             final Slice<Target> targets = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
                     pageRequest,
-                    rollout.getId(), rollout.getWeight().orElse(repositoryProperties.getActionWeightIfAbsent()),
+                    rollout.getId(), rollout.getWeight().orElse(1000), // Dynamic rollouts shall always have weight!
                     rolloutGroupRepository.findByRolloutOrderByIdAsc(rollout).get(0).getId(),
                     targetFilter, rollout.getDistributionSet().getType());
 

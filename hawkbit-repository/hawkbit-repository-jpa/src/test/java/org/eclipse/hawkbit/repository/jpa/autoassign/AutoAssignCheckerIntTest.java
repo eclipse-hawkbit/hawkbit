@@ -440,7 +440,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final List<Action> actions = deploymentManagement.findActionsAll(PAGE).getContent();
         assertThat(actions).hasSize(amountOfTargets);
-        assertThat(actions).allMatch(action -> !action.getWeight().isPresent());
+        assertThat(actions).allMatch(action -> action.getWeight().isPresent());
     }
 
     @Test

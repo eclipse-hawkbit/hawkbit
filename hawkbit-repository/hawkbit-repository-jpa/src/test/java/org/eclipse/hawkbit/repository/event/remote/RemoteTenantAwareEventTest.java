@@ -106,6 +106,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
         generateAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);
 
@@ -132,6 +133,7 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         generateAction.setDistributionSet(dsA);
         generateAction.setStatus(Status.RUNNING);
         generateAction.setInitiatedBy(tenantAware.getCurrentUsername());
+        generateAction.setWeight(1000);
 
         final Action action = actionRepository.save(generateAction);
 

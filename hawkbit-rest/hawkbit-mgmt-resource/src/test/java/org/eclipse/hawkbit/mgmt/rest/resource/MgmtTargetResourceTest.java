@@ -2196,28 +2196,17 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final Long dsId = testdataFactory.createDistributionSet().getId();
         final int customWeightHigh = 800;
         final int customWeightLow = 300;
-        assignDistributionSet(dsId, targetId);
+        assignDistributionSet(dsId, targetId); // default weight 1000
         enableMultiAssignments();
         assignDistributionSet(dsId, targetId, customWeightHigh);
         assignDistributionSet(dsId, targetId, customWeightLow);
 
-        // POSTGRESQL sets null values at the end, not the beginning
-        if (Database.POSTGRESQL.equals(jpaProperties.getDatabase())) {
-            mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
-                    .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
-                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(jsonPath("content.[0].weight", equalTo(customWeightLow)))
-                    .andExpect(jsonPath("content.[1].weight", equalTo(customWeightHigh)))
-                    .andExpect(jsonPath("content.[2].weight").doesNotExist());
-        } else {
-            mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
-                    .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
-                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                    .andExpect(jsonPath("content.[0].weight").doesNotExist())
-                    .andExpect(jsonPath("content.[1].weight", equalTo(customWeightLow)))
-                    .andExpect(jsonPath("content.[2].weight", equalTo(customWeightHigh)));
-        }
-
+        mvc.perform(get("/rest/v1/targets/{targetId}/actions", targetId)
+                .param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "WEIGHT:ASC"))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                .andExpect(jsonPath("content.[0].weight", equalTo(customWeightLow)))
+                .andExpect(jsonPath("content.[1].weight", equalTo(customWeightHigh)))
+                .andExpect(jsonPath("content.[2].weight", equalTo(1000)));
     }
 
     @Test

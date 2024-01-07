@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -67,12 +68,13 @@ public abstract class AbstractDsAssignmentStrategy {
     private final QuotaManagement quotaManagement;
     private final BooleanSupplier multiAssignmentsConfig;
     private final BooleanSupplier confirmationFlowConfig;
+    private final RepositoryProperties repositoryProperties;
 
     AbstractDsAssignmentStrategy(final TargetRepository targetRepository,
                                  final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
                                  final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
                                  final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-                                 final BooleanSupplier confirmationFlowConfig) {
+                                 final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         this.targetRepository = targetRepository;
         this.afterCommit = afterCommit;
         this.eventPublisherHolder = eventPublisherHolder;
@@ -81,6 +83,7 @@ public abstract class AbstractDsAssignmentStrategy {
         this.quotaManagement = quotaManagement;
         this.multiAssignmentsConfig = multiAssignmentsConfig;
         this.confirmationFlowConfig = confirmationFlowConfig;
+        this.repositoryProperties = repositoryProperties;
     }
 
     /**
@@ -252,7 +255,9 @@ public abstract class AbstractDsAssignmentStrategy {
             final JpaAction actionForTarget = new JpaAction();
             actionForTarget.setActionType(targetWithActionType.getActionType());
             actionForTarget.setForcedTime(targetWithActionType.getForceTime());
-            actionForTarget.setWeight(targetWithActionType.getWeight());
+            actionForTarget.setWeight(
+                    targetWithActionType.getWeight() == null ?
+                            repositoryProperties.getActionWeightIfAbsent() :  targetWithActionType.getWeight());
             actionForTarget.setActive(true);
             actionForTarget.setTarget(target);
             actionForTarget.setDistributionSet(set);

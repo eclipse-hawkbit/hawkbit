@@ -54,6 +54,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -1331,77 +1332,37 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 "name==*")).isFalse();
     }
 
+    /**
+     * Tests action based aspects of the dynamic group assignment filters.
+     */
     @Test
     @Description("Target matches filter no active action with ge weight.")
     void findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable() {
         final String targetPrefix = "dyn_action_filter_";
         final DistributionSet distributionSet = testdataFactory.createDistributionSet();
-        final List<Target> targets = testdataFactory.createTargets(targetPrefix, 10);
+        final List<Target> targets = testdataFactory.createTargets(targetPrefix, 9);
+        final Rollout rolloutOlder = testdataFactory.createRollout();
         final Rollout rollout = testdataFactory.createRollout();
-        for (int i = 0; i < targets.size(); i++) {
-            final Target target = targets.get(i);
-            JpaAction action = new JpaAction();
-            action.setActionType(Action.ActionType.FORCED);
-            action.setTarget(target);
-            action.setInitiatedBy("test");
-            action.setDistributionSet(distributionSet);
-            switch (i % 3) {
-                case 0: {
-                    action.setStatus(Status.FINISHED);
-                    action.setWeight(100);
-                    if (i == 6) { // for 6th device that otherwise match action condition - add it already in rollout
-                        action.setRollout(rollout);
-                    }
-                    break;
-                }
-                case 1: {
-                    action.setStatus(Status.ERROR);
-                    action.setWeight(100);
-                    break;
-                }
-                default: {
-                    action.setStatus(Status.CANCELED);
-                    action.setWeight(100);
-                    break;
-                }
-            }
-            actionRepository.save(action);
+        final Rollout rolloutNewer = testdataFactory.createRollout();
 
-            action = new JpaAction();
-            action.setActionType(Action.ActionType.FORCED);
-            action.setTarget(target);
-            action.setInitiatedBy("test");
-            action.setDistributionSet(distributionSet);
-            action.setStatus(Status.RUNNING);
-
-            switch (i % 5) {
-                case 0: {
-                    action.setStatus(Status.DOWNLOADED);
-                    action.setWeight(1);
-                    break;
-                }
-                case 1: {
-                    action.setStatus(Status.WAIT_FOR_CONFIRMATION);
-                    break;
-                }
-                case 2: {
-                    action.setStatus(Status.SCHEDULED);
-                    action.setWeight(10);
-                    break;
-                }
-                case 3: {
-                    action.setStatus(Status.RUNNING);
-                    action.setWeight(100);
-                    break;
-                }
-                default: {
-                    action.setStatus(Status.RUNNING);
-                    action.setWeight(3);
-                    break;
-                }
-            }
-            actionRepository.save(action);
-        }
+        // old ro with less weight - match
+        createAction(targets.get(0), rolloutOlder, 0, Status.RUNNING, distributionSet);
+        // old ro with less weight - match
+        createAction(targets.get(1), rolloutOlder, 5, Status.SCHEDULED, distributionSet);
+        // old ro with equal weight - match
+        createAction(targets.get(2), rolloutOlder, 10, Status.RUNNING, distributionSet);
+        // old ro with BIGGER weight - doesn't match
+        createAction(targets.get(3), rolloutOlder, 20, Status.WAIT_FOR_CONFIRMATION, distributionSet);
+        // same ro - doesn't match
+        createAction(targets.get(4), rollout, 10, Status.RUNNING, distributionSet);
+        // new ro with less weight - match
+        createAction(targets.get(5), rolloutNewer, 0, Status.RUNNING, distributionSet);
+        // new ro with less weight - match
+        createAction(targets.get(6), rolloutNewer, 5, Status.WARNING, distributionSet);
+        // NEW ro with EQUAL weight - doesn't match
+        createAction(targets.get(7), rolloutNewer, 10, Status.RUNNING, distributionSet);
+        // new ro with BIGGER weight - doesn't match
+        createAction(targets.get(8), rolloutNewer, 20, Status.DOWNLOADED, distributionSet);
 
         final Slice<Target> matching = targetManagement.findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
                 PAGE, rollout.getId(), 10, Long.MAX_VALUE,"controllerid==dyn_action_filter_*", distributionSet.getType());
@@ -1412,7 +1373,22 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
                 .map(s -> s.substring(targetPrefix.length()))
                 .map(Integer::parseInt)
                 .sorted()
-                .toList()).isEqualTo(List.of(0, 1, 4, 5, 9));
+                .toList()).isEqualTo(List.of(0, 1, 2, 5, 6));
+    }
+    private void createAction(final Target target, final Rollout rollout, final Integer weight, final Action.Status status, final DistributionSet distributionSet) {
+        final JpaAction action = new JpaAction();
+        action.setActionType(Action.ActionType.FORCED);
+        action.setTarget(target);
+        action.setInitiatedBy("test");
+        if (rollout != null) {
+            action.setRollout(rollout);
+        }
+        if (weight != null) {
+            action.setWeight(weight);
+        }
+        action.setStatus(status);
+        action.setDistributionSet(distributionSet);
+        actionRepository.save(action);
     }
 
     @Test

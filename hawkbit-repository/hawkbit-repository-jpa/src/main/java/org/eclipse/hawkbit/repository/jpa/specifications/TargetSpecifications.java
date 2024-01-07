@@ -634,12 +634,23 @@ public final class TargetSpecifications {
             final ListJoin<JpaTarget, JpaAction> actionsJoin = targetRoot.join(JpaTarget_.actions, JoinType.LEFT);
             actionsJoin.on(
                     cb.or(
-                            // in rollout
-                            cb.equal(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
-                            // or, active action with ge status
+                            cb.gt(actionsJoin.get(JpaAction_.weight), weight),
                             cb.and(
-                                    cb.not(actionsJoin.get(JpaAction_.STATUS).in(Action.Status.FINISHED, Action.Status.ERROR, Action.Status.CANCELED)),
-                                    cb.ge(actionsJoin.get(JpaAction_.weight), weight))));
+                                    cb.equal(actionsJoin.get(JpaAction_.weight), weight),
+                                    cb.ge(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId))));
+                    // another, but probably heavier variant
+//            actionsJoin.on(
+//                    cb.or(
+//                            // in rollout
+//                            cb.equal(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                            // or, in newer rollout with greater or equal weight
+//                            cb.and(
+//                                    cb.gt(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                                    cb.ge(actionsJoin.get(JpaAction_.weight), weight)),
+//                            // or, in older with greater status
+//                            cb.and(
+//                                    cb.lt(actionsJoin.get(JpaAction_.ROLLOUT).get(JpaRollout_.ID), rolloutId),
+//                                    cb.gt(actionsJoin.get(JpaAction_.weight), weight))));
             return cb.isNull(actionsJoin.get(JpaAction_.id));
         };
     }
