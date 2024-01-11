@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.ui.view.util;
+package org.eclipse.hawkbit.ui.simple.view.util;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;

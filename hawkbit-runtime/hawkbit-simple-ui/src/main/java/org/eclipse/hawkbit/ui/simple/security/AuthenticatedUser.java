@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.ui.security;
+package org.eclipse.hawkbit.ui.simple.security;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import org.springframework.stereotype.Component;
