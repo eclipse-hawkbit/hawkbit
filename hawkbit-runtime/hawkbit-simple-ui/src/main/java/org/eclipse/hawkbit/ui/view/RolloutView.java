@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
-import com.eclipse.hawkbit.ui.HawkbitClient;
-import com.eclipse.hawkbit.ui.view.util.Filter;
-import com.eclipse.hawkbit.ui.MainLayout;
-import com.eclipse.hawkbit.ui.view.util.SelectionGrid;
-import com.eclipse.hawkbit.ui.view.util.TableView;
-import com.eclipse.hawkbit.ui.view.util.Utils;
+import org.eclipse.hawkbit.ui.HawkbitClient;
+import org.eclipse.hawkbit.ui.view.util.Filter;
+import org.eclipse.hawkbit.ui.MainLayout;
+import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.view.util.TableView;
+import org.eclipse.hawkbit.ui.view.util.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Text;

@@ -7,16 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui;
+package org.eclipse.hawkbit.ui;
 
-import com.eclipse.hawkbit.ui.view.util.Utils;
-import com.vaadin.flow.component.UI;
+import org.eclipse.hawkbit.ui.view.util.Utils;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
 import feign.FeignException;
 import feign.RequestInterceptor;
-import feign.Response;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
