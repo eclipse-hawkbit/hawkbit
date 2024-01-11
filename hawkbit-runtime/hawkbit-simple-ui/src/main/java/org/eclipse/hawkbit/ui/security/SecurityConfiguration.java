@@ -7,9 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.security;
+package org.eclipse.hawkbit.ui.security;
 
-import com.eclipse.hawkbit.ui.view.LoginView;
+import org.eclipse.hawkbit.ui.view.LoginView;
 import com.vaadin.flow.spring.security.VaadinWebSecurity;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

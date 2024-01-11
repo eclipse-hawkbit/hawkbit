@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view.util;
+package org.eclipse.hawkbit.ui.view.util;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.HasValue;
@@ -30,7 +30,6 @@ import com.vaadin.flow.theme.lumo.LumoUtility;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;

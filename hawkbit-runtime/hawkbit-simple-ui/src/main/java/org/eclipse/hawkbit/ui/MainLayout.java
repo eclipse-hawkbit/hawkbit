@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui;
+package org.eclipse.hawkbit.ui;
 
-import com.eclipse.hawkbit.ui.view.RolloutView;
-import com.eclipse.hawkbit.ui.view.TargetView;
-import com.eclipse.hawkbit.ui.security.AuthenticatedUser;
-import com.eclipse.hawkbit.ui.view.AboutView;
-import com.eclipse.hawkbit.ui.view.DistributionSetView;
-import com.eclipse.hawkbit.ui.view.SoftwareModuleView;
+import org.eclipse.hawkbit.ui.view.RolloutView;
+import org.eclipse.hawkbit.ui.view.TargetView;
+import org.eclipse.hawkbit.ui.security.AuthenticatedUser;
+import org.eclipse.hawkbit.ui.view.AboutView;
+import org.eclipse.hawkbit.ui.view.DistributionSetView;
+import org.eclipse.hawkbit.ui.view.SoftwareModuleView;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
@@ -38,6 +38,7 @@ import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.server.auth.AccessAnnotationChecker;
 import com.vaadin.flow.theme.lumo.LumoUtility;
+
 import java.util.Optional;
 
 /**

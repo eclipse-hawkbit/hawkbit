@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
 public interface Constants {
 

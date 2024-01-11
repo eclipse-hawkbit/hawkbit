@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
-import com.eclipse.hawkbit.ui.HawkbitClient;
-import com.eclipse.hawkbit.ui.view.util.Filter;
-import com.eclipse.hawkbit.ui.MainLayout;
-import com.eclipse.hawkbit.ui.view.util.SelectionGrid;
-import com.eclipse.hawkbit.ui.view.util.TableView;
-import com.eclipse.hawkbit.ui.view.util.Utils;
+import org.eclipse.hawkbit.ui.HawkbitClient;
+import org.eclipse.hawkbit.ui.view.util.Filter;
+import org.eclipse.hawkbit.ui.MainLayout;
+import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.view.util.TableView;
+import org.eclipse.hawkbit.ui.view.util.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -68,8 +68,8 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     @Override
                     protected void addColumns(final Grid<MgmtTarget> grid) {
                         grid.addColumn(MgmtTarget::getControllerId).setHeader(CONTROLLER_ID).setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getName).setHeader(NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtTarget::getName).setHeader(Constants.NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtTarget::getTargetTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 TargetDetails::new, TargetDetails::setItem));
@@ -77,7 +77,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                 },
                 (query, filter) -> hawkbitClient.getTargetRestApi()
                         .getTargets(
-                                query.getOffset(), query.getPageSize(), NAME_ASC,
+                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC,
                                 filter)
                         .getBody()
                         .getContent()
@@ -103,7 +103,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
             controllerId = Utils.textField(CONTROLLER_ID);
             controllerId.setPlaceholder("<controller id filter>");
-            type = new CheckboxGroup<>(TYPE);
+            type = new CheckboxGroup<>(Constants.TYPE);
             type.setItemLabelGenerator(MgmtTargetType::getName);
             tag = new CheckboxGroup<>(TAG);
             tag.setItemLabelGenerator(MgmtTag::getName);
@@ -113,11 +113,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
         public List<Component> components() {
             final List<Component> components = new LinkedList<>();
             components.add(controllerId);
-            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(0, 20, NAME_ASC, null).getBody().getContent());
+            type.setItems(hawkbitClient.getTargetTypeRestApi().getTargetTypes(0, 20, Constants.NAME_ASC, null).getBody().getContent());
             if (!type.getValue().isEmpty()) {
                 components.add(type);
             }
-            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(0, 20, NAME_ASC, null).getBody().getContent());
+            tag.setItems(hawkbitClient.getTargetTagRestApi().getTargetTags(0, 20, Constants.NAME_ASC, null).getBody().getContent());
             if (!tag.isEmpty()) {
                 components.add(tag);
             }
@@ -166,7 +166,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     setHeight("40%");
                     final Button finishBtn = Utils.tooltip(new Button("Save"), "Save (Enter)");
                     final TextField name = Utils.textField(
-                            NAME,
+                            Constants.NAME,
                             e -> finishBtn.setEnabled(!e.getHasValue().isEmpty()));
                     name.focus();
                     finishBtn.addClickShortcut(Key.ENTER);
@@ -206,11 +206,11 @@ public class TargetView extends TableView<MgmtTarget, String> {
 
     private static class TargetDetails extends FormLayout {
 
-        private final TextArea description = new TextArea(DESCRIPTION);
-        private final TextField createdBy = Utils.textField(CREATED_BY);
-        private final TextField createdAt = Utils.textField(CREATED_AT);
-        private final TextField lastModifiedBy = Utils.textField(LAST_MODIFIED_BY);
-        private final TextField lastModifiedAt = Utils.textField(LAST_MODIFIED_AT);
+        private final TextArea description = new TextArea(Constants.DESCRIPTION);
+        private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
+        private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
 
         private TargetDetails() {
             description.setMinLength(2);
@@ -251,7 +251,7 @@ public class TargetView extends TableView<MgmtTarget, String> {
                     "Type",
                     e -> {},
                     hawkbitClient.getTargetTypeRestApi()
-                            .getTargetTypes(0, 30, NAME_ASC, null)
+                            .getTargetTypes(0, 30, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtTargetType[0]));
@@ -261,9 +261,9 @@ public class TargetView extends TableView<MgmtTarget, String> {
             controllerId = Utils.textField(CONTROLLER_ID,
                     e -> register.setEnabled(!e.getHasValue().isEmpty()));
             controllerId.focus();
-            name = Utils.textField(NAME);
+            name = Utils.textField(Constants.NAME);
             name.setWidthFull();
-            description = new TextArea(DESCRIPTION);
+            description = new TextArea(Constants.DESCRIPTION);
             description.setMinLength(2);
             description.setWidthFull();
 

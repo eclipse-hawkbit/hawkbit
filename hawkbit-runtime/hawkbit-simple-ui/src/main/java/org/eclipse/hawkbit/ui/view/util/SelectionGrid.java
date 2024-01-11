@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view.util;
+package org.eclipse.hawkbit.ui.view.util;
 
 import com.google.common.collect.Streams;
 import com.vaadin.flow.component.grid.Grid;

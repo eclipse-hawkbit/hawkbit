@@ -24,7 +24,7 @@
         <relativePath/>
     </parent>
 
-    <groupId>com.eclipse.hawkbit</groupId>
+    <groupId>org.eclipse.hawkbit</groupId>
     <artifactId>hawkbit-simple-ui</artifactId>
     <version>${revision}</version>
     <packaging>jar</packaging>
@@ -272,7 +272,7 @@
                         <configuration>
                             <serverId>ossrh</serverId>
                             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <stagingProfileId>1d2b23f380235e</stagingProfileId>
+<!--                            <stagingProfileId>1d2b23f380235e</stagingProfileId>-->
                             <autoReleaseAfterClose>false</autoReleaseAfterClose>
                         </configuration>
                     </plugin>

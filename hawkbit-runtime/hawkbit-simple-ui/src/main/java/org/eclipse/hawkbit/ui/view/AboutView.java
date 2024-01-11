@@ -7,9 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
-import com.eclipse.hawkbit.ui.MainLayout;
+import org.eclipse.hawkbit.ui.MainLayout;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;

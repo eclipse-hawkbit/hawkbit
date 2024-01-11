@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
-import com.eclipse.hawkbit.ui.HawkbitClient;
-import com.eclipse.hawkbit.ui.view.util.Filter;
-import com.eclipse.hawkbit.ui.MainLayout;
-import com.eclipse.hawkbit.ui.view.util.SelectionGrid;
-import com.eclipse.hawkbit.ui.view.util.TableView;
-import com.eclipse.hawkbit.ui.view.util.Utils;
+import org.eclipse.hawkbit.ui.HawkbitClient;
+import org.eclipse.hawkbit.ui.view.util.Filter;
+import org.eclipse.hawkbit.ui.MainLayout;
+import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.view.util.TableView;
+import org.eclipse.hawkbit.ui.view.util.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -65,10 +65,10 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
 
                     @Override
                     protected void addColumns(Grid<MgmtDistributionSet> grid) {
-                        grid.addColumn(MgmtDistributionSet::getDsId).setHeader(ID).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getName).setHeader(NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader(VERSION).setAutoWidth(true);
-                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getDsId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getName).setHeader(Constants.NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtDistributionSet::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, DistributionSetDetails::setItem));
@@ -76,7 +76,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getDistributionSetRestApi()
                         .getDistributionSets(
-                                query.getOffset(), query.getPageSize(), NAME_ASC, rsqlFilter)
+                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -95,11 +95,11 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                         MgmtSoftwareModule.class, MgmtSoftwareModule::getModuleId) {
                     @Override
                     protected void addColumns(Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(ID).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(VERSION).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(TYPE).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(VENDOR).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(Constants.NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(Constants.VENDOR).setAutoWidth(true);
                     }
                 });
     }
@@ -115,13 +115,13 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
             type.setItems(
                     hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 20, NAME_ASC, null)
+                            .getDistributionSetTypes(0, 20, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent());
             tag.setItemLabelGenerator(MgmtTag::getName);
             tag.setItems(
                     hawkbitClient.getDistributionSetTagRestApi()
-                            .getDistributionSetTags(0, 20, NAME_ASC, null)
+                            .getDistributionSetTags(0, 20, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent());
         }
@@ -183,7 +183,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     hawkbitClient.getDistributionSetRestApi()
                             .getAssignedSoftwareModules(
                                     distributionSet.getDsId(),
-                                    query.getOffset(), query.getLimit(), NAME_ASC)
+                                    query.getOffset(), query.getLimit(), Constants.NAME_ASC)
                             .getBody()
                             .getContent()
                             .stream());
@@ -210,7 +210,7 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
                     "Type",
                     this::readyToCreate,
                     hawkbitClient.getDistributionSetTypeRestApi()
-                            .getDistributionSetTypes(0, 30, NAME_ASC, null)
+                            .getDistributionSetTypes(0, 30, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtDistributionSetType[0]));
@@ -218,10 +218,10 @@ public class DistributionSetView extends TableView<MgmtDistributionSet, Long> {
             type.setWidthFull();
             type.setRequiredIndicatorVisible(true);
             type.setItemLabelGenerator(MgmtDistributionSetType::getName);
-            name = Utils.textField(NAME, this::readyToCreate);
-            version = Utils.textField(VERSION, this::readyToCreate);
-            final TextField vendor = Utils.textField(VENDOR);
-            description = new TextArea(DESCRIPTION);
+            name = Utils.textField(Constants.NAME, this::readyToCreate);
+            version = Utils.textField(Constants.VERSION, this::readyToCreate);
+            final TextField vendor = Utils.textField(Constants.VENDOR);
+            description = new TextArea(Constants.DESCRIPTION);
             description.setWidthFull();
             description.setMinLength(2);
             requiredMigrationStep = new Checkbox("Required Migration Step");

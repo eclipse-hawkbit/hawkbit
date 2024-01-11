@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package com.eclipse.hawkbit.ui.view;
+package org.eclipse.hawkbit.ui.view;
 
-import com.eclipse.hawkbit.ui.HawkbitClient;
-import com.eclipse.hawkbit.ui.view.util.Filter;
-import com.eclipse.hawkbit.ui.view.util.SelectionGrid;
-import com.eclipse.hawkbit.ui.MainLayout;
-import com.eclipse.hawkbit.ui.view.util.TableView;
-import com.eclipse.hawkbit.ui.view.util.Utils;
+import org.eclipse.hawkbit.ui.HawkbitClient;
+import org.eclipse.hawkbit.ui.view.util.Filter;
+import org.eclipse.hawkbit.ui.view.util.SelectionGrid;
+import org.eclipse.hawkbit.ui.MainLayout;
+import org.eclipse.hawkbit.ui.view.util.TableView;
+import org.eclipse.hawkbit.ui.view.util.Utils;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.button.Button;
@@ -60,7 +60,7 @@ import java.util.stream.Stream;
 @Route(value = "software_modules", layout = MainLayout.class)
 @RolesAllowed({"SOFTWARE_MODULE_READ"})
 @Uses(Icon.class)
-public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
+public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long> {
 
     @Autowired
     public SoftwareModuleView(final HawkbitClient hawkbitClient) {
@@ -75,11 +75,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
                     private final SoftwareModuleDetails details = new SoftwareModuleDetails(hawkbitClient);
                     @Override
                     protected void addColumns(final Grid<MgmtSoftwareModule> grid) {
-                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(ID).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(NAME).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(VERSION).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(TYPE).setAutoWidth(true);
-                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(VENDOR).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getModuleId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getName).setHeader(Constants.NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVersion).setHeader(Constants.VERSION).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getTypeName).setHeader(Constants.TYPE).setAutoWidth(true);
+                        grid.addColumn(MgmtSoftwareModule::getVendor).setHeader(Constants.VENDOR).setAutoWidth(true);
 
                         grid.setItemDetailsRenderer(new ComponentRenderer<>(
                                 () -> details, SoftwareModuleDetails::setItem));
@@ -88,7 +88,7 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
                 },
                 (query, rsqlFilter) -> hawkbitClient.getSoftwareModuleRestApi()
                         .getSoftwareModules(
-                                query.getOffset(), query.getPageSize(), NAME_ASC, rsqlFilter)
+                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter)
                         .getBody()
                         .getContent()
                         .stream(),
@@ -110,8 +110,8 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
                 new SelectionGrid.EntityRepresentation<>(MgmtArtifact.class, MgmtArtifact::getArtifactId) {
                     @Override
                     protected void addColumns(final Grid<MgmtArtifact> grid) {
-                        grid.addColumn(MgmtArtifact::getArtifactId).setHeader(ID).setAutoWidth(true);
-                        grid.addColumn(MgmtArtifact::getProvidedFilename).setHeader(NAME).setAutoWidth(true);
+                        grid.addColumn(MgmtArtifact::getArtifactId).setHeader(Constants.ID).setAutoWidth(true);
+                        grid.addColumn(MgmtArtifact::getProvidedFilename).setHeader(Constants.NAME).setAutoWidth(true);
                         grid.addColumn(MgmtArtifact::getSize).setHeader("Size").setAutoWidth(true);
                     }
                 });
@@ -119,15 +119,15 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
 
     private static class SoftwareModuleFilter implements Filter.Rsql {
 
-        private final TextField name = Utils.textField(NAME);
-        private final CheckboxGroup<MgmtSoftwareModuleType> type = new CheckboxGroup<>(TYPE);
+        private final TextField name = Utils.textField(Constants.NAME);
+        private final CheckboxGroup<MgmtSoftwareModuleType> type = new CheckboxGroup<>(Constants.TYPE);
 
         private SoftwareModuleFilter(final HawkbitClient hawkbitClient) {
             name.setPlaceholder("<name filter>");
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.setItems(
                     hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 20, NAME_ASC, null)
+                            .getTypes(0, 20, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent());
         }
@@ -152,11 +152,11 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
 
         private final transient HawkbitClient hawkbitClient;
 
-        private final TextArea description = new TextArea(DESCRIPTION);
-        private final TextField createdBy = Utils.textField(CREATED_BY);
-        private final TextField createdAt = Utils.textField(CREATED_AT);
-        private final TextField lastModifiedBy = Utils.textField(LAST_MODIFIED_BY);
-        private final TextField lastModifiedAt = Utils.textField(LAST_MODIFIED_AT);
+        private final TextArea description = new TextArea(Constants.DESCRIPTION);
+        private final TextField createdBy = Utils.textField(Constants.CREATED_BY);
+        private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
+        private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
+        private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
         private final SelectionGrid<MgmtArtifact, Long> artifactGrid;
 
         private SoftwareModuleDetails(final HawkbitClient hawkbitClient) {
@@ -211,10 +211,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
             super("Create Software Module");
 
             type = new Select<>(
-                    TYPE,
+                    Constants.TYPE,
                     this::readyToCreate,
                     hawkbitClient.getSoftwareModuleTypeRestApi()
-                            .getTypes(0, 30, NAME_ASC, null)
+                            .getTypes(0, 30, Constants.NAME_ASC, null)
                             .getBody()
                             .getContent()
                             .toArray(new MgmtSoftwareModuleType[0]));
@@ -222,10 +222,10 @@ public class SoftwareModuleView extends TableView<MgmtSoftwareModule, Long>{
             type.setRequiredIndicatorVisible(true);
             type.setItemLabelGenerator(MgmtSoftwareModuleType::getName);
             type.focus();
-            name = Utils.textField(NAME, this::readyToCreate);
-            version = Utils.textField(VERSION, this::readyToCreate);
-            vendor = Utils.textField(VENDOR);
-            description = new TextArea(DESCRIPTION);
+            name = Utils.textField(Constants.NAME, this::readyToCreate);
+            version = Utils.textField(Constants.VERSION, this::readyToCreate);
+            vendor = Utils.textField(Constants.VENDOR);
+            description = new TextArea(Constants.DESCRIPTION);
             description.setWidthFull();
             description.setMinLength(2);
             enableArtifactEncryption = new Checkbox("Enable artifact encryption");
