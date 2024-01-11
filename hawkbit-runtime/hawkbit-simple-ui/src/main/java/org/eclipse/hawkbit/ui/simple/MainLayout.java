@@ -7,14 +7,14 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.ui;
+package org.eclipse.hawkbit.ui.simple;
 
-import org.eclipse.hawkbit.ui.view.RolloutView;
-import org.eclipse.hawkbit.ui.view.TargetView;
-import org.eclipse.hawkbit.ui.security.AuthenticatedUser;
-import org.eclipse.hawkbit.ui.view.AboutView;
-import org.eclipse.hawkbit.ui.view.DistributionSetView;
-import org.eclipse.hawkbit.ui.view.SoftwareModuleView;
+import org.eclipse.hawkbit.ui.simple.view.TargetView;
+import org.eclipse.hawkbit.ui.simple.view.RolloutView;
+import org.eclipse.hawkbit.ui.simple.security.AuthenticatedUser;
+import org.eclipse.hawkbit.ui.simple.view.AboutView;
+import org.eclipse.hawkbit.ui.simple.view.DistributionSetView;
+import org.eclipse.hawkbit.ui.simple.view.SoftwareModuleView;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;

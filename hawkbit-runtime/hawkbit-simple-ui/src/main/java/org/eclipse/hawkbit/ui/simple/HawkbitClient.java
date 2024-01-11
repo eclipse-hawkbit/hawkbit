@@ -7,9 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.eclipse.hawkbit.ui;
+package org.eclipse.hawkbit.ui.simple;
 
-import org.eclipse.hawkbit.ui.view.util.Utils;
+import org.eclipse.hawkbit.ui.simple.view.util.Utils;
 import feign.Client;
 import feign.Contract;
 import feign.Feign;
