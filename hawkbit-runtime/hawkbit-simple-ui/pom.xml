@@ -38,6 +38,19 @@
         <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
     </properties>
 
+
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>hawkBit Repository - Release</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <name>hawkBit Repository - Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
     <repositories>
         <repository>
             <id>Vaadin Repo</id>
