@@ -15,7 +15,7 @@ set -xe
 # -f <flavour> to pass flavour. "mysql" stands for MySQL while all the rest (and default) is assumed Standard
 # -r <local maven repository> the local maven repository the already built application jars are located into
 
-VERSION=0.4.0-SNAPSHOT
+VERSION=0.4.1
 FLAVOUR="standard"
 MVN_REPO=~/.m2/repository
 
@@ -52,5 +52,6 @@ build "hawkbit-ddi-server"
 build "hawkbit-dmf-server"
 build "hawkbit-mgmt-server"
 build "hawkbit-vv8-ui"
+build "hawkbit-simple-ui"
 
 build "hawkbit-update-server"
