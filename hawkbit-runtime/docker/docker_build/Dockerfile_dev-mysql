@@ -4,7 +4,7 @@ ARG JAVA_VERSION=17.0.9_9
 FROM eclipse-temurin:${JAVA_VERSION}-jre-alpine as build
 
 ARG HAWKBIT_APP=hawkbit-update-server
-ARG HAWKBIT_VERSION=0.3.0
+ARG HAWKBIT_VERSION=0.4.1
 
 ENV BUILD_DIR=/opt/hawkbit_build
 ENV APP=${HAWKBIT_APP}
