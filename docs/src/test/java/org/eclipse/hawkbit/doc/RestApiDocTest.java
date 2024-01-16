@@ -125,7 +125,7 @@ class RestApiDocTest {
         if (isMgmt) {
             return fieldName.startsWith("Ddi");
         }
-        return !(fieldName.startsWith("Ddi") || fieldName.equals("Link") || fieldName.equals("ExceptionInfo"));
+        return !(fieldName.startsWith("Ddi") || fieldName.equals("Link") || fieldName.equals("Links") || fieldName.equals("ExceptionInfo"));
 
     }
 
