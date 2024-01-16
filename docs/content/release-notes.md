@@ -7,7 +7,8 @@ weight: 100
 
 **Release Date:** Friday, January 12, 2024 <br />
 Hawkbit: [Tag](https://github.com/eclipse/hawkbit/releases/tag/0.4.1) /
-[Release](https://github.com/eclipse/hawkbit/milestone/25) 
+[Release](https://github.com/eclipse/hawkbit/milestone/25) <br />
+Extensions: [Tag](https://github.com/eclipse/hawkbit-extensions/releases/tag/0.4.1)
 
 ## 0.3.0
 
