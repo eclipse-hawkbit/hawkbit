@@ -144,7 +144,7 @@
    </pluginRepositories>
 
    <properties>
-      <revision>0.5.0-SNAPSHOT</revision>
+      <revision>0-SNAPSHOT</revision>
 
       <dash.skip>true</dash.skip>
       <dash.fail>true</dash.fail>
