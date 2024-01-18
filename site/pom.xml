@@ -17,8 +17,7 @@
       <version>${revision}</version>
    </parent>
 
-   <artifactId>docs</artifactId>
-<!--   <packaging>pom</packaging>-->
+   <artifactId>site</artifactId>
    <name>hawkBit :: Documentation</name>
    <description>Documentation for hawkBit</description>
 

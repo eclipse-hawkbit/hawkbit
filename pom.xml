@@ -443,10 +443,10 @@
                      <exclude>.sonar</exclude>
                      <exclude>**/docker/**</exclude>
                      <exclude>**/.sonar/**</exclude>
-                     <exclude>docs/content/**</exclude>
-                     <exclude>docs/layouts/**</exclude>
-                     <exclude>docs/static/**</exclude>
-                     <exclude>docs/*.toml</exclude>
+                     <exclude>site/content/**</exclude>
+                     <exclude>site/layouts/**</exclude>
+                     <exclude>site/static/**</exclude>
+                     <exclude>site/*.toml</exclude>
                      <exclude>**/spring.factories</exclude>
                      <exclude>**/LICENSE*</exclude>
                   </excludes>
