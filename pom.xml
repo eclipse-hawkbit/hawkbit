@@ -198,20 +198,6 @@
       <!-- ************************ -->
       <!-- Maven Plugins -->
       <!-- ************************ -->
-      <!-- Docker image build - START -->
-      <docker.repository.name>${project.artifactId}</docker.repository.name>
-      <docker.host>unix:///var/run/docker.sock</docker.host>
-      <docker.maven.plugin.version>0.40.3</docker.maven.plugin.version>
-      <docker.memory.size>-Xms600m -Xmx600m -XX:MaxMetaspaceSize=250m -XX:MetaspaceSize=250m -Xss300K
-      </docker.memory.size>
-      <docker.base.image.platform>linux/amd64</docker.base.image.platform>
-      <docker.gc.settings>-XX:+UseG1GC -XX:+UseStringDeduplication -XX:+UseCompressedOops</docker.gc.settings>
-      <docker.jvm.args>${docker.memory.size} ${docker.gc.settings} -XX:+HeapDumpOnOutOfMemoryError
-         -XX:+ExitOnOutOfMemoryError -Djava.security.egd=file:/dev/./urandom
-      </docker.jvm.args>
-      <docker.jre.version>17.0.9_9-jre-alpine</docker.jre.version>
-      <!-- Docker image build - END -->
-
       <maven.scm.plugin.version>2.0.1</maven.scm.plugin.version>
       <maven.site.plugin.version>3.12.1</maven.site.plugin.version>
       <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
