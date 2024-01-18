@@ -37,7 +37,6 @@ public class ThresholdRolloutGroupSuccessCondition
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-
         final long totalGroup = rolloutGroup.getTotalTargets();
         if (totalGroup == 0) {
             // in case e.g. targets has been deleted we don't have any

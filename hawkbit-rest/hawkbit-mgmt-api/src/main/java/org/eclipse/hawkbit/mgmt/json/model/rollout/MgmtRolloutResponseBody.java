@@ -72,6 +72,10 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
     private Integer weight;
 
     @JsonProperty
+    @Schema(example = "true")
+    private boolean dynamic;
+
+    @JsonProperty
     @Schema(example = "Approved remark.")
     private String approvalRemark;
 
@@ -169,6 +173,14 @@ public class MgmtRolloutResponseBody extends MgmtNamedEntity {
 
     public Integer getWeight() {
         return weight;
+    }
+
+    public void setDynamic(final boolean dynamic) {
+        this.dynamic = dynamic;
+    }
+
+    public boolean isDynamic() {
+        return dynamic;
     }
 
     public void setTotalGroups(final Integer totalGroups) {

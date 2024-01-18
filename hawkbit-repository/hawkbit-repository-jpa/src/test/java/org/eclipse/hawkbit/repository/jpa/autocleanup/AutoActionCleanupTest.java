@@ -115,6 +115,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
+        waitNextMillis();
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(1);

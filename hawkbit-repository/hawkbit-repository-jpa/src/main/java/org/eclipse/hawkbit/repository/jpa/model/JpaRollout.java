@@ -140,6 +140,9 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
     @Max(Action.WEIGHT_MAX)
     private Integer weight;
 
+    @Column(name = "is_dynamic") // dynamic is reserved keyword in some databases
+    private Boolean dynamic;
+
     @Column(name = "access_control_context", nullable = true)
     private String accessControlContext;
 
@@ -223,6 +226,21 @@ public class JpaRollout extends AbstractJpaNamedEntity implements Rollout, Event
 
     public void setWeight(final Integer weight) {
         this.weight = weight;
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return Boolean.TRUE.equals(dynamic);
+    }
+
+    public void setDynamic(final Boolean dynamic) {
+        this.dynamic = dynamic;
+    }
+
+    // dynamic is null only for old rollouts - could be used for distinguishing
+    // old once from the other
+    public boolean isNewStyleTargetPercent() {
+        return dynamic != null;
     }
 
     public Optional<String> getAccessControlContext() {

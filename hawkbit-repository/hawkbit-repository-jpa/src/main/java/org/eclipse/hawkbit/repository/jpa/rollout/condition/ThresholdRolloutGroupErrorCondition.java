@@ -39,8 +39,7 @@ public class ThresholdRolloutGroupErrorCondition
 
     @Override
     public boolean eval(final Rollout rollout, final RolloutGroup rolloutGroup, final String expression) {
-        final Long totalGroup = actionRepository.countByRolloutAndRolloutGroup((JpaRollout) rollout,
-                (JpaRolloutGroup) rolloutGroup);
+        final long totalGroup = rolloutGroup.getTotalTargets();
         final Long error = actionRepository.countByRolloutIdAndRolloutGroupIdAndStatus(rollout.getId(),
                 rolloutGroup.getId(), Action.Status.ERROR);
         try {

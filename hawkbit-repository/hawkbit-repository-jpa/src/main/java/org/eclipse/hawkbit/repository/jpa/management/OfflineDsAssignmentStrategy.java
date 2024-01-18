@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
@@ -52,9 +53,9 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                                 final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
                                 final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
                                 final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-                                final BooleanSupplier confirmationFlowConfig) {
+                                final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
     }
 
     @Override

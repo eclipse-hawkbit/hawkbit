@@ -19,6 +19,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionCancelEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
@@ -55,9 +56,9 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                                final AfterTransactionCommitExecutor afterCommit, final EventPublisherHolder eventPublisherHolder,
                                final ActionRepository actionRepository, final ActionStatusRepository actionStatusRepository,
                                final QuotaManagement quotaManagement, final BooleanSupplier multiAssignmentsConfig,
-                               final BooleanSupplier confirmationFlowConfig) {
+                               final BooleanSupplier confirmationFlowConfig, final RepositoryProperties repositoryProperties) {
         super(targetRepository, afterCommit, eventPublisherHolder, actionRepository, actionStatusRepository,
-                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig);
+                quotaManagement, multiAssignmentsConfig, confirmationFlowConfig, repositoryProperties);
     }
 
     @Override

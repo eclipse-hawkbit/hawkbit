@@ -176,10 +176,10 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         this.txManager = txManager;
         onlineDsAssignmentStrategy = new OnlineDsAssignmentStrategy(targetRepository, afterCommit, eventPublisherHolder,
                 actionRepository, actionStatusRepository, quotaManagement, this::isMultiAssignmentsEnabled,
-                this::isConfirmationFlowEnabled);
+                this::isConfirmationFlowEnabled, repositoryProperties);
         offlineDsAssignmentStrategy = new OfflineDsAssignmentStrategy(targetRepository, afterCommit,
                 eventPublisherHolder, actionRepository, actionStatusRepository, quotaManagement,
-                this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled);
+                this::isMultiAssignmentsEnabled, this::isConfirmationFlowEnabled, repositoryProperties);
         this.tenantConfigurationManagement = tenantConfigurationManagement;
         this.systemSecurityContext = systemSecurityContext;
         this.tenantAware = tenantAware;

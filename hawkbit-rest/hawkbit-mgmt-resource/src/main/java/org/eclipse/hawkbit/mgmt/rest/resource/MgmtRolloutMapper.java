@@ -79,6 +79,7 @@ final class MgmtRolloutMapper {
         body.setLastModifiedBy(rollout.getLastModifiedBy());
         body.setName(rollout.getName());
         body.setRolloutId(rollout.getId());
+        body.setDynamic(rollout.isDynamic());
         body.setTargetFilterQuery(rollout.getTargetFilterQuery());
         body.setDistributionSetId(rollout.getDistributionSet().getId());
         body.setStatus(rollout.getStatus().toString().toLowerCase());
@@ -126,6 +127,7 @@ final class MgmtRolloutMapper {
             final DistributionSet distributionSet) {
 
         return entityFactory.rollout().create().name(restRequest.getName()).description(restRequest.getDescription())
+                .dynamic(restRequest.isDynamic())
                 .set(distributionSet).targetFilterQuery(restRequest.getTargetFilterQuery())
                 .actionType(MgmtRestModelMapper.convertActionType(restRequest.getType()))
                 .forcedTime(restRequest.getForcetime()).startAt(restRequest.getStartAt())

@@ -655,10 +655,11 @@ public class RepositoryApplicationConfiguration extends JpaBaseConfiguration {
             final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final JpaProperties properties, final TenantConfigurationManagement tenantConfigurationManagement,
+            final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
         return new JpaTargetFilterQueryManagement(targetFilterQueryRepository, targetManagement,
                 virtualPropertyReplacer, distributionSetManagement, quotaManagement, properties.getDatabase(),
-                tenantConfigurationManagement, systemSecurityContext, contextAware);
+                tenantConfigurationManagement, repositoryProperties, systemSecurityContext, contextAware);
     }
 
 

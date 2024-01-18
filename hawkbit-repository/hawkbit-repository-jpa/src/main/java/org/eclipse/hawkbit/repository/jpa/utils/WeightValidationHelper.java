@@ -123,9 +123,7 @@ public final class WeightValidationHelper {
         final boolean bypassWeightEnforcement = true;
         final boolean multiAssignmentsEnabled = TenantConfigHelper
                 .usingContext(systemSecurityContext, tenantConfigurationManagement).isMultiAssignmentsEnabled();
-        if (!multiAssignmentsEnabled && hasWeight) {
-            throw new MultiAssignmentIsNotEnabledException();
-        } else if (bypassWeightEnforcement) {
+        if (bypassWeightEnforcement) {
             return;
         } else if (multiAssignmentsEnabled && hasNoWeight) {
             throw new NoWeightProvidedInMultiAssignmentModeException();

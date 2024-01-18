@@ -513,4 +513,15 @@ public abstract class AbstractIntegrationTest {
                 .getConfigurationValue(TenantConfigurationKey.USER_CONFIRMATION_ENABLED, Boolean.class).getValue();
     }
 
+    // ensure that next action will get current time millis AFTER got from the previous
+    protected void waitNextMillis() {
+        final long createTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() == createTime) {
+            try {
+                Thread.sleep(1);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
 }

@@ -1101,6 +1101,9 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
                 .messages(Lists.newArrayList("proceeding message 1")));
+
+        final long createTime = System.currentTimeMillis();
+        waitNextMillis();
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
                 .messages(Lists.newArrayList("proceeding message 2")));

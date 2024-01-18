@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
+import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryFields;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -84,6 +85,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private final DistributionSetManagement distributionSetManagement;
     private final QuotaManagement quotaManagement;
     private final TenantConfigurationManagement tenantConfigurationManagement;
+    private final RepositoryProperties repositoryProperties;
     private final SystemSecurityContext systemSecurityContext;
     private final ContextAware contextAware;
 
@@ -93,6 +95,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final TargetManagement targetManagement, final VirtualPropertyReplacer virtualPropertyReplacer,
             final DistributionSetManagement distributionSetManagement, final QuotaManagement quotaManagement,
             final Database database, final TenantConfigurationManagement tenantConfigurationManagement,
+            final RepositoryProperties repositoryProperties,
             final SystemSecurityContext systemSecurityContext, final ContextAware contextAware) {
         this.targetFilterQueryRepository = targetFilterQueryRepository;
         this.targetManagement = targetManagement;
@@ -101,6 +104,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         this.quotaManagement = quotaManagement;
         this.database = database;
         this.tenantConfigurationManagement = tenantConfigurationManagement;
+        this.repositoryProperties = repositoryProperties;
         this.systemSecurityContext = systemSecurityContext;
         this.contextAware = contextAware;
     }
@@ -270,7 +274,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAccessControlContext(null);
             targetFilterQuery.setAutoAssignDistributionSet(null);
             targetFilterQuery.setAutoAssignActionType(null);
-            targetFilterQuery.setAutoAssignWeight(null);
+            targetFilterQuery.setAutoAssignWeight(0);
             targetFilterQuery.setAutoAssignInitiatedBy(null);
             targetFilterQuery.setConfirmationRequired(false);
         } else {
@@ -284,9 +288,11 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
-            targetFilterQuery.setAutoAssignWeight(update.getWeight());
-            final boolean confirmationRequired = update.isConfirmationRequired() == null ? isConfirmationFlowEnabled()
-                    : update.isConfirmationRequired();
+            targetFilterQuery.setAutoAssignWeight(
+                    update.getWeight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.getWeight());
+            final boolean confirmationRequired =
+                    update.isConfirmationRequired() == null ?
+                            isConfirmationFlowEnabled() : update.isConfirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return targetFilterQueryRepository.save(targetFilterQuery);

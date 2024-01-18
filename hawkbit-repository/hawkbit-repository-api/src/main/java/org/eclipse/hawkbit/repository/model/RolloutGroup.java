@@ -34,6 +34,11 @@ public interface RolloutGroup extends NamedEntity {
     RolloutGroup getParent();
 
     /**
+     * @return if the group is dynamic
+     */
+    boolean isDynamic();
+
+    /**
      * @return the {@link RolloutGroupSuccessCondition} for this group to
      *         indicate when a group is successful
      */

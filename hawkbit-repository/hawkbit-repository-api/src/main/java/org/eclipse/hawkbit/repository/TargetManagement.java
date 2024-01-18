@@ -310,7 +310,7 @@ public interface TargetManagement {
      *            the pageRequest to enhance the query for paging and sorting
      * @param groups
      *            the list of {@link RolloutGroup}s
-     * @param rsqlParam
+     * @param targetFilterQuery
      *            filter definition in RSQL syntax
      * @param distributionSetType
      *            type of the {@link DistributionSet} the targets must be compatible
@@ -319,8 +319,16 @@ public interface TargetManagement {
      */
     @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
     Slice<Target> findByTargetFilterQueryAndNotInRolloutGroupsAndCompatibleAndUpdatable(@NotNull Pageable pageRequest,
-            @NotEmpty Collection<Long> groups, @NotNull String rsqlParam,
+            @NotEmpty Collection<Long> groups, @NotNull String targetFilterQuery,
             @NotNull DistributionSetType distributionSetType);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_TARGET)
+    Slice<Target> findByNotInGEGroupAndNotInActiveActionGEWeightOrInRolloutAndTargetFilterQueryAndCompatibleAndUpdatable(
+            @NotNull Pageable pageRequest, final long rolloutId, final int weight, final long firstGroupId, @NotNull String targetFilterQuery,
+            @NotNull DistributionSetType distributionSetType);
+
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_READ_TARGET)
+    long countByActionsInRolloutGroup(final long rolloutGroupId);
 
     /**
      * Finds all targets with failed actions for specific Rollout and that are not
