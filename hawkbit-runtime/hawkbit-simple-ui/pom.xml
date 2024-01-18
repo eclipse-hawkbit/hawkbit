@@ -31,7 +31,7 @@
     <name>hawkBit :: Runtime :: Simple UI</name>
 
     <properties>
-        <revision>0.5.0-SNAPSHOT</revision>
+        <revision>0-SNAPSHOT</revision>
 
         <java.version>17</java.version>
         <vaadin.version>24.2.2</vaadin.version>
