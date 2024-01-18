@@ -7,7 +7,7 @@ This directory contains docker files for building both hawkBit docker flavours:
 Both flavours of are almost the same, just mysql has in addition a MariaDB Java connector and is started, by default, with mysql Spring profile.
 
 For every flavour there are two build types:
-* _default_ - uses officially released hawkBit versions, downloading them from https://repo1.maven.org
+* _release_ - uses officially released hawkBit versions, downloading them from https://repo1.maven.org
 * _development/dev_ - uses the local maven repository with built by developer (or just downloaded from any maven repository) hawkBit applications 
 
 ## Build overview
@@ -21,35 +21,35 @@ Building images supports the following build arguments (i.e. ARG-s which could b
 Additionally, tge _development_ builds shall be started with docker build context the local maven repository
 
 ## Build standard
-Standard flavour could be build, for example, with:
+Standard flavour could be build, for example, with (fixed version 0.4.1 is just an example):
 ```shell
-docker build --build-arg HAWKBIT_APP=hawkbit-update-server -t hawkbit_update_server:0.3.0 . -f Dockerfile
+docker build --build-arg HAWKBIT_APP=hawkbit-update-server --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 . -f Dockerfile
 ```
 or just by:
 ```shell
-docker build -t hawkbit_update_server:0.3.0 .
+docker build --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1 .
 ```
 having that docker uses by default _Dockerfile_ and the _hawkbit-update-server_ is the default _HAWKBIT_APP_.
 
-To build development docker images, e.g. snapshot based, you could use something like:
+To build standard development docker images, e.g. snapshot based, you could use something like:
 ```shell
-docker build -t hawkbit_update_server:0.4.0-SNAPSHOT -f Dockerfile_dev ~/.m2/repository
+docker build -t hawkbit_update_server:0-SNAPSHOT -f Dockerfile_dev ~/.m2/repository
 ```
 Note that here you have to use your maven repository containing the hawkBit app as docker build context, in the example case _~/.m2/repository_ 
 
 ## Build mysql
 Mysql flavour could be build, for example, with:
 ```shell
-docker build --build-arg HAWKBIT_APP=hawkbit-update-server -t hawkbit_update_server:0.3.0-mysql . -f Dockerfile-mysql
+docker build --build-arg HAWKBIT_APP=hawkbit-update-server --build-arg HAWKBIT_VERSION=0.4.1 -t hawkbit_update_server:0.4.1-mysql . -f Dockerfile-mysql
 ```
 or just by:
 ```shell
-docker build --build-arg -t hawkbit_update_server:0.3.0-mysql . -f Dockerfile-mysql
+docker build --build-arg -t hawkbit_update_server:0.4.1-mysql --build-arg HAWKBIT_VERSION=0.4.1 . -f Dockerfile-mysql
 ```
 having that the _hawkbit-update-server_ is the default _HAWKBIT_APP_.
 
-To build development docker images, e.g. snapshot based, you could use something like:
+To build development mysql docker images, e.g. snapshot based, you could use something like:
 ```shell
-docker build -t hawkbit_update_server:0.4.0-SNAPSHOT-mysql -f Dockerfile_dev-mysql ~/.m2/repository
+docker build -t hawkbit_update_server:0-SNAPSHOT-mysql -f Dockerfile_dev-mysql ~/.m2/repository
 ```
-Note that here you have to use your maven repository containing the hawkBit app as docker build context, in the example case _~/.m2/repository_ 
+Note that here you have to use your maven repository containing the hawkBit app as docker build context, in the example case _~/.m2/repository_

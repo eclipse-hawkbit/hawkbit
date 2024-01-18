@@ -15,7 +15,7 @@ set -xe
 # -f <flavour> to pass flavour. "mysql" stands for MySQL while all the rest (and default) is assumed Standard
 # -r <local maven repository> the local maven repository the already built application jars are located into
 
-VERSION=0.4.1
+VERSION=0-SNAPSHOT
 FLAVOUR="standard"
 MVN_REPO=~/.m2/repository
 
