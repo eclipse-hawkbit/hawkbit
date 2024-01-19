@@ -12,6 +12,12 @@ package org.eclipse.hawkbit.app;
 import org.eclipse.hawkbit.autoconfigure.security.EnableHawkbitManagedSecurityConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * A {@link SpringBootApplication} annotated class with a main method to start.
@@ -34,5 +40,23 @@ public class Start {
     @SuppressWarnings({ "squid:S2095" })
     public static void main(final String[] args) {
         SpringApplication.run(Start.class, args);
+    }
+
+    @Controller
+    public static class RedirectController {
+
+        @GetMapping("/")
+        public RedirectView redirectToSwagger(
+                RedirectAttributes attributes) {
+            attributes.addFlashAttribute("flashAttribute", "redirectWithRedirectView");
+            attributes.addAttribute("attribute", "redirectWithRedirectView");
+            return new RedirectView("swagger-ui/index.html");
+        }
+    }
+
+    @Configuration
+    @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, proxyTargetClass = true)
+    public static class MethodSecurityConfig {
+
     }
 }
