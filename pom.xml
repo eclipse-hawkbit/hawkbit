@@ -129,12 +129,6 @@
       </snapshotRepository>
    </distributionManagement>
 
-   <repositories>
-      <repository>
-         <id>vaadin-addons</id>
-         <url>https://maven.vaadin.com/vaadin-addons</url>
-      </repository>
-   </repositories>
    <pluginRepositories>
       <pluginRepository>
          <id>dash-licenses</id>
@@ -182,17 +176,6 @@
       <eclipselink.version>2.7.13</eclipselink.version>
       <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
-
-      <!-- Vaadin versions - START -->
-      <!-- Vaadin version 8.14.3 is the last version running under an Apache 2.0 license -->
-      <vaadin.version>8.14.3</vaadin.version>
-      <vaadin.spring.version>3.2.1</vaadin.spring.version>
-      <vaadin.spring.addon.version>2.0.0.RELEASE</vaadin.spring.addon.version>
-      <vaadin.plugin.version>${vaadin.version}</vaadin.plugin.version>
-      <vaadin.addon.dbar-addon.version>3.0.1</vaadin.addon.dbar-addon.version>
-      <vaadin.gwt-api.version>1.3.0</vaadin.gwt-api.version>
-      <vaadin.gwt-user.version>2.9.0</vaadin.gwt-user.version>
-      <!-- Vaadin versions - END -->
 
       <!-- ************************ -->
       <!-- Maven Plugins -->
@@ -437,8 +420,6 @@
                      <exclude>.git*</exclude>
                      <exclude>**/*.sql</exclude>
                      <exclude>eclipse_codeformatter.xml</exclude>
-                     <exclude>**/addons.scss</exclude>
-                     <exclude>**/VAADIN/widgetsets/**</exclude>
                      <exclude>.sonar</exclude>
                      <exclude>**/docker/**</exclude>
                      <exclude>**/.sonar/**</exclude>
@@ -472,20 +453,6 @@
                            </pluginExecutionFilter>
                            <action>
                               <ignore />
-                           </action>
-                        </pluginExecution>
-                        <pluginExecution>
-                           <pluginExecutionFilter>
-                              <groupId>com.vaadin</groupId>
-                              <artifactId>vaadin-maven-plugin</artifactId>
-                              <versionRange>${vaadin.plugin.version}</versionRange>
-                              <goals>
-                                 <goal>resources</goal>
-                                 <goal>update-widgetset</goal>
-                              </goals>
-                           </pluginExecutionFilter>
-                           <action>
-                              <ignore/>
                            </action>
                         </pluginExecution>
                      </pluginExecutions>
@@ -647,59 +614,6 @@
 
    <dependencyManagement>
       <dependencies>
-         <!-- Vaadin -->
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-bom</artifactId>
-            <version>${vaadin.version}</version>
-            <type>pom</type>
-            <scope>import</scope>
-         </dependency>
-         <dependency>
-            <groupId>com.vaadin</groupId>
-            <artifactId>vaadin-spring-boot</artifactId>
-            <version>${vaadin.spring.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.vaadin</groupId>
-                  <artifactId>vaadin-server</artifactId>
-               </exclusion>
-            </exclusions>            
-         </dependency>
-         <dependency>
-            <groupId>org.vaadin.spring.addons</groupId>
-            <artifactId>vaadin-spring-addon-eventbus</artifactId>
-            <version>${vaadin.spring.addon.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.vaadin</groupId>
-                  <artifactId>vaadin-spring</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.vaadin.spring.extensions</groupId>
-            <artifactId>vaadin-spring-ext-security</artifactId>
-            <version>${vaadin.spring.addon.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.vaadin</groupId>
-                  <artifactId>vaadin-spring</artifactId>
-               </exclusion>            
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>org.vaadin.alump.distributionbar</groupId>
-            <artifactId>dbar-addon</artifactId>
-            <version>${vaadin.addon.dbar-addon.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.vaadin</groupId>
-                  <artifactId>vaadin-server</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-
          <!-- Misc -->
          <dependency>
             <groupId>com.rabbitmq</groupId>
@@ -720,33 +634,6 @@
             <groupId>javax.el</groupId>
             <artifactId>javax.el-api</artifactId>
             <version>${javax.el-api.version}</version>
-         </dependency>
-         <dependency>
-            <groupId>com.github.gwtd3</groupId>
-            <artifactId>gwt-d3-api</artifactId>
-            <version>${vaadin.gwt-api.version}</version>
-            <exclusions>
-               <exclusion>
-                  <groupId>com.google.gwt</groupId>
-                  <artifactId>gwt-user</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>junit</groupId>
-                  <artifactId>junit</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
-            <groupId>com.google.gwt</groupId>
-            <artifactId>gwt-user</artifactId>
-            <version>${vaadin.gwt-user.version}</version>
-            <exclusions>
-               <!-- Exclude javax.validation because a very old source.jar is referenced by this gwt-user dependency -->
-               <exclusion>
-                  <groupId>javax.validation</groupId>
-                  <artifactId>validation-api</artifactId>
-               </exclusion>
-            </exclusions>
          </dependency>
          <dependency>
             <groupId>javax.xml.bind</groupId>
