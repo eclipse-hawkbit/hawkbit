@@ -51,7 +51,6 @@ function build() {
 build "hawkbit-ddi-server"
 build "hawkbit-dmf-server"
 build "hawkbit-mgmt-server"
-build "hawkbit-vv8-ui"
 build "hawkbit-simple-ui"
 
 build "hawkbit-update-server"

@@ -98,8 +98,7 @@
       <module>hawkbit-dmf-server</module>
       <module>hawkbit-mgmt-server</module>
 	  <module>hawkbit-simple-ui</module>
-	  
-      <module>hawkbit-vv8-ui</module>
+
       <module>hawkbit-update-server</module>
    </modules>
 </project>

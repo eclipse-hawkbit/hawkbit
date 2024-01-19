@@ -28,7 +28,7 @@ HawkBit Update Server username/password -> admin/admin as default login credenti
 
 It supports two configurations:
 * monolith - hawkbit-update-server
-* micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server, hawkbit-vv8-ui.
+* micro-service - hawkbit-mgmt-server, hawkbit-ddi-server, hawkbit-dmf-server.
 
 ### A: Run hawkBit Update Server (Monolith) as Docker Container
 
