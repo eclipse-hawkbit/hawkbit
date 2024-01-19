@@ -37,11 +37,5 @@
          <artifactId>hawkbit-boot-starter-mgmt-api</artifactId>
          <version>${project.version}</version>
       </dependency>
-      <dependency>
-         <groupId>org.eclipse.hawkbit</groupId>
-         <artifactId>hawkbit-boot-starter-mgmt-ui</artifactId>
-         <version>${project.version}</version>
-      </dependency>
    </dependencies>
-
 </project>
