@@ -42,7 +42,6 @@
       <module>hawkbit-repository</module>
       <module>hawkbit-artifact-repository-filesystem</module>
       <module>hawkbit-autoconfigure</module>
-      <module>hawkbit-ui</module>
       <module>hawkbit-rest</module>
       <module>hawkbit-dmf</module>
       <module>hawkbit-test-report</module>
