@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;

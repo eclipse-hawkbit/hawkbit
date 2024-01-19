@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.repository;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSet;

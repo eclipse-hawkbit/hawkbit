@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.builder;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.SoftwareModuleTypeManagement;
 import org.eclipse.hawkbit.repository.builder.AbstractSoftwareModuleUpdateCreate;

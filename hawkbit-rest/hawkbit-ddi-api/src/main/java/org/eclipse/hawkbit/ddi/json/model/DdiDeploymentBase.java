@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.ddi.json.model;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.hateoas.RepresentationModel;

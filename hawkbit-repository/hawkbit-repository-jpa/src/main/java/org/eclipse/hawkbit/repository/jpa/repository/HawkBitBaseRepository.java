@@ -13,9 +13,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;

@@ -393,7 +393,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andReturn();
 
         final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
-        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertEquals("jakarta.validation.ValidationException", exceptionInfo.getExceptionClass());
         assertTrue(exceptionInfo.getMessage().contains("Software Module Type already deleted"));
     }
 
@@ -1106,7 +1106,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         final long current = System.currentTimeMillis();
 
         final MvcResult mvcResult = mvc.perform(
-                        post("/rest/v1/softwaremodules/").accept(MediaType.APPLICATION_JSON_VALUE)
+                        post("/rest/v1/softwaremodules").accept(MediaType.APPLICATION_JSON_VALUE)
                                 .content(JsonBuilder.softwareModules(modules))
                                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print())

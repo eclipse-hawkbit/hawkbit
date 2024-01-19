@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.aspects;
 import java.util.List;
 import java.util.Map;
 
-import javax.transaction.TransactionManager;
+import jakarta.transaction.TransactionManager;
 
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
@@ -110,7 +110,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
         Throwable exception = rex;
         do {
             final Throwable cause = exception.getCause();
-            if (cause instanceof javax.validation.ConstraintViolationException) {
+            if (cause instanceof jakarta.validation.ConstraintViolationException) {
                 return (Exception) cause;
             }
             exception = cause;

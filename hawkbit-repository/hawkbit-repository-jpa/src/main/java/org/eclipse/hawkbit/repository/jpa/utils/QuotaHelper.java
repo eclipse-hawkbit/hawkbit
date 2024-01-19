@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 
 import java.util.function.ToLongFunction;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.slf4j.Logger;

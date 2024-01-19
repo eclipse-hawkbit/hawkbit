@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.BaseEntity;

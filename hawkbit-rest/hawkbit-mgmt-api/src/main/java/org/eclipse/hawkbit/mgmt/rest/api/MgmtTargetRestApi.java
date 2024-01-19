@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -484,7 +485,8 @@ public interface MgmtTargetRestApi {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE }, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
-            @PathVariable("targetId") String targetId, MgmtDistributionSetAssignments dsAssignments,
+            @PathVariable("targetId") String targetId,
+            @Valid MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) boolean offline);
 
     /**

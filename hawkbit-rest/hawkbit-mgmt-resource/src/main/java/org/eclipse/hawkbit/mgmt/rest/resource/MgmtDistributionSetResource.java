@@ -18,8 +18,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.ValidationException;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;

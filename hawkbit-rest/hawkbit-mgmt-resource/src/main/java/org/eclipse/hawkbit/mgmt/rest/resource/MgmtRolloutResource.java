@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.validation.ValidationException;
+import jakarta.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;

@@ -17,7 +17,7 @@
    <parent>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-parent</artifactId>
-      <version>2.7.18</version>
+      <version>3.2.1</version>
    </parent>
 
    <groupId>org.eclipse.hawkbit</groupId>
@@ -138,23 +138,13 @@
 
    <properties>
       <revision>0-SNAPSHOT</revision>
-
-      <dash.skip>true</dash.skip>
-      <dash.fail>true</dash.fail>
-      <dash.projectId>iot.hawkbit</dash.projectId>
-      <dash.summary>${project.build.directory}/dash/summary</dash.summary>
-      <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
-      <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
-      <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
-
-      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
-
       <java.version>17</java.version>
+      <snapshotDependencyAllowed>true</snapshotDependencyAllowed>
       <test.jvm.args/>
 
-      <spring.boot.version>2.7.18</spring.boot.version>
-      <spring.cloud.version>2021.0.8</spring.cloud.version>
-      <spring.plugin.core.version>2.0.0.RELEASE</spring.plugin.core.version>
+      <spring.boot.version>3.2.1</spring.boot.version>
+      <spring.cloud.version>2023.0.0</spring.cloud.version>
+      <spring.plugin.core.version>3.0.0</spring.plugin.core.version>
 
       <!-- Swagger Support -->
       <springdoc-openapi.version>1.7.0</springdoc-openapi.version>
@@ -163,18 +153,18 @@
       <!-- Newer versions needed than defined in Boot -->
       <!-- Fixed dependencies -->
       <!-- CVE-2022-25857 -->
-      <snakeyaml.version>1.33</snakeyaml.version>
-      <logback.version>1.2.13</logback.version>
+<!--      <snakeyaml.version>1.33</snakeyaml.version>-->
+<!--      <logback.version>1.2.13</logback.version>-->
       <!-- Spring boot version overrides - END -->
 
       <!-- CVE-2022-45868, fixed in 2.2.200 -->
-      <h2.version>2.2.222</h2.version>
+<!--      <h2.version>2.2.222</h2.version>-->
 
       <rabbitmq.http-client.version>5.1.0</rabbitmq.http-client.version>
 
       <!-- Eclipselink - START -->
-      <eclipselink.version>2.7.13</eclipselink.version>
-      <eclipselink.maven.plugin.version>2.7.9.1</eclipselink.maven.plugin.version>
+      <eclipselink.version>4.0.2</eclipselink.version>
+      <eclipselink.maven.plugin.version>3.0.0</eclipselink.maven.plugin.version>
       <!-- Eclipselink - END -->
 
       <!-- ************************ -->
@@ -185,10 +175,18 @@
       <maven.surefire.plugin.version>3.1.2</maven.surefire.plugin.version>
       <maven.failsafe.plugin.version>3.1.2</maven.failsafe.plugin.version>
       <maven.enforcer.plugin.version>3.3.0</maven.enforcer.plugin.version>
+
+      <!-- dash tool integration -->
+      <dash.skip>true</dash.skip>
+      <dash.fail>true</dash.fail>
+      <dash.projectId>iot.hawkbit</dash.projectId>
+      <dash.summary>${project.build.directory}/dash/summary</dash.summary>
+      <!-- To automatically create IP Team review requests for identified content call with -Ddash.iplab.token=<token> (do not share your access token) -->
+      <dash.review.summary>${project.build.directory}/dash/review-summary</dash.review.summary>
+      <excludeGroupIds>org.eclipse,org.junit</excludeGroupIds>
       <!-- ************************ -->
       <!-- Maven Surefire settings -->
       <!-- ************************ -->
-      <surefire.forkcount>1</surefire.forkcount>
 
       <!-- Misc libraries versions - START -->
       <cron-utils.version>9.2.1</cron-utils.version>
@@ -201,6 +199,7 @@
       <io-protostuff.version>1.8.0</io-protostuff.version>
 
       <!-- test -->
+      <surefire.forkcount>1</surefire.forkcount>
       <allure.version>2.24.0</allure.version>
       <awaitility.version>4.2.0</awaitility.version>
 
@@ -409,26 +408,27 @@
                      <validHeader>licenses/LICENSE_HEADER_TEMPLATE_ENAPTER.txt</validHeader>
                   </validHeaders>
                   <excludes>
+                     <exclude>.3rd-party/**</exclude>
                      <exclude>.azure-pipelines/*</exclude>
                      <exclude>.devcontainer/*</exclude>
+                     <exclude>.git*</exclude>
+                     <exclude>.github/**</exclude>
+                     <exclude>.sonar</exclude>
+                     <exclude>licenses/LICENSE*</exclude>
+                     <exclude>eclipse_codeformatter.xml</exclude>
                      <exclude>**/banner.txt</exclude>
                      <exclude>**/helm/**</exclude>
                      <exclude>**/README</exclude>
-                     <exclude>.3rd-party/**</exclude>
-                     <exclude>.github/**</exclude>
                      <exclude>**/.git*</exclude>
-                     <exclude>.git*</exclude>
                      <exclude>**/*.sql</exclude>
-                     <exclude>eclipse_codeformatter.xml</exclude>
-                     <exclude>.sonar</exclude>
                      <exclude>**/docker/**</exclude>
                      <exclude>**/.sonar/**</exclude>
+                     <exclude>**/frontend/**</exclude>
                      <exclude>site/content/**</exclude>
                      <exclude>site/layouts/**</exclude>
                      <exclude>site/static/**</exclude>
                      <exclude>site/*.toml</exclude>
                      <exclude>**/spring.factories</exclude>
-                     <exclude>**/LICENSE*</exclude>
                   </excludes>
                   <mapping>
                      <scss>JAVADOC_STYLE</scss>

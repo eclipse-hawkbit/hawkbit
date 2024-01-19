@@ -14,7 +14,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.UUID;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;

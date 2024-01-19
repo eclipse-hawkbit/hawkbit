@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.NamedEntity;

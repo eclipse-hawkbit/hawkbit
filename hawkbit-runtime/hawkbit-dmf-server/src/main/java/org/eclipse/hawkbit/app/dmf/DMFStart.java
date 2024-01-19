@@ -17,7 +17,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * A {@link SpringBootApplication} annotated class with a main method to start.
  * The minimal configuration for the stand alone hawkBit DMF server.
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
 @EnableHawkbitManagedSecurityConfiguration
 public class DMFStart {
 

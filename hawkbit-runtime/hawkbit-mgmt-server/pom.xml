@@ -17,6 +17,7 @@
         <artifactId>hawkbit-runtime-parent</artifactId>
         <version>${revision}</version>
     </parent>
+
     <artifactId>hawkbit-mgmt-server</artifactId>
     <name>hawkBit :: Runtime :: Management Server</name>
 

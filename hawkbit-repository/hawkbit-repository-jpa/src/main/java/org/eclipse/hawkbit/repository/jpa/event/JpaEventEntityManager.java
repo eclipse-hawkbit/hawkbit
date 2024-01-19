@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.event;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.event.remote.EventEntityManager;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;

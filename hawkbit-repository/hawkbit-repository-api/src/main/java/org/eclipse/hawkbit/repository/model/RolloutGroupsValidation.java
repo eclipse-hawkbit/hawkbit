@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * Represents information to validate the correct distribution of targets to

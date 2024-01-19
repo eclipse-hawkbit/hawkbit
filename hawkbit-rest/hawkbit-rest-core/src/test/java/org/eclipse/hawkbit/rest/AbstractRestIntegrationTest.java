@@ -17,7 +17,8 @@ import org.eclipse.hawkbit.rest.util.FilterHttpResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
@@ -31,7 +32,8 @@ import org.springframework.web.filter.CharacterEncodingFilter;
  */
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestConfiguration.class, RepositoryApplicationConfiguration.class,
-        TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        TestConfiguration.class})
+@Import(TestChannelBinderConfiguration.class)
 @AutoConfigureMockMvc
 public abstract class AbstractRestIntegrationTest extends AbstractIntegrationTest {
 

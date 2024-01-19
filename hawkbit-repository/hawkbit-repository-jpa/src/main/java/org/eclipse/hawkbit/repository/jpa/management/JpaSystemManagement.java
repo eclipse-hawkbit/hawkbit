@@ -13,7 +13,7 @@ import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;

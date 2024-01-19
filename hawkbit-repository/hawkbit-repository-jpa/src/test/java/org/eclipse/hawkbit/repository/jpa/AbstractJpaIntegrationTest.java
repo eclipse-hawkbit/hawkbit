@@ -13,8 +13,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
@@ -55,7 +55,8 @@ import org.eclipse.hawkbit.repository.test.util.RolloutTestApprovalStrategy;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.context.ContextConfiguration;
@@ -67,8 +68,8 @@ import com.google.common.collect.Lists;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration(classes = {
-        RepositoryApplicationConfiguration.class, TestConfiguration.class,
-        TestSupportBinderAutoConfiguration.class })
+        RepositoryApplicationConfiguration.class, TestConfiguration.class })
+@Import(TestChannelBinderConfiguration.class)
 @TestPropertySource(locations = "classpath:/jpa-test.properties")
 public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest {
 

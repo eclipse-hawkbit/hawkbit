@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Collection;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.ActionStatus;

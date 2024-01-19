@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
@@ -875,7 +875,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Target> targets = Arrays.asList(test1, test2, test3);
 
         final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
+                .perform(post("/rest/v1/targets").content(JsonBuilder.targets(targets, true))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
@@ -2261,7 +2261,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final List<Target> targets = Arrays.asList(test1, test2, test3);
 
         final MvcResult mvcPostResult = mvc
-                .perform(post("/rest/v1/targets/").content(JsonBuilder.targets(targets, true))
+                .perform(post("/rest/v1/targets").content(JsonBuilder.targets(targets, true))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

@@ -17,8 +17,8 @@ import java.util.Map.Entry;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.Valid;
-import javax.validation.ValidationException;
+import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
@@ -328,7 +328,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") final String targetId,
-            @Valid @RequestBody final MgmtDistributionSetAssignments dsAssignments,
+            @RequestBody final MgmtDistributionSetAssignments dsAssignments,
             @RequestParam(value = "offline", required = false) final boolean offline) {
         if (offline) {
             final List<Entry<String, Long>> offlineAssignments = dsAssignments.stream()

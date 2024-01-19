@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.util.Optional;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.model.Action;

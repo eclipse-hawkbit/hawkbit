@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository.jpa;
 
 import java.sql.SQLException;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLStateSQLExceptionTranslator;

@@ -13,7 +13,7 @@ import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * Update operations to be executed by the target.

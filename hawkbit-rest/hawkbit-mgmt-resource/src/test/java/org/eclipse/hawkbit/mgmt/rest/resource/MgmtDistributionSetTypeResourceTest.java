@@ -175,7 +175,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
     @Step
     private MvcResult runPostDistributionSetType(final List<DistributionSetType> types) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsettypes/").content(JsonBuilder.distributionSetTypes(types))
+                .perform(post("/rest/v1/distributionsettypes").content(JsonBuilder.distributionSetTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

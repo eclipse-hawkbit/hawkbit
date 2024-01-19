@@ -24,7 +24,7 @@ import org.springframework.web.servlet.view.RedirectView;
  * The minimal configuration for the stand alone hawkBit server.
  *
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.eclipse.hawkbit")
 @EnableHawkbitManagedSecurityConfiguration
 public class MgmtServerStart {
 

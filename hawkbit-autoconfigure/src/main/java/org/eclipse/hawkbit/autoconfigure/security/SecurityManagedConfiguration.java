@@ -14,13 +14,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.Filter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.FilterConfig;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.cache.DownloadIdCache;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
@@ -197,7 +197,7 @@ public class SecurityManagedConfiguration {
             final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
 
             http
-                    .requestMatchers(requestMatchers -> requestMatchers.antMatchers(DDI_ANT_MATCHERS))
+                    .securityMatcher(DDI_ANT_MATCHERS)
                     .csrf(AbstractHttpConfigurer::disable);
 
             if (securityProperties.isRequireSsl()) {
@@ -315,7 +315,7 @@ public class SecurityManagedConfiguration {
             final AuthenticationManager authenticationManager = setAuthenticationManager(http, ddiSecurityConfiguration);
 
             http
-                    .requestMatcher(new AntPathRequestMatcher(DDI_DL_ANT_MATCHER))
+                    .securityMatcher(DDI_DL_ANT_MATCHER)
                     .csrf(AbstractHttpConfigurer::disable);
 
             if (securityProperties.isRequireSsl()) {
@@ -436,7 +436,7 @@ public class SecurityManagedConfiguration {
             downloadIdAuthenticationFilter.setAuthenticationManager(authenticationManager);
 
             http
-                    .requestMatcher(new AntPathRequestMatcher("/**/downloadId/**"))
+                    .securityMatcher(MgmtRestConstants.DOWNLOAD_ID_V1_REQUEST_MAPPING_BASE + "/downloadId/*/*")
                     .authorizeHttpRequests(armrRepository -> armrRepository.anyRequest().authenticated())
                     .csrf(AbstractHttpConfigurer::disable)
                     .anonymous(AbstractHttpConfigurer::disable)
@@ -495,11 +495,11 @@ public class SecurityManagedConfiguration {
                 final SystemSecurityContext systemSecurityContext)
                 throws Exception {
             http
-                    .requestMatchers(requestMatchers -> requestMatchers.antMatchers("/rest/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**"))
+                    .securityMatcher("/rest/**", MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                     .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(amrmRegistry ->
                             amrmRegistry
-                                    .antMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
+                                    .requestMatchers(MgmtRestConstants.BASE_SYSTEM_MAPPING + "/admin/**")
                                         .hasAnyAuthority(SpPermission.SYSTEM_ADMIN)
                                     .anyRequest()
                                         .authenticated())

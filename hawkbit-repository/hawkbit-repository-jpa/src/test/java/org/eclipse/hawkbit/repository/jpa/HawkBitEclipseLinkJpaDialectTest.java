@@ -15,8 +15,8 @@ import static org.mockito.Mockito.when;
 
 import java.sql.SQLException;
 
-import javax.persistence.OptimisticLockException;
-import javax.persistence.PersistenceException;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.persistence.PersistenceException;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.ConcurrencyFailureException;

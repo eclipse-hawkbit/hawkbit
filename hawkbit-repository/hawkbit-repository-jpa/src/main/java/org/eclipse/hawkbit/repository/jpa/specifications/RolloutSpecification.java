@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Predicate;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;

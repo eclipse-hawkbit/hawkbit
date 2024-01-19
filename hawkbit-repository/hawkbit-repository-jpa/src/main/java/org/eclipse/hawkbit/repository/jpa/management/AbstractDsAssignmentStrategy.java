@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.JoinType;
 
 /**
  * {@link DistributionSet} to {@link Target} assignment strategy as utility for
