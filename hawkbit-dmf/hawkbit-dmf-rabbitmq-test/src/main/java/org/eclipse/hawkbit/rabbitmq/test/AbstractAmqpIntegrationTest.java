@@ -29,14 +29,16 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.junit.RabbitAvailable;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.test.binder.TestSupportBinderAutoConfiguration;
+import org.springframework.cloud.stream.binder.test.TestChannelBinderConfiguration;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ContextConfiguration;
 
 @RabbitAvailable
 @ContextConfiguration(classes = { RepositoryApplicationConfiguration.class, AmqpTestConfiguration.class,
-        TestConfiguration.class, TestSupportBinderAutoConfiguration.class })
+        TestConfiguration.class})
+@Import(TestChannelBinderConfiguration.class)
 // Dirty context is necessary to create a new vhost and recreate all necessary
 // beans after every test class.
 @DirtiesContext(classMode = ClassMode.AFTER_CLASS)

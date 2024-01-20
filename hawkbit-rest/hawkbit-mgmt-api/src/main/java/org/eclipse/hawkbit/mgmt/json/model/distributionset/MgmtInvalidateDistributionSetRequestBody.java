@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;

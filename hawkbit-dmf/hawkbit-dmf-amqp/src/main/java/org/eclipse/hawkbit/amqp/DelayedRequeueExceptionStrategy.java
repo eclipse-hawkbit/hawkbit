@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.amqp;
 
 import java.util.concurrent.TimeUnit;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;

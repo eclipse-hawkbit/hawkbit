@@ -350,14 +350,14 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final DistributionSet generated = testdataFactory.generateDistributionSet(
             "stanTest", "2", reloaded, Collections.singletonList(softwareModule));
         final MvcResult mvcResult = mvc
-            .perform(post("/rest/v1/distributionsets/")
+            .perform(post("/rest/v1/distributionsets")
                 .content(JsonBuilder.distributionSets(Arrays.asList(generated)))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest()).andReturn();
 
         final ExceptionInfo exceptionInfo = ResourceUtility.convertException(mvcResult.getResponse().getContentAsString());
-        assertEquals("javax.validation.ValidationException", exceptionInfo.getExceptionClass());
+        assertEquals("jakarta.validation.ValidationException", exceptionInfo.getExceptionClass());
         assertTrue(exceptionInfo.getMessage().contains("Distribution Set Type already deleted"));
     }
 
@@ -936,7 +936,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     private MvcResult executeMgmtTargetPost(final DistributionSet one, final DistributionSet two,
             final DistributionSet three) throws Exception {
         return mvc
-                .perform(post("/rest/v1/distributionsets/")
+                .perform(post("/rest/v1/distributionsets")
                         .content(JsonBuilder.distributionSets(Arrays.asList(one, two, three)))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())

@@ -22,8 +22,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.validation.ConstraintDeclarationException;
-import javax.validation.ValidationException;
+import jakarta.validation.ConstraintDeclarationException;
+import jakarta.validation.ValidationException;
 
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;

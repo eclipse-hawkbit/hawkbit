@@ -11,8 +11,8 @@ package org.eclipse.hawkbit.repository.model;
 
 import java.io.InputStream;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.ValidString;
 

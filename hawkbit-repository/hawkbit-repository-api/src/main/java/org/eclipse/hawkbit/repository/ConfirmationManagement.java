@@ -15,7 +15,7 @@ import org.eclipse.hawkbit.repository.model.AutoConfirmationStatus;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.springframework.security.access.prepost.PreAuthorize;
 
-import javax.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

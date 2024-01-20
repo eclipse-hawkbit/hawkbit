@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import java.util.Collections;
 import java.util.List;
 
-import javax.persistence.PersistenceException;
+import jakarta.persistence.PersistenceException;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.exception.AbstractServerRtException;

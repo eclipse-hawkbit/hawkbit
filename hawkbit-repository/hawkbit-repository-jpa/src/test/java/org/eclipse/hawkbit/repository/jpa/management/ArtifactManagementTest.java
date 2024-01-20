@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import javax.validation.ConstraintViolationException;
+import jakarta.validation.ConstraintViolationException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;

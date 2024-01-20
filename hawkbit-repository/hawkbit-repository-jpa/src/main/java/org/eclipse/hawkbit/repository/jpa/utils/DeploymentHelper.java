@@ -12,7 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.utils;
 import java.util.List;
 import java.util.function.Supplier;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;

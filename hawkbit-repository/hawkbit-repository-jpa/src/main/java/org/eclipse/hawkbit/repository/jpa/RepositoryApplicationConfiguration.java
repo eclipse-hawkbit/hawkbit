@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import javax.sql.DataSource;
-import javax.validation.Validation;
+import jakarta.validation.Validation;
 
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;

@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaTenantConfiguration;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;

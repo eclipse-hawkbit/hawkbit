@@ -9,8 +9,8 @@
  */
 package org.eclipse.hawkbit.repository;
 
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

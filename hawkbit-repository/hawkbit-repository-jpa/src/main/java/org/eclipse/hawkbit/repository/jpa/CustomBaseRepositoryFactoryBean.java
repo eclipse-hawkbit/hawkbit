@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.repository.BaseRepositoryTypeProvider;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -166,14 +166,14 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
         types.add(entityFactory.softwareModuleType().create().key("test-1").name("TestName-1").maxAssignments(-1)
                 .build());
 
-        mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
 
         types.clear();
         types.add(entityFactory.softwareModuleType().create().key("test0").name("TestName0").maxAssignments(0).build());
 
-        mvc.perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
+        mvc.perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                 .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isBadRequest());
     }
@@ -192,7 +192,7 @@ public class MgmtSoftwareModuleTypeResourceTest extends AbstractManagementApiInt
                         .colour("col3‚").maxAssignments(3).build());
 
         final MvcResult mvcResult = mvc
-                .perform(post("/rest/v1/softwaremoduletypes/").content(JsonBuilder.softwareModuleTypes(types))
+                .perform(post("/rest/v1/softwaremoduletypes").content(JsonBuilder.softwareModuleTypes(types))
                         .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))

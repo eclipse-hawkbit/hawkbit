@@ -122,7 +122,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .andExpect(status().isNotFound());
 
         // create tenant -- creates softwaremoduletypes and distributionsettypes
-        systemManagement.getTenantMetadata("tenantDoesNotExists");
+        systemManagement.createTenantMetadata("tenantDoesNotExists");
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), "aControllerId"))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk());

@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties.Clients;

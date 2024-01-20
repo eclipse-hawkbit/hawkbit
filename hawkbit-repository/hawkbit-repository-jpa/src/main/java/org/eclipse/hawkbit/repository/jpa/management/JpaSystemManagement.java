@@ -10,10 +10,11 @@
 package org.eclipse.hawkbit.repository.jpa.management;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
@@ -210,14 +211,13 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     }
 
     @Override
-    public TenantMetaData getTenantMetadata(final String tenant) {
+    public TenantMetaData createTenantMetadata(final String tenant) {
         final TenantMetaData result = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         // Create if it does not exist
         if (result == null) {
             try {
                 currentTenantCacheKeyGenerator.setTenantInCreation(tenant);
                 return createInitialTenantMetaData(tenant);
-
             } finally {
                 currentTenantCacheKeyGenerator.removeTenantInCreation();
             }
@@ -230,7 +230,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
      * {@link MultiTenantJpaTransactionManager} is using the current tenant to
      * set the necessary tenant discriminator to the query. This is not working
      * if we don't have a current tenant set. Due the
-     * {@link #getTenantMetadata(String)} is maybe called without having a
+     * {@link #createTenantMetadata(String)} is maybe called without having a
      * current tenant we need to re-open a new transaction so the
      * {@link MultiTenantJpaTransactionManager} is called again and set the
      * tenant for this transaction.
@@ -249,12 +249,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
 
     @Override
     public Page<String> findTenants(final Pageable pageable) {
-        final Page<JpaTenantMetaData> result = tenantMetaDataRepository.findAll(pageable);
-
-        return new PageImpl<>(
-                Collections.unmodifiableList(
-                        result.getContent().stream().map(TenantMetaData::getTenant).collect(Collectors.toList())),
-                pageable, result.getTotalElements());
+        return tenantMetaDataRepository.findTenants(pageable);
     }
 
     @Override
@@ -289,7 +284,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         if (tenantAware.getCurrentTenant() == null) {
             throw new IllegalStateException("Tenant not set");
         }
-        return getTenantMetadata(tenantAware.getCurrentTenant());
+        return Objects.requireNonNull(
+                tenantMetaDataRepository.findByTenantIgnoreCase(tenantAware.getCurrentTenant()),
+                "No such tenant!");
     }
 
     @Override
@@ -356,7 +353,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
     // intended in this case
     @SuppressWarnings("squid:S2229")
     public void forEachTenant(final Consumer<String> consumer) {
-
         Page<String> tenants;
         Pageable query = PageRequest.of(0, MAX_TENANTS_QUERY);
         do {

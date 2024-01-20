@@ -19,7 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetType;
 import org.eclipse.hawkbit.repository.model.TargetType;
 import org.springframework.data.jpa.domain.Specification;
 
-import javax.persistence.criteria.SetJoin;
+import jakarta.persistence.criteria.SetJoin;
 import java.util.Collection;
 
 /**

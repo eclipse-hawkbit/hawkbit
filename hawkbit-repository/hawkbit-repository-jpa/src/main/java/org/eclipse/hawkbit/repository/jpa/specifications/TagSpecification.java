@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.specifications;
 
-import javax.persistence.criteria.Join;
+import jakarta.persistence.criteria.Join;
 
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetTag;

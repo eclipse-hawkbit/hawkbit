@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.eclipse.hawkbit.rest.exception.ResponseExceptionHandler;
 import org.eclipse.hawkbit.rest.filter.ExcludePathAwareShallowETagFilter;

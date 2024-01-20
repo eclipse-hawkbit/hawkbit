@@ -9,7 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.Size;
 
 import org.eclipse.hawkbit.repository.model.NamedEntity;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;

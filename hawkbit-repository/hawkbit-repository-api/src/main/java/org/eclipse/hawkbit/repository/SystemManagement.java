@@ -11,7 +11,7 @@ package org.eclipse.hawkbit.repository;
 
 import java.util.function.Consumer;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.model.DistributionSetType;
@@ -108,7 +108,7 @@ public interface SystemManagement {
      * @return {@link TenantMetaData} of given tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    TenantMetaData getTenantMetadata(@NotNull String tenant);
+    TenantMetaData createTenantMetadata(@NotNull String tenant);
 
     /**
      * Update call for {@link TenantMetaData} of the current tenant.
