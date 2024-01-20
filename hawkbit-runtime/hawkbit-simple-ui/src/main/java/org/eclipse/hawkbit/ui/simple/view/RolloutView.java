@@ -422,11 +422,11 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 request.setSuccessCondition(
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
-                                triggerThreshold.getValue().intValue() + "%"));
+                                triggerThreshold.getValue().intValue() + ""));
                 request.setErrorCondition(
                         new MgmtRolloutCondition(
                                 MgmtRolloutCondition.Condition.THRESHOLD,
-                                errorThreshold.getValue().intValue() + "%"));
+                                errorThreshold.getValue().intValue() + ""));
                 request.setErrorAction(
                         new MgmtRolloutErrorAction(
                                 MgmtRolloutErrorAction.ErrorAction.PAUSE, ""));

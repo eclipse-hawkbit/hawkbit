@@ -108,7 +108,7 @@ public interface SystemManagement {
      * @return {@link TenantMetaData} of given tenant
      */
     @PreAuthorize(SpringEvalExpressions.IS_SYSTEM_CODE)
-    TenantMetaData getTenantMetadata(@NotNull String tenant);
+    TenantMetaData createTenantMetadata(@NotNull String tenant);
 
     /**
      * Update call for {@link TenantMetaData} of the current tenant.

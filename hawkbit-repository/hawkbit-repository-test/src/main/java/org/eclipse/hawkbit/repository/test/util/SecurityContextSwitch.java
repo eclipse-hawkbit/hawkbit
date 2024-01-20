@@ -57,7 +57,7 @@ public class SecurityContextSwitch {
         final SecurityContext oldContext = SecurityContextHolder.getContext();
         setSecurityContext(PRIVILEDGED_USER);
         try {
-            SystemManagementHolder.getInstance().getSystemManagement().getTenantMetadata(tenantId);
+            SystemManagementHolder.getInstance().getSystemManagement().createTenantMetadata(tenantId);
         } finally {
             SecurityContextHolder.setContext(oldContext);
         }
