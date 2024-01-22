@@ -53,4 +53,4 @@ ENV JAVA_OPTS="-Dspring.profiles.active=mysql -Xms768m -Xmx768m -XX:MaxMetaspace
 
 VOLUME "/artifactrepo"
 EXPOSE ${CONTAINER_PORT}
-ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.JarLauncher ${@}"]
+ENTRYPOINT ["sh", "-c", "java ${JAVA_OPTS} org.springframework.boot.loader.launch.JarLauncher ${@}"]
