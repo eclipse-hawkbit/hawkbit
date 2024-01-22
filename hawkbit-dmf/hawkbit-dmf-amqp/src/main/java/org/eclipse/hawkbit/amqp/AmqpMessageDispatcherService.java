@@ -568,6 +568,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         artifact.setFilename(localArtifact.getFilename());
         artifact.setHashes(new DmfArtifactHash(localArtifact.getSha1Hash(), localArtifact.getMd5Hash()));
         artifact.setSize(localArtifact.getSize());
+        artifact.setLastModified(localArtifact.getLastModifiedAt());
         return artifact;
     }
 
