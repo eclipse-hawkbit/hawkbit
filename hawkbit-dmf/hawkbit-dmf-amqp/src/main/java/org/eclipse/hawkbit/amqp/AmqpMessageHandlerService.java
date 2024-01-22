@@ -231,14 +231,18 @@ public class AmqpMessageHandlerService extends BaseAmqpService {
             final URI amqpUri = IpUtil.createAmqpUri(virtualHost, replyTo);
             final Target target;
             if (isOptionalMessageBodyEmpty(message)) {
+                LOG.debug("Received \"THING_CREATED\" AMQP message for thing \"{}\" without body.", thingId);
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri);
             } else {
                 checkContentTypeJson(message);
                 final DmfCreateThing thingCreateBody = convertMessage(message, DmfCreateThing.class);
                 final DmfAttributeUpdate thingAttributeUpdateBody = thingCreateBody.getAttributeUpdate();
 
+                LOG.debug("Received \"THING_CREATED\" AMQP message for thing \"{}\" with target name \"{}\" and type " +
+                                "\"{}\".", thingId, thingCreateBody.getName(), thingCreateBody.getType());
+
                 target = controllerManagement.findOrRegisterTargetIfItDoesNotExist(thingId, amqpUri,
-                        thingCreateBody.getName());
+                        thingCreateBody.getName(), thingCreateBody.getType());
 
                 if (thingAttributeUpdateBody != null) {
                     controllerManagement.updateControllerAttributes(thingId, thingAttributeUpdateBody.getAttributes(),

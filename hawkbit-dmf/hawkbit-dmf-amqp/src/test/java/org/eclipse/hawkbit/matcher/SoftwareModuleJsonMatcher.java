@@ -26,7 +26,7 @@ public final class SoftwareModuleJsonMatcher {
 
     /**
      * Creates a matcher that matches when the list of repository software
-     * modules arelogically equal to the specified JSON software modules.
+     * modules are logically equal to the specified JSON software modules.
      * <p>
      * If the specified repository software modules are <code>null</code> then
      * the created matcher will only match if the JSON software modules are
