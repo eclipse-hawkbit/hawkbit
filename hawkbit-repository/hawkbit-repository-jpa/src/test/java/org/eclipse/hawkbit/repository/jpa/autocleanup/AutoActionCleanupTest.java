@@ -58,6 +58,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(2);
 
+        waitNextMillis();
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(2);
@@ -84,6 +85,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(2);
 
+        waitNextMillis();
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(2);
@@ -148,6 +150,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
 
         assertThat(actionRepository.count()).isEqualTo(3);
 
+        waitNextMillis();
         autoActionCleanup.run();
 
         assertThat(actionRepository.count()).isEqualTo(2);
@@ -180,6 +183,7 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         setActionToCanceled(action1);
         setActionToFailed(action2);
 
+        waitNextMillis();
         autoActionCleanup.run();
 
         // actions have not expired yet
@@ -210,5 +214,4 @@ public class AutoActionCleanupTest extends AbstractJpaIntegrationTest {
         tenantConfigurationManagement.addOrUpdateConfiguration(ACTION_CLEANUP_ACTION_STATUS,
                 Arrays.stream(status).map(Status::toString).collect(Collectors.joining(",")));
     }
-
 }
