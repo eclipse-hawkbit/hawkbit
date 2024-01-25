@@ -254,7 +254,7 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
         final String etagWithFirstUpdate = mvc
                 .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
+                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON).with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -266,7 +266,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         assertThat(etagWithFirstUpdate).isNotNull();
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId).header("If-None-Match",
-                etagWithFirstUpdate)).andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
+                etagWithFirstUpdate).with(new RequestOnHawkbitDefaultPortPostProcessor()))
+                .andDo(MockMvcResultPrinter.print()).andExpect(status().isNotModified());
 
         // now lets finish the update
         sendDeploymentActionFeedback(target, updateAction, "closed", null).andDo(MockMvcResultPrinter.print())
@@ -276,7 +277,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
         // original state cannot be restored
         final String etagAfterInstallation = mvc
                 .perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON))
+                        .header("If-None-Match", etag).accept(MediaType.APPLICATION_JSON)
+                        .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))
@@ -294,7 +296,8 @@ class DdiRootControllerTest extends AbstractDDiApiIntegrationTest {
                 .getContent().get(0);
 
         mvc.perform(get(CONTROLLER_BASE, tenantAware.getCurrentTenant(), controllerId)
-                .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON))
+                .header("If-None-Match", etagAfterInstallation).accept(MediaType.APPLICATION_JSON)
+                .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.config.polling.sleep", equalTo("00:01:00")))

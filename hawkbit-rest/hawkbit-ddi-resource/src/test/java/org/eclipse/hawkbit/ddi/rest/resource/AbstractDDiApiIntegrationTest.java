@@ -61,7 +61,8 @@ import com.fasterxml.jackson.dataformat.cbor.CBORParser;
 @TestPropertySource(locations = "classpath:/ddi-test.properties")
 public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrationTest {
 
-    protected static final String HTTP_LOCALHOST = "http://localhost/";
+    public static final int HTTP_PORT = 8080;
+    protected static final String HTTP_LOCALHOST = String.format("http://localhost:%s/",HTTP_PORT);
     protected static final String CONTROLLER_BASE = "/{tenant}/controller/v1/{controllerId}";
 
     protected static final String SOFTWARE_MODULE_ARTIFACTS = CONTROLLER_BASE
@@ -156,7 +157,8 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
 
     protected ResultActions performGet(final String url, final MediaType mediaType, final ResultMatcher statusMatcher,
             final String... values) throws Exception {
-        return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType))
+        return mvc.perform(MockMvcRequestBuilders.get(url, values).accept(mediaType)
+                .with(new RequestOnHawkbitDefaultPortPostProcessor()))
                 .andDo(MockMvcResultPrinter.print()).andExpect(statusMatcher)
                 .andExpect(content().contentTypeCompatibleWith(mediaType));
     }
@@ -242,12 +244,12 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
     }
 
     protected String installedBaseLink(final String controllerId, final String actionId) {
-        return "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/installedBase/" + actionId;
     }
 
     protected String deploymentBaseLink(final String controllerId, final String actionId) {
-        return "http://localhost/" + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
+        return HTTP_LOCALHOST + tenantAware.getCurrentTenant() + "/controller/v1/" + controllerId
                 + "/deploymentBase/" + actionId;
     }
 
