@@ -273,6 +273,7 @@ public class AmqpConfiguration {
      * @return handler service bean
      */
     @Bean
+    @ConditionalOnMissingBean
     public AmqpMessageHandlerService amqpMessageHandlerService(final RabbitTemplate rabbitTemplate,
             final AmqpMessageDispatcherService amqpMessageDispatcherService,
             final ControllerManagement controllerManagement, final EntityFactory entityFactory,
