@@ -9,12 +9,11 @@
  */
 package org.eclipse.hawkbit.rest;
 
-import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springdoc.core.GroupedOpenApi;
+import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -51,7 +50,7 @@ public class OpenApiConfiguration {
         .builder()
         .group("Management API")
         .pathsToMatch("/rest/v1/**")
-        .addOpenApiCustomiser(openApi -> {
+        .addOpenApiCustomizer(openApi -> {
             openApi
                 .addSecurityItem(new SecurityRequirement()
                         .addList(BASIC_AUTH_SEC_SCHEME_NAME)
@@ -85,7 +84,7 @@ public class OpenApiConfiguration {
         .builder()
         .group("Direct Device Integration API")
         .pathsToMatch("/{tenant}/controller/**")
-        .addOpenApiCustomiser(openApi -> {
+        .addOpenApiCustomizer(openApi -> {
             openApi
                 .addSecurityItem(new SecurityRequirement().addList(DDI_TOKEN_SEC_SCHEME_NAME))
                 .components(
