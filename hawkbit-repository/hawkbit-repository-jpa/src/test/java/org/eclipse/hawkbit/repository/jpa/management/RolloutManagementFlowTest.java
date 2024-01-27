@@ -78,7 +78,11 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                     .filter(action -> !(targetPrefix + (amountGroups * 3 - 1)).equals(action.getTarget().getControllerId()))
                     .forEach(this::finishAction);
             rolloutHandler.handleAll();
-            assertThat(refresh(groups.get(i)).getStatus()).isEqualTo(i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED);
+            final RolloutGroupStatus expectedStatus =
+                    i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED;
+            assertThat(refresh(groups.get(i)).getStatus())
+                    .as("Check that group %s is in status %s", i, expectedStatus)
+                    .isEqualTo(expectedStatus);
             if (i + 1 != amountGroups) {
                 assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
             }
@@ -141,7 +145,11 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                     .filter(action -> !(targetPrefix + (amountGroups * 3 - 1)).equals(action.getTarget().getControllerId()))
                     .forEach(this::finishAction);
             rolloutHandler.handleAll();
-            assertThat(refresh(groups.get(i)).getStatus()).isEqualTo(i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED);
+            final RolloutGroupStatus expectedStatus =
+                    i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED;
+            assertThat(refresh(groups.get(i)).getStatus())
+                    .as("Check that group %s is in status %s", i, expectedStatus)
+                    .isEqualTo(expectedStatus);
             assertThat(refresh(i + 1 == amountGroups ? dynamic1 : groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING); // on last round check dynamic
         }
 
