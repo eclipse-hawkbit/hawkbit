@@ -25,6 +25,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -67,26 +68,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
             assertGroup(groups.get(i), false, i == 0 ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.SCHEDULED, 3);
         }
 
-        // execute groups (without on of the last)
-        assertThat(refresh(groups.get(0)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        for (int i = 0; i < amountGroups; i++) {
-            if (i + 1 != amountGroups) {
-                assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
-            }
-            assertAndGetRunning(rollout, 3)
-                    .stream()
-                    .filter(action -> !(targetPrefix + (amountGroups * 3 - 1)).equals(action.getTarget().getControllerId()))
-                    .forEach(this::finishAction);
-            rolloutHandler.handleAll();
-            final RolloutGroupStatus expectedStatus =
-                    i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED;
-            assertThat(refresh(groups.get(i)).getStatus())
-                    .as("Check that group %s is in status %s", i, expectedStatus)
-                    .isEqualTo(expectedStatus);
-            if (i + 1 != amountGroups) {
-                assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-            }
-        }
+        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
 
         rolloutManagement.pauseRollout(rollout.getId());
         rolloutHandler.handleAll();
@@ -136,22 +118,7 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         }
         assertGroup(dynamic1, true, RolloutGroupStatus.SCHEDULED, 0);
 
-        // execute statics (without on of the last) which start dynamic
-        assertThat(refresh(groups.get(0)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
-        for (int i = 0; i < amountGroups; i++) {
-            assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
-            assertAndGetRunning(rollout, 3)
-                    .stream()
-                    .filter(action -> !(targetPrefix + (amountGroups * 3 - 1)).equals(action.getTarget().getControllerId()))
-                    .forEach(this::finishAction);
-            rolloutHandler.handleAll();
-            final RolloutGroupStatus expectedStatus =
-                    i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED;
-            assertThat(refresh(groups.get(i)).getStatus())
-                    .as("Check that group %s is in status %s", i, expectedStatus)
-                    .isEqualTo(expectedStatus);
-            assertThat(refresh(i + 1 == amountGroups ? dynamic1 : groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING); // on last round check dynamic
-        }
+        executeStaticWithoutOneTargetFromTheLastGroup(groups, rollout, amountGroups);
 
         // partially fill the first dynamic (it is running and now create actions for 2 targets)
         rolloutHandler.handleAll();
@@ -185,7 +152,6 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
                 .forEach(this::finishAction);
         assertAndGetRunning(rollout, 1); // remains on in the first dynamic
 
-
         rolloutHandler.handleAll();
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 3);
         assertGroup(groups.get(amountGroups - 1), false, RolloutGroupStatus.FINISHED, 3);
@@ -209,5 +175,41 @@ class RolloutManagementFlowTest extends AbstractJpaIntegrationTest {
         assertRollout(rollout, true, RolloutStatus.RUNNING, amountGroups + 2, amountGroups * 3 + 5);
         assertAndGetRunning(rollout, 3);
         assertGroup(dynamic2, true, RolloutGroupStatus.RUNNING, 2); // assign the target created when paused
+    }
+
+    private void executeStaticWithoutOneTargetFromTheLastGroup(
+            final List<RolloutGroup> groups,
+            final Rollout rollout, final int amountGroups) {
+        // execute groups (without on of the last)
+        assertThat(refresh(groups.get(0)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+        for (int i = 0; i < amountGroups; i++) {
+            if (i + 1 < groups.size()) {
+                assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.SCHEDULED);
+            }
+            // skip on from the last group only
+            final AtomicBoolean skipOne = new AtomicBoolean(i + 1 == amountGroups);
+            assertAndGetRunning(rollout, 3)
+                    .stream()
+                    .filter(action -> {
+                        if (skipOne.get()) {
+                            skipOne.set(false);
+                            // in the last group, skip first
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    })
+                    .forEach(this::finishAction);
+            assertAndGetRunning(rollout, i + 1 == amountGroups ? 1 : 0);
+            rolloutHandler.handleAll();
+            final RolloutGroupStatus expectedStatus =
+                    i + 1 == amountGroups ? RolloutGroupStatus.RUNNING : RolloutGroupStatus.FINISHED;
+            assertThat(refresh(groups.get(i)).getStatus())
+                    .as("Check that group %s is in status %s", i, expectedStatus)
+                    .isEqualTo(expectedStatus);
+            if (i + 1 != amountGroups) {
+                assertThat(refresh(groups.get(i + 1)).getStatus()).isEqualTo(RolloutGroupStatus.RUNNING);
+            }
+        }
     }
 }
