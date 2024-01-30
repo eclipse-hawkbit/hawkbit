@@ -56,7 +56,7 @@ public class RepositoryProperties {
     private boolean eagerPollPersistence;
 
     /**
-     * If an {@link Action} has a weight of null this value is used as weight.
+     * If an {@link org.eclipse.hawkbit.repository.model.Action} has a weight of null this value is used as weight.
      */
     private int actionWeightIfAbsent = 1000;
 
@@ -65,6 +65,8 @@ public class RepositoryProperties {
      * (in seconds).
      */
     private long dsInvalidationLockTimeout = 5;
+
+    private boolean implicitTenantCreateAllowed;
 
     public boolean isEagerPollPersistence() {
         return eagerPollPersistence;
@@ -122,4 +124,11 @@ public class RepositoryProperties {
         this.dsInvalidationLockTimeout = dsInvalidationLockTimeout;
     }
 
+    public boolean isImplicitTenantCreateAllowed() {
+        return implicitTenantCreateAllowed;
+    }
+
+    public void setImplicitTenantCreateAllowed(final boolean implicitTenantCreateAllowed) {
+        this.implicitTenantCreateAllowed = implicitTenantCreateAllowed;
+    }
 }

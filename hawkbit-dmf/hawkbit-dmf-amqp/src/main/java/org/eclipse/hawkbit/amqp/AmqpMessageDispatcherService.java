@@ -62,6 +62,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.Target;
+import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.slf4j.Logger;
@@ -557,9 +558,10 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
     private DmfArtifact convertArtifact(final Target target, final Artifact localArtifact) {
         final DmfArtifact artifact = new DmfArtifact();
 
+        final TenantMetaData metaData = systemManagement.getTenantMetadata();
         artifact.setUrls(artifactUrlHandler
-                .getUrls(new URLPlaceholder(systemManagement.getTenantMetadata().getTenant(),
-                        systemManagement.getTenantMetadata().getId(), target.getControllerId(), target.getId(),
+                .getUrls(new URLPlaceholder(metaData.getTenant(),
+                        metaData.getId(), target.getControllerId(), target.getId(),
                         new SoftwareData(localArtifact.getSoftwareModule().getId(), localArtifact.getFilename(),
                                 localArtifact.getId(), localArtifact.getSha1Hash())),
                         ApiType.DMF)
