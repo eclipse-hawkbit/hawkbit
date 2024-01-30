@@ -164,7 +164,7 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class })
+    @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, IllegalArgumentException.class })
     public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
