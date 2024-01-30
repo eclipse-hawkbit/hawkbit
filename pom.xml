@@ -723,14 +723,6 @@
             <version>${spring.plugin.core.version}</version>
          </dependency>
 
-         <!-- CVE-2023-1370 Remove after Spring 3.0.0 migration -->
-         <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-oauth2-jose</artifactId>
-            <version>5.8.8</version>
-            <scope>compile</scope>
-         </dependency>
-
          <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
