@@ -182,6 +182,24 @@ public class PropertyBasedArtifactUrlHandlerTest {
     }
 
     @Test
+    @Description("Verfies that if default protocol port in request is used then url is returned without port")
+    public void urlGenerationWithPortFromRequestForHttps() throws URISyntaxException {
+        String protocol = "https";
+        final UrlProtocol proto = new UrlProtocol();
+        proto.setRef(
+                "{protocolRequest}://{hostnameRequest}:{portRequest}/{tenant}/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/{artifactFileName}");
+        proto.setProtocol(protocol);
+        properties.getProtocols().put("download-http", proto);
+
+        URI uri = new URI(protocol+"://anotherHost.com");
+        final List<ArtifactUrl> urls = urlHandlerUnderTest.getUrls(placeholder, ApiType.DDI, uri);
+        assertThat(urls).containsExactly(new ArtifactUrl(protocol.toUpperCase(), "download-http",
+                uri +"/" + TENANT + "/controller/v1/" + CONTROLLER_ID + "/softwaremodules/"
+                        + SOFTWAREMODULEID + "/artifacts/" + FILENAME_ENCODE));
+
+    }
+
+    @Test
     @Description("Verfies that the domain of the statically defined hostname is replaced with the domain of the request.")
     public void urlGenerationWithDomainFromRequest() throws URISyntaxException {
         final UrlProtocol proto = new UrlProtocol();
