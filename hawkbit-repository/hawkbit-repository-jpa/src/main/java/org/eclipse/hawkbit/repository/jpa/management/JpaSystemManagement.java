@@ -359,9 +359,6 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         try {
             currentTenantCacheKeyGenerator.setTenantInCreation(tenant);
             return createInitialTenantMetaData(tenant);
-        } catch (final Throwable t) {
-            LOGGER.error("Failed to create tenant: {}", tenant, t);
-            return null;
         } finally {
             currentTenantCacheKeyGenerator.removeTenantInCreation();
         }
