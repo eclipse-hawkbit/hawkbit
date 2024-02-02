@@ -15,16 +15,15 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.lang.reflect.Method;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ConcurrentHashMultiset;
-import com.google.common.collect.Multiset;
-import com.google.common.collect.Sets;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
@@ -137,7 +136,7 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
     private static class EventCaptor implements ApplicationListener<RemoteApplicationEvent> {
 
-        private final Multiset<Class<?>> capturedEvents = ConcurrentHashMultiset.create();
+        private final ConcurrentHashMap<Class<?>, Integer> capturedEvents = new ConcurrentHashMap<>();
 
         @Override
         public void onApplicationEvent(final RemoteApplicationEvent event) {
@@ -162,18 +161,18 @@ public class EventVerifier extends AbstractTestExecutionListener {
                 assertThat(((TargetAssignDistributionSetEvent) event).getDistributionSetId()).isNotNull();
             }
 
-            capturedEvents.add(event.getClass());
+            capturedEvents.compute(event.getClass(), (k, v) -> v == null ? 1 : v + 1);
         }
 
         public int getCountFor(final Class<?> expectedEvent) {
-            return capturedEvents.count(expectedEvent);
+            return Optional.ofNullable(capturedEvents.get(expectedEvent)).orElse(0);
         }
 
         public Set<Class<?>> diff(final Expect[] allEvents) {
-            return Sets.difference(capturedEvents.elementSet(),
-                    Stream.of(allEvents).map(Expect::type).collect(Collectors.toSet()));
+            final Set<Class<?>> keys = new HashSet<>(capturedEvents.keySet());
+            keys.removeAll(Stream.of(allEvents).map(Expect::type).collect(Collectors.toSet()));
+            return keys;
         }
-
     }
 
     private static final class ResetCounterMarkerEvent extends RemoteApplicationEvent {

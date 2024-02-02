@@ -14,14 +14,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.base.Splitter;
 
 /**
  * Implementation of the {@link ArtifactRepository} to store artifacts on the
@@ -94,9 +91,8 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
 
     private Path getSha1DirectoryPath(final String tenant, final String sha1) {
         final int length = sha1.length();
-        final List<String> folders = Splitter.fixedLength(2).splitToList(sha1.substring(length - 4, length));
-        final String folder1 = folders.get(0);
-        final String folder2 = folders.get(1);
+        final String folder1 = sha1.substring(length - 4, length - 2);
+        final String folder2 = sha1.substring(length - 2, length);
         return Paths.get(artifactResourceProperties.getPath(), sanitizeTenant(tenant), folder1, folder2);
     }
 

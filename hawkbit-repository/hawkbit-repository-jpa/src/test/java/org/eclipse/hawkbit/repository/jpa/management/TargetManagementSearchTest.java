@@ -38,7 +38,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
-import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 
 import io.qameta.allure.Description;

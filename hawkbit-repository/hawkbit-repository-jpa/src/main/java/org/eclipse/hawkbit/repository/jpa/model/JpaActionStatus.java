@@ -14,7 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.google.common.base.Splitter;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
@@ -159,7 +159,20 @@ public class JpaActionStatus extends AbstractJpaTenantAwareBaseEntity implements
             if (messages == null) {
                 messages = new ArrayList<>((message.length() / MESSAGE_ENTRY_LENGTH) + 1);
             }
-            Splitter.fixedLength(MESSAGE_ENTRY_LENGTH).split(message).forEach(messages::add);
+            if (message.length() > MESSAGE_ENTRY_LENGTH) {
+                // split
+                for (int off = 0; off < message.length();) {
+                    final int end = off + MESSAGE_ENTRY_LENGTH;
+                    if (end < message.length()) {
+                        messages.add(message.substring(off, end));
+                    } else {
+                        messages.add(message.substring(off));
+                    }
+                    off = end;
+                }
+            } else {
+                messages.add(message);
+            }
         }
     }
 

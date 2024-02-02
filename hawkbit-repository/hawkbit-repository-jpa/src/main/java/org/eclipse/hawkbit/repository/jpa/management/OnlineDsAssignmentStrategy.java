@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.event.remote.MultiActionAssignEvent;
@@ -109,7 +109,7 @@ public class OnlineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
             mapper = ids -> targetRepository
                     .findAll(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId));
         }
-        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
+        return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 

@@ -21,7 +21,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -29,6 +28,7 @@ import jakarta.persistence.criteria.MapJoin;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotEmpty;
 
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.FilterParams;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
@@ -40,7 +40,6 @@ import org.eclipse.hawkbit.repository.TimestampCalculator;
 import org.eclipse.hawkbit.repository.builder.TargetCreate;
 import org.eclipse.hawkbit.repository.builder.TargetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.TargetAttributesRequestedEvent;
-import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -49,7 +48,6 @@ import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetCreate;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaTargetUpdate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
-import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata_;
@@ -553,7 +551,7 @@ public class JpaTargetManagement implements TargetManagement {
 
     private List<JpaTarget> findTargetsByInSpecification(final Collection<String> controllerIds,
             final Specification<JpaTarget> specification) {
-        return Lists.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
+        return ListUtils.partition(new ArrayList<>(controllerIds), Constants.MAX_ENTRIES_IN_STATEMENT).stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids).and(specification)))
                 .flatMap(List::stream).toList();
     }
