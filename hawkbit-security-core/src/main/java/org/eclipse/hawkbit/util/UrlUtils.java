@@ -22,5 +22,4 @@ public class UrlUtils {
   public static String decodeUriValue(String value) {
     return UriUtils.decode(value, StandardCharsets.UTF_8);
   }
-
 }
