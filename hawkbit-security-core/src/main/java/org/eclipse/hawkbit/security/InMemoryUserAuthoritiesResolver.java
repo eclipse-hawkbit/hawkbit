@@ -43,5 +43,4 @@ public class InMemoryUserAuthoritiesResolver implements UserAuthoritiesResolver 
         }
         return authorities;
     }
-
 }

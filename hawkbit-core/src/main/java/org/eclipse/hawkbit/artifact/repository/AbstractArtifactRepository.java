@@ -21,6 +21,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
@@ -32,11 +33,11 @@ import org.springframework.util.StringUtils;
  * Abstract utility class for ArtifactRepository implementations with common
  * functionality, e.g. computation of hashes.
  */
+@Slf4j
 public abstract class AbstractArtifactRepository implements ArtifactRepository {
+
     private static final String TEMP_FILE_PREFIX = "tmp";
     private static final String TEMP_FILE_SUFFIX = "artifactrepo";
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractArtifactRepository.class);
 
     @Override
     // suppress warning, of not strong enough hashing algorithm, SHA-1 and MD5
@@ -104,7 +105,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
         try {
             Files.deleteIfExists(file.toPath());
         } catch (IOException e) {
-            LOG.error("Could not delete temp file {} ({})", file, e.getMessage());
+            log.error("Could not delete temp file {} ({})", file, e.getMessage());
         }
     }
 

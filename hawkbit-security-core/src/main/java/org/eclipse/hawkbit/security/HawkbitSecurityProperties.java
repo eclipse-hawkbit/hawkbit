@@ -13,12 +13,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * Security related hawkbit configuration.
  *
  */
+@Data
 @ConfigurationProperties("hawkbit.server.security")
 public class HawkbitSecurityProperties {
 
@@ -53,62 +55,10 @@ public class HawkbitSecurityProperties {
      */
     private String basicRealm = "hawkBit";
 
-    public boolean isRequireSsl() {
-        return requireSsl;
-    }
-
-    public void setRequireSsl(final boolean requireSsl) {
-        this.requireSsl = requireSsl;
-    }
-
-    public List<String> getAllowedHostNames() {
-        return allowedHostNames;
-    }
-
-    public void setAllowedHostNames(final List<String> allowedHostNames) {
-        this.allowedHostNames = allowedHostNames;
-    }
-
-    public List<String> getHttpFirewallIgnoredPaths() {
-        return httpFirewallIgnoredPaths;
-    }
-
-    public void setHttpFirewallIgnoredPaths(final List<String> httpFirewallIgnoredPaths) {
-        this.httpFirewallIgnoredPaths = httpFirewallIgnoredPaths;
-    }
-
-    public String getBasicRealm() {
-        return basicRealm;
-    }
-
-    public void setBasicRealm(final String basicRealm) {
-        this.basicRealm = basicRealm;
-    }
-
-    public String getContentSecurityPolicy() {
-        return contentSecurityPolicy;
-    }
-
-    public void setContentSecurityPolicy(final String contentSecurityPolicy) {
-        this.contentSecurityPolicy = contentSecurityPolicy;
-    }
-
-    public Dos getDos() {
-        return dos;
-    }
-
-    public Clients getClients() {
-        return clients;
-    }
-
-    public Cors getCors() {
-        return cors;
-    }
-
     /**
      * Security configuration related to CORS.
-     *
      */
+    @Data
     public static class Cors {
 
         /**
@@ -135,52 +85,12 @@ public class HawkbitSecurityProperties {
          * Exposed headers for CORS.
          */
         private List<String> exposedHeaders = Collections.emptyList();
-
-        public boolean isEnabled() {
-            return enabled;
-        }
-
-        public void setEnabled(final boolean enabled) {
-            this.enabled = enabled;
-        }
-
-        public List<String> getAllowedOrigins() {
-            return allowedOrigins;
-        }
-
-        public void setAllowedOrigins(final List<String> allowedOrigins) {
-            this.allowedOrigins = allowedOrigins;
-        }
-
-        public List<String> getAllowedHeaders() {
-            return allowedHeaders;
-        }
-
-        public void setAllowedHeaders(final List<String> allowedHeaders) {
-            this.allowedHeaders = allowedHeaders;
-        }
-
-        public List<String> getAllowedMethods() {
-            return allowedMethods;
-        }
-
-        public void setAllowedMethods(final List<String> allowedMethods) {
-            this.allowedMethods = allowedMethods;
-        }
-
-        public List<String> getExposedHeaders() {
-            return exposedHeaders;
-        }
-
-        public void setExposedHeaders(final List<String> exposedHeaders) {
-            this.exposedHeaders = exposedHeaders;
-        }
     }
 
     /**
      * Security configuration related to clients.
-     *
      */
+    @Data
     public static class Clients {
 
         public static final String X_FORWARDED_FOR = "X-Forwarded-For";
@@ -199,36 +109,12 @@ public class HawkbitSecurityProperties {
          * Set to <code>true</code> if DDI clients remote IP should be stored.
          */
         private boolean trackRemoteIp = true;
-
-        public String getBlacklist() {
-            return blacklist;
-        }
-
-        public void setBlacklist(final String blacklist) {
-            this.blacklist = blacklist;
-        }
-
-        public String getRemoteIpHeader() {
-            return remoteIpHeader;
-        }
-
-        public void setRemoteIpHeader(final String remoteIpHeader) {
-            this.remoteIpHeader = remoteIpHeader;
-        }
-
-        public boolean isTrackRemoteIp() {
-            return trackRemoteIp;
-        }
-
-        public void setTrackRemoteIp(final boolean trackRemoteIp) {
-            this.trackRemoteIp = trackRemoteIp;
-        }
     }
 
     /**
      * Denial of service protection related properties.
-     *
      */
+    @Data
     public static class Dos {
 
         /**
@@ -322,159 +208,14 @@ public class HawkbitSecurityProperties {
         private final Filter filter = new Filter();
         private final Filter uiFilter = new Filter();
 
-        public Filter getUiFilter() {
-            return uiFilter;
-        }
-
-        public Filter getFilter() {
-            return filter;
-        }
-
-        public int getMaxStatusEntriesPerAction() {
-            return maxStatusEntriesPerAction;
-        }
-
-        public void setMaxStatusEntriesPerAction(final int maxStatusEntriesPerAction) {
-            this.maxStatusEntriesPerAction = maxStatusEntriesPerAction;
-        }
-
-        public int getMaxMessagesPerActionStatus() {
-            return maxMessagesPerActionStatus;
-        }
-
-        public void setMaxMessagesPerActionStatus(final int maxMessagesPerActionStatus) {
-            this.maxMessagesPerActionStatus = maxMessagesPerActionStatus;
-        }
-
-        public int getMaxAttributeEntriesPerTarget() {
-            return maxAttributeEntriesPerTarget;
-        }
-
-        public void setMaxAttributeEntriesPerTarget(final int maxAttributeEntriesPerTarget) {
-            this.maxAttributeEntriesPerTarget = maxAttributeEntriesPerTarget;
-        }
-
-        public int getMaxRolloutGroupsPerRollout() {
-            return maxRolloutGroupsPerRollout;
-        }
-
-        public void setMaxRolloutGroupsPerRollout(final int maxRolloutGroupsPerRollout) {
-            this.maxRolloutGroupsPerRollout = maxRolloutGroupsPerRollout;
-        }
-
-        public int getMaxMetaDataEntriesPerSoftwareModule() {
-            return maxMetaDataEntriesPerSoftwareModule;
-        }
-
-        public void setMaxMetaDataEntriesPerSoftwareModule(final int maxMetaDataEntriesPerSoftwareModule) {
-            this.maxMetaDataEntriesPerSoftwareModule = maxMetaDataEntriesPerSoftwareModule;
-        }
-
-        public int getMaxMetaDataEntriesPerDistributionSet() {
-            return maxMetaDataEntriesPerDistributionSet;
-        }
-
-        public void setMaxMetaDataEntriesPerDistributionSet(final int maxMetaDataEntriesPerDistributionSet) {
-            this.maxMetaDataEntriesPerDistributionSet = maxMetaDataEntriesPerDistributionSet;
-        }
-
-        public int getMaxMetaDataEntriesPerTarget() {
-            return maxMetaDataEntriesPerTarget;
-        }
-
-        public void setMaxMetaDataEntriesPerTarget(final int maxMetaDataEntriesPerTarget) {
-            this.maxMetaDataEntriesPerTarget = maxMetaDataEntriesPerTarget;
-        }
-
-        public int getMaxSoftwareModulesPerDistributionSet() {
-            return maxSoftwareModulesPerDistributionSet;
-        }
-
-        public void setMaxSoftwareModulesPerDistributionSet(final int maxSoftwareModulesPerDistributionSet) {
-            this.maxSoftwareModulesPerDistributionSet = maxSoftwareModulesPerDistributionSet;
-        }
-
-        public int getMaxSoftwareModuleTypesPerDistributionSetType() {
-            return maxSoftwareModuleTypesPerDistributionSetType;
-        }
-
-        public void setMaxSoftwareModuleTypesPerDistributionSetType(
-                final int maxSoftwareModuleTypesPerDistributionSetType) {
-            this.maxSoftwareModuleTypesPerDistributionSetType = maxSoftwareModuleTypesPerDistributionSetType;
-        }
-
-        public int getMaxArtifactsPerSoftwareModule() {
-            return maxArtifactsPerSoftwareModule;
-        }
-
-        public void setMaxArtifactsPerSoftwareModule(final int maxArtifactsPerSoftwareModule) {
-            this.maxArtifactsPerSoftwareModule = maxArtifactsPerSoftwareModule;
-        }
-
-        public int getMaxTargetsPerRolloutGroup() {
-            return maxTargetsPerRolloutGroup;
-        }
-
-        public void setMaxTargetsPerRolloutGroup(final int maxTargetsPerRolloutGroup) {
-            this.maxTargetsPerRolloutGroup = maxTargetsPerRolloutGroup;
-        }
-
-        public int getMaxActionsPerTarget() {
-            return maxActionsPerTarget;
-        }
-
-        public void setMaxActionsPerTarget(final int maxActionsPerTarget) {
-            this.maxActionsPerTarget = maxActionsPerTarget;
-        }
-
-        public int getMaxTargetDistributionSetAssignmentsPerManualAssignment() {
-            return maxTargetDistributionSetAssignmentsPerManualAssignment;
-        }
-        
-        public void setMaxTargetDistributionSetAssignmentsPerManualAssignment(
-                final int maxTargetDistributionSetAssignmentsPerManualAssignment) {
-            this.maxTargetDistributionSetAssignmentsPerManualAssignment = maxTargetDistributionSetAssignmentsPerManualAssignment;
-        }
-        
-        public int getMaxTargetsPerAutoAssignment() {
-            return maxTargetsPerAutoAssignment;
-        }
-
-        public void setMaxTargetsPerAutoAssignment(final int maxTargetsPerAutoAssignment) {
-            this.maxTargetsPerAutoAssignment = maxTargetsPerAutoAssignment;
-        }
-
-        public void setMaxArtifactSize(final long maxArtifactSize) {
-            this.maxArtifactSize = maxArtifactSize;
-        }
-
-        public long getMaxArtifactSize() {
-            return maxArtifactSize;
-        }
-
-        public long getMaxArtifactStorage() {
-            return maxArtifactStorage;
-        }
-
-        public void setMaxArtifactStorage(final long maxArtifactStorage) {
-            this.maxArtifactStorage = maxArtifactStorage;
-        }
-
-        public int getMaxDistributionSetTypesPerTargetType() {
-            return maxDistributionSetTypesPerTargetType;
-        }
-
-        public void setMaxDistributionSetTypesPerTargetType(final int maxDistributionSetTypesPerTargetType) {
-            this.maxDistributionSetTypesPerTargetType = maxDistributionSetTypesPerTargetType;
-        }
-        
         /**
          * Configuration for hawkBits DOS prevention filter. This is usually an
          * infrastructure topic (e.g. Web Application Firewall (WAF)) but might
          * be useful in some cases, e.g. to prevent unintended misuse.
-         *
          */
+        @Data
         public static class Filter {
+
             /**
              * True if filter is enabled.
              */
@@ -497,40 +238,6 @@ public class HawkbitSecurityProperties {
              * second per client IP.
              */
             private int maxWrite = 50;
-
-            public boolean isEnabled() {
-                return enabled;
-            }
-
-            public void setEnabled(final boolean enabled) {
-                this.enabled = enabled;
-            }
-
-            public String getWhitelist() {
-                return whitelist;
-            }
-
-            public void setWhitelist(final String whitelist) {
-                this.whitelist = whitelist;
-            }
-
-            public int getMaxRead() {
-                return maxRead;
-            }
-
-            public void setMaxRead(final int maxRead) {
-                this.maxRead = maxRead;
-            }
-
-            public int getMaxWrite() {
-                return maxWrite;
-            }
-
-            public void setMaxWrite(final int maxWrite) {
-                this.maxWrite = maxWrite;
-            }
-
         }
-
     }
 }
