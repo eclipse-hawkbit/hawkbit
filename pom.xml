@@ -295,6 +295,13 @@
                   </goals>
                </execution>
                <execution>
+                  <id>flatten.clean.on.install</id>
+                  <phase>install</phase>
+                  <goals>
+                     <goal>clean</goal>
+                  </goals>
+               </execution>
+               <execution>
                   <id>flatten.clean</id>
                   <phase>clean</phase>
                   <goals>
@@ -810,4 +817,12 @@
          </dependency>
       </dependencies>
    </dependencyManagement>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.projectlombok</groupId>
+         <artifactId>lombok</artifactId>
+         <optional>true</optional>
+      </dependency>
+   </dependencies>
 </project>
