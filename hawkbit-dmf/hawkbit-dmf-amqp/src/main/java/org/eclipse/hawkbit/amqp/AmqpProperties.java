@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
@@ -16,6 +17,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * connection.
  * 
  */
+@Data
 @ConfigurationProperties("hawkbit.dmf.rabbitmq")
 public class AmqpProperties {
 
@@ -66,68 +68,4 @@ public class AmqpProperties {
      * Delay for messages that are requeued in milliseconds.
      */
     private long requeueDelay = DEFAULT_REQUEUE_DELAY;
-
-    public long getRequeueDelay() {
-        return requeueDelay;
-    }
-
-    public void setRequeueDelay(final long requeueDelay) {
-        this.requeueDelay = requeueDelay;
-    }
-
-    public int getDeclarationRetries() {
-        return declarationRetries;
-    }
-
-    public void setDeclarationRetries(final int declarationRetries) {
-        this.declarationRetries = declarationRetries;
-    }
-
-    public String getAuthenticationReceiverQueue() {
-        return authenticationReceiverQueue;
-    }
-
-    public void setAuthenticationReceiverQueue(final String authenticationReceiverQueue) {
-        this.authenticationReceiverQueue = authenticationReceiverQueue;
-    }
-
-    public boolean isMissingQueuesFatal() {
-        return missingQueuesFatal;
-    }
-
-    public void setMissingQueuesFatal(final boolean missingQueuesFatal) {
-        this.missingQueuesFatal = missingQueuesFatal;
-    }
-
-    public String getDeadLetterExchange() {
-        return deadLetterExchange;
-    }
-
-    public void setDeadLetterExchange(final String deadLetterExchange) {
-        this.deadLetterExchange = deadLetterExchange;
-    }
-
-    public String getDeadLetterQueue() {
-        return deadLetterQueue;
-    }
-
-    public void setDeadLetterQueue(final String deadLetterQueue) {
-        this.deadLetterQueue = deadLetterQueue;
-    }
-
-    public String getReceiverQueue() {
-        return receiverQueue;
-    }
-
-    public void setReceiverQueue(final String receiverQueue) {
-        this.receiverQueue = receiverQueue;
-    }
-
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-    }
 }
