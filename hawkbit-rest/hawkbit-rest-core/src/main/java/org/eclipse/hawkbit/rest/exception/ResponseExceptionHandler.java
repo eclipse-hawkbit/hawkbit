@@ -31,6 +31,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MultipartException;
 
 import com.google.common.collect.Iterables;
@@ -164,7 +165,10 @@ public class ResponseExceptionHandler {
      * @return the entity to be responded containing the exception information
      *         as entity.
      */
-    @ExceptionHandler({ HttpMessageNotReadableException.class, MethodArgumentNotValidException.class, IllegalArgumentException.class })
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentNotValidException.class, HandlerMethodValidationException.class,
+            IllegalArgumentException.class })
     public ResponseEntity<ExceptionInfo> handleExceptionCausedByIncorrectRequestBody(final HttpServletRequest request,
             final Exception ex) {
         logRequest(request, ex);
