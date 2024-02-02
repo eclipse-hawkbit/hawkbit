@@ -44,7 +44,6 @@ import java.util.stream.Stream;
 import jakarta.validation.ConstraintViolationException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.awaitility.Awaitility;
 import org.eclipse.hawkbit.exception.SpServerError;
@@ -2014,7 +2013,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         final String knownValuePrefix = "knownValue";
         final Target testTarget = testdataFactory.createTarget("targetId");
         for (int index = 0; index < totalMetadata; index++) {
-            targetManagement.createMetaData(testTarget.getControllerId(), Lists.newArrayList(
+            targetManagement.createMetaData(testTarget.getControllerId(), List.of(
                     entityFactory.generateTargetMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 

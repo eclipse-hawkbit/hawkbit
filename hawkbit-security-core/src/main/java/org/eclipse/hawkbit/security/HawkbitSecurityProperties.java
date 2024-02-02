@@ -183,6 +183,8 @@ public class HawkbitSecurityProperties {
      */
     public static class Clients {
 
+        public static final String X_FORWARDED_FOR = "X-Forwarded-For";
+
         /**
          * Blacklisted client (IP addresses) for for DDI and Management API.
          */
@@ -191,7 +193,7 @@ public class HawkbitSecurityProperties {
         /**
          * Name of the http header from which the remote ip is extracted.
          */
-        private String remoteIpHeader = "X-Forwarded-For";
+        private String remoteIpHeader = X_FORWARDED_FOR;
 
         /**
          * Set to <code>true</code> if DDI clients remote IP should be stored.

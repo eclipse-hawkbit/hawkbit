@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -72,8 +73,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.jayway.jsonpath.JsonPath;
 
 import io.qameta.allure.Description;
@@ -218,7 +217,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
         // verify quota enforcement
         final int maxSoftwareModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
-        final List<Long> moduleIDs = Lists.newArrayList();
+        final List<Long> moduleIDs = new ArrayList<>();
         for (int i = 0; i < maxSoftwareModules + 1; ++i) {
             moduleIDs.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
         }
@@ -1271,8 +1270,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         final String knownValuePrefix = "knownValue";
         final DistributionSet testDS = testdataFactory.createDistributionSet("one");
         for (int index = 0; index < totalMetadata; index++) {
-            distributionSetManagement.createMetaData(testDS.getId(), Lists
-                    .newArrayList(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
+            distributionSetManagement.createMetaData(testDS.getId(), List.of(entityFactory.generateDsMetadata(knownKeyPrefix + index, knownValuePrefix + index)));
         }
 
         mvc.perform(get(MgmtRestConstants.DISTRIBUTIONSET_V1_REQUEST_MAPPING + "/{distributionSetId}/metadata",
@@ -1383,7 +1381,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
 
     private Set<DistributionSet> createDistributionSetsAlphabetical(final int amount) {
         char character = 'a';
-        final Set<DistributionSet> created = Sets.newHashSetWithExpectedSize(amount);
+        final Set<DistributionSet> created = new HashSet<>(amount);
         for (int index = 0; index < amount; index++) {
             final String str = String.valueOf(character);
             created.add(testdataFactory.createDistributionSet(str));

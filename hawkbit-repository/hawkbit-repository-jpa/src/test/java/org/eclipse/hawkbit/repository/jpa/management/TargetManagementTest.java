@@ -54,7 +54,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldExc
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -78,8 +77,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-
-import com.google.common.collect.Iterables;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -674,7 +671,7 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
 
         final int numberToDelete = 50;
         final Collection<Target> targetsToDelete = firstList.subList(0, numberToDelete);
-        final Target[] deletedTargets = Iterables.toArray(targetsToDelete, Target.class);
+        final Target[] deletedTargets = toArray(targetsToDelete, Target.class);
         final List<Long> targetsIdsToDelete = targetsToDelete.stream().map(Target::getId).collect(Collectors.toList());
 
         targetManagement.delete(targetsIdsToDelete);
@@ -708,14 +705,14 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT1Tags).containsAll(t1Tags);
         assertThat(targetTagManagement.findByTarget(PAGE, t11.getControllerId()).getContent()).as("Tag size is wrong")
-                .hasSize(noT1Tags).doesNotContain(Iterables.toArray(t2Tags, TargetTag.class));
+                .hasSize(noT1Tags).doesNotContain(toArray(t2Tags, TargetTag.class));
 
         final Target t21 = targetManagement.getByControllerID(t2.getControllerId())
                 .orElseThrow(IllegalStateException::new);
         assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
                 .hasSize(noT2Tags).containsAll(t2Tags);
         assertThat(targetTagManagement.findByTarget(PAGE, t21.getControllerId()).getContent()).as("Tag size is wrong")
-                .hasSize(noT2Tags).doesNotContain(Iterables.toArray(t1Tags, TargetTag.class));
+                .hasSize(noT2Tags).doesNotContain(toArray(t1Tags, TargetTag.class));
     }
 
     @Test
@@ -758,16 +755,16 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         final List<Target> targetWithTagC = new ArrayList<>();
 
         // storing target lists to enable easy evaluation
-        Iterables.addAll(targetWithTagA, tagATargets);
-        Iterables.addAll(targetWithTagA, tagABTargets);
-        Iterables.addAll(targetWithTagA, tagABCTargets);
+        targetWithTagA.addAll(tagATargets);
+        targetWithTagA.addAll(tagABTargets);
+        targetWithTagA.addAll(tagABCTargets);
 
-        Iterables.addAll(targetWithTagB, tagBTargets);
-        Iterables.addAll(targetWithTagB, tagABTargets);
-        Iterables.addAll(targetWithTagB, tagABCTargets);
+        targetWithTagB.addAll(tagBTargets);
+        targetWithTagB.addAll(tagABTargets);
+        targetWithTagB.addAll(tagABCTargets);
 
-        Iterables.addAll(targetWithTagC, tagCTargets);
-        Iterables.addAll(targetWithTagC, tagABCTargets);
+        targetWithTagC.addAll(tagCTargets);
+        targetWithTagC.addAll(tagABCTargets);
 
         // check the target lists as returned by assignTag
         checkTargetHasTags(false, targetWithTagA, tagA);

@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -89,10 +90,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort.Direction;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -259,7 +256,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that tag to distribution set assignment that does not exist will cause EntityNotFoundException.")
     void assignDistributionSetToTagThatDoesNotExistThrowsException() {
-        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(5);
+        final List<Long> assignDS = new ArrayList<>(5);
         for (int i = 0; i < 4; i++) {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
@@ -730,9 +727,10 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet createdDs = testdataFactory.createDistributionSet();
 
-        final String[] knownTargetIdsArray = { "1", "2" };
-        final List<String> knownTargetIds = Lists.newArrayList(knownTargetIdsArray);
-        testdataFactory.createTargets(knownTargetIdsArray);
+        final List<String> knownTargetIds = new ArrayList<>();
+        knownTargetIds.add( "1");
+        knownTargetIds.add("2");
+        testdataFactory.createTargets(knownTargetIds.toArray(new String[0]));
 
         // add not existing target to targets
         knownTargetIds.add(notExistingId);
@@ -1055,9 +1053,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         assertThat(allFoundTargets).as("founded targets are wrong").containsAll(savedDeployedTargets)
                 .containsAll(savedNakedTargets);
         assertThat(savedDeployedTargets).as("saved target are wrong")
-                .doesNotContain(Iterables.toArray(savedNakedTargets, Target.class));
+                .doesNotContain(toArray(savedNakedTargets, Target.class));
         assertThat(savedNakedTargets).as("saved target are wrong")
-                .doesNotContain(Iterables.toArray(savedDeployedTargets, Target.class));
+                .doesNotContain(toArray(savedDeployedTargets, Target.class));
 
         for (final Target myt : savedNakedTargets) {
             final Target t = targetManagement.getByControllerID(myt.getControllerId()).get();
@@ -1101,7 +1099,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 .isThrownBy(() -> assignDistributionSet(incomplete, targets));
 
         final DistributionSet nowComplete = distributionSetManagement.assignSoftwareModules(incomplete.getId(),
-                Sets.newHashSet(os.getId()));
+                Set.of(os.getId()));
 
         assertThat(assignDistributionSet(nowComplete, targets).getAssigned()).as("assign ds doesn't work")
                 .isEqualTo(10);
@@ -1165,9 +1163,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assertThat(deployedTargetsFromDB).as("content of deployed target is wrong")
                 .usingElementComparator(controllerIdComparator()).containsAll(savedDeployedTargets)
-                .doesNotContain(Iterables.toArray(undeployedTargetsFromDB, JpaTarget.class));
+                .doesNotContain(toArray(undeployedTargetsFromDB, JpaTarget.class));
         assertThat(undeployedTargetsFromDB).as("content of undeployed target is wrong").containsAll(savedNakedTargets)
-                .doesNotContain(Iterables.toArray(deployedTargetsFromDB, JpaTarget.class));
+                .doesNotContain(toArray(deployedTargetsFromDB, JpaTarget.class));
     }
 
     @Test
@@ -1710,9 +1708,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 final Iterable<DistributionSet> dss, final String deployedTargetPrefix,
                 final String undeployedTargetPrefix, final String distributionSetPrefix) {
 
-            Iterables.addAll(deployedTargets, deployedTs);
-            Iterables.addAll(undeployedTargets, undeployedTs);
-            Iterables.addAll(distributionSets, dss);
+            deployedTargets.addAll(toList(deployedTs));
+            undeployedTargets.addAll(toList(undeployedTs));
+            distributionSets.addAll(toList(dss));
 
             deployedTargets.forEach(t -> deployedTargetIDs.add(t.getId()));
 

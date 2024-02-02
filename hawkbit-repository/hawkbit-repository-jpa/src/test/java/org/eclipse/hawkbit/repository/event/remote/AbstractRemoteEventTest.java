@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.eclipse.hawkbit.event.BusProtoStuffMessageConverter;
@@ -33,7 +34,6 @@ import org.springframework.util.MimeTypeUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Maps;
 
 /**
  * Test the remote entity events.
@@ -57,13 +57,13 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
     }
 
     private Message<?> createProtoStuffMessage(final TenantAwareEvent event) {
-        final Map<String, Object> headers = Maps.newLinkedHashMap();
+        final Map<String, Object> headers = new LinkedHashMap<>();
         headers.put(MessageHeaders.CONTENT_TYPE, BusProtoStuffMessageConverter.APPLICATION_BINARY_PROTOSTUFF);
         return busProtoStuffMessageConverter.toMessage(event, new MutableMessageHeaders(headers));
     }
 
     private Message<String> createJsonMessage(final Object event) {
-        final Map<String, MimeType> headers = Maps.newLinkedHashMap();
+        final Map<String, MimeType> headers = new LinkedHashMap<>();
         headers.put(MessageHeaders.CONTENT_TYPE, MimeTypeUtils.APPLICATION_JSON);
         try {
             final String json = new ObjectMapper().writeValueAsString(event);
@@ -76,7 +76,7 @@ public abstract class AbstractRemoteEventTest extends AbstractJpaIntegrationTest
     }
 
     protected Message<?> createMessageWithImmutableHeader(final TenantAwareEvent event) {
-        final Map<String, Object> headers = Maps.newLinkedHashMap();
+        final Map<String, Object> headers = new LinkedHashMap<>();
         return busProtoStuffMessageConverter.toMessage(event, new MessageHeaders(headers));
     }
 

@@ -44,11 +44,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MvcResult;
-
-import com.google.common.base.Charsets;
-import com.google.common.net.HttpHeaders;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -225,7 +223,7 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
                 .andReturn();
 
         assertThat(result.getResponse().getContentAsByteArray())
-                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(Charsets.US_ASCII));
+                .isEqualTo((artifact.getMd5Hash() + "  " + artifact.getFilename()).getBytes(StandardCharsets.US_ASCII));
     }
 
     @Test

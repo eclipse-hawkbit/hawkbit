@@ -11,11 +11,10 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.BaseEncoding;
 
 /**
  * Hash digest utility.
@@ -66,7 +65,7 @@ public final class HashGeneratorUtils {
         try {
             final MessageDigest digest = MessageDigest.getInstance(algorithm);
             final byte[] hashedBytes = digest.digest(message);
-            return BaseEncoding.base16().lowerCase().encode(hashedBytes);
+            return HexFormat.of().withLowerCase().formatHex(hashedBytes);
         } catch (final NoSuchAlgorithmException e) {
             LOG.error("Algorithm could not be found", e);
         }

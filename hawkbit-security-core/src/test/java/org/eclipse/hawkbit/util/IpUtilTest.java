@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.util;
 
-import static com.google.common.net.HttpHeaders.X_FORWARDED_FOR;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -37,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @Story("IP Util Test")
 public class IpUtilTest {
 
+    private static final String X_FORWARDED_FOR = HawkbitSecurityProperties.Clients.X_FORWARDED_FOR;
     private static final String KNOWN_REQUEST_HEADER = "bumlux";
 
     @Mock

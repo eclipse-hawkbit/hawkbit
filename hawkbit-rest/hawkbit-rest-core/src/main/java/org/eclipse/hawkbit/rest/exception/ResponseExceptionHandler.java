@@ -34,8 +34,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.multipart.MultipartException;
 
-import com.google.common.collect.Iterables;
-
 /**
  * General controller advice for exception handling.
  */
@@ -247,7 +245,7 @@ public class ResponseExceptionHandler {
         logRequest(request, ex);
 
         final List<Throwable> throwables = ExceptionUtils.getThrowableList(ex);
-        final Throwable responseCause = Iterables.getLast(throwables);
+        final Throwable responseCause = throwables.get(throwables.size() - 1);
 
         if (responseCause.getMessage().isEmpty()) {
             LOG.warn("Request {} lead to MultipartException without root cause message:\n{}", request.getRequestURL(),

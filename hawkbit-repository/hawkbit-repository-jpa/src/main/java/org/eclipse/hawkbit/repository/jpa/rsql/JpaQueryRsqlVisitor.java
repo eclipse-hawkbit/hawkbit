@@ -35,7 +35,6 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.persistence.criteria.Subquery;
 
-import com.google.common.collect.Lists;
 import cz.jirutka.rsql.parser.ast.AndNode;
 import cz.jirutka.rsql.parser.ast.ComparisonNode;
 import cz.jirutka.rsql.parser.ast.LogicalNode;
@@ -73,7 +72,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
 
     public static final Character LIKE_WILDCARD = '*';
     private static final char ESCAPE_CHAR = '\\';
-    private static final List<String> NO_JOINS_OPERATOR = Lists.newArrayList("!=", "=out=");
+    private static final List<String> NO_JOINS_OPERATOR = List.of("!=", "=out=");
     private static final String ESCAPE_CHAR_WITH_ASTERISK = ESCAPE_CHAR +"*";
 
     private final Map<Integer, Set<Join<Object, Object>>> joinsInLevel = new HashMap<>(3);

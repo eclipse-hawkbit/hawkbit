@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
@@ -29,7 +30,6 @@ import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
-import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -55,9 +55,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -309,7 +306,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        testdataFactory.createDistributionSet(Sets.newHashSet(assignedModule));
+        testdataFactory.createDistributionSet(Set.of(assignedModule));
 
         // [STEP3]: Delete the assigned SoftwareModule
         softwareModuleManagement.delete(assignedModule.getId());
@@ -345,7 +342,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         SoftwareModule assignedModule = createSoftwareModuleWithArtifacts(osType, "moduleX", "3.0.2", 2);
 
         // [STEP2]: Assign SoftwareModule to DistributionSet
-        final DistributionSet disSet = testdataFactory.createDistributionSet(Sets.newHashSet(assignedModule));
+        final DistributionSet disSet = testdataFactory.createDistributionSet(Set.of(assignedModule));
 
         // [STEP3]: Assign DistributionSet to a Device
         assignDistributionSet(disSet, Collections.singletonList(target));
@@ -446,11 +443,11 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final Artifact artifactY = moduleY.getArtifacts().iterator().next();
 
         // [STEP3]: Assign SoftwareModuleX to DistributionSetX and to target
-        final DistributionSet disSetX = testdataFactory.createDistributionSet(Sets.newHashSet(moduleX), "X");
+        final DistributionSet disSetX = testdataFactory.createDistributionSet(Set.of(moduleX), "X");
         assignDistributionSet(disSetX, Collections.singletonList(target));
 
         // [STEP4]: Assign SoftwareModuleY to DistributionSet and to target
-        final DistributionSet disSetY = testdataFactory.createDistributionSet(Sets.newHashSet(moduleY), "Y");
+        final DistributionSet disSetY = testdataFactory.createDistributionSet(Set.of(moduleY), "Y");
         assignDistributionSet(disSetY, Collections.singletonList(target));
 
         // [STEP5]: Delete SoftwareModuleX
@@ -549,8 +546,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
 
         final DistributionSet set = distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(Lists
-                        .newArrayList(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
+                .create(entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(
+                        List.of(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
         softwareModuleManagement.delete(deleted.getId());
 
         // with filter on name, version and module type
@@ -610,8 +607,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule four = testdataFactory.createSoftwareModuleOs("e");
 
         distributionSetManagement
-                .create(entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(Lists
-                        .newArrayList(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
+                .create(entityFactory.distributionSet().create().name("set").version("1").type(testDsType).modules(
+                        List.of(one.getId(), two.getId(), deleted.getId(), four.getId(), differentName.getId())));
         softwareModuleManagement.delete(deleted.getId());
 
         // test

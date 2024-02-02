@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.management;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -62,8 +63,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
 
 import cz.jirutka.rsql.parser.RSQLParserException;
 
@@ -212,7 +211,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             final String rsqlFilter) {
         final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
 
-        final List<Specification<JpaTargetFilterQuery>> specList = Lists.newArrayListWithExpectedSize(2);
+        final List<Specification<JpaTargetFilterQuery>> specList = new ArrayList<>(2);
         specList.add(TargetFilterQuerySpecification.byAutoAssignDS(distributionSet));
         if (!ObjectUtils.isEmpty(rsqlFilter)) {
             specList.add(RSQLUtility.buildRsqlSpecification(rsqlFilter, TargetFilterQueryFields.class,

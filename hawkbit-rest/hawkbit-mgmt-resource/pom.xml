@@ -21,7 +21,6 @@
    <artifactId>hawkbit-mgmt-resource</artifactId>
    <name>hawkBit :: REST :: Management Resources</name>
 
-
    <dependencies>
       <dependency>
          <groupId>org.eclipse.hawkbit</groupId>
@@ -41,10 +40,6 @@
       <dependency>
          <groupId>org.springframework.plugin</groupId>
          <artifactId>spring-plugin-core</artifactId>
-      </dependency>
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
       </dependency>
       <dependency>
          <groupId>org.springframework</groupId>

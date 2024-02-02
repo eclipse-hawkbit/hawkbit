@@ -89,8 +89,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link DistributionSetManagement}.
  *
@@ -600,7 +598,7 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
 
     private static List<Specification<JpaDistributionSet>> buildDistributionSetSpecifications(
             final DistributionSetFilter distributionSetFilter) {
-        final List<Specification<JpaDistributionSet>> specList = Lists.newArrayListWithExpectedSize(10);
+        final List<Specification<JpaDistributionSet>> specList = new ArrayList<>(10);
 
         Specification<JpaDistributionSet> spec;
 

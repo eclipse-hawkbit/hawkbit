@@ -13,11 +13,11 @@ package org.eclipse.hawkbit.ddi.json.model;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.reflect.ClassPath;
 
 import io.qameta.allure.Description;
@@ -37,7 +37,7 @@ public class JsonIgnorePropertiesAnnotationTest {
         final ClassLoader loader = Thread.currentThread().getContextClassLoader();
         final String packageName = this.getClass().getPackage().getName();
 
-        final ImmutableSet<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader)
+        final Set<ClassPath.ClassInfo> topLevelClasses = ClassPath.from(loader)
                 .getTopLevelClasses(packageName);
         for (final ClassPath.ClassInfo classInfo : topLevelClasses) {
             final Class<?> modelClass = classInfo.load();

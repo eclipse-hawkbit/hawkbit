@@ -18,11 +18,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifact;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +32,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-
-import com.google.common.base.Preconditions;
-import com.google.common.io.ByteStreams;
-import com.google.common.math.DoubleMath;
 
 /**
  * Utility class for artifact file streaming.
@@ -138,7 +136,7 @@ public final class FileStreamingUtil {
         // set the x-content-type options header to prevent browsers from doing
         // MIME-sniffing when downloading an artifact, as this could cause a
         // security vulnerability
-        response.setHeader(com.google.common.net.HttpHeaders.X_CONTENT_TYPE_OPTIONS, "nosniff");
+        response.setHeader("X-Content-Type-Options", "nosniff");
         if (lastModified > 0) {
             response.setDateHeader(HttpHeaders.LAST_MODIFIED, lastModified);
         }
@@ -334,13 +332,13 @@ public final class FileStreamingUtil {
         final long startMillis = System.currentTimeMillis();
         LOG.trace("Start of copy-streams of file {} from {} to {}", filename, start, length);
 
-        Preconditions.checkNotNull(from);
-        Preconditions.checkNotNull(to);
+        Objects.requireNonNull(from);
+        Objects.requireNonNull(to);
         final byte[] buf = new byte[BUFFER_SIZE];
         long total = 0;
         int progressPercent = 1;
 
-        ByteStreams.skipFully(from, start);
+        IOUtils.skipFully(from, start);
 
         long toRead = length;
         boolean toContinue = true;
@@ -365,7 +363,7 @@ public final class FileStreamingUtil {
             }
 
             if (progressListener != null) {
-                final int newPercent = DoubleMath.roundToInt(total * 100.0 / length, RoundingMode.DOWN);
+                final int newPercent = (int)Math.floor(total * 100.0 / length);
 
                 // every 10 percent an event
                 if (newPercent == 100 || newPercent > progressPercent + 10) {

@@ -93,8 +93,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.validation.annotation.Validated;
 
-import com.google.common.collect.Lists;
-
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
@@ -171,7 +169,7 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     @Override
     public Page<Rollout> findByRsql(final Pageable pageable, final String rsqlParam, final boolean deleted) {
-        final List<Specification<JpaRollout>> specList = Lists.newArrayListWithExpectedSize(2);
+        final List<Specification<JpaRollout>> specList = new ArrayList<>(2);
         specList.add(
                 RSQLUtility.buildRsqlSpecification(rsqlParam, RolloutFields.class, virtualPropertyReplacer, database));
         specList.add(RolloutSpecification.isDeletedWithDistributionSet(deleted, pageable.getSort()));

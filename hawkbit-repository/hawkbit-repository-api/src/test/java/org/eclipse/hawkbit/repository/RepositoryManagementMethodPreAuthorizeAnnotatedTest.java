@@ -14,17 +14,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.google.common.reflect.ClassPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.access.prepost.PreAuthorize;
-
-import com.google.common.reflect.ClassPath;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -42,8 +40,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
 
     @Test
     @Description("Verifies that repository methods are @PreAuthorize annotated")
-    public void repositoryManagementMethodsArePreAuthorizedAnnotated()
-            throws ClassNotFoundException, URISyntaxException, IOException {
+    public void repositoryManagementMethodsArePreAuthorizedAnnotated() throws IOException {
         final List<Class<?>> findInterfacesInPackage = findInterfacesInPackage(getClass().getPackage(),
                 Pattern.compile(".*Management"));
 
@@ -81,8 +78,7 @@ public class RepositoryManagementMethodPreAuthorizeAnnotatedTest {
         }
     }
 
-    private List<Class<?>> findInterfacesInPackage(final Package p, final Pattern includeFilter)
-            throws URISyntaxException, IOException, ClassNotFoundException {
+    private List<Class<?>> findInterfacesInPackage(final Package p, final Pattern includeFilter) throws IOException {
         return ClassPath.from(Thread.currentThread().getContextClassLoader()).getTopLevelClasses(p.getName()).stream()
                 .filter(clazzInfo -> includeFilter.matcher(clazzInfo.getSimpleName()).matches())
                 .map(clazzInfo -> clazzInfo.load()).filter(clazz -> clazz.isInterface()).collect(Collectors.toList());

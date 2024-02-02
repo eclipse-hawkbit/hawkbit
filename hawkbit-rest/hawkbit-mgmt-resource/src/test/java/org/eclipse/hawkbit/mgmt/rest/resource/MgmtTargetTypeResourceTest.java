@@ -544,7 +544,7 @@ class MgmtTargetTypeResourceTest extends AbstractManagementApiIntegrationTest {
 
         // create distribution set types
         final int maxDistributionSetTypes = quotaManagement.getMaxDistributionSetTypesPerTargetType();
-        final List<Long> dsTypeIds = Lists.newArrayList();
+        final List<Long> dsTypeIds = new ArrayList<>();
         for (int i = 0; i < maxDistributionSetTypes + 1; ++i) {
             final DistributionSetType ds = testdataFactory.findOrCreateDistributionSetType("dsType_" + i,
                     "dsType_" + i);

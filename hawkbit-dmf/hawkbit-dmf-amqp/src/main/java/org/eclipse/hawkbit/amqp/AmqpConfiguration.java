@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.amqp;
 
-import com.google.common.collect.Maps;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
@@ -54,6 +53,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.ErrorHandler;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -366,10 +366,9 @@ public class AmqpConfiguration {
     }
 
     private static Map<String, Object> getTTLMaxArgsAuthenticationQueue() {
-        final Map<String, Object> args = Maps.newHashMapWithExpectedSize(2);
+        final Map<String, Object> args = new HashMap<>(2);
         args.put("x-message-ttl", Duration.ofSeconds(30).toMillis());
         args.put("x-max-length", 1_000);
         return args;
     }
-
 }

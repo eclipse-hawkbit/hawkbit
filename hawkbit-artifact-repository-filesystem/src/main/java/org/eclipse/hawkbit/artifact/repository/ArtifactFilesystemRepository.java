@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.artifact.repository;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -21,7 +22,6 @@ import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.springframework.validation.annotation.Validated;
 
 import com.google.common.base.Splitter;
-import com.google.common.io.Files;
 
 /**
  * Implementation of the {@link ArtifactRepository} to store artifacts on the
@@ -79,7 +79,7 @@ public class ArtifactFilesystemRepository extends AbstractArtifactRepository {
         if (fileSHA1Naming.exists()) {
             FileUtils.deleteQuietly(file);
         } else {
-            Files.move(file, fileSHA1Naming);
+            Files.move(file.toPath(), fileSHA1Naming.toPath());
         }
 
         return new ArtifactFilesystem(fileSHA1Naming, artifact.getArtifactId(), artifact.getHashes(),

@@ -758,38 +758,6 @@
             <scope>test</scope>
          </dependency>
          <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
-            <!-- https://github.com/google/guava/issues/2824 -->
-            <exclusions>
-               <exclusion>
-                  <groupId>com.google.j2objc</groupId>
-                  <artifactId>j2objc-annotations</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>com.google.code.findbugs</groupId>
-                  <artifactId>jsr305</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.checkerframework</groupId>
-                  <artifactId>checker-compat-qual</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>com.google.errorprone</groupId>
-                  <artifactId>error_prone_annotations</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>com.google.j2objc</groupId>
-                  <artifactId>j2objc-annotations</artifactId>
-               </exclusion>
-               <exclusion>
-                  <groupId>org.codehaus.mojo</groupId>
-                  <artifactId>animal-sniffer-annotations</artifactId>
-               </exclusion>
-            </exclusions>
-         </dependency>
-         <dependency>
             <groupId>org.awaitility</groupId>
             <artifactId>awaitility</artifactId>
             <version>${awaitility.version}</version>
@@ -802,6 +770,38 @@
          <groupId>org.projectlombok</groupId>
          <artifactId>lombok</artifactId>
          <optional>true</optional>
+      </dependency>
+      <dependency>
+         <groupId>com.google.guava</groupId>
+         <artifactId>guava</artifactId>
+         <version>${guava.version}</version>
+         <!-- https://github.com/google/guava/issues/2824 -->
+         <exclusions>
+            <exclusion>
+               <groupId>com.google.j2objc</groupId>
+               <artifactId>j2objc-annotations</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>com.google.code.findbugs</groupId>
+               <artifactId>jsr305</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.checkerframework</groupId>
+               <artifactId>checker-compat-qual</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>com.google.errorprone</groupId>
+               <artifactId>error_prone_annotations</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>com.google.j2objc</groupId>
+               <artifactId>j2objc-annotations</artifactId>
+            </exclusion>
+            <exclusion>
+               <groupId>org.codehaus.mojo</groupId>
+               <artifactId>animal-sniffer-annotations</artifactId>
+            </exclusion>
+         </exclusions>
       </dependency>
    </dependencies>
 </project>

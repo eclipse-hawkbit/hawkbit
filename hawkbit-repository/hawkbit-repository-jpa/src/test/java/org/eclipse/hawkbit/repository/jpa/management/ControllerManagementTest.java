@@ -86,9 +86,6 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
@@ -156,7 +153,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
         verifyThrownExceptionBy(() -> controllerManagement.registerRetrieved(NOT_EXIST_IDL, "test message"), "Action");
 
         verifyThrownExceptionBy(
-                () -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, Maps.newHashMap(), null), "Target");
+                () -> controllerManagement.updateControllerAttributes(NOT_EXIST_ID, new HashMap<>(), null), "Target");
     }
 
     @Test
@@ -973,7 +970,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void addAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(1);
+        final Map<String, String> testData = new HashMap<>(1);
         testData.put("test1", "testdata1");
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
@@ -983,7 +980,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void addSecondAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        final Map<String, String> testData = new HashMap<>(2);
         testData.put("test2", "testdata20");
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
 
@@ -994,7 +991,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     @Step
     private void updateAttributeAndVerify(final String controllerId) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(2);
+        final Map<String, String> testData = new HashMap<>(2);
         testData.put("test1", "testdata12");
 
         controllerManagement.updateControllerAttributes(controllerId, testData, null);
@@ -1141,7 +1138,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
     private void writeAttributes(final String controllerId, final int allowedAttributes, final String keyPrefix,
             final String valuePrefix) {
-        final Map<String, String> testData = Maps.newHashMapWithExpectedSize(allowedAttributes);
+        final Map<String, String> testData = new HashMap<>(allowedAttributes);
         for (int i = 0; i < allowedAttributes; i++) {
             testData.put(keyPrefix + i, valuePrefix);
         }
@@ -1212,13 +1209,13 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
 
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(Lists.newArrayList("proceeding message 1")));
+                .messages(List.of("proceeding message 1")));
 
         final long createTime = System.currentTimeMillis();
         waitNextMillis();
         controllerManagement.addUpdateActionStatus(entityFactory.actionStatus().create(actionId)
                 .status(Action.Status.RUNNING).occurredAt(System.currentTimeMillis())
-                .messages(Lists.newArrayList("proceeding message 2")));
+                .messages(List.of("proceeding message 2")));
 
         final List<String> messages = controllerManagement.getActionHistoryMessages(actionId, 2);
 
@@ -1279,7 +1276,7 @@ class ControllerManagementTest extends AbstractJpaIntegrationTest {
                 assignDistributionSet(testdataFactory.createDistributionSet("ds1"), testdataFactory.createTargets(1)));
         assertThat(actionId).isNotNull();
 
-        final List<String> messages = Lists.newArrayList();
+        final List<String> messages = new ArrayList<>();
         IntStream.range(0, maxMessages).forEach(i -> messages.add(i, "msg"));
 
         assertThat(controllerManagement.addInformationalActionStatus(

@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -256,7 +257,7 @@ public class MgmtDistributionSetTypeResourceTest extends AbstractManagementApiIn
 
         // create software module types
         final int maxSoftwareModuleTypes = quotaManagement.getMaxSoftwareModuleTypesPerDistributionSetType();
-        final List<Long> moduleTypeIds = Lists.newArrayList();
+        final List<Long> moduleTypeIds = new ArrayList<>();
         for (int i = 0; i < maxSoftwareModuleTypes + 1; ++i) {
             final SoftwareModuleTypeCreate smCreate = entityFactory.softwareModuleType().create().name("smType_" + i)
                     .description("smType_" + i).maxAssignments(1).colour("blue").key("smType_" + i);
