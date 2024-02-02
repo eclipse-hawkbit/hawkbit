@@ -25,7 +25,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import com.google.common.collect.Iterables;
+import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.api.ApiType;
 import org.eclipse.hawkbit.api.ArtifactUrl;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
@@ -368,7 +369,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         // Ensure not exceeding the max value of MAX_PROCESSING_SIZE
         if (controllerIds.size() > MAX_PROCESSING_SIZE) {
             // Split the provided collection
-            final Iterable<List<T>> partitions = Iterables.partition(controllerIds, MAX_PROCESSING_SIZE);
+            final Iterable<List<T>> partitions = ListUtils.partition(IterableUtils.toList(controllerIds), MAX_PROCESSING_SIZE);
             // Preserve the security context because it gets lost when executing
             // loading calls in new threads
             final SecurityContext context = SecurityContextHolder.getContext();

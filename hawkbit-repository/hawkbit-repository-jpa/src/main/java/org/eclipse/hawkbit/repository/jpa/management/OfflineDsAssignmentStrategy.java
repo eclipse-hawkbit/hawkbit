@@ -17,7 +17,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryConstants;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -75,7 +75,7 @@ public class OfflineDsAssignmentStrategy extends AbstractDsAssignmentStrategy {
                     Arrays.asList(TargetSpecifications.hasControllerIdAndAssignedDistributionSetIdNot(ids, setId),
                             TargetSpecifications.notEqualToTargetUpdateStatus(TargetUpdateStatus.PENDING))));
         }
-        return Lists.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
+        return ListUtils.partition(controllerIDs, Constants.MAX_ENTRIES_IN_STATEMENT).stream().map(mapper)
                 .flatMap(List::stream).collect(Collectors.toList());
     }
 

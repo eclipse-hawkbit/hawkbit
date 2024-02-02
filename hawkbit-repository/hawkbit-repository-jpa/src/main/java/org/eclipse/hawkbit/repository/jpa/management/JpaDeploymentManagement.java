@@ -28,7 +28,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -37,6 +36,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.Root;
 
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -281,7 +281,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
     private void checkCompatibilityForSingleDsAssignment(final Long distSetId, final List<String> controllerIds) {
         final DistributionSetType distSetType = distributionSetManagement.getValidAndComplete(distSetId).getType();
-        final Set<String> incompatibleTargetTypes = Lists.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+        final Set<String> incompatibleTargetTypes = ListUtils.partition(controllerIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream()
                 .map(ids -> targetRepository.findAll(TargetSpecifications.hasControllerIdIn(ids)
                         .and(TargetSpecifications.notCompatibleWithDistributionSetType(distSetType.getId()))))
@@ -377,7 +377,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().toList();
 
-        final List<String> existingTargetIds = Lists.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
+        final List<String> existingTargetIds = ListUtils.partition(providedTargetIds, Constants.MAX_ENTRIES_IN_STATEMENT)
                 .stream()
                 .map(ids -> targetRepository.findAll(AccessController.Operation.UPDATE,
                         TargetSpecifications.hasControllerIdIn(ids)))
@@ -442,7 +442,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      * statements
      */
     private static List<List<Long>> getTargetEntitiesAsChunks(final List<JpaTarget> targetEntities) {
-        return Lists.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
+        return ListUtils.partition(targetEntities.stream().map(Target::getId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
     }
 

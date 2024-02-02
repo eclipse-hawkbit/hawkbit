@@ -33,15 +33,14 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 
+import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.EntityFactory;
@@ -473,7 +472,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
         LOG.debug("Persist {} targetqueries.", polls.size());
 
-        final List<List<String>> pollChunks = Lists.partition(
+        final List<List<String>> pollChunks = ListUtils.partition(
                 polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
                 Constants.MAX_ENTRIES_IN_STATEMENT);
 

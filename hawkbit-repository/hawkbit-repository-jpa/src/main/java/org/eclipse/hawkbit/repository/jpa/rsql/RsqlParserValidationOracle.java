@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,9 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
-
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 
 import cz.jirutka.rsql.parser.ParseException;
 import cz.jirutka.rsql.parser.RSQLParserException;
@@ -254,22 +252,14 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
     // sensitive help on search query.
     private static final class TokenDescription {
 
-        private static final Multimap<Integer, String> TOKEN_MAP = ArrayListMultimap.create();
+        private static final Map<Integer, List<String>> TOKEN_MAP = new HashMap<>();
 
         private static final int LOGICAL_OP = 8;
         private static final int COMPARATOR = 12;
 
         static {
-            TOKEN_MAP.put(LOGICAL_OP, "and");
-            TOKEN_MAP.put(LOGICAL_OP, "or");
-            TOKEN_MAP.put(COMPARATOR, "==");
-            TOKEN_MAP.put(COMPARATOR, "!=");
-            TOKEN_MAP.put(COMPARATOR, "=ge=");
-            TOKEN_MAP.put(COMPARATOR, "=le=");
-            TOKEN_MAP.put(COMPARATOR, "=gt=");
-            TOKEN_MAP.put(COMPARATOR, "=lt=");
-            TOKEN_MAP.put(COMPARATOR, "=in=");
-            TOKEN_MAP.put(COMPARATOR, "=out=");
+            TOKEN_MAP.put(LOGICAL_OP, List.of("and", "or"));
+            TOKEN_MAP.put(COMPARATOR, List.of("==", "!=", "=ge=", "=le=", "=gt=", "=lt=", "=in=", "=out="));
         }
 
         private TokenDescription() {
@@ -279,7 +269,6 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
         private static Collection<String> getTokenImage(final int tokenIndex) {
             return TOKEN_MAP.get(tokenIndex);
         }
-
     }
 
     private static final class FieldNameDescription {
