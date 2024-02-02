@@ -40,8 +40,6 @@ import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.google.common.collect.Maps;
-
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
@@ -99,7 +97,7 @@ class DdiConfigDataTest extends AbstractDDiApiIntegrationTest {
                 .getLastTargetQuery())
                 .isGreaterThanOrEqualTo(current);
 
-        final Map<String, String> attributes = Maps.newHashMapWithExpectedSize(1);
+        final Map<String, String> attributes = new HashMap<>(1);
         attributes.put("dsafsdf", "sdsds");
 
         final Target updateControllerAttributes = controllerManagement

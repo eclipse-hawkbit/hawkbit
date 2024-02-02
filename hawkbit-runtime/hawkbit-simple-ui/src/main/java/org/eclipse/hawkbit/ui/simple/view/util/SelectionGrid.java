@@ -9,7 +9,6 @@
  */
 package org.eclipse.hawkbit.ui.simple.view.util;
 
-import com.google.common.collect.Streams;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.data.provider.Query;
@@ -55,7 +54,7 @@ public class SelectionGrid<T,ID> extends Grid<T> {
                     // if matching keeps old entries instead of new the new ones in order to
                     // select them in case refresh is made with keepSelection
                     // this however means that if they are changed the old state will be shown!!!
-                    return Streams.concat(selected.stream(),
+                    return Stream.concat(selected.stream(),
                             fetch.filter(next -> !selectedIds.contains(entityRepresentation.idFn.apply(next))));
                 }
             });

@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.DosFilter;
+import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,8 +29,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.DefaultMockMvcBuilder;
 import org.springframework.web.context.WebApplicationContext;
-
-import com.google.common.net.HttpHeaders;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -44,6 +43,8 @@ import io.qameta.allure.Story;
 @Story("Denial of Service protection filter")
 class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
+    private static final String X_FORWARDED_FOR = HawkbitSecurityProperties.Clients.X_FORWARDED_FOR;
+
     @Override
     protected DefaultMockMvcBuilder createMvcWebAppContext(final WebApplicationContext context) {
         return super.createMvcWebAppContext(context).addFilter(
@@ -56,7 +57,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     @Description("Ensures that clients that are on the blacklist are forbidden")
     void blackListedClientIsForbidden() throws Exception {
         mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                .header(HttpHeaders.X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 ")).andExpect(status().isForbidden());
+                .header(X_FORWARDED_FOR, "192.168.0.4 , 10.0.0.1 ")).andExpect(status().isForbidden());
     }
 
     @Test
@@ -68,7 +69,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         int requests = 0;
         do {
             result = mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1")).andReturn();
+                    .header(X_FORWARDED_FOR, "10.0.0.1")).andReturn();
             requests++;
 
             // we give up after 1.000 requests
@@ -84,7 +85,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     void unacceptableGetLoadButOnWhitelistIPv4() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(HttpHeaders.X_FORWARDED_FOR, "127.0.0.1")).andExpect(status().isOk());
+                    .header(X_FORWARDED_FOR, "127.0.0.1")).andExpect(status().isOk());
         }
     }
 
@@ -93,7 +94,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
     void unacceptableGetLoadButOnWhitelistIPv6() throws Exception {
         for (int i = 0; i < 100; i++) {
             mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                    .header(HttpHeaders.X_FORWARDED_FOR, "0:0:0:0:0:0:0:1")).andExpect(status().isOk());
+                    .header(X_FORWARDED_FOR, "0:0:0:0:0:0:0:1")).andExpect(status().isOk());
         }
     }
 
@@ -107,7 +108,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
             Thread.sleep(1100);
             for (int i = 0; i < 9; i++) {
                 mvc.perform(get("/{tenant}/controller/v1/4711", tenantAware.getCurrentTenant())
-                        .header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1")).andExpect(status().isOk());
+                        .header(X_FORWARDED_FOR, "10.0.0.1")).andExpect(status().isOk());
             }
         }
     }
@@ -122,7 +123,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
         int requests = 0;
         do {
             result = mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                    tenantAware.getCurrentTenant()).header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1").content(feedback)
+                    tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1").content(feedback)
                             .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
                     .andReturn();
             requests++;
@@ -149,7 +150,7 @@ class DosFilterTest extends AbstractDDiApiIntegrationTest {
 
             for (int i = 0; i < 9; i++) {
                 mvc.perform(post("/{tenant}/controller/v1/4711/deploymentBase/" + actionId + "/feedback",
-                        tenantAware.getCurrentTenant()).header(HttpHeaders.X_FORWARDED_FOR, "10.0.0.1")
+                        tenantAware.getCurrentTenant()).header(X_FORWARDED_FOR, "10.0.0.1")
                                 .content(feedback).contentType(MediaType.APPLICATION_JSON)
                                 .accept(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk());

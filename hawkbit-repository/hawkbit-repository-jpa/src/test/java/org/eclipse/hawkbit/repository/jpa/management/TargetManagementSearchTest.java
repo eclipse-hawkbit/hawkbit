@@ -643,9 +643,9 @@ class TargetManagementSearchTest extends AbstractJpaIntegrationTest {
         final Long[] overdueMix = { lastTargetQueryAlwaysOverdue, lastTargetQueryNotOverdue,
                 lastTargetQueryAlwaysOverdue, lastTargetNull, lastTargetQueryAlwaysOverdue };
 
-        final List<Target> notAssigned = Lists.newArrayListWithExpectedSize(overdueMix.length);
-        List<Target> targAssigned = Lists.newArrayListWithExpectedSize(overdueMix.length);
-        List<Target> targInstalled = Lists.newArrayListWithExpectedSize(overdueMix.length);
+        final List<Target> notAssigned = new ArrayList<>(overdueMix.length);
+        List<Target> targAssigned = new ArrayList<>(overdueMix.length);
+        List<Target> targInstalled = new ArrayList<>(overdueMix.length);
 
         for (int i = 0; i < overdueMix.length; i++) {
             notAssigned.add(targetManagement

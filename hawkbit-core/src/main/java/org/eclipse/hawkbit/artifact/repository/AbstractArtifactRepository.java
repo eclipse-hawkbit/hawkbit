@@ -19,15 +19,14 @@ import java.nio.file.Files;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.artifact.repository.model.DbArtifactHash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
-
-import com.google.common.io.BaseEncoding;
-import com.google.common.io.ByteStreams;
 
 /**
  * Abstract utility class for ArtifactRepository implementations with common
@@ -61,9 +60,11 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
 
             tempFile = storeTempFile(inputStream);
 
-            final String sha1Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA1.digest());
-            final String md5Hash16 = BaseEncoding.base16().lowerCase().encode(mdMD5.digest());
-            final String sha256Hash16 = BaseEncoding.base16().lowerCase().encode(mdSHA256.digest());
+            final HexFormat hexFormat = HexFormat.of().withLowerCase();
+
+            final String sha1Hash16 = hexFormat.formatHex(mdSHA1.digest());
+            final String md5Hash16 = hexFormat.formatHex(mdMD5.digest());
+            final String sha256Hash16 = hexFormat.formatHex(mdSHA256.digest());
 
             checkHashes(sha1Hash16, md5Hash16, sha256Hash16, providedHashes);
 
@@ -110,7 +111,7 @@ public abstract class AbstractArtifactRepository implements ArtifactRepository {
     protected String storeTempFile(final InputStream content) throws IOException {
         final File file = createTempFile();
         try (final OutputStream outputstream = new BufferedOutputStream(new FileOutputStream(file))) {
-            ByteStreams.copy(content, outputstream);
+            IOUtils.copy(content, outputstream);
             outputstream.flush();
         }
         return file.getPath();

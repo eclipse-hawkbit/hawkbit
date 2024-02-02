@@ -18,10 +18,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -69,9 +71,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
@@ -324,7 +323,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Description("Verifies that multiple DS are of default type if not specified explicitly at creation time.")
     void createMultipleDistributionSetsWithImplicitType() {
 
-        final List<DistributionSetCreate> creates = Lists.newArrayListWithExpectedSize(10);
+        final List<DistributionSetCreate> creates = new ArrayList<>(10);
         for (int i = 0; i < 10; i++) {
             creates.add(entityFactory.distributionSet().create().name("newtypesoft" + i).version("1" + i));
         }
@@ -406,7 +405,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Ensures that distribution sets can assigned and unassigned to a  distribution set tag.")
     void assignAndUnassignDistributionSetToTag() {
-        final List<Long> assignDS = Lists.newArrayListWithExpectedSize(4);
+        final List<Long> assignDS = new ArrayList<>(4);
         for (int i = 0; i < 4; i++) {
             assignDS.add(testdataFactory.createDistributionSet("DS" + i, "1.0", Collections.emptyList()).getId());
         }
@@ -450,7 +449,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         final SoftwareModule os2 = testdataFactory.createSoftwareModuleOs();
 
         // update is allowed as it is still not assigned to a target
-        ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(ah2.getId()));
+        ds = distributionSetManagement.assignSoftwareModules(ds.getId(), Set.of(ah2.getId()));
 
         // assign target
         assignDistributionSet(ds.getId(), target.getControllerId());
@@ -458,7 +457,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         final Long dsId = ds.getId();
         // not allowed as it is assigned now
-        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(dsId, Sets.newHashSet(os2.getId())))
+        assertThatThrownBy(() -> distributionSetManagement.assignSoftwareModules(dsId, Set.of(os2.getId())))
                 .isInstanceOf(EntityReadOnlyException.class);
 
         // not allowed as it is assigned now
@@ -482,7 +481,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // update data
         assertThatThrownBy(
-                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Sets.newHashSet(module.getId())))
+                () -> distributionSetManagement.assignSoftwareModules(set.getId(), Set.of(module.getId())))
                         .isInstanceOf(UnsupportedSoftwareModuleForThisDistributionSetException.class);
     }
 
@@ -495,7 +494,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // update data
         // legal update of module addition
-        distributionSetManagement.assignSoftwareModules(ds.getId(), Sets.newHashSet(os.getId()));
+        distributionSetManagement.assignSoftwareModules(ds.getId(), Set.of(os.getId()));
         ds = getOrThrow(distributionSetManagement.getWithDetails(ds.getId()));
         assertThat(getOrThrow(ds.findFirstModuleByType(osType))).isEqualTo(os);
 
@@ -531,7 +530,7 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // create some software modules
         final int maxModules = quotaManagement.getMaxSoftwareModulesPerDistributionSet();
-        final List<Long> modules = Lists.newArrayList();
+        final List<Long> modules = new ArrayList<>();
         for (int i = 0; i < maxModules + 1; ++i) {
             modules.add(testdataFactory.createSoftwareModuleApp("sm" + i).getId());
         }

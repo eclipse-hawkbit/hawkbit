@@ -21,6 +21,8 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +33,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -110,10 +113,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
@@ -450,7 +449,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         LOG.debug("{} events in flushUpdateQueue.", size);
 
-        final Set<TargetPoll> events = Sets.newHashSetWithExpectedSize(queue.size());
+        final Set<TargetPoll> events = new HashSet<>(queue.size());
         final int drained = queue.drainTo(events);
 
         if (drained <= 0) {
@@ -494,7 +493,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * itself.
      */
     private void setLastTargetQuery(final String tenant, final long currentTimeMillis, final List<String> chunk) {
-        final Map<String, String> paramMapping = Maps.newHashMapWithExpectedSize(chunk.size());
+        final Map<String, String> paramMapping = new HashMap<>(chunk.size());
 
         for (int i = 0; i < chunk.size(); i++) {
             paramMapping.put("cid" + i, chunk.get(i));

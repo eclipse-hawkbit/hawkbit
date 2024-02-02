@@ -71,10 +71,6 @@
       <dependency>
          <groupId>org.springframework</groupId>
          <artifactId>spring-context-support</artifactId>
-      </dependency>      
-      <dependency>
-         <groupId>com.google.guava</groupId>
-         <artifactId>guava</artifactId>
       </dependency>
       <dependency>
          <groupId>io.protostuff</groupId>
