@@ -11,17 +11,16 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.Extension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An {@link Extension} for creating and dropping MySql schemas if
  * tests are set up with MySql.
  */
+@Slf4j
 public class MySqlTestDatabase extends AbstractSqlTestDatabase {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MySqlTestDatabase.class);
+    
     protected static final String MYSQL_URI_PATTERN = "jdbc:mariadb://{host}:{port}/{db}*";
 
     public MySqlTestDatabase(final DatasourceContext context) {
@@ -32,7 +31,7 @@ public class MySqlTestDatabase extends AbstractSqlTestDatabase {
     public MySqlTestDatabase createRandomSchema() {
         final String uri = context.getDatasourceUrl();
         final String schemaName = getSchemaName(uri);
-        LOGGER.info("\033[0;33mCreating mysql schema {} if not existing \033[0m", context.getRandomSchemaName());
+        log.info("\033[0;33mCreating mysql schema {} if not existing \033[0m", context.getRandomSchemaName());
 
         executeStatement(uri.split("/" + schemaName)[0],
                 "CREATE SCHEMA IF NOT EXISTS " + context.getRandomSchemaName() + ";");
@@ -43,7 +42,7 @@ public class MySqlTestDatabase extends AbstractSqlTestDatabase {
     protected void dropRandomSchema() {
         final String uri = context.getDatasourceUrl();
         final String schemaName = getSchemaName(uri);
-        LOGGER.info("\033[0;33mDropping mysql schema {} \033[0m", context.getRandomSchemaName());
+        log.info("\033[0;33mDropping mysql schema {} \033[0m", context.getRandomSchemaName());
         executeStatement(uri.split("/" + schemaName)[0], "DROP SCHEMA " + context.getRandomSchemaName() + ";");
     }
 

@@ -9,28 +9,26 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestWatcher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+@Slf4j
 public class JUnitTestLoggerExtension implements BeforeTestExecutionCallback, TestWatcher {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JUnitTestLoggerExtension.class);
 
     @Override
     public void testSuccessful(final ExtensionContext context) {
-        LOG.info("Test {} succeeded.", context.getTestMethod());
+        log.info("Test {} succeeded.", context.getTestMethod());
     }
 
     @Override
     public void testFailed(final ExtensionContext context, final Throwable cause) {
-        LOG.error("Test {} failed with {}.", context.getTestMethod(), cause.getMessage());
+        log.error("Test {} failed with {}.", context.getTestMethod(), cause.getMessage());
     }
 
     @Override
     public void beforeTestExecution(final ExtensionContext context) {
-        LOG.info("Starting Test {}...", context.getTestMethod());
+        log.info("Starting Test {}...", context.getTestMethod());
     }
 }

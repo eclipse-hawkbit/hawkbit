@@ -9,16 +9,14 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Holds all database related configuration
  */
+@Slf4j
 public class DatasourceContext {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DatasourceContext.class);
 
     public static final String SPRING_DATASOURCE_URL_KEY = "spring.datasource.url";
     public static final String SPRING_DATABASE_KEY = "spring.jpa.database";
@@ -82,7 +80,7 @@ public class DatasourceContext {
     }
 
     public boolean isNotProperlyConfigured() {
-        LOGGER.debug("Datasource environment variables: [database: {}, username: {}, password: {}, datasourceUrl: {}]",
+        log.debug("Datasource environment variables: [database: {}, username: {}, password: {}, datasourceUrl: {}]",
                 database, username, password, datasourceUrl);
         
         return database == null || datasourceUrl == null || username == null || password == null;

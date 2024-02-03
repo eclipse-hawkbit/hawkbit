@@ -11,17 +11,16 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import java.util.Map;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.extension.Extension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An {@link Extension} for creating and dropping MySql schemas if
  * tests are set up with MySql.
  */
+@Slf4j
 public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PostgreSqlTestDatabase.class);
+    
     private static final String POSTGRESQL_URI_PATTERN = "jdbc:postgresql://{host}:{port}/{db}*";
 
     public PostgreSqlTestDatabase(final DatasourceContext context) {
@@ -30,7 +29,7 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected PostgreSqlTestDatabase createRandomSchema() {
-        LOGGER.info("\033[0;33mCreating postgreSql schema {} \033[0m", context.getRandomSchemaName());
+        log.info("\033[0;33mCreating postgreSql schema {} \033[0m", context.getRandomSchemaName());
         final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
         executeStatement(uri, "CREATE SCHEMA " + context.getRandomSchemaName() + ";");
         return this;
@@ -38,7 +37,7 @@ public class PostgreSqlTestDatabase extends AbstractSqlTestDatabase {
 
     @Override
     protected void dropRandomSchema() {
-        LOGGER.info("\033[0;33mDropping postgreSql schema {}\033[0m", context.getRandomSchemaName());
+        log.info("\033[0;33mDropping postgreSql schema {}\033[0m", context.getRandomSchemaName());
         final String uri = getBaseUri() + "?currentSchema=" + getSchemaName();
         executeStatement(uri, "DROP SCHEMA " + context.getRandomSchemaName() + " CASCADE;");
     }
