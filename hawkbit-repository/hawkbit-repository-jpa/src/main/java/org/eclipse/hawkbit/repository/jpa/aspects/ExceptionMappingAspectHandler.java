@@ -16,14 +16,13 @@ import java.util.Map;
 
 import jakarta.transaction.TransactionManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.annotation.AfterThrowing;
 import org.aspectj.lang.annotation.Aspect;
 import org.eclipse.hawkbit.exception.GenericSpServerException;
 import org.eclipse.hawkbit.repository.exception.ConcurrentModificationException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -36,10 +35,9 @@ import org.springframework.transaction.TransactionSystemException;
  * specific exceptions Additionally it checks and prevents access to certain
  * packages. Logging aspect which logs the call stack
  */
+@Slf4j
 @Aspect
 public class ExceptionMappingAspectHandler implements Ordered {
-
-    private static final Logger LOG = LoggerFactory.getLogger(ExceptionMappingAspectHandler.class);
 
     private static final Map<String, String> EXCEPTION_MAPPING = new HashMap<>(4);
 
@@ -98,7 +96,7 @@ public class ExceptionMappingAspectHandler implements Ordered {
                         .getConstructor(Throwable.class).newInstance(ex);
             }
 
-            LOG.error("there is no mapping configured for exception class {}", mappedEx.getName());
+            log.error("there is no mapping configured for exception class {}", mappedEx.getName());
             throw new GenericSpServerException(ex);
         }
 

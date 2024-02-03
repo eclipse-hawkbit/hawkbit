@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.jpa.repository.RolloutGroupRepository;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
@@ -18,15 +19,12 @@ import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
 import org.eclipse.hawkbit.repository.model.RolloutGroup.RolloutGroupStatus;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Success action which starts the next following {@link RolloutGroup}.
  */
+@Slf4j
 public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActionEvaluator<RolloutGroup.RolloutGroupSuccessAction> {
-
-    private static final Logger logger = LoggerFactory.getLogger(StartNextGroupRolloutGroupSuccessAction.class);
 
     private final RolloutGroupRepository rolloutGroupRepository;
 
@@ -60,13 +58,13 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
         // started.
         final long countOfStartedActions = deploymentManagement.startScheduledActionsByRolloutGroupParent(
                 rollout.getId(), rollout.getDistributionSet().getId(), rolloutGroup.getId());
-        logger.debug("{} Next actions started for rollout {} and parent group {}", countOfStartedActions, rollout,
+        log.debug("{} Next actions started for rollout {} and parent group {}", countOfStartedActions, rollout,
                 rolloutGroup);
         if (countOfStartedActions > 0) {
             // get all next scheduled groups and set them in state running
             rolloutGroupRepository.setStatusForCildren(RolloutGroupStatus.RUNNING, rolloutGroup);
         } else {
-            logger.debug("No actions to start for next rolloutgroup of parent {} {}", rolloutGroup.getId(),
+            log.debug("No actions to start for next rolloutgroup of parent {} {}", rolloutGroup.getId(),
                     rolloutGroup.getName());
             // nothing for next group, just finish the group, this can happen
             // e.g. if targets has been deleted after the group has been
@@ -78,7 +76,7 @@ public class StartNextGroupRolloutGroupSuccessAction implements RolloutGroupActi
                 if (nextGroup.isDynamic()) {
                     nextGroup.setStatus(RolloutGroupStatus.RUNNING);
                 } else {
-                    logger.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
+                    log.debug("Rolloutgroup {} is finished, starting next group", nextGroup);
                     nextGroup.setStatus(RolloutGroupStatus.FINISHED);
                     rolloutGroupRepository.save(nextGroup);
                     // find the next group to set in running state
