@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.Data;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -18,6 +20,7 @@ import java.util.List;
  * how much of the assignments had already been existed.
  *
  */
+@Data
 public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Action> {
 
     private final DistributionSet distributionSet;
@@ -37,12 +40,4 @@ public class DistributionSetAssignmentResult extends AbstractAssignmentResult<Ac
         super(alreadyAssigned, assigned, Collections.emptyList());
         this.distributionSet = distributionSet;
     }
-
-    /**
-     * @return The distribution set that has been assigned
-     */
-    public DistributionSet getDistributionSet() {
-        return distributionSet;
-    }
-
 }

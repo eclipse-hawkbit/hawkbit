@@ -123,5 +123,4 @@ public class DeploymentRequestBuilder {
         return new DeploymentRequest(controllerId, distributionSetId, actionType, forceTime, weight,
                 maintenanceSchedule, maintenanceWindowDuration, maintenanceWindowTimeZone, confirmationRequired);
     }
-
 }
