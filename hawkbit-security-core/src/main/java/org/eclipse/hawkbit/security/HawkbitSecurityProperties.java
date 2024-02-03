@@ -32,26 +32,21 @@ public class HawkbitSecurityProperties {
      * Content Security policy Header for Manager UI.
      */
     private String contentSecurityPolicy;
-
     /**
      * Secure access enforced.
      */
     private boolean requireSsl;
-
     /**
      * With this property a list of allowed hostnames can be configured. All
      * requests with different Host headers will be rejected.
      */
     private List<String> allowedHostNames;
-
     /**
-     * Add paths that will be ignored by {@link StrictHttpFirewall}.
+     * Add paths that will be ignored by {@link org.springframework.security.web.firewall.StrictHttpFirewall}.
      */
     private List<String> httpFirewallIgnoredPaths;
-
     /**
-     * Basic authentication realm, see
-     * https://tools.ietf.org/html/rfc2617#page-3 .
+     * Basic authentication realm, see https://tools.ietf.org/html/rfc2617#page-3 .
      */
     private String basicRealm = "hawkBit";
 
@@ -65,22 +60,18 @@ public class HawkbitSecurityProperties {
          * Flag to enable CORS.
          */
         private boolean enabled = false;
-
         /**
          * Allowed origins for CORS.
          */
         private List<String> allowedOrigins = Collections.singletonList("http://localhost");
-
         /**
          * Allowed headers for CORS.
          */
         private List<String> allowedHeaders = Collections.singletonList("*");
-
         /**
          * Allowed methods for CORS.
          */
         private List<String> allowedMethods = Arrays.asList("DELETE", "GET", "POST", "PATCH", "PUT");
-
         /**
          * Exposed headers for CORS.
          */
@@ -94,17 +85,14 @@ public class HawkbitSecurityProperties {
     public static class Clients {
 
         public static final String X_FORWARDED_FOR = "X-Forwarded-For";
-
         /**
          * Blacklisted client (IP addresses) for for DDI and Management API.
          */
         private String blacklist = "";
-
         /**
          * Name of the http header from which the remote ip is extracted.
          */
         private String remoteIpHeader = X_FORWARDED_FOR;
-
         /**
          * Set to <code>true</code> if DDI clients remote IP should be stored.
          */
@@ -122,84 +110,68 @@ public class HawkbitSecurityProperties {
          * an action (0 to disable).
          */
         private int maxStatusEntriesPerAction = 1000;
-
         /**
          * Maximum number of attributes that the controller can report;
          */
         private int maxAttributeEntriesPerTarget = 100;
-
         /**
          * Maximum number of allowed groups per Rollout.
          */
         private int maxRolloutGroupsPerRollout = 500;
-
         /**
          * Maximum number of messages per ActionStatus
          */
         private int maxMessagesPerActionStatus = 50;
-
         /**
          * Maximum number of meta data entries per software module
          */
         private int maxMetaDataEntriesPerSoftwareModule = 100;
-
         /**
          * Maximum number of meta data entries per distribution set
          */
         private int maxMetaDataEntriesPerDistributionSet = 100;
-
         /**
          * Maximum number of meta data entries per target
          */
         private int maxMetaDataEntriesPerTarget = 100;
-
         /**
          * Maximum number of software modules per distribution set
          */
         private int maxSoftwareModulesPerDistributionSet = 100;
-
         /**
          * Maximum number of software modules per distribution set
          */
         private int maxSoftwareModuleTypesPerDistributionSetType = 50;
-
         /**
          * Maximum number of artifacts per software module
          */
         private int maxArtifactsPerSoftwareModule = 50;
-
         /**
          * Maximum number of targets per rollout group
          */
         private int maxTargetsPerRolloutGroup = 20000;
-
         /**
          * Maximum number of overall actions targets per target
          */
         private int maxActionsPerTarget = 2000;
-
         /**
          * Maximum number of actions resulting from a manual assignment of
          * distribution sets and targets. Must be greater than 1000.
          */
         private int maxTargetDistributionSetAssignmentsPerManualAssignment = 5000;
-
         /**
          * Maximum number of targets for an automatic distribution set
          * assignment
          */
         private int maxTargetsPerAutoAssignment = 20000;
-
         /**
          * Maximum size of artifacts in bytes. Defaults to 1 GB.
          */
         private long maxArtifactSize = 1_073_741_824;
-
         /**
          * Maximum size of all artifacts in bytes. Defaults to 20 GB.
          */
         private long maxArtifactStorage = 21_474_836_480L;
-
         /**
          * Maximum number of distribution set types per target types
          */
@@ -220,19 +192,16 @@ public class HawkbitSecurityProperties {
              * True if filter is enabled.
              */
             private boolean enabled = true;
-
             /**
              * White list of peer IP addresses for DOS filter (regular
              * expression).
              */
             private String whitelist = "10\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|192\\.168\\.\\d{1,3}\\.\\d{1,3}|169\\.254\\.\\d{1,3}\\.\\d{1,3}|127\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}|172\\.1[6-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.2[0-9]{1}\\.\\d{1,3}\\.\\d{1,3}|172\\.3[0-1]{1}\\.\\d{1,3}\\.\\d{1,3}";
-
             /**
              * # Maximum number of allowed REST read/GET requests per second per
              * client IP.
              */
             private int maxRead = 200;
-
             /**
              * Maximum number of allowed REST write/(PUT/POST/etc.) requests per
              * second per client IP.

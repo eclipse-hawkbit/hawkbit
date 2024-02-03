@@ -48,12 +48,10 @@ public class DdiSecurityProperties {
          * HTTP header field for common name of a DDI target client certificate.
          */
         private String cnHeader = "X-Ssl-Client-Cn";
-
         /**
          * HTTP header field for issuer hash of a DDI target client certificate.
          */
         private String sslIssuerHashHeader = "X-Ssl-Issuer-Hash-%d";
-
         /**
          * List of trusted (reverse proxy) IP addresses for performing DDI
          * client certificate authentication.
@@ -66,6 +64,7 @@ public class DdiSecurityProperties {
      */
     @Data
     public static class Authentication {
+
         private final Anonymous anonymous = new Anonymous();
         private final Targettoken targettoken = new Targettoken();
         private final Gatewaytoken gatewaytoken = new Gatewaytoken();
