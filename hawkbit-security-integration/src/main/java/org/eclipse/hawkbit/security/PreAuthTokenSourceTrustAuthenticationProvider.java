@@ -37,7 +37,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
  * also check the remote IP address of the request.
  */
 @Slf4j
-public class PreAuthTokenSourceTrustAuthenticationProvider implements AuthenticationProvider 
+public class PreAuthTokenSourceTrustAuthenticationProvider implements AuthenticationProvider {
     
     private final List<String> authorizedSourceIps;
 
