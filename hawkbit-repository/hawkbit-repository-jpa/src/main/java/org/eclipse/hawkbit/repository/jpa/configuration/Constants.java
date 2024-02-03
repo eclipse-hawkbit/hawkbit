@@ -9,13 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.jpa.configuration;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
 /**
  * A constant class which holds only static constants used within the SP server.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Constants {
 
     /**
@@ -26,22 +28,12 @@ public final class Constants {
      * number.
      */
     public static final int MAX_ENTRIES_IN_STATEMENT = 999;
-
     /**
      * @see Retryable#maxAttempts()
      */
     public static final int TX_RT_MAX = 10;
-
     /**
      * @see Backoff#delay()
      */
     public static final long TX_RT_DELAY = 100;
-
-    /**
-     * Constant class only private constructor.
-     */
-    private Constants() {
-
-    }
-
 }

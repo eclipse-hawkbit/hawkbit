@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -50,8 +51,6 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,13 +67,11 @@ import cz.jirutka.rsql.parser.RSQLParserException;
 
 /**
  * JPA implementation of {@link TargetFilterQueryManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaTargetFilterQueryManagement implements TargetFilterQueryManagement {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTargetFilterQueryManagement.class);
 
     private final TargetFilterQueryRepository targetFilterQueryRepository;
     private final TargetManagement targetManagement;
@@ -331,7 +328,7 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             RSQLUtility.validateRsqlFor(query, TargetFields.class);
             return true;
         } catch (final RSQLParserException | RSQLParameterUnsupportedFieldException e) {
-            LOGGER.debug("The RSQL query '" + query + "' is invalid.", e);
+            log.debug("The RSQL query '" + query + "' is invalid.", e);
             return false;
         }
     }
@@ -346,6 +343,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     @Transactional
     public void cancelAutoAssignmentForDistributionSet(final long distributionSetId) {
         targetFilterQueryRepository.unsetAutoAssignDistributionSetAndActionTypeAndAccessContext(distributionSetId);
-        LOGGER.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
+        log.debug("Auto assignments for distribution sets {} deactivated", distributionSetId);
     }
 }

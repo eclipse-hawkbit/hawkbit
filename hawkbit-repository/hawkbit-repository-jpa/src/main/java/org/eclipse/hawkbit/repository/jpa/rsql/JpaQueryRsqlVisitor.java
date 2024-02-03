@@ -41,14 +41,13 @@ import cz.jirutka.rsql.parser.ast.LogicalNode;
 import cz.jirutka.rsql.parser.ast.Node;
 import cz.jirutka.rsql.parser.ast.OrNode;
 import cz.jirutka.rsql.parser.ast.RSQLVisitor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.eclipse.hawkbit.repository.FieldNameProvider;
 import org.eclipse.hawkbit.repository.FieldValueConverter;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.SimpleTypeConverter;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.orm.jpa.vendor.Database;
@@ -59,16 +58,12 @@ import org.springframework.util.StringUtils;
  * An implementation of the {@link RSQLVisitor} to visit the parsed tokens and
  * build JPA where clauses.
  *
- * @param <A>
- *            the enum for providing the field name of the entity field to
- *            filter on.
- * @param <T>
- *            the entity type referenced by the root
+ * @param <A> the enum for providing the field name of the entity field to filter on.
+ * @param <T> the entity type referenced by the root
  */
+@Slf4j
 public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> extends AbstractFieldNameRSQLVisitor<A>
         implements RSQLVisitor<List<Predicate>, String> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaQueryRsqlVisitor.class);
 
     public static final Character LIKE_WILDCARD = '*';
     private static final char ESCAPE_CHAR = '\\';
@@ -296,9 +291,9 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
         } catch (final IllegalArgumentException e) {
             // we could not transform the given string value into the enum
             // type, so ignore it and return null and do not filter
-            LOGGER.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
+            log.info("given value {} cannot be transformed into the correct enum type {}", value.toUpperCase(),
                     javaType);
-            LOGGER.debug("value cannot be transformed to an enum", e);
+            log.debug("value cannot be transformed to an enum", e);
 
             throw new RSQLParameterUnsupportedFieldException("field {" + node.getSelector()
                     + "} must be one of the following values {" + Arrays.stream(tmpEnumType.getEnumConstants())
@@ -596,7 +591,7 @@ public class JpaQueryRsqlVisitor<A extends Enum<A> & FieldNameProvider, T> exten
             if (!CollectionUtils.isEmpty(accept)) {
                 childs.addAll(accept);
             } else {
-                LOGGER.debug("visit logical node children but could not parse it, ignoring {}", node2);
+                log.debug("visit logical node children but could not parse it, ignoring {}", node2);
             }
         }
         return childs;

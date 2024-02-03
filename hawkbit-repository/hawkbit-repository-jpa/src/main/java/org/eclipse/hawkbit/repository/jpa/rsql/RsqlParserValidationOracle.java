@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TargetFields;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
@@ -32,8 +33,6 @@ import org.eclipse.hawkbit.repository.rsql.SuggestionContext;
 import org.eclipse.hawkbit.repository.rsql.SyntaxErrorContext;
 import org.eclipse.hawkbit.repository.rsql.ValidationOracleContext;
 import org.eclipse.persistence.exceptions.ConversionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.util.CollectionUtils;
 
@@ -51,11 +50,9 @@ import cz.jirutka.rsql.parser.RSQLParserException;
  * There is a feature request on the GitHub project
  * <a href="https://github.com/jirutka/rsql-parser/issues/22">https://github.com
  * /jirutka/rsql-parser/issues/22</a>
- * 
  */
+@Slf4j
 public class RsqlParserValidationOracle implements RsqlValidationOracle {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RsqlParserValidationOracle.class);
 
     @Override
     public ValidationOracleContext suggest(final String rsqlQuery, final int cursorPosition) {
@@ -76,10 +73,10 @@ public class RsqlParserValidationOracle implements RsqlValidationOracle {
             setExceptionDetails(rsqlQuery, new Exception(ex.getCause().getCause()), expectedTokens);
             errorContext.setErrorMessage(getCustomMessage(ex.getCause().getMessage(), expectedTokens));
             suggestionContext.setSuggestions(expectedTokens);
-            LOGGER.trace("Syntax exception on parsing :", ex);
+            log.trace("Syntax exception on parsing :", ex);
         } catch (final RSQLParameterUnsupportedFieldException | IllegalArgumentException ex) {
             errorContext.setErrorMessage(getCustomMessage(ex.getMessage(), null));
-            LOGGER.trace("Illegal argument on parsing :", ex);
+            log.trace("Illegal argument on parsing :", ex);
         } catch (@SuppressWarnings("squid:S1166") final ConversionException | JpaSystemException e) {
             // noop
         }

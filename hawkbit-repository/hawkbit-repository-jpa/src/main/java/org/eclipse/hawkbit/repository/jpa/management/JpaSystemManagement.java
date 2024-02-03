@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 
 import jakarta.persistence.EntityManager;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.cache.TenancyCacheManager;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -48,8 +49,6 @@ import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.persistence.config.PersistenceUnitProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
 import org.springframework.cache.annotation.Cacheable;
@@ -68,13 +67,11 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation of {@link SystemManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, SystemManagement {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaSystemManagement.class);
 
     private static final int MAX_TENANTS_QUERY = 1000;
 
@@ -262,7 +259,7 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
         final TenantMetaData metaData = tenantMetaDataRepository.findByTenantIgnoreCase(tenant);
         if (metaData == null) {
             if (repositoryProperties.isImplicitTenantCreateAllowed()) {
-                LOGGER.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
+                log.info("Tenant {} doesn't exist create metadata", tenant, new Exception("Thread dump"));
                 return createTenantMetadata0(tenant);
             } else {
                 throw new EntityNotFoundException(TenantMetaData.class, tenant);
@@ -344,9 +341,9 @@ public class JpaSystemManagement implements CurrentTenantCacheKeyGenerator, Syst
                 try {
                     consumer.accept(tenant);
                 } catch (final RuntimeException ex) {
-                    LOGGER.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
+                    log.debug("Exception on forEachTenant execution for tenant {}. Continue with next tenant.",
                             tenant, ex);
-                    LOGGER.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
+                    log.error("Exception on forEachTenant execution for tenant {} with error message [{}]. "
                             + "Continue with next tenant.", tenant, ex.getMessage());
                 }
                 return null;

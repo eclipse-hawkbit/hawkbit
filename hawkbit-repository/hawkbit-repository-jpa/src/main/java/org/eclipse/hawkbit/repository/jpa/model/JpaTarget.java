@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository.jpa.model;
 
+import java.io.Serial;
 import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
@@ -45,6 +46,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission;
 import org.eclipse.hawkbit.repository.event.remote.TargetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
@@ -70,12 +72,9 @@ import org.eclipse.persistence.annotations.ConversionValue;
 import org.eclipse.persistence.annotations.Convert;
 import org.eclipse.persistence.annotations.ObjectTypeConverter;
 import org.eclipse.persistence.descriptors.DescriptorEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * JPA implementation of {@link Target}.
- *
  */
 @Entity
 @Table(name = "sp_target", indexes = {
@@ -88,11 +87,11 @@ import org.slf4j.LoggerFactory;
 // exception squid:S2160 - BaseEntity equals/hashcode is handling correctly for
 // sub entities
 @SuppressWarnings("squid:S2160")
+@Slf4j
 public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAwareEntity {
 
+    @Serial
     private static final long serialVersionUID = 1L;
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaTarget.class);
 
     private static final List<String> TARGET_UPDATE_EVENT_IGNORE_FIELDS = Arrays.asList("lastTargetQuery", "address",
             "optLockRevision", "lastModifiedAt", "lastModifiedBy");
@@ -347,7 +346,7 @@ public class JpaTarget extends AbstractJpaNamedEntity implements Target, EventAw
         try {
             return URI.create(address);
         } catch (final IllegalArgumentException e) {
-            LOG.warn("Invalid address provided. Cloud not be configured to URI", e);
+            log.warn("Invalid address provided. Cloud not be configured to URI", e);
             return null;
         }
     }
