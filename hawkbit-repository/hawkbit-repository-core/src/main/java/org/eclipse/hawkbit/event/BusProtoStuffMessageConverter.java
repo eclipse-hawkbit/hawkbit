@@ -9,8 +9,7 @@
  */
 package org.eclipse.hawkbit.event;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHeaders;
@@ -33,12 +32,11 @@ import io.protostuff.runtime.RuntimeSchema;
  * message header information will get lost. So in this implementation the
  * information about the event-type is encoded in the payload of the message
  * directly using the encoded values of {@link EventType}.
- *
  */
+@Slf4j
 public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
 
     public static final MimeType APPLICATION_BINARY_PROTOSTUFF = new MimeType("application", "binary+protostuff");
-    private static final Logger LOG = LoggerFactory.getLogger(BusProtoStuffMessageConverter.class);
     /**
      * The length of the class type length of the payload.
      */
@@ -60,9 +58,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     public Object convertFromInternal(final Message<?> message, final Class<?> targetClass,
             final Object conversionHint) {
         final Object objectPayload = message.getPayload();
-        if (objectPayload instanceof byte[]) {
-
-            final byte[] payload = (byte[]) objectPayload;
+        if (objectPayload instanceof byte[] payload) {
             final byte[] clazzHeader = extractClazzHeader(payload);
             final byte[] content = extraxtContent(payload);
 
@@ -86,7 +82,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     private static Object readContent(final EventType eventType, final byte[] content) {
         final Class<?> targetClass = eventType.getTargetClass();
         if (targetClass == null) {
-            LOG.error("Cannot read clazz header for given EventType value {}, missing mapping", eventType.getValue());
+            log.error("Cannot read clazz header for given EventType value {}, missing mapping", eventType.getValue());
             throw new MessageConversionException("Missing mapping of EventType for value " + eventType.getValue());
         }
         @SuppressWarnings("unchecked")
@@ -133,7 +129,7 @@ public class BusProtoStuffMessageConverter extends AbstractMessageConverter {
     private static byte[] writeClassHeader(final Class<?> clazz) {
         final EventType clazzEventType = EventType.from(clazz);
         if (clazzEventType == null) {
-            LOG.error("There is no mapping to EventType for the given class {}", clazz);
+            log.error("There is no mapping to EventType for the given class {}", clazz);
             throw new MessageConversionException("Missing EventType for given class : " + clazz);
         }
         @SuppressWarnings("unchecked")

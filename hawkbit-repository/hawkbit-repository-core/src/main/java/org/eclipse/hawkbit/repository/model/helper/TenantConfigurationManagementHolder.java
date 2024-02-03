@@ -9,6 +9,9 @@
  */
 package org.eclipse.hawkbit.repository.model.helper;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,29 +20,19 @@ import org.springframework.beans.factory.annotation.Autowired;
  * and makes it accessible to beans which are not managed by spring, e.g. JPA
  * entities.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TenantConfigurationManagementHolder {
 
     private static final TenantConfigurationManagementHolder INSTANCE = new TenantConfigurationManagementHolder();
 
+    @Getter
     @Autowired
-    private TenantConfigurationManagement tenantConfiguration;
-
-    private TenantConfigurationManagementHolder() {
-    }
+    private TenantConfigurationManagement tenantConfigurationManagement;
 
     /**
-     * @return the singleton {@link TenantConfigurationManagementHolder}
-     *         instance
+     * @return the singleton {@link TenantConfigurationManagementHolder} instance
      */
     public static TenantConfigurationManagementHolder getInstance() {
         return INSTANCE;
     }
-
-    /**
-     * @return the {@link TenantConfigurationManagement} service
-     */
-    public TenantConfigurationManagement getTenantConfigurationManagement() {
-        return tenantConfiguration;
-    }
-
 }

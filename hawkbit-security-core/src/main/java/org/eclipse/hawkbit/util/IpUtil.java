@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
 
@@ -23,7 +24,7 @@ import org.eclipse.hawkbit.security.HawkbitSecurityProperties;
  * A utility which determines the correct IP of a connected {@link Target}. E.g
  * from a {@link HttpServletRequest}.
  */
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 // Exception squid:S2083 - false positive, file paths not handled here
 @SuppressWarnings("squid:S2083")
 public final class IpUtil {

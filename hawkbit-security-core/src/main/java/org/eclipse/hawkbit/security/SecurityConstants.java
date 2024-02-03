@@ -9,12 +9,13 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
  * Constants related to security.
  */
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SecurityConstants {
 
     /**

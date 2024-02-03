@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository;
 import java.time.Duration;
 import java.time.Instant;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.repository.model.helper.SystemSecurityContextHolder;
 import org.eclipse.hawkbit.repository.model.helper.TenantConfigurationManagementHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
@@ -22,12 +24,9 @@ import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.T
  * Calculates non-persistent timestamps , e.g. the point a time a target is
  * declared as overdue.<br>
  * Therefore tenant specific configuration may be considered.
- *
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class TimestampCalculator {
-
-    private TimestampCalculator() {
-    }
 
     /**
      * Calculates the overdue timestamp (<em>overdue_ts</em>) based on the

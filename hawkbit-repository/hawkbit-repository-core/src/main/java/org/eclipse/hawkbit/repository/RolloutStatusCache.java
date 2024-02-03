@@ -38,9 +38,11 @@ import com.github.benmanes.caffeine.cache.Caffeine;
  *
  */
 public class RolloutStatusCache {
+
     private static final String CACHE_RO_NAME = "RolloutStatus";
     private static final String CACHE_GR_NAME = "RolloutGroupStatus";
     private static final long DEFAULT_SIZE = 50_000;
+    
     private final TenancyCacheManager cacheManager;
     private final TenantAware tenantAware;
 
