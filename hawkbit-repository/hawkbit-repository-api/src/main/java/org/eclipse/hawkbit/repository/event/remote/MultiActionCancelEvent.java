@@ -44,5 +44,4 @@ public class MultiActionCancelEvent extends MultiActionEvent {
     public MultiActionCancelEvent(String tenant, String applicationId, List<Action> actions) {
         super(tenant, applicationId, actions);
     }
-
 }

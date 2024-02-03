@@ -44,5 +44,4 @@ public class MultiActionAssignEvent extends MultiActionEvent {
     public MultiActionAssignEvent(String tenant, String applicationId, List<Action> actions) {
         super(tenant, applicationId, actions);
     }
-
 }

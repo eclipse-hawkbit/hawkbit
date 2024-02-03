@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.repository;
 
+import lombok.Data;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -19,9 +20,11 @@ import org.springframework.data.domain.Sort;
  * the REST-API is working with {@code offset} and {@code limit} parameter we
  * need an offset based page request.
  */
+@Data
 public final class OffsetBasedPageRequest extends PageRequest {
 
     private static final long serialVersionUID = 1L;
+
     private final long offset;
 
     /**
@@ -52,42 +55,4 @@ public final class OffsetBasedPageRequest extends PageRequest {
         super(0, limit, sort);
         this.offset = offset;
     }
-
-    @Override
-    public long getOffset() {
-        return offset;
-    }
-
-    @Override
-    public String toString() {
-        return "OffsetBasedPageRequest [offset=" + offset + ", getPageSize()=" + getPageSize() + ", getPageNumber()="
-                + getPageNumber() + "]";
-    }
-
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + (int) (offset ^ (offset >>> 32));
-        return result;
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!super.equals(obj)) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final OffsetBasedPageRequest other = (OffsetBasedPageRequest) obj;
-        if (offset != other.offset) {
-            return false;
-        }
-        return true;
-    }
-
 }

@@ -36,5 +36,4 @@ public class CancelTargetAssignmentEvent extends AbstractAssignmentEvent {
         super(applicationId, tenant, a, applicationId);
 
     }
-
 }

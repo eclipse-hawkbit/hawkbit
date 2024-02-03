@@ -13,12 +13,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.eclipse.hawkbit.repository.model.Action;
 
 /**
  * TenantAwareEvent that gets sent when a distribution set gets assigned to a
  * target.
  */
+@Getter
+@EqualsAndHashCode
 public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
 
     private static final long serialVersionUID = 1L;
@@ -70,13 +74,4 @@ public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
         this(action.getTenant(), action.getDistributionSet().getId(), Collections.singletonList(action), applicationId,
                 action.isMaintenanceWindowAvailable());
     }
-
-    public Long getDistributionSetId() {
-        return distributionSetId;
-    }
-
-    public boolean isMaintenanceWindowAvailable() {
-        return maintenanceWindowAvailable;
-    }
-
 }

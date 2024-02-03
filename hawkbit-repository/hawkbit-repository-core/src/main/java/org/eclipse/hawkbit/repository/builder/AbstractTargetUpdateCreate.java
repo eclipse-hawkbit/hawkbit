@@ -11,6 +11,8 @@ package org.eclipse.hawkbit.repository.builder;
 
 import java.net.URI;
 import java.util.Optional;
+
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.ValidString;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
@@ -28,6 +30,7 @@ public class AbstractTargetUpdateCreate<T> extends AbstractNamedEntityBuilder<T>
 
     protected String address;
 
+    @ToString.Exclude
     @ValidString
     protected String securityToken;
 

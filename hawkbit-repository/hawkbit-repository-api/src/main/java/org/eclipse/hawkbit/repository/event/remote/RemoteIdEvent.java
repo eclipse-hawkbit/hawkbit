@@ -9,14 +9,17 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 import java.util.Arrays;
 
 /**
  * An base definition class for an event which contains an id.
- *
  */
+@Getter
+@EqualsAndHashCode
 public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
@@ -59,20 +62,5 @@ public class RemoteIdEvent extends RemoteTenantAwareEvent {
         final Class<?>[] interfaces = baseEntity.getInterfaces();
         return Arrays.stream(interfaces).filter(TenantAwareBaseEntity.class::isAssignableFrom).findFirst()
                 .orElse(baseEntity);
-    }
-
-    /**
-     * @return the entityClass
-     */
-    public String getEntityClass() {
-        return entityClass;
-    }
-
-    public Long getEntityId() {
-        return entityId;
-    }
-
-    public String getInterfaceClass() {
-        return interfaceClass;
     }
 }

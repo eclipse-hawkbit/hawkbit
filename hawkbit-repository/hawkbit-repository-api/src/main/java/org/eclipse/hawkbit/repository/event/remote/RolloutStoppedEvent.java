@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import java.util.Collection;
 
+import lombok.Data;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 
 /**
@@ -18,6 +19,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
  * Event that is published when a rollout is stopped due to invalidation of a
  * {@link DistributionSet}.
  */
+@Data
 public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
 
     private static final long serialVersionUID = 1L;
@@ -50,21 +52,4 @@ public class RolloutStoppedEvent extends RemoteTenantAwareEvent {
         this.rolloutId = rolloutId;
         this.rolloutGroupIds = rolloutGroupIds;
     }
-
-    public Collection<Long> getRolloutGroupIds() {
-        return rolloutGroupIds;
-    }
-
-    public void setRolloutGroupIds(final Collection<Long> rolloutGroupIds) {
-        this.rolloutGroupIds = rolloutGroupIds;
-    }
-
-    public long getRolloutId() {
-        return rolloutId;
-    }
-
-    public void setRolloutId(final long rolloutId) {
-        this.rolloutId = rolloutId;
-    }
-
 }
