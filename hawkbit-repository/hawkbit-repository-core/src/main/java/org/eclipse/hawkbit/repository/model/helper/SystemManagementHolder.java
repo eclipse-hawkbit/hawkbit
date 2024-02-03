@@ -9,25 +9,25 @@
  */
 package org.eclipse.hawkbit.repository.model.helper;
 
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * A singleton bean which holds {@link SystemManagement} service and makes it
  * accessible to beans which are not managed by spring, e.g. JPA entities.
- *
- *
- *
- **/
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class SystemManagementHolder {
 
     private static final SystemManagementHolder INSTANCE = new SystemManagementHolder();
 
+    @Getter @Setter
     @Autowired
     private SystemManagement systemManagement;
-
-    private SystemManagementHolder() {
-    }
 
     /**
      * @return the singleton {@link SystemManagementHolder} instance
@@ -37,25 +37,9 @@ public final class SystemManagementHolder {
     }
 
     /**
-     * @return the systemManagement
-     */
-    public SystemManagement getSystemManagement() {
-        return systemManagement;
-    }
-
-    /**
-     * @param systemManagement
-     *            the systemManagement to set
-     */
-    public void setSystemManagement(final SystemManagement systemManagement) {
-        this.systemManagement = systemManagement;
-    }
-
-    /**
      * @return the {@link SystemManagement#currentTenant()}.
      */
     public String currentTenant() {
         return systemManagement.currentTenant();
     }
-
 }

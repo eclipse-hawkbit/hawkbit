@@ -67,5 +67,4 @@ public class VirtualPropertyResolver extends StrLookup<String> implements Virtua
         }
         return substitutor.replace(input);
     }
-
 }
