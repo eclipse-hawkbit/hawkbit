@@ -115,7 +115,7 @@ public class SystemManagementTest extends AbstractJpaIntegrationTest {
         final List<TenantUsage> tenants = systemManagement.getSystemUsageStatisticsWithTenants().getTenants();
         assertThat(tenants).hasSize(3);
         final TenantUsage tenantUsage0 = new TenantUsage("tenant0");
-        tenantUsage0.setTargets(40);
+        tenantUsage0.setTargets(20);
         tenantUsage0.setActions(40);
         final TenantUsage tenantUsage1 = new TenantUsage("tenant1");
         tenantUsage1.setTargets(20);
