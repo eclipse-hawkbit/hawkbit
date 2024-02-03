@@ -9,17 +9,23 @@
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.entity.EntityDeletedEvent;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
 
 /**
- *
  * Defines the remote event of deleting a {@link org.eclipse.hawkbit.repository.model.TenantConfiguration}.
  */
+@Getter
+@EqualsAndHashCode
 public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     private static final long serialVersionUID = 2L;
+
     private String configKey;
+    @ToString.Exclude
     private String configValue;
 
     /**
@@ -50,13 +56,5 @@ public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements En
         super(entityId, tenant, entityClass, applicationId);
         this.configKey = configKey;
         this.configValue = configValue;
-    }
-
-    public String getConfigKey() {
-        return configKey;
-    }
-
-    public String getConfigValue() {
-        return configValue;
     }
 }

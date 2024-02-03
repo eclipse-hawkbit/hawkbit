@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.Data;
 import org.eclipse.hawkbit.repository.Identifiable;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Target;
@@ -24,6 +25,7 @@ import org.eclipse.hawkbit.repository.model.Target;
  * a deployment action (e.g. a software assignment (update) or a cancellation of
  * an update).
  */
+@Data
 public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements Iterable<String> {
 
     private static final long serialVersionUID = 1L;
@@ -54,17 +56,9 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
         this.actionIds.addAll(getIdsFromActions(actions));
     }
 
-    public List<String> getControllerIds() {
-        return controllerIds;
-    }
-
     @Override
     public Iterator<String> iterator() {
         return controllerIds.iterator();
-    }
-
-    public List<Long> getActionIds() {
-        return actionIds;
     }
 
     private static List<String> getControllerIdsFromActions(final List<Action> actions) {

@@ -44,5 +44,4 @@ public class SoftwareModuleDeletedEvent extends RemoteIdEvent implements EntityD
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
     }
-
 }

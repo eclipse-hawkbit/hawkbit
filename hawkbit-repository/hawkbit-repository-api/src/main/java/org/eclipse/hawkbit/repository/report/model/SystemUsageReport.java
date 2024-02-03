@@ -9,11 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.report.model;
 
+import lombok.Data;
+
 /**
  * Bean for holding the system usage stats.
  *
  */
+@Data
 public class SystemUsageReport {
+
     private final long overallTargets;
     private final long overallArtifacts;
     private final long overallArtifactVolumeInBytes;
@@ -41,25 +45,5 @@ public class SystemUsageReport {
         this.overallActions = overallActions;
         this.overallArtifactVolumeInBytes = overallArtifactVolumeInBytes;
         this.overallTenants = overallTenants;
-    }
-
-    public long getOverallTargets() {
-        return overallTargets;
-    }
-
-    public long getOverallArtifacts() {
-        return overallArtifacts;
-    }
-
-    public long getOverallArtifactVolumeInBytes() {
-        return overallArtifactVolumeInBytes;
-    }
-
-    public long getOverallActions() {
-        return overallActions;
-    }
-
-    public long getOverallTenants() {
-        return overallTenants;
     }
 }

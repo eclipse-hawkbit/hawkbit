@@ -19,5 +19,4 @@ public class TenantConfigurationBooleanValidator implements TenantConfigurationV
     public Class<?> validateToClass() {
         return Boolean.class;
     }
-
 }

@@ -44,5 +44,4 @@ public class RolloutGroupDeletedEvent extends RemoteIdEvent implements EntityDel
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
     }
-
 }

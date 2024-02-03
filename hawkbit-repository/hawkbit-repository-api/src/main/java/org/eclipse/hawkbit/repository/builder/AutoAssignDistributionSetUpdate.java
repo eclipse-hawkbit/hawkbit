@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.repository.builder;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -21,7 +23,10 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  * Builder to update the auto assign {@link DistributionSet} of a
  * {@link TargetFilterQuery} entry. Defines all fields that can be updated.
  */
+@Getter
+@EqualsAndHashCode
 public class AutoAssignDistributionSetUpdate {
+
     private final long targetFilterId;
     private Long dsId;
     private ActionType actionType;
@@ -90,25 +95,4 @@ public class AutoAssignDistributionSetUpdate {
         this.confirmationRequired = confirmationRequired;
         return this;
     }
-
-    public Long getDsId() {
-        return dsId;
-    }
-
-    public ActionType getActionType() {
-        return actionType;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public long getTargetFilterId() {
-        return targetFilterId;
-    }
-
 }

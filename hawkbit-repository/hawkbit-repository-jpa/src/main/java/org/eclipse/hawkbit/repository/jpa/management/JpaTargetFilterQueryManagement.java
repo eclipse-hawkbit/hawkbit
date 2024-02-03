@@ -290,8 +290,8 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
             targetFilterQuery.setAutoAssignWeight(
                     update.getWeight() == null ? repositoryProperties.getActionWeightIfAbsent() : update.getWeight());
             final boolean confirmationRequired =
-                    update.isConfirmationRequired() == null ?
-                            isConfirmationFlowEnabled() : update.isConfirmationRequired();
+                    update.getConfirmationRequired() == null ?
+                            isConfirmationFlowEnabled() : update.getConfirmationRequired();
             targetFilterQuery.setConfirmationRequired(confirmationRequired);
         }
         return targetFilterQueryRepository.save(targetFilterQuery);

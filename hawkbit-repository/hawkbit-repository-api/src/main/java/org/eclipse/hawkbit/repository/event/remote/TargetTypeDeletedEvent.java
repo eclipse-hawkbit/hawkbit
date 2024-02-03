@@ -44,5 +44,4 @@ public class TargetTypeDeletedEvent extends RemoteIdEvent implements EntityDelet
             final Class<? extends TenantAwareBaseEntity> entityClass, final String applicationId) {
         super(entityId, tenant, entityClass, applicationId);
     }
-
 }
