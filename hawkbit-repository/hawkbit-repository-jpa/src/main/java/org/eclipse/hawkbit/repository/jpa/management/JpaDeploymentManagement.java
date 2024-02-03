@@ -36,6 +36,7 @@ import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.ListJoin;
 import jakarta.persistence.criteria.Root;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ActionFields;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
@@ -90,8 +91,6 @@ import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.domain.Page;
@@ -114,13 +113,11 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA implementation for {@link DeploymentManagement}.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaDeploymentManagement extends JpaActionManagement implements DeploymentManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDeploymentManagement.class);
 
     /**
      * Maximum amount of Actions that are started at once.
@@ -492,7 +489,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
             });
             actionRepository.switchStatus(Status.CANCELED, targetIds, false, Status.SCHEDULED);
         } else {
-            LOG.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
+            log.debug("The Multi Assignments feature is enabled: No need to cancel inactive scheduled actions.");
         }
     }
 
@@ -575,7 +572,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Action cancelAction(final long actionId) {
-        LOG.debug("cancelAction({})", actionId);
+        log.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -587,7 +584,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         assertTargetUpdateAllowed(action);
 
         if (action.isActive()) {
-            LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved
@@ -622,7 +619,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
 
         assertTargetUpdateAllowed(action);
 
-        LOG.warn("action ({}) was still active and has been force quite.", action);
+        log.warn("action ({}) was still active and has been force quite.", action);
 
         // document that the status has been retrieved
         actionStatusRepository.save(new JpaActionStatus(action, Status.CANCELED, System.currentTimeMillis(),
@@ -703,7 +700,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 && action.getDistributionSet().getId().equals(target.getAssignedDistributionSet().getId())) {
             // the target has already the distribution set assigned, we don't
             // need to start the scheduled action, just finish it.
-            LOG.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
+            log.debug("Target {} has distribution set {} assigned. Closing action...", target.getControllerId(),
                     action.getDistributionSet().getName());
             action.setStatus(Status.FINISHED);
             action.setActive(false);
@@ -964,7 +961,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
         deleteQuery.setParameter("tenant", tenantAware.getCurrentTenant().toUpperCase());
         deleteQuery.setParameter("last_modified_at", lastModified);
 
-        LOG.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
+        log.debug("Action cleanup: Executing the following (native) query: {}", deleteQuery);
         return deleteQuery.executeUpdate();
     }
 
@@ -1036,11 +1033,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                     try {
                         assertTargetUpdateAllowed(action);
                         cancelAction(action.getId());
-                        LOG.debug("Action {} canceled", action.getId());
+                        log.debug("Action {} canceled", action.getId());
                     } catch (final InsufficientPermissionException e) {
-                        LOG.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                        log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
                     } catch (final EntityNotFoundException e) {
-                        LOG.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
+                        log.trace("Could not cancel action {} due to entity not found exception.", action.getId(), e);
                     }
                 });
         if (cancelationType == CancelationType.FORCE) {
@@ -1049,11 +1046,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                         try {
                             assertTargetUpdateAllowed(action);
                             forceQuitAction(action.getId());
-                            LOG.debug("Action {} force canceled", action.getId());
+                            log.debug("Action {} force canceled", action.getId());
                         } catch (final InsufficientPermissionException e) {
-                            LOG.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
+                            log.trace("Could not cancel action {} due to insufficient permissions.", action.getId(), e);
                         } catch (final EntityNotFoundException e) {
-                            LOG.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
+                            log.trace("Could not cancel action {} due to entity not found exception.", action.getId(),
                                     e);
                         }
                     });

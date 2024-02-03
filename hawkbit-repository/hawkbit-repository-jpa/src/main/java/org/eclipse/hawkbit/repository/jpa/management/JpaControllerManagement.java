@@ -40,6 +40,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import jakarta.validation.constraints.NotEmpty;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.repository.ConfirmationManagement;
 import org.eclipse.hawkbit.repository.ControllerManagement;
@@ -93,8 +94,6 @@ import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -115,12 +114,11 @@ import org.springframework.validation.annotation.Validated;
 
 /**
  * JPA based {@link ControllerManagement} implementation.
- *
  */
+@Slf4j
 @Transactional(readOnly = true)
 @Validated
 public class JpaControllerManagement extends JpaActionManagement implements ControllerManagement {
-    private static final Logger LOG = LoggerFactory.getLogger(JpaControllerManagement.class);
 
     private final BlockingDeque<TargetPoll> queue;
 
@@ -404,7 +402,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
     private Target createTarget(final String controllerId, final URI address, final String name, final String type) {
 
-        LOG.debug("Creating target for thing ID \"{}\".", controllerId);
+        log.debug("Creating target for thing ID \"{}\".", controllerId);
         JpaTarget jpaTarget = (JpaTarget) entityFactory.target().create()
                 .controllerId(controllerId).description("Plug and Play target: " + controllerId)
                 .name((StringUtils.hasText(name) ? name : controllerId)).status(TargetUpdateStatus.REGISTERED)
@@ -414,10 +412,10 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         if (StringUtils.hasText(type)) {
             var targetTypeOptional = getTargetType(type);
             if (targetTypeOptional.isPresent()) {
-                LOG.debug("Setting target type for thing ID \"{}\" to \"{}\".", controllerId, type);
+                log.debug("Setting target type for thing ID \"{}\" to \"{}\".", controllerId, type);
                 jpaTarget.setTargetType(targetTypeOptional.get());
             } else {
-                LOG.error("Target type with the provided name \"{}\" was not found. Creating target for thing ID" +
+                log.error("Target type with the provided name \"{}\" was not found. Creating target for thing ID" +
                         " \"{}\" without target type assignment", type, controllerId);
             }
         }
@@ -439,14 +437,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
      * {@link Target#getLastTargetQuery()}.
      */
     private void flushUpdateQueue() {
-        LOG.debug("Run flushUpdateQueue.");
+        log.debug("Run flushUpdateQueue.");
 
         final int size = queue.size();
         if (size <= 0) {
             return;
         }
 
-        LOG.debug("{} events in flushUpdateQueue.", size);
+        log.debug("{} events in flushUpdateQueue.", size);
 
         final Set<TargetPoll> events = new HashSet<>(queue.size());
         final int drained = queue.drainTo(events);
@@ -462,15 +460,15 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                         () -> DeploymentHelper.runInNewTransaction(txManager, "flushUpdateQueue", createTransaction));
             });
         } catch (final RuntimeException ex) {
-            LOG.error("Failed to persist UpdateQueue content.", ex);
+            log.error("Failed to persist UpdateQueue content.", ex);
             return;
         }
 
-        LOG.debug("{} events persisted.", drained);
+        log.debug("{} events persisted.", drained);
     }
 
     private Void updateLastTargetQueries(final String tenant, final List<TargetPoll> polls) {
-        LOG.debug("Persist {} targetqueries.", polls.size());
+        log.debug("Persist {} targetqueries.", polls.size());
 
         final List<List<String>> pollChunks = ListUtils.partition(
                 polls.stream().map(TargetPoll::getControllerId).collect(Collectors.toList()),
@@ -508,7 +506,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
 
         final int updated = updateQuery.executeUpdate();
         if (updated < chunk.size()) {
-            LOG.error("Targets polls could not be applied completely ({} instead of {}).", updated, chunk.size());
+            log.error("Targets polls could not be applied completely ({} instead of {}).", updated, chunk.size());
         }
     }
 
@@ -535,14 +533,14 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
                 if (StringUtils.hasText(type)) {
                     var targetTypeOptional = getTargetType(type);
                     if (targetTypeOptional.isPresent()) {
-                        LOG.debug("Updating target type for thing ID \"{}\" to \"{}\".", toUpdate.getControllerId(), type);
+                        log.debug("Updating target type for thing ID \"{}\" to \"{}\".", toUpdate.getControllerId(), type);
                         toUpdate.setTargetType(targetTypeOptional.get());
                     } else {
-                        LOG.error("Target type with the provided name \"{}\" was not found. Target type for thing ID" +
+                        log.error("Target type with the provided name \"{}\" was not found. Target type for thing ID" +
                                 " \"{}\" will not be updated", type, toUpdate.getControllerId());
                     }
                 } else {
-                    LOG.debug("Removing target type assignment for thing ID \"{}\".", toUpdate.getControllerId());
+                    log.debug("Removing target type assignment for thing ID \"{}\".", toUpdate.getControllerId());
                     toUpdate.setTargetType(null); //unassign target type if "" target type name was provided
                 }
             }
@@ -926,7 +924,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         final Page<String> messages = actionStatusRepository.findMessagesByActionIdAndMessageNotLike(pageable, actionId,
                 RepositoryConstants.SERVER_MESSAGE_PREFIX + "%");
 
-        LOG.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(),
+        log.debug("Retrieved {} message(s) from action history for action {}.", messages.getNumberOfElements(),
                 actionId);
 
         return messages.getContent();
@@ -1027,7 +1025,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
     @Modifying
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public Action cancelAction(final long actionId) {
-        LOG.debug("cancelAction({})", actionId);
+        log.debug("cancelAction({})", actionId);
 
         final JpaAction action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
@@ -1037,7 +1035,7 @@ public class JpaControllerManagement extends JpaActionManagement implements Cont
         }
 
         if (action.isActive()) {
-            LOG.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
+            log.debug("action ({}) was still active. Change to {}.", action, Status.CANCELING);
             action.setStatus(Status.CANCELING);
 
             // document that the status has been retrieved

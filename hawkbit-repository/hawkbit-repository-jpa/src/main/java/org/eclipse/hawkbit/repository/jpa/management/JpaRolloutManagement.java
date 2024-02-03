@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.ConstraintDeclarationException;
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
@@ -73,8 +74,6 @@ import org.eclipse.hawkbit.repository.model.TotalTargetCountStatus;
 import org.eclipse.hawkbit.repository.model.helper.EventPublisherHolder;
 import org.eclipse.hawkbit.repository.rsql.VirtualPropertyReplacer;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.data.domain.Page;
@@ -96,10 +95,10 @@ import org.springframework.validation.annotation.Validated;
 /**
  * JPA implementation of {@link RolloutManagement}.
  */
+@Slf4j
 @Validated
 @Transactional(readOnly = true)
 public class JpaRolloutManagement implements RolloutManagement {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutManagement.class);
 
     private static final List<RolloutStatus> ACTIVE_ROLLOUTS = Arrays.asList(RolloutStatus.CREATING,
             RolloutStatus.DELETING, RolloutStatus.STARTING, RolloutStatus.READY, RolloutStatus.RUNNING,
@@ -382,7 +381,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout approveOrDeny(final long rolloutId, final Rollout.ApprovalDecision decision, final String remark) {
-        LOGGER.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
+        log.debug("approveOrDeny rollout called for rollout {} with decision {}", rolloutId, decision);
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.verifyRolloutInStatus(rollout, RolloutStatus.WAITING_FOR_APPROVAL);
         switch (decision) {
@@ -407,7 +406,7 @@ public class JpaRolloutManagement implements RolloutManagement {
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public Rollout start(final long rolloutId) {
-        LOGGER.debug("startRollout called for rollout {}", rolloutId);
+        log.debug("startRollout called for rollout {}", rolloutId);
 
         final JpaRollout rollout = getRolloutAndThrowExceptionIfNotFound(rolloutId);
         RolloutHelper.checkIfRolloutCanStarted(rollout, rollout);
@@ -644,7 +643,7 @@ public class JpaRolloutManagement implements RolloutManagement {
             final JpaRollout jpaRollout = (JpaRollout) rollout;
             jpaRollout.setStatus(RolloutStatus.STOPPING);
             rolloutRepository.save(jpaRollout);
-            LOGGER.debug("Rollout {} stopped", jpaRollout.getId());
+            log.debug("Rollout {} stopped", jpaRollout.getId());
         });
     }
 

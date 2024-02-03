@@ -14,6 +14,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.QuotaManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
@@ -28,8 +29,6 @@ import org.eclipse.hawkbit.repository.jpa.utils.QuotaHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
@@ -39,9 +38,8 @@ import static org.eclipse.hawkbit.repository.model.Action.Status.FINISHED;
 /**
  * Implements utility methods for managing {@link Action}s
  */
+@Slf4j
 public class JpaActionManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaActionManagement.class);
 
     protected final ActionRepository actionRepository;
     protected final ActionStatusRepository actionStatusRepository;
@@ -99,7 +97,7 @@ public class JpaActionManagement {
             return handleAddUpdateActionStatus(actionStatus, action);
         }
 
-        LOG.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
+        log.debug("Update of actionStatus {} for action {} not possible since action not active anymore.",
               actionStatus.getStatus(), action.getId());
         return action;
     }

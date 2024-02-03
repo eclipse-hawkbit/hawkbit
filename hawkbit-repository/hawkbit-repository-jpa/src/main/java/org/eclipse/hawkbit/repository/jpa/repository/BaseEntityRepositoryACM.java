@@ -9,12 +9,11 @@
  */
 package org.eclipse.hawkbit.repository.jpa.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InsufficientPermissionException;
 import org.eclipse.hawkbit.repository.jpa.acm.AccessController;
 import org.eclipse.hawkbit.repository.jpa.model.AbstractJpaTenantAwareBaseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,9 +34,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
+@Slf4j
 public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity> implements BaseEntityRepository<T> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseEntityRepositoryACM.class);
 
     private final BaseEntityRepository<T> repository;
     private final AccessController<T> accessController;
@@ -95,7 +93,7 @@ public class BaseEntityRepositoryACM<T extends AbstractJpaTenantAwareBaseEntity>
                         throw e.getCause() == null ? e : e.getCause();
                     }
                 });
-        LOGGER.info("Proxy created -> {}", acmProxy);
+        log.info("Proxy created -> {}", acmProxy);
         return acmProxy;
     }
 
