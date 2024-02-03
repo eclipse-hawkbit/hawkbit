@@ -110,7 +110,7 @@ public class JpaArtifactManagement implements ArtifactManagement {
         final String filename = artifactUpload.getFilename();
         final Artifact existing = softwareModule.getArtifactByFilename(filename).orElse(null);
         if (existing != null) {
-            if (artifactUpload.overrideExisting()) {
+            if (artifactUpload.isOverrideExisting()) {
                 LOG.debug("overriding existing artifact with new filename {}", filename);
             } else {
                 throw new EntityAlreadyExistsException("File with that name already exists in the Software Module");

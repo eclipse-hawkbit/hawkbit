@@ -15,9 +15,7 @@ import java.util.List;
 /**
  * Generic assignment result bean.
  * 
- * @param <T>
- *            type of the assigned and unassigned {@link BaseEntity}s.
- *
+ * @param <T> type of the assigned and unassigned {@link BaseEntity}s.
  */
 public abstract class AbstractAssignmentResult<T extends BaseEntity> {
 
@@ -90,5 +88,4 @@ public abstract class AbstractAssignmentResult<T extends BaseEntity> {
 
         return Collections.unmodifiableList(unassignedEntity);
     }
-
 }

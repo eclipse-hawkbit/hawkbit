@@ -81,7 +81,7 @@ class DistributionSetAccessControllerTest extends AbstractAccessControllerTest {
         // verify distributionSetManagement#findByDistributionSetFilter
         assertThat(distributionSetManagement
                 .findByDistributionSetFilter(Pageable.unpaged(),
-                        new DistributionSetFilter.DistributionSetFilterBuilder().setIsDeleted(false).build())
+                        DistributionSetFilter.builder().isDeleted(false).build())
                 .get().map(Identifiable::getId).toList()).containsOnly(permitted.getId());
 
         // verify distributionSetManagement#get

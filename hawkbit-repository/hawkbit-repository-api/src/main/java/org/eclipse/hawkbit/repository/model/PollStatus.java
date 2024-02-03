@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 /**
@@ -17,7 +19,9 @@ import java.time.LocalDateTime;
  * poll time.
  *
  */
+@Data
 public class PollStatus {
+
     private final LocalDateTime lastPollDate;
     private final LocalDateTime nextPollDate;
     private final LocalDateTime overdueDate;
@@ -40,30 +44,5 @@ public class PollStatus {
      */
     public boolean isOverdue() {
         return currentDate.isAfter(overdueDate);
-    }
-
-    /**
-     * @return the lastPollDate
-     */
-    public LocalDateTime getLastPollDate() {
-        return lastPollDate;
-    }
-
-    public LocalDateTime getNextPollDate() {
-        return nextPollDate;
-    }
-
-    public LocalDateTime getOverdueDate() {
-        return overdueDate;
-    }
-
-    public LocalDateTime getCurrentDate() {
-        return currentDate;
-    }
-
-    @Override
-    public String toString() {
-        return "PollTime [lastPollDate=" + lastPollDate + ", nextPollDate=" + nextPollDate + ", overdueDate="
-                + overdueDate + ", currentDate=" + currentDate + "]";
     }
 }
