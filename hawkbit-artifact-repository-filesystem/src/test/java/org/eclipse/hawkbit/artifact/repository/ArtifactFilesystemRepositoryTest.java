@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Random;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.api.Assertions;
@@ -24,17 +25,15 @@ import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Story;
 
+@Slf4j
 @Feature("Unit Tests - Artifact File System Repository")
 @Story("Test storing artifact binaries in the file-system")
 public class ArtifactFilesystemRepositoryTest {
-    private static final Logger LOG = LoggerFactory.getLogger(ArtifactFilesystemRepositoryTest.class);
 
     private static final String TENANT = "test_tenant";
 
@@ -56,7 +55,7 @@ public class ArtifactFilesystemRepositoryTest {
             try {
                 FileUtils.deleteDirectory(new File(artifactResourceProperties.getPath()));
             } catch (final IOException | IllegalArgumentException e) {
-                LOG.warn("Cannot delete file-directory", e);
+                log.warn("Cannot delete file-directory", e);
             }
         }
     }
