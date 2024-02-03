@@ -1,11 +1,10 @@
 /**
- * Copyright (c) 2019 Bosch Software Innovations GmbH and others
+ * Copyright (c) 2019 Bosch Software Innovations GmbH and others.
  *
- * This program and the accompanying materials are made
- * available under the terms of the Eclipse Public License 2.0
- * which is available at https://www.eclipse.org/legal/epl-2.0/
- *
- * SPDX-License-Identifier: EPL-2.0
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
  */
 package org.eclipse.hawkbit.repository.event.remote;
 
@@ -50,8 +49,7 @@ public abstract class MultiActionEvent extends RemoteTenantAwareEvent implements
      * @param actions
      *            the actions involved
      */
-    protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {
-        super(applicationId, tenant, applicationId);
+    protected MultiActionEvent(String tenant, String applicationId, List<Action> actions) {super(applicationId, tenant, applicationId);
         this.controllerIds.addAll(getControllerIdsFromActions(actions));
         this.actionIds.addAll(getIdsFromActions(actions));
     }
