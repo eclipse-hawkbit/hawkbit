@@ -9,17 +9,16 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Constants related to security.
  */
+@NoArgsConstructor
 public final class SecurityConstants {
 
     /**
      * Logger prefix used for security logging.
      */
     public static final String SECURITY_LOG_PREFIX = "server-security";
-
-    private SecurityConstants() {
-
-    }
 }
