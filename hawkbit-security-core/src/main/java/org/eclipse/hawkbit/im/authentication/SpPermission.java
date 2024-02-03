@@ -145,7 +145,7 @@ public final class SpPermission {
                     final String role = (String) field.get(null);
                     allPermissions.add(role);
                 } catch (final IllegalAccessException e) {
-                    log().error(e.getMessage(), e);
+                    log.error(e.getMessage(), e);
                 }
             }
         }
