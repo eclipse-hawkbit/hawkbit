@@ -24,5 +24,4 @@ public final class RepositoryModelConstants {
     private RepositoryModelConstants() {
         // Utility class.
     }
-
 }

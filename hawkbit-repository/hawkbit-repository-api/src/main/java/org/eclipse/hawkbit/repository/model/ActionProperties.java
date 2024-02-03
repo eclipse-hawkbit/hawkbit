@@ -10,12 +10,14 @@
 package org.eclipse.hawkbit.repository.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 
 import java.io.Serializable;
 
 /**
  * Holds properties for {@link Action}
  */
+@Data
 public class ActionProperties implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -41,42 +43,6 @@ public class ActionProperties implements Serializable {
         this.tenant = action.getTenant();
         this.maintenanceWindowAvailable = action.isMaintenanceWindowAvailable();
         this.status = action.getStatus();
-    }
-
-    public void setId(final Long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setTenant(final String tenant) {
-        this.tenant = tenant;
-    }
-
-    public String getTenant() {
-        return tenant;
-    }
-
-    public void setMaintenanceWindowAvailable(final boolean maintenanceWindowAvailable) {
-        this.maintenanceWindowAvailable = maintenanceWindowAvailable;
-    }
-
-    public boolean isMaintenanceWindowAvailable() {
-        return maintenanceWindowAvailable;
-    }
-
-    public Action.ActionType getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(final Action.ActionType actionType) {
-        this.actionType = actionType;
-    }
-
-    public Action.Status getStatus() {
-        return status;
     }
 
     @JsonIgnore

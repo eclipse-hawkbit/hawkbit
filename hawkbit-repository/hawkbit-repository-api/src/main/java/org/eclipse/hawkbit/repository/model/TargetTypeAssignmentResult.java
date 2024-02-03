@@ -9,12 +9,15 @@
  */
 package org.eclipse.hawkbit.repository.model;
 
+import lombok.Data;
+
 import java.util.List;
 
 /**
  * Result object for {@link TargetType} assignments.
  *
  */
+@Data
 public class TargetTypeAssignmentResult extends AbstractAssignmentResult<Target> {
 
     private final TargetType targetType;
@@ -35,9 +38,5 @@ public class TargetTypeAssignmentResult extends AbstractAssignmentResult<Target>
                                       final List<? extends Target> unassigned, final TargetType targetType) {
         super(alreadyAssigned, assigned, unassigned);
         this.targetType = targetType;
-    }
-
-    public TargetType getTargetType() {
-        return targetType;
     }
 }

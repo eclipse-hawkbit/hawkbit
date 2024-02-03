@@ -24,5 +24,4 @@ public interface DistributionSetMetadata extends MetaData {
     default Long getEntityId() {
         return getDistributionSet().getId();
     }
-
 }
