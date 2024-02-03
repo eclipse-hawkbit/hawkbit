@@ -9,11 +9,10 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
 /**
@@ -21,9 +20,8 @@ import org.springframework.scheduling.annotation.Scheduled;
  * delay between the checks be configured using the property from
  * {#PROP_SCHEDULER_DELAY_PLACEHOLDER}.
  */
+@Slf4j
 public class RolloutScheduler {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RolloutScheduler.class);
 
     private static final String PROP_SCHEDULER_DELAY_PLACEHOLDER = "${hawkbit.rollout.scheduler.fixedDelay:2000}";
 
@@ -58,7 +56,7 @@ public class RolloutScheduler {
      */
     @Scheduled(initialDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER, fixedDelayString = PROP_SCHEDULER_DELAY_PLACEHOLDER)
     public void runningRolloutScheduler() {
-        LOGGER.debug("rollout schedule checker has been triggered.");
+        log.debug("rollout schedule checker has been triggered.");
 
         // run this code in system code privileged to have the necessary
         // permission to query and create entities.

@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.repository.jpa.autoassign;
 import java.util.List;
 import java.util.function.Consumer;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
@@ -21,8 +22,6 @@ import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DeploymentRequest;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -33,9 +32,8 @@ import org.springframework.util.StringUtils;
 /**
  * Abstract implementation of an AutoAssignExecutor
  */
+@Slf4j
 public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAutoAssignExecutor.class);
 
     /**
      * The message which is added to the action status when a distribution set is
@@ -115,10 +113,10 @@ public abstract class AbstractAutoAssignExecutor implements AutoAssignExecutor {
                                 })
                     );
                 } catch (final RuntimeException ex) {
-                    LOGGER.debug(
+                    log.debug(
                             "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {}. Continue with next filter query.",
                             filterQuery.getTenant(), filterQuery.getId(), ex);
-                    LOGGER.error(
+                    log.error(
                             "Exception on forEachFilterWithAutoAssignDS execution for tenant {} with filter id {} and error message [{}]. "
                                     + "Continue with next filter query.",
                             filterQuery.getTenant(), filterQuery.getId(), ex.getMessage());

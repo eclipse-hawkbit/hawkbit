@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.DistributionSetInvalidationManagement;
 import org.eclipse.hawkbit.repository.DistributionSetManagement;
@@ -29,18 +30,14 @@ import org.eclipse.hawkbit.repository.model.DistributionSetInvalidation.Cancelat
 import org.eclipse.hawkbit.repository.model.DistributionSetInvalidationCount;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * Jpa implementation for {@link DistributionSetInvalidationManagement}
- *
  */
+@Slf4j
 public class JpaDistributionSetInvalidationManagement implements DistributionSetInvalidationManagement {
-
-    private static final Logger LOG = LoggerFactory.getLogger(JpaDistributionSetInvalidationManagement.class);
 
     private final DistributionSetManagement distributionSetManagement;
     private final RolloutManagement rolloutManagement;
@@ -73,7 +70,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     @Override
     public void invalidateDistributionSet(final DistributionSetInvalidation distributionSetInvalidation) {
-        LOG.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
+        log.debug("Invalidate distribution sets {}", distributionSetInvalidation.getDistributionSetIds());
         final String tenant = tenantAware.getCurrentTenant();
         if (shouldRolloutsBeCanceled(distributionSetInvalidation.getCancelationType(),
                 distributionSetInvalidation.isCancelRollouts())) {
@@ -89,7 +86,7 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
                     lock.unlock();
                 }
             } catch (final InterruptedException e) {
-                LOG.error("InterruptedException while invalidating distribution sets {}!",
+                log.error("InterruptedException while invalidating distribution sets {}!",
                         distributionSetInvalidation.getDistributionSetIds(), e);
                 Thread.currentThread().interrupt();
             }
@@ -113,22 +110,22 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             final boolean cancelRollouts) {
         final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
         distributionSetManagement.invalidate(set);
-        LOG.debug("Distribution set {} marked as invalid.", setId);
+        log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission
         if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
-            LOG.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
+            log.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
             rolloutManagement.cancelRolloutsForDistributionSet(set);
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
         systemSecurityContext.runAsSystem(() -> {
             if (cancelationType != CancelationType.NONE) {
-                LOG.debug("Cancel actions after ds invalidation. ID: {}", setId);
+                log.debug("Cancel actions after ds invalidation. ID: {}", setId);
                 deploymentManagement.cancelActionsForDistributionSet(cancelationType, set);
             }
 
-            LOG.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
+            log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);
             targetFilterQueryManagement.cancelAutoAssignmentForDistributionSet(setId);
             return null;
         });

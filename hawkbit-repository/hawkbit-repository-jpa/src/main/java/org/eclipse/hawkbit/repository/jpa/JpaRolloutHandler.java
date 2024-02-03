@@ -12,22 +12,21 @@ package org.eclipse.hawkbit.repository.jpa;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.ContextAware;
 import org.eclipse.hawkbit.repository.RolloutExecutor;
 import org.eclipse.hawkbit.repository.RolloutHandler;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.integration.support.locks.LockRegistry;
 import org.springframework.transaction.PlatformTransactionManager;
 
 /**
  * JPA implementation of {@link RolloutHandler}.
  */
+@Slf4j
 public class JpaRolloutHandler implements RolloutHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaRolloutHandler.class);
 
     private final TenantAware tenantAware;
     private final RolloutManagement rolloutManagement;
@@ -73,18 +72,18 @@ public class JpaRolloutHandler implements RolloutHandler {
         final String handlerId = createRolloutLockKey(tenantAware.getCurrentTenant());
         final Lock lock = lockRegistry.obtain(handlerId);
         if (!lock.tryLock()) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Could not perform lock {}", lock);
+            if (log.isTraceEnabled()) {
+                log.trace("Could not perform lock {}", lock);
             }
             return;
         }
 
         try {
-            LOGGER.trace("Trigger handling {} rollouts.", rollouts.size());
+            log.trace("Trigger handling {} rollouts.", rollouts.size());
             rollouts.forEach(rolloutId -> handleRolloutInNewTransaction(rolloutId, handlerId));
         } finally {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.trace("Unlock lock {}", lock);
+            if (log.isTraceEnabled()) {
+                log.trace("Unlock lock {}", lock);
             }
             lock.unlock();
         }
@@ -114,7 +113,7 @@ public class JpaRolloutHandler implements RolloutHandler {
                                     })
                         );
                     },
-                    () -> LOGGER.error("Could not retrieve rollout with id {}. Will not continue with execution.",
+                    () -> log.error("Could not retrieve rollout with id {}. Will not continue with execution.",
                             rolloutId));
             return 0L;
         });

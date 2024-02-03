@@ -14,6 +14,9 @@ import java.util.function.Supplier;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.TargetRepository;
@@ -25,8 +28,6 @@ import org.eclipse.hawkbit.repository.model.Action.Status;
 import org.eclipse.hawkbit.repository.model.TargetUpdateStatus;
 import org.eclipse.hawkbit.security.SecurityContextTenantAware;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -38,15 +39,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * Utility class for deployment related topics.
- *
  */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class DeploymentHelper {
-
-    private static final Logger LOG = LoggerFactory.getLogger(DeploymentHelper.class);
-
-    private DeploymentHelper() {
-        // utility class
-    }
 
     /**
      * This method is called, when cancellation has been successful. It sets the
@@ -147,7 +143,7 @@ public final class DeploymentHelper {
             return;
         }
         final String user = username.get();
-        LOG.debug("Switching user context from '{}' to '{}'", currentUser, user);
+        log.debug("Switching user context from '{}' to '{}'", currentUser, user);
         tenantAware.runAsTenantAsUser(tenantAware.getCurrentTenant(), user, () -> {
             handler.run();
             return null;

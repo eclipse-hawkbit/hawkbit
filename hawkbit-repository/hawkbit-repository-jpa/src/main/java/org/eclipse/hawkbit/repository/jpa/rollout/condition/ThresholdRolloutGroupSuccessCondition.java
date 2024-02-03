@@ -9,20 +9,19 @@
  */
 package org.eclipse.hawkbit.repository.jpa.rollout.condition;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Threshold to calculate if the {@link RolloutGroup#getSuccessConditionExp()} is reached and the
  * next rollout group can get started.
  */
+@Slf4j
 public class ThresholdRolloutGroupSuccessCondition
         implements RolloutGroupConditionEvaluator<RolloutGroup.RolloutGroupSuccessCondition> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ThresholdRolloutGroupSuccessCondition.class);
 
     private final ActionRepository actionRepository;
 
@@ -55,9 +54,8 @@ public class ThresholdRolloutGroupSuccessCondition
             return ((float) finished / (float) totalGroup) >= ((float) threshold / 100F);
 
         } catch (final NumberFormatException e) {
-            LOGGER.error("Cannot evaluate condition expression " + expression, e);
+            log.error("Cannot evaluate condition expression " + expression, e);
             return false;
         }
     }
-
 }
