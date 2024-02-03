@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
@@ -23,11 +24,10 @@ import org.slf4j.LoggerFactory;
  * A pre-authenticated processing filter which extracts the principal from a
  * request URI and the credential from a request header in a the
  * {@link DmfTenantSecurityToken}.
- *
  */
+@Slf4j
 public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractControllerAuthenticationFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerPreAuthenticatedSecurityHeaderFilter.class);
+    
     private static final Logger LOG_SECURITY_AUTH = LoggerFactory.getLogger("server-security.authentication");
 
     private final GetSecurityAuthorityNameTenantRunner sslIssuerNameConfigTenantRunner = new GetSecurityAuthorityNameTenantRunner();
@@ -83,11 +83,11 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         final String knownSslIssuerConfigurationValue = tenantAware.runAsTenant(securityToken.getTenant(),
                 sslIssuerNameConfigTenantRunner);
         final String sslIssuerHashValue = getIssuerHashHeader(securityToken, knownSslIssuerConfigurationValue);
-        if (commonNameValue != null && LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Found commonNameHeader {}={}, using as credentials", caCommonNameHeader, commonNameValue);
+        if (commonNameValue != null && log.isTraceEnabled()) {
+            log.trace("Found commonNameHeader {}={}, using as credentials", caCommonNameHeader, commonNameValue);
         }
-        if (sslIssuerHashValue != null && LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Found sslIssuerHash ****, using as credentials for tenant {}", securityToken.getTenant());
+        if (sslIssuerHashValue != null && log.isTraceEnabled()) {
+            log.trace("Found sslIssuerHash ****, using as credentials for tenant {}", securityToken.getTenant());
         }
 
         if (commonNameValue != null && sslIssuerHashValue != null) {
@@ -129,8 +129,8 @@ public class ControllerPreAuthenticatedSecurityHeaderFilter extends AbstractCont
         String foundHash;
         while ((foundHash = securityToken.getHeader(String.format(sslIssuerHashBasicHeader, iHeader))) != null) {
             if (knownHashes.contains(foundHash.toLowerCase())) {
-                if (LOGGER.isTraceEnabled()) {
-                    LOGGER.trace("Found matching ssl issuer hash at position {}", iHeader);
+                if (log.isTraceEnabled()) {
+                    log.trace("Found matching ssl issuer hash at position {}", iHeader);
                 }
                 return foundHash.toLowerCase();
             }

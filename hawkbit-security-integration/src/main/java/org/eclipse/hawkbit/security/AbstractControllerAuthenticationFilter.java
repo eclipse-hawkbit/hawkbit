@@ -12,11 +12,10 @@ package org.eclipse.hawkbit.security;
 import java.util.Arrays;
 import java.util.Collection;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -24,9 +23,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
  * An abstraction for all controller based security. Check if the tenant
  * configuration is enabled.
  */
+@Slf4j
 public abstract class AbstractControllerAuthenticationFilter implements PreAuthenticationFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractControllerAuthenticationFilter.class);
 
     protected final TenantConfigurationManagement tenantConfigurationManagement;
     protected final TenantAware tenantAware;
@@ -52,7 +50,7 @@ public abstract class AbstractControllerAuthenticationFilter implements PreAuthe
         @Override
         public Boolean run() {
 
-            LOGGER.trace("retrieving configuration value for configuration key {}", getTenantConfigurationKey());
+            log.trace("retrieving configuration value for configuration key {}", getTenantConfigurationKey());
             return systemSecurityContext.runAsSystem(() -> tenantConfigurationManagement
                     .getConfigurationValue(getTenantConfigurationKey(), Boolean.class).getValue());
         }

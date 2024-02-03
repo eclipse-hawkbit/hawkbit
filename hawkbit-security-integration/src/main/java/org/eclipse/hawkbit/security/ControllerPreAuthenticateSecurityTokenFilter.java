@@ -11,13 +11,12 @@ package org.eclipse.hawkbit.security;
 
 import java.util.Optional;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.ControllerManagement;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An pre-authenticated processing filter which extracts (if enabled through
@@ -25,13 +24,10 @@ import org.slf4j.LoggerFactory;
  * security-token with the {@code Authorization} HTTP header.
  * {@code Example Header: Authorization: TargetToken
  * 5d8fSD54fdsFG98DDsa.}
- * 
- *
- *
  */
+@Slf4j
 public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractControllerAuthenticationFilter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ControllerPreAuthenticateSecurityTokenFilter.class);
+    
     private static final String TARGET_SECURITY_TOKEN_AUTH_SCHEME = "TargetToken ";
     private static final int OFFSET_TARGET_TOKEN = TARGET_SECURITY_TOKEN_AUTH_SCHEME.length();
 
@@ -66,11 +62,11 @@ public class ControllerPreAuthenticateSecurityTokenFilter extends AbstractContro
         final String controllerId = resolveControllerId(securityToken);
         final String authHeader = securityToken.getHeader(DmfTenantSecurityToken.AUTHORIZATION_HEADER);
         if ((authHeader != null) && authHeader.startsWith(TARGET_SECURITY_TOKEN_AUTH_SCHEME)) {
-            LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
+            log.debug("found authorization header with scheme {} using target security token for authentication",
                     TARGET_SECURITY_TOKEN_AUTH_SCHEME);
             return new HeaderAuthentication(controllerId, authHeader.substring(OFFSET_TARGET_TOKEN));
         }
-        LOGGER.debug(
+        log.debug(
                 "security token filter is enabled but requst does not contain either the necessary path variables {} or the authorization header with scheme {}",
                 securityToken, TARGET_SECURITY_TOKEN_AUTH_SCHEME);
         return null;
