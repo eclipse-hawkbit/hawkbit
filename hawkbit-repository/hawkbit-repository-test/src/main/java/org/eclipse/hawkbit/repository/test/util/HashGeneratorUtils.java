@@ -9,23 +9,20 @@
  */
 package org.eclipse.hawkbit.repository.test.util;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Hash digest utility.
  */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class HashGeneratorUtils {
-
-    private static final Logger LOG = LoggerFactory.getLogger(HashGeneratorUtils.class);
-
-    private HashGeneratorUtils() {
-
-    }
 
     /**
      * Generates a MD5 cryptographic string.
@@ -67,9 +64,8 @@ public final class HashGeneratorUtils {
             final byte[] hashedBytes = digest.digest(message);
             return HexFormat.of().withLowerCase().formatHex(hashedBytes);
         } catch (final NoSuchAlgorithmException e) {
-            LOG.error("Algorithm could not be found", e);
+            log.error("Algorithm could not be found", e);
         }
         return null;
     }
-
 }

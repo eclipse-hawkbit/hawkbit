@@ -11,19 +11,18 @@ package org.eclipse.hawkbit.repository.test.util;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.cache.TenantAwareCacheManager;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 
+@Slf4j
 public class JpaTestRepositoryManagement {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JpaTestRepositoryManagement.class);
     private static final Pageable PAGE = PageRequest.of(0, 400, Sort.by(Direction.ASC, "id"));
 
     private final TenantAwareCacheManager cacheManager;
@@ -64,7 +63,7 @@ public class JpaTestRepositoryManagement {
                     return null;
                 });
             } catch (final Exception e) {
-                LOGGER.error("Error while delete tenant", e);
+                log.error("Error while delete tenant", e);
             }
         });
     }

@@ -24,13 +24,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.eclipse.hawkbit.repository.event.remote.RemoteIdEvent;
 import org.eclipse.hawkbit.repository.event.remote.RemoteTenantAwareEvent;
 import org.eclipse.hawkbit.repository.event.remote.TargetAssignDistributionSetEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationListener;
@@ -42,8 +41,8 @@ import org.springframework.test.context.support.AbstractTestExecutionListener;
 /**
  * Test rule to setup and verify the event count for a method.
  */
+@Slf4j
 public class EventVerifier extends AbstractTestExecutionListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EventVerifier.class);
 
     private EventCaptor eventCaptor;
 
@@ -140,10 +139,10 @@ public class EventVerifier extends AbstractTestExecutionListener {
 
         @Override
         public void onApplicationEvent(final RemoteApplicationEvent event) {
-            LOGGER.debug("Received event {}", event.getClass().getSimpleName());
+            log.debug("Received event {}", event.getClass().getSimpleName());
 
             if (ResetCounterMarkerEvent.class.isAssignableFrom(event.getClass())) {
-                LOGGER.debug("Retrieving reset counter marker event - resetting counters");
+                log.debug("Retrieving reset counter marker event - resetting counters");
                 capturedEvents.clear();
                 return;
             }
