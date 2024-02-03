@@ -19,10 +19,9 @@ import java.net.URL;
 public interface HostnameResolver {
 
     /**
+     * Resolved the hostname
      *
-     *
-     * @return
+     * @return resolved hostname as URL
      */
     URL resolveHostname();
-
 }

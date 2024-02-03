@@ -12,8 +12,7 @@ package org.eclipse.hawkbit;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
@@ -24,11 +23,9 @@ import org.springframework.core.io.support.ResourcePatternResolver;
  * MessageSource implementation supports more than 1 properties file with the
  * same name. All properties files will be merged.
  */
+@Slf4j
 public class DistributedResourceBundleMessageSource extends ReloadableResourceBundleMessageSource {
 
-    // Exception squid:S2387 - Follows our upper case convention
-    @SuppressWarnings({ "squid:S2387" })
-    private static final Logger LOGGER = LoggerFactory.getLogger(DistributedResourceBundleMessageSource.class);
     private static final String PROPERTIES_SUFFIX = ".properties";
     private ResourceLoader resourceLoader;
 
@@ -47,7 +44,7 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
         final Properties properties = new Properties();
         long lastModified = -1;
         if (!(resourceLoader instanceof ResourcePatternResolver)) {
-            LOGGER.warn(
+            log.warn(
                     "Resource Loader {} doesn't support getting multiple resources. Default properties mechanism will used",
                     resourceLoader.getClass().getName());
             return super.refreshProperties(filename, propHolder);
@@ -65,7 +62,7 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
                 }
             }
         } catch (final IOException ignored) {
-            LOGGER.warn("Resource with filename " + filename + " couldn't load", ignored);
+            log.warn("Resource with filename " + filename + " couldn't load", ignored);
         }
         return new PropertiesHolder(properties, lastModified);
     }
@@ -75,5 +72,4 @@ public class DistributedResourceBundleMessageSource extends ReloadableResourceBu
         this.resourceLoader = resourceLoader;
         super.setResourceLoader(resourceLoader);
     }
-
 }
