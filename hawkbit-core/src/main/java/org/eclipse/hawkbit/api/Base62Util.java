@@ -9,17 +9,17 @@
  */
 package org.eclipse.hawkbit.api;
 
+import lombok.NoArgsConstructor;
+
 /**
  * Utility class for Base10 to Base62 conversion and vice versa. Base62 has the
  * benefit of being shorter in ASCII representation than Base10.
  */
+@NoArgsConstructor
 public final class Base62Util {
+
     private static final String BASE62_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final int BASE62_BASE = BASE62_ALPHABET.length();
-
-    private Base62Util() {
-        // Utility class
-    }
 
     /**
      * @param base10
