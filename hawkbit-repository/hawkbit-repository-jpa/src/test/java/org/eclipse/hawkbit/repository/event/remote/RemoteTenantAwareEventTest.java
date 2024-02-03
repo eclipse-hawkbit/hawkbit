@@ -54,7 +54,9 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
     }
 
     private Action createAction(final String controllerId) {
+        long id = 1;
         final JpaAction generateAction = new JpaAction();
+        generateAction.setId(id++);
         generateAction.setActionType(ActionType.FORCED);
         generateAction.setTarget(testdataFactory.createTarget(controllerId));
         generateAction.setStatus(Status.RUNNING);
