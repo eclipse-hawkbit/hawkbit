@@ -32,16 +32,7 @@ import io.qameta.allure.Story;
 public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
 
     private static final String TENANT_DEFAULT = "DEFAULT";
-
     private static final String APPLICATION_ID_DEFAULT = "Node";
-
-    private Action createAction(final String controllerId) {
-        final JpaAction generateAction = new JpaAction();
-        generateAction.setActionType(ActionType.FORCED);
-        generateAction.setTarget(testdataFactory.createTarget(controllerId));
-        generateAction.setStatus(Status.RUNNING);
-        return generateAction;
-    }
 
     @Test
     @Description("Verifies that a testMultiActionAssignEvent can be properly serialized and deserialized")
@@ -60,6 +51,14 @@ public class RemoteTenantAwareEventTest extends AbstractRemoteEventTest {
         final MultiActionAssignEvent remoteAssignEventJackson = createJacksonEvent(assignEvent);
         assertThat(assignEvent).isEqualTo(remoteAssignEventJackson);
         assertThat(remoteAssignEventJackson.getControllerIds()).containsExactlyElementsOf(controllerIds);
+    }
+
+    private Action createAction(final String controllerId) {
+        final JpaAction generateAction = new JpaAction();
+        generateAction.setActionType(ActionType.FORCED);
+        generateAction.setTarget(testdataFactory.createTarget(controllerId));
+        generateAction.setStatus(Status.RUNNING);
+        return generateAction;
     }
 
     @Test

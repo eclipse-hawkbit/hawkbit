@@ -54,5 +54,4 @@ public class SystemUsageReportWithTenants extends SystemUsageReport {
     public List<TenantUsage> getTenants() {
         return Collections.unmodifiableList(tenants);
     }
-
 }

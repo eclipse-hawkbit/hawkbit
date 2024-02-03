@@ -9,12 +9,13 @@
  */
 package org.eclipse.hawkbit.artifact.repository.model;
 
+import lombok.Data;
 import org.springframework.util.Assert;
 
 /**
  * Database representation of artifact.
- * 
  */
+@Data
 public abstract class AbstractDbArtifact implements DbArtifact {
 
     private final String artifactId;
@@ -31,35 +32,5 @@ public abstract class AbstractDbArtifact implements DbArtifact {
         this.hashes = hashes;
         this.size = size;
         this.contentType = contentType;
-    }
-
-    @Override
-    public String getArtifactId() {
-        return artifactId;
-    }
-
-    @Override
-    public DbArtifactHash getHashes() {
-        return hashes;
-    }
-
-    /**
-     * Set hashes of the artifact
-     * 
-     * @param hashes
-     *            artifact hashes
-     */
-    public void setHashes(final DbArtifactHash hashes) {
-        this.hashes = hashes;
-    }
-
-    @Override
-    public long getSize() {
-        return size;
-    }
-
-    @Override
-    public String getContentType() {
-        return contentType;
     }
 }

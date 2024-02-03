@@ -26,8 +26,7 @@ public class DefaultDownloadIdCache implements DownloadIdCache {
     private final CacheManager cacheManager;
 
     /**
-     * @param cacheManager
-     *            the underlying cache-manager to store the download-ids
+     * @param cacheManager the underlying cache-manager to store the download-ids
      */
     public DefaultDownloadIdCache(final CacheManager cacheManager) {
         this.cacheManager = cacheManager;
