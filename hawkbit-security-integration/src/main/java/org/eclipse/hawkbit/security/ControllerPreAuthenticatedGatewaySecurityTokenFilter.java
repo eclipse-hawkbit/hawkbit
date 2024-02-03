@@ -9,11 +9,10 @@
  */
 package org.eclipse.hawkbit.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties.TenantConfigurationKey;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * An pre-authenticated processing filter which extracts (if enabled through
@@ -23,14 +22,10 @@ import org.slf4j.LoggerFactory;
  * gateway security token which can be set via the {@code TenantsecurityToken}
  * header. {@code Example Header: Authorization: GatewayToken
  * 5d8fSD54fdsFG98DDsa.}
- * 
- *
- *
  */
+@Slf4j
 public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends AbstractControllerAuthenticationFilter {
-
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(ControllerPreAuthenticatedGatewaySecurityTokenFilter.class);
+    
     private static final String GATEWAY_SECURITY_TOKEN_AUTH_SCHEME = "GatewayToken ";
     private static final int OFFSET_GATEWAY_TOKEN = GATEWAY_SECURITY_TOKEN_AUTH_SCHEME.length();
 
@@ -61,12 +56,12 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
         if (authHeader != null &&
                 authHeader.startsWith(GATEWAY_SECURITY_TOKEN_AUTH_SCHEME) &&
                 authHeader.length() > OFFSET_GATEWAY_TOKEN) { // disables empty string token
-            LOGGER.debug("found authorization header with scheme {} using target security token for authentication",
+            log.debug("found authorization header with scheme {} using target security token for authentication",
                     GATEWAY_SECURITY_TOKEN_AUTH_SCHEME);
             return new HeaderAuthentication(securityToken.getControllerId(),
                     authHeader.substring(OFFSET_GATEWAY_TOKEN));
         }
-        LOGGER.debug(
+        log.debug(
                 "security token filter is enabled but request does not contain either the necessary security token {} or the authorization header with scheme {}",
                 securityToken, GATEWAY_SECURITY_TOKEN_AUTH_SCHEME);
         return null;
@@ -88,7 +83,7 @@ public class ControllerPreAuthenticatedGatewaySecurityTokenFilter extends Abstra
 
         @Override
         public String run() {
-            LOGGER.trace("retrieving configuration value for configuration key {}",
+            log.trace("retrieving configuration value for configuration key {}",
                     TenantConfigurationKey.AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY);
 
             return systemSecurityContext
