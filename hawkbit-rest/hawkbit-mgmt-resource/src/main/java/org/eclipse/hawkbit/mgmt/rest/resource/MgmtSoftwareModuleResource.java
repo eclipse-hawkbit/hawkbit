@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.artifact.MgmtArtifact;
@@ -42,8 +43,6 @@ import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleMetadata;
 import org.eclipse.hawkbit.repository.model.SoftwareModuleType;
 import org.eclipse.hawkbit.rest.data.ResponseList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -62,21 +61,15 @@ import org.springframework.web.multipart.MultipartFile;
  * REST Resource handling for {@link SoftwareModule} and related
  * {@link Artifact} CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtSoftwareModuleResource.class);
-
     private final ArtifactManagement artifactManagement;
-
     private final SoftwareModuleManagement softwareModuleManagement;
-
     private final SoftwareModuleTypeManagement softwareModuleTypeManagement;
-
     private final ArtifactUrlHandler artifactUrlHandler;
-
     private final SystemManagement systemManagement;
-
     private final EntityFactory entityFactory;
 
     MgmtSoftwareModuleResource(final ArtifactManagement artifactManagement, final SoftwareModuleManagement softwareModuleManagement,
@@ -118,7 +111,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(reponse);
         } catch (final IOException e) {
-            LOG.error("Failed to store artifact", e);
+            log.error("Failed to store artifact", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -146,7 +139,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
         return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
             // no need for a 400, just apply a safe fallback
-            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
     }
@@ -229,7 +222,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
     public ResponseEntity<List<MgmtSoftwareModule>> createSoftwareModules(
             @RequestBody final List<MgmtSoftwareModuleRequestBodyPost> softwareModules) {
 
-        LOG.debug("creating {} softwareModules", softwareModules.size());
+        log.debug("creating {} softwareModules", softwareModules.size());
 
         for (final MgmtSoftwareModuleRequestBodyPost sm : softwareModules) {
             final Optional<SoftwareModuleType> opt = softwareModuleTypeManagement.getByKey(sm.getType());
@@ -243,7 +236,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
         }
         final Collection<SoftwareModule> createdSoftwareModules = softwareModuleManagement
                 .create(MgmtSoftwareModuleMapper.smFromRequest(entityFactory, softwareModules));
-        LOG.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
+        log.debug("{} softwareModules created, return status {}", softwareModules.size(), HttpStatus.CREATED);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(MgmtSoftwareModuleMapper.toResponse(createdSoftwareModules));

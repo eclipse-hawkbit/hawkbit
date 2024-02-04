@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetType;
 import org.eclipse.hawkbit.mgmt.json.model.distributionsettype.MgmtDistributionSetTypeAssignment;
@@ -25,8 +26,6 @@ import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.TargetTypeManagement;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.TargetType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -41,9 +40,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource handling for {@link TargetType} CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetTypeResource.class);
 
     private final TargetTypeManagement targetTypeManagement;
     private final EntityFactory entityFactory;
@@ -89,7 +88,7 @@ public class MgmtTargetTypeResource implements MgmtTargetTypeRestApi {
 
     @Override
     public ResponseEntity<Void> deleteTargetType(@PathVariable("targetTypeId") final Long targetTypeId) {
-        LOG.debug("Delete {} target type", targetTypeId);
+        log.debug("Delete {} target type", targetTypeId);
         targetTypeManagement.delete(targetTypeId);
         return ResponseEntity.ok().build();
     }

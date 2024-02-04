@@ -13,24 +13,21 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Definition of the Action type for the REST management API.
- *
  */
 public enum MgmtActionType {
+
     /**
      * The soft action type.
      */
     SOFT("soft"),
-
     /**
      * The forced action type.
      */
     FORCED("forced"),
-
     /**
      * The time forced action type.
      */
     TIMEFORCED("timeforced"),
-
     /**
      * The Download-Only action type.
      */
@@ -38,7 +35,7 @@ public enum MgmtActionType {
 
     private final String name;
 
-    private MgmtActionType(final String name) {
+    MgmtActionType(final String name) {
         this.name = name;
     }
 
@@ -46,5 +43,4 @@ public enum MgmtActionType {
     public String getName() {
         return name;
     }
-
 }

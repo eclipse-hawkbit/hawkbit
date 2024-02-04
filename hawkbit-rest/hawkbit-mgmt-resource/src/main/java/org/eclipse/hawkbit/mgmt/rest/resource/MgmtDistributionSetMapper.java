@@ -18,6 +18,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionId;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
@@ -38,10 +40,8 @@ import org.eclipse.hawkbit.rest.data.ResponseList;
  * A mapper which maps repository model to RESTful model representation and
  * back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtDistributionSetMapper {
-    private MgmtDistributionSetMapper() {
-        // Utility class
-    }
 
     /**
      * {@link MgmtDistributionSetRequestBodyPost}s to {@link DistributionSet}s.
@@ -86,7 +86,7 @@ public final class MgmtDistributionSetMapper {
 
         return entityFactory.distributionSet().create().name(dsRest.getName()).version(dsRest.getVersion())
                 .description(dsRest.getDescription()).type(dsRest.getType()).modules(modules)
-                .requiredMigrationStep(dsRest.isRequiredMigrationStep());
+                .requiredMigrationStep(dsRest.getRequiredMigrationStep());
     }
 
     static List<MetaData> fromRequestDsMetadata(final List<MgmtMetadata> metadata, final EntityFactory entityFactory) {

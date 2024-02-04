@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutResponseBody;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.MgmtRolloutRestRequestBody;
@@ -44,8 +45,6 @@ import org.eclipse.hawkbit.repository.model.RolloutGroupConditions;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -58,12 +57,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST Resource handling rollout CRUD operations.
- *
  */
+@Slf4j
 @RestController
 public class MgmtRolloutResource implements MgmtRolloutRestApi {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtRolloutResource.class);
 
     private final RolloutManagement rolloutManagement;
 
@@ -336,7 +333,7 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
         return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
             // no need for a 400, just apply a safe fallback
-            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
     }

@@ -13,11 +13,14 @@ import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * A json annotated rest model for invalidate DistributionSet requests.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtInvalidateDistributionSetRequestBody {
 
     @NotNull
@@ -26,21 +29,4 @@ public class MgmtInvalidateDistributionSetRequestBody {
     @JsonProperty
     @Schema(example = "true")
     private boolean cancelRollouts;
-
-    public MgmtCancelationType getActionCancelationType() {
-        return actionCancelationType;
-    }
-
-    public void setActionCancelationType(final MgmtCancelationType actionCancelationType) {
-        this.actionCancelationType = actionCancelationType;
-    }
-
-    public boolean isCancelRollouts() {
-        return cancelRollouts;
-    }
-
-    public void setCancelRollouts(final boolean cancelRollouts) {
-        this.cancelRollouts = cancelRollouts;
-    }
-
 }

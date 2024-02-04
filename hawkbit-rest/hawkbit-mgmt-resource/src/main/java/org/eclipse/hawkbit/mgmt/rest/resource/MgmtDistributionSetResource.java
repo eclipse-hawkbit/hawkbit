@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
@@ -60,8 +61,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -76,9 +75,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource handling for {@link DistributionSet} CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtDistributionSetResource.class);
 
     private final SoftwareModuleManagement softwareModuleManagement;
 
@@ -163,7 +162,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<List<MgmtDistributionSet>> createDistributionSets(
             @RequestBody final List<MgmtDistributionSetRequestBodyPost> sets) {
 
-        LOG.debug("creating {} distribution sets", sets.size());
+        log.debug("creating {} distribution sets", sets.size());
         // set default Ds type if ds type is null
         final String defaultDsKey = systemSecurityContext
                 .runAsSystem(systemManagement.getTenantMetadata().getDefaultDsType()::getKey);
@@ -184,7 +183,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         final Collection<DistributionSet> createdDSets = distributionSetManagement
                 .create(MgmtDistributionSetMapper.dsFromRequest(sets, entityFactory));
 
-        LOG.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
+        log.debug("{} distribution sets created, return status {}", sets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtDistributionSetMapper.toResponseDistributionSets(createdDSets),
                 HttpStatus.CREATED);
     }
@@ -202,7 +201,7 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
 
         final DistributionSet updated = distributionSetManagement.update(entityFactory.distributionSet()
                 .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
-                .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.isRequiredMigrationStep()));
+                .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.getRequiredMigrationStep()));
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(updated);
         MgmtDistributionSetMapper.addLinks(updated, response);
@@ -299,9 +298,9 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
         }
 
         final List<DeploymentRequest> deploymentRequests = assignments.stream().map(dsAssignment -> {
-            final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
+            final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
                     ? tenantConfigHelper.isConfirmationFlowEnabled()
-                    : dsAssignment.isConfirmationRequired();
+                    : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, distributionSetId)
                     .setConfirmationRequired(isConfirmationRequired).build();
         }).collect(Collectors.toList());

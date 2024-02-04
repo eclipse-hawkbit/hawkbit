@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValue;
 import org.eclipse.hawkbit.mgmt.json.model.system.MgmtSystemTenantConfigurationValueRequest;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
@@ -23,8 +24,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.repository.model.TenantConfigurationValue;
 import org.eclipse.hawkbit.tenancy.configuration.TenantConfigurationProperties;
 import org.eclipse.hawkbit.tenancy.configuration.validator.TenantConfigurationValidatorException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,10 +33,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource for handling tenant specific configuration operations.
  */
+@Slf4j
 @RestController
 public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTenantManagementResource.class);
 
     private final TenantConfigurationManagement tenantConfigurationManagement;
     private final TenantConfigurationProperties tenantConfigurationProperties;
@@ -61,7 +59,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
         MgmtSystemTenantConfigurationValue defaultDsTypeId = loadTenantConfigurationValueBy(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY);
         tenantConfigurationValueMap.put(MgmtTenantManagementMapper.DEFAULT_DISTRIBUTION_SET_TYPE_KEY, defaultDsTypeId);
         //return combined TenantConfiguration and TenantMetadata
-        LOG.debug("getTenantConfiguration, return status {}", HttpStatus.OK);
+        log.debug("getTenantConfiguration, return status {}", HttpStatus.OK);
         return ResponseEntity.ok(tenantConfigurationValueMap);
     }
 
@@ -93,7 +91,7 @@ public class MgmtTenantManagementResource implements MgmtTenantManagementRestApi
 
         tenantConfigurationManagement.deleteConfiguration(keyName);
 
-        LOG.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
+        log.debug("{} config value deleted, return status {}", keyName, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
