@@ -14,6 +14,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -23,11 +25,8 @@ import org.eclipse.hawkbit.rest.data.ResponseList;
  * A mapper which maps repository model to RESTful model representation and
  * back.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class MgmtActionMapper {
-
-    private MgmtActionMapper() {
-        // Utility class
-    }
 
     /**
      * Create a response for actions.
@@ -54,5 +53,4 @@ public final class MgmtActionMapper {
         }
         return MgmtTargetMapper.toResponseWithLinks(controllerId, action);
     }
-
 }
