@@ -21,10 +21,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -38,17 +36,13 @@ import org.springframework.security.concurrent.DelegatingSecurityContextExecutor
 import org.springframework.security.concurrent.DelegatingSecurityContextExecutorService;
 import org.springframework.security.concurrent.DelegatingSecurityContextScheduledExecutorService;
 
-import static java.util.Objects.requireNonNull;
-
 /**
  * Central event processors inside update server.
- *
  */
+@Slf4j
 @Configuration
 @EnableConfigurationProperties(AsyncConfigurerThreadpoolProperties.class)
 public class ExecutorAutoConfiguration {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorAutoConfiguration.class);
 
     @Autowired
     private AsyncConfigurerThreadpoolProperties asyncConfigurerProperties;
@@ -89,7 +83,7 @@ public class ExecutorAutoConfiguration {
     private static class PoolSizeExceededPolicy extends CallerRunsPolicy {
         @Override
         public void rejectedExecution(final Runnable r, final ThreadPoolExecutor executor) {
-            LOGGER.warn(
+            log.warn(
                     "Caller has to run on its own instead of centralExecutorService, reached limit of queue size {}",
                     executor.getQueue().size());
             super.rejectedExecution(r, executor);
