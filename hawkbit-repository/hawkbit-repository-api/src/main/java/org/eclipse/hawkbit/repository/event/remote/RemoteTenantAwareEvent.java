@@ -11,10 +11,13 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.TenantAwareEvent;
 import org.springframework.cloud.bus.event.RemoteApplicationEvent;
 
 import com.cronutils.utils.StringUtils;
+
+import java.io.Serial;
 
 /**
  * A distributed tenant aware event. It's the base class of the other
@@ -22,9 +25,11 @@ import com.cronutils.utils.StringUtils;
  * other nodes.
  */
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
+@ToString
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private String tenant;

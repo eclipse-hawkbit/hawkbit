@@ -21,15 +21,12 @@ public enum DmfUpdateMode {
      * Merge update strategy
      */
     MERGE,
-
     /**
      * Replacement update strategy
      */
     REPLACE,
-
     /**
      * Removal update strategy
      */
     REMOVE
-
 }

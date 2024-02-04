@@ -16,25 +16,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * JSON representation of artifact.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfArtifact {
+
     @JsonProperty
     private String filename;
-
     @JsonProperty
     private DmfArtifactHash hashes;
-
     @JsonProperty
     private long size;
-
     @JsonProperty
     private long lastModified;
-
     @JsonProperty
     private Map<String, String> urls;
 
@@ -45,41 +44,4 @@ public class DmfArtifact {
 
         return Collections.unmodifiableMap(urls);
     }
-
-    public long getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(final long lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public void setUrls(final Map<String, String> urls) {
-        this.urls = urls;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(final String filename) {
-        this.filename = filename;
-    }
-
-    public DmfArtifactHash getHashes() {
-        return hashes;
-    }
-
-    public void setHashes(final DmfArtifactHash hashes) {
-        this.hashes = hashes;
-    }
-
-    public long getSize() {
-        return size;
-    }
-
-    public void setSize(final long size) {
-        this.size = size;
-    }
-
 }

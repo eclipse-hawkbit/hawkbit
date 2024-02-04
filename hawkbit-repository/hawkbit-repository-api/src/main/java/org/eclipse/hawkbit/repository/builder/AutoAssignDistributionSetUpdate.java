@@ -14,6 +14,7 @@ import jakarta.validation.constraints.Min;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -25,6 +26,7 @@ import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
  */
 @Getter
 @EqualsAndHashCode
+@ToString
 public class AutoAssignDistributionSetUpdate {
 
     private final long targetFilterId;

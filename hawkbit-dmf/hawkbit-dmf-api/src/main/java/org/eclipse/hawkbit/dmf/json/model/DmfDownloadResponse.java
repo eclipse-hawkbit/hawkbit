@@ -13,58 +13,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
- * The authentification response JSON representation.
- * 
- *
- *
+ * The download response JSON representation.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfDownloadResponse {
 
     @JsonProperty
     private String downloadUrl;
-
     @JsonProperty
     private DmfArtifact artifact;
-
     @JsonProperty
     private int responseCode;
-
     @JsonProperty
     private String message;
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(final String message) {
-        this.message = message;
-    }
-
-    public int getResponseCode() {
-        return responseCode;
-    }
-
-    public void setResponseCode(final int responseCode) {
-        this.responseCode = responseCode;
-    }
-
-    public String getDownloadUrl() {
-        return downloadUrl;
-    }
-
-    public void setDownloadUrl(final String downloadUrl) {
-        this.downloadUrl = downloadUrl;
-    }
-
-    public DmfArtifact getArtifact() {
-        return artifact;
-    }
-
-    public void setArtifact(final DmfArtifact artifact) {
-        this.artifact = artifact;
-    }
 }

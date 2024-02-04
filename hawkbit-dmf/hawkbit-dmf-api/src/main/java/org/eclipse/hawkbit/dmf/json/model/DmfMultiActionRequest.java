@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.dmf.json.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.eclipse.hawkbit.dmf.amqp.api.EventTopic;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -27,14 +29,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * JSON representation of a multi-action request.
  */
+@NoArgsConstructor
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfMultiActionRequest {
 
     private List<DmfMultiActionElement> elements;
-
-    public DmfMultiActionRequest() {
-    }
 
     @JsonCreator
     public DmfMultiActionRequest(final List<DmfMultiActionElement> elements) {
@@ -64,6 +64,7 @@ public class DmfMultiActionRequest {
     /**
      * Represents an element within a {@link DmfMultiActionRequest}.
      */
+    @Data
     public static class DmfMultiActionElement {
 
         @JsonProperty
@@ -75,32 +76,11 @@ public class DmfMultiActionRequest {
         @JsonProperty
         private int weight;
 
-        public DmfActionRequest getAction() {
-            return action;
-        }
-
         @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.EXTERNAL_PROPERTY, property = "topic", defaultImpl = DmfActionRequest.class)
         @JsonSubTypes({ @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD"),
                 @Type(value = DmfDownloadAndUpdateRequest.class, name = "DOWNLOAD_AND_INSTALL") })
         public void setAction(final DmfActionRequest action) {
             this.action = action;
         }
-
-        public EventTopic getTopic() {
-            return topic;
-        }
-
-        public void setTopic(final EventTopic actionType) {
-            this.topic = actionType;
-        }
-
-        public void setWeight(final int weight) {
-            this.weight = weight;
-        }
-
-        public int getWeight() {
-            return weight;
-        }
     }
-
 }

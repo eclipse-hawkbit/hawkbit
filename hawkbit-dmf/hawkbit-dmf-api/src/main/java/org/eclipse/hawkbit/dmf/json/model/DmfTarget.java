@@ -13,53 +13,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import lombok.Data;
+import lombok.ToString;
 
 /**
  * Json representation of Target used in batch download and update request.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfTarget {
 
     @JsonProperty
     private Long actionId;
-
     @JsonProperty
     private String controllerId;
-
+    @ToString.Exclude
     @JsonProperty
     private String targetSecurityToken;
-
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(final Long actionId) {
-        this.actionId = actionId;
-    }
-
-    public String getControllerId() {
-        return controllerId;
-    }
-
-    public void setControllerId(final String controllerId) {
-        this.controllerId = controllerId;
-    }
-
-    public String getTargetSecurityToken() {
-        return targetSecurityToken;
-    }
-
-    public void setTargetSecurityToken(final String targetSecurityToken) {
-        this.targetSecurityToken = targetSecurityToken;
-    }
-
-    @Override
-    public String toString() {
-        return String.format(
-                "DmfTarget [actionId=%d controllerId='%s']",
-                actionId, controllerId);
-    }
 }
