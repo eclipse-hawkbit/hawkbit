@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.mgmt.json.model.tag;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -20,8 +22,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for Tag to RESTful API representation.
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTag extends MgmtNamedEntity {
@@ -29,25 +32,7 @@ public class MgmtTag extends MgmtNamedEntity {
     @JsonProperty(value = "id", required = true)
     @Schema(example = "2")
     private Long tagId;
-
     @JsonProperty
     @Schema(example = "rgb(255,0,0)")
     private String colour;
-
-    @JsonIgnore
-    public void setTagId(final Long tagId) {
-        this.tagId = tagId;
-    }
-
-    public Long getTagId() {
-        return tagId;
-    }
-
-    public void setColour(final String colour) {
-        this.colour = colour;
-    }
-
-    public String getColour() {
-        return colour;
-    }
 }

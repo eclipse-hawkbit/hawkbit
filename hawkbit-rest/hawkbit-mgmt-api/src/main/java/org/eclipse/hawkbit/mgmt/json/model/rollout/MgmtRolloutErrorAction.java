@@ -13,13 +13,21 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * An action that runs when the error condition is met
  */
+@NoArgsConstructor
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutErrorAction {
+
+    public enum ErrorAction {
+        PAUSE
+    }
 
     private ErrorAction action = ErrorAction.PAUSE;
     @Schema(example = "80")
@@ -28,57 +36,11 @@ public class MgmtRolloutErrorAction {
     /**
      * Creates a rollout error action
      * 
-     * @param action
-     *            the action to run when th error condition is met
-     * @param expression
-     *            the expression for the action
+     * @param action the action to run when th error condition is met
+     * @param expression the expression for the action
      */
     public MgmtRolloutErrorAction(ErrorAction action, String expression) {
         this.action = action;
         this.expression = expression;
-    }
-
-    /**
-     * Default constructor
-     */
-    public MgmtRolloutErrorAction() {
-        // Instantiate default error action
-    }
-
-    /**
-     * @return the action
-     */
-    public ErrorAction getAction() {
-        return action;
-    }
-
-    /**
-     * @param action
-     *            the action to set
-     */
-    public void setAction(final ErrorAction action) {
-        this.action = action;
-    }
-
-    /**
-     * @return the expression
-     */
-    public String getExpression() {
-        return expression;
-    }
-
-    /**
-     * @param expression
-     *            the expression to set
-     */
-    public void setExpression(final String expression) {
-        this.expression = expression;
-    }
-
-    /**
-     * Possible actions
-     */
-    public enum ErrorAction {
-        PAUSE
     }
 }

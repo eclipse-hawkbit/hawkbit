@@ -11,11 +11,14 @@ package org.eclipse.hawkbit.mgmt.json.model.targettype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * Request Body for TargetType PUT.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
@@ -29,56 +32,4 @@ public class MgmtTargetTypeRequestBodyPut {
     @JsonProperty
     @Schema(example = "#aaafff")
     private String colour;
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     *
-     * @return updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setName(final String name) {
-        this.name = name;
-        return this;
-    }
-
-    /**
-     * @return description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *          Description
-     * @return Updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setDescription(final String description) {
-        this.description = description;
-        return this;
-    }
-
-    /**
-     * @return Colour
-     */
-    public String getColour() {
-        return colour;
-    }
-
-    /**
-     * @param colour
-     *          Colour
-     * @return Updated body
-     */
-    public MgmtTargetTypeRequestBodyPut setColour(final String colour) {
-        this.colour = colour;
-        return this;
-    }
 }

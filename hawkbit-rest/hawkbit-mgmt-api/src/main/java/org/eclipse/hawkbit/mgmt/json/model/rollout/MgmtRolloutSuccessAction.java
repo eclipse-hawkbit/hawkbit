@@ -12,60 +12,24 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- *
- */
+@NoArgsConstructor
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutSuccessAction {
 
+    public enum SuccessAction {
+        NEXTGROUP
+    }
+
     private SuccessAction action = SuccessAction.NEXTGROUP;
     private String expression = null;
-
-    /**
-     * 
-     */
-    public MgmtRolloutSuccessAction() {
-        // needed for json creator
-    }
 
     public MgmtRolloutSuccessAction(final SuccessAction action, final String expression) {
         this.action = action;
         this.expression = expression;
-    }
-
-    /**
-     * @return the action
-     */
-    public SuccessAction getAction() {
-        return action;
-    }
-
-    /**
-     * @param action
-     *            the action to set
-     */
-    public void setAction(final SuccessAction action) {
-        this.action = action;
-    }
-
-    /**
-     * @return the expession
-     */
-    public String getExpression() {
-        return expression;
-    }
-
-    /**
-     * @param expession
-     *            the expession to set
-     */
-    public void setExpression(final String expession) {
-        this.expression = expession;
-    }
-
-    public enum SuccessAction {
-        NEXTGROUP
     }
 }

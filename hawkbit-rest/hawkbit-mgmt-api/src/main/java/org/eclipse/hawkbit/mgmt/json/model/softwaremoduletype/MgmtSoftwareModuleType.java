@@ -15,12 +15,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
  * A json annotated rest model for SoftwareModuleType to RESTful API
  * representation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleType extends MgmtTypeEntity {
@@ -28,24 +32,7 @@ public class MgmtSoftwareModuleType extends MgmtTypeEntity {
     @JsonProperty(value = "id", required = true)
     @Schema(example = "83")
     private Long moduleId;
-
     @JsonProperty
     @Schema(example = "1")
     private int maxAssignments;
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(final Long moduleId) {
-        this.moduleId = moduleId;
-    }
-
-    public int getMaxAssignments() {
-        return maxAssignments;
-    }
-
-    public void setMaxAssignments(final int maxAssignments) {
-        this.maxAssignments = maxAssignments;
-    }
 }

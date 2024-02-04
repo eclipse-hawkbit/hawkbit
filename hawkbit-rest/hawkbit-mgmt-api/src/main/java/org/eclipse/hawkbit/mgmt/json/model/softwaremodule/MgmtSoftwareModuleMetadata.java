@@ -14,11 +14,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * The representation of SoftwareModuleMetadata in the REST API for POST/Create.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtSoftwareModuleMetadata {
@@ -32,29 +33,4 @@ public class MgmtSoftwareModuleMetadata {
     @JsonProperty
     @Schema(example = "false")
     private boolean targetVisible;
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
-
-    public boolean isTargetVisible() {
-        return targetVisible;
-    }
-
-    public void setTargetVisible(final boolean targetVisible) {
-        this.targetVisible = targetVisible;
-    }
-
 }

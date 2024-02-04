@@ -146,9 +146,9 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
             @PathVariable("filterId") final Long filterId,
             @RequestBody final MgmtDistributionSetAutoAssignment autoAssignRequest) {
 
-        final boolean confirmationRequired = autoAssignRequest.isConfirmationRequired() == null
+        final boolean confirmationRequired = autoAssignRequest.getConfirmationRequired() == null
                 ? tenantConfigHelper.isConfirmationFlowEnabled()
-                : autoAssignRequest.isConfirmationRequired();
+                : autoAssignRequest.getConfirmationRequired();
 
         final AutoAssignDistributionSetUpdate update = MgmtTargetFilterQueryMapper
                 .fromRequest(entityFactory, filterId, autoAssignRequest).confirmationRequired(confirmationRequired);

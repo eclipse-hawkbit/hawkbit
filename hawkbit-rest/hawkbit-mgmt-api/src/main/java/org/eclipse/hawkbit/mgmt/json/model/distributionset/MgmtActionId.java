@@ -35,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtActionId extends RepresentationModel<MgmtActionId> {
 
+    @JsonProperty("id")
     private long actionId;
 
     /**

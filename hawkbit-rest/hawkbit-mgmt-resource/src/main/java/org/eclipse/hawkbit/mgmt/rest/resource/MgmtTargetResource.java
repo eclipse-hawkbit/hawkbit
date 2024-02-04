@@ -146,8 +146,8 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     public ResponseEntity<MgmtTarget> updateTarget(@PathVariable("targetId") final String targetId,
             @RequestBody final MgmtTargetRequestBody targetRest) {
 
-        if (targetRest.isRequestAttributes() != null) {
-            if (targetRest.isRequestAttributes()) {
+        if (targetRest.getRequestAttributes() != null) {
+            if (targetRest.getRequestAttributes()) {
                 targetManagement.requestControllerAttributes(targetId);
             } else {
                 return ResponseEntity.badRequest().build();
@@ -162,13 +162,13 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
             // update target without targetType here ...
             updateTarget = this.targetManagement.update(entityFactory.target().update(targetId)
                 .name(targetRest.getName()).description(targetRest.getDescription()).address(targetRest.getAddress())
-                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.isRequestAttributes()));
+                .securityToken(targetRest.getSecurityToken()).requestAttributes(targetRest.getRequestAttributes()));
 
         } else {
             updateTarget = this.targetManagement.update(
                 entityFactory.target().update(targetId).name(targetRest.getName()).description(targetRest.getDescription())
                     .address(targetRest.getAddress()).targetType(targetRest.getTargetType()).securityToken(targetRest.getSecurityToken())
-                    .requestAttributes(targetRest.isRequestAttributes()));
+                    .requestAttributes(targetRest.getRequestAttributes()));
 
         }
 
@@ -339,9 +339,9 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         findTargetWithExceptionIfNotFound(targetId);
 
         final List<DeploymentRequest> deploymentRequests = dsAssignments.stream().map(dsAssignment -> {
-            final boolean isConfirmationRequired = dsAssignment.isConfirmationRequired() == null
+            final boolean isConfirmationRequired = dsAssignment.getConfirmationRequired() == null
                     ? tenantConfigHelper.isConfirmationFlowEnabled()
-                    : dsAssignment.isConfirmationRequired();
+                    : dsAssignment.getConfirmationRequired();
             return MgmtDeploymentRequestMapper.createAssignmentRequestBuilder(dsAssignment, targetId)
                     .setConfirmationRequired(isConfirmationRequired).build();
         }).collect(Collectors.toList());

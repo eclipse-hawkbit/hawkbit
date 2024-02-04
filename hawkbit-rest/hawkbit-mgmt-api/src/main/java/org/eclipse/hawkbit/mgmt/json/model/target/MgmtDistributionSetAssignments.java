@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
  */
 @JsonDeserialize(using = MgmtDistributionSetAssignmentsDeserializer.class)
 public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSetAssignment> {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -28,7 +31,7 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
      * 
      */
     public MgmtDistributionSetAssignments() {
-        super();
+
     }
 
     /**
@@ -39,7 +42,6 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
      *            the assignment
      */
     public MgmtDistributionSetAssignments(final MgmtDistributionSetAssignment assignment) {
-        super();
         add(assignment);
     }
 
@@ -53,5 +55,4 @@ public class MgmtDistributionSetAssignments extends ArrayList<MgmtDistributionSe
     public MgmtDistributionSetAssignments(final List<MgmtDistributionSetAssignment> assignments) {
         super(assignments);
     }
-
 }

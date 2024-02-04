@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.mgmt.json.model;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.RepresentationModel;
 
@@ -18,22 +20,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A json annotated rest model for BaseEntity to RESTful API representation.
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
 
     @JsonProperty
     @Schema(example = "bumlux")
     private String createdBy;
-
     @JsonProperty
     @Schema(example = "1691065905897")
     private Long createdAt;
-
     @JsonProperty
     @Schema(example = "bumlux")
     private String lastModifiedBy;
-
     @JsonProperty
     @Schema(example = "1691065906407")
     private Long lastModifiedAt;
@@ -48,32 +48,13 @@ public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity>
         return this.getRequiredLink("self");
     }
 
-    /**
-     * @return the createdBy
-     */
-    public String getCreatedBy() {
-        return createdBy;
-    }
-
-    /**
-     * @param createdBy
-     *            the createdBy to set
-     */
     @JsonIgnore
     public void setCreatedBy(final String createdBy) {
         this.createdBy = createdBy;
     }
 
     /**
-     * @return the createdAt
-     */
-    public Long getCreatedAt() {
-        return createdAt;
-    }
-
-    /**
-     * @param createdAt
-     *            the createdAt to set
+     * @param createdAt the createdAt to set
      */
     @JsonIgnore
     public void setCreatedAt(final Long createdAt) {
@@ -81,26 +62,11 @@ public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity>
     }
 
     /**
-     * @return the lastModifiedBy
-     */
-    public String getLastModifiedBy() {
-        return lastModifiedBy;
-    }
-
-    /**
-     * @param lastModifiedBy
-     *            the lastModifiedBy to set
+     * @param lastModifiedBy the lastModifiedBy to set
      */
     @JsonIgnore
     public void setLastModifiedBy(final String lastModifiedBy) {
         this.lastModifiedBy = lastModifiedBy;
-    }
-
-    /**
-     * @return the lastModifiedAt
-     */
-    public Long getLastModifiedAt() {
-        return lastModifiedAt;
     }
 
     /**

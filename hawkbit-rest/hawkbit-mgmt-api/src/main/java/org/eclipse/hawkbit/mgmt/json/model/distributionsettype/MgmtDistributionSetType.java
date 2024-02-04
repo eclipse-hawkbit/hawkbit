@@ -15,12 +15,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
  * A json annotated rest model for SoftwareModuleType to RESTful API
  * representation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetType extends MgmtTypeEntity {
@@ -28,19 +32,4 @@ public class MgmtDistributionSetType extends MgmtTypeEntity {
     @JsonProperty(value = "id", required = true)
     @Schema(example = "99")
     private Long moduleId;
-
-    /**
-     * @return the moduleId
-     */
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    /**
-     * @param moduleId
-     *            the moduleId to set
-     */
-    public void setModuleId(final Long moduleId) {
-        this.moduleId = moduleId;
-    }
 }
