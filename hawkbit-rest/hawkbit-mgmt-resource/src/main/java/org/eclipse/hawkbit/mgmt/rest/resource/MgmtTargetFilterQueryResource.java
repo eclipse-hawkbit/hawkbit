@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.util.List;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 import org.eclipse.hawkbit.mgmt.json.model.targetfilter.MgmtDistributionSetAutoAssignment;
@@ -29,8 +30,6 @@ import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.TargetFilterQuery;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -45,9 +44,9 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource handling target CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestApi {
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetFilterQueryResource.class);
 
     private final TargetFilterQueryManagement filterManagement;
 
@@ -122,7 +121,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<MgmtTargetFilterQuery> updateFilter(@PathVariable("filterId") final Long filterId,
             @RequestBody final MgmtTargetFilterQueryRequestBody targetFilterRest) {
-        LOG.debug("updating target filter query {}", filterId);
+        log.debug("updating target filter query {}", filterId);
 
         final TargetFilterQuery updateFilter = filterManagement
                 .update(entityFactory.targetFilterQuery().update(filterId).name(targetFilterRest.getName())
@@ -138,7 +137,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     @Override
     public ResponseEntity<Void> deleteFilter(@PathVariable("filterId") final Long filterId) {
         filterManagement.delete(filterId);
-        LOG.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
+        log.debug("{} target filter query deleted, return status {}", filterId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
@@ -194,7 +193,7 @@ public class MgmtTargetFilterQueryResource implements MgmtTargetFilterQueryRestA
     private static MgmtRepresentationMode parseRepresentationMode(final String representationModeParam) {
         return MgmtRepresentationMode.fromValue(representationModeParam).orElseGet(() -> {
             // no need for a 400, just apply a safe fallback
-            LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+            log.warn("Received an invalid representation mode: {}", representationModeParam);
             return MgmtRepresentationMode.COMPACT;
         });
     }

@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.rest.resource;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.action.MgmtAction;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtActionRestApi;
@@ -17,8 +18,6 @@ import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.OffsetBasedPageRequest;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.model.Action;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -26,11 +25,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @ConditionalOnProperty(name = "hawkbit.rest.MgmtActionResource.enabled", matchIfMissing = true)
 public class MgmtActionResource implements MgmtActionRestApi {
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtActionResource.class);
 
     private final DeploymentManagement deploymentManagement;
 
@@ -77,7 +75,7 @@ public class MgmtActionResource implements MgmtActionRestApi {
         return MgmtRepresentationMode.fromValue(representationModeParam)
             .orElseGet(() -> {
                 // no need for a 400, just apply a safe fallback
-                LOG.warn("Received an invalid representation mode: {}", representationModeParam);
+                log.warn("Received an invalid representation mode: {}", representationModeParam);
                 return MgmtRepresentationMode.COMPACT;
             });
     }

@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.im.authentication.SpPermission.SpringEvalExpressions;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemCache;
 import org.eclipse.hawkbit.mgmt.json.model.systemmanagement.MgmtSystemStatisticsRest;
@@ -22,8 +23,6 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtSystemManagementRestApi;
 import org.eclipse.hawkbit.repository.SystemManagement;
 import org.eclipse.hawkbit.repository.report.model.SystemUsageReportWithTenants;
 import org.eclipse.hawkbit.repository.report.model.TenantUsage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,12 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * {@link SystemManagement} capabilities by REST.
- *
  */
+@Slf4j
 @RestController
 public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MgmtSystemManagementResource.class);
 
     private final SystemManagement systemManagement;
 
@@ -120,7 +117,7 @@ public class MgmtSystemManagementResource implements MgmtSystemManagementRestApi
     @Override
     public ResponseEntity<Collection<String>> invalidateCaches() {
         final Collection<String> cacheNames = cacheManager.getCacheNames();
-        LOGGER.info("Invalidating caches {}", cacheNames);
+        log.info("Invalidating caches {}", cacheNames);
         cacheNames.forEach(cacheName -> cacheManager.getCache(cacheName).clear());
         return ResponseEntity.ok(cacheNames);
     }

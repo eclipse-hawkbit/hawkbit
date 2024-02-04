@@ -14,40 +14,32 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
+@EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtDistributionSetStatistics {
+
   private static final String TOTAL = "total";
 
   @JsonProperty("actions")
   private Map<String, Long> totalActionsPerStatus;
-
   @JsonProperty("rollouts")
   private Map<String, Long> totalRolloutsPerStatus;
-
   @JsonProperty
   private Long totalAutoAssignments;
-  private MgmtDistributionSetStatistics() {
-    // Private constructor to enforce the use of the builder pattern
-  }
-
-  public Map<String, Long> getTotalActionsPerStatus() {
-    return totalActionsPerStatus;
-  }
-
-  public Map<String, Long> getTotalRolloutsPerStatus() {
-    return totalRolloutsPerStatus;
-  }
-
-  public Long getTotalAutoAssignments() {
-    return totalAutoAssignments;
-  }
 
   public static class Builder {
+
     private final Map<String, Long> totalActionsPerStatus;
     private final Map<String, Long> totalRolloutsPerStatus;
     private Long totalAutoAssignments;
@@ -101,4 +93,3 @@ public class MgmtDistributionSetStatistics {
     }
   }
 }
-

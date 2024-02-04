@@ -9,6 +9,8 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
+import lombok.Data;
+import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMaintenanceWindowRequestBody;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,8 +19,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Request Body of Target for assignment operations (ID only).
- *
  */
+@Data
+@Accessors(chain = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentRequestBody {
 
@@ -32,59 +35,10 @@ public class MgmtTargetAssignmentRequestBody {
     /**
      * JsonCreator Constructor
      * 
-     * @param id
-     *            Mandatory ID of the target that should be assigned
+     * @param id Mandatory ID of the target that should be assigned
      */
     @JsonCreator
     public MgmtTargetAssignmentRequestBody(@JsonProperty(required = true, value = "id") final String id) {
         this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(final String id) {
-        this.id = id;
-    }
-
-    public MgmtActionType getType() {
-        return type;
-    }
-
-    public void setType(final MgmtActionType type) {
-        this.type = type;
-    }
-
-    public long getForcetime() {
-        return forcetime;
-    }
-
-    public void setForcetime(final long forcetime) {
-        this.forcetime = forcetime;
-    }
-
-    public Integer getWeight() {
-        return weight;
-    }
-
-    public void setWeight(final Integer weight) {
-        this.weight = weight;
-    }
-
-    public MgmtMaintenanceWindowRequestBody getMaintenanceWindow() {
-        return maintenanceWindow;
-    }
-
-    public void setMaintenanceWindow(final MgmtMaintenanceWindowRequestBody maintenanceWindow) {
-        this.maintenanceWindow = maintenanceWindow;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
     }
 }

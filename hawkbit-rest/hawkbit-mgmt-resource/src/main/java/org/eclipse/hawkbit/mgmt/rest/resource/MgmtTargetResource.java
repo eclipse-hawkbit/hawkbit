@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import jakarta.validation.Valid;
 import jakarta.validation.ValidationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtId;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadata;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtMetadataBodyPut;
@@ -53,8 +54,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetMetadata;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -69,11 +68,11 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST Resource handling target CRUD operations.
  */
+@Slf4j
 @RestController
 public class MgmtTargetResource implements MgmtTargetRestApi {
+    
     private static final String ACTION_TARGET_MISSING_ASSIGN_WARN = "given action ({}) is not assigned to given target ({}).";
-
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetResource.class);
 
     private final TargetManagement targetManagement;
 
@@ -135,10 +134,10 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTarget>> createTargets(@RequestBody final List<MgmtTargetRequestBody> targets) {
-        LOG.debug("creating {} targets", targets.size());
+        log.debug("creating {} targets", targets.size());
         final Collection<Target> createdTargets = this.targetManagement
                 .create(MgmtTargetMapper.fromRequest(entityFactory, targets));
-        LOG.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
+        log.debug("{} targets created, return status {}", targets.size(), HttpStatus.CREATED);
         return new ResponseEntity<>(MgmtTargetMapper.toResponse(createdTargets, tenantConfigHelper),
                 HttpStatus.CREATED);
     }
@@ -183,7 +182,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
     @Override
     public ResponseEntity<Void> deleteTarget(@PathVariable("targetId") final String targetId) {
         this.targetManagement.deleteByControllerID(targetId);
-        LOG.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
+        log.debug("{} target deleted, return status {}", targetId, HttpStatus.OK);
         return ResponseEntity.ok().build();
     }
 
@@ -248,7 +247,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         final Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -263,7 +262,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, actionId, targetId);
             return ResponseEntity.notFound().build();
         }
 
@@ -291,7 +290,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
 
         if (!action.getTarget().getId().equals(target.getId())) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), target.getId());
             return ResponseEntity.notFound().build();
         }
 
@@ -382,7 +381,7 @@ public class MgmtTargetResource implements MgmtTargetRestApi {
         Action action = deploymentManagement.findAction(actionId)
                 .orElseThrow(() -> new EntityNotFoundException(Action.class, actionId));
         if (!action.getTarget().getControllerId().equals(targetId)) {
-            LOG.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
+            log.warn(ACTION_TARGET_MISSING_ASSIGN_WARN, action.getId(), targetId);
             return ResponseEntity.notFound().build();
         }
 

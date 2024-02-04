@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.mgmt.json.model.PagedList;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtAssignedTargetRequestBody;
 import org.eclipse.hawkbit.mgmt.json.model.tag.MgmtTag;
@@ -31,8 +32,6 @@ import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -45,11 +44,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 /**
  * REST Resource handling for tag CRUD operations.
- *
  */
+@Slf4j
 @RestController
 public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
-    private static final Logger LOG = LoggerFactory.getLogger(MgmtTargetTagResource.class);
 
     private final TargetTagManagement tagManagement;
 
@@ -105,7 +103,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<List<MgmtTag>> createTargetTags(@RequestBody final List<MgmtTagRequestBodyPut> tags) {
-        LOG.debug("creating {} target tags", tags.size());
+        log.debug("creating {} target tags", tags.size());
         final List<TargetTag> createdTargetTags = this.tagManagement
                 .create(MgmtTagMapper.mapTagFromRequest(entityFactory, tags));
         return new ResponseEntity<>(MgmtTagMapper.toResponse(createdTargetTags), HttpStatus.CREATED);
@@ -114,13 +112,13 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<MgmtTag> updateTargetTag(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final MgmtTagRequestBodyPut restTargetTagRest) {
-        LOG.debug("update {} target tag", restTargetTagRest);
+        log.debug("update {} target tag", restTargetTagRest);
 
         final TargetTag updateTargetTag = tagManagement
                 .update(entityFactory.tag().update(targetTagId).name(restTargetTagRest.getName())
                         .description(restTargetTagRest.getDescription()).colour(restTargetTagRest.getColour()));
 
-        LOG.debug("target tag updated");
+        log.debug("target tag updated");
 
         final MgmtTag response = MgmtTagMapper.toResponse(updateTargetTag);
         MgmtTagMapper.addLinks(updateTargetTag, response);
@@ -130,7 +128,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
 
     @Override
     public ResponseEntity<Void> deleteTargetTag(@PathVariable("targetTagId") final Long targetTagId) {
-        LOG.debug("Delete {} target tag", targetTagId);
+        log.debug("Delete {} target tag", targetTagId);
         final TargetTag targetTag = findTargetTagById(targetTagId);
 
         this.tagManagement.delete(targetTag.getName());
@@ -165,7 +163,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     public ResponseEntity<MgmtTargetTagAssigmentResult> toggleTagAssignment(
             @PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        LOG.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
+        log.debug("Toggle Target assignment {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
 
         final TargetTag targetTag = findTargetTagById(targetTagId);
         final TargetTagAssignmentResult assigmentResult = this.targetManagement
@@ -182,7 +180,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<List<MgmtTarget>> assignTargets(@PathVariable("targetTagId") final Long targetTagId,
             @RequestBody final List<MgmtAssignedTargetRequestBody> assignedTargetRequestBodies) {
-        LOG.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
+        log.debug("Assign Targets {} for target tag {}", assignedTargetRequestBodies.size(), targetTagId);
         final List<Target> assignedTarget = this.targetManagement
                 .assignTag(findTargetControllerIds(assignedTargetRequestBodies), targetTagId);
         return ResponseEntity.ok(MgmtTargetMapper.toResponse(assignedTarget, tenantConfigHelper));
@@ -191,7 +189,7 @@ public class MgmtTargetTagResource implements MgmtTargetTagRestApi {
     @Override
     public ResponseEntity<Void> unassignTarget(@PathVariable("targetTagId") final Long targetTagId,
             @PathVariable("controllerId") final String controllerId) {
-        LOG.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
+        log.debug("Unassign target {} for target tag {}", controllerId, targetTagId);
         this.targetManagement.unassignTag(controllerId, targetTagId);
         return ResponseEntity.ok().build();
     }

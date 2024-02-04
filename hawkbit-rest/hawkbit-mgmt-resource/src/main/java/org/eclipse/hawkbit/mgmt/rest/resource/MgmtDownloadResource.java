@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.rest.resource;
 
 import java.io.InputStream;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.artifact.repository.ArtifactRepository;
 import org.eclipse.hawkbit.artifact.repository.model.AbstractDbArtifact;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
@@ -19,8 +20,6 @@ import org.eclipse.hawkbit.cache.DownloadType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtDownloadRestApi;
 import org.eclipse.hawkbit.rest.util.FileStreamingUtil;
 import org.eclipse.hawkbit.rest.util.RequestResponseContextHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,11 +30,10 @@ import org.springframework.web.context.WebApplicationContext;
 /**
  * A resource for download artifacts.
  */
+@Slf4j
 @RestController
 @Scope(value = WebApplicationContext.SCOPE_REQUEST)
 public class MgmtDownloadResource implements MgmtDownloadRestApi {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MgmtDownloadResource.class);
 
     private final ArtifactRepository artifactRepository;
 
@@ -58,7 +56,7 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
         try {
             final DownloadArtifactCache artifactCache = downloadIdCache.get(downloadId);
             if (artifactCache == null) {
-                LOGGER.warn("Download Id {} could not be found", downloadId);
+                log.warn("Download Id {} could not be found", downloadId);
                 return ResponseEntity.notFound().build();
             }
 
@@ -69,11 +67,11 @@ public class MgmtDownloadResource implements MgmtDownloadRestApi {
                         ? artifactRepository.getArtifactBySha1(tenant, artifactCache.getId())
                         : null;
             } else {
-                LOGGER.warn("Download Type {} not supported", artifactCache.getDownloadType());
+                log.warn("Download Type {} not supported", artifactCache.getDownloadType());
             }
 
             if (artifact == null) {
-                LOGGER.warn("Artifact with cached id {} and download type {} could not be found.",
+                log.warn("Artifact with cached id {} and download type {} could not be found.",
                         artifactCache.getId(), artifactCache.getDownloadType());
                 return ResponseEntity.notFound().build();
             }
