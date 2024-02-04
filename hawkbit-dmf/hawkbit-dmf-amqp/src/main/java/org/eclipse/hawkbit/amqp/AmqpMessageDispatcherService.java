@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.collections4.ListUtils;
 import org.eclipse.hawkbit.api.ApiType;
@@ -67,8 +68,6 @@ import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantMetaData;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.util.IpUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
 import org.springframework.amqp.core.MessageProperties;
@@ -87,11 +86,9 @@ import org.springframework.util.CollectionUtils;
  *
  * Additionally the dispatcher listener/subscribe for some target events e.g.
  * assignment.
- *
  */
+@Slf4j
 public class AmqpMessageDispatcherService extends BaseAmqpService {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpMessageDispatcherService.class);
 
     private static final int MAX_PROCESSING_SIZE = 1000;
 
@@ -167,7 +164,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
                 assignedEvent.getActions().keySet());
 
         if (!filteredTargetList.isEmpty()) {
-            LOG.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
+            log.debug("targetAssignDistributionSet retrieved. I will forward it to DMF broker.");
             sendUpdateMessageToTargets(assignedEvent.getDistributionSetId(), assignedEvent.getActions(),
                     filteredTargetList);
         }
@@ -184,7 +181,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         if (!shouldBeProcessed(multiActionEvent)) {
             return;
         }
-        LOG.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
+        log.debug("MultiActionEvent received for {}", multiActionEvent.getControllerIds());
         sendMultiActionRequestMessages(multiActionEvent.getTenant(), multiActionEvent.getControllerIds());
     }
 
@@ -192,7 +189,7 @@ public class AmqpMessageDispatcherService extends BaseAmqpService {
         return partitionedParallelExecution(controllerIds, partition -> {
             return targetManagement.getByControllerID(partition).stream().filter(target -> {
                 if (hasPendingCancellations(target.getId())) {
-                    LOG.debug("Target {} has pending cancellations. Will not send update message to it.",
+                    log.debug("Target {} has pending cancellations. Will not send update message to it.",
                             target.getControllerId());
                     return false;
                 }

@@ -12,16 +12,15 @@ package org.eclipse.hawkbit.amqp;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.util.ErrorHandler;
 
 /**
  * An error handler delegates error handling to the matching {@link AmqpErrorHandler} based on the type of exception
  */
+@Slf4j
 public class DelegatingConditionalErrorHandler implements ErrorHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(DelegatingConditionalErrorHandler.class);
     private final List<AmqpErrorHandler> handlers;
     private final ErrorHandler defaultHandler;
 
@@ -41,12 +40,12 @@ public class DelegatingConditionalErrorHandler implements ErrorHandler {
     @Override
     public void handleError(final Throwable t) {
         if (t.getCause() == null) {
-            LOG.error("Cannot handle the error as the cause of the error is null!");
+            log.error("Cannot handle the error as the cause of the error is null!");
             return;
         }
 
         if (includesAmqpRejectException(t.getCause())) {
-            LOG.error("Received an AmqpRejectAndDontRequeueException due to {}", t.getCause().getMessage());
+            log.error("Received an AmqpRejectAndDontRequeueException due to {}", t.getCause().getMessage());
             return;
         }
 
