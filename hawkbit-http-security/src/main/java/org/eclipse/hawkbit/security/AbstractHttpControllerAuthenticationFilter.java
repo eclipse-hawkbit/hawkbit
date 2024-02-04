@@ -22,12 +22,11 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
 import org.eclipse.hawkbit.util.UrlUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,10 +39,9 @@ import org.springframework.util.AntPathMatcher;
  * name from the URL and the controller ID from the URL to do security checks
  * based on this information.
  */
+@Slf4j
 public abstract class AbstractHttpControllerAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AbstractHttpControllerAuthenticationFilter.class);
-
+    
     private static final String TENANT_PLACE_HOLDER = "tenant";
     private static final String CONTROLLER_ID_PLACE_HOLDER = "controllerId";
 
@@ -134,28 +132,28 @@ public abstract class AbstractHttpControllerAuthenticationFilter extends Abstrac
         final String requestURI = request.getRequestURI();
 
         if (pathExtractor.match(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI)) {
-            LOG.debug("retrieving principal from URI request {}", requestURI);
+            log.debug("retrieving principal from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor
                     .extractUriTemplateVariables(request.getContextPath() + CONTROLLER_REQUEST_ANT_PATTERN, requestURI);
             final String controllerId = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(CONTROLLER_ID_PLACE_HOLDER));
             final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
+            if (log.isTraceEnabled()) {
+                log.trace("Parsed tenant {} and controllerId {} from path request {}", tenant, controllerId,
                         requestURI);
             }
             return createTenantSecurityTokenVariables(request, tenant, controllerId);
         } else if (pathExtractor.match(request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI)) {
-            LOG.debug("retrieving path variables from URI request {}", requestURI);
+            log.debug("retrieving path variables from URI request {}", requestURI);
             final Map<String, String> extractUriTemplateVariables = pathExtractor.extractUriTemplateVariables(
                     request.getContextPath() + CONTROLLER_DL_REQUEST_ANT_PATTERN, requestURI);
             final String tenant = UrlUtils.decodeUriValue(extractUriTemplateVariables.get(TENANT_PLACE_HOLDER));
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Parsed tenant {} from path request {}", tenant, requestURI);
+            if (log.isTraceEnabled()) {
+                log.trace("Parsed tenant {} from path request {}", tenant, requestURI);
             }
             return createTenantSecurityTokenVariables(request, tenant, "anonymous");
         } else {
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
+            if (log.isTraceEnabled()) {
+                log.trace("request {} does not match the path pattern {}, request gets ignored", requestURI,
                         CONTROLLER_REQUEST_ANT_PATTERN);
             }
             return null;

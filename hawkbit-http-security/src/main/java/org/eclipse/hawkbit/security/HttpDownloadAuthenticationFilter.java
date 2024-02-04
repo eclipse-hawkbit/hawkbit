@@ -14,22 +14,18 @@ import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 /**
- * Extracts download or upload id from the request URI secruity token and set
+ * Extracts download or upload id from the request URI security token and set
  * the security context.
- * 
- *
- *
  */
+@Slf4j
 public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedProcessingFilter {
 
     public static final String REQUEST_ID_REGEX_PATTERN = ".*\\/downloadId\\/.*";
-    private static final Logger LOG = LoggerFactory.getLogger(HttpDownloadAuthenticationFilter.class);
 
     private final Pattern pattern;
     private final DownloadIdCache downloadIdCache;
@@ -51,7 +47,7 @@ public class HttpDownloadAuthenticationFilter extends AbstractPreAuthenticatedPr
         if (!matcher.matches()) {
             return null;
         }
-        LOG.debug("retrieving id from URI request {}", requestURI);
+        log.debug("retrieving id from URI request {}", requestURI);
         final String[] groups = requestURI.split("\\/");
         final String id = groups[groups.length - 1];
         if (id == null) {
