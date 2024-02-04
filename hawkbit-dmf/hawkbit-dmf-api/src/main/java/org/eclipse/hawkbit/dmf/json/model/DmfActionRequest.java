@@ -13,22 +13,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * JSON representation of an action related request.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfActionRequest {
+
     @JsonProperty
     private Long actionId;
-
-    public Long getActionId() {
-        return actionId;
-    }
-
-    public void setActionId(final Long correlator) {
-        this.actionId = correlator;
-    }
 }

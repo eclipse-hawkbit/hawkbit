@@ -18,6 +18,7 @@ import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTagDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetTypeDeletedEvent;
@@ -78,13 +79,14 @@ import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationUpd
 @NoArgsConstructor(access = AccessLevel.PUBLIC)
 @Getter
 @EqualsAndHashCode
+@ToString
 public class EventType {
 
     private static final Map<Integer, Class<?>> TYPES = new HashMap<>();
 
     /**
      * The associated event-type-value must remain the same as initially
-     * declared. Otherwise messages cannot correctly de-serialized.
+     * declared. Otherwise, messages cannot correctly de-serialized.
      */
     static {
         // target

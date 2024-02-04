@@ -19,30 +19,24 @@ public enum MessageType {
      * The event type related to interaction with a thing.
      */
     EVENT,
-
     /**
      * The thing created type.
      */
     THING_CREATED,
-
     /**
      * The thing deleted type.
      */
     THING_DELETED,
-
     /**
      * The request to delete a target.
      */
     THING_REMOVED,
-
     /**
      * DMF receiver health check type.
      */
     PING,
-
     /**
      * DMF receiver health check response type.
      */
     PING_RESPONSE
-
 }

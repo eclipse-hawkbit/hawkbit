@@ -11,16 +11,22 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Target;
+
+import java.io.Serial;
 
 /**
  * Event is send in case a target polls either through DDI or DMF.
  */
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
+@ToString
 public class TargetPollEvent extends RemoteTenantAwareEvent {
 
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private String controllerId;
     private String targetAdress;
 

@@ -13,6 +13,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +28,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfBatchDownloadAndUpdateRequest {
 
+    @Getter @Setter
     @JsonProperty
     private Long timestamp;
 
@@ -34,14 +37,6 @@ public class DmfBatchDownloadAndUpdateRequest {
 
     @JsonProperty
     private List<DmfSoftwareModule> softwareModules;
-
-    public Long getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(final Long timestamp) {
-        this.timestamp = timestamp;
-    }
 
     public List<DmfSoftwareModule> getSoftwareModules() {
         if (softwareModules == null) {
@@ -54,8 +49,7 @@ public class DmfBatchDownloadAndUpdateRequest {
     /**
      * Add a Software module.
      *
-     * @param createSoftwareModule
-     *            the module
+     * @param createSoftwareModule the module
      */
     public void addSoftwareModule(final DmfSoftwareModule createSoftwareModule) {
         if (softwareModules == null) {
@@ -72,7 +66,6 @@ public class DmfBatchDownloadAndUpdateRequest {
 
         return Collections.unmodifiableList(targets);
     }
-
 
     /**
      * Add a Target.
@@ -91,8 +84,7 @@ public class DmfBatchDownloadAndUpdateRequest {
     /**
      * Add multiple Targets.
      *
-     * @param targets
-     *            the target
+     * @param targets the target
      */
     public void addTargets(final List<DmfTarget> targets) {
         if (this.targets == null) {

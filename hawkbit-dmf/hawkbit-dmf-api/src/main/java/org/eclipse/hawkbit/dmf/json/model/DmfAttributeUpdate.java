@@ -16,10 +16,12 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * JSON representation of the Attribute Update message.
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DmfAttributeUpdate {
@@ -29,17 +31,4 @@ public class DmfAttributeUpdate {
 
     @JsonProperty
     private DmfUpdateMode mode;
-
-    public DmfUpdateMode getMode() {
-        return mode;
-    }
-
-    public void setMode(final DmfUpdateMode mode) {
-        this.mode = mode;
-    }
-
-    public Map<String, String> getAttributes() {
-        return attributes;
-    }
-
 }

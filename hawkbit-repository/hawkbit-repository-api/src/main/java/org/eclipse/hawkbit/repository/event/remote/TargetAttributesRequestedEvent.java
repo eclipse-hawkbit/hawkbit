@@ -11,16 +11,23 @@ package org.eclipse.hawkbit.repository.event.remote;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TenantAwareBaseEntity;
+
+import java.io.Serial;
 
 /**
  * Defines the remote event of triggering attribute updates of a {@link Target}.
  */
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = true)
+@ToString
 public class TargetAttributesRequestedEvent extends RemoteIdEvent {
+
+    @Serial
     private static final long serialVersionUID = 1L;
+
     private String controllerId;
     private String targetAddress;
 
