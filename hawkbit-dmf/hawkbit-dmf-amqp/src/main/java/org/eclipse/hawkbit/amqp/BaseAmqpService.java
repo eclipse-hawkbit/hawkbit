@@ -13,8 +13,7 @@ import java.util.Map;
 
 import jakarta.validation.constraints.NotNull;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
@@ -26,9 +25,9 @@ import org.springframework.amqp.support.converter.MessageConverter;
 /**
  * A base class which provide basis amqp staff.
  */
+@Slf4j
 public class BaseAmqpService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseAmqpService.class);
     private final RabbitTemplate rabbitTemplate;
 
     /**
@@ -91,7 +90,7 @@ public class BaseAmqpService {
     }
 
     protected static final void logAndThrowMessageError(final Message message, final String error) {
-        LOGGER.debug("Warning! \"{}\" reported by message: {}", error, message);
+        log.debug("Warning! \"{}\" reported by message: {}", error, message);
         throw new AmqpRejectAndDontRequeueException(error);
     }
 

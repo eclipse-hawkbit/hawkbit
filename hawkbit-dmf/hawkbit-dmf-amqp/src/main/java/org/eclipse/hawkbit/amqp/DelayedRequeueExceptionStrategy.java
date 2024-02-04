@@ -13,14 +13,13 @@ import java.util.concurrent.TimeUnit;
 
 import jakarta.validation.ConstraintViolationException;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.repository.exception.CancelActionNotAllowedException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAddressException;
 import org.eclipse.hawkbit.repository.exception.InvalidTargetAttributeException;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.listener.ConditionalRejectingErrorHandler;
 import org.springframework.amqp.rabbit.listener.FatalExceptionStrategy;
 import org.springframework.amqp.support.converter.MessageConversionException;
@@ -31,16 +30,14 @@ import org.springframework.messaging.MessageHandlingException;
  * exceptions not to be requeued. In addition it throttles in case of a requeue
  * by means of blocking the processing thread for a certain amount of time. That
  * avoids a back and forth between broker and hawkBit at maximum speed.
- *
  */
+@Slf4j
 public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHandler.DefaultExceptionStrategy {
-    private static final Logger LOG = LoggerFactory.getLogger(DelayedRequeueExceptionStrategy.class);
 
     private final long delay;
 
     /**
-     * @param delay
-     *            in {@link TimeUnit#MILLISECONDS} before requeue.
+     * @param delay in {@link TimeUnit#MILLISECONDS} before requeue.
      */
     public DelayedRequeueExceptionStrategy(final long delay) {
         this.delay = delay;
@@ -52,12 +49,12 @@ public class DelayedRequeueExceptionStrategy extends ConditionalRejectingErrorHa
             return true;
         }
 
-        LOG.error("Found a message that has to be requeued. Processing with delay of {}ms: ", delay, cause);
+        log.error("Found a message that has to be requeued. Processing with delay of {}ms: ", delay, cause);
 
         try {
             TimeUnit.MILLISECONDS.sleep(delay);
         } catch (final InterruptedException e) {
-            LOG.error("Delay interrupted!", e);
+            log.error("Delay interrupted!", e);
             Thread.currentThread().interrupt();
         }
 

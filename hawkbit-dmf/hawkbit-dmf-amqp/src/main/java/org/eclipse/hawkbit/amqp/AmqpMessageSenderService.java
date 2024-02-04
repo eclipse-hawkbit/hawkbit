@@ -31,5 +31,4 @@ public interface AmqpMessageSenderService {
      *            the reply to uri
      */
     void sendMessage(@NotNull final Message message, @NotNull final URI replyTo);
-
 }

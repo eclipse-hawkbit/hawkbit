@@ -14,7 +14,7 @@ import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 /**
  * An abstract error handler for errors resulting from AMQP.
  */
-public abstract class AbstractAmqpErrorHandler<T> implements AmqpErrorHandler{
+public abstract class AbstractAmqpErrorHandler<T> implements AmqpErrorHandler {
 
     @Override
     public void doHandle(Throwable throwable, AmqpErrorHandlerChain chain) {

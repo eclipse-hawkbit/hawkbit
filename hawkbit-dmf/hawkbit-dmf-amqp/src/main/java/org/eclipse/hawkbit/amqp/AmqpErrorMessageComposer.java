@@ -13,16 +13,16 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.support.ListenerExecutionFailedException;
 
 /**
  * Class that composes a meaningful error message and enhances it with properties from failed message
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class AmqpErrorMessageComposer {
-
-    private AmqpErrorMessageComposer() {
-    }
 
     /**
      * Constructs an error message based on failed message content

@@ -21,6 +21,7 @@ import org.springframework.util.ErrorHandler;
  *
  */
 public class ConfigurableRabbitListenerContainerFactory extends SimpleRabbitListenerContainerFactory {
+
     private final int declarationRetries;
 
     /**

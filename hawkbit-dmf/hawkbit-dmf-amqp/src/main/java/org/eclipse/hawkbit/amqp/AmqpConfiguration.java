@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.amqp;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.api.ArtifactUrlHandler;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
@@ -26,8 +27,6 @@ import org.eclipse.hawkbit.repository.TenantConfigurationManagement;
 import org.eclipse.hawkbit.security.DdiSecurityProperties;
 import org.eclipse.hawkbit.security.SystemSecurityContext;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.FanoutExchange;
@@ -60,14 +59,12 @@ import java.util.Map;
 /**
  * Spring configuration for AMQP based DMF communication for indirect device
  * integration.
- *
  */
+@Slf4j
 @EnableConfigurationProperties({ AmqpProperties.class, AmqpDeadletterProperties.class })
 @ConditionalOnProperty(prefix = "hawkbit.dmf.rabbitmq", name = "enabled", matchIfMissing = true)
 @PropertySource("classpath:/hawkbit-dmf-defaults.properties")
 public class AmqpConfiguration {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AmqpConfiguration.class);
 
     @Autowired
     private AmqpProperties amqpProperties;
@@ -154,9 +151,9 @@ public class AmqpConfiguration {
 
         rabbitTemplate.setConfirmCallback((correlationData, ack, cause) -> {
             if (ack) {
-                LOGGER.debug("Message with {} confirmed by broker.", correlationData);
+                log.debug("Message with {} confirmed by broker.", correlationData);
             } else {
-                LOGGER.error("Broker is unable to handle message with {} : {}", correlationData, cause);
+                log.error("Broker is unable to handle message with {} : {}", correlationData, cause);
             }
         });
 

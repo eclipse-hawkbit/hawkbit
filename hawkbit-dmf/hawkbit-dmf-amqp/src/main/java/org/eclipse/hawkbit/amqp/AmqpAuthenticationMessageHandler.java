@@ -13,6 +13,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 import java.util.UUID;
 
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.hawkbit.api.HostnameResolver;
 import org.eclipse.hawkbit.cache.DownloadArtifactCache;
 import org.eclipse.hawkbit.cache.DownloadIdCache;
@@ -27,8 +28,6 @@ import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken;
 import org.eclipse.hawkbit.security.DmfTenantSecurityToken.FileResource;
 import org.eclipse.hawkbit.tenancy.TenantAware;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -48,10 +47,9 @@ import org.springframework.web.util.UriComponentsBuilder;
  * is permitted to download certain artifact. This is handled by the queue that
  * is configured for the property
  * hawkbit.dmf.rabbitmq.authenticationReceiverQueue.
- *
  */
+@Slf4j
 public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
-    private static final Logger LOG = LoggerFactory.getLogger(AmqpAuthenticationMessageHandler.class);
 
     private final AmqpControllerAuthentication authenticationManager;
 
@@ -133,30 +131,30 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
         } else if (securityToken.getTargetId() != null) {
             checkByTargetId(sha1Hash, securityToken.getTargetId());
         } else {
-            LOG.info("anonymous download no authentication check for artifact {}", sha1Hash);
+            log.info("anonymous download no authentication check for artifact {}", sha1Hash);
         }
 
     }
 
     private void checkByTargetId(final String sha1Hash, final Long targetId) {
-        LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}", targetId,
+        log.debug("no anonymous download request, doing authentication check for target {} and artifact {}", targetId,
                 sha1Hash);
         if (!controllerManagement.hasTargetArtifactAssigned(targetId, sha1Hash)) {
-            LOG.info("target {} tried to download artifact {} which is not assigned to the target", targetId, sha1Hash);
+            log.info("target {} tried to download artifact {} which is not assigned to the target", targetId, sha1Hash);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", targetId, sha1Hash);
+        log.info("download security check for target {} and artifact {} granted", targetId, sha1Hash);
     }
 
     private void checkByControllerId(final String sha1Hash, final String controllerId) {
-        LOG.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
+        log.debug("no anonymous download request, doing authentication check for target {} and artifact {}",
                 controllerId, sha1Hash);
         if (!controllerManagement.hasTargetArtifactAssigned(controllerId, sha1Hash)) {
-            LOG.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
+            log.info("target {} tried to download artifact {} which is not assigned to the target", controllerId,
                     sha1Hash);
             throw new EntityNotFoundException();
         }
-        LOG.info("download security check for target {} and artifact {} granted", controllerId, sha1Hash);
+        log.info("download security check for target {} and artifact {} granted", controllerId, sha1Hash);
     }
 
     private Optional<Artifact> findArtifactByFileResource(final FileResource fileResource) {
@@ -222,16 +220,16 @@ public class AmqpAuthenticationMessageHandler extends BaseAmqpService {
                     .path(tenantAware.getCurrentTenant()).path("/").path(downloadId).build().toUriString());
             authenticationResponse.setResponseCode(HttpStatus.OK.value());
         } catch (final BadCredentialsException | AuthenticationServiceException | CredentialsExpiredException e) {
-            LOG.error("Login failed", e);
+            log.error("Login failed", e);
             authenticationResponse.setResponseCode(HttpStatus.FORBIDDEN.value());
             authenticationResponse.setMessage("Login failed");
         } catch (final URISyntaxException e) {
-            LOG.error("URI build exception", e);
+            log.error("URI build exception", e);
             authenticationResponse.setResponseCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
             authenticationResponse.setMessage("Building download URI failed");
         } catch (final EntityNotFoundException e) {
             final String errorMessage = "Artifact for resource " + fileResource + " not found ";
-            LOG.info(errorMessage);
+            log.info(errorMessage);
             authenticationResponse.setResponseCode(HttpStatus.NOT_FOUND.value());
             authenticationResponse.setMessage(errorMessage);
         }

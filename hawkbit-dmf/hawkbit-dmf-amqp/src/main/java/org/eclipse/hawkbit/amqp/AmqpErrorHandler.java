@@ -24,6 +24,5 @@ public interface AmqpErrorHandler {
      * @param chain
      *            an {@link AmqpErrorHandlerChain}
      */
-void doHandle(final Throwable throwable, final AmqpErrorHandlerChain chain);
-
+    void doHandle(final Throwable throwable, final AmqpErrorHandlerChain chain);
 }
