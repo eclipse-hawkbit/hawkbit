@@ -158,9 +158,9 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
             rollout = rolloutManagement.create(create, rolloutGroups, rolloutGroupConditions);
 
         } else if (rolloutRequestBody.getAmountGroups() != null) {
-            final boolean confirmationRequired = rolloutRequestBody.isConfirmationRequired() == null
+            final boolean confirmationRequired = rolloutRequestBody.getConfirmationRequired() == null
                     ? confirmationFlowActive
-                    : rolloutRequestBody.isConfirmationRequired();
+                    : rolloutRequestBody.getConfirmationRequired();
             rollout = rolloutManagement.create(create, rolloutRequestBody.getAmountGroups(), confirmationRequired,
                     rolloutGroupConditions);
 
@@ -173,10 +173,10 @@ public class MgmtRolloutResource implements MgmtRolloutRestApi {
 
     private Optional<Boolean> isConfirmationRequiredForGroup(final MgmtRolloutGroup group,
             final MgmtRolloutRestRequestBody request) {
-        if (group.isConfirmationRequired() != null) {
-            return Optional.of(group.isConfirmationRequired());
-        } else if (request.isConfirmationRequired() != null) {
-            return Optional.of(request.isConfirmationRequired());
+        if (group.getConfirmationRequired() != null) {
+            return Optional.of(group.getConfirmationRequired());
+        } else if (request.getConfirmationRequired() != null) {
+            return Optional.of(request.getConfirmationRequired());
         }
         return Optional.empty();
     }

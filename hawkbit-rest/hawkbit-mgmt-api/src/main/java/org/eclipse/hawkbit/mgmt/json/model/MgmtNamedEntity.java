@@ -11,49 +11,20 @@ package org.eclipse.hawkbit.mgmt.json.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 /**
  * A json annotated rest model for NamedEntity to RESTful API representation.
- *
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 public abstract class MgmtNamedEntity extends MgmtBaseEntity {
 
     @JsonProperty(required = true)
     @Schema(example = "Name of entity")
     private String name;
-
     @JsonProperty
     @Schema(example = "Description of entity")
     private String description;
-
-    /**
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * @param name
-     *            the name to set
-     */
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    /**
-     * @return the description
-     */
-    public String getDescription() {
-        return description;
-    }
-
-    /**
-     * @param description
-     *            the description to set
-     */
-    public void setDescription(final String description) {
-        this.description = description;
-    }
-
 }

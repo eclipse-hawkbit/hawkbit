@@ -11,37 +11,20 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionsettype;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * Request Body for DistributionSetType PUT, i.e. update.
- *
  */
+@Data
+@Accessors(chain = true)
 public class MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty
     @Schema(example = "Example description")
     private String description;
-
     @JsonProperty
     @Schema(example = "rgb(86,37,99)")
     private String colour;
-
-    public String getDescription() {
-        return description;
-    }
-
-    public MgmtDistributionSetTypeRequestBodyPut setDescription(final String description) {
-        this.description = description;
-        return this;
-    }
-
-    public String getColour() {
-        return colour;
-    }
-
-    public MgmtDistributionSetTypeRequestBodyPut setColour(final String colour) {
-        this.colour = colour;
-        return this;
-    }
-
 }

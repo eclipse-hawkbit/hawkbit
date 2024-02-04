@@ -313,7 +313,7 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestBody final MgmtSoftwareModuleMetadataBodyPut metadata) {
         final SoftwareModuleMetadata updated = softwareModuleManagement
                 .updateMetaData(entityFactory.softwareModuleMetadata().update(softwareModuleId, metadataKey)
-                        .value(metadata.getValue()).targetVisible(metadata.isTargetVisible()));
+                        .value(metadata.getValue()).targetVisible(metadata.getTargetVisible()));
 
         return ResponseEntity.ok(MgmtSoftwareModuleMapper.toResponseSwMetadata(updated));
     }

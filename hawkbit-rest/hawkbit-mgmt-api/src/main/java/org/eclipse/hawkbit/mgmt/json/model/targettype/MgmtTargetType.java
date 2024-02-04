@@ -13,12 +13,16 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
  * A json annotated rest model for TargetType to RESTful API
  * representation.
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetType extends MgmtTypeEntity {
@@ -26,19 +30,4 @@ public class MgmtTargetType extends MgmtTypeEntity {
     @JsonProperty(value = "id", required = true)
     @Schema(example = "26")
     private Long typeId;
-
-    /**
-     * @return target type ID
-     */
-    public Long getTypeId() {
-        return typeId;
-    }
-
-    /**
-     * @param typeId
-     *          Target type ID
-     */
-    public void setTypeId(final Long typeId) {
-        this.typeId = typeId;
-    }
 }

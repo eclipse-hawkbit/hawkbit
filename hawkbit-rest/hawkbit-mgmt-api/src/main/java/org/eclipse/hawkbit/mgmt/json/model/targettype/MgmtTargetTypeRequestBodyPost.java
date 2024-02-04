@@ -19,7 +19,6 @@ import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModule
 
 /**
  * Request Body for TargetType POST.
- *
  */
 public class MgmtTargetTypeRequestBodyPost extends MgmtTargetTypeRequestBodyPut {
 

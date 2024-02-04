@@ -10,6 +10,8 @@
 package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,6 +20,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 /**
  * Model for defining the Attributes of a Rollout Group
  */
+@Data
+@EqualsAndHashCode(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
@@ -28,28 +32,4 @@ public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
     private Float targetPercentage;
     @Schema(example = "false")
     private Boolean confirmationRequired;
-
-    public String getTargetFilterQuery() {
-        return targetFilterQuery;
-    }
-
-    public void setTargetFilterQuery(final String targetFilterQuery) {
-        this.targetFilterQuery = targetFilterQuery;
-    }
-
-    public Float getTargetPercentage() {
-        return targetPercentage;
-    }
-
-    public void setTargetPercentage(Float targetPercentage) {
-        this.targetPercentage = targetPercentage;
-    }
-
-    public Boolean isConfirmationRequired() {
-        return confirmationRequired;
-    }
-
-    public void setConfirmationRequired(final Boolean confirmationRequired) {
-        this.confirmationRequired = confirmationRequired;
-    }
 }

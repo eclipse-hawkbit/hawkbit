@@ -12,15 +12,17 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * Payload to activate the auto-confirmation by given initiator and remark.
  */
+@Data
 public class MgmtTargetAutoConfirmUpdate {
+
     @JsonProperty(required = false)
     @Schema(example = "custom_initiator_value")
     private final String initiator;
-
     @JsonProperty(required = false)
     @Schema(example = "custom_remark")
     private final String remark;
@@ -28,29 +30,13 @@ public class MgmtTargetAutoConfirmUpdate {
     /**
      * Constructor.
      *
-     * @param initiator
-     *            can be null
-     * @param remark
-     *            can be null
+     * @param initiator can be null
+     * @param remark can be null
      */
     @JsonCreator
     public MgmtTargetAutoConfirmUpdate(@JsonProperty(value = "initiator") final String initiator,
             @JsonProperty(value = "remark") final String remark) {
         this.initiator = initiator;
         this.remark = remark;
-    }
-
-    public String getInitiator() {
-        return initiator;
-    }
-
-    public String getRemark() {
-        return remark;
-    }
-
-    @Override
-    public String toString() {
-        return "MgmtTargetAutoConfirm [initiator=" + initiator + ", remark=" + remark + ", toString()="
-                + super.toString() + "]";
     }
 }

@@ -10,6 +10,7 @@
 package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -23,6 +24,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
  * {@link MgmtDistributionSetAssignment}s
  */
 public class MgmtDistributionSetAssignmentsDeserializer extends StdDeserializer<MgmtDistributionSetAssignments> {
+
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
