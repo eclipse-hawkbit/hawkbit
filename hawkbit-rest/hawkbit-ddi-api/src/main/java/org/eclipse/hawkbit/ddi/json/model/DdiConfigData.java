@@ -7,9 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-    package org.eclipse.hawkbit.ddi.json.model;
+package org.eclipse.hawkbit.ddi.json.model;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -18,17 +17,32 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Feedback channel for ConfigData action.
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example =  """
+    {
+       "mode" : "merge",
+       "data" : {
+         "VIN" : "JH4TB2H26CC000000",
+         "hwRevision" : "2"
+       }
+     }""")
 public class DdiConfigData {
 
     @NotEmpty
+    @Schema(description = "Link which is provided whenever the provisioning target or device is supposed to push its configuration data (aka. \"controller attributes\") to the server. Only shown for the initial configuration, after a successful update action, or if requested explicitly (e.g. via the management UI).")
     private final Map<String, String> data;
 
-    @Schema(example = "merge")
+    @Schema(description = "Optional parameter to specify the update mode that should be applied when updating target attributes. Valid values are 'merge', 'replace', and 'remove'. Defaults to 'merge'.")
     private final DdiUpdateMode mode;
 
     /**
@@ -40,23 +54,10 @@ public class DdiConfigData {
      *            defines the mode of the update (replace, merge, remove)
      */
     @JsonCreator
-    public DdiConfigData(@JsonProperty(value = "data") final Map<String, String> data,
+    public DdiConfigData(
+            @JsonProperty(value = "data") final Map<String, String> data,
             @JsonProperty(value = "mode") final DdiUpdateMode mode) {
         this.data = data;
         this.mode = mode;
     }
-
-    public Map<String, String> getData() {
-        return data;
-    }
-
-    public DdiUpdateMode getMode() {
-        return mode;
-    }
-
-    @Override
-    public String toString() {
-        return "ConfigData [data=" + data + ", mode=" + mode + ", toString()=" + super.toString() + "]";
-    }
-
 }

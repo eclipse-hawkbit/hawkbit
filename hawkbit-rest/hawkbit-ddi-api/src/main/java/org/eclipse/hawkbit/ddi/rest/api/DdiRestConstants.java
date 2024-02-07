@@ -67,7 +67,7 @@ public final class DdiRestConstants {
     /**
      * Default value specifying that no action history to be sent as part of
      * response to deploymentBase
-     * {@link DdiRootControllerRestApi#getControllerBasedeploymentAction}.
+     * {@link DdiRootControllerRestApi#getControllerDeploymentBaseAction}.
      * {@link DdiRootControllerRestApi#getConfirmationBaseAction}.
      */
     public static final String NO_ACTION_HISTORY = "0";

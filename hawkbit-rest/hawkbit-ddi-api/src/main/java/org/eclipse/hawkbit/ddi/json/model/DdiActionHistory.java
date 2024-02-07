@@ -12,6 +12,8 @@ package org.eclipse.hawkbit.ddi.json.model;
 import java.util.List;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRootControllerRestApi;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -21,41 +23,39 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Provide action history information to the controller as part of response to
- * {@link DdiRootControllerRestApi#getControllerBasedeploymentAction} and
- * {@link DdiRootControllerRestApi#getControllerBaseconfirmationAction}:
- * 1. Current action status at the server; 2. List of messages from action history
- * that were sent to server earlier by the controller using
- * {@link DdiActionFeedback}.
+ * {@link DdiRootControllerRestApi#getControllerDeploymentBaseAction} and
+ * {@link DdiRootControllerRestApi#getConfirmationBaseAction}:
+ * <ol>
+ *     <li>Current action status at the server</li>
+ *     <li>List of messages from action history</li>
+ * </ol>
+ * that were sent to server earlier by the controller using {@link DdiActionFeedback}.
  */
-
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "status", "messages" })
 public class DdiActionHistory {
 
     @JsonProperty("status")
-    @Schema(example = "RUNNING")
+    @Schema(description = "Status of the deployment based on previous feedback by the device", example = "RUNNING")
     private final String actionStatus;
 
     @JsonProperty("messages")
+    @Schema(description = "Messages are previously sent to the feedback channel in LIFO order by the device. Note: The first status message is set by the system and describes the trigger of the deployment")
     private final List<String> messages;
 
     /**
      * Parameterized constructor for creating {@link DdiActionHistory}.
      *
-     * @param actionStatus
-     *            is the current action status at the server
-     * @param messages
-     *            is a list of messages retrieved from action history.
+     * @param actionStatus is the current action status at the server
+     * @param messages is a list of messages retrieved from action history.
      */
     @JsonCreator
-    public DdiActionHistory(@JsonProperty("status") final String actionStatus,
+    public DdiActionHistory(
+            @JsonProperty("status") final String actionStatus,
             @JsonProperty("messages") List<String> messages) {
         this.actionStatus = actionStatus;
         this.messages = messages;
-    }
-
-    @Override
-    public String toString() {
-        return "Action history [" + "status=" + actionStatus + ", messages={" + messages.toString() + "}]";
     }
 }

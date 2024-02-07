@@ -277,7 +277,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<DdiDeploymentBase> getControllerBasedeploymentAction(
+    public ResponseEntity<DdiDeploymentBase> getControllerDeploymentBaseAction(
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
@@ -329,7 +329,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
     }
 
     @Override
-    public ResponseEntity<Void> postBasedeploymentActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
+    public ResponseEntity<Void> postDeploymentBaseActionFeedback(@Valid @RequestBody final DdiActionFeedback feedback,
             @PathVariable("tenant") final String tenant, @PathVariable("controllerId") final String controllerId,
             @PathVariable("actionId") @NotNull final Long actionId) {
         log.debug("provideBasedeploymentActionFeedback for target [{},{}]: {}", controllerId, actionId, feedback);

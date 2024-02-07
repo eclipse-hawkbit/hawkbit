@@ -14,32 +14,33 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
- * Hashes for given Artifact.
+ * Hashes for given Artifact
  */
+@NoArgsConstructor // needed for json create
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiArtifactHash {
 
     @JsonProperty
-    @Schema(example = "2d86c2a659e364e9abba49ea6ffcd53dd5559f05")
+    @Schema(description = "SHA1 hash of the artifact in Base 16 format", example = "2d86c2a659e364e9abba49ea6ffcd53dd5559f05")
     private String sha1;
 
     @JsonProperty
-    @Schema(example = "0d1b08c34858921bc7c662b228acb7ba")
+    @Schema(description = "MD5 hash of the artifact", example = "0d1b08c34858921bc7c662b228acb7ba")
     private String md5;
 
     @JsonProperty
     @JsonInclude(Include.NON_NULL)
-    @Schema(example = "a03b221c6c6eae7122ca51695d456d5222e524889136394944b2f9763b483615")
+    @Schema(description = "SHA-256 hash of the artifact in Base 16 format", example = "a03b221c6c6eae7122ca51695d456d5222e524889136394944b2f9763b483615")
     private String sha256;
-
-    /**
-     * Default constructor.
-     */
-    public DdiArtifactHash() {
-        // needed for json create
-    }
 
     /**
      * Public constructor.
@@ -55,26 +56,5 @@ public class DdiArtifactHash {
         this.sha1 = sha1;
         this.md5 = md5;
         this.sha256 = sha256;
-    }
-
-    /**
-     * @return the sha1
-     */
-    public String getSha1() {
-        return sha1;
-    }
-
-    /**
-     * @return the md5
-     */
-    public String getMd5() {
-        return md5;
-    }
-
-    /**
-     * @return the sha256
-     */
-    public String getSha256() {
-        return sha256;
     }
 }

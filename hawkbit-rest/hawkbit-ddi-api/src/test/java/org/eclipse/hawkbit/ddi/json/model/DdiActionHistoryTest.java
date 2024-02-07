@@ -33,19 +33,19 @@ import io.qameta.allure.Story;
 @Story("Serializability of DDI api Models")
 public class DdiActionHistoryTest {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     @Test
     @Description("Verify the correct serialization and deserialization of the model")
     public void shouldSerializeAndDeserializeObject() throws IOException {
         // Setup
-        String actionStatus = "TestAction";
-        List<String> messages = Arrays.asList("Action status message 1", "Action status message 2");
-        DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus, messages);
+        final String actionStatus = "TestAction";
+        final List<String> messages = Arrays.asList("Action status message 1", "Action status message 2");
+        final DdiActionHistory ddiActionHistory = new DdiActionHistory(actionStatus, messages);
 
         // Test
-        String serializedDdiActionHistory = mapper.writeValueAsString(ddiActionHistory);
-        DdiActionHistory deserializedDdiActionHistory = mapper.readValue(serializedDdiActionHistory,
+        final String serializedDdiActionHistory = OBJECT_MAPPER.writeValueAsString(ddiActionHistory);
+        final DdiActionHistory deserializedDdiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory,
                 DdiActionHistory.class);
 
         assertThat(serializedDdiActionHistory).contains(actionStatus, messages.get(0), messages.get(1));
@@ -56,10 +56,15 @@ public class DdiActionHistoryTest {
     @Description("Verify the correct deserialization of a model with a additional unknown property")
     public void shouldDeserializeObjectWithUnknownProperty() throws IOException {
         // Setup
-        String serializedDdiActionHistory = "{\"status\":\"SomeAction\", \"messages\":[\"Some message\"], \"unknownProperty\": \"test\"}";
+        final String serializedDdiActionHistory = """
+            {
+                "status": "SomeAction",
+                "messages": [ "Some message"],
+                "unknownProperty": "test"
+            }""";
 
         // Test
-        DdiActionHistory ddiActionHistory = mapper.readValue(serializedDdiActionHistory, DdiActionHistory.class);
+        final DdiActionHistory ddiActionHistory = OBJECT_MAPPER.readValue(serializedDdiActionHistory, DdiActionHistory.class);
 
         assertThat(ddiActionHistory.toString()).contains("SomeAction", "Some message");
     }
@@ -68,9 +73,13 @@ public class DdiActionHistoryTest {
     @Description("Verify that deserialization fails for known properties with a wrong datatype")
     public void shouldFailForObjectWithWrongDataTypes() throws IOException {
         // Setup
-        String serializedDdiActionFeedback = "{\"status\": [SomeAction], \"messages\": [\"Some message\"]}";
+        final String serializedDdiActionFeedback = """
+            {
+                "status": [SomeAction],
+                "messages": ["Some message"]
+            }""";
 
         assertThatExceptionOfType(MismatchedInputException.class).isThrownBy(
-                () -> mapper.readValue(serializedDdiActionFeedback, DdiActionHistory.class));
+                () -> OBJECT_MAPPER.readValue(serializedDdiActionFeedback, DdiActionHistory.class));
     }
 }

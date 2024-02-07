@@ -13,44 +13,36 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiActivateAutoConfirmation {
 
     @JsonProperty(required = false)
-    @Schema(example = "exampleUser")
+    @Schema(description = "Individual value (e.g. username) stored as initiator and automatically used as confirmed" +
+            " user in future actions", example = "exampleUser")
     private final String initiator;
 
     @JsonProperty(required = false)
-    @Schema(example = "exampleRemark")
+    @Schema(description = "Individual value to attach a remark which will be persisted when automatically " +
+            "confirming future actions", example = "exampleRemark")
     private final String remark;
 
     /**
      * Constructor.
      *
-     * @param initiator
-     *            can be null
-     * @param remark
-     *            can be null
+     * @param initiator can be null
+     * @param remark can be null
      */
     @JsonCreator
     public DdiActivateAutoConfirmation(@JsonProperty(value = "initiator") final String initiator,
             @JsonProperty(value = "remark") final String remark) {
         this.initiator = initiator;
         this.remark = remark;
-    }
-
-    @Override
-    public String toString() {
-        return "DdiActivateAutoConfirmation [initiator=" + initiator + ", remark=" + remark + ", toString()="
-                + super.toString() + "]";
-    }
-
-    public String getInitiator() {
-        return initiator;
-    }
-
-    public String getRemark() {
-        return remark;
     }
 }

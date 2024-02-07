@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.im.authentication;
 import java.util.Collection;
 import java.util.Collections;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,6 +25,7 @@ import org.springframework.security.core.userdetails.User;
  * 
  */
 @Getter
+@EqualsAndHashCode(callSuper = true)
 @ToString
 public class UserPrincipal extends User {
 
