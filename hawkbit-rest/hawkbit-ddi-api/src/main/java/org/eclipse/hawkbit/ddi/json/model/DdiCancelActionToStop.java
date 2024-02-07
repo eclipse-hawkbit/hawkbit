@@ -15,35 +15,30 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * The action that has to be stopped by the target.
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiCancelActionToStop {
 
     @NotNull
-    @Schema(example = "11")
+    @Schema(description = "Id of the action that needs to be canceled (typically identical to id field on the cancel action itself)", example = "11")
     private final String stopId;
 
     /**
      * Parameterized constructor.
      *
-     * @param stopId
-     *            ID of the action to be stopped
+     * @param stopId ID of the action to be stopped
      */
     @JsonCreator
     public DdiCancelActionToStop(@JsonProperty("stopId") final String stopId) {
         this.stopId = stopId;
     }
-
-    public String getStopId() {
-        return stopId;
-    }
-
-    @Override
-    public String toString() {
-        return "CancelAction [stopId=" + stopId + "]";
-    }
-
 }

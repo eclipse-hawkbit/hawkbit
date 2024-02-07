@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.security;
 import java.util.List;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -21,6 +22,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * The common properties for DDI security.
  */
 @Getter
+@EqualsAndHashCode
+@ToString
 @ConfigurationProperties("hawkbit.server.ddi.security")
 public class DdiSecurityProperties {
 

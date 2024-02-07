@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Hashes for given Artifact.
@@ -21,6 +22,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor // used for jackson to instantiate
 @Getter
 @EqualsAndHashCode
+@ToString
 public class MgmtArtifactHash {
 
     @JsonProperty

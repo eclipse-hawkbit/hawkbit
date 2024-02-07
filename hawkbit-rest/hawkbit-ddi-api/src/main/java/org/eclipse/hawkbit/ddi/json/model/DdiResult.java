@@ -17,42 +17,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Result information of the action progress which can by an intermediate or
  * final update.
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiResult {
-
-    @NotNull
-    @Valid
-    private final FinalResult finished;
-
-    private final DdiProgress progress;
-
-    /**
-     * Constructor.
-     *
-     * @param finished
-     *            as final result
-     * @param progress
-     *            if not yet finished
-     */
-    @JsonCreator
-    public DdiResult(@JsonProperty("finished") final FinalResult finished,
-            @JsonProperty("progress") final DdiProgress progress) {
-        this.finished = finished;
-        this.progress = progress;
-    }
-
-    public FinalResult getFinished() {
-        return finished;
-    }
-
-    public DdiProgress getProgress() {
-        return progress;
-    }
 
     /**
      * Defined status of the final result.
@@ -86,9 +63,26 @@ public class DdiResult {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Result [finished=" + finished + ", progress=" + progress + "]";
-    }
+    @NotNull
+    @Valid
+    @Schema(description = "Result of the action execution")
+    private final FinalResult finished;
 
+    @Schema(description = "Progress assumption of the device (currently not supported)")
+    private final DdiProgress progress;
+
+    /**
+     * Constructor.
+     *
+     * @param finished
+     *            as final result
+     * @param progress
+     *            if not yet finished
+     */
+    @JsonCreator
+    public DdiResult(@JsonProperty("finished") final FinalResult finished,
+            @JsonProperty("progress") final DdiProgress progress) {
+        this.finished = finished;
+        this.progress = progress;
+    }
 }

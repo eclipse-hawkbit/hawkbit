@@ -164,7 +164,7 @@ public final class DataConversionHelper {
                 // response because of eTags.
                 result.add(WebMvcLinkBuilder.linkTo(WebMvcLinkBuilder
                         .methodOn(DdiRootController.class, tenantAware.getCurrentTenant())
-                        .getControllerBasedeploymentAction(tenantAware.getCurrentTenant(), target.getControllerId(),
+                        .getControllerDeploymentBaseAction(tenantAware.getCurrentTenant(), target.getControllerId(),
                                 activeAction.getId(), calculateEtag(activeAction), null))
                         .withRel(DdiRestConstants.DEPLOYMENT_BASE_ACTION).expand());
             }

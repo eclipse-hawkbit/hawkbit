@@ -13,12 +13,22 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * Standard configuration for the target.
  */
+@NoArgsConstructor // needed for json deserialization
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "DDI controller configuration")
 public class DdiConfig {
 
     @JsonProperty
@@ -27,22 +37,9 @@ public class DdiConfig {
     /**
      * Constructor.
      *
-     * @param polling
-     *            configuration of the SP target
+     * @param polling configuration of the polling for the target
      */
     public DdiConfig(final DdiPolling polling) {
         this.polling = polling;
     }
-
-    /**
-     * Constructor.
-     */
-    public DdiConfig() {
-        // needed for json create.
-    }
-
-    public DdiPolling getPolling() {
-        return polling;
-    }
-
 }

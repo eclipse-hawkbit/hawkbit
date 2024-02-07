@@ -45,5 +45,4 @@ public enum DdiUpdateMode {
     public String getName() {
         return name;
     }
-
 }

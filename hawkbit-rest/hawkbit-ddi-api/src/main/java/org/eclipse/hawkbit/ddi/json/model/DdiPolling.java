@@ -13,9 +13,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
-import com.fasterxml.jackson.annotation.JsonValue;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
@@ -23,10 +20,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
  */
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "Suggested sleep time between polls")
 public class DdiPolling {
 
     @JsonProperty
-    @Schema(example = "12:00:00")
+    @Schema(description = "Sleep time in HH:MM:SS notation", pattern = "HH:MM:SS", example = "12:00:00")
     private String sleep;
 
     /**
@@ -50,5 +48,4 @@ public class DdiPolling {
     public String getSleep() {
         return sleep;
     }
-
 }

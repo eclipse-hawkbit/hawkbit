@@ -15,21 +15,27 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 
 /**
  * Additional metadata to be provided for the target/device.
- *
  */
+@Getter
+@EqualsAndHashCode
+@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DdiMetadata {
+
     @JsonProperty
     @NotNull
-    @Schema(example = "aMetadataKey")
+    @Schema(description = "Key of meta data entry")
     private final String key;
 
     @JsonProperty
     @NotNull
-    @Schema(example = "Metadata value as defined in software module")
+    @Schema(description = "Value of meta data entry")
     private final String value;
 
     @JsonCreator
@@ -37,13 +43,4 @@ public class DdiMetadata {
         this.key = key;
         this.value = value;
     }
-
-    public String getKey() {
-        return key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
 }
