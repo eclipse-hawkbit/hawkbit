@@ -25,17 +25,24 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity> {
 
-    @JsonProperty
-    @Schema(example = "bumlux")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(description = "Entity was originally created by (User, AMQP-Controller, anonymous etc.)",
+            accessMode = Schema.AccessMode.READ_WRITE, example = "bumlux")
     private String createdBy;
-    @JsonProperty
-    @Schema(example = "1691065905897")
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(description = "Entity was originally created at (timestamp UTC in milliseconds)",
+            accessMode = Schema.AccessMode.READ_ONLY, example = "1691065905897")
     private Long createdAt;
-    @JsonProperty
-    @Schema(example = "bumlux")
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(description = "Entity was last modified by (User, AMQP-Controller, anonymous etc.)",
+            accessMode = Schema.AccessMode.READ_ONLY, example = "bumlux")
     private String lastModifiedBy;
-    @JsonProperty
-    @Schema(example = "1691065906407")
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @Schema(description = "Entity was last modified at (timestamp UTC in milliseconds)",
+            accessMode = Schema.AccessMode.READ_ONLY, example = "1691065906407")
     private Long lastModifiedAt;
 
     /**
@@ -46,35 +53,5 @@ public abstract class MgmtBaseEntity extends RepresentationModel<MgmtBaseEntity>
     @JsonIgnore
     public Link getId() {
         return this.getRequiredLink("self");
-    }
-
-    @JsonIgnore
-    public void setCreatedBy(final String createdBy) {
-        this.createdBy = createdBy;
-    }
-
-    /**
-     * @param createdAt the createdAt to set
-     */
-    @JsonIgnore
-    public void setCreatedAt(final Long createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    /**
-     * @param lastModifiedBy the lastModifiedBy to set
-     */
-    @JsonIgnore
-    public void setLastModifiedBy(final String lastModifiedBy) {
-        this.lastModifiedBy = lastModifiedBy;
-    }
-
-    /**
-     * @param lastModifiedAt
-     *            the lastModifiedAt to set
-     */
-    @JsonIgnore
-    public void setLastModifiedAt(final Long lastModifiedAt) {
-        this.lastModifiedAt = lastModifiedAt;
     }
 }

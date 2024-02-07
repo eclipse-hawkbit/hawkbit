@@ -28,6 +28,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "createdBy" : "bumlux",
+      "createdAt" : 1682408571231,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408571265,
+      "type" : "update",
+      "status" : "finished",
+      "detailStatus" : "finished",
+      "rollout" : 1,
+      "rolloutName" : "rollout",
+      "_links" : {
+        "self" : {
+          "href" : "https://management-api.host.com/rest/v1/targets/target137/actions/1"
+        },
+        "target" : {
+          "href" : "https://management-api.host.com/rest/v1/targets/target137",
+          "name" : "target137"
+        },
+        "distributionset" : {
+          "href" : "https://management-api.host.com/rest/v1/distributionsets/1",
+          "name" : "DS:1.0"
+        },
+        "status" : {
+          "href" : "https://management-api.host.com/rest/v1/targets/target137/actions/1/status?offset=0&limit=50&sort=id%3ADESC"
+        },
+        "rollout" : {
+          "href" : "https://management-api.host.com/rest/v1/rollouts/1",
+          "name" : "rollout"
+        }
+      },
+      "id" : 1,
+      "forceType" : "forced"
+    }""")
 public class MgmtAction extends MgmtBaseEntity {
 
     /**
@@ -48,16 +82,16 @@ public class MgmtAction extends MgmtBaseEntity {
     public static final String ACTION_PENDING = "pending";
 
     @JsonProperty("id")
-    @Schema(example = "7")
+    @Schema(description = "ID of the action", example = "7")
     private Long actionId;
     @JsonProperty
-    @Schema(example = "update")
+    @Schema(description = "Type of action", example = "update")
     private String type;
     @JsonProperty
-    @Schema(example = "finished")
+    @Schema(description = "Status of action", example = "finished")
     private String status;
     @JsonProperty
-    @Schema(example = "finished")
+    @Schema(description = "Detailed status of action", example = "finished")
     private String detailStatus;
     @JsonProperty
     @Schema(example = "1691065903238")
@@ -65,18 +99,19 @@ public class MgmtAction extends MgmtBaseEntity {
     @JsonProperty(value = "forceType")
     private MgmtActionType actionType;
     @JsonProperty
-    @Schema(example = "600")
+    @Schema(description = "Weight of the action showing the importance of the update", example = "600")
     private Integer weight;
     @JsonProperty
     @Schema(hidden = true)
     private MgmtMaintenanceWindow maintenanceWindow;
     @JsonProperty
-    @Schema(example = "1")
+    @Schema(description = "The ID of the rollout this action was created for", example = "1")
     private Long rollout;
     @JsonProperty
-    @Schema(example = "rollout")
+    @Schema(description = "The name of the rollout this action was created for", example = "rollout")
     private String rolloutName;
     @JsonProperty
-    @Schema(example = "200")
+    @Schema(description = "(Optional) Code provided as part of the last status update that was sent by the device.",
+            example = "200")
     private Integer lastStatusCode;
 }

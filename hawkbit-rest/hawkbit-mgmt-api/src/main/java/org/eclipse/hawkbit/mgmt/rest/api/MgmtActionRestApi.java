@@ -54,46 +54,82 @@ public interface MgmtActionRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-
     @Operation(summary = "Return all actions", description = "Handles the GET request of retrieving all actions.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be " +
+                "changed (i.e. read-only) or data volume restriction applies.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts " +
+                "and the client has to wait another second.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtAction>> getActions(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @Schema(description = "The paging offset (default is 0)")
+            int pagingOffsetParam,
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @Schema(description = "The maximum number of entries in a page (default is 50)")
+            int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
+            @Schema(description = """
+                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
+                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
+                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
+                    in the result.""")
+            String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam,
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
+            @Schema(description = """
+                    The representation mode. Can be "full" or "compact". Defaults to "compact"
+                    """)
+            String representationModeParam);
 
     /**
      * Handles the GET request of retrieving a specific {@link MgmtAction} by
      * its <code>actionId</code>.
      *
-     * @param actionId
-     *            The ID of the requested action
+     * @param actionId The ID of the requested action
      *
      * @return the {@link MgmtAction}
      */
-    @Operation(summary = "Return action by id", description = "Handles the GET request of retrieving a single action by actionId.")
+    @Operation(summary = "Return action by id",
+            description = "Handles the GET request of retrieving a single action by actionId.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
-        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts and the client has to wait another second.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "401", description = "The request requires user authentication.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target not found.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "429", description = "Too many requests. The server will refuse further attempts" +
+                " and the client has to wait another second.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true)))
     })
     @GetMapping(value = MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "/{actionId}", produces = {
             MediaTypes.HAL_JSON_VALUE, MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<MgmtAction> getAction(@PathVariable("actionId") Long actionId);
-
 }
