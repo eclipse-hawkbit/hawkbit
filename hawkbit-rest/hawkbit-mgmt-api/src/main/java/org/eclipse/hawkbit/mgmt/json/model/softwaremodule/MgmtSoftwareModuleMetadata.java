@@ -25,12 +25,15 @@ import lombok.Data;
 public class MgmtSoftwareModuleMetadata {
 
     @JsonProperty(required = true)
-    @Schema(example = "someKnownKey")
+    @Schema(description = "Metadata property key", example = "someKnownKey")
     private String key;
+
     @JsonProperty
-    @Schema(example = "someKnownValue")
+    @Schema(description = "Metadata property value", example = "someKnownValue")
     private String value;
+
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "Metadata property is visible to targets as part of software update action",
+            example = "false")
     private boolean targetVisible;
 }
