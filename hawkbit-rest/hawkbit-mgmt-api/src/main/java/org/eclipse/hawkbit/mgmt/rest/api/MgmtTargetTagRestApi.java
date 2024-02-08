@@ -63,7 +63,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return all target tags", description = "Handles the GET request of retrieving all target tags.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -73,10 +74,28 @@ public interface MgmtTargetTagRestApi {
     @GetMapping(value = MgmtRestConstants.TARGET_TAG_V1_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTag>> getTargetTags(
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @Schema(description = "The paging offset (default is 0)")
+            int pagingOffsetParam,
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @Schema(description = "The maximum number of entries in a page (default is 50)")
+            int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
+            @Schema(description = """
+                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
+                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
+                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
+                    in the result.""")
+            String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam);
 
     /**
      * Handles the GET request of retrieving a single target tag.
@@ -89,7 +108,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return target tag by id", description = "Handles the GET request of retrieving a single target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -114,7 +134,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Create target tag(s)", description = "Handles the POST request of creating new target tag. The request body must always be a list of target tags.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -141,7 +162,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Update target tag by id", description = "Handles the PUT request of updating a target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -168,7 +190,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Delete target tag by id", description = "Handles the DELETE request of deleting a single target tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "404", description = "Target tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -203,7 +226,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Return assigned targets for tag", description = "Handles the GET request of retrieving a list of assigned targets.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "404", description = "Target tag not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
@@ -215,10 +239,28 @@ public interface MgmtTargetTagRestApi {
             + MgmtRestConstants.TARGET_TAG_TARGETS_REQUEST_MAPPING, produces = { MediaTypes.HAL_JSON_VALUE,
                     MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<PagedList<MgmtTarget>> getAssignedTargets(@PathVariable("targetTagId") Long targetTagId,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET) int pagingOffsetParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT) int pagingLimitParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false) String sortParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false) String rsqlParam);
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_OFFSET,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_OFFSET)
+            @Schema(description = "The paging offset (default is 0)")
+            int pagingOffsetParam,
+            @RequestParam(
+                    value = MgmtRestConstants.REQUEST_PARAMETER_PAGING_LIMIT,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_PAGING_DEFAULT_LIMIT)
+            @Schema(description = "The maximum number of entries in a page (default is 50)")
+            int pagingLimitParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SORTING, required = false)
+            @Schema(description = """
+                    The query parameter sort allows to define the sort order for the result of a query. A sort criteria
+                    consists of the name of a field and the sort direction (ASC for ascending and DESC descending).
+                    The sequence of the sort criteria (multiple can be used) defines the sort order of the entities
+                    in the result.""")
+            String sortParam,
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_SEARCH, required = false)
+            @Schema(description = """
+                    Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
+                    available fields.""")
+            String rsqlParam);
 
     /**
      * Handles the POST request to toggle the assignment of targets by the given
@@ -234,7 +276,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Toggles target tag assignment", description = "Handles the POST request of toggle target assignment. The request body must always be a list of controller ids.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -263,7 +306,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Assign target(s) to given tagId", description = "Handles the POST request of target assignment. Already assigned target will be ignored.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource."),
@@ -291,7 +335,8 @@ public interface MgmtTargetTagRestApi {
     @Operation(summary = "Unassign target from a given tagId", description = "Handles the DELETE request to unassign the given target.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
-        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExceptionInfo.class))),
         @ApiResponse(responseCode = "401", description = "The request requires user authentication."),
         @ApiResponse(responseCode = "403", description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or data volume restriction applies."),
         @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),

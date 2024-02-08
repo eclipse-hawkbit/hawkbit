@@ -22,9 +22,9 @@ import lombok.experimental.Accessors;
 public class MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "Example description")
+    @Schema(description = "The description of the entity", example = "Example description")
     private String description;
     @JsonProperty
-    @Schema(example = "rgb(86,37,99)")
+    @Schema(description = "The colour of the entity", example = "rgb(86,37,99)")
     private String colour;
 }
