@@ -44,7 +44,8 @@ public interface MgmtTenantManagementRestApi {
      * 
      * @return a map of all configuration values.
      */
-    @Operation(summary = "Return all tenant specific configuration values", description = "The GET request returns a list of all possible configuration keys for the tenant. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Return all tenant specific configuration values", description = "The GET request returns " +
+            "a list of all possible configuration keys for the tenant. Required Permission: TENANT_CONFIGURATION")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -77,7 +78,9 @@ public interface MgmtTenantManagementRestApi {
      *         OK. In any failure the JsonResponseExceptionHandler is handling
      *         the response.
      */
-    @Operation(summary = "Delete a tenant specific configuration value", description = "The DELETE request removes a tenant specific configuration value for the tenant. Afterwards the global default value is used. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Delete a tenant specific configuration value", description = "The DELETE request removes a " +
+            "tenant specific configuration value for the tenant. Afterwards the global default value is used. " +
+            "Required Permission: TENANT_CONFIGURATION")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -110,7 +113,9 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Return a tenant specific configuration value", description = "The GET request returns the configuration value of a specific configuration key for the tenant. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Return a tenant specific configuration value", description = "The GET request returns the " +
+            "configuration value of a specific configuration key for the tenant. " +
+            "Required Permission: TENANT_CONFIGURATION")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -121,7 +126,8 @@ public interface MgmtTenantManagementRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Configuration key not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Configuration key not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -147,7 +153,9 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Update a tenant specific configuration value.", description = "The PUT request changes a configuration value of a specific configuration key for the tenant. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Update a tenant specific configuration value.", description = "The PUT request changes a " +
+            "configuration value of a specific configuration key for the tenant. " +
+            "Required Permission: TENANT_CONFIGURATION")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -158,7 +166,8 @@ public interface MgmtTenantManagementRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Configuration key not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Configuration key not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -189,7 +198,8 @@ public interface MgmtTenantManagementRestApi {
      *         In any failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Batch update of tenant configuration.", description = "The PUT request updates the whole configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
+    @Operation(summary = "Batch update of tenant configuration.", description = "The PUT request updates the whole " +
+            "configuration for the tenant. Required Permission: TENANT_CONFIGURATION")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -219,5 +229,4 @@ public interface MgmtTenantManagementRestApi {
             MediaType.APPLICATION_JSON_VALUE })
     ResponseEntity<List<MgmtSystemTenantConfigurationValue>> updateTenantConfiguration(
             @RequestBody Map<String, Serializable> configurationValueMap);
-
 }
