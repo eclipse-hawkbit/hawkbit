@@ -20,15 +20,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 public class MgmtDistributionSetAssignment extends MgmtId {
 
-    @Schema(example = "1691065930359")
+    @Schema(description = "Forcetime in milliseconds", example = "1691065930359")
     private long forcetime;
-    @JsonProperty(required = false)
-    @Schema(example = "23")
+
+    @JsonProperty
+    @Schema(description = "Importance of the assignment", example = "23")
     private Integer weight;
-    @JsonProperty(required = false)
-    @Schema(example = "false")
+
+    @JsonProperty
+    @Schema(description = """
+        (Available with user consent flow active) Specifies if the confirmation by the device
+        is required for this action""", example = "false")
     private Boolean confirmationRequired;
+
+    @Schema(description = "The type of the assignment")
     private MgmtActionType type;
+
+    @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
 
     /**

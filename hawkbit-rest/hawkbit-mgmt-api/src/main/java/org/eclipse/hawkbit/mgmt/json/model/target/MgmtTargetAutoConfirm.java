@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.target;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -27,15 +28,34 @@ import jakarta.validation.constraints.NotNull;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })
+@Schema(description = """
+    **_links**:
+    * **deactivate** - Reference link to deactivate auto confirm (present if active)
+    """, example = """
+    {
+      "active" : true,
+      "initiator" : "custom_initiator_value",
+      "remark" : "custom_remark",
+      "activatedAt" : 1682408577704,
+      "_links" : {
+        "deactivate" : {
+          "href" : "https://management-api.host.com/rest/v1/targets/137/autoConfirm/deactivate"
+        }
+      }
+    }""")
 public class MgmtTargetAutoConfirm extends RepresentationModel<MgmtTargetAutoConfirm> {
+
     @NotNull
-    @Schema(example = "true")
+    @Schema(description = "Flag if auto confirm is active", example = "true")
     private boolean active;
-    @Schema(example = "custom_initiator_value")
+
+    @Schema(description = "Initiator set on activation", example = "custom_initiator_value")
     private String initiator;
-    @Schema(example = "custom_remark")
+
+    @Schema(description = "Remark set on activation", example = "custom_remark")
     private String remark;
-    @Schema(example = "1691065938576")
+
+    @Schema(description = "Timestamp of the activation", example = "1691065938576")
     private Long activatedAt;
 
     public static MgmtTargetAutoConfirm active(final long activatedAt) {
