@@ -27,12 +27,14 @@ import lombok.experimental.Accessors;
 public class MgmtTagRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "rgb(0,255,0)")
-    private String colour;
-    @JsonProperty
-    @Schema(example = "Example name")
+    @Schema(description = "The name of the entity", example = "Example name")
     private String name;
+
     @JsonProperty
-    @Schema(example = "Example description")
+    @Schema(description = "The description of the entity", example = "Example description")
     private String description;
+
+    @JsonProperty
+    @Schema(description = "The colour of the entity", example = "rgb(0,255,0)")
+    private String colour;
 }
