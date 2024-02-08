@@ -28,14 +28,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
-    @Schema(example = "Example type name")
+    @Schema(description = "The name of the entity", example = "Example type name")
     private String name;
+
     @JsonProperty(required = true)
-    @Schema(example = "Example key")
+    @Schema(description = "Functional key of the distribution set type", example = "Example key")
     private String key;
+
     @JsonProperty
+    @Schema(description = "Mandatory module type IDs")
     private List<MgmtSoftwareModuleTypeAssigment> mandatorymodules;
     @JsonProperty
+    @Schema(description = "Optional module type IDs")
     private List<MgmtSoftwareModuleTypeAssigment> optionalmodules;
 
     @Override
