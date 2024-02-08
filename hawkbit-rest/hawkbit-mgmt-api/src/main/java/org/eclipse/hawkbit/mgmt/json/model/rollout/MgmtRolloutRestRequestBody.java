@@ -31,27 +31,69 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "distributionSetId" : 6,
+      "targetFilterQuery" : "id==targets-*",
+      "description" : "Rollout for all named targets",
+      "amountGroups" : 5,
+      "type" : "forced",
+      "successCondition" : {
+        "condition" : "THRESHOLD",
+        "expression" : "50"
+      },
+      "successAction" : {
+        "expression" : "",
+        "action" : "NEXTGROUP"
+      },
+      "name" : "exampleRollout",
+      "forcetime" : 1682408571791,
+      "errorAction" : {
+        "expression" : "",
+        "action" : "PAUSE"
+      },
+      "confirmationRequired" : false,
+      "errorCondition" : {
+        "condition" : "THRESHOLD",
+        "expression" : "80"
+      },
+      "startAt" : 1682408570791
+    }""")
 public class MgmtRolloutRestRequestBody extends AbstractMgmtRolloutConditionsEntity {
 
-    @Schema(example = "id==targets-*")
+    @Schema(description = "Target filter query language expression", example = "id==targets-*")
     private String targetFilterQuery;
-    @Schema(example = "6")
+
+    @Schema(description = "The ID of distributionset of this rollout", example = "6")
     private long distributionSetId;
-    @Schema(example = "5")
+
+    @Schema(description = "The amount of groups the rollout should split targets into", example = "5")
     private Integer amountGroups;
-    @Schema(example = "1691065781929")
+
+    @Schema(description = "Forcetime in milliseconds", example = "1691065781929")
     private Long forcetime;
-    @Schema(example = "1691065780929")
+
+    @Schema(description = "Start at timestamp of Rollout", example = "1691065780929")
     private Long startAt;
+
     @JsonProperty
-    @Schema(example = "400")
+    @Schema(description = "Weight of the resulting Actions", example = "400")
     private Integer weight;
+
     @JsonProperty
     @Schema(example = "true")
     private boolean dynamic;
+
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = """
+        (Available with user consent flow active) If the confirmation is required for this rollout. Value will be used
+        if confirmation options are missing in the rollout group definitions. Confirmation is required per default""",
+            example = "false")
     private Boolean confirmationRequired;
+
+    @Schema(description = "The type of this rollout")
     private MgmtActionType type;
+
+    @Schema(description = "The list of group definitions")
     private List<MgmtRolloutGroup> groups;
 }

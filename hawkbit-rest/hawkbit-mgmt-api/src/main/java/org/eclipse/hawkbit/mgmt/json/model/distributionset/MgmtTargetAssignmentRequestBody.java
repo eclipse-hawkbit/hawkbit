@@ -34,7 +34,7 @@ public class MgmtTargetAssignmentRequestBody {
     private MgmtActionType type;
     @Schema(description = "Separation of download and install by defining a maintenance window for the installation")
     private MgmtMaintenanceWindowRequestBody maintenanceWindow;
-    @Schema(description = "Importance of the assignment. Allowed values: 0 - 1000", example = "100")
+    @Schema(description = "Importance of the assignment", example = "100")
     private Integer weight;
     @Schema(description = "(Available with user consent flow active) Defines, if the confirmation is required for " +
             "an action. Confirmation is required per default")

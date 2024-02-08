@@ -27,8 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(
-        description = """
+@Schema(description = """
     **_links**:
     * **assignedDistributionSets** - Links to assigned distribution sets
     """, example = """

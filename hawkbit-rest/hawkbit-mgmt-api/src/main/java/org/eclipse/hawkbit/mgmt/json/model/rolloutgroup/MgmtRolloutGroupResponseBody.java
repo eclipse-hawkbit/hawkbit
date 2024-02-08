@@ -30,17 +30,65 @@ import lombok.Setter;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "createdBy" : "bumlux",
+      "createdAt" : 1682408569768,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408569795,
+      "name" : "group-1",
+      "description" : "group-1",
+      "successCondition" : {
+        "condition" : "THRESHOLD",
+        "expression" : "10"
+      },
+      "successAction" : {
+        "action" : "NEXTGROUP",
+        "expression" : ""
+      },
+      "errorCondition" : {
+        "condition" : "THRESHOLD",
+        "expression" : "50"
+      },
+      "errorAction" : {
+        "action" : "PAUSE",
+        "expression" : ""
+      },
+      "targetFilterQuery" : "",
+      "targetPercentage" : 20.0,
+      "confirmationRequired" : false,
+      "status" : "ready",
+      "totalTargets" : 4,
+      "totalTargetsPerStatus" : {
+        "running" : 0,
+        "notstarted" : 4,
+        "scheduled" : 0,
+        "cancelled" : 0,
+        "finished" : 0,
+        "error" : 0
+      },
+      "_links" : {
+        "self" : {
+          "href" : "https://management-api.host.com/rest/v1/rollouts/17/deploygroups/78"
+        }
+      },
+      "id" : 78
+    }""")
 public class MgmtRolloutGroupResponseBody extends MgmtRolloutGroup {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "63")
+    @Schema(description = "Rollouts id", example = "63")
     private Long rolloutGroupId;
+
     @JsonProperty(required = true)
-    @Schema(example = "ready")
+    @Schema(description = "The status of this rollout", example = "ready")
     private String status;
-    @Schema(example = "4")
+
+    @Schema(description = "The total targets of a rollout", example = "4")
     private int totalTargets;
+
     @Setter(AccessLevel.NONE)
+    @Schema(description = "The total targets per status")
     private Map<String, Long> totalTargetsPerStatus;
 
     public void addTotalTargetsPerStatus(final String status, final Long totalTargetCountByStatus) {

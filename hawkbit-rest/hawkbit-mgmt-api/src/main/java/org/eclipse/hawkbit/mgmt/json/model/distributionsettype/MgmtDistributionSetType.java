@@ -27,8 +27,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(
-        description = """
+@Schema(description = """
     **_links**:
     * **mandatorymodules** - Link to mandatory software modules types in this distribution set type
     * **optionalmodules** - Link to optional software modules types in this distribution set type

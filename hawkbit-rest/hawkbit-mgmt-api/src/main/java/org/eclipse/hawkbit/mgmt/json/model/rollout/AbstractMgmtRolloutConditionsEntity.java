@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.mgmt.json.model.rollout;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
@@ -25,8 +26,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class AbstractMgmtRolloutConditionsEntity extends MgmtNamedEntity {
 
+    @Schema(description = "The success condition which takes in place to evaluate if a rollout group is successful " +
+            "and so the next group can be started")
     private MgmtRolloutCondition successCondition;
+
+    @Schema(description = "The success action which takes in place to execute in case the success action is fulfilled")
     private MgmtRolloutSuccessAction successAction;
+
+    @Schema(description = "The error condition which takes in place to evaluate if a rollout group encounter errors")
     private MgmtRolloutCondition errorCondition;
+
+    @Schema(description = "The error action which is executed if the error condition is fulfilled")
     private MgmtRolloutErrorAction errorAction;
 }

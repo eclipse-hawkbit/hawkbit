@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rollout;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,8 +26,10 @@ public class MgmtRolloutSuccessAction {
         NEXTGROUP
     }
 
+    @Schema(description = "The success action to execute")
     private SuccessAction action = SuccessAction.NEXTGROUP;
-    private String expression = null;
+    @Schema(description = "The expression for the success action")
+    private String expression;
 
     public MgmtRolloutSuccessAction(final SuccessAction action, final String expression) {
         this.action = action;
