@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.tag;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtDistributionSet;
 
@@ -29,7 +30,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtDistributionSetTagAssigmentResult {
 
     @JsonProperty
+    @Schema(description = "Assigned distribution sets")
     private List<MgmtDistributionSet> assignedDistributionSets;
     @JsonProperty
+    @Schema(description = "Unassigned distribution sets")
     private List<MgmtDistributionSet> unassignedDistributionSets;
 }
