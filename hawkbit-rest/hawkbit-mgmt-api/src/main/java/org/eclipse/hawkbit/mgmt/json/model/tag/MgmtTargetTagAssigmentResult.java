@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.tag;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.eclipse.hawkbit.mgmt.json.model.target.MgmtTarget;
 
@@ -29,7 +30,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtTargetTagAssigmentResult {
 
     @JsonProperty
+    @Schema(description = "Assigned targets")
     private List<MgmtTarget> assignedTargets;
+
     @JsonProperty
+    @Schema(description = "Unassigned targets")
     private List<MgmtTarget> unassignedTargets;
 }
