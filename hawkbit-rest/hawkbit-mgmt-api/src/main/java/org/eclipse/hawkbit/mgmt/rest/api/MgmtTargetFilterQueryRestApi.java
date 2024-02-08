@@ -47,7 +47,8 @@ public interface MgmtTargetFilterQueryRestApi {
      * @return a single target with status OK.
      */
 
-    @Operation(summary = "Return target filter query by id", description = "Handles the GET request of retrieving a single target filter query. Required permission: READ_TARGET")
+    @Operation(summary = "Return target filter query by id", description = "Handles the GET request of retrieving a " +
+            "single target filter query. Required permission: READ_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -58,7 +59,8 @@ public interface MgmtTargetFilterQueryRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target filter query not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target filter query not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -299,7 +301,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *            assignment
      * @return http status
      */
-    @Operation(summary = "Set auto assignment of distribution set for a target filter query", description = "Handles the POST request of setting the auto assign distribution set for a target filter query. Required permissions: UPDATE_TARGET and READ_REPOSITORY")
+    @Operation(summary = "Set auto assignment of distribution set for a target filter query",
+            description = "Handles the POST request of setting the auto assign distribution set for a target filter " +
+                    "query. Required permissions: UPDATE_TARGET and READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -310,7 +314,8 @@ public interface MgmtTargetFilterQueryRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target filter not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target filter not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -339,7 +344,9 @@ public interface MgmtTargetFilterQueryRestApi {
      *            of the target to change
      * @return http status
      */
-    @Operation(summary = "Remove Distribution Set for auto assignment of a target filter", description = "Removes the auto assign distribution set from the target filter query. Required permission: UPDATE_TARGET")
+    @Operation(summary = "Remove Distribution Set for auto assignment of a target filter",
+            description = "Removes the auto assign distribution set from the target filter query. " +
+                    "Required permission: UPDATE_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -350,7 +357,8 @@ public interface MgmtTargetFilterQueryRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target filter query not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target filter query not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -361,5 +369,4 @@ public interface MgmtTargetFilterQueryRestApi {
     })
     @DeleteMapping(value = MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/{filterId}/autoAssignDS")
     ResponseEntity<Void> deleteAssignedDistributionSet(@PathVariable("filterId") Long filterId);
-
 }

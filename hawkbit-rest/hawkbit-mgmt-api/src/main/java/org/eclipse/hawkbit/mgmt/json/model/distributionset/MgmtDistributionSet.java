@@ -31,35 +31,100 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Schema(example = """
+@Schema(description = """
+    **_links**:
+    * **type** - The type of the distribution set
+    * **modules** - List of software modules
+    * **metadata** - List of metadata
+    """, example = """
     {
-      "createdBy" : "bumlux",
-      "createdAt" : 1682408575642,
-      "lastModifiedBy" : "bumlux",
-      "lastModifiedAt" : 1682408575643,
-      "name" : "DS",
-      "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
-      "version" : "1.0",
-      "modules" : [ {
-        "createdBy" : "bumlux",
-        "createdAt" : 1682408575640,
-        "lastModifiedBy" : "bumlux",
-        "lastModifiedAt" : 1682408575644,
-        "name" : "Firmware",
-        "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
-        "version" : "1.0.5",
-        "type" : "os",
-        "typeName" : "OS",
-        "vendor" : "vendor Limited Inc, California",
-        "deleted" : false,
-        "encrypted" : false,
-        "_links" : {
-          "self" : {
-            "href" : "https://management-api.host.com/rest/v1/softwaremodules/76"
-          }
-        },
-        "id" : 76
-    }""")
+       "createdBy" : "bumlux",
+       "createdAt" : 1682408574924,
+       "lastModifiedBy" : "bumlux",
+       "lastModifiedAt" : 1682408574925,
+       "name" : "DS",
+       "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+       "version" : "1.0",
+       "modules" : [ {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574921,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574926,
+         "name" : "Firmware",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.42",
+         "type" : "os",
+         "typeName" : "OS",
+         "vendor" : "vendor Limited Inc, California",
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/18"
+           }
+         },
+         "id" : 18
+       }, {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574920,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574925,
+         "name" : "app runtime",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.25",
+         "type" : "runtime",
+         "typeName" : "runtime",
+         "vendor" : "vendor GmbH, Stuttgart, Germany",
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/17"
+           }
+         },
+         "id" : 17
+       }, {
+         "createdBy" : "bumlux",
+         "createdAt" : 1682408574919,
+         "lastModifiedBy" : "bumlux",
+         "lastModifiedAt" : 1682408574926,
+         "name" : "application",
+         "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+         "version" : "1.0.67",
+         "type" : "application",
+         "typeName" : "Application",
+         "vendor" : "vendor Limited, California",
+         "deleted" : false,
+         "encrypted" : false,
+         "_links" : {
+           "self" : {
+             "href" : "https://management-api.host.com/rest/v1/softwaremodules/16"
+           }
+         },
+         "id" : 16
+       } ],
+       "requiredMigrationStep" : false,
+       "type" : "test_default_ds_type",
+       "typeName" : "OS (FW) mandatory, runtime (FW) and app (SW) optional",
+       "complete" : true,
+       "deleted" : false,
+       "valid" : true,
+       "_links" : {
+         "self" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6"
+         },
+         "modules" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6/assignedSM?offset=0&limit=50"
+         },
+         "type" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsettypes/24"
+         },
+         "metadata" : {
+           "href" : "https://management-api.host.com/rest/v1/distributionsets/6/metadata?offset=0&limit=50"
+         }
+       },
+       "id" : 6
+     }""")
 public class MgmtDistributionSet extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
