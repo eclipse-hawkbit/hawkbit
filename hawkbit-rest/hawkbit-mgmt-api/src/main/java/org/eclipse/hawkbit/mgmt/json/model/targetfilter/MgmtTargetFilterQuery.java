@@ -27,25 +27,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.ALWAYS)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "createdBy" : "bumlux",
+      "createdAt" : 1682408575234,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408575234,
+      "name" : "filter1",
+      "query" : "name==a",
+      "autoAssignDistributionSet" : 16,
+      "autoAssignActionType" : null,
+      "autoAssignWeight" : null,
+      "confirmationRequired" : null,
+      "_links" : {
+        "self" : {
+          "href" : "https://management-api.host.com/rest/v1/targetfilters/2"
+        }
+      },
+      "id" : 2
+    }""")
 public class MgmtTargetFilterQuery extends MgmtBaseEntity {
 
     @JsonProperty(value = "id", required = true)
     @Schema(example = "2")
     private Long filterId;
+
     @JsonProperty
     @Schema(example = "filterName")
     private String name;
+
     @JsonProperty
     @Schema(example = "name==*")
     private String query;
+
     @JsonProperty
     @Schema(example = "15")
+
     private Long autoAssignDistributionSet;
+
     @JsonProperty
     private MgmtActionType autoAssignActionType;
+
     @JsonProperty
     @Schema(example = "")
     private Integer autoAssignWeight;
+
     @JsonProperty
     @Schema(example = "false")
     private Boolean confirmationRequired;

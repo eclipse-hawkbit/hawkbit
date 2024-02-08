@@ -14,68 +14,29 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * Request body for maintenance window PUT/POST commands, based on a schedule
  * defined as cron expression, duration in HH:mm:ss format and time zone as
  * offset from UTC.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMaintenanceWindowRequestBody {
+
     @JsonProperty
-    @Schema(example = "10 12 14 3 8 ? 2023")
+    @Schema(description = """
+            Schedule for the maintenance window start in quartz cron notation, such as '0 15 10 * * ? 2018'
+            for 10:15am every day during the year 2018""", example = "10 12 14 3 8 ? 2023")
     private String schedule;
 
     @JsonProperty
-    @Schema(example = "00:10:00")
+    @Schema(description = "Duration of the window, such as '02:00:00' for 2 hours", example = "00:10:00")
     private String duration;
 
     @JsonProperty
-    @Schema(example = "+00:00")
+    @Schema(description = "A time-zone offset from Greenwich/UTC, such as '+02:00'", example = "+00:00")
     private String timezone;
-
-    public String getSchedule() {
-        return schedule;
-    }
-
-    /**
-     * @param schedule
-     *            is the cron expression to be used for scheduling maintenance
-     *            window(s). Expression has 6 mandatory fields and a last
-     *            optional field: "second minute hour dayofmonth month weekday
-     *            year".
-     */
-    public void setSchedule(final String schedule) {
-        this.schedule = schedule;
-    }
-
-    public String getDuration() {
-        return duration;
-    }
-
-    /**
-     * @param duration
-     *            in HH:mm:ss format specifying the duration of a maintenance
-     *            window, for example 00:30:00 for 30 minutes.
-     */
-    public void setDuration(final String duration) {
-        this.duration = duration;
-    }
-
-    public String getTimezone() {
-        return timezone;
-    }
-
-    /**
-     * @param timezone
-     *            is the time zone specified as +/-hh:mm offset from UTC. For
-     *            example +02:00 for CET summer time and +00:00 for UTC. The
-     *            start time of a maintenance window calculated based on the
-     *            cron expression is relative to this time zone.
-     */
-    public void setTimezone(final String timezone) {
-        this.timezone = timezone;
-    }
 }

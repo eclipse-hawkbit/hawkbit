@@ -47,6 +47,6 @@ public class MgmtDistributionSetRequestBodyPost extends MgmtDistributionSetReque
     @JsonProperty
     private List<MgmtSoftwareModuleAssigment> modules;
     @JsonProperty
-    @Schema(example = "test_default_ds_type")
+    @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;
 }

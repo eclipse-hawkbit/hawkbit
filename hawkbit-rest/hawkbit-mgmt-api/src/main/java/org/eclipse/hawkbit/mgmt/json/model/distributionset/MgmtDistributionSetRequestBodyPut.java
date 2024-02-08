@@ -27,15 +27,17 @@ import lombok.experimental.Accessors;
 public class MgmtDistributionSetRequestBodyPut {
 
     @JsonProperty
-    @Schema(example = "dsOne")
+    @Schema(description = "The name of the entity", example = "dsOne")
     private String name;
     @JsonProperty
-    @Schema(example = "Description of the distribution set.")
+    @Schema(description = "The description of the entity", example = "Description of the distribution set.")
     private String description;
     @JsonProperty
-    @Schema(example = "1.0.0")
+    @Schema(description = "Package version", example = "1.0.0")
     private String version;
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = """
+        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
     private Boolean requiredMigrationStep;
 }

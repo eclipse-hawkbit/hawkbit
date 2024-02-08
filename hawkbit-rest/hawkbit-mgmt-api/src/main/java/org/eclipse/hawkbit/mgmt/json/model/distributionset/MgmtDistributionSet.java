@@ -18,7 +18,6 @@ import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremodule.MgmtSoftwareModule;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -32,32 +31,75 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @EqualsAndHashCode(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(example = """
+    {
+      "createdBy" : "bumlux",
+      "createdAt" : 1682408575642,
+      "lastModifiedBy" : "bumlux",
+      "lastModifiedAt" : 1682408575643,
+      "name" : "DS",
+      "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+      "version" : "1.0",
+      "modules" : [ {
+        "createdBy" : "bumlux",
+        "createdAt" : 1682408575640,
+        "lastModifiedBy" : "bumlux",
+        "lastModifiedAt" : 1682408575644,
+        "name" : "Firmware",
+        "description" : "Updated Desc: 2LaONizh7WZp0on6XEOZI9AwEYIjj77YZskEmA2LVrKtAOXj9vvqACopEghLMqt6DIWpIahn6XM4jUlRZ1T5SZS2NWMuWHGoFIg1",
+        "version" : "1.0.5",
+        "type" : "os",
+        "typeName" : "OS",
+        "vendor" : "vendor Limited Inc, California",
+        "deleted" : false,
+        "encrypted" : false,
+        "_links" : {
+          "self" : {
+            "href" : "https://management-api.host.com/rest/v1/softwaremodules/76"
+          }
+        },
+        "id" : 76
+    }""")
 public class MgmtDistributionSet extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "51")
+    @Schema(description = "The technical identifier of the entity", example = "51")
     private Long dsId;
+
     @JsonProperty
-    @Schema(example = "1.4.2")
+    @Schema(description = "Package version", example = "1.4.2")
     private String version;
+
+    @JsonProperty
+    @Schema(description = """
+        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
+    private boolean requiredMigrationStep;
+
+    @JsonProperty
+    @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
+    private String type;
+
+    @JsonProperty
+    @Schema(description = "The type name of the distribution set",
+            example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
+    private String typeName;
+
+    @JsonProperty
+    @Schema(description = """
+        True of the distribution set software module setup is complete as defined by the
+        distribution set type""", example = "true")
+    private Boolean complete;
+
+    @JsonProperty
+    @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
+    private boolean deleted;
+
+    @JsonProperty
+    @Schema(description = "True by default and false after the distribution set is invalidated by the user",
+            example = "true")
+    private boolean valid;
+
     @JsonProperty
     private List<MgmtSoftwareModule> modules = new ArrayList<>();
-    @JsonProperty
-    @Schema(example = "false")
-    private boolean requiredMigrationStep;
-    @JsonProperty
-    @Schema(example = "test_default_ds_type")
-    private String type;
-    @JsonProperty
-    @Schema(example = "OS (FW) mandatory, runtime (FW) and app (SW) optional")
-    private String typeName;
-    @JsonProperty
-    @Schema(example = "true")
-    private Boolean complete;
-    @JsonProperty
-    @Schema(example = "false")
-    private boolean deleted;
-    @JsonProperty
-    @Schema(example = "true")
-    private boolean valid;
 }

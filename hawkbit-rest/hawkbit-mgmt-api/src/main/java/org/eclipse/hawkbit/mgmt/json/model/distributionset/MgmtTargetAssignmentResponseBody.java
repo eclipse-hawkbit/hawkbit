@@ -11,6 +11,7 @@ package org.eclipse.hawkbit.mgmt.json.model.distributionset;
 
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.hateoas.RepresentationModel;
@@ -29,7 +30,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtTargetAssignmentResponseBody extends RepresentationModel<MgmtTargetAssignmentResponseBody> {
 
+    @Schema(description = """
+            Targets that had this distribution set already assigned (in "offline" case this includes
+            targets that have arbitrary updates running)""")
     private int alreadyAssigned;
+    @Schema(description = "The newly created actions as a result of this assignment")
     private List<MgmtActionId> assignedActions;
 
     /**
