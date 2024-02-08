@@ -60,7 +60,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *         with status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all Software Module Types", description = "Handles the GET request of retrieving all software module types. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return all Software Module Types", 
+            description = "Handles the GET request of retrieving all software module types. " +
+                    "Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -113,7 +115,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *
      * @return a single softwareModule with status OK.
      */
-    @Operation(summary = "Return single Software Module Type", description = "Handles the GET request of retrieving a single software module type. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return single Software Module Type",
+            description = "Handles the GET request of retrieving a single software module type. " +
+                    "Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -124,7 +128,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -146,7 +151,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      * @return status OK if delete as successfully.
      *
      */
-    @Operation(summary = "Delete Software Module Type by Id", description = "Handles the DELETE request for a single software module type. Required Permission: DELETE_REPOSITORY")
+    @Operation(summary = "Delete Software Module Type by Id",
+            description = "Handles the DELETE request for a single software module type. " +
+                    "Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -157,7 +164,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -178,7 +186,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *            the module type to be updated.
      * @return status OK if update is successful
      */
-    @Operation(summary = "Update Software Module Type", description = "Handles the PUT request for a single software module type. Required Permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Update Software Module Type",
+            description = "Handles the PUT request for a single software module type. " +
+                    "Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -189,7 +199,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module Type not found.", 
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -223,7 +234,9 @@ public interface MgmtSoftwareModuleTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Creates new Software Module Types", description = "Handles the POST request of creating new software module types. The request body must always be a list of module types. Required Permission: CREATE_REPOSITORY")
+    @Operation(summary = "Creates new Software Module Types",
+            description = "Handles the POST request of creating new software module types. The request body must " +
+                    "always be a list of module types. Required Permission: CREATE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -234,7 +247,8 @@ public interface MgmtSoftwareModuleTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Software Module not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Software Module not found",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 

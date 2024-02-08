@@ -114,7 +114,8 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return a single distribution set tag with status OK.
      */
-    @Operation(summary = "Return single Distribution Set Tag", description = "Handles the GET request of retrieving a single distribution set tag.")
+    @Operation(summary = "Return single Distribution Set Tag",
+            description = "Handles the GET request of retrieving a single distribution set tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -125,7 +126,8 @@ public interface MgmtDistributionSetTagRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -148,7 +150,8 @@ public interface MgmtDistributionSetTagRestApi {
      *         with status code 201 - Created. The Response Body contains the
      *         created distribution set tags but without details.
      */
-    @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating new distribution set tag. The request body must always be a list of distribution set tags.")
+    @Operation(summary = "Creates new Distribution Set Tags", description = "Handles the POST request of creating " +
+            "new distribution set tag. The request body must always be a list of distribution set tags.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -189,7 +192,8 @@ public interface MgmtDistributionSetTagRestApi {
      * @return status OK if update is successful and the updated distribution
      *         set tag.
      */
-    @Operation(summary = "Update Distribution Set Tag", description = "Handles the PUT request of updating a distribution set tag.")
+    @Operation(summary = "Update Distribution Set Tag",
+            description = "Handles the PUT request of updating a distribution set tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -200,7 +204,8 @@ public interface MgmtDistributionSetTagRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -230,7 +235,8 @@ public interface MgmtDistributionSetTagRestApi {
      * @return status OK if delete as successfully.
      *
      */
-    @Operation(summary = "Delete a single distribution set tag", description = "Handles the DELETE request of deleting a single distribution set tag.")
+    @Operation(summary = "Delete a single distribution set tag",
+            description = "Handles the DELETE request of deleting a single distribution set tag.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -241,7 +247,8 @@ public interface MgmtDistributionSetTagRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -280,7 +287,8 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution sets.
      */
-    @Operation(summary = "Return all assigned distribution sets by given tag Id", description = "Handles the GET request of retrieving a list of assigned distributions.")
+    @Operation(summary = "Return all assigned distribution sets by given tag Id",
+            description = "Handles the GET request of retrieving a list of assigned distributions.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -291,7 +299,8 @@ public interface MgmtDistributionSetTagRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -340,7 +349,9 @@ public interface MgmtDistributionSetTagRestApi {
      * @return the list of assigned distribution sets and unassigned
      *         distribution sets.
      */
-    @Operation(summary = "Toggle the assignment of distribution sets by the given tag id", description = "Handles the POST request of toggle distribution assignment. The request body must always be a list of distribution set ids.")
+    @Operation(summary = "Toggle the assignment of distribution sets by the given tag id",
+            description = "Handles the POST request of toggle distribution assignment. The request body must " +
+                    "always be a list of distribution set ids.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -381,7 +392,9 @@ public interface MgmtDistributionSetTagRestApi {
      *
      * @return the list of assigned distribution set.
      */
-    @Operation(summary = "Assign distribution sets to the given tag id", description = "Handles the POST request of distribution assignment. Already assigned distribution will be ignored.")
+    @Operation(summary = "Assign distribution sets to the given tag id",
+            description = "Handles the POST request of distribution assignment. Already assigned distribution will " +
+                    "be ignored.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -424,7 +437,8 @@ public interface MgmtDistributionSetTagRestApi {
      *            the ID of the distribution set to unassign
      * @return http status code
      */
-    @Operation(summary = "Unassign one distribution set from the given tag id", description = "Handles the DELETE request of unassign the given distribution.")
+    @Operation(summary = "Unassign one distribution set from the given tag id",
+            description = "Handles the DELETE request of unassign the given distribution.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -435,7 +449,8 @@ public interface MgmtDistributionSetTagRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution Set Tag not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 

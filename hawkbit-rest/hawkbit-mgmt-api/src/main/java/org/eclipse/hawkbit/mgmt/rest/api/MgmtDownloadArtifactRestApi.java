@@ -28,14 +28,8 @@ public interface MgmtDownloadArtifactRestApi {
     /**
      * Handles the GET request for downloading an artifact.
      *
-     * @param softwareModuleId
-     *            of the parent SoftwareModule
-     * @param artifactId
-     *            of the related LocalArtifact
-     * @param servletResponse
-     *            of the servlet
-     * @param request
-     *            of the client
+     * @param softwareModuleId of the parent SoftwareModule
+     * @param artifactId of the related LocalArtifact
      *
      * @return responseEntity with status ok if successful
      */

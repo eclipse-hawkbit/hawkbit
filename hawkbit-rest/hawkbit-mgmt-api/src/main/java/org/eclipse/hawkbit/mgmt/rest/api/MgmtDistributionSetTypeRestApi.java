@@ -117,7 +117,8 @@ public interface MgmtDistributionSetTypeRestApi {
      *
      * @return a single DS type with status OK.
      */
-    @Operation(summary = "Return single Distribution Set Type", description = "Handles the GET request of retrieving a single distribution set type. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return single Distribution Set Type", description = "Handles the GET request of retrieving a " +
+            "single distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -151,7 +152,8 @@ public interface MgmtDistributionSetTypeRestApi {
      * @return status OK if delete is successful.
      *
      */
-    @Operation(summary = "Delete Distribution Set Type by Id", description = "Handles the DELETE request for a single distribution set type. Required Permission: DELETE_REPOSITORY")
+    @Operation(summary = "Delete Distribution Set Type by Id", description = "Handles the DELETE request for a single" +
+            " distribution set type. Required Permission: DELETE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -184,7 +186,8 @@ public interface MgmtDistributionSetTypeRestApi {
      *            the DS type to be updated.
      * @return status OK if update is successful
      */
-    @Operation(summary = "Update Distribution Set Type", description = "Handles the PUT request for a single distribution set type. Required Permission: UPDATE_REPOSITORY")
+    @Operation(summary = "Update Distribution Set Type", description = "Handles the PUT request for a single " +
+            "distribution set type. Required Permission: UPDATE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -230,7 +233,9 @@ public interface MgmtDistributionSetTypeRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Create new distribution set types", description = "Handles the POST request for creating new distribution set types. The request body must always be a list of types. Required Permission: CREATE_REPOSITORY")
+    @Operation(summary = "Create new distribution set types", description = "Handles the POST request for creating " +
+            "new distribution set types. The request body must always be a list of types. " +
+            "Required Permission: CREATE_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
@@ -269,7 +274,9 @@ public interface MgmtDistributionSetTypeRestApi {
      *            of the DistributionSetType.
      * @return Unpaged list of module types and OK in case of success.
      */
-    @Operation(summary = "Return mandatory Software Module Types in a Distribution Set Type", description = "Handles the GET request of retrieving the list of mandatory software module types in that distribution set type. Required Permission: READ_REPOSITORY")
+    @Operation(summary = "Return mandatory Software Module Types in a Distribution Set Type",
+            description = "Handles the GET request of retrieving the list of mandatory software module types in that " +
+                    "distribution set type. Required Permission: READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters",
