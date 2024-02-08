@@ -59,7 +59,8 @@ public interface MgmtRolloutRestApi {
      *         status OK. The response is always paged. In any failure the
      *         JsonResponseExceptionHandler is handling the response.
      */
-    @Operation(summary = "Return all Rollouts", description = "Handles the GET request of retrieving all rollouts. Required Permission: READ_ROLLOUT")
+    @Operation(summary = "Return all Rollouts", description = "Handles the GET request of retrieving all rollouts. " +
+            "Required Permission: READ_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -103,7 +104,9 @@ public interface MgmtRolloutRestApi {
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
             String rsqlParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
+            String representationModeParam);
 
     /**
      * Handles the GET request of retrieving a single rollout.
@@ -112,7 +115,8 @@ public interface MgmtRolloutRestApi {
      *            the ID of the rollout to retrieve
      * @return a single rollout with status OK.
      */
-    @Operation(summary = "Return single Rollout", description = "Handles the GET request of retrieving a single rollout. Required Permission: READ_ROLLOUT")
+    @Operation(summary = "Return single Rollout", description = "Handles the GET request of retrieving a single " +
+            "rollout. Required Permission: READ_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -123,7 +127,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -146,7 +151,8 @@ public interface MgmtRolloutRestApi {
      *         failure the JsonResponseExceptionHandler is handling the
      *         response.
      */
-    @Operation(summary = "Create a new Rollout", description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
+    @Operation(summary = "Create a new Rollout",
+            description = "Handles the POST request of creating new rollout. Required Permission: CREATE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -186,7 +192,10 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout is approved now. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Approve a Rollout", description = "Handles the POST request of approving a created rollout. Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
+    @Operation(summary = "Approve a Rollout",
+            description = "Handles the POST request of approving a created rollout. Only possible if approval " +
+                    "workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. " +
+                    "Required Permission: APPROVE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -220,7 +229,9 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout is denied now. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Deny a Rollout", description = "Handles the POST request of denying a created rollout. Only possible if approval workflow is enabled in system configuration and rollout is in state WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
+    @Operation(summary = "Deny a Rollout", description = "Handles the POST request of denying a created rollout. " +
+            "Only possible if approval workflow is enabled in system configuration and rollout is in state " +
+            "WAITING_FOR_APPROVAL. Required Permission: APPROVE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -252,7 +263,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be started. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Start a Rollout", description = "Handles the POST request of starting a created rollout. Required Permission: HANDLE_ROLLOUT")
+    @Operation(summary = "Start a Rollout", description = "Handles the POST request of starting a created rollout. " +
+            "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -283,7 +295,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be paused. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Pause a Rollout", description = "Handles the POST request of pausing a running rollout. Required Permission: HANDLE_ROLLOUT")
+    @Operation(summary = "Pause a Rollout", description = "Handles the POST request of pausing a running rollout. " +
+            "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -314,7 +327,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be deleted. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout. Required Permission: DELETE_ROLLOUT")
+    @Operation(summary = "Delete a Rollout", description = "Handles the DELETE request of deleting a rollout. " +
+            "Required Permission: DELETE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -325,7 +339,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -346,7 +361,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200) if rollout could be resumed. In case of any
      *         exception the corresponding errors occur.
      */
-    @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. Required Permission: HANDLE_ROLLOUT")
+    @Operation(summary = "Resume a Rollout", description = "Handles the POST request of resuming a paused rollout. " +
+            "Required Permission: HANDLE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -395,7 +411,8 @@ public interface MgmtRolloutRestApi {
      *         paged. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @Operation(summary = "Return all rollout groups referred to a Rollout", description = "Handles the GET request of retrieving all deploy groups of a specific rollout. Required Permission: READ_ROLLOUT")
+    @Operation(summary = "Return all rollout groups referred to a Rollout", description = "Handles the GET request of " +
+            "retrieving all deploy groups of a specific rollout. Required Permission: READ_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -406,7 +423,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -440,7 +458,9 @@ public interface MgmtRolloutRestApi {
                     Query fields based on the Feed Item Query Language (FIQL). See Entity Definitions for
                     available fields.""")
             String rsqlParam,
-            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE, defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT) String representationModeParam);
+            @RequestParam(value = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE,
+                    defaultValue = MgmtRestConstants.REQUEST_PARAMETER_REPRESENTATION_MODE_DEFAULT)
+            String representationModeParam);
 
     /**
      * Handles the GET request for retrieving a single rollout group.
@@ -451,7 +471,8 @@ public interface MgmtRolloutRestApi {
      *            the groupId to retrieve the rollout group
      * @return the OK response containing the MgmtRolloutGroupResponseBody
      */
-    @Operation(summary = "Return single rollout group", description = "Handles the GET request of a single deploy group of a specific rollout. Required Permission: READ_ROLLOUT")
+    @Operation(summary = "Return single rollout group", description = "Handles the GET request of a single deploy " +
+            "group of a specific rollout. Required Permission: READ_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -462,7 +483,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -500,7 +522,9 @@ public interface MgmtRolloutRestApi {
      * @return a paged list of targets related to a specific rollout and rollout
      *         group.
      */
-    @Operation(summary = "Return all targets related to a specific rollout group", description = "Handles the GET request of retrieving all targets of a single deploy group of a specific rollout. Required Permissions: READ_ROLLOUT, READ_TARGET.")
+    @Operation(summary = "Return all targets related to a specific rollout group",
+            description = "Handles the GET request of retrieving all targets of a single deploy group of a specific " +
+                    "rollout. Required Permissions: READ_ROLLOUT, READ_TARGET.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -511,7 +535,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -557,7 +582,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200). In case of any exception the corresponding
      *         errors occur.
      */
-    @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
+    @Operation(summary = "Force trigger processing next group of a Rollout", description = "Handles the POST request " +
+            "of triggering the next group of a rollout. Required Permission: UPDATE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -588,7 +614,8 @@ public interface MgmtRolloutRestApi {
      * @return OK response (200). In case of any exception the corresponding
      *         errors occur.
      */
-    @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. Required Permission: CREATE_ROLLOUT")
+    @Operation(summary = "Retry a rollout", description = "Handles the POST request of retrying a rollout. " +
+            "Required Permission: CREATE_ROLLOUT")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -599,7 +626,8 @@ public interface MgmtRolloutRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Rollout not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Rollout not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
