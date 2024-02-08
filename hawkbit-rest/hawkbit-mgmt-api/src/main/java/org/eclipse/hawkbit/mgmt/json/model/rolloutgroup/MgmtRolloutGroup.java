@@ -26,10 +26,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {
 
-    @Schema(example = "controllerId==exampleTarget*")
+    @Schema(description = "The name of the entity", example = "controllerId==exampleTarget*")
     private String targetFilterQuery;
-    @Schema(example = "20.0")
+
+    @Schema(description = "Percentage of remaining and matching targets that should be added to this group",
+            example = "20.0")
     private Float targetPercentage;
-    @Schema(example = "false")
+
+    @Schema(description = "(Available with user consent flow active) If the confirmation is required for this " +
+            "rollout group. Confirmation is required per default", example = "false")
     private Boolean confirmationRequired;
 }
