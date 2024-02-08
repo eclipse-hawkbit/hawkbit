@@ -115,7 +115,8 @@ public interface MgmtTargetTypeRestApi {
      *
      * @return a single target type with status OK.
      */
-    @Operation(summary = "Return target type by id", description = "Handles the GET request of retrieving a single target type")
+    @Operation(summary = "Return target type by id",
+            description = "Handles the GET request of retrieving a single target type")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -126,7 +127,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target type not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -147,7 +149,8 @@ public interface MgmtTargetTypeRestApi {
      * @return status OK if delete is successful.
      *
      */
-    @Operation(summary = "Delete target type by id", description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
+    @Operation(summary = "Delete target type by id",
+            description = "Handles the DELETE request for a single target type. Required Permission: DELETE_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -158,7 +161,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target type not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -179,7 +183,8 @@ public interface MgmtTargetTypeRestApi {
      *            the target type to be updated.
      * @return status OK if update is successful
      */
-    @Operation(summary = "Update target type by id", description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
+    @Operation(summary = "Update target type by id",
+            description = "Handles the PUT request for a single target type. Required Permission: UPDATE_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -190,7 +195,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target type not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -222,7 +228,8 @@ public interface MgmtTargetTypeRestApi {
      *         ResponseBody. In any failure the JsonResponseExceptionHandler is
      *         handling the response.
      */
-    @Operation(summary = "Create target types", description = "Handles the POST request for creating new target types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
+    @Operation(summary = "Create target types", description = "Handles the POST request for creating new target " +
+            "types. The request body must always be a list of types. Required Permission: CREATE_TARGET")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -233,7 +240,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target type not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target type not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -261,7 +269,9 @@ public interface MgmtTargetTypeRestApi {
      *            of the TargetType.
      * @return Unpaged list of distribution set types and OK in case of success.
      */
-    @Operation(summary = "Return list of compatible distribution set types", description = "Handles the GET request of retrieving the list of compatible distribution set types in that target type. Required Permission: READ_TARGET, READ_REPOSITORY")
+    @Operation(summary = "Return list of compatible distribution set types", description = "Handles the GET request " +
+            "of retrieving the list of compatible distribution set types in that target type. " +
+            "Required Permission: READ_TARGET, READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -272,7 +282,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -298,7 +309,9 @@ public interface MgmtTargetTypeRestApi {
      *
      * @return OK if the request was successful
      */
-    @Operation(summary = "Remove compatibility of distribution set type from the target type", description = "Handles the DELETE request for removing a distribution set type from a single target type. Required Permission: UPDATE_TARGET and READ_REPOSITORY")
+    @Operation(summary = "Remove compatibility of distribution set type from the target type",
+            description = "Handles the DELETE request for removing a distribution set type from a single target type. " +
+                    "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -309,7 +322,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -334,7 +348,9 @@ public interface MgmtTargetTypeRestApi {
      *
      * @return OK if the request was successful
      */
-    @Operation(summary = "Adding compatibility of a distribution set type to a target type", description = "Handles the POST request for adding compatible distribution set types to a target type. Required Permission: UPDATE_TARGET and READ_REPOSITORY")
+    @Operation(summary = "Adding compatibility of a distribution set type to a target type",
+            description = "Handles the POST request for adding compatible distribution set types to a target type. " +
+                    "Required Permission: UPDATE_TARGET and READ_REPOSITORY")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -345,7 +361,8 @@ public interface MgmtTargetTypeRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Distribution set type was not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 

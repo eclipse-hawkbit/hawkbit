@@ -22,14 +22,14 @@ import lombok.experimental.Accessors;
 public class MgmtTargetTypeRequestBodyPut {
 
     @JsonProperty(required = true)
-    @Schema(example = "updatedTypeName")
+    @Schema(description = "The name of the entity", example = "updatedTypeName")
     private String name;
 
     @JsonProperty
-    @Schema(example = "an updated description")
+    @Schema(description = "The description of the entity", example = "an updated description")
     private String description;
 
     @JsonProperty
-    @Schema(example = "#aaafff")
+    @Schema(description = "The colour of the entity", example = "#aaafff")
     private String colour;
 }
