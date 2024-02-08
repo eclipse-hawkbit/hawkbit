@@ -14,7 +14,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtNamedEntity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -30,23 +29,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MgmtSoftwareModule extends MgmtNamedEntity {
 
     @JsonProperty(value = "id", required = true)
-    @Schema(example = "6")
+    @Schema(description = "The technical identifier of the entity", example = "6")
     private Long moduleId;
     @JsonProperty(required = true)
-    @Schema(example = "1.0.0")
+    @Schema(description = "Package version", example = "1.0.0")
     private String version;
     @JsonProperty(required = true)
-    @Schema(example = "os")
+    @Schema(description = "The software module type of the entity", example = "os")
     private String type;
-    @Schema(example = "OS")
+    @Schema(description = "The software module type name of the entity", example = "OS")
     private String typeName;
     @JsonProperty
-    @Schema(example = "Vendor Limited, California")
+    @Schema(description = "The software vendor", example = "Vendor Limited, California")
     private String vendor;
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "If the software module is deleted", example = "false")
     private boolean deleted;
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "If the software module is encrypted", example = "false")
     private boolean encrypted;
 }

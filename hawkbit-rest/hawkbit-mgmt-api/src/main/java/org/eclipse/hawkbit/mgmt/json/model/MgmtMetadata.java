@@ -14,35 +14,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
 /**
  * The representation of an meta data in the REST API for POST/Create.
- *
  */
+@Data
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtMetadata {
 
     @JsonProperty(required = true)
-    @Schema(example = "someKnownKey")
+    @Schema(description = "Metadata property key", example = "someKnownKey")
     private String key;
     @JsonProperty
-    @Schema(example = "someKnownKeyValue")
+    @Schema(description = "Metadata property value", example = "someKnownKeyValue")
     private String value;
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(final String key) {
-        this.key = key;
-    }
-
-    public String getValue() {
-        return value;
-    }
-
-    public void setValue(final String value) {
-        this.value = value;
-    }
 }
