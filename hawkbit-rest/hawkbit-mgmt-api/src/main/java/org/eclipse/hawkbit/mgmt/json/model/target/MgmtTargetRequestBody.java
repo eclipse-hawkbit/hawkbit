@@ -16,23 +16,32 @@ import lombok.experimental.Accessors;
 public class MgmtTargetRequestBody {
 
     @JsonProperty(required = true)
-    @Schema(example = "controllerName")
+    @Schema(description = "The name of the entity", example = "controllerName")
     private String name;
-    @Schema(example = "Example description of a target")
+
+    @Schema(description = "The description of the entity", example = "Example description of a target")
     private String description;
+
     @JsonProperty(required = true)
-    @Schema(example = "12345")
+    @Schema(description = "Controller ID", example = "123")
     private String controllerId;
+
     @JsonProperty
-    @Schema(example = "https://192.168.0.1")
+    @Schema(description = "The last known address URI of the target. Includes information of the target is " +
+            "connected either directly (DDI) through HTTP or indirectly (DMF) through amqp",
+            example = "https://192.168.0.1")
     private String address;
+
     @JsonProperty
-    @Schema(example = "2345678DGGDGFTDzztgf")
+    @Schema(description = "Pre-Shared key that allows targets to authenticate at Direct Device Integration API if " +
+            "enabled in the tenant settings", example = "2345678DGGDGFTDzztgf")
     private String securityToken;
+
     @JsonProperty
-    @Schema(example = "false")
+    @Schema(description = "Request re-transmission of target attributes", example = "true")
     private Boolean requestAttributes;
+
     @JsonProperty
-    @Schema(example = "10")
+    @Schema(description = "ID of the target type", example = "10")
     private Long targetType;
 }

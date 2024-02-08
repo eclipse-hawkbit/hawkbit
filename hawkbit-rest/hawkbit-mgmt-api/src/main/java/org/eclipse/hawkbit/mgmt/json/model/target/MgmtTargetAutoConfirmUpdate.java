@@ -20,11 +20,12 @@ import lombok.Data;
 @Data
 public class MgmtTargetAutoConfirmUpdate {
 
-    @JsonProperty(required = false)
-    @Schema(example = "custom_initiator_value")
+    @JsonProperty
+    @Schema(description = "(Optional) Initiator set on activation", example = "custom_initiator_value")
     private final String initiator;
-    @JsonProperty(required = false)
-    @Schema(example = "custom_remark")
+
+    @JsonProperty
+    @Schema(description = "(Optional) Remark set on activation", example = "custom_remark")
     private final String remark;
 
     /**

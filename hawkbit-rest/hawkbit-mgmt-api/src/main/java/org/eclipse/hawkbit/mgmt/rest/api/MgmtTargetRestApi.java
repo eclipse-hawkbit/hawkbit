@@ -59,7 +59,8 @@ public interface MgmtTargetRestApi {
      *            the ID of the target to retrieve
      * @return a single target with status OK.
      */
-    @Operation(summary = "Return target by id", description = "Handles the GET request of retrieving a single target. Required Permission: READ_TARGET.")
+    @Operation(summary = "Return target by id", description = "Handles the GET request of retrieving a single target. " +
+            "Required Permission: READ_TARGET.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Successfully retrieved"),
         @ApiResponse(responseCode = "400", description = "Bad Request - e.g. invalid parameters", 
@@ -70,7 +71,8 @@ public interface MgmtTargetRestApi {
                 description = "Insufficient permissions, entity is not allowed to be changed (i.e. read-only) or " +
                         "data volume restriction applies.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
-        @ApiResponse(responseCode = "404", description = "Target not found.", content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
+        @ApiResponse(responseCode = "404", description = "Target not found.",
+                content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "405", description = "The http request method is not allowed on the resource.", 
                 content = @Content(mediaType = "application/json", schema = @Schema(hidden = true))),
         @ApiResponse(responseCode = "406", description = "In case accept header is specified and not application/json.", 
@@ -672,7 +674,13 @@ public interface MgmtTargetRestApi {
     ResponseEntity<MgmtTargetAssignmentResponseBody> postAssignedDistributionSet(
             @PathVariable("targetId") String targetId,
             @Valid MgmtDistributionSetAssignments dsAssignments,
-            @RequestParam(value = "offline", required = false) boolean offline);
+            @RequestParam(value = "offline", required = false)
+            @Schema(description = """
+                    Offline update (set param to true) that is only reported but not managed by the service, e.g.
+                    defaults set in factory, manual updates or migrations from other update systems. A completed action
+                    is added to the history of the target(s). Target is set to IN_SYNC state as both assigned and
+                    installed DS are set. Note: only executed if the target has currently no running update""")
+            boolean offline);
 
     /**
      * Handles the GET request of retrieving the installed distribution set of
