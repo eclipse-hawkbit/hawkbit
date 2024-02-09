@@ -9,6 +9,7 @@
  */
 package org.eclipse.hawkbit.ui.simple.view;
 
+import com.vaadin.flow.component.checkbox.Checkbox;
 import org.eclipse.hawkbit.ui.simple.HawkbitClient;
 import org.eclipse.hawkbit.ui.simple.MainLayout;
 import org.eclipse.hawkbit.ui.simple.view.util.SelectionGrid;
@@ -194,6 +195,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final TextField distributionSet = Utils.textField(Constants.DISTRIBUTION_SET);
         private final TextField actonType = Utils.textField(Constants.ACTION_TYPE);
         private final TextField startAt = Utils.textField(Constants.START_AT);
+        private final Checkbox dynamic  = new Checkbox(Constants.DYNAMIC);
         private final SelectionGrid<MgmtRolloutGroupResponseBody, Long> groupGrid;
 
         private RolloutDetails(final HawkbitClient hawkbitClient) {
@@ -211,6 +213,9 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                         field.setReadOnly(true);
                         add(field);
                     });
+            dynamic.setReadOnly(true);
+            dynamic.setEnabled(false);
+            add(dynamic);
             add(groupGrid);
 
             setResponsiveSteps(new ResponsiveStep("0", 2));
@@ -235,6 +240,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 case TIMEFORCED -> "Scheduled at " + new Date(rollout.getForcetime());
             });
             startAt.setValue(ObjectUtils.isEmpty(rollout.getStartAt()) ? "" : new Date(rollout.getStartAt()).toString());
+            dynamic.setValue(rollout.isDynamic());
 
             groupGrid.setItems(query ->
                     hawkbitClient.getRolloutRestApi()
@@ -266,6 +272,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
         private final NumberField groupNumber;
         private final NumberField triggerThreshold;
         private final NumberField errorThreshold;
+        private final Checkbox dynamic = new Checkbox(Constants.DYNAMIC);
 
         private final Button create = new Button("Create");
 
@@ -374,6 +381,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                     name, distributionSet, targetFilter, description,
                     actionType, startType,
                     groupNumber, triggerThreshold, errorThreshold,
+                    dynamic,
                     actions);
             add(layout);
             open();
@@ -430,6 +438,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 request.setErrorAction(
                         new MgmtRolloutErrorAction(
                                 MgmtRolloutErrorAction.ErrorAction.PAUSE, ""));
+                request.setDynamic(dynamic.getValue());
                 hawkbitClient.getRolloutRestApi().create(request).getBody();
             });
         }
