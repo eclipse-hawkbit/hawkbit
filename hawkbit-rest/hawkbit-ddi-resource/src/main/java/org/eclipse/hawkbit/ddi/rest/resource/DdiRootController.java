@@ -282,7 +282,7 @@ public class DdiRootController implements DdiRootControllerRestApi {
             @PathVariable("actionId") final Long actionId,
             @RequestParam(value = "c", required = false, defaultValue = "-1") final int resource,
             @RequestParam(value = "actionHistory", defaultValue = DdiRestConstants.NO_ACTION_HISTORY) final Integer actionHistoryMessageCount) {
-        log.debug("getControllerBasedeploymentAction({},{})", controllerId, resource);
+        log.debug("getControllerDeploymentBaseAction({},{})", controllerId, resource);
 
         final Target target = findTarget(controllerId);
         final Action action = findActionForTarget(actionId, target);
