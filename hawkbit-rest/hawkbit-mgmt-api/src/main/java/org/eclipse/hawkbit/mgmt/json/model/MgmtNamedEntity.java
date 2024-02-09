@@ -13,12 +13,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 /**
  * A json annotated rest model for NamedEntity to RESTful API representation.
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 public abstract class MgmtNamedEntity extends MgmtBaseEntity {
 
     @JsonProperty(required = true)
