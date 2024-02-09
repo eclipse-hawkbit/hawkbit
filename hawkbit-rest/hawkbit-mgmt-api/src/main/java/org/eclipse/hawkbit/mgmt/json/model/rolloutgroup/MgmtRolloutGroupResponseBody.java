@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Model for the rollout group annotated with json-annotations for easier
@@ -28,6 +29,7 @@ import lombok.Setter;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(example = """

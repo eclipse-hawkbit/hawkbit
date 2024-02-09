@@ -29,7 +29,7 @@ import java.util.Objects;
 @NoArgsConstructor // needed for json create
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "id", "confirmation", "actionHistory" })
 @Schema(description = """

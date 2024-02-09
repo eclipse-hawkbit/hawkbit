@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @NoArgsConstructor // needed for json create
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "id", "deployment", "actionHistory" })
 @Schema(example = """

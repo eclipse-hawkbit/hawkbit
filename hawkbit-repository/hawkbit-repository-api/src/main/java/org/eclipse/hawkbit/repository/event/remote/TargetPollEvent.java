@@ -21,7 +21,7 @@ import java.io.Serial;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class TargetPollEvent extends RemoteTenantAwareEvent {
 
     @Serial

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 import jakarta.validation.constraints.NotNull;
@@ -25,6 +26,7 @@ import jakarta.validation.constraints.NotNull;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "active", "initiator", "remark", "activatedAt" })

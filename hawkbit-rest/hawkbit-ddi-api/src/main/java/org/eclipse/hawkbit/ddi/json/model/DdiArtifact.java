@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.hateoas.RepresentationModel;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """
     **_links**:

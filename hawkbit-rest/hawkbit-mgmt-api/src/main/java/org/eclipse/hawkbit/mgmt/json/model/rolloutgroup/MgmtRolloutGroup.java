@@ -12,6 +12,7 @@ package org.eclipse.hawkbit.mgmt.json.model.rolloutgroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.rollout.AbstractMgmtRolloutConditionsEntity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MgmtRolloutGroup extends AbstractMgmtRolloutConditionsEntity {

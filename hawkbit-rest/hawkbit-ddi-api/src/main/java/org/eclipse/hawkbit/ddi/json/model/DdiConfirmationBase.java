@@ -29,7 +29,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NoArgsConstructor // needed for json create
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonPropertyOrder({ "autoConfirm" })
 @Schema(

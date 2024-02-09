@@ -22,7 +22,7 @@ import java.io.Serial;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class TargetAttributesRequestedEvent extends RemoteIdEvent {
 
     @Serial

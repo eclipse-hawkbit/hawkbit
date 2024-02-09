@@ -14,6 +14,7 @@ import java.util.List;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import lombok.experimental.Accessors;
 import org.eclipse.hawkbit.mgmt.json.model.softwaremoduletype.MgmtSoftwareModuleTypeAssigment;
 
@@ -24,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Accessors(chain = true)
 public class MgmtDistributionSetTypeRequestBodyPost extends MgmtDistributionSetTypeRequestBodyPut {
 

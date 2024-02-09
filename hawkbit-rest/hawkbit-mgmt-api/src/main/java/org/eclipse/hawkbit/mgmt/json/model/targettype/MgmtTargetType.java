@@ -15,6 +15,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
 
 /**
@@ -23,6 +24,7 @@ import org.eclipse.hawkbit.mgmt.json.model.MgmtTypeEntity;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """

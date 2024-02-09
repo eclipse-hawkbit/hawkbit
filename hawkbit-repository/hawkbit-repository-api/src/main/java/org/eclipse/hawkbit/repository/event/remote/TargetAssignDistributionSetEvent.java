@@ -26,7 +26,7 @@ import org.eclipse.hawkbit.repository.model.Action;
 @NoArgsConstructor // for serialization libs like jackson
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class TargetAssignDistributionSetEvent extends AbstractAssignmentEvent {
 
     @Serial

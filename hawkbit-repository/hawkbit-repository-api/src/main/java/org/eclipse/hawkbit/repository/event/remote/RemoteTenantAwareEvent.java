@@ -26,7 +26,7 @@ import java.io.Serial;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class RemoteTenantAwareEvent extends RemoteApplicationEvent implements TenantAwareEvent {
 
     @Serial
