@@ -68,6 +68,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                         MgmtRolloutResponseBody.class, MgmtRolloutResponseBody::getRolloutId) {
 
                     private final RolloutDetails details = new RolloutDetails(hawkbitClient);
+
                     @Override
                     protected void addColumns(final Grid<MgmtRolloutResponseBody> grid) {
                         grid.addColumn(MgmtRolloutResponseBody::getRolloutId).setHeader(Constants.ID).setAutoWidth(true);
@@ -86,7 +87,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                 },
                 (query, rsqlFilter) -> hawkbitClient.getRolloutRestApi()
                         .getRollouts(
-                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, null)
+                                query.getOffset(), query.getPageSize(), Constants.NAME_ASC, rsqlFilter, "full")
                         .getBody()
                         .getContent()
                         .stream(),
@@ -247,7 +248,7 @@ public class RolloutView extends TableView<MgmtRolloutResponseBody, Long> {
                             .getRolloutGroups(
                                     rollout.getRolloutId(),
                                     query.getOffset(), query.getPageSize(),
-                                    null, null, null)
+                                    null, null, "full")
                             .getBody().getContent().stream()
                             .skip(query.getOffset())
                             .limit(query.getPageSize()));
