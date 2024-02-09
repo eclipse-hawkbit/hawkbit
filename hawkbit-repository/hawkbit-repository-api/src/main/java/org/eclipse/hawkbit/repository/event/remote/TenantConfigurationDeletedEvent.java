@@ -24,7 +24,7 @@ import java.io.Serial;
 @NoArgsConstructor // for serialization libs like jackson
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class TenantConfigurationDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     @Serial

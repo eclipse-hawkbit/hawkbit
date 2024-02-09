@@ -27,7 +27,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @NoArgsConstructor // needed for json deserialization
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 @JsonInclude(Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Schema(description = """

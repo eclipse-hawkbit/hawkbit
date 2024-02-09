@@ -25,7 +25,7 @@ import java.util.Arrays;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class RemoteIdEvent extends RemoteTenantAwareEvent {
 
     @Serial

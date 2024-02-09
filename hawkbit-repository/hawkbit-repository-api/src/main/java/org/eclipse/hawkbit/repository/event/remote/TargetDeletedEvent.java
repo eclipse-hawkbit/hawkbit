@@ -23,7 +23,7 @@ import java.io.Serial;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class TargetDeletedEvent extends RemoteIdEvent implements EntityDeletedEvent {
 
     @Serial

@@ -26,7 +26,7 @@ import org.springframework.security.core.userdetails.User;
  */
 @Getter
 @EqualsAndHashCode(callSuper = true)
-@ToString
+@ToString(callSuper = true)
 public class UserPrincipal extends User {
 
     private static final long serialVersionUID = 1L;
