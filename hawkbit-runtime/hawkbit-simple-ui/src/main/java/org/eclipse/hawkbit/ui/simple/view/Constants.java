@@ -41,6 +41,7 @@ public interface Constants {
     String START_TYPE = "Start Type";
     String MANUAL = "Manual";
     String AUTO = "Auto";
+    String DYNAMIC = "Dynamic";
 
     String NAME_ASC = "name:asc";
 }
