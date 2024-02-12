@@ -211,13 +211,15 @@ public class TargetView extends TableView<MgmtTarget, String> {
         private final TextField createdAt = Utils.textField(Constants.CREATED_AT);
         private final TextField lastModifiedBy = Utils.textField(Constants.LAST_MODIFIED_BY);
         private final TextField lastModifiedAt = Utils.textField(Constants.LAST_MODIFIED_AT);
+        private final TextField securityToken = Utils.textField(Constants.SECURITY_TOKEN);
 
         private TargetDetails() {
             description.setMinLength(2);
             Stream.of(
                     description,
                     createdBy, createdAt,
-                    lastModifiedBy, lastModifiedAt)
+                    lastModifiedBy, lastModifiedAt,
+                    securityToken)
                     .forEach(field -> {
                         field.setReadOnly(true);
                         add(field);
@@ -228,11 +230,12 @@ public class TargetView extends TableView<MgmtTarget, String> {
         }
 
         private void setItem(final MgmtTarget target) {
-            description.setValue(target.getDescription());
+            description.setValue(target.getDescription() == null ? "N/A" : target.getDescription());
             createdBy.setValue(target.getCreatedBy());
             createdAt.setValue(new Date(target.getCreatedAt()).toString());
             lastModifiedBy.setValue(target.getLastModifiedBy());
             lastModifiedAt.setValue(new Date(target.getLastModifiedAt()).toString());
+            securityToken.setValue(target.getSecurityToken());
         }
     }
 
