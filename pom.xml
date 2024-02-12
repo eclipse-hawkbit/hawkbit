@@ -131,6 +131,7 @@
       <module>hawkbit-test-report</module>
       <module>hawkbit-runtime</module>
       <module>hawkbit-starters</module>
+      <module>hawkbit-sdk</module>
    </modules>
 
    <scm>

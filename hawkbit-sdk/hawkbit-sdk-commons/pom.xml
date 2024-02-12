@@ -1,0 +1,48 @@
+<!--
+
+    Copyright (c) 2023 Bosch.IO GmbH and others
+
+    This program and the accompanying materials are made
+    available under the terms of the Eclipse Public License 2.0
+    which is available at https://www.eclipse.org/legal/epl-2.0/
+
+    SPDX-License-Identifier: EPL-2.0
+
+-->
+<project
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+   xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+   <modelVersion>4.0.0</modelVersion>
+   <parent>
+      <groupId>org.eclipse.hawkbit</groupId>
+      <artifactId>hawkbit-sdk</artifactId>
+      <version>${revision}</version>
+   </parent>
+
+   <artifactId>hawkbit-sdk-commons</artifactId>
+   <name>hawkBit :: SDK :: Commons</name>
+   <description>SDK commons</description>
+
+   <properties>
+      <spring-cloud-starter-openfeign.version>4.0.4</spring-cloud-starter-openfeign.version>
+      <openfeign-hc5.version>13.0</openfeign-hc5.version>
+   </properties>
+
+   <dependencies>
+      <dependency>
+         <groupId>org.springframework.cloud</groupId>
+         <artifactId>spring-cloud-starter-openfeign</artifactId>
+         <version>${spring-cloud-starter-openfeign.version}</version>
+      </dependency>
+      <dependency>
+         <groupId>io.github.openfeign</groupId>
+         <artifactId>feign-hc5</artifactId>
+         <version>${openfeign-hc5.version}</version>
+      </dependency>
+
+      <dependency>
+         <groupId>org.springframework.boot</groupId>
+         <artifactId>spring-boot-starter-hateoas</artifactId>
+      </dependency>
+   </dependencies>
+</project>
