@@ -34,5 +34,5 @@ public class Tenant {
     @Nullable
     private String gatewayToken;
 
-    private boolean downloadAuthenticationEnabled;
+    private boolean downloadAuthenticationEnabled = true;
 }
