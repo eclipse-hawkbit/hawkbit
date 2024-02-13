@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.sdk.HawkbitSDKConfigurtion;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.demo.SetupHelper;
 import org.eclipse.hawkbit.sdk.device.DdiController;
+import org.eclipse.hawkbit.sdk.device.UpdateHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -30,6 +31,7 @@ import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -56,7 +58,9 @@ public class DeviceApp {
     DdiController device(
             @Value("${hawkbit.device:controller-default}") final String controllerId,
             @Value("${hawkbit.device.securityToken:}") final String securityToken,
-            final Tenant defaultTenant, final HawkbitClient hawkbitClient) {
+            final Tenant defaultTenant,
+            final Optional<UpdateHandler> updateHandler,
+            final HawkbitClient hawkbitClient) {
         return new DdiController(
                 defaultTenant,
                 Controller.builder()
@@ -65,6 +69,7 @@ public class DeviceApp {
                                 (ObjectUtils.isEmpty(defaultTenant.getGatewayToken()) ? SetupHelper.randomToken() : securityToken) :
                                 securityToken)
                         .build(),
+                updateHandler.orElse(null),
                 hawkbitClient).setOverridePollMillis(10_000);
     }
 
