@@ -22,6 +22,7 @@ import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.springframework.util.ObjectUtils;
 
+import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class SetupHelper {
         return securityTargetToken;
     }
 
-    private static final Random RND = new Random();
+    private static final Random RND = new SecureRandom();
     public static String randomToken() {
         final byte[] rnd = new byte[24];
         RND.nextBytes(rnd);
