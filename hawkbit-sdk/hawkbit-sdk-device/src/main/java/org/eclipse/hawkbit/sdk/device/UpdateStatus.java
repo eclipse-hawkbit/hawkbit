@@ -15,13 +15,13 @@ import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 
 import java.util.List;
 
-record UpdateStatus(Status status, List<String> messages) {
+public record UpdateStatus(Status status, List<String> messages) {
 
     /**
      * The status to response to the hawkBit update server if an simulated update process should be respond with
      * successful or failure update.
      */
-    enum Status {
+    public enum Status {
 
         /**
          * Update has been successful and response the successful update.

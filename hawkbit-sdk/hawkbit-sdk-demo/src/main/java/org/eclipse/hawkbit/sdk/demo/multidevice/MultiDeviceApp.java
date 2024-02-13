@@ -21,6 +21,7 @@ import org.eclipse.hawkbit.sdk.HawkbitSDKConfigurtion;
 import org.eclipse.hawkbit.sdk.Tenant;
 import org.eclipse.hawkbit.sdk.demo.SetupHelper;
 import org.eclipse.hawkbit.sdk.device.DdiController;
+import org.eclipse.hawkbit.sdk.device.UpdateHandler;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -57,6 +59,7 @@ public class MultiDeviceApp {
     public static class Shell {
 
         private final Tenant tenant;
+        private final UpdateHandler updateHandler;
         private final HawkbitClient hawkbitClient;
         private final Map<String, DdiController> devices = new ConcurrentHashMap<>();
 
@@ -64,8 +67,9 @@ public class MultiDeviceApp {
 
         private boolean setup;
 
-        Shell(final Tenant tenant, final HawkbitClient hawkbitClient) {
+        Shell(final Tenant tenant, final Optional<UpdateHandler> updateHandler, final HawkbitClient hawkbitClient) {
             this.tenant = tenant;
+            this.updateHandler = updateHandler.orElse(null);
             this.hawkbitClient = hawkbitClient;
         }
 
@@ -86,11 +90,13 @@ public class MultiDeviceApp {
                 securityTargetToken = null;
             }
             if (device == null) {
-                device = new DdiController(tenant,
+                device = new DdiController(
+                        tenant,
                         Controller.builder()
                                 .controllerId(controllerId)
                                 .securityToken(securityTargetToken)
                                 .build(),
+                        updateHandler,
                         hawkbitClient).setOverridePollMillis(10_000);
                 final DdiController oldDevice = devices.putIfAbsent(controllerId, device);
                 if (oldDevice != null) {

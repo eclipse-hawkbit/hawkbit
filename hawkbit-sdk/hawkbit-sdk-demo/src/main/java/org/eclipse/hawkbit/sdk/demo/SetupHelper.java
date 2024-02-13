@@ -19,13 +19,13 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtTargetRestApi;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtTenantManagementRestApi;
 import org.eclipse.hawkbit.sdk.HawkbitClient;
 import org.eclipse.hawkbit.sdk.Tenant;
-import org.eclipse.hawkbit.sdk.device.DdiController;
 import org.springframework.util.ObjectUtils;
 
 import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 /**
@@ -51,25 +51,25 @@ public class SetupHelper {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi =
                 hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
         if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
-            if (!((Boolean)mgmtTenantManagementRestApi
+            if (!((Boolean) Objects.requireNonNull(mgmtTenantManagementRestApi
                     .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
-                    .getBody().getValue())) {
+                    .getBody()).getValue())) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED, true)
                 );
             }
         } else {
-            if (!((Boolean)mgmtTenantManagementRestApi
+            if (!((Boolean) Objects.requireNonNull(mgmtTenantManagementRestApi
                     .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED)
-                    .getBody().getValue())) {
+                    .getBody()).getValue())) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true)
                 );
             }
             if (!tenant.getGatewayToken().equals(
-                    mgmtTenantManagementRestApi
+                    Objects.requireNonNull(mgmtTenantManagementRestApi
                         .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
-                        .getBody().getValue())) {
+                        .getBody()).getValue())) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
                         Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, tenant.getGatewayToken())
                 );
@@ -85,7 +85,7 @@ public class SetupHelper {
             final MgmtTargetRestApi mgmtTargetRestApi = hawkbitClient.mgmtService(MgmtTargetRestApi.class, tenant);
             try {
                 // test if target exist, if not - throws 404
-                final MgmtTarget target = mgmtTargetRestApi.getTarget(controllerId).getBody();
+                final MgmtTarget target = Objects.requireNonNull(mgmtTargetRestApi.getTarget(controllerId).getBody());
                 if (ObjectUtils.isEmpty(securityTargetToken)) {
                     if (ObjectUtils.isEmpty(target.getSecurityToken())) {
                         // generate random to set to tha existing target without configured security token
