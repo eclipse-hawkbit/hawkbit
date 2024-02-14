@@ -204,7 +204,7 @@ public enum SpServerError {
      *
      */
     SP_DS_INCOMPLETE("hawkbit.server.error.distributionset.incomplete",
-            "Distribution set is assigned to a target that is incomplete (i.e. mandatory modules are missing)"),
+            "Distribution set is assigned/locked to a target that is incomplete (i.e. mandatory modules are missing)"),
 
     /**
     *
