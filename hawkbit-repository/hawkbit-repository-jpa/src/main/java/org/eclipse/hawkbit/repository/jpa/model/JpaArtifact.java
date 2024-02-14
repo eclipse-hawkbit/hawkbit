@@ -83,9 +83,10 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
      */
     public JpaArtifact(@NotEmpty final String sha1Hash, @NotNull final String filename,
             final SoftwareModule softwareModule) {
-        setSoftwareModule(softwareModule);
         this.sha1Hash = sha1Hash;
         this.filename = filename;
+        this.softwareModule = (JpaSoftwareModule) softwareModule;
+        this.softwareModule.addArtifact(this);
     }
 
     @Override
@@ -128,11 +129,6 @@ public class JpaArtifact extends AbstractJpaTenantAwareBaseEntity implements Art
     @Override
     public SoftwareModule getSoftwareModule() {
         return softwareModule;
-    }
-
-    public final void setSoftwareModule(final SoftwareModule softwareModule) {
-        this.softwareModule = (JpaSoftwareModule) softwareModule;
-        this.softwareModule.addArtifact(this);
     }
 
     @Override
