@@ -822,6 +822,19 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
+    @Description("Locks a SM.")
+    void lockSoftwareModule() {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("ds-1");
+        assertThat(
+                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true))
+                .isFalse();
+        softwareModuleManagement.lock(softwareModule.getId());
+        assertThat(
+                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
+                .isTrue();
+    }
+
+    @Test
     @Description("Verifies that non existing metadata find results in exception.")
     public void findSoftwareModuleMetadataFailsIfEntryDoesNotExist() {
         final String knownKey1 = "myKnownKey1";

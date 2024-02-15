@@ -995,7 +995,35 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Deltes a DS that is no in use. Expected behaviour is a hard delete on the database.")
+    @Description("Locks a DS.")
+    void lockDistributionSet() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(true))
+                .isFalse();
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(false))
+                .isTrue();
+    }
+
+    @Test
+    @Description("Locks an incomplete DS. Expected behaviour is to throw exception and to do not lock it.")
+    void lockIncompleteDistributionSetFails() {
+        final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
+        assertThatExceptionOfType(IncompleteDistributionSetException.class)
+                .as("Locking an incomplete distribution set should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.lock(incompleteDistributionSet.getId()));
+        assertThat(
+                distributionSetManagement.get(incompleteDistributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(true))
+                .isFalse();
+    }
+
+    @Test
+    @Description("Deletes a DS that is no in use. Expected behaviour is a hard delete on the database.")
     void deleteUnassignedDistributionSet() {
         final DistributionSet ds1 = testdataFactory.createDistributionSet("ds-1");
         testdataFactory.createDistributionSet("ds-2");
