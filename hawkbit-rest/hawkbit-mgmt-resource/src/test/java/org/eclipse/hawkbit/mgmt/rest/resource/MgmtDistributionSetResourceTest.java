@@ -41,6 +41,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -1035,12 +1036,10 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
     @Test
     @Description("Ensures that DS property update request to API is reflected by the repository.")
     public void updateDistributionSet() throws Exception {
-
         // prepare test data
         assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
 
         final DistributionSet set = testdataFactory.createDistributionSet("one");
-
         assertThat(distributionSetManagement.count()).isEqualTo(1);
 
         final String body = new JSONObject().put("version", "anotherVersion").put("requiredMigrationStep", true)
@@ -1051,6 +1050,7 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("$.version", equalTo("anotherVersion")))
                 .andExpect(jsonPath("$.requiredMigrationStep", equalTo(true)))
+                .andExpect(jsonPath("$.locked", equalTo(false)))
                 .andExpect(jsonPath("$.deleted", equalTo(false)));
 
         final DistributionSet setupdated = distributionSetManagement.get(set.getId()).get();
@@ -1059,6 +1059,54 @@ public class MgmtDistributionSetResourceTest extends AbstractManagementApiIntegr
         assertThat(setupdated.getVersion()).isEqualTo("anotherVersion");
         assertThat(setupdated.getName()).isEqualTo(set.getName());
         assertThat(setupdated.isDeleted()).isEqualTo(false);
+    }
+
+    @Test
+    @Description("Tests the lock. It is verified that the distribution set can be marked as locked through update operation.")
+    void lockDistributionSet() throws Exception {
+        // prepare test data
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
+        assertThat(set.isLocked()).as("Created distribution set should not be locked").isFalse();
+
+        final String body = new JSONObject().put("locked", true).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locked", equalTo(true)));
+
+        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        assertThat(updatedSet.isLocked()).isEqualTo(true);
+    }
+
+    @Test
+    @Description("Tests the unlock. It is verified that the distribution set can't be unmarked as locked through update operation.")
+    void unlockDistributionSetSkippedSilently() throws Exception {
+        // prepare test data
+        assertThat(distributionSetManagement.findByCompleted(PAGE, true)).hasSize(0);
+
+        final DistributionSet set = testdataFactory.createDistributionSet("one");
+        assertThat(distributionSetManagement.count()).isEqualTo(1);
+        distributionSetManagement.lock(set.getId());
+        assertThat(distributionSetManagement.get(set.getId())
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, set.getId())).isLocked())
+                .as("Created software module should not be locked")
+                .isTrue();
+
+        final String body = new JSONObject().put("locked", false).toString();
+
+        mvc.perform(put("/rest/v1/distributionsets/{dsId}", set.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.locked", equalTo(true)));
+
+        final DistributionSet updatedSet = distributionSetManagement.get(set.getId()).get();
+        assertThat(updatedSet.isLocked()).isEqualTo(true);
     }
 
     @Test
