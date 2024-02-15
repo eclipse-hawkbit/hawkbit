@@ -135,6 +135,16 @@ public interface DistributionSetManagement
     void deleteMetaData(long id, @NotEmpty String key);
 
     /**
+     * Locks a distribution set. From then on its functional properties could not be changed and
+     * it could be assigned to targets
+     *
+     * @param id the distribution set id
+     * @throws EntityNotFoundException if distribution set with given ID does not exist
+     */
+    @PreAuthorize(SpringEvalExpressions.HAS_AUTH_UPDATE_REPOSITORY)
+    void lock(final long id);
+
+    /**
      * Retrieves the distribution set for a given action.
      *
      * @param actionId

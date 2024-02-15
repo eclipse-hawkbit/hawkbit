@@ -620,6 +620,20 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
     @Transactional
     @Retryable(include = {
             ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
+    public void lock(final long id) {
+        final JpaSoftwareModule softwareModule = softwareModuleRepository
+                .findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, id));
+        if (!softwareModule.isLocked()) {
+            softwareModule.lock();
+            softwareModuleRepository.save(softwareModule);
+        }
+    }
+
+    @Override
+    @Transactional
+    @Retryable(include = {
+            ConcurrencyFailureException.class }, maxAttempts = Constants.TX_RT_MAX, backoff = @Backoff(delay = Constants.TX_RT_DELAY))
     public void delete(final long id) {
         delete(List.of(id));
     }
