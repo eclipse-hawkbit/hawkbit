@@ -285,6 +285,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         update.getDescription().ifPresent(set::setDescription);
         update.getVersion().ifPresent(set::setVersion);
 
+        if (Boolean.TRUE.equals(update.getLocked()) && !set.isLocked()) {
+            set.lock();
+        }
+
         if (update.isRequiredMigrationStep() != null
                 && !update.isRequiredMigrationStep().equals(set.isRequiredMigrationStep())) {
             assertDistributionSetIsNotAssignedToTargets(update.getId());

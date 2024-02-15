@@ -45,8 +45,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
       "type" : "os",
       "typeName" : "OS",
       "vendor" : "Vendor Limited, California",
-      "deleted" : false,
       "encrypted" : false,
+      "locked" : true,
+      "deleted" : false,
       "_links" : {
         "self" : {
           "href" : "https://management-api.host.com/rest/v1/softwaremodules/6"
@@ -85,10 +86,14 @@ public class MgmtSoftwareModule extends MgmtNamedEntity {
     private String vendor;
 
     @JsonProperty
-    @Schema(description = "If the software module is deleted", example = "false")
-    private boolean deleted;
-
-    @JsonProperty
     @Schema(description = "If the software module is encrypted", example = "false")
     private boolean encrypted;
+
+    @JsonProperty
+    @Schema(description = "If the software module is locked", example = "true")
+    private boolean locked;
+
+    @JsonProperty
+    @Schema(description = "If the software module is deleted", example = "false")
+    private boolean deleted;
 }

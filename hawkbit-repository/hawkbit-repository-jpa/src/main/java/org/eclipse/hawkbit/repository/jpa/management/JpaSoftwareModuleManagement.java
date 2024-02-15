@@ -142,6 +142,9 @@ public class JpaSoftwareModuleManagement implements SoftwareModuleManagement {
 
         update.getDescription().ifPresent(module::setDescription);
         update.getVendor().ifPresent(module::setVendor);
+        if (Boolean.TRUE.equals(update.getLocked()) && !module.isLocked()) {
+            module.lock();
+        }
 
         return softwareModuleRepository.save(module);
     }

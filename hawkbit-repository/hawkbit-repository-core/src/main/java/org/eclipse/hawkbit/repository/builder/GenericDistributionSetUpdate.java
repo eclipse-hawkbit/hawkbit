@@ -9,14 +9,33 @@
  */
 package org.eclipse.hawkbit.repository.builder;
 
+import jakarta.annotation.Nullable;
+
+import java.util.Optional;
+
 /**
  * Update implementation.
  */
 public class GenericDistributionSetUpdate extends AbstractDistributionSetUpdateCreate<DistributionSetUpdate>
         implements DistributionSetUpdate {
 
+    @Nullable
+    protected Boolean locked;
+
     public GenericDistributionSetUpdate(final Long id) {
         super.id = id;
     }
 
+    public DistributionSetUpdate locked(@Nullable final Boolean locked) {
+        if (Boolean.FALSE.equals(locked)) {
+            this.locked = null;
+        } else {
+            this.locked = locked;
+        }
+        return this;
+    }
+
+    public Boolean getLocked() {
+        return locked;
+    }
 }
