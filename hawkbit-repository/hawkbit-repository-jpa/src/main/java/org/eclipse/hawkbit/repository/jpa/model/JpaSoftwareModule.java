@@ -88,6 +88,9 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     @Size(max = SoftwareModule.VENDOR_MAX_SIZE)
     private String vendor;
 
+    @Column(name = "encrypted")
+    private boolean encrypted;
+
     @ToString.Exclude
     @CascadeOnDelete
     @OneToMany(mappedBy = "softwareModule", fetch = FetchType.LAZY, targetEntity = JpaSoftwareModuleMetadata.class)
@@ -98,9 +101,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
 
     @Column(name = "deleted")
     private boolean deleted;
-
-    @Column(name = "encrypted")
-    private boolean encrypted;
 
     @ToString.Exclude
     @Getter(AccessLevel.NONE)
@@ -188,15 +188,6 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      */
     public void setEncrypted(final boolean encrypted) {
         this.encrypted = encrypted;
-    }
-
-    @Override
-    public List<DistributionSet> getAssignedTo() {
-        if (assignedTo == null) {
-            return Collections.emptyList();
-        }
-
-        return Collections.unmodifiableList(assignedTo);
     }
 
     @Override

@@ -14,13 +14,46 @@ import java.util.Optional;
 
 /**
  * Software package as sub element of a {@link DistributionSet}.
- *
  */
 public interface SoftwareModule extends NamedVersionedEntity {
+
     /**
      * Maximum length of software vendor.
      */
     int VENDOR_MAX_SIZE = 256;
+
+    /**
+     * @return the type of the software module
+     */
+    SoftwareModuleType getType();
+
+    /**
+     * @return immutable list of all artifacts
+     */
+    List<Artifact> getArtifacts();
+
+    /**
+     * @return the vendor of this {@link SoftwareModule}.
+     */
+    String getVendor();
+
+    /**
+     * @return {@code true} if this software module is marked as encrypted
+     *         otherwise {@code false}
+     */
+    boolean isEncrypted();
+
+    /**
+     * @return <code>true</code> if this {@link SoftwareModule} is locked. If so it's 'functional'
+     *         properties (e.g. software modules) could not be modified anymore.
+     */
+    boolean isLocked();
+
+    /**
+     * @return {@code true} if this {@link SoftwareModule} is marked as deleted
+     *         otherwise {@code false}
+     */
+    boolean isDeleted();
 
     /**
      * @param artifactId
@@ -40,37 +73,4 @@ public interface SoftwareModule extends NamedVersionedEntity {
         return getArtifacts().stream().filter(artifact -> artifact.getFilename().equalsIgnoreCase(fileName.trim()))
                 .findAny();
     }
-
-    /**
-     * @return immutable list of all artifacts
-     */
-    List<Artifact> getArtifacts();
-
-    /**
-     * @return the vendor of this software module
-     */
-    String getVendor();
-
-    /**
-     * @return the type of the software module
-     */
-    SoftwareModuleType getType();
-
-    /**
-     * @return {@code true} if this software module is marked as deleted
-     *         otherwise {@code false}
-     */
-    boolean isDeleted();
-
-    /**
-     * @return immutable list of {@link DistributionSet}s the module is assigned
-     *         to
-     */
-    List<DistributionSet> getAssignedTo();
-
-    /**
-     * @return {@code true} if this software module is marked as encrypted
-     *         otherwise {@code false}
-     */
-    boolean isEncrypted();
 }
