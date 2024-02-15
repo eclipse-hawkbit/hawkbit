@@ -123,6 +123,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     private boolean requiredMigrationStep;
 
     @ToString.Exclude
+    @Getter(AccessLevel.NONE)
     @OneToMany(mappedBy = "autoAssignDistributionSet", targetEntity = JpaTargetFilterQuery.class, fetch = FetchType.LAZY)
     private List<TargetFilterQuery> autoAssignFilters;
 

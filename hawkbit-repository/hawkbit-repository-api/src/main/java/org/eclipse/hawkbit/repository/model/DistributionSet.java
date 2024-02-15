@@ -26,10 +26,40 @@ import java.util.Set;
 public interface DistributionSet extends NamedVersionedEntity {
 
     /**
-     * @return <code>true</code> if the set is deleted and only kept for history
+     * @return type of the {@link DistributionSet}.
+     */
+    DistributionSetType getType();
+
+    /**
+     *
+     * @return unmodifiableSet of {@link SoftwareModule}.
+     */
+    Set<SoftwareModule> getModules();
+
+    /**
+     * @return <code>true</code> if all defined
+     *         {@link DistributionSetType#getMandatoryModuleTypes()} of
+     *         {@link #getType()} are present in this {@link DistributionSet}.
+     */
+    boolean isComplete();
+
+    /**
+     * @return <code>true</code> if this {@link DistributionSet} is locked. If so it's 'functional'
+     *         properties (e.g. software modules) could not be modified anymore.
+     */
+    boolean isLocked();
+
+    /**
+     * @return <code>true</code> if this {@link DistributionSet} is deleted and only kept for history
      *         purposes.
      */
     boolean isDeleted();
+
+    /**
+     * @return <code>false</code> if this {@link DistributionSet} is
+     *         invalidated.
+     */
+    boolean isValid();
 
     /**
      * @return <code>true</code> if {@link DistributionSet} contains a mandatory
@@ -37,17 +67,6 @@ public interface DistributionSet extends NamedVersionedEntity {
      *         and not automatically canceled if overridden by a newer update.
      */
     boolean isRequiredMigrationStep();
-
-    /**
-     * @return the auto assign target filters
-     */
-    List<TargetFilterQuery> getAutoAssignFilters();
-
-    /**
-     *
-     * @return unmodifiableSet of {@link SoftwareModule}.
-     */
-    Set<SoftwareModule> getModules();
 
     /**
      * Searches through modules for the given type.
@@ -59,23 +78,4 @@ public interface DistributionSet extends NamedVersionedEntity {
     default Optional<SoftwareModule> findFirstModuleByType(final SoftwareModuleType type) {
         return getModules().stream().filter(module -> module.getType().equals(type)).findAny();
     }
-
-    /**
-     * @return type of the {@link DistributionSet}.
-     */
-    DistributionSetType getType();
-
-    /**
-     * @return <code>true</code> if all defined
-     *         {@link DistributionSetType#getMandatoryModuleTypes()} of
-     *         {@link #getType()} are present in this {@link DistributionSet}.
-     */
-    boolean isComplete();
-
-    /**
-     * @return <code>false</code> if this {@link DistributionSet} is
-     *         invalidated.
-     */
-    boolean isValid();
-
 }
