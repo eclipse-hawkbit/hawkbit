@@ -198,10 +198,10 @@ public class MgmtDistributionSetResource implements MgmtDistributionSetRestApi {
     public ResponseEntity<MgmtDistributionSet> updateDistributionSet(
             @PathVariable("distributionSetId") final Long distributionSetId,
             @RequestBody final MgmtDistributionSetRequestBodyPut toUpdate) {
-
         final DistributionSet updated = distributionSetManagement.update(entityFactory.distributionSet()
                 .update(distributionSetId).name(toUpdate.getName()).description(toUpdate.getDescription())
-                .version(toUpdate.getVersion()).requiredMigrationStep(toUpdate.getRequiredMigrationStep()));
+                .version(toUpdate.getVersion()).locked(toUpdate.getLocked())
+                .requiredMigrationStep(toUpdate.getRequiredMigrationStep()));
 
         final MgmtDistributionSet response = MgmtDistributionSetMapper.toResponse(updated);
         MgmtDistributionSetMapper.addLinks(updated, response);

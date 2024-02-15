@@ -248,7 +248,9 @@ public class MgmtSoftwareModuleResource implements MgmtSoftwareModuleRestApi {
             @RequestBody final MgmtSoftwareModuleRequestBodyPut restSoftwareModule) {
         final SoftwareModule module = softwareModuleManagement
                 .update(entityFactory.softwareModule().update(softwareModuleId)
-                        .description(restSoftwareModule.getDescription()).vendor(restSoftwareModule.getVendor()));
+                        .description(restSoftwareModule.getDescription())
+                        .vendor(restSoftwareModule.getVendor())
+                        .locked(restSoftwareModule.getLocked()));
 
         final MgmtSoftwareModule response = MgmtSoftwareModuleMapper.toResponse(module);
         MgmtSoftwareModuleMapper.addLinks(module, response);

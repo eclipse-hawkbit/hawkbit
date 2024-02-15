@@ -29,12 +29,21 @@ public class MgmtDistributionSetRequestBodyPut {
     @JsonProperty
     @Schema(description = "The name of the entity", example = "dsOne")
     private String name;
+
     @JsonProperty
     @Schema(description = "The description of the entity", example = "Description of the distribution set.")
     private String description;
+
     @JsonProperty
     @Schema(description = "Package version", example = "1.0.0")
     private String version;
+
+    @JsonProperty
+    @Schema(description = "Put it to true only if want to lock the distribution set. Otherwise skip it. " +
+            "Shall not be false!",
+            example = "true")
+    private Boolean locked;
+
     @JsonProperty
     @Schema(description = """
         True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled

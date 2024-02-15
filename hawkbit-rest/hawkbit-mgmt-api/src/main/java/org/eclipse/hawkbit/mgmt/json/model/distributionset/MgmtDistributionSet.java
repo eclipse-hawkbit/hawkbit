@@ -58,6 +58,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
          "type" : "os",
          "typeName" : "OS",
          "vendor" : "vendor Limited Inc, California",
+         "locked" : true,
          "deleted" : false,
          "encrypted" : false,
          "_links" : {
@@ -77,6 +78,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
          "type" : "runtime",
          "typeName" : "runtime",
          "vendor" : "vendor GmbH, Stuttgart, Germany",
+         "locked" : true,
          "deleted" : false,
          "encrypted" : false,
          "_links" : {
@@ -96,6 +98,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
          "type" : "application",
          "typeName" : "Application",
          "vendor" : "vendor Limited, California",
+         "locked" : true,
          "deleted" : false,
          "encrypted" : false,
          "_links" : {
@@ -138,12 +141,6 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     private String version;
 
     @JsonProperty
-    @Schema(description = """
-        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
-        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
-    private boolean requiredMigrationStep;
-
-    @JsonProperty
     @Schema(description = "The type of the distribution set", example = "test_default_ds_type")
     private String type;
 
@@ -159,6 +156,10 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     private Boolean complete;
 
     @JsonProperty
+    @Schema(description = "If the distribution set is locked", example = "true")
+    private boolean locked;
+
+    @JsonProperty
     @Schema(description = "Deleted flag, used for soft deleted entities", example = "false")
     private boolean deleted;
 
@@ -166,6 +167,12 @@ public class MgmtDistributionSet extends MgmtNamedEntity {
     @Schema(description = "True by default and false after the distribution set is invalidated by the user",
             example = "true")
     private boolean valid;
+
+    @JsonProperty
+    @Schema(description = """
+        True if DS is a required migration step for another DS. As a result the DS’s assignment will not be cancelled
+        when another DS is assigned (note: updatable only if DS is not yet assigned to a target)""", example = "false")
+    private boolean requiredMigrationStep;
 
     @JsonProperty
     private List<MgmtSoftwareModule> modules = new ArrayList<>();

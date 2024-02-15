@@ -111,6 +111,7 @@ public final class MgmtDistributionSetMapper {
         response.setComplete(distributionSet.isComplete());
         response.setType(distributionSet.getType().getKey());
         response.setTypeName(distributionSet.getType().getName());
+        response.setLocked(distributionSet.isLocked());
         response.setDeleted(distributionSet.isDeleted());
         response.setValid(distributionSet.isValid());
 

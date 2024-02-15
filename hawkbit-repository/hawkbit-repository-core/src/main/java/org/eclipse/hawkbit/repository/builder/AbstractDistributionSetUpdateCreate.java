@@ -18,15 +18,13 @@ import org.springframework.util.StringUtils;
 /**
  * Create and update builder DTO.
  *
- * @param <T>
- *            update or create builder interface
+ * @param <T> update or create builder interface
  */
 public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNamedEntityBuilder<T> {
+
     @ValidString
     protected String version;
     protected Boolean requiredMigrationStep;
-
-
     protected Collection<Long> modules;
 
     public T modules(final Collection<Long> modules) {
@@ -55,5 +53,4 @@ public abstract class AbstractDistributionSetUpdateCreate<T> extends AbstractNam
     public Optional<String> getVersion() {
         return Optional.ofNullable(version);
     }
-
 }

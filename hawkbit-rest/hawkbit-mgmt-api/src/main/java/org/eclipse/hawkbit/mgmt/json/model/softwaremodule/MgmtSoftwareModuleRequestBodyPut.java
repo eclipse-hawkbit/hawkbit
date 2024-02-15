@@ -24,7 +24,14 @@ public class MgmtSoftwareModuleRequestBodyPut {
     @JsonProperty
     @Schema(example = "SM Description")
     private String description;
+
     @JsonProperty
     @Schema(example = "SM Vendor Name")
     private String vendor;
+
+    @JsonProperty
+    @Schema(description = "Put it to true only if want to lock the software module. Otherwise skip it. " +
+            "Shall not be false!",
+            example = "true")
+    private Boolean locked;
 }
