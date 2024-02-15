@@ -46,6 +46,7 @@ import org.eclipse.hawkbit.mgmt.rest.api.MgmtRepresentationMode;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.Constants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
+import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.FileSizeQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.StorageQuotaExceededException;
 import org.eclipse.hawkbit.repository.model.Artifact;
@@ -74,6 +75,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -140,6 +142,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
                 .andExpect(jsonPath("$.lastModifiedAt", not(equalTo(sm.getLastModifiedAt()))))
                 .andExpect(jsonPath("$.description", equalTo(updateDescription)))
                 .andExpect(jsonPath("$.name", equalTo(knownSWName)))
+                .andExpect(jsonPath("$.locked", equalTo(false)))
                 .andReturn();
 
         final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
@@ -151,7 +154,7 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
     }
 
     @Test
-    @Description("Tests the update of the deletion flag. It is verfied that the software module can't be marked as deleted through update operation.")
+    @Description("Tests the update of the deletion flag. It is verified that the software module can't be marked as deleted through update operation.")
     @WithUser(principal = "smUpdateTester", allSpPermissions = true)
     void updateSoftwareModuleDeletedFlag() throws Exception {
         final String knownSWName = "name1";
@@ -184,6 +187,71 @@ class MgmtSoftwareModuleResourceTest extends AbstractManagementApiIntegrationTes
         assertThat(sm.getLastModifiedAt()).isEqualTo(sm.getLastModifiedAt());
         assertThat(sm.isDeleted()).isFalse();
 
+    }
+
+    @Test
+    @Description("Tests the lock. It is verified that the software module can be marked as locked through update operation.")
+    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    void lockSoftwareModule() throws Exception {
+        final SoftwareModule sm = softwareModuleManagement.create(
+                entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
+        assertThat(sm.isLocked()).as("Created software module should not be locked").isFalse();
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await()
+                .atMost(Duration.ofMillis(100))
+                .pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+
+        final String body = new JSONObject().put("locked", true).toString();
+        final ResultActions resultActions =
+                mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
+        assertThat(updatedSm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(updatedSm.isLocked()).isTrue();
+
+        resultActions
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(updatedSm.getLastModifiedAt())))
+                .andExpect(jsonPath("$.locked", equalTo(true)));
+    }
+
+    @Test
+    @Description("Tests the unlock. It is verified that the software module can't be unmarked as locked through update operation.")
+    @WithUser(principal = "smUpdateTester", allSpPermissions = true)
+    void unlockSoftwareModuleSkippedSilently() throws Exception {
+        final SoftwareModule sm = softwareModuleManagement.create(
+                entityFactory.softwareModule().create().type(osType).name("name1").version("version1"));
+        softwareModuleManagement.lock(sm.getId());
+        assertThat(softwareModuleManagement.get(sm.getId())
+                .orElseThrow(() -> new EntityNotFoundException(SoftwareModule.class, sm.getId())).isLocked())
+                .as("Created software module should not be locked")
+                .isTrue();
+        // ensures that we are not to fast so that last modified is not set correctly
+        Awaitility.await()
+                .atMost(Duration.ofMillis(100))
+                .pollInterval(10L, TimeUnit.MILLISECONDS)
+                .until(() -> sm.getLastModifiedAt() > 0L && sm.getLastModifiedBy() != null);
+
+        final String body = new JSONObject().put("locked", false).toString();
+        final ResultActions resultActions =
+                mvc.perform(put("/rest/v1/softwaremodules/{smId}", sm.getId()).content(body)
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        final SoftwareModule updatedSm = softwareModuleManagement.get(sm.getId()).get();
+        assertThat(updatedSm.getLastModifiedBy()).isEqualTo("smUpdateTester");
+        assertThat(updatedSm.isLocked()).isTrue(); // not unlocked
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", equalTo(sm.getId().intValue())))
+                .andExpect(jsonPath("$.lastModifiedBy", equalTo("smUpdateTester")))
+                .andExpect(jsonPath("$.lastModifiedAt", equalTo(updatedSm.getLastModifiedAt())))
+                .andExpect(jsonPath("$.locked", equalTo(true)));
     }
 
     @Test
