@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -46,6 +45,7 @@ import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -626,7 +626,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Tests that a DS queue is possible where the result is ordered by the target assignment, i.e. assigned first in the list.")
     void findDistributionSetsAllOrderedByLinkTarget() {
-
         final List<DistributionSet> buildDistributionSets = testdataFactory.createDistributionSets("dsOrder", 10);
 
         final List<Target> buildTargetFixtures = testdataFactory.createTargets(5, "tOrder", "someDesc");
@@ -642,12 +641,15 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // set assigned
         assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
+        TestHelper.implicitLock(dsSecond);
         assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
+        TestHelper.implicitLock(dsThree);
         // set installed
         testdataFactory.sendUpdateActionStatusToTargets(Collections.singleton(tSecond), Status.FINISHED,
                 singletonList("some message"));
 
         assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
+        TestHelper.implicitLock(dsFour);
 
         final DistributionSetFilter distributionSetFilter =
                 DistributionSetFilter.builder()
@@ -702,7 +704,6 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
         assertThat(tSecondPinOrderedByName.get(7)).isEqualTo(buildDistributionSets.get(4));
         assertThat(tSecondPinOrderedByName.get(8)).isEqualTo(buildDistributionSets.get(2));
         assertThat(tSecondPinOrderedByName.get(9)).isEqualTo(buildDistributionSets.get(0));
-
     }
 
     @Test

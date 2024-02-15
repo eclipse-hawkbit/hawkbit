@@ -40,7 +40,9 @@ import org.eclipse.hawkbit.repository.event.remote.TargetPollEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.ActionUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTagCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetTypeCreatedEvent;
@@ -53,6 +55,7 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
@@ -451,10 +454,12 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Finds a target by given ID and checks if all data is in the response (including the data defined as lazy).")
     @ExpectEvents({ @Expect(type = DistributionSetCreatedEvent.class, count = 2),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
             @Expect(type = TargetCreatedEvent.class, count = 1), @Expect(type = TargetUpdatedEvent.class, count = 5),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = ActionUpdatedEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
             @Expect(type = TargetAttributesRequestedEvent.class, count = 1),
             @Expect(type = TargetPollEvent.class, count = 1) })
     void findTargetByControllerIDWithDetails() {
@@ -480,10 +485,12 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(testDs1.getId(), "4711");
+        TestHelper.implicitLock(testDs1);
 
         controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(getFirstAssignedActionId(result)).status(Status.FINISHED));
         assignDistributionSet(testDs2.getId(), "4711");
+        TestHelper.implicitLock(testDs2);
 
         target = targetManagement.getByControllerID("4711").orElseThrow(IllegalStateException::new);
         // read data

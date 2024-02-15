@@ -42,6 +42,7 @@ import org.eclipse.hawkbit.repository.event.remote.CancelTargetAssignmentEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TenantConfigurationCreatedEvent;
@@ -54,6 +55,7 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
+import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -279,7 +281,9 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = CancelTargetAssignmentEvent.class, count = 1),
             @Expect(type = ActionUpdatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6) })
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6) }) // implicit lock })
     void multiAssigmentHistoryOverMultiplePagesResultsInTwoActiveAction() {
 
         final DistributionSet cancelDs = testdataFactory.createDistributionSet("Canceled DS", "1.0",
@@ -452,6 +456,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private JpaAction assignSet(final Target target, final DistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
+        TestHelper.implicitLock(ds);
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
                 .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).as("wrong assigned ds")
@@ -474,6 +479,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1) })
     void assignedDistributionSet() {
 
@@ -516,6 +523,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12), // implicit lock
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
     void multiOfflineAssignment() {
         final List<String> targetIds = testdataFactory.createTargets(1).stream().map(Target::getControllerId)
@@ -547,6 +556,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = ActionUpdatedEvent.class, count = 10),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 2),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1),
             @Expect(type = TenantConfigurationUpdatedEvent.class, count = 1) })
@@ -585,6 +596,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 20), @Expect(type = ActionCreatedEvent.class, count = 20),
             @Expect(type = DistributionSetCreatedEvent.class, count = 2),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 6),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 6), // implicit lock
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = MultiActionCancelEvent.class, count = 0),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
@@ -628,6 +641,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12), // implicit lock
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 0),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
@@ -658,6 +673,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = TargetUpdatedEvent.class, count = 4), @Expect(type = ActionCreatedEvent.class, count = 4),
             @Expect(type = DistributionSetCreatedEvent.class, count = 4),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 12),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 4), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 12), // implicit lock
             @Expect(type = MultiActionAssignEvent.class, count = 1),
             @Expect(type = MultiActionCancelEvent.class, count = 4),
             @Expect(type = ActionUpdatedEvent.class, count = 4),
@@ -900,6 +917,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = MultiActionAssignEvent.class, count = 1),
@@ -985,6 +1004,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @ExpectEvents({ @Expect(type = TargetCreatedEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = ActionCreatedEvent.class, count = 2), @Expect(type = TargetUpdatedEvent.class, count = 2),
             @Expect(type = MultiActionAssignEvent.class, count = 2),
             @Expect(type = TenantConfigurationCreatedEvent.class, count = 1) })
@@ -1022,9 +1043,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Simple deployment or distribution set to target assignment test.")
     @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
+            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = TargetCreatedEvent.class, count = 30), @Expect(type = ActionCreatedEvent.class, count = 20),
-            @Expect(type = TargetUpdatedEvent.class, count = 20),
-            @Expect(type = SoftwareModuleCreatedEvent.class, count = 3) })
+            @Expect(type = TargetUpdatedEvent.class, count = 20) })
     void assignDistributionSet2Targets() {
 
         final String myCtrlIDPref = "myCtrlID";
@@ -1035,8 +1058,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 "first description");
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-
         assignDistributionSet(ds, savedDeployedTargets);
+        TestHelper.implicitLock(ds);
 
         // verify that one Action for each assignDistributionSet
         final Page<JpaAction> actions = actionRepository.findAll(PAGE);
@@ -1079,12 +1102,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
     @Description("Test that it is not possible to assign a distribution set that is not complete.")
     @ExpectEvents({ @Expect(type = TargetAssignDistributionSetEvent.class, count = 1),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
-            @Expect(type = TargetCreatedEvent.class, count = 10), @Expect(type = ActionCreatedEvent.class, count = 10),
-            @Expect(type = TargetUpdatedEvent.class, count = 10),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 2),
-            @Expect(type = DistributionSetUpdatedEvent.class, count = 1)
-
-    })
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 2), // implicit lock
+            @Expect(type = TargetCreatedEvent.class, count = 10), @Expect(type = ActionCreatedEvent.class, count = 10),
+            @Expect(type = TargetUpdatedEvent.class, count = 10) })
     void failDistributionSetAssigmentThatIsNotComplete() throws InterruptedException {
         final List<Target> targets = testdataFactory.createTargets(10);
 
@@ -1115,6 +1137,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = CancelTargetAssignmentEvent.class, count = 2),
             @Expect(type = DistributionSetCreatedEvent.class, count = 3),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 9),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 3), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 9), // implicit lock
             @Expect(type = TargetAssignDistributionSetEvent.class, count = 3) })
     void multipleDeployments() {
         final String undeployedTargetPrefix = "undep-T";
@@ -1219,8 +1243,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // verify, that dsA is deployed correctly
         for (final Target t_ : updatedTsDsA) {
             final Target t = targetManagement.getByControllerID(t_.getControllerId()).get();
-            assertThat(deploymentManagement.getAssignedDistributionSet(t.getControllerId())).as("assigned ds is wrong")
-                    .contains(dsA);
+            assertThat(deploymentManagement.getAssignedDistributionSet(t.getControllerId()))
+                    .as("assigned ds is wrong").contains(dsA);
             assertThat(deploymentManagement.getInstalledDistributionSet(t.getControllerId()))
                     .as("installed ds is wrong").contains(dsA);
             assertThat(targetManagement.getByControllerID(t.getControllerId()).get().getUpdateStatus())
@@ -1361,11 +1385,12 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // doing the assignment
         targs = assignDistributionSet(dsA, targs).getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
+        TestHelper.implicitLock(dsA);
         Target targ = targetManagement.getByControllerID(targs.iterator().next().getControllerId()).get();
 
         // checking the revisions of the created entities
         // verifying that the revision of the object and the revision within the
-        // DB has not changed
+        // DB has incremented by implicit lock
         assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
 
@@ -1402,6 +1427,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
+        TestHelper.implicitLock(dsB);
 
         targ = targs.iterator().next();
 
@@ -1417,7 +1443,6 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
                 "Installed ds is wrong");
         assertEquals(dsB, deploymentManagement.findActiveActionsByTarget(PAGE, targ.getControllerId()).getContent()
                 .get(0).getDistributionSet(), "Active ds is wrong");
-
     }
 
     @Test
@@ -1433,7 +1458,8 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         assignDistributionSet(dsA, Collections.singletonList(targ));
 
-        assertThat(dsA.getOptLockRevision()).as("lock revision is wrong")
+        // implicit lock - incremented the version
+        assertThat(dsA.getOptLockRevision() + 1).as("lock revision is wrong")
                 .isEqualTo(distributionSetManagement.getWithDetails(dsA.getId()).get().getOptLockRevision());
     }
 
@@ -1568,6 +1594,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
+        TestHelper.implicitLock(ds);
 
         final List<Target> content = targetManagement.findAll(Pageable.unpaged()).getContent();
 
@@ -1593,6 +1620,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = Arrays.asList(deployment1, deployment2);
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
+        TestHelper.implicitLock(ds);
 
         final Optional<DistributionSet> assignedDsTarget1 = targetManagement
                 .getByControllerID(target1.getControllerId()).map(JpaTarget.class::cast)
@@ -1680,11 +1708,11 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final DistributionSet ds : dsList) {
             deployedTargets = assignDistributionSet(ds, deployedTargets).getAssignedEntity().stream()
                     .map(Action::getTarget).collect(Collectors.toList());
+            TestHelper.implicitLock(ds);
         }
 
         return new DeploymentResult(deployedTargets, nakedTargets, dsList, deployedTargetPrefix, undeployedTargetPrefix,
                 distributionSetPrefix);
-
     }
 
     private Slice<Action> findActionsByDistributionSet(final Pageable pageable, final long distributionSetId) {

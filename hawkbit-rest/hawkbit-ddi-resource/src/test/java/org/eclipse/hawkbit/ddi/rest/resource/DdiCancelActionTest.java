@@ -28,19 +28,15 @@ import java.util.List;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.ddi.rest.api.DdiRestConstants;
-import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.Status;
-import org.eclipse.hawkbit.repository.model.ActionStatus;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.test.util.TestdataFactory;
 import org.eclipse.hawkbit.rest.util.MockMvcResultPrinter;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.MediaType;
 import org.springframework.integration.json.JsonPathUtils;
@@ -95,6 +91,7 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), savedTarget.getControllerId()));
+        implicitLock(ds);
 
         final Action cancelAction = deploymentManagement.cancelAction(actionId);
 
@@ -343,10 +340,13 @@ class DdiCancelActionTest extends AbstractDDiApiIntegrationTest {
 
         final Long actionId = getFirstAssignedActionId(
                 assignDistributionSet(ds.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
+        implicitLock(ds);
         final Long actionId2 = getFirstAssignedActionId(
                 assignDistributionSet(ds2.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
+        implicitLock(ds2);
         final Long actionId3 = getFirstAssignedActionId(
                 assignDistributionSet(ds3.getId(), TestdataFactory.DEFAULT_CONTROLLER_ID));
+        implicitLock(ds3);
 
         assertThat(countActionStatusAll()).isEqualTo(3);
 

@@ -15,11 +15,13 @@ import java.util.List;
 
 import org.eclipse.hawkbit.repository.event.remote.RolloutDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutGroupUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.RolloutUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
+import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.TargetCreatedEvent;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -62,6 +64,8 @@ class RolloutGroupManagementTest extends AbstractJpaIntegrationTest {
             @Expect(type = RolloutGroupUpdatedEvent.class, count = 5),
             @Expect(type = DistributionSetCreatedEvent.class, count = 1),
             @Expect(type = SoftwareModuleCreatedEvent.class, count = 3),
+            @Expect(type = DistributionSetUpdatedEvent.class, count = 1), // implicit lock
+            @Expect(type = SoftwareModuleUpdatedEvent.class, count = 3), // implicit lock
             @Expect(type = RolloutUpdatedEvent.class, count = 1),
             @Expect(type = TargetCreatedEvent.class, count = 125),
             @Expect(type = RolloutCreatedEvent.class, count = 1) })

@@ -191,15 +191,13 @@ class DistributionSetInvalidationManagementTest extends AbstractJpaIntegrationTe
     }
 
     @Test
-    @Description("Verify that invalidating an invalidated distribution set throws an exception")
-    void verifyInvalidateInvalidatedDistributionSetThrowsException() {
+    @Description("Verify that invalidating an invalidated distribution set don't throws an exception" +
+            " -> should be able to cancel actions again (if previous time there was a problem")
+    void verifyInvalidateInvalidatedDistributionSetDontThrowsException() {
         final DistributionSet distributionSet = testdataFactory.createAndInvalidateDistributionSet();
-
-        assertThatExceptionOfType(InvalidDistributionSetException.class)
-                .as("Invalid distributionSet should throw an exception")
-                .isThrownBy(() -> distributionSetInvalidationManagement.invalidateDistributionSet(
+        distributionSetInvalidationManagement.invalidateDistributionSet(
                         new DistributionSetInvalidation(Collections.singletonList(distributionSet.getId()),
-                                CancelationType.SOFT, true)));
+                                CancelationType.SOFT, true));
     }
 
     @Test

@@ -49,6 +49,7 @@ import org.eclipse.hawkbit.repository.jpa.JpaManagementHelper;
 import org.eclipse.hawkbit.repository.jpa.builder.JpaRolloutGroupCreate;
 import org.eclipse.hawkbit.repository.jpa.configuration.Constants;
 import org.eclipse.hawkbit.repository.jpa.executor.AfterTransactionCommitExecutor;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout_;
@@ -205,22 +206,29 @@ public class JpaRolloutManagement implements RolloutManagement {
 
     private JpaRollout createRollout(final JpaRollout rollout) {
         WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(rollout);
-        long totalTargets;
-        String errMsg;
+        final JpaDistributionSet distributionSet = (JpaDistributionSet) rollout.getDistributionSet();
+        final long totalTargets;
+        final String errMsg;
         if (RolloutHelper.isRolloutRetried(rollout.getTargetFilterQuery())) {
             totalTargets = targetManagement.countByFailedInRollout(
                 RolloutHelper.getIdFromRetriedTargetFilter(rollout.getTargetFilterQuery()),
-                rollout.getDistributionSet().getType().getId());
+                    distributionSet.getType().getId());
             errMsg = "No failed targets in Rollout";
          } else {
             totalTargets = targetManagement.countByRsqlAndCompatible(rollout.getTargetFilterQuery(),
-                rollout.getDistributionSet().getType().getId());
+                    distributionSet.getType().getId());
             errMsg = "Rollout does not match any existing targets";
         }
         if (totalTargets == 0) {
             throw new ValidationException(errMsg);
         }
         rollout.setTotalTargets(totalTargets);
+
+        // implicit lock
+        if (!distributionSet.isLocked()) {
+            distributionSetManagement.lock(distributionSet.getId());
+        }
+
         if (rollout.getWeight().isEmpty()) {
             rollout.setWeight(repositoryProperties.getActionWeightIfAbsent());
         }
@@ -526,7 +534,6 @@ public class JpaRolloutManagement implements RolloutManagement {
         rollout.setStartAt(update.getStartAt().orElse(null));
         update.getSet().ifPresent(setId -> {
             final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
-
             rollout.setDistributionSet(set);
         });
         if (rolloutApprovalStrategy.isApprovalNeeded(rollout)) {
