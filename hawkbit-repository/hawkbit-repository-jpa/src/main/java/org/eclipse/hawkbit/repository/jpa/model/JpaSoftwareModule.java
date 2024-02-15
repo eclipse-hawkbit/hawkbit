@@ -39,6 +39,7 @@ import lombok.ToString;
 import org.eclipse.hawkbit.repository.event.remote.SoftwareModuleDeletedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleUpdatedEvent;
+import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
 import org.eclipse.hawkbit.repository.model.SoftwareModule;
@@ -140,6 +141,10 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
     }
 
     public void addArtifact(final Artifact artifact) {
+        if (isLocked()) {
+            throw new LockedException(JpaSoftwareModule.class, getId(), "ADD_ARTIFACT");
+        }
+
         if (artifacts == null) {
             artifacts = new ArrayList<>(4);
             artifacts.add((JpaArtifact) artifact);
@@ -155,6 +160,10 @@ public class JpaSoftwareModule extends AbstractJpaNamedVersionedEntity implement
      * @param artifact is removed from the assigned {@link Artifact}s.
      */
     public void removeArtifact(final Artifact artifact) {
+        if (isLocked()) {
+            throw new LockedException(JpaSoftwareModule.class, getId(), "REMOVE_ARTIFACT");
+        }
+
         if (artifacts != null) {
             artifacts.remove(artifact);
         }
