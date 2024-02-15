@@ -28,6 +28,7 @@ import org.eclipse.hawkbit.repository.builder.SoftwareModuleMetadataCreate;
 import org.eclipse.hawkbit.repository.event.remote.entity.SoftwareModuleCreatedEvent;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
+import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -824,7 +825,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
     @Test
     @Description("Locks a SM.")
     void lockSoftwareModule() {
-        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("ds-1");
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
         assertThat(
                 softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(true))
                 .isFalse();
@@ -832,6 +833,43 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         assertThat(
                 softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
                 .isTrue();
+    }
+
+    @Test
+    @Description("Artifacts of a locked SM can't be modified. Expected behaviour is to throw an exception and to do not modify them.")
+    void lockSoftwareModuleApplied() {
+        final SoftwareModule softwareModule = testdataFactory.createSoftwareModule("sm-1");
+        artifactManagement.create(
+                new ArtifactUpload(new ByteArrayInputStream(new byte[] {1}), softwareModule.getId(),
+                        "artifact1", false, 1));
+        final int artifactCount = softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size();
+        assertThat(artifactCount).isNotEqualTo(0);
+        softwareModuleManagement.lock(softwareModule.getId());
+        assertThat(
+                softwareModuleManagement.get(softwareModule.getId()).map(SoftwareModule::isLocked).orElse(false))
+                .isTrue();
+
+
+        // try add
+        assertThatExceptionOfType(LockedException.class)
+                .as("Attempt to modify a locked SM artifacts should throw an exception")
+                .isThrownBy(() -> artifactManagement.create(
+                        new ArtifactUpload(new ByteArrayInputStream(new byte[] {2}), softwareModule.getId(),
+                                "artifact2", false, 1)));
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size())
+                .as("Artifacts shall not be added to a locked SM.")
+                .isEqualTo(artifactCount);
+
+        // try remove
+        final long artifactId = softwareModuleManagement.get(softwareModule.getId()).get()
+                .getArtifacts().stream().findFirst().get().getId();
+        assertThatExceptionOfType(LockedException.class)
+                .as("Attempt to modify a locked DS software modules should throw an exception")
+                .isThrownBy(() -> artifactManagement.delete(artifactId));
+        assertThat(softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size())
+                .as("Software module shall not be removed from a locked DS.")
+                .isEqualTo(artifactCount);
+        assertThat(artifactManagement.get(artifactId)).isPresent();
     }
 
     @Test

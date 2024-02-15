@@ -44,6 +44,7 @@ import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetCreated
 import org.eclipse.hawkbit.repository.event.remote.entity.DistributionSetUpdatedEvent;
 import org.eclipse.hawkbit.repository.exception.DistributionSetTypeUndefinedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -185,6 +186,10 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     public boolean addModule(final SoftwareModule softwareModule) {
+        if (isLocked()) {
+            throw new LockedException(JpaDistributionSet.class, getId(), "ADD_SOFTWARE_MODULE");
+        }
+
         if (modules == null) {
             modules = new HashSet<>();
         }
@@ -215,6 +220,10 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     public void removeModule(final SoftwareModule softwareModule) {
+        if (isLocked()) {
+            throw new LockedException(JpaDistributionSet.class, getId(), "REMOVE_SOFTWARE_MODULE");
+        }
+
         if (modules != null && modules.removeIf(m -> m.getId().equals(softwareModule.getId()))) {
             complete = type.checkComplete(this);
         }
@@ -253,7 +262,7 @@ public class JpaDistributionSet extends AbstractJpaNamedVersionedEntity implemen
     }
 
     public void lock() {
-        if (!complete) {
+        if (!isComplete()) {
             throw new IncompleteDistributionSetException("Could not be locked while incomplete!");
         }
         locked = true;

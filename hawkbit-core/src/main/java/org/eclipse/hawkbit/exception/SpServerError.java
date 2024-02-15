@@ -205,6 +205,10 @@ public enum SpServerError {
      */
     SP_DS_INCOMPLETE("hawkbit.server.error.distributionset.incomplete",
             "Distribution set is assigned/locked to a target that is incomplete (i.e. mandatory modules are missing)"),
+    /**
+     *
+     */
+    SP_LOCKED("hawkbit.server.error.locked", "Entry is locked. Could not be modified"),
 
     /**
     *

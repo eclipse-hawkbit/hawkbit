@@ -43,6 +43,7 @@ import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
+import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
@@ -1010,7 +1011,39 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
     }
 
     @Test
-    @Description("Locks an incomplete DS. Expected behaviour is to throw exception and to do not lock it.")
+    @Description("Software modules of a locked DS can't be modified. Expected behaviour is to throw an exception and to do not modify them.")
+    void lockDistributionSetApplied() {
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet("ds-1");
+        final int softwareModuleCount = distributionSet.getModules().size();
+        assertThat(softwareModuleCount).isNotEqualTo(0);
+        distributionSetManagement.lock(distributionSet.getId());
+        assertThat(
+                distributionSetManagement.get(distributionSet.getId()).map(DistributionSet::isLocked)
+                        .orElse(false))
+                .isTrue();
+
+
+        // try add
+        assertThatExceptionOfType(LockedException.class)
+                .as("Attempt to modify a locked DS software modules should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.assignSoftwareModules(
+                        distributionSet.getId(), List.of(testdataFactory.createSoftwareModule("sm-1").getId())));
+        assertThat(distributionSetManagement.get(distributionSet.getId()).get().getModules().size())
+                .as("Software module shall not be added to a locked DS.")
+                .isEqualTo(softwareModuleCount);
+
+        // try remove
+        assertThatExceptionOfType(LockedException.class)
+                .as("Attempt to modify a locked DS software modules should throw an exception")
+                .isThrownBy(() -> distributionSetManagement.unassignSoftwareModule(
+                        distributionSet.getId(), distributionSet.getModules().stream().findFirst().get().getId()));
+        assertThat(distributionSetManagement.get(distributionSet.getId()).get().getModules().size())
+                .as("Software module shall not be removed from a locked DS.")
+                .isEqualTo(softwareModuleCount);
+    }
+
+    @Test
+    @Description("Locks an incomplete DS. Expected behaviour is to throw an exception and to do not lock it.")
     void lockIncompleteDistributionSetFails() {
         final DistributionSet incompleteDistributionSet = testdataFactory.createIncompleteDistributionSet();
         assertThatExceptionOfType(IncompleteDistributionSetException.class)
