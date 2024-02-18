@@ -276,11 +276,14 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
         } else {
             WeightValidationHelper.usingContext(systemSecurityContext, tenantConfigurationManagement).validate(update);
             assertMaxTargetsQuota(targetFilterQuery.getQuery(), targetFilterQuery.getName(), update.getDsId());
-            final JpaDistributionSet ds = (JpaDistributionSet) distributionSetManagement
+            final JpaDistributionSet distributionSet = (JpaDistributionSet) distributionSetManagement
                     .getValidAndComplete(update.getDsId());
-            verifyDistributionSetAndThrowExceptionIfDeleted(ds);
+            // implicit lock
+            if (!distributionSet.isLocked()) {
+                distributionSetManagement.lock(distributionSet.getId());
+            }
 
-            targetFilterQuery.setAutoAssignDistributionSet(ds);
+            targetFilterQuery.setAutoAssignDistributionSet(distributionSet);
             contextAware.getCurrentContext().ifPresent(targetFilterQuery::setAccessControlContext);
             targetFilterQuery.setAutoAssignInitiatedBy(contextAware.getCurrentUsername());
             targetFilterQuery.setAutoAssignActionType(sanitizeAutoAssignActionType(update.getActionType()));
@@ -297,12 +300,6 @@ public class JpaTargetFilterQueryManagement implements TargetFilterQueryManageme
     private boolean isConfirmationFlowEnabled() {
         return TenantConfigHelper.usingContext(systemSecurityContext, tenantConfigurationManagement)
                 .isConfirmationFlowEnabled();
-    }
-
-    private static void verifyDistributionSetAndThrowExceptionIfDeleted(final DistributionSet distributionSet) {
-        if (distributionSet.isDeleted()) {
-            throw new EntityNotFoundException(DistributionSet.class, distributionSet.getId());
-        }
     }
 
     private static ActionType sanitizeAutoAssignActionType(final ActionType actionType) {

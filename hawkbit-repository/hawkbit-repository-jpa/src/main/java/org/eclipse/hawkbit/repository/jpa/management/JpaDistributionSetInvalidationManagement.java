@@ -20,6 +20,7 @@ import org.eclipse.hawkbit.repository.DistributionSetManagement;
 import org.eclipse.hawkbit.repository.RepositoryProperties;
 import org.eclipse.hawkbit.repository.RolloutManagement;
 import org.eclipse.hawkbit.repository.TargetFilterQueryManagement;
+import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.StopRolloutException;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.utils.DeploymentHelper;
@@ -94,7 +95,6 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
             // no lock is needed as no rollout will be stopped
             invalidateDistributionSetsInTransaction(distributionSetInvalidation, tenant);
         }
-
     }
 
     private void invalidateDistributionSetsInTransaction(final DistributionSetInvalidation distributionSetInvalidation,
@@ -108,21 +108,25 @@ public class JpaDistributionSetInvalidationManagement implements DistributionSet
 
     private void invalidateDistributionSet(final long setId, final CancelationType cancelationType,
             final boolean cancelRollouts) {
-        final DistributionSet set = distributionSetManagement.getValidAndComplete(setId);
-        distributionSetManagement.invalidate(set);
+        final DistributionSet distributionSet = distributionSetManagement.getOrElseThrowException(setId);
+        if (!distributionSet.isComplete()) {
+            throw new IncompleteDistributionSetException("Distribution set of type "
+                    + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+        distributionSetManagement.invalidate(distributionSet);
         log.debug("Distribution set {} marked as invalid.", setId);
 
         // rollout cancellation should only be permitted with UPDATE_ROLLOUT permission
         if (shouldRolloutsBeCanceled(cancelationType, cancelRollouts)) {
             log.debug("Cancel rollouts after ds invalidation. ID: {}", setId);
-            rolloutManagement.cancelRolloutsForDistributionSet(set);
+            rolloutManagement.cancelRolloutsForDistributionSet(distributionSet);
         }
 
         // Do run as system to ensure all actions (even invisible) are canceled due to invalidation.
         systemSecurityContext.runAsSystem(() -> {
             if (cancelationType != CancelationType.NONE) {
                 log.debug("Cancel actions after ds invalidation. ID: {}", setId);
-                deploymentManagement.cancelActionsForDistributionSet(cancelationType, set);
+                deploymentManagement.cancelActionsForDistributionSet(cancelationType, distributionSet);
             }
 
             log.debug("Cancel auto assignments after ds invalidation. ID: {}", setId);

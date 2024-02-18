@@ -30,7 +30,7 @@ import org.eclipse.hawkbit.exception.SpServerError;
 import org.eclipse.hawkbit.mgmt.json.model.distributionset.MgmtActionType;
 import org.eclipse.hawkbit.mgmt.rest.api.MgmtRestConstants;
 import org.eclipse.hawkbit.repository.exception.AssignmentQuotaExceededException;
-import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeException;
 import org.eclipse.hawkbit.repository.model.Action;
@@ -427,20 +427,21 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
     @Description("Ensures that the update of a target filter query results in a HTTP Forbidden error (403) "
             + "if the updated query addresses too many targets.")
     public void updateTargetFilterQueryWithQueryThatExceedsQuota() throws Exception {
-
         // create targets
         final int maxTargets = quotaManagement.getMaxTargetsPerAutoAssignment();
         testdataFactory.createTargets(maxTargets + 1, "target");
 
+        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target1");
+
         // create the filter query and the distribution set
         final DistributionSet set = testdataFactory.createDistributionSet();
-        final TargetFilterQuery filterQuery = createSingleTargetFilterQuery("1", "controllerId==target1");
 
         // assign the auto-assign distribution set, this should work
         mvc.perform(
                 post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + filterQuery.getId() + "/autoAssignDS")
                         .content("{\"id\":" + set.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isOk());
+        implicitLock(set);
 
         final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(filterQuery.getId()).get();
 
@@ -469,23 +470,18 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
             enableConfirmationFlow();
         }
 
-        final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
 
+        // set will be locked after first assignment
+        final DistributionSet set = testdataFactory.createDistributionSet();
+
         verifyAutoAssignmentWithoutActionType(tfq, set, confirmationRequired);
-
         verifyAutoAssignmentWithForcedActionType(tfq, set, confirmationRequired);
-
         verifyAutoAssignmentWithSoftActionType(tfq, set, confirmationRequired);
-
         verifyAutoAssignmentWithTimeForcedActionType(tfq, set);
-
         verifyAutoAssignmentWithDownloadOnlyActionType(tfq, set, confirmationRequired);
-
         verifyAutoAssignmentWithUnknownActionType(tfq, set);
-
         verifyAutoAssignmentWithIncompleteDs(tfq);
-
         verifyAutoAssignmentWithSoftDeletedDs(tfq);
     }
 
@@ -500,8 +496,9 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
             enableConfirmationFlow();
         }
 
-        final DistributionSet set = testdataFactory.createDistributionSet();
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
+        // set will be implicitly locked
+        final DistributionSet set = testdataFactory.createDistributionSet();
 
         // do not provide something about the confirmation
         verifyAutoAssignmentByActionType(tfq, set, null, null);
@@ -551,6 +548,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content(jsonObject.toString()).contentType(MediaType.APPLICATION_JSON)).andDo(print())
                 .andExpect(status().isOk());
+        implicitLock(set);
 
         final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
         final MgmtActionType expectedActionType = actionType != null ? actionType : MgmtActionType.FORCED;
@@ -623,8 +621,8 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         mvc.perform(post(MgmtRestConstants.TARGET_FILTER_V1_REQUEST_MAPPING + "/" + tfq.getId() + "/autoAssignDS")
                 .content("{\"id\":" + softDeletedDs.getId() + "}").contentType(MediaType.APPLICATION_JSON))
                 .andDo(print()).andExpect(status().isNotFound())
-                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(EntityNotFoundException.class.getName())))
-                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_REPO_ENTITY_NOT_EXISTS.getKey())));
+                .andExpect(jsonPath(JSON_PATH_EXCEPTION_CLASS, equalTo(DeletedException.class.getName())))
+                .andExpect(jsonPath(JSON_PATH_ERROR_CODE, equalTo(SpServerError.SP_DELETED.getKey())));
     }
 
     @Test
@@ -677,7 +675,6 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
     @Test
     @Description("Ensures that the deletion of auto-assignment distribution set works as intended, deleting the auto-assignment action type as well")
     public void deleteAutoAssignDistributionSetOfTargetFilterQuery() throws Exception {
-
         final String knownQuery = "name==test06";
         final String knownName = "filter06";
         final String dsName = "testDS";
@@ -686,6 +683,7 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
         targetFilterQueryManagement
                 .updateAutoAssignDS(entityFactory.targetFilterQuery().updateAutoAssign(tfq.getId()).ds(set.getId()));
+        implicitLock(set);
 
         final TargetFilterQuery updatedFilterQuery = targetFilterQueryManagement.get(tfq.getId()).get();
 

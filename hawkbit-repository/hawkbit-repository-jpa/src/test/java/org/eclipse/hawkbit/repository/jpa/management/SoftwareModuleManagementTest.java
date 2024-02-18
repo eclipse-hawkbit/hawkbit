@@ -31,6 +31,7 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
+import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -196,6 +197,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
+        TestHelper.implicitLock(os);
+        TestHelper.implicitLock(jvm);
 
         // standard searches
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, "poky", osType.getId()).getContent()).hasSize(1);
@@ -203,7 +206,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
                 .isEqualTo(os);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle", runtimeType.getId()).getContent())
                 .hasSize(1);
-        assertThat(softwareModuleManagement.findByTextAndType(PAGE, "oracle", runtimeType.getId()).getContent().get(0))
+        assertThat(
+                softwareModuleManagement.findByTextAndType(PAGE, "oracle", runtimeType.getId()).getContent().get(0))
                 .isEqualTo(jvm);
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, ":1.0.1", appType.getId()).getContent()).hasSize(1)
                 .first().isEqualTo(ah);
@@ -218,6 +222,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
+        TestHelper.implicitLock(ds);
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
@@ -864,12 +869,14 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
         final long artifactId = softwareModuleManagement.get(softwareModule.getId()).get()
                 .getArtifacts().stream().findFirst().get().getId();
         assertThatExceptionOfType(LockedException.class)
-                .as("Attempt to modify a locked DS software modules should throw an exception")
+                .as("Attempt to modify a locked SM artifacts should throw an exception")
                 .isThrownBy(() -> artifactManagement.delete(artifactId));
         assertThat(softwareModuleManagement.get(softwareModule.getId()).get().getArtifacts().size())
-                .as("Software module shall not be removed from a locked DS.")
+                .as("Artifact shall not be removed from a locked SM.")
                 .isEqualTo(artifactCount);
-        assertThat(artifactManagement.get(artifactId)).isPresent();
+        assertThat(artifactManagement.get(artifactId))
+                .as("Artifact shall not be removed if belongs to a locked SM.")
+                .isPresent();
     }
 
     @Test

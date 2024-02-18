@@ -92,7 +92,6 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.test.web.servlet.MvcResult;
 
 import com.jayway.jsonpath.JsonPath;
@@ -1391,10 +1390,9 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
-    @Description("Verfies that a DS to target assignment is reflected by the repository and that repeating "
+    @Description("Verifies that a DS to target assignment is reflected by the repository and that repeating "
             + "the assignment does not change the target.")
     void assignDistributionSetToTarget() throws Exception {
-
         Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -1403,6 +1401,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
                 .andExpect(jsonPath("total", equalTo(1)));
+        implicitLock(set);
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         target = targetManagement.getByControllerID(target.getControllerId()).get();
@@ -1425,7 +1424,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Description("Ensures that confirmation option is considered in assignment request.")
     void assignDistributionSetToTargetWithConfirmationOptions(final boolean confirmationFlowActive,
             final Boolean confirmationRequired) throws Exception {
-
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -1444,6 +1442,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
                 .andExpect(jsonPath("total", equalTo(1)));
+        implicitLock(set);
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
 
@@ -1468,7 +1467,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Verfies that a DOWNLOAD_ONLY DS to target assignment is properly handled")
     void assignDownloadOnlyDistributionSetToTarget() throws Exception {
-
         final Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -1477,6 +1475,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
                 .andExpect(jsonPath("total", equalTo(1)));
+        implicitLock(set);
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         final Slice<Action> actions = deploymentManagement.findActionsByTarget("targetExist", PageRequest.of(0, 100));
@@ -1488,7 +1487,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Description("Verfies that an offline DS to target assignment is reflected by the repository and that repeating "
             + "the assignment does not change the target.")
     void offlineAssignDistributionSetToTarget() throws Exception {
-
         Target target = testdataFactory.createTarget();
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -1498,6 +1496,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
                 .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
                 .andExpect(jsonPath("assigned", equalTo(1))).andExpect(jsonPath("alreadyAssigned", equalTo(0)))
                 .andExpect(jsonPath("total", equalTo(1)));
+        implicitLock(set);
 
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId()).get()).isEqualTo(set);
         assertThat(deploymentManagement.getInstalledDistributionSet(target.getControllerId()).get()).isEqualTo(set);
@@ -1518,7 +1517,6 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
 
     @Test
     void assignDistributionSetToTargetWithActionTimeForcedAndTime() throws Exception {
-
         final Target target = testdataFactory.createTarget("fsdfsd");
         final DistributionSet set = testdataFactory.createDistributionSet("one");
 
@@ -1529,6 +1527,7 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
         mvc.perform(post(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/fsdfsd/assignedDS").content(body)
                 .contentType(MediaType.APPLICATION_JSON)).andDo(MockMvcResultPrinter.print())
                 .andExpect(status().isOk());
+        implicitLock(set);
 
         final List<Action> findActiveActionsByTarget = deploymentManagement
                 .findActiveActionsByTarget(PAGE, target.getControllerId()).getContent();

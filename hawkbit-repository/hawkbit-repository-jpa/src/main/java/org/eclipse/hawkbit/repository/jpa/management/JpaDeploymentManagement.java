@@ -329,10 +329,11 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
     }
 
     private DistributionSetAssignmentResult assignDistributionSetToTargetsWithRetry(final String initiatedBy,
-            final Long dsID, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
+            final Long dsId, final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
-        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback = retryContext -> assignDistributionSetToTargets(
-                initiatedBy, dsID, targetsWithActionType, actionMessage, assignmentStrategy);
+        final RetryCallback<DistributionSetAssignmentResult, ConcurrencyFailureException> retryCallback =
+                retryContext -> assignDistributionSetToTargets(
+                        initiatedBy, dsId, targetsWithActionType, actionMessage, assignmentStrategy);
         return retryTemplate.execute(retryCallback);
     }
 
@@ -351,7 +352,7 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *
      * @param initiatedBy
      *            the username of the user who initiated the assignment
-     * @param dsID
+     * @param dsId
      *            the ID of the distribution set to assign
      * @param targetsWithActionType
      *            a list of all targets and their action type
@@ -365,12 +366,20 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
      *             if mandatory {@link SoftwareModuleType} are not assigned as
      *             define by the {@link DistributionSetType}.
      */
-    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsID,
+    private DistributionSetAssignmentResult assignDistributionSetToTargets(final String initiatedBy, final Long dsId,
             final Collection<TargetWithActionType> targetsWithActionType, final String actionMessage,
             final AbstractDsAssignmentStrategy assignmentStrategy) {
+        final JpaDistributionSet distributionSet =
+                (JpaDistributionSet) distributionSetManagement.getValidAndComplete(dsId);
+        // implicit lock
+        if (!distributionSet.isLocked()) {
+            // without new transaction DS changed event is not thrown
+            DeploymentHelper.runInNewTransaction(txManager, "Implicit lock", status -> {
+                distributionSetManagement.lock(distributionSet.getId());
+                return null;
+            });
+        }
 
-        final JpaDistributionSet distributionSetEntity = (JpaDistributionSet) distributionSetManagement
-                .getValidAndComplete(dsID);
         final List<String> providedTargetIds = targetsWithActionType.stream().map(TargetWithActionType::getControllerId)
                 .distinct().toList();
 
@@ -381,19 +390,19 @@ public class JpaDeploymentManagement extends JpaActionManagement implements Depl
                 .flatMap(List::stream).map(JpaTarget::getControllerId).toList();
 
         final List<JpaTarget> targetEntities = assignmentStrategy.findTargetsForAssignment(existingTargetIds,
-                distributionSetEntity.getId());
+                distributionSet.getId());
 
         if (targetEntities.isEmpty()) {
-            return allTargetsAlreadyAssignedResult(distributionSetEntity, existingTargetIds.size());
+            return allTargetsAlreadyAssignedResult(distributionSet, existingTargetIds.size());
         }
 
         final List<TargetWithActionType> existingTargetsWithActionType = targetsWithActionType.stream()
                 .filter(target -> existingTargetIds.contains(target.getControllerId())).toList();
 
         final List<JpaAction> assignedActions = doAssignDistributionSetToTargets(initiatedBy,
-                existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSetEntity,
+                existingTargetsWithActionType, actionMessage, assignmentStrategy, distributionSet,
                 targetEntities);
-        return buildAssignmentResult(distributionSetEntity, assignedActions, existingTargetsWithActionType.size());
+        return buildAssignmentResult(distributionSet, assignedActions, existingTargetsWithActionType.size());
     }
 
     private DistributionSetAssignmentResult allTargetsAlreadyAssignedResult(

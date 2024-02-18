@@ -34,6 +34,7 @@ import org.eclipse.hawkbit.repository.builder.DistributionSetCreate;
 import org.eclipse.hawkbit.repository.builder.DistributionSetUpdate;
 import org.eclipse.hawkbit.repository.builder.GenericDistributionSetUpdate;
 import org.eclipse.hawkbit.repository.event.remote.DistributionSetDeletedEvent;
+import org.eclipse.hawkbit.repository.exception.DeletedException;
 import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.exception.EntityReadOnlyException;
@@ -697,6 +698,13 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
     public void lock(final long id) {
         final JpaDistributionSet distributionSet = getById(id);
         if (!distributionSet.isLocked()) {
+            distributionSet.getModules().forEach(module -> {
+                if (!module.isLocked()) {
+                    final JpaSoftwareModule jpaSoftwareModule = (JpaSoftwareModule)module;
+                    jpaSoftwareModule.lock();
+                    softwareModuleRepository.save(jpaSoftwareModule);
+                }
+            });
             distributionSet.lock();
             distributionSetRepository.save(distributionSet);
         }
@@ -778,6 +786,10 @@ public class JpaDistributionSetManagement implements DistributionSetManagement {
         if (!distributionSet.isComplete()) {
             throw new IncompleteDistributionSetException("Distribution set of type "
                     + distributionSet.getType().getKey() + " is incomplete: " + distributionSet.getId());
+        }
+
+        if (distributionSet.isDeleted()) {
+            throw new DeletedException(DistributionSet.class, id);
         }
 
         return distributionSet;

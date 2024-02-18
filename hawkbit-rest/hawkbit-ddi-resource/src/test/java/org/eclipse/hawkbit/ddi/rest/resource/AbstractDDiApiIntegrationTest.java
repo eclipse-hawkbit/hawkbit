@@ -30,6 +30,7 @@ import org.eclipse.hawkbit.ddi.json.model.DdiProgress;
 import org.eclipse.hawkbit.ddi.json.model.DdiResult;
 import org.eclipse.hawkbit.ddi.json.model.DdiStatus;
 import org.eclipse.hawkbit.repository.jpa.RepositoryApplicationConfiguration;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Artifact;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -372,5 +373,7 @@ public abstract class AbstractDDiApiIntegrationTest extends AbstractRestIntegrat
                 downloadType, updateType);
     }
 
-
+    static void implicitLock(final DistributionSet set) {
+        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
 }

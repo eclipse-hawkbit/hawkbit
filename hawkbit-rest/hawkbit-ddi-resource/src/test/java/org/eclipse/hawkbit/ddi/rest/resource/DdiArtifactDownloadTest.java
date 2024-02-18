@@ -79,13 +79,14 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
 
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
-        assignDistributionSet(ds, targets);
 
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(new ArtifactUpload(new ByteArrayInputStream(random),
                 ds.findFirstModuleByType(osType).get().getId(), "file1", false, artifactSize));
+
+        assignDistributionSet(ds, targets);
 
         // no artifact available
         mvc.perform(get("/controller/v1/{controllerId}/softwaremodules/{softwareModuleId}/artifacts/123455",
@@ -206,13 +207,13 @@ public class DdiArtifactDownloadTest extends AbstractDDiApiIntegrationTest {
         // create ds
         final DistributionSet ds = testdataFactory.createDistributionSet("");
 
-        assignDistributionSet(ds, target);
-
         // create artifact
         final int artifactSize = 5 * 1024;
         final byte random[] = RandomUtils.nextBytes(artifactSize);
         final Artifact artifact = artifactManagement.create(
                 new ArtifactUpload(new ByteArrayInputStream(random), getOsModule(ds), "file1", false, artifactSize));
+
+        assignDistributionSet(ds, target);
 
         // download
         final MvcResult result = mvc.perform(get(

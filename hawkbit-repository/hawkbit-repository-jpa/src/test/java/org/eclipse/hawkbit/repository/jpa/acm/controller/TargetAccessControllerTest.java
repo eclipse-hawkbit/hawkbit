@@ -207,14 +207,20 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     void verifyTargetAssignment() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
+        permitAllOperations(AccessController.Operation.UPDATE);
+        final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(ds.getId());
+        // entities created - reset rules
+        testAccessControlManger.deleteAllRules();
+
+        permitAllOperations(AccessController.Operation.READ);
+        permitAllOperations(AccessController.Operation.CREATE);
 
         final Target permittedTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
 
         final Target hiddenTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
-
-        final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
 
         // define access controlling rule
         defineAccess(AccessController.Operation.READ, permittedTarget);
@@ -248,14 +254,22 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     void verifyTargetAssignmentOnNonUpdatableTarget() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
+        permitAllOperations(AccessController.Operation.UPDATE);
+        final DistributionSet firstDs = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(firstDs.getId());
+        final DistributionSet secondDs = testdataFactory.createDistributionSet("anotherDs");
+        distributionSetManagement.lock(secondDs.getId());
+        // entities created - reset rules
+        testAccessControlManger.deleteAllRules();
+
+        permitAllOperations(AccessController.Operation.READ);
+        permitAllOperations(AccessController.Operation.CREATE);
 
         final Target manageableTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device01").status(TargetUpdateStatus.REGISTERED));
 
         final Target readOnlyTarget = targetManagement
                 .create(entityFactory.target().create().controllerId("device02").status(TargetUpdateStatus.REGISTERED));
-
-        final DistributionSet firstDs = testdataFactory.createDistributionSet("myDs");
 
         // define access controlling rule
         defineAccess(AccessController.Operation.READ, manageableTarget, readOnlyTarget);
@@ -271,8 +285,6 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
                 () -> assignDistributionSet(firstDs.getId(), readOnlyTarget.getControllerId())
         ).isInstanceOf(AssertionError.class);
 
-        final DistributionSet secondDs = testdataFactory.createDistributionSet("anotherDs");
-
         // bunch assignment skips denied denied since at least one target without update
         // permissions is present
         assertThat(assignDistributionSet(secondDs.getId(),
@@ -285,17 +297,25 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     void verifyRolloutTargetScope() {
         permitAllOperations(AccessController.Operation.READ);
         permitAllOperations(AccessController.Operation.CREATE);
+        permitAllOperations(AccessController.Operation.UPDATE);
+        final DistributionSet ds = testdataFactory.createDistributionSet("myDs");
+        distributionSetManagement.lock(ds.getId());
+        // entities created - reset rules
+        testAccessControlManger.deleteAllRules();
+
+        permitAllOperations(AccessController.Operation.READ);
+        permitAllOperations(AccessController.Operation.CREATE);
 
         final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
         final List<Target> readTargets = testdataFactory.createTargets("read1", "read2", "read3", "read4");
-        final List<Target> hiddenTargets = testdataFactory.createTargets("hidden1", "hidden2", "hidden3", "hidden4",
-                "hidden5");
+        final List<Target> hiddenTargets = testdataFactory.createTargets(
+                "hidden1", "hidden2", "hidden3", "hidden4", "hidden5");
 
         defineAccess(AccessController.Operation.UPDATE, updateTargets);
         defineAccess(AccessController.Operation.READ, merge(readTargets, updateTargets));
 
         final Rollout rollout = testdataFactory.createRolloutByVariables("testRollout", "description",
-                updateTargets.size(), "id==*", testdataFactory.createDistributionSet(), "50", "5");
+                updateTargets.size(), "id==*", ds, "50", "5");
 
         assertThat(rollout.getTotalTargets()).isEqualTo(updateTargets.size());
 
@@ -318,6 +338,14 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
     @Test
     @Description("Verifies only manageable targets are part of an auto assignment.")
     void verifyAutoAssignmentTargetScope() {
+        permitAllOperations(AccessController.Operation.READ);
+        permitAllOperations(AccessController.Operation.CREATE);
+        permitAllOperations(AccessController.Operation.UPDATE);
+        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
+        distributionSetManagement.lock(distributionSet.getId());
+        // entities created - reset rules
+        testAccessControlManger.deleteAllRules();
+
         permitAllOperations(AccessController.Operation.CREATE);
 
         final List<Target> updateTargets = testdataFactory.createTargets("update1", "update2", "update3");
@@ -331,7 +359,6 @@ class TargetAccessControllerTest extends AbstractAccessControllerTest {
         final TargetFilterQuery targetFilterQuery = targetFilterQueryManagement
                 .create(entityFactory.targetFilterQuery().create().name("testName").query("id==*"));
 
-        final DistributionSet distributionSet = testdataFactory.createDistributionSet();
         testAccessControlManger.defineAccessRule(
                 JpaDistributionSet.class, AccessController.Operation.READ,
                 DistributionSetSpecification.byId(distributionSet.getId()),
