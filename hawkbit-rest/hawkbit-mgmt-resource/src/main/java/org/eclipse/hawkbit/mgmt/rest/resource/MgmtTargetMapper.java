@@ -53,6 +53,7 @@ import org.eclipse.hawkbit.rest.data.SortDirection;
 import org.eclipse.hawkbit.util.IpUtil;
 import org.eclipse.hawkbit.utils.TenantConfigHelper;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.util.ObjectUtils;
 
 /**
  * A mapper which maps repository model to RESTful model representation and
@@ -278,6 +279,11 @@ public final class MgmtTargetMapper {
             action.getMaintenanceWindowStartTime()
                     .ifPresent(nextStart -> maintenanceWindow.setNextStartAt(nextStart.toInstant().toEpochMilli()));
             result.setMaintenanceWindow(maintenanceWindow);
+        }
+
+        final String externalRef = action.getExternalRef();
+        if (!ObjectUtils.isEmpty(externalRef)) {
+            result.setExternalRef(externalRef);
         }
 
         MgmtRestModelMapper.mapBaseToBase(result, action);
