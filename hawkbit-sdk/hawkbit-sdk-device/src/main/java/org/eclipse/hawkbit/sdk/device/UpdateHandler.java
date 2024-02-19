@@ -68,8 +68,9 @@ public interface UpdateHandler {
         private static final String LOG_PREFIX = "[{}:{}] ";
 
         private static final String DOWNLOAD_LOG_MESSAGE = "Download ";
+        private static final String EXPECTED = "(Expected: ";
         private static final String BUT_GOT_LOG_MESSAGE = " but got: ";
-        private static final int MINIMUM_TOKENLENGTH_FOR_HINT = 6;
+        private static final int MINIMUM_TOKEN_LENGTH_FOR_HINT = 6;
 
         private final DdiController ddiController;
 
@@ -239,7 +240,7 @@ public interface UpdateHandler {
                         }
 
                         if (response.getEntity().getContentLength() != size) {
-                            throw new IllegalArgumentException("Wrong content length " + "(Expected: " + size + BUT_GOT_LOG_MESSAGE + response.getEntity()
+                            throw new IllegalArgumentException("Wrong content length " + EXPECTED + size + BUT_GOT_LOG_MESSAGE + response.getEntity()
                                     .getContentLength() + ")!");
                         }
 
@@ -284,7 +285,7 @@ public interface UpdateHandler {
                 return "<EMPTY!>";
             }
 
-            if (targetToken.length() <= MINIMUM_TOKENLENGTH_FOR_HINT) {
+            if (targetToken.length() <= MINIMUM_TOKEN_LENGTH_FOR_HINT) {
                 return "***";
             }
 
@@ -325,16 +326,14 @@ public interface UpdateHandler {
                 public void read(final byte[] buff, final int len) {
                     read += len;
                     if (read > size) {
-                        throw new SecurityException("Size mismatch: read more " +
-                                "(Expected: " + size + BUT_GOT_LOG_MESSAGE + read + ")!");
+                        throw new SecurityException("Size mismatch: read more " + EXPECTED + size + BUT_GOT_LOG_MESSAGE + read + ")!");
                     }
                 }
 
                 @Override
                 public void validate() {
                     if (read != size) {
-                        throw new SecurityException("Size mismatch " +
-                                "(Expected: " + size + BUT_GOT_LOG_MESSAGE + read + ")!");
+                        throw new SecurityException("Size mismatch " + EXPECTED + size + BUT_GOT_LOG_MESSAGE + read + ")!");
                     }
                 }
             };
@@ -360,8 +359,7 @@ public interface UpdateHandler {
                     final String actual = BaseEncoding.base16().lowerCase().encode(messageDigest.digest());
                     if (!actual.equals(expected)) {
                         throw new SecurityException(
-                                messageDigest.getAlgorithm() + " hash mismatch " +
-                                        "(Expected: " + expected + BUT_GOT_LOG_MESSAGE + actual + ")!");
+                                messageDigest.getAlgorithm() + " hash mismatch " + EXPECTED + expected + BUT_GOT_LOG_MESSAGE + actual + ")!");
                     }
                 }
             }

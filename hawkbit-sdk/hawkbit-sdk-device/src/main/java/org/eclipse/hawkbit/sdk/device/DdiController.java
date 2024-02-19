@@ -69,6 +69,7 @@ public class DdiController {
     private long overridePollMillis = -1; // -1 means disabled
 
     // state
+    @SuppressWarnings("java:S3077") // volatile used only for the reference as expected
     private volatile ScheduledExecutorService executorService;
     private volatile Long currentActionId;
 

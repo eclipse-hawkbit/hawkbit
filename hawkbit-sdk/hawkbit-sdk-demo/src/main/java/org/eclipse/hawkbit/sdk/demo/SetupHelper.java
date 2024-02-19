@@ -50,7 +50,8 @@ public class SetupHelper {
     public static void setupTargetAuthentication(final HawkbitClient hawkbitClient, final Tenant tenant) {
         final MgmtTenantManagementRestApi mgmtTenantManagementRestApi =
                 hawkbitClient.mgmtService(MgmtTenantManagementRestApi.class, tenant);
-        if (ObjectUtils.isEmpty(tenant.getGatewayToken())) {
+        final String gatewayToken = tenant.getGatewayToken();
+        if (ObjectUtils.isEmpty(gatewayToken)) {
             if (!((Boolean) Objects.requireNonNull(mgmtTenantManagementRestApi
                     .getTenantConfigurationValue(AUTHENTICATION_MODE_TARGET_SECURITY_TOKEN_ENABLED)
                     .getBody()).getValue())) {
@@ -66,12 +67,12 @@ public class SetupHelper {
                         Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_ENABLED, true)
                 );
             }
-            if (!tenant.getGatewayToken().equals(
+            if (!gatewayToken.equals(
                     Objects.requireNonNull(mgmtTenantManagementRestApi
                         .getTenantConfigurationValue(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY)
                         .getBody()).getValue())) {
                 mgmtTenantManagementRestApi.updateTenantConfiguration(
-                        Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, tenant.getGatewayToken())
+                        Map.of(AUTHENTICATION_MODE_GATEWAY_SECURITY_TOKEN_KEY, gatewayToken)
                 );
             }
         }
