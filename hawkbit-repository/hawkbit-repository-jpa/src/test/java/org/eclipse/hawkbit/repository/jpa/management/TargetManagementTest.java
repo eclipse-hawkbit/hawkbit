@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.exception.RSQLParameterSyntaxException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.exception.TenantNotExistException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTarget;
 import org.eclipse.hawkbit.repository.jpa.model.JpaTargetMetadata;
@@ -485,12 +484,12 @@ class TargetManagementTest extends AbstractJpaIntegrationTest {
         controllerManagement.findOrRegisterTargetIfItDoesNotExist("4711", LOCALHOST);
 
         final DistributionSetAssignmentResult result = assignDistributionSet(testDs1.getId(), "4711");
-        TestHelper.implicitLock(testDs1);
+        implicitLock(testDs1);
 
         controllerManagement.addUpdateActionStatus(
                 entityFactory.actionStatus().create(getFirstAssignedActionId(result)).status(Status.FINISHED));
         assignDistributionSet(testDs2.getId(), "4711");
-        TestHelper.implicitLock(testDs2);
+        implicitLock(testDs2);
 
         target = targetManagement.getByControllerID("4711").orElseThrow(IllegalStateException::new);
         // read data

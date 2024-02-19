@@ -45,7 +45,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.exception.UnsupportedSoftwareModuleForThisDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSetMetadata;
 import org.eclipse.hawkbit.repository.model.Action.Status;
@@ -641,15 +640,15 @@ class DistributionSetManagementTest extends AbstractJpaIntegrationTest {
 
         // set assigned
         assignDistributionSet(dsSecond.getId(), tSecond.getControllerId());
-        TestHelper.implicitLock(dsSecond);
+        implicitLock(dsSecond);
         assignDistributionSet(dsThree.getId(), tFirst.getControllerId());
-        TestHelper.implicitLock(dsThree);
+        implicitLock(dsThree);
         // set installed
         testdataFactory.sendUpdateActionStatusToTargets(Collections.singleton(tSecond), Status.FINISHED,
                 singletonList("some message"));
 
         assignDistributionSet(dsFour.getId(), tSecond.getControllerId());
-        TestHelper.implicitLock(dsFour);
+        implicitLock(dsFour);
 
         final DistributionSetFilter distributionSetFilter =
                 DistributionSetFilter.builder()

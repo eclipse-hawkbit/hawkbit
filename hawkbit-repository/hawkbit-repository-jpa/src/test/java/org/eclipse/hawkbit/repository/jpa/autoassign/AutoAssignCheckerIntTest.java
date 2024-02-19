@@ -23,7 +23,6 @@ import java.util.stream.Stream;
 import org.eclipse.hawkbit.repository.DeploymentManagement;
 import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.specifications.ActionSpecifications;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
@@ -119,7 +118,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .updateAutoAssign(targetFilterQueryManagement
                         .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
                 .ds(setA.getId()));
-        TestHelper.implicitLock(setA);
+        implicitLock(setA);
 
         final String targetDsAIdPref = "targ";
         final List<Target> targets = testdataFactory.createTargets(25, targetDsAIdPref,
@@ -136,7 +135,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         // they have now 2 DS in their action history and should not get updated
         // with dsA
         assignDistributionSet(setB, targets.subList(0, 5));
-        TestHelper.implicitLock(setB);
+        implicitLock(setB);
         verifyThatTargetsHaveDistributionSetAssignment(setB, targets.subList(0, 5), targetsCount);
 
         // assign set B to next 10 targets
@@ -169,7 +168,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
                 .updateAutoAssign(targetFilterQueryManagement
                         .create(entityFactory.targetFilterQuery().create().name("filterA").query("name==*")).getId())
                 .ds(toAssignDs.getId()));
-        TestHelper.implicitLock(toAssignDs);
+        implicitLock(toAssignDs);
 
         final List<Target> targets = testdataFactory.createTargets(25);
         final int targetsCount = targets.size();
@@ -270,7 +269,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
         // target filter query that matches failed bunch of targets
         targetFilterQueryManagement.create(entityFactory.targetFilterQuery().create().name("filterB")
                 .query("id==" + targetDsAIdPref + "*").autoAssignDistributionSet(setA.getId()));
-        TestHelper.implicitLock(setA);
+        implicitLock(setA);
 
         final List<Target> targetsF = testdataFactory.createTargets(10, targetDsFIdPref,
                 targetDsFIdPref.concat(" description"));
@@ -282,7 +281,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         // assign set B to first 5 targets of fail group
         assignDistributionSet(setB, targetsF.subList(0, 5));
-        TestHelper.implicitLock(setB);
+        implicitLock(setB);
         verifyThatTargetsHaveDistributionSetAssignment(setB, targetsF.subList(0, 5), targetsCount);
 
         // Run the check
@@ -371,7 +370,7 @@ class AutoAssignCheckerIntTest extends AbstractJpaIntegrationTest {
 
         final List<Target> targetsA = createTargetsAndAutoAssignDistSet(targetDsAIdPref, 5, distributionSet,
                 ActionType.FORCED);
-        TestHelper.implicitLock(distributionSet);
+        implicitLock(distributionSet);
         final List<Target> targetsB = createTargetsAndAutoAssignDistSet(targetDsBIdPref, 10, distributionSet,
                 ActionType.SOFT);
         final List<Target> targetsC = createTargetsAndAutoAssignDistSet(targetDsCIdPref, 10, distributionSet,

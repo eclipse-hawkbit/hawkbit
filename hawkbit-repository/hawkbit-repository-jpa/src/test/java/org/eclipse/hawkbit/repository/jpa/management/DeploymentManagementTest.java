@@ -55,7 +55,6 @@ import org.eclipse.hawkbit.repository.exception.IncompleteDistributionSetExcepti
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.MultiAssignmentIsNotEnabledException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
 import org.eclipse.hawkbit.repository.jpa.model.JpaActionStatus;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
@@ -456,7 +455,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
     private JpaAction assignSet(final Target target, final DistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
-        TestHelper.implicitLock(ds);
+        implicitLock(ds);
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
                 .as("wrong update status").isEqualTo(TargetUpdateStatus.PENDING);
         assertThat(deploymentManagement.getAssignedDistributionSet(target.getControllerId())).as("wrong assigned ds")
@@ -1059,7 +1058,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         final DistributionSet ds = testdataFactory.createDistributionSet("");
         assignDistributionSet(ds, savedDeployedTargets);
-        TestHelper.implicitLock(ds);
+        implicitLock(ds);
 
         // verify that one Action for each assignDistributionSet
         final Page<JpaAction> actions = actionRepository.findAll(PAGE);
@@ -1385,7 +1384,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         // doing the assignment
         targs = assignDistributionSet(dsA, targs).getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
-        TestHelper.implicitLock(dsA);
+        implicitLock(dsA);
         Target targ = targetManagement.getByControllerID(targs.iterator().next().getControllerId()).get();
 
         // checking the revisions of the created entities
@@ -1427,7 +1426,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
 
         targs = assignDistributionSet(dsB.getId(), "target-id-A").getAssignedEntity().stream().map(Action::getTarget)
                 .collect(Collectors.toList());
-        TestHelper.implicitLock(dsB);
+        implicitLock(dsB);
 
         targ = targs.iterator().next();
 
@@ -1594,7 +1593,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         }
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
-        TestHelper.implicitLock(ds);
+        implicitLock(ds);
 
         final List<Target> content = targetManagement.findAll(Pageable.unpaged()).getContent();
 
@@ -1620,7 +1619,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         final List<DeploymentRequest> deploymentRequests = Arrays.asList(deployment1, deployment2);
 
         deploymentManagement.assignDistributionSets(deploymentRequests);
-        TestHelper.implicitLock(ds);
+        implicitLock(ds);
 
         final Optional<DistributionSet> assignedDsTarget1 = targetManagement
                 .getByControllerID(target1.getControllerId()).map(JpaTarget.class::cast)
@@ -1708,7 +1707,7 @@ class DeploymentManagementTest extends AbstractJpaIntegrationTest {
         for (final DistributionSet ds : dsList) {
             deployedTargets = assignDistributionSet(ds, deployedTargets).getAssignedEntity().stream()
                     .map(Action::getTarget).collect(Collectors.toList());
-            TestHelper.implicitLock(ds);
+            implicitLock(ds);
         }
 
         return new DeploymentResult(deployedTargets, nakedTargets, dsList, deployedTargetPrefix, undeployedTargetPrefix,

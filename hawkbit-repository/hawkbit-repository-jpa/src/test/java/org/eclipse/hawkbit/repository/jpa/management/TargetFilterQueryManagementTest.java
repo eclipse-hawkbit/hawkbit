@@ -37,7 +37,6 @@ import org.eclipse.hawkbit.repository.exception.InvalidAutoAssignActionTypeExcep
 import org.eclipse.hawkbit.repository.exception.InvalidDistributionSetException;
 import org.eclipse.hawkbit.repository.exception.RSQLParameterUnsupportedFieldException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.model.Action;
 import org.eclipse.hawkbit.repository.model.Action.ActionType;
 import org.eclipse.hawkbit.repository.model.DistributionSet;
@@ -220,7 +219,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
             final TargetFilterQuery targetFilterQuery, final DistributionSet distributionSet) {
         targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
-        TestHelper.implicitLock(distributionSet);
+        implicitLock(distributionSet);
         verifyAutoAssignDsAndActionType(filterName, distributionSet, ActionType.FORCED);
     }
 
@@ -324,7 +323,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
 
         targetFilterQueryManagement.updateAutoAssignDS(entityFactory.targetFilterQuery()
                 .updateAutoAssign(targetFilterQuery.getId()).ds(distributionSet.getId()));
-        TestHelper.implicitLock(distributionSet);
+        implicitLock(distributionSet);
 
         // Check if target filter query is there
         TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();
@@ -356,7 +355,7 @@ public class TargetFilterQueryManagementTest extends AbstractJpaIntegrationTest 
                 .getId();
         targetFilterQueryManagement.updateAutoAssignDS(
                 entityFactory.targetFilterQuery().updateAutoAssign(filterId).ds(distributionSet.getId()));
-        TestHelper.implicitLock(distributionSet);
+        implicitLock(distributionSet);
 
         // Check if target filter query is there with the distribution set
         TargetFilterQuery tfq = targetFilterQueryManagement.getByName(filterName).get();

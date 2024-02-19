@@ -24,8 +24,10 @@ import org.assertj.core.api.Assertions;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.eclipse.hawkbit.repository.exception.EntityNotFoundException;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction;
+import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRollout;
 import org.eclipse.hawkbit.repository.jpa.model.JpaRolloutGroup;
+import org.eclipse.hawkbit.repository.jpa.model.JpaSoftwareModule;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.ActionStatusRepository;
 import org.eclipse.hawkbit.repository.jpa.repository.DistributionSetRepository;
@@ -48,6 +50,7 @@ import org.eclipse.hawkbit.repository.model.DistributionSetTag;
 import org.eclipse.hawkbit.repository.model.DistributionSetTagAssignmentResult;
 import org.eclipse.hawkbit.repository.model.Rollout;
 import org.eclipse.hawkbit.repository.model.RolloutGroup;
+import org.eclipse.hawkbit.repository.model.SoftwareModule;
 import org.eclipse.hawkbit.repository.model.Target;
 import org.eclipse.hawkbit.repository.model.TargetTag;
 import org.eclipse.hawkbit.repository.model.TargetTagAssignmentResult;
@@ -219,5 +222,13 @@ public abstract class AbstractJpaIntegrationTest extends AbstractIntegrationTest
             array[i] = list.get(i);
         }
         return array;
+    }
+
+    protected static void implicitLock(final DistributionSet set) {
+        ((JpaDistributionSet) set).setOptLockRevision(set.getOptLockRevision() + 1);
+    }
+
+    protected static void implicitLock(final SoftwareModule module) {
+        ((JpaSoftwareModule) module).setOptLockRevision(module.getOptLockRevision() + 1);
     }
 }
