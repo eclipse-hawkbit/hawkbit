@@ -111,7 +111,7 @@ public class MultiDeviceApp {
         public void stopOne(@ShellOption("--id") final String controllerId) {
             final DdiController device = devices.get(controllerId);
             if (device == null) {
-                System.out.println("ERROR: controller with id " + controllerId + " not found!");
+                throw new IllegalArgumentException("Controller with id " + controllerId + " not found!");
             } else {
                 device.stop();
             }
@@ -123,7 +123,7 @@ public class MultiDeviceApp {
                 @ShellOption(value = "--offset", defaultValue = "0") final int offset,
                 @ShellOption(value = "--count") final int count) {
             for (int i = 0; i < count; i++) {
-                startOne(String.format(prefix + "%03d", offset + i));
+                startOne(toId(prefix, offset + i));
             }
         }
 
@@ -133,8 +133,12 @@ public class MultiDeviceApp {
                 @ShellOption(value = "--offset", defaultValue = "0") final int offset,
                 @ShellOption(value = "--count") final int count) {
             for (int i = 0; i < count; i++) {
-                stopOne(String.format(prefix + "%03d", offset + i));
+                stopOne(toId(prefix, offset + i));
             }
+        }
+
+        private static String toId(final String prefix, final int index) {
+            return String.format("%s%03d", prefix, index);
         }
     }
 }

@@ -30,6 +30,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
@@ -171,10 +172,12 @@ public interface UpdateHandler {
          */
         protected void cleanup() {
             downloads.values().forEach(path -> {
-                if (!path.toFile().delete()) {
+                try {
+                    Files.delete(path);
+                } catch (final IOException e) {
                     log.warn(LOG_PREFIX + "Failed to cleanup {}",
                             ddiController.getTenantId(), ddiController.getControllerId(),
-                            path.toFile().getAbsolutePath());
+                            path.toFile().getAbsolutePath(), e);
                 }
             });
             log.debug(LOG_PREFIX + "Cleaned up", ddiController.getTenantId(), ddiController.getControllerId());
