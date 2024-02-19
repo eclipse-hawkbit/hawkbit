@@ -31,7 +31,6 @@ import org.eclipse.hawkbit.repository.exception.EntityAlreadyExistsException;
 import org.eclipse.hawkbit.repository.exception.LockedException;
 import org.eclipse.hawkbit.repository.jpa.AbstractJpaIntegrationTest;
 import org.eclipse.hawkbit.repository.jpa.RandomGeneratedInputStream;
-import org.eclipse.hawkbit.repository.jpa.TestHelper;
 import org.eclipse.hawkbit.repository.jpa.model.JpaAction_;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet;
 import org.eclipse.hawkbit.repository.jpa.model.JpaDistributionSet_;
@@ -197,8 +196,8 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
         final JpaTarget target = (JpaTarget) testdataFactory.createTarget();
         ds = (JpaDistributionSet) assignSet(target, ds).getDistributionSet();
-        TestHelper.implicitLock(os);
-        TestHelper.implicitLock(jvm);
+        implicitLock(os);
+        implicitLock(jvm);
 
         // standard searches
         assertThat(softwareModuleManagement.findByTextAndType(PAGE, "poky", osType.getId()).getContent()).hasSize(1);
@@ -222,7 +221,7 @@ public class SoftwareModuleManagementTest extends AbstractJpaIntegrationTest {
 
     private Action assignSet(final JpaTarget target, final JpaDistributionSet ds) {
         assignDistributionSet(ds.getId(), target.getControllerId());
-        TestHelper.implicitLock(ds);
+        implicitLock(ds);
         assertThat(targetManagement.getByControllerID(target.getControllerId()).get().getUpdateStatus())
                 .isEqualTo(TargetUpdateStatus.PENDING);
         final Optional<DistributionSet> assignedDistributionSet = deploymentManagement
