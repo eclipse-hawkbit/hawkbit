@@ -497,7 +497,6 @@ public class  MgmtTargetFilterQueryResourceTest extends AbstractManagementApiInt
         }
 
         final TargetFilterQuery tfq = createSingleTargetFilterQuery(knownName, knownQuery);
-        // set will be implicitly locked
         final DistributionSet set = testdataFactory.createDistributionSet();
 
         // do not provide something about the confirmation
