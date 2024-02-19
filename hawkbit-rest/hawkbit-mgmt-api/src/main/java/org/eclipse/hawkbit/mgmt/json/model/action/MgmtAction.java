@@ -116,4 +116,7 @@ public class MgmtAction extends MgmtBaseEntity {
     @Schema(description = "(Optional) Code provided as part of the last status update that was sent by the device.",
             example = "200")
     private Integer lastStatusCode;
+    @JsonProperty
+    @Schema(description = "If created by external system this field contains the external reference for the action")
+    private String externalRef;
 }

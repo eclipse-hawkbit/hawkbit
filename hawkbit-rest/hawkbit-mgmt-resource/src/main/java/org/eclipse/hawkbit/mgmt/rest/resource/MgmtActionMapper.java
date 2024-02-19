@@ -42,7 +42,8 @@ public final class MgmtActionMapper {
         if (actions == null) {
             return Collections.emptyList();
         }
-        return new ResponseList<>(actions.stream().map(action -> MgmtActionMapper.toResponse(action, repMode))
+        return new ResponseList<>(actions.stream()
+                .map(action -> toResponse(action, repMode))
                 .collect(Collectors.toList()));
     }
 

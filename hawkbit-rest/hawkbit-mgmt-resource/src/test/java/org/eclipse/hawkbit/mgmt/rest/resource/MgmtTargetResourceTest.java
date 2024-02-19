@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -100,6 +101,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Step;
 import io.qameta.allure.Story;
+import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * Spring MVC Tests against the MgmtTargetResource.
@@ -1088,25 +1090,50 @@ class MgmtTargetResourceTest extends AbstractManagementApiIntegrationTest {
     @Test
     @Description("Ensures that the expected response of getting actions of a target is returned.")
     void getActions() throws Exception {
+        getActions(false);
+    }
+
+    @Test
+    @Description("Ensures that the expected response of getting actions (with ext refs) of a target is returned.")
+    void getActionsExtRef() throws Exception {
+        getActions(true);
+    }
+
+    private void getActions(final boolean withExternalRef) throws Exception {
         final String knownTargetId = "targetId";
         final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
 
-        mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
-                + MgmtRestConstants.TARGET_V1_ACTIONS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
-                .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
-                .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
-                .andExpect(jsonPath("content.[1].type", equalTo("update")))
-                .andExpect(jsonPath("content.[1].status", equalTo("pending")))
-                .andExpect(jsonPath("content.[1]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
-                .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
-                .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
-                .andExpect(jsonPath("content.[0].status", equalTo("pending")))
-                .andExpect(jsonPath("content.[0]._links.self.href",
-                        equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
-                .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+        final List<String> externalRefs = new ArrayList<>(2);
+        if (withExternalRef) {
+            externalRefs.add("extRef#123_0");
+            externalRefs.add("extRef#123_1");
+            controllerManagement.updateActionExternalRef(actions.get(0).getId(), externalRefs.get(0));
+            controllerManagement.updateActionExternalRef(actions.get(1).getId(), externalRefs.get(1));
+        }
+
+        final ResultActions resultActions =
+                mvc.perform(get(MgmtRestConstants.TARGET_V1_REQUEST_MAPPING + "/" + knownTargetId + "/"
+                        + MgmtRestConstants.TARGET_V1_ACTIONS).param(MgmtRestConstants.REQUEST_PARAMETER_SORTING, "ID:ASC"))
+                    .andDo(MockMvcResultPrinter.print()).andExpect(status().isOk())
+                    .andExpect(jsonPath("content.[1].id", equalTo(actions.get(1).getId().intValue())))
+                    .andExpect(jsonPath("content.[1].type", equalTo("update")))
+                    .andExpect(jsonPath("content.[1].status", equalTo("pending")))
+                    .andExpect(jsonPath("content.[1]._links.self.href",
+                            equalTo(generateActionSelfLink(knownTargetId, actions.get(1).getId()))))
+                    .andExpect(jsonPath("content.[0].id", equalTo(actions.get(0).getId().intValue())))
+                    .andExpect(jsonPath("content.[0].type", equalTo("cancel")))
+                    .andExpect(jsonPath("content.[0].status", equalTo("pending")))
+                    .andExpect(jsonPath("content.[0]._links.self.href",
+                            equalTo(generateActionSelfLink(knownTargetId, actions.get(0).getId()))))
+                    .andExpect(jsonPath(JSON_PATH_PAGED_LIST_TOTAL, equalTo(2)))
+                    .andExpect(jsonPath(JSON_PATH_PAGED_LIST_SIZE, equalTo(2)))
+                    .andExpect(jsonPath(JSON_PATH_PAGED_LIST_CONTENT, hasSize(2)));
+
+        if (withExternalRef) {
+            resultActions
+                    .andExpect(jsonPath("content.[1].externalRef", equalTo(externalRefs.get(1))))
+                    .andExpect(jsonPath("content.[0].externalRef", equalTo(externalRefs.get(0))));
+        }
     }
 
     @Test
