@@ -129,6 +129,48 @@ class MgmtActionResourceTest extends AbstractManagementApiIntegrationTest {
     }
 
     @Test
+    @Description("Verifies that actions can be filtered based on extRef.")
+    void filterActionsByExternalRef() throws Exception {
+        // prepare test
+        final String knownTargetId = "targetId";
+        final List<Action> actions = generateTargetWithTwoUpdatesWithOneOverride(knownTargetId);
+
+        final Action action0 = actions.get(0);
+        final Action action1 = actions.get(1);
+
+        final List<String> externalRefs = new ArrayList<>(2);
+        externalRefs.add("extRef");
+        externalRefs.add("extRef#123_1");
+        controllerManagement.updateActionExternalRef(action0.getId(), externalRefs.get(0));
+        controllerManagement.updateActionExternalRef(action1.getId(), externalRefs.get(1));
+
+        final String rsqlExtRef = "externalref==extRef";
+        final String rsqlExtRefWildcard = "externalref==extRef*";
+        final String rsqlExtRefNoMatch = "externalref==234extRef";
+
+        // pending status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRef))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk()).andExpect(jsonPath("total", equalTo(1)))
+                .andExpect(jsonPath("size", equalTo(1)))
+                .andExpect(jsonPath("content[0].externalRef", equalTo(externalRefs.get(0))));
+
+        // finished status none result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefWildcard))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(2)))
+                .andExpect(jsonPath("size", equalTo(2)));
+
+        // pending or finished status one result
+        mvc.perform(get(MgmtRestConstants.ACTION_V1_REQUEST_MAPPING + "?q=" + rsqlExtRefNoMatch))
+                .andDo(MockMvcResultPrinter.print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("total", equalTo(0)))
+                .andExpect(jsonPath("size", equalTo(0)));
+    }
+
+    @Test
     @Description("Verifies that actions can be filtered based on the action status code that was reported last.")
     void filterActionsByLastStatusCode() throws Exception {
 
