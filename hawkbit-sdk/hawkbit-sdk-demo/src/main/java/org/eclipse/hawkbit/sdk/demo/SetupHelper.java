@@ -93,8 +93,10 @@ public class SetupHelper {
                         securityTargetToken = randomToken();
                         mgmtTargetRestApi.updateTarget(controllerId,
                                 new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
+                    } else {
+                        securityTargetToken = target.getSecurityToken();
                     }
-                } else if (!securityTargetToken.equals(target.getSecurityToken())){
+                } else if (!securityTargetToken.equals(target.getSecurityToken())) {
                     // update target's with the security token (since it doesn't match)
                     mgmtTargetRestApi.updateTarget(controllerId,
                             new MgmtTargetRequestBody().setSecurityToken(securityTargetToken));
