@@ -25,6 +25,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.hateoas.config.EnableHypermediaSupport;
 import org.springframework.hateoas.config.WebConverters;
 import org.springframework.http.MediaType;
@@ -38,6 +39,7 @@ import java.util.LinkedHashMap;
 @EnableConfigurationProperties({ HawkbitServer.class, Tenant.class})
 @EnableHypermediaSupport(type = EnableHypermediaSupport.HypermediaType.HAL)
 @Import(FeignClientsConfiguration.class)
+@PropertySource("classpath:/hawkbit-sdk-defaults.properties")
 public class HawkbitSDKConfigurtion {
 
     /**

@@ -19,12 +19,14 @@
       <version>${revision}</version>
    </parent>
 
-   <artifactId>hawkbit-sdk-test</artifactId>
+   <artifactId>hawkbit-sdk-demo</artifactId>
    <name>hawkBit :: SDK :: Test / Example</name>
    <description>Test / Example of how SDK could be used to for devices and for Mgmt API access</description>
 
    <properties>
       <spring-shell.version>3.1.5</spring-shell.version>
+      <spring.app.class>org.eclipse.hawkbit.sdk.demo.multidevice.MultiDeviceApp</spring.app.class>
+      <start-class>${spring.app.class}</start-class>
    </properties>
 
    <dependencies>
@@ -45,4 +47,30 @@
          <version>${spring-shell.version}</version>
       </dependency>
    </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-maven-plugin</artifactId>
+            <executions>
+               <execution>
+                  <goals>
+                     <goal>repackage</goal>
+                  </goals>
+                  <configuration>
+                     <outputDirectory>${baseDir}</outputDirectory>
+                     <layout>JAR</layout>
+                  </configuration>
+               </execution>
+            </executions>
+         </plugin>
+      </plugins>
+
+      <resources>
+         <resource>
+            <directory>src/main/resources</directory>
+         </resource>
+      </resources>
+   </build>
 </project>

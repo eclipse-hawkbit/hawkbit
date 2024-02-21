@@ -41,7 +41,6 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 @Slf4j
 @SpringBootApplication
-@Import({ HawkbitSDKConfigurtion.class})
 public class MultiDeviceApp {
 
     public static void main(String[] args) {
